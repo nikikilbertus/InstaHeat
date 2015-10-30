@@ -19,15 +19,15 @@ mathematical constants
 simulation parameters
 */
 // Number of gridpoints (needs to be odd for fourier grid)
-#define NOGP 		(21)
+#define NOGP 		(31)
 // maximal number of timesteps
 #define MAXTS 		(10000)
 // timestep
-#define DT			(0.1)
+#define DT			(0.01)
 // starttime (initial time)
 #define TI 			(0.0)
 // final time
-#define TF 			(10.0)
+#define TF 			(PI*100)
 // boundaries of spatial region
 #define LOW_BND		(-PI)
 #define UP_BND 		(PI)

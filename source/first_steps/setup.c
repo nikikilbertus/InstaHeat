@@ -116,7 +116,7 @@ double phi_init(double x) {
 }
 
 double dphi_init(double x) {
-	return 0.0;
+	return -sin(x);
 }
 
 /*

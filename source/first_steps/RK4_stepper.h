@@ -4,6 +4,6 @@
 #include <stddef.h>
 
 void run_RK4_stepper(double dt, size_t N);
-void get_field_velocity(double* field, double *result, size_t N);
+void get_field_velocity(double* f, double *df, double *result, size_t N);
 
 #endif
