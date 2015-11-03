@@ -27,12 +27,15 @@ int main(int argc, const char * argv[]) {
     return 0;
 #endif
 
-    allocate_and_initialize_all(&pars);
+    int count = 0;
+    for (double dt = 0.1; dt > 1e-4; dt /= 2, count++)
+    {
+    	pars.dt = dt;
+    	allocate_and_initialize_all(&pars);
+    	run_RK4_stepper(&pars);
+		print_vector_to_file(field, 2*pars.Nx*pars.Nt, 1, count);
+    	free_all_external();
+    }
 
-    run_RK4_stepper(&pars);
-
-	print_vector_to_file(field, 2*pars.Nx*pars.Nt, 1, 0);
-
-    free_all_external();
     return 0;
 }

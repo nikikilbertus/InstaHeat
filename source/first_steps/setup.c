@@ -22,7 +22,7 @@ void allocate_and_initialize_all(parameters_t *pars) {
 
 void initialize_parameters(parameters_t *pars) {
 	pars->Nx = GRIDPOINTS_SPATIAL;
-	pars->dt = DELTA_T;
+	pars->dt = DELTA_T > 0 ? DELTA_T : pars->dt;
 	pars->ti = INITIAL_TIME;
 	pars->tf = FINAL_TIME;
 	pars->a  = SPATIAL_LOWER_BOUND;
