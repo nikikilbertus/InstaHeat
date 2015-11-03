@@ -57,9 +57,7 @@ void allocate_external(size_t Nx, size_t Nt) {
     //solutions for the field and the temporal derivative (we are saving each
     //timestep:2 * N * TS space)
     field   = calloc(N2 * Nt, sizeof *field);
-    fieldD1 = calloc(N2 * Nt, sizeof *fieldD1);
-    fieldD2 = calloc(N2 * Nt, sizeof *fieldD2);
-    if (!field || !fieldD1 || !fieldD2)
+    if (!field)
     {
     	fputs("Allocating memory failed.", stderr);
     	exit(EXIT_FAILURE);
@@ -173,8 +171,6 @@ void free_all_external() {
 	#endif
 
 	free(field);
-	free(fieldD1);
-	free(fieldD2);
 	DEBUG(puts("Memory from all external variables freed.\n"));
 }
 

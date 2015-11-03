@@ -86,6 +86,6 @@ in the variable field we save phi and dphi
 */
 
 //solutions for the field we evolve and its spatial derivatives
-extern double *field, *fieldD1, *fieldD2;
+extern double *field;
 
 #endif

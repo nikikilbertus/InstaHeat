@@ -17,8 +17,6 @@ double *D2;
 
 // evolution of the field and spatial derivatives (2*Nx * Nt space required)
 double *field;
-double *fieldD1;
-double *fieldD2;
 
 int main(int argc, const char * argv[]) {
 
