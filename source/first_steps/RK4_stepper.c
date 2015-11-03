@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <complex.h>
+#include <time.h>
 #include <Accelerate/Accelerate.h>
 #include <fftw3.h>
 #include "RK4_stepper.h"
@@ -39,6 +40,8 @@ void run_RK4_stepper(parameters_t *pars) {
 	#ifdef FFT_DERIVATIVE
 		DEBUG(puts("Using DFT (fftw3) for spatial derivatives.\n"));
 	#endif
+
+	clock_t start = clock();
 
 	for (size_t nt = 0; nt < Nt; ++nt)
 	{
@@ -88,13 +91,16 @@ void run_RK4_stepper(parameters_t *pars) {
 		#endif
 	}
 
+	clock_t end = clock();
+
 	free(k1);
 	free(k2);
 	free(k3);
 	free(k4);
 	free(tmp);
 
-	DEBUG(puts("Finished RK4 time evolution.\n"));
+	double secs = (double)(end - start) / CLOCKS_PER_SEC;
+	DEBUG(printf("Finished RK4 time evolution in: %f seconds.\n", secs));
 }
 
 void get_field_velocity(double* f, double *result, size_t N) {

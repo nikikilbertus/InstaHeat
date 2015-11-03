@@ -23,8 +23,8 @@ execution
 /*
 choose the differentiation procedure by defining either one of the two
 */
-#define SPECTRAL_OPERATOR_DERIVATIVE
-// #define FFT_DERIVATIVE
+// #define SPECTRAL_OPERATOR_DERIVATIVE
+#define FFT_DERIVATIVE
 
 /*
 check for NaNs during time evolution
