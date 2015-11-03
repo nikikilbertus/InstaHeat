@@ -2,10 +2,12 @@
 #define __SETUP__
 
 #include <stddef.h>
+#include "main.h"
 
-void allocate_and_initialize_all(void);
-void allocate_external(size_t N);
-void mk_fourier_spectral_operators(size_t N, double low_bnd, double up_bnd);
+void allocate_and_initialize_all(parameters_t *pars);
+void initialize_parameters(parameters_t *pars);
+void allocate_external(size_t Nx, size_t Nt);
+void mk_fourier_spectral_operators(size_t N, double a, double b);
 void mk_initial_conditions(size_t N, double (*f_init)(double),
 								double (*df_init)(double));
 double phi_init(double x);

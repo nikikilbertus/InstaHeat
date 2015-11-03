@@ -1,7 +1,7 @@
 TARGET = first_steps
-LIBS = -framework Accelerate
+LIBS = -L /usr/local/lib -lfftw3 -lm -framework Accelerate
 CC = gcc
-CFLAGS = -ansi -std=c99 -O3 -g -Wall
+CFLAGS = -ansi -std=c99 -O3 -g -Wall -I /usr/local/include
 
 .PHONY: default all clean
 

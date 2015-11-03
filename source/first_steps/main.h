@@ -7,8 +7,29 @@
 macros for debugging, testing and printing additional information during
 execution
 */
+#define DEBUG_MODE
 // #define RUN_TESTS_ONLY
 // #define PRINT_SPECTRAL_OPERATORS
+// #define PRINT_INITIAL_CONDITIONS
+
+#ifdef DEBUG_MODE
+#define DEBUG(f) do {\
+		(f); \
+	} while (0)
+#else
+#define DEBUG(f)
+#endif
+
+/*
+choose the differentiation procedure by defining either one of the two
+*/
+#define SPECTRAL_OPERATOR_DERIVATIVE
+// #define FFT_DERIVATIVE
+
+/*
+check for NaNs during time evolution
+*/
+// #define CHECK_FOR_NAN
 
 /*
 mathematical constants
@@ -19,24 +40,32 @@ mathematical constants
 simulation parameters
 */
 // Number of gridpoints (needs to be odd for fourier grid)
-#define NOGP 		(31)
-// maximal number of timesteps
-#define MAXTS 		(10000)
+#define GRIDPOINTS_SPATIAL 		(31)
 // timestep
-#define DT			(0.01)
+#define DELTA_T					(0.1)
 // starttime (initial time)
-#define TI 			(0.0)
+#define INITIAL_TIME 			(0.0)
 // final time
-#define TF 			(PI*100)
+#define FINAL_TIME	 			(10.0)
 // boundaries of spatial region
-#define LOW_BND		(-PI)
-#define UP_BND 		(PI)
+#define SPATIAL_LOWER_BOUND		(-PI)
+#define SPATIAL_UPPER_BOUND 	(PI)
 
 /*
-counter for the timesteps and number of timesteps
+simulation parameters struct
 */
-extern size_t nt;
-extern size_t TS;
+typedef struct {
+	size_t Nx; // Number of gridpoints in spatial direction (odd for fourier)
+	size_t Nt; // Number of timesteps
+	size_t nt; // counter for timesteps
+	double dt; // size of timestep delta t
+	double ti; // initial time
+	double tf; // final time
+	double a;
+	double b;
+}parameters_t;
+
+extern parameters_t pars;
 
 /*
 gridpoints: x; spectral operators (matrices for first and second order
@@ -52,17 +81,11 @@ variable for lapack routines (everything is passed by reference!)
 /*
 GENERAL REMARKS
 D1,D2 as suffix indicates 1st and 2nd order spatial derivatives
-d as a prefix indicates temporal derivatives EXAMPLE: dphiD2 is
-\dot{\sigma}^{\prime \prime} (1 temporal and 2 spatial derivatives)
 
-We might not want to keep all derivatives through out the whole evolution in
-memory later.
+in the variable field we save phi and dphi
 */
 
-//solutions for phi and its spatial derivatives
-extern double *phi, *phiD1, *phiD2;
-
-//solution for dphi and its spatial derivatives
-extern double *dphi, *dphiD1, *dphiD2;
+//solutions for the field we evolve and its spatial derivatives
+extern double *field, *fieldD1, *fieldD2;
 
 #endif

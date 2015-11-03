@@ -5,46 +5,60 @@
 #include "setup.h"
 #include "main.h"
 
-void allocate_and_initialize_all() {
-    allocate_external(NOGP);
-    mk_fourier_spectral_operators(NOGP, LOW_BND, UP_BND);
-    mk_initial_conditions(NOGP, phi_init, dphi_init);
+void allocate_and_initialize_all(parameters_t *pars) {
+	initialize_parameters(pars);
+	DEBUG(puts("Initialized parameters.\n"));
+	size_t Nx = pars->Nx;
+	size_t Nt = pars->Nt;
+    double a = pars->a;
+	double b = pars->b;
+    allocate_external(Nx, Nt);
+    DEBUG(puts("Allocated memory for all external variables.\n"));
+    mk_fourier_spectral_operators(Nx, a, b);
+    DEBUG(puts("Constructed fourier gridpoints (and spectral operators).\n"));
+    mk_initial_conditions(Nx, phi_init, dphi_init);
+    DEBUG(puts("Initialized the field and its temporal derivative.\n"));
+}
+
+void initialize_parameters(parameters_t *pars) {
+	pars->Nx = GRIDPOINTS_SPATIAL;
+	pars->dt = DELTA_T;
+	pars->ti = INITIAL_TIME;
+	pars->tf = FINAL_TIME;
+	pars->a  = SPATIAL_LOWER_BOUND;
+	pars->b  = SPATIAL_UPPER_BOUND;
+	pars->Nt = ceil((pars->tf - pars->ti) / pars->dt);
+	pars->nt = 0;
 }
 
 /*
 allocate memory and initialize all external variables
 */
-void allocate_external(size_t N) {
-    size_t N2 = N * N;
-
-    //running parameter for time evolution and number of timesteps
-    nt = 0;
-    TS = ceil( ((double)(TF - TI)) / DT );
+void allocate_external(size_t Nx, size_t Nt) {
+    size_t N2 = Nx * Nx;
 
     //grid points and spectral operators
-    x  = malloc(N  * sizeof *x);
+    x  = malloc(Nx * sizeof *x);
+    #ifdef SPECTRAL_OPERATOR_DERIVATIVE
     D1 = malloc(N2 * sizeof *D1);
     D2 = malloc(N2 * sizeof *D2);
+    #endif
 
-    //solutions for phi (we are saving each timestep: N * TS space)
-    phi   = calloc(N * TS, sizeof *phi);
-    phiD1 = calloc(N * TS, sizeof *phiD1);
-    phiD2 = calloc(N * TS, sizeof *phiD2);
-
-    //solution for dphi
-    dphi   = calloc(N * TS, sizeof *dphi);
-    dphiD1 = calloc(N * TS, sizeof *dphiD1);
-    dphiD2 = calloc(N * TS, sizeof *dphiD2);
+    //solutions for the field and the temporal derivative (we are saving each
+    //timestep:2 * N * TS space)
+    field   = calloc(N2 * Nt, sizeof *field);
+    fieldD1 = calloc(N2 * Nt, sizeof *fieldD1);
+    fieldD2 = calloc(N2 * Nt, sizeof *fieldD2);
 }
 
 /*
-	make the N fourier spectral gridpoints for the interval [low_bnd, up_bnd],
+	make the N fourier spectral gridpoints for the interval [a, b],
 	and the spectral operators (N \times N matrices) for first and second order
 	derivatives; x, D1 and D2 need to be initialized and memory needs to be
 	allocated before calling this function
 	see mathematica notebook spectral_operators for further info
 */
-void mk_fourier_spectral_operators(size_t N, double low_bnd, double up_bnd) {
+void mk_fourier_spectral_operators(size_t N, double a, double b) {
 	if (N <= 0 || N%2 == 0)
 	{
 		fputs("Need an odd number of gridpoints for a fourier grid", stderr);
@@ -53,20 +67,21 @@ void mk_fourier_spectral_operators(size_t N, double low_bnd, double up_bnd) {
 	// Grid points
 	for (size_t i = 0; i < N; ++i)
 	{
-		x[i] = low_bnd + (up_bnd - low_bnd)*i/N;
+		x[i] = a + (b - a) * i / N;
 	}
 
+	#ifdef SPECTRAL_OPERATOR_DERIVATIVE
 	//D1
 	for (size_t i = 0; i < N; ++i)
 	{
-		size_t offset = i*N;
+		size_t offset = i * N;
 		double tmpD1 = 0.0;
 		for (size_t j = 0; j < N; ++j)
 		{
 			if (i != j)
 			{
 				int diff = (int)j - (int)i;
-				tmpD1 = PI / (sin((diff*PI)/(int)N) * (up_bnd-low_bnd));
+				tmpD1 = PI / ( sin( (diff*PI) / (double)N ) * (b - a) );
 				if ( (i+j)%2 != 0 )
 				{
 					tmpD1 *= -1.0;
@@ -82,28 +97,41 @@ void mk_fourier_spectral_operators(size_t N, double low_bnd, double up_bnd) {
 
 	//D2
 	sq_matrix(D1, D2, N);
+	#endif
 
 	// Console output for debugging
 	#ifdef PRINT_SPECTRAL_OPERATORS
-		printf("\nx\n");
+		puts("x");
         print_vector(x, N);
-        printf("\n\n\nD1\n");
+        #ifdef SPECTRAL_OPERATOR_DERIVATIVE
+        puts("\nD1");
         print_matrix(D1, N);
-        printf("\n\n\nD2\n");
+        puts("\nD2");
         print_matrix(D2, N);
+        #endif
+        puts("\n");
 	#endif
 }
 
 /*
-setup initial conditions for phi
+setup initial conditions for the field
 */
-void mk_initial_conditions(size_t N, double (*phi_init)(double),
-								double (*dphi_init)(double)) {
+void mk_initial_conditions(size_t N, double (*f_init)(double),
+								double (*df_init)(double)) {
     for (size_t i = 0; i < N; ++i)
     {
-        phi[i] = phi_init(x[i]);
-        dphi[i] = dphi_init(x[i]);
+        field[i] = f_init(x[i]);
+        field[N+i] = df_init(x[i]);
     }
+
+    // Console output for debugging
+    #ifdef PRINT_INITIAL_CONDITIONS
+    	puts("phi");
+        print_vector(field, N);
+        puts("\ndphi");
+        print_vector(field + N, N);
+        puts("\n");
+    #endif
 }
 
 /*
@@ -116,7 +144,7 @@ double phi_init(double x) {
 }
 
 double dphi_init(double x) {
-	return -sin(x);
+	return -cos(x);
 }
 
 /*
@@ -124,15 +152,15 @@ free all allocated memory
 */
 void free_all_external() {
 	free(x);
+	#ifdef SPECTRAL_OPERATOR_DERIVATIVE
 	free(D1);
 	free(D2);
+	#endif
 
-	free(phi);
-	free(phiD1);
-	free(phiD2);
-	free(dphi);
-	free(dphiD1);
-	free(dphiD2);
+	free(field);
+	free(fieldD1);
+	free(fieldD2);
+	DEBUG(puts("Memory from all external variables freed.\n"));
 }
 
 //****************************** matrix/vector operations

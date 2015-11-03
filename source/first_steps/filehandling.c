@@ -2,26 +2,70 @@
 #include <stdlib.h>
 #include "main.h"
 
-void print_vector_to_file(double *v, size_t N, int filenumber) {
+/*
+print a N \times 1 vector to a .txt file with the name "vector_<filenumber>".
+row_skip: only print every row_skip-th entry
+*/
+void print_vector_to_file(double *v, size_t N, size_t row_skip,
+							int filenumber) {
+	DEBUG(puts("Start writing to file...\n"));
 	if (filenumber < 0 || filenumber > 999)
 	{
-		fputs("Need an odd number of gridpoints for a fourier grid", stderr);
+		fputs("Filenumber should not exceed three digits.", stderr);
+		return;
+	}
+	if (row_skip < 1)
+	{
+		fputs("Skip amount has to be at least 1.", stderr);
 		return;
 	}
 
-	char filename[sizeof "file000.txt"];
-    sprintf(filename, "file%03d.txt", filenumber);
+	char filename[sizeof "vector_000.txt"];
+    sprintf(filename, "vector_%03d.txt", filenumber);
 
-    FILE *phi_f;
-    phi_f = fopen(filename, "w");
+    FILE *vector_f;
+    vector_f = fopen(filename, "w");
 
-    for (size_t i = 0; i < TS; i+=10)
+    for (size_t i = 0; i < N; i+=row_skip)
     {
-    	for (size_t j = 0; j < N; j+=2)
-    	{
-    		fprintf(phi_f, "%.10f, ", v[i*N+j]);
-    	}
-    	fputs("\n", phi_f);
+    	fprintf(vector_f, "%.15f\n", v[i]);
     }
-    fclose(phi_f);
+    fclose(vector_f);
+    DEBUG(puts("Finished writing to file.\n"));
+}
+
+/*
+print a N \times M matrix to a .txt file with the name "matrix_<filenumber>".
+row_skip and col_skip: only every <>-th row/column is printed
+*/
+void print_matrix_to_file(double *A, size_t N, size_t M,
+						size_t row_skip, size_t col_skip, int filenumber) {
+	DEBUG(puts("Start writing to file...\n"));
+	if (filenumber < 0 || filenumber > 999)
+	{
+		fputs("Filenumber should not exceed three digits.", stderr);
+		return;
+	}
+	if (row_skip < 1 || col_skip < 1)
+	{
+		fputs("Skip amount has to be at least 1.", stderr);
+		return;
+	}
+
+	char filename[sizeof "matrix_000.txt"];
+    sprintf(filename, "matrix_%03d.txt", filenumber);
+
+    FILE *matrix_f;
+    matrix_f = fopen(filename, "w");
+
+    for (size_t i = 0; i < N; i+=row_skip)
+    {
+    	for (size_t j = 0; j < M; j+=col_skip)
+    	{
+    		fprintf(matrix_f, "%.15f, ", A[i*N+j]);
+    	}
+    	fputs("\n", matrix_f);
+    }
+    fclose(matrix_f);
+    DEBUG(puts("Finished writing to file.\n"));
 }

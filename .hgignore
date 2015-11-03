@@ -6,3 +6,4 @@ syntax: glob
 # object files and executable
 *.o
 *prog
+*.txt

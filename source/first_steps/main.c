@@ -7,24 +7,18 @@
 #include "filehandling.h"
 #include "tests.h"
 
+// simulation parameters
+parameters_t pars;
+
 //grid and spectral operators
 double *x;
 double *D1;
 double *D2;
 
-// timestep counter and number of timesteps
-size_t nt;
-size_t TS;
-
-//evolution of phi and spatial derivatives (NOGP * TSMAX space)
-double *phi;
-double *phiD1;
-double *phiD2;
-
-//solution for dsigma
-double *dphi;
-double *dphiD1;
-double *dphiD2;
+// evolution of the field and spatial derivatives (2*Nx * Nt space required)
+double *field;
+double *fieldD1;
+double *fieldD2;
 
 int main(int argc, const char * argv[]) {
 
@@ -33,13 +27,11 @@ int main(int argc, const char * argv[]) {
     return 0;
 #endif
 
-    allocate_and_initialize_all();
+    allocate_and_initialize_all(&pars);
 
-    run_RK4_stepper(DT, NOGP);
+    run_RK4_stepper(&pars);
 
-    print_vector_to_file(phi, NOGP, 0);
-
-    print_vector_to_file(dphi, NOGP, 0);
+	print_vector_to_file(field, 2*pars.Nx*pars.Nt, 1, 0);
 
     free_all_external();
     return 0;
