@@ -20,6 +20,11 @@ void run_RK4_stepper(parameters_t *pars) {
 	k3  = malloc(N2 * sizeof *k3);
 	k4  = malloc(N2 * sizeof *k4);
 	tmp = malloc(N2 * sizeof *tmp);
+	if (!(k1 && k2 && k3 && k4 && tmp))
+	{
+		fputs("Allocating memory failed.", stderr);
+    	exit(EXIT_FAILURE);
+	}
 	size_t os, new_os;
 
 	DEBUG(puts("Starting RK4 time evolution with:\n"));
@@ -115,6 +120,11 @@ void fft_D2(double *f, double *result, size_t N) {
 	fftw_plan p_fw;
 	fftw_plan p_bw;
 	tmp = fftw_malloc(nc * sizeof *tmp);
+	if (!tmp)
+	{
+		fputs("Allocating memory failed.", stderr);
+    	exit(EXIT_FAILURE);
+	}
 	p_fw = fftw_plan_dft_r2c_1d(N, f, tmp, FFTW_ESTIMATE);
 	fftw_execute(p_fw);
 	double L = pars.b - pars.a;

@@ -39,9 +39,19 @@ void allocate_external(size_t Nx, size_t Nt) {
 
     //grid points and spectral operators
     x  = malloc(Nx * sizeof *x);
+    if (!x)
+    {
+    	fputs("Allocating memory failed.", stderr);
+    	exit(EXIT_FAILURE);
+    }
     #ifdef SPECTRAL_OPERATOR_DERIVATIVE
     D1 = malloc(N2 * sizeof *D1);
     D2 = malloc(N2 * sizeof *D2);
+    if (!D1 || !D2)
+    {
+    	fputs("Allocating memory failed.", stderr);
+    	exit(EXIT_FAILURE);
+    }
     #endif
 
     //solutions for the field and the temporal derivative (we are saving each
@@ -49,6 +59,11 @@ void allocate_external(size_t Nx, size_t Nt) {
     field   = calloc(N2 * Nt, sizeof *field);
     fieldD1 = calloc(N2 * Nt, sizeof *fieldD1);
     fieldD2 = calloc(N2 * Nt, sizeof *fieldD2);
+    if (!field || !fieldD1 || !fieldD2)
+    {
+    	fputs("Allocating memory failed.", stderr);
+    	exit(EXIT_FAILURE);
+    }
 }
 
 /*
