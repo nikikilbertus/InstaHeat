@@ -12,12 +12,12 @@ void print_vector_to_file(double *v, size_t N, size_t row_skip,
 	if (filenumber < 0 || filenumber > 999)
 	{
 		fputs("Filenumber should not exceed three digits.", stderr);
-		return;
+		exit(EXIT_FAILURE);
 	}
 	if (row_skip < 1)
 	{
 		fputs("Skip amount has to be at least 1.", stderr);
-		return;
+		exit(EXIT_FAILURE);
 	}
 
 	char filename[sizeof "vector_000.txt"];
@@ -25,6 +25,12 @@ void print_vector_to_file(double *v, size_t N, size_t row_skip,
 
     FILE *vector_f;
     vector_f = fopen(filename, "w");
+
+    if (!vector_f)
+    {
+    	fputs("Could not open file.", stderr);
+		exit(EXIT_FAILURE);
+    }
 
     for (size_t i = 0; i < N; i+=row_skip)
     {
@@ -57,6 +63,12 @@ void print_matrix_to_file(double *A, size_t N, size_t M,
 
     FILE *matrix_f;
     matrix_f = fopen(filename, "w");
+
+    if (!matrix_f)
+    {
+    	fputs("Could not open file.", stderr);
+		exit(EXIT_FAILURE);
+    }
 
     for (size_t i = 0; i < N; i+=row_skip)
     {
