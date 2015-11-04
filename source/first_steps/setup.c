@@ -29,6 +29,7 @@ void initialize_parameters(parameters_t *pars) {
 	pars->b  = SPATIAL_UPPER_BOUND;
 	pars->Nt = ceil((pars->tf - pars->ti) / pars->dt);
 	pars->nt = 0;
+	pars->t  = 0.0;
 }
 
 /*
@@ -55,9 +56,17 @@ void allocate_external(size_t Nx, size_t Nt) {
     #endif
 
     //solutions for the field and the temporal derivative (we are saving each
-    //timestep:2 * N * TS space)
-    field   = calloc(N2 * Nt, sizeof *field);
+    //timestep: 2 * Nx * Nt space)
+    field = calloc(N2 * Nt, sizeof *field);
     if (!field)
+    {
+    	fputs("Allocating memory failed.", stderr);
+    	exit(EXIT_FAILURE);
+    }
+
+    // solution for the scale parameter a: Nt space
+    a = calloc(Nt, sizeof *a);
+    if (!a)
     {
     	fputs("Allocating memory failed.", stderr);
     	exit(EXIT_FAILURE);
@@ -137,6 +146,8 @@ void mk_initial_conditions(size_t N, double (*f_init)(double),
         field[N+i] = df_init(x[i]);
     }
 
+    a[0] = 1.0;
+
     // Console output for debugging
     #ifdef PRINT_INITIAL_CONDITIONS
     	puts("phi");
@@ -153,11 +164,13 @@ when using fourier grid points, those need to be periodic in the spatial domain
 specified by LOW_BND and UP_BND in main.h
 */
 double phi_init(double x) {
-	return sin(x);
+	// return sin(x);
+	return tanh(pow(x, 8));
 }
 
 double dphi_init(double x) {
-	return -cos(x);
+	// return -cos(x);
+	return 0.0;
 }
 
 /*

@@ -21,6 +21,9 @@ void run_RK4_stepper(parameters_t *pars) {
 	k3  = malloc(N2 * sizeof *k3);
 	k4  = malloc(N2 * sizeof *k4);
 	tmp = malloc(N2 * sizeof *tmp);
+
+	//double a1, a2, a3, a4;
+
 	if (!(k1 && k2 && k3 && k4 && tmp))
 	{
 		fputs("Allocating memory failed.", stderr);
@@ -47,37 +50,42 @@ void run_RK4_stepper(parameters_t *pars) {
 	{
 		os = nt * N2;
 
-		// k1
+		// k1 & a1
 		get_field_velocity(field + os, k1, N);
+		// a1 = get_a_velocity(field + os, a[nt], N);
 
-		// k2
+		// k2 & k2
 		for (size_t i = 0; i < N2; ++i)
 		{
 			tmp[i] = field[os+i] + dt * k1[i] / 2.0;
 		}
 		get_field_velocity(tmp, k2, N);
+		// a2 = get_a_velocity(tmp, a[nt], N);
 
-		// k3
+		// k3 & a3
 		for (size_t i = 0; i < N2; ++i)
 		{
 			tmp[i] = field[os+i] + dt * k2[i] / 2.0;
 		}
 		get_field_velocity(tmp, k3, N);
+		// a3 = get_a_velocity(tmp, a[nt], N);
 
-		// k4
+		// k4 & a4
 		for (size_t i = 0; i < N2; ++i)
 		{
 			tmp[i] = field[os+i] + dt * k3[i];
 		}
 		get_field_velocity(tmp, k4, N);
+		// a4 = get_a_velocity(tmp, a[nt], N);
 
-		// perform one time step
+		// perform one time step for the field and a
 		new_os = os + N2;
 		for (size_t i = 0; i < N2; ++i)
 		{
 			field[new_os+i] = field[os+i] +
 						dt * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]) / 6.0;
 		}
+		// a[nt+1] = a[nt] + dt * (a1 + 2.0 * a2 + 2.0 * a3 + a4) / 6.0;
 
 		#ifdef CHECK_FOR_NAN
 			for (size_t i = 0; i < N2; ++i)
@@ -100,10 +108,10 @@ void run_RK4_stepper(parameters_t *pars) {
 	free(tmp);
 
 	double secs = (double)(end - start) / CLOCKS_PER_SEC;
-	DEBUG(printf("Finished RK4 time evolution in: %f seconds.\n", secs));
+	DEBUG(printf("Finished RK4 time evolution in: %f seconds.\n\n", secs));
 }
 
-void get_field_velocity(double* f, double *result, size_t N) {
+void get_field_velocity(double *f, double *result, size_t N) {
 	for (size_t i = 0; i < N; ++i)
 	{
 		result[i] = f[N + i];
@@ -114,6 +122,11 @@ void get_field_velocity(double* f, double *result, size_t N) {
 	#ifdef FFT_DERIVATIVE
 		fft_D2(f, result + N, N);
 	#endif
+
+	for (size_t i = 0; i < N; ++i)
+	{
+		result[i + N] += potential_term(f[i]);
+	}
 }
 
 void spectral_op_D2(double *f, double *result, size_t N) {
@@ -144,4 +157,25 @@ void fft_D2(double *f, double *result, size_t N) {
 	fftw_destroy_plan(p_fw);
 	fftw_destroy_plan(p_bw);
 	fftw_free(tmp);
+}
+
+inline double potential_term(double f) {
+	// return -MASS*MASS*f - COUPLING * f*f*f / 6.0;
+	// return - 20.0 * tanh(pow(f, 50));
+	return 0.0;
+}
+
+double get_a_velocity(double *f, double a, size_t N) {
+	return a * get_hubble(f, N);
+}
+
+double get_hubble(double *f, size_t N) {
+	/*
+	TODO: compute average energy at current time:
+		* what exactly do I need
+		* how do I average
+		* ^0.5 in the end?
+		* what about units
+	*/
+	return 0.0;
 }

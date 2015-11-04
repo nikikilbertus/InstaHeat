@@ -20,8 +20,8 @@ void print_vector_to_file(double *v, size_t N, size_t row_skip,
 		exit(EXIT_FAILURE);
 	}
 
-	char filename[sizeof "vector_000.txt"];
-    sprintf(filename, "vector_%03d.txt", filenumber);
+	char filename[sizeof "../../../data/vector_000.txt"];
+    sprintf(filename, "../../../data/vector_%03d.txt", filenumber);
 
     FILE *vector_f;
     vector_f = fopen(filename, "w");
