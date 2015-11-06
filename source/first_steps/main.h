@@ -56,9 +56,9 @@ simulation parameters
 #define SPATIAL_LOWER_BOUND		(-PI)
 #define SPATIAL_UPPER_BOUND 	(PI)
 // mass parameter
-#define MASS 					(5.0)
+#define MASS 					(1.0)
 // coupling in a phi4 potential
-#define COUPLING 				(100.0)
+#define COUPLING 				(1.0)
 // cutoff fraction used in spectral filtering during time evolution
 #define CUTOFF_FRACTION 		(0.0)
 

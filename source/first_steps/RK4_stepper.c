@@ -146,14 +146,16 @@ void get_field_velocity(double *f, double *result, size_t N) {
 }
 
 inline double potential(double f){
-	// return MASS * MASS * f * f / 2.0 + COUPLING * f * f * f * f / 24.0;
-	return 0.0;
+	// return MASS * MASS * f * f / 2.0;
+	return MASS * MASS * f * f / 2.0 + COUPLING * f * f * f * f / 24.0;
+	// return 0.0;
 }
 
 inline double potential_prime_term(double f) {
-	// return MASS * MASS * f + COUPLING * f * f * f / 6.0;
+	// return MASS * MASS * f;
+	return MASS * MASS * f + COUPLING * f * f * f / 6.0;
 	// return 20.0 * tanh(pow(f, 50));
-	return 0.0;
+	// return 0.0;
 }
 
 double get_a_velocity(double *f, size_t nt, size_t N) {
@@ -171,9 +173,12 @@ double get_total_energy(double *f, size_t N) {
 	double *fD1 = malloc(N * sizeof *fD1);
 	fft_D1(f, fD1, N);
 
+	double ft, fx;
 	for (size_t i = 0; i < N; ++i)
 	{
-		energy += (f[N+i] + fD1[i]) / 2. + potential(f[i]);
+		ft = f[N + i];
+		fx = fD1[i];
+		energy += (ft * ft + fx * fx) / 2. + potential(f[i]);
 	}
 
 	free(fD1);
