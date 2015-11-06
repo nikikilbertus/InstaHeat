@@ -34,7 +34,7 @@ check for NaNs during time evolution
 /*
 apply a frequency cutoff based filter during the time evolution
 */
-// #define ENABLE_FFT_FILTER
+#define ENABLE_FFT_FILTER
 
 /*
 mathematical constants
