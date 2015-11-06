@@ -32,6 +32,11 @@ check for NaNs during time evolution
 // #define CHECK_FOR_NAN
 
 /*
+apply a frequency cutoff based filter during the time evolution
+*/
+// #define ENABLE_FFT_FILTER
+
+/*
 mathematical constants
 */
 #define PI (3.141592653589793238462643383279)
@@ -40,7 +45,7 @@ mathematical constants
 simulation parameters
 */
 // Number of gridpoints (needs to be odd for fourier grid)
-#define GRIDPOINTS_SPATIAL 		(101)
+#define GRIDPOINTS_SPATIAL 		(51)
 // timestep
 #define DELTA_T					(-0.1)
 // starttime (initial time)
@@ -54,7 +59,8 @@ simulation parameters
 #define MASS 					(5.0)
 // coupling in a phi4 potential
 #define COUPLING 				(100.0)
-
+// cutoff fraction used in spectral filtering during time evolution
+#define CUTOFF_FRACTION 		(0.0)
 
 /*
 simulation parameters struct
@@ -69,6 +75,7 @@ typedef struct {
 	double tf; // final time
 	double a;  // lower boundary of spatial domain
 	double b;  // upper boudnary of spatial domain
+	double cutoff_fraction; // used in spectral filtering during time evolution
 }parameters_t;
 
 extern parameters_t pars;
@@ -95,6 +102,9 @@ in the variable field we save phi and dphi
 extern double *field;
 
 // solution for the FRW euqations
-extern double *a;
+extern double *frw_a;
+
+// total energy of the field
+extern double *e_tot;
 
 #endif

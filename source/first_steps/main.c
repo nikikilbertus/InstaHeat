@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <Accelerate/Accelerate.h>
 #include "main.h"
 #include "setup.h"
 #include "RK4_stepper.h"
@@ -19,12 +18,18 @@ double *D2;
 double *field;
 
 // evolution of the scale parameter a for the FRW equations
-double *a;
+double *frw_a;
+
+// evolution of the total energy of the field
+double *e_tot;
 
 int main(int argc, const char * argv[]) {
 
 #ifdef RUN_TESTS_ONLY
+    pars.dt = 0.1;
+    allocate_and_initialize_all(&pars);
     run_all_tests();
+    free_all_external();
     return 0;
 #endif
 
@@ -34,7 +39,12 @@ int main(int argc, const char * argv[]) {
     	pars.dt = dt;
     	allocate_and_initialize_all(&pars);
     	run_RK4_stepper(&pars);
-		print_vector_to_file(field, 2*pars.Nx*pars.Nt, 1, count);
+        char *prefix_field = "field";
+		print_vector_to_file(field, 2*pars.Nx*pars.Nt, 1, prefix_field, count);
+        char *prefix_frw_a = "a";
+        print_vector_to_file(frw_a, pars.Nt, 1, prefix_frw_a, count);
+        char *prefix_e_tot = "energy";
+        print_vector_to_file(e_tot, pars.Nt, 1, prefix_e_tot, count);
     	free_all_external();
     }
 

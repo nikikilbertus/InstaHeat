@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <Accelerate/Accelerate.h>
 #include "setup.h"
 #include "main.h"
 
@@ -30,6 +29,7 @@ void initialize_parameters(parameters_t *pars) {
 	pars->Nt = ceil((pars->tf - pars->ti) / pars->dt);
 	pars->nt = 0;
 	pars->t  = 0.0;
+    pars->cutoff_fraction = CUTOFF_FRACTION;
 }
 
 /*
@@ -65,11 +65,19 @@ void allocate_external(size_t Nx, size_t Nt) {
     }
 
     // solution for the scale parameter a: Nt space
-    a = calloc(Nt, sizeof *a);
-    if (!a)
+    frw_a = calloc(Nt, sizeof *frw_a);
+    if (!frw_a)
     {
     	fputs("Allocating memory failed.", stderr);
     	exit(EXIT_FAILURE);
+    }
+
+    // total energy of the field over time: Nt space
+    e_tot = calloc(Nt, sizeof *e_tot);
+    if (!e_tot)
+    {
+        fputs("Allocating memory failed.", stderr);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -146,7 +154,8 @@ void mk_initial_conditions(size_t N, double (*f_init)(double),
         field[N+i] = df_init(x[i]);
     }
 
-    a[0] = 1.0;
+    // todo: is that correct?
+    frw_a[0] = 1.0;
 
     // Console output for debugging
     #ifdef PRINT_INITIAL_CONDITIONS
@@ -164,13 +173,13 @@ when using fourier grid points, those need to be periodic in the spatial domain
 specified by LOW_BND and UP_BND in main.h
 */
 double phi_init(double x) {
-	// return sin(x);
-	return tanh(pow(x, 8));
+	return sin(x);
+	// return tanh(pow(x, 8));
 }
 
 double dphi_init(double x) {
-	// return -cos(x);
-	return 0.0;
+	return -cos(x);
+	// return 0.0;
 }
 
 /*
@@ -184,52 +193,7 @@ void free_all_external() {
 	#endif
 
 	free(field);
+    free(frw_a);
+    free(e_tot);
 	DEBUG(puts("Memory from all external variables freed.\n"));
-}
-
-//****************************** matrix/vector operations
-/*
-matrix-matrix and matrix-vector function wrapper
-*/
-void matrix_matrix(double *matrixA, double *matrixB, double *result, size_t N) {
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, N, N, N, 1.0,
-    				matrixA, N, matrixB, N, 0.0, result, N);
-}
-
-void sq_matrix(double *matrix, double *result, size_t N) {
-    matrix_matrix(matrix, matrix, result, N);
-}
-
-void matrix_vector(double *matrix, double *vector, double *result, size_t N) {
-    cblas_dgemv(CblasColMajor, CblasNoTrans, N, N, 1.0,
-    				matrix, N, vector, 1, 0.0, result, 1);
-}
-
-//****************************** printing functions
-/*
-for debugging mostly, watch out for colomn_major vs row_major in lapack routines
-*/
-void print_matrix(double *matrix, size_t N){
-    for (size_t i = 0; i < N; i++)
-    {
-        for (size_t j = 0; j < N; j++)
-        {
-            printf("%f\t", matrix[j*N+i]);
-        }
-        printf("\n");
-    }
-}
-
-void print_vector(double *vector, size_t N) {
-    for (size_t i = 0; i < N; i++)
-    {
-        printf("%f\n", vector[i]);
-    }
-}
-
-/*
-conversion from 2D to 1D indices
-*/
-size_t idx(size_t N, size_t row, size_t col) {
-	return row * N + col;
 }

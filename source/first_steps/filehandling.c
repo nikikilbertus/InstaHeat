@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "main.h"
 
 /*
-print a N \times 1 vector to a .txt file with the name "vector_<filenumber>".
+print a N \times 1 vector to a .txt file with the name "<prefix>_<filenumber>".
 row_skip: only print every row_skip-th entry
 */
 void print_vector_to_file(double *v, size_t N, size_t row_skip,
-							int filenumber) {
-	DEBUG(puts("Start writing to file...\n"));
+							char *prefix, int filenumber) {
 	if (filenumber < 0 || filenumber > 999)
 	{
 		fputs("Filenumber should not exceed three digits.", stderr);
@@ -19,9 +19,16 @@ void print_vector_to_file(double *v, size_t N, size_t row_skip,
 		fputs("Skip amount has to be at least 1.", stderr);
 		exit(EXIT_FAILURE);
 	}
+    if (prefix == NULL)
+    {
+        prefix = "vector";
+    }
 
-	char filename[sizeof "../../../data/vector_000.txt"];
-    sprintf(filename, "../../../data/vector_%03d.txt", filenumber);
+    DEBUG(printf("Start writing %s to file...\n", prefix));
+
+    size_t prefix_length = strlen(prefix);
+	char filename[prefix_length + (sizeof "../../../data/_000.txt")];
+    sprintf(filename, "../../../data/%s_%03d.txt", prefix, filenumber);
 
     FILE *vector_f;
     vector_f = fopen(filename, "w");
@@ -41,12 +48,11 @@ void print_vector_to_file(double *v, size_t N, size_t row_skip,
 }
 
 /*
-print a N \times M matrix to a .txt file with the name "matrix_<filenumber>".
+print a N \times M matrix to a .txt file with the name "<prefix>_<filenumber>".
 row_skip and col_skip: only every <>-th row/column is printed
 */
-void print_matrix_to_file(double *A, size_t N, size_t M,
-						size_t row_skip, size_t col_skip, int filenumber) {
-	DEBUG(puts("Start writing to file...\n"));
+void print_matrix_to_file(double *A, size_t N, size_t M, size_t row_skip,
+                            size_t col_skip, char *prefix, int filenumber) {
 	if (filenumber < 0 || filenumber > 999)
 	{
 		fputs("Filenumber should not exceed three digits.", stderr);
@@ -57,9 +63,16 @@ void print_matrix_to_file(double *A, size_t N, size_t M,
 		fputs("Skip amount has to be at least 1.", stderr);
 		return;
 	}
+    if (prefix == NULL)
+    {
+        prefix = "matrix";
+    }
 
-	char filename[sizeof "matrix_000.txt"];
-    sprintf(filename, "matrix_%03d.txt", filenumber);
+    DEBUG(printf("Start writing %s to file...\n", prefix));
+
+    size_t prefix_length = strlen(prefix);
+    char filename[prefix_length + (sizeof "../../../data/_000.txt")];
+    sprintf(filename, "../../../data/%s_%03d.txt", prefix, filenumber);
 
     FILE *matrix_f;
     matrix_f = fopen(filename, "w");
