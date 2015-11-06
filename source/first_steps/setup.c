@@ -72,9 +72,9 @@ void allocate_external(size_t Nx, size_t Nt) {
     	exit(EXIT_FAILURE);
     }
 
-    // total energy of the field over time: Nt space
-    e_tot = calloc(Nt, sizeof *e_tot);
-    if (!e_tot)
+    // T00 of the scalar field over time: Nt space
+    rho = calloc(Nt, sizeof *rho);
+    if (!rho)
     {
         fputs("Allocating memory failed.", stderr);
         exit(EXIT_FAILURE);
@@ -194,6 +194,6 @@ void free_all_external() {
 
 	free(field);
     free(frw_a);
-    free(e_tot);
+    free(rho);
 	DEBUG(puts("Memory from all external variables freed.\n"));
 }

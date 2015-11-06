@@ -52,33 +52,32 @@ void run_RK4_stepper(parameters_t *pars) {
 		os = nt * N2;
 
 		// k1 & a1
-		get_field_velocity(field + os, k1, N);
-		a1 = get_a_velocity(field + os, nt, N);
-		e_tot[nt] = a1 / frw_a[nt];
+		mk_field_velocity(field + os, nt, k1, N);
+		a1 = get_a_velocity(nt);
 
 		// k2 & k2
 		for (size_t i = 0; i < N2; ++i)
 		{
 			tmp[i] = field[os+i] + dt * k1[i] / 2.0;
 		}
-		get_field_velocity(tmp, k2, N);
-		a2 = get_a_velocity(tmp, nt, N);
+		mk_field_velocity(tmp, nt, k2, N);
+		a2 = get_a_velocity(nt);
 
 		// k3 & a3
 		for (size_t i = 0; i < N2; ++i)
 		{
 			tmp[i] = field[os+i] + dt * k2[i] / 2.0;
 		}
-		get_field_velocity(tmp, k3, N);
-		a3 = get_a_velocity(tmp, nt, N);
+		mk_field_velocity(tmp, nt, k3, N);
+		a3 = get_a_velocity(nt);
 
 		// k4 & a4
 		for (size_t i = 0; i < N2; ++i)
 		{
 			tmp[i] = field[os+i] + dt * k3[i];
 		}
-		get_field_velocity(tmp, k4, N);
-		a4 = get_a_velocity(tmp, nt, N);
+		mk_field_velocity(tmp, nt, k4, N);
+		a4 = get_a_velocity(nt);
 
 		// perform one time step for the field and a
 		new_os = os + N2;
@@ -89,6 +88,8 @@ void run_RK4_stepper(parameters_t *pars) {
 		}
 
 		frw_a[nt + 1] = frw_a[nt] + dt * (a1 + 2.0 * a2 + 2.0 * a3 + a4) / 6.0;
+
+		rho[nt] = mk_rho(field + os, frw_a[nt], N);
 
 		// apply filter
 		#ifdef ENABLE_FFT_FILTER
@@ -112,8 +113,8 @@ void run_RK4_stepper(parameters_t *pars) {
 		#endif
 	}
 
-	// compute the final total energy
-	e_tot[Nt - 1] = get_total_energy(field + 2 * N * (Nt - 1), N);
+	// compute the final 00 component of the stress energy
+	rho[Nt - 1] = mk_rho(field + 2 * N * (Nt - 1), frw_a[Nt - 1], N);
 
 	clock_t end = clock();
 
@@ -127,7 +128,11 @@ void run_RK4_stepper(parameters_t *pars) {
 	DEBUG(printf("Finished RK4 time evolution in: %f seconds.\n\n", secs));
 }
 
-void get_field_velocity(double *f, double *result, size_t N) {
+void mk_field_velocity(double *f, size_t nt, double *result, size_t N) {
+	size_t N2 = 2 * N;
+	double a = frw_a[nt];
+	rho[nt] = mk_rho(f, a, N);
+
 	for (size_t i = 0; i < N; ++i)
 	{
 		result[i] = f[N + i];
@@ -139,48 +144,59 @@ void get_field_velocity(double *f, double *result, size_t N) {
 		fft_D2(f, result + N, N);
 	#endif
 
-	for (size_t i = 0; i < N; ++i)
+	for (size_t i = N; i < N2; ++i)
 	{
-		result[i + N] -= potential_prime_term(f[i]);
+		result[i] /= (a * a);
+		result[i] -= ( 3.0 * get_hubble(nt) * f[i]
+						+ potential_prime_term(f[i - N]) );
 	}
 }
 
+/*
+A small selection of potentials one can try, make sure to set the corresponding
+potential_prime_term, the derivative is not computed automatically yet
+TODO: change that?
+*/
 inline double potential(double f){
 	// return MASS * MASS * f * f / 2.0;
-	return MASS * MASS * f * f / 2.0 + COUPLING * f * f * f * f / 24.0;
-	// return 0.0;
+	// return MASS * MASS * f * f / 2.0 + COUPLING * f * f * f * f / 24.0;
+	return 0.0;
 }
 
 inline double potential_prime_term(double f) {
 	// return MASS * MASS * f;
-	return MASS * MASS * f + COUPLING * f * f * f / 6.0;
+	// return MASS * MASS * f + COUPLING * f * f * f / 6.0;
 	// return 20.0 * tanh(pow(f, 50));
-	// return 0.0;
+	return 0.0;
 }
 
-double get_a_velocity(double *f, size_t nt, size_t N) {
-	return frw_a[nt] * get_total_energy(f, N);
+inline double get_a_velocity(size_t nt) {
+	return frw_a[nt] * get_hubble(nt);
 }
 
-double get_total_energy(double *f, size_t N) {
-	/*
-	TODO: compute average energy at current time:
-		* what about units
-		* is my formula correct (sign)
-	*/
-	double energy = 0.0;
+inline double get_hubble(size_t nt) {
+	return sqrt(rho[nt] / 3.0);
+}
+
+/*
+TODO: compute average 00 component of stress energy at current time:
+	* what about units
+	* is my formula correct (sign)
+*/
+double mk_rho(double *f, double a, size_t N) {
+	double T00 = 0.0;
 
 	double *fD1 = malloc(N * sizeof *fD1);
 	fft_D1(f, fD1, N);
 
-	double ft, fx;
+	double ft, fxa;
 	for (size_t i = 0; i < N; ++i)
 	{
 		ft = f[N + i];
-		fx = fD1[i];
-		energy += (ft * ft + fx * fx) / 2. + potential(f[i]);
+		fxa = fD1[i] / a;
+		T00 += (ft * ft + fxa * fxa) / 2. + potential(f[i]);
 	}
 
 	free(fD1);
-	return energy / N;
+	return T00 / N;
 }

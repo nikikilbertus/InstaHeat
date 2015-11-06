@@ -5,10 +5,11 @@
 #include "main.h"
 
 void run_RK4_stepper(parameters_t *pars);
-void get_field_velocity(double* f, double *result, size_t N);
+void mk_field_velocity(double *f, size_t nt, double *result, size_t N);
 inline double potential(double f);
 inline double potential_prime_term(double field_value);
-double get_a_velocity(double *f, size_t nt, size_t N);
-double get_total_energy(double *f, size_t N);
+inline double get_a_velocity(size_t nt);
+inline double get_hubble(size_t nt);
+double mk_rho(double *f, double a, size_t N);
 
 #endif

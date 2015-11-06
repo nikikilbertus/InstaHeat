@@ -110,15 +110,10 @@ void fft_apply_filter(double *f, size_t N) {
 
 			for (size_t j = 0; j < nc; ++j)
 			{
-				tmp[j] *= window[j];
+				tmp[j] *= window[j] / N;
 			}
 
 			fftw_execute(p_bw);
-		}
-		// have to normalize ourselves (both field and temporal derivative)
-		for (size_t i = 0; i < 2*N; ++i)
-		{
-			f[i] /= (double)N;
 		}
 
 		fftw_destroy_plan(p_fw);

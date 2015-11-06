@@ -21,7 +21,7 @@ double *field;
 double *frw_a;
 
 // evolution of the total energy of the field
-double *e_tot;
+double *rho;
 
 int main(int argc, const char * argv[]) {
 
@@ -43,8 +43,8 @@ int main(int argc, const char * argv[]) {
 		print_vector_to_file(field, 2*pars.Nx*pars.Nt, 1, prefix_field, count);
         char *prefix_frw_a = "a";
         print_vector_to_file(frw_a, pars.Nt, 1, prefix_frw_a, count);
-        char *prefix_e_tot = "energy";
-        print_vector_to_file(e_tot, pars.Nt, 1, prefix_e_tot, count);
+        char *prefix_rho = "energy";
+        print_vector_to_file(rho, pars.Nt, 1, prefix_rho, count);
     	free_all_external();
     }
 

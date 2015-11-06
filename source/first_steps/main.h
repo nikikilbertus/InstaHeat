@@ -51,7 +51,7 @@ simulation parameters
 // starttime (initial time)
 #define INITIAL_TIME 			(0.0)
 // final time
-#define FINAL_TIME	 			(PI)
+#define FINAL_TIME	 			(100)
 // boundaries of spatial region
 #define SPATIAL_LOWER_BOUND		(-PI)
 #define SPATIAL_UPPER_BOUND 	(PI)
@@ -87,11 +87,6 @@ derivatives: D1, D2)
 extern double *x, *D1, *D2;
 
 /*
-variable for lapack routines (everything is passed by reference!)
-*/
-// currently empty
-
-/*
 GENERAL REMARKS
 D1,D2 as suffix indicates 1st and 2nd order spatial derivatives
 
@@ -105,6 +100,6 @@ extern double *field;
 extern double *frw_a;
 
 // total energy of the field
-extern double *e_tot;
+extern double *rho;
 
 #endif
