@@ -58,6 +58,38 @@ void fft_D2(double *f, double *result, size_t N) {
 	p_fw = fftw_plan_dft_r2c_1d(N, f, tmp, FFTW_ESTIMATE);
 	fftw_execute(p_fw);
 
+	#if defined(ENABLE_FFT_FILTER) && defined(ENABLE_ADAPTIVE_FILTER)
+	{
+		double *power_spec = malloc(nc * sizeof *power_spec);
+		double absval;
+		double cpsd = CPSD_FRACTION, threshold;
+		double total = 0.0, fraction = 0.0;
+
+		for (size_t i = 0; i < nc; ++i)
+		{
+			absval = cabs(tmp[i]);
+			power_spec[i] = absval * absval;
+			total += power_spec[i];
+			// printf("%zu: %f\n", i, absval);
+		}
+		// puts("\n\n");
+
+		threshold = cpsd * total;
+		for (size_t i = 0; i < nc; ++i)
+		{
+			fraction += power_spec[i];
+			if (fraction >= threshold)
+			{
+				pars.cutoff_fraction =
+							fmax(0.0, (double)(nc - i - 3) / (double)nc);
+				printf("cutoff was set to: %f\n", pars.cutoff_fraction);
+				break;
+			}
+		}
+		free(power_spec);
+	}
+	#endif
+
 	double L = pars.b - pars.a;
 	double factor = - 4. * PI * PI / (L*L);
 	for (size_t i = 0; i < nc; ++i)
@@ -83,44 +115,49 @@ void fft_apply_filter(double *f, size_t N) {
 	size_t nc = N / 2 + 1;
 	size_t nmax = (size_t) fmin(nc, ceil(nc * (1.0 - cutoff_fraction)));
 
-	// if there is something to cut off
-	if (nc != nmax)
+	// if there is nothing to cut off
+	if (nc == nmax)
 	{
-		double *window = malloc(nc * sizeof *window);
-		mk_filter_window(window, nmax, nc);
-
-		fftw_complex *tmp;
-		fftw_plan p_fw;
-		fftw_plan p_bw;
-
-		tmp = fftw_malloc(nc * sizeof *tmp);
-		if (!tmp)
-		{
-			fputs("Allocating memory failed.", stderr);
-	    	exit(EXIT_FAILURE);
-		}
-
-		// we filter the field and its temporal derivative
-		for (size_t i = 0; i <= N; i += N)
-		{
-			p_fw = fftw_plan_dft_r2c_1d(N, f + i, tmp, FFTW_ESTIMATE);
-			p_bw = fftw_plan_dft_c2r_1d(N, tmp, f + i, FFTW_ESTIMATE);
-
-			fftw_execute(p_fw);
-
-			for (size_t j = 0; j < nc; ++j)
-			{
-				tmp[j] *= window[j] / N;
-			}
-
-			fftw_execute(p_bw);
-		}
-
-		fftw_destroy_plan(p_fw);
-		fftw_destroy_plan(p_bw);
-		fftw_free(tmp);
-		free(window);
+		fputs("Warning: filtering is enabled (ENABLE_FFT_FILTER "
+			  "but the cutoff fraction is 0. FFT is performed"
+			  "but nothing will be filtered -> Overhead!\n"
+			  , stderr);
 	}
+
+	double *window = malloc(nc * sizeof *window);
+	mk_filter_window(window, nmax, nc);
+
+	fftw_complex *tmp;
+	fftw_plan p_fw;
+	fftw_plan p_bw;
+
+	tmp = fftw_malloc(nc * sizeof *tmp);
+	if (!tmp)
+	{
+		fputs("Allocating memory failed.", stderr);
+    	exit(EXIT_FAILURE);
+	}
+
+	// we filter the field and its temporal derivative
+	for (size_t i = 0; i <= N; i += N)
+	{
+		p_fw = fftw_plan_dft_r2c_1d(N, f + i, tmp, FFTW_ESTIMATE);
+		p_bw = fftw_plan_dft_c2r_1d(N, tmp, f + i, FFTW_ESTIMATE);
+
+		fftw_execute(p_fw);
+
+		for (size_t j = 0; j < nc; ++j)
+		{
+			tmp[j] *= window[j] / N;
+		}
+
+		fftw_execute(p_bw);
+	}
+
+	fftw_destroy_plan(p_fw);
+	fftw_destroy_plan(p_bw);
+	fftw_free(tmp);
+	free(window);
 }
 
 void mk_filter_window(double *window, size_t nmax, size_t nc) {

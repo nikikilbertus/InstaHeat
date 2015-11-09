@@ -35,6 +35,7 @@ check for NaNs during time evolution
 apply a frequency cutoff based filter during the time evolution
 */
 #define ENABLE_FFT_FILTER
+#define ENABLE_ADAPTIVE_FILTER
 
 /*
 mathematical constants
@@ -45,13 +46,13 @@ mathematical constants
 simulation parameters
 */
 // Number of gridpoints (needs to be odd for fourier grid)
-#define GRIDPOINTS_SPATIAL 		(51)
+#define GRIDPOINTS_SPATIAL 		(501)
 // timestep
 #define DELTA_T					(-0.1)
 // starttime (initial time)
 #define INITIAL_TIME 			(0.0)
 // final time
-#define FINAL_TIME	 			(100)
+#define FINAL_TIME	 			(10)
 // boundaries of spatial region
 #define SPATIAL_LOWER_BOUND		(-PI)
 #define SPATIAL_UPPER_BOUND 	(PI)
@@ -59,8 +60,12 @@ simulation parameters
 #define MASS 					(1.0)
 // coupling in a phi4 potential
 #define COUPLING 				(1.0)
-// cutoff fraction used in spectral filtering during time evolution
-#define CUTOFF_FRACTION 		(0.0)
+// cutoff fraction used in spectral filtering during time evolution (disabled
+// when ENABLE_ADAPTIVE_FILTER)
+#define CUTOFF_FRACTION 		(0.5)
+// in adaptive filtering, amount of energy required within cutoff (cumulative
+// power spectral density)
+#define CPSD_FRACTION 			(0.9999)
 
 /*
 simulation parameters struct
