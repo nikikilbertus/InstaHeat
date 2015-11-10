@@ -4,8 +4,10 @@
 #include <stddef.h>
 
 void run_all_tests(void);
+#ifdef USE_ACCELERATE_FRAMEWORK
 void test_matrix_matrix(void);
 void test_matrix_vector(void);
+#endif
 void test_fft_first_derivative();
 void test_fft_second_derivative();
 void test_fft_apply_filter();

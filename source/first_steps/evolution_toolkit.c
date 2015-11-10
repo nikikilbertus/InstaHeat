@@ -3,15 +3,11 @@
 #include <math.h>
 #include <complex.h>
 #include <fftw3.h>
-#include <Accelerate/Accelerate.h>
+// #include <Accelerate/Accelerate.h>
 #include "evolution_toolkit.h"
 #include "main.h"
 
-void spectral_op_D2(double *f, double *result, size_t N) {
-	matrix_vector(D2, f, result, N);
-}
-
-void fft_D1(double *f, double *result, size_t N) {
+void fft_D1(double *in, double *out, size_t N) {
 	size_t nc = N / 2 + 1;
 	fftw_complex *tmp;
 	fftw_plan p_fw;
@@ -24,7 +20,7 @@ void fft_D1(double *f, double *result, size_t N) {
     	exit(EXIT_FAILURE);
 	}
 
-	p_fw = fftw_plan_dft_r2c_1d(N, f, tmp, FFTW_ESTIMATE);
+	p_fw = fftw_plan_dft_r2c_1d(N, in, tmp, FFTW_ESTIMATE);
 	fftw_execute(p_fw);
 
 	double L = pars.b - pars.a;
@@ -34,7 +30,7 @@ void fft_D1(double *f, double *result, size_t N) {
 		tmp[i] *= factor * i / N;
 	}
 
-	p_bw = fftw_plan_dft_c2r_1d(N, tmp, result, FFTW_ESTIMATE);
+	p_bw = fftw_plan_dft_c2r_1d(N, tmp, out, FFTW_ESTIMATE);
 	fftw_execute(p_bw);
 
 	fftw_destroy_plan(p_fw);
@@ -42,7 +38,7 @@ void fft_D1(double *f, double *result, size_t N) {
 	fftw_free(tmp);
 }
 
-void fft_D2(double *f, double *result, size_t N) {
+void fft_D2(double *in, double *out, size_t N) {
 	size_t nc = N / 2 + 1;
 	fftw_complex *tmp;
 	fftw_plan p_fw;
@@ -55,7 +51,7 @@ void fft_D2(double *f, double *result, size_t N) {
     	exit(EXIT_FAILURE);
 	}
 
-	p_fw = fftw_plan_dft_r2c_1d(N, f, tmp, FFTW_ESTIMATE);
+	p_fw = fftw_plan_dft_r2c_1d(N, in, tmp, FFTW_ESTIMATE);
 	fftw_execute(p_fw);
 
 	#if defined(ENABLE_FFT_FILTER) && defined(ENABLE_ADAPTIVE_FILTER)
@@ -97,7 +93,7 @@ void fft_D2(double *f, double *result, size_t N) {
 		tmp[i] *= (factor * i * i) / N;
 	}
 
-	p_bw = fftw_plan_dft_c2r_1d(N, tmp, result, FFTW_ESTIMATE);
+	p_bw = fftw_plan_dft_c2r_1d(N, tmp, out, FFTW_ESTIMATE);
 	fftw_execute(p_bw);
 
 	fftw_destroy_plan(p_fw);
@@ -105,7 +101,7 @@ void fft_D2(double *f, double *result, size_t N) {
 	fftw_free(tmp);
 }
 
-void fft_apply_filter(double *f, size_t N) {
+void fft_apply_filter(double *in, size_t N) {
 	double cutoff_fraction = pars.cutoff_fraction;
 	if (cutoff_fraction < 0.0 || cutoff_fraction > 1.0)
 	{
@@ -124,25 +120,26 @@ void fft_apply_filter(double *f, size_t N) {
 			  , stderr);
 	}
 
-	double *window = malloc(nc * sizeof *window);
-	mk_filter_window(window, nmax, nc);
-
+	double *window;
 	fftw_complex *tmp;
 	fftw_plan p_fw;
 	fftw_plan p_bw;
 
+	window = malloc(nc * sizeof *window);
 	tmp = fftw_malloc(nc * sizeof *tmp);
-	if (!tmp)
+	if (!tmp || !window)
 	{
 		fputs("Allocating memory failed.", stderr);
     	exit(EXIT_FAILURE);
 	}
 
+	mk_filter_window(window, nmax, nc);
+
 	// we filter the field and its temporal derivative
 	for (size_t i = 0; i <= N; i += N)
 	{
-		p_fw = fftw_plan_dft_r2c_1d(N, f + i, tmp, FFTW_ESTIMATE);
-		p_bw = fftw_plan_dft_c2r_1d(N, tmp, f + i, FFTW_ESTIMATE);
+		p_fw = fftw_plan_dft_r2c_1d(N, in + i, tmp, FFTW_ESTIMATE);
+		p_bw = fftw_plan_dft_c2r_1d(N, tmp, in + i, FFTW_ESTIMATE);
 
 		fftw_execute(p_fw);
 
@@ -179,6 +176,13 @@ inline double filter_window_function(double x) {
 	// return 0.0;
 }
 
+#ifdef USE_ACCELERATE_FRAMEWORK
+#ifdef SPECTRAL_OPERATOR_DERIVATIVE
+void spectral_op_D2(double *in, double *out, size_t N) {
+	matrix_vector(D2, in, out, N);
+}
+#endif
+
 //****************************** matrix/vector operations
 /*
 matrix-matrix and matrix-vector function wrapper
@@ -196,6 +200,7 @@ void matrix_vector(double *matrix, double *vector, double *result, size_t N) {
     cblas_dgemv(CblasColMajor, CblasNoTrans, N, N, 1.0,
     				matrix, N, vector, 1, 0.0, result, 1);
 }
+#endif
 
 //****************************** printing functions
 /*

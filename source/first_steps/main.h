@@ -21,6 +21,11 @@ execution
 #endif
 
 /*
+Use accelerate framework?
+*/
+// #define USE_ACCELERATE_FRAMEWORK
+
+/*
 choose the differentiation procedure by defining either one of the two
 */
 // #define SPECTRAL_OPERATOR_DERIVATIVE
@@ -52,7 +57,7 @@ simulation parameters
 // starttime (initial time)
 #define INITIAL_TIME 			(0.0)
 // final time
-#define FINAL_TIME	 			(10)
+#define FINAL_TIME	 			(PI)
 // boundaries of spatial region
 #define SPATIAL_LOWER_BOUND		(-PI)
 #define SPATIAL_UPPER_BOUND 	(PI)

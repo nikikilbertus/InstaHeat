@@ -6,13 +6,15 @@
 #include "evolution_toolkit.h"
 
 void run_all_tests() {
+#ifdef USE_ACCELERATE_FRAMEWORK
     test_matrix_vector();
     test_matrix_matrix();
+#endif
     test_fft_first_derivative();
     test_fft_second_derivative();
     test_fft_apply_filter();
 }
-
+#ifdef USE_ACCELERATE_FRAMEWORK
 void test_matrix_matrix() {
     size_t N = 3;
     int count = 0;
@@ -61,6 +63,7 @@ void test_matrix_vector() {
         puts("failed\n");
     }
 }
+#endif
 
 void test_fft_first_derivative() {
     size_t N = 101;

@@ -1,8 +1,8 @@
-Nfiles = 10;
-Nx = 51;
+Nfiles = 4;
+Nx = 31;
 sol = @(x,t) zeros(size(x)); %sin(x) .* cos(t);
-dtf = @(filenum) 0.1 -filenum *0.01; %0.1 * 2.^(-filenum);
-finaltime = 10;
+dtf = @(filenum) 0.1 * 2.^(-filenum); %0.1 -filenum *0.01;
+finaltime = 100;
 
 [~, ~, x] = mkSpectralOperators({Nx, 'fourier'});
 
@@ -47,7 +47,8 @@ for i = 1:5
     ylabel('err(i+1) - err(i)');
     shg;
     pause();
-    plot(dnormsf'./ddt(i,:));
+    plot(dnormsf'./ddt(i,:), 'o');
+    ylabel(['(err(i+1) - err(i)) / (dt(i+1)^' num2str(i) ' - dt(i)^' num2str(i) ')']);
     shg;
     pause();
 end

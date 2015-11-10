@@ -45,7 +45,7 @@ void allocate_external(size_t Nx, size_t Nt) {
     	fputs("Allocating memory failed.", stderr);
     	exit(EXIT_FAILURE);
     }
-    #ifdef SPECTRAL_OPERATOR_DERIVATIVE
+#ifdef SPECTRAL_OPERATOR_DERIVATIVE
     D1 = malloc(N2 * sizeof *D1);
     D2 = malloc(N2 * sizeof *D2);
     if (!D1 || !D2)
@@ -53,7 +53,7 @@ void allocate_external(size_t Nx, size_t Nt) {
     	fputs("Allocating memory failed.", stderr);
     	exit(EXIT_FAILURE);
     }
-    #endif
+#endif
 
     //solutions for the field and the temporal derivative (we are saving each
     //timestep: 2 * Nx * Nt space)
@@ -100,7 +100,7 @@ void mk_fourier_spectral_operators(size_t N, double a, double b) {
 		x[i] = a + (b - a) * i / N;
 	}
 
-	#ifdef SPECTRAL_OPERATOR_DERIVATIVE
+#ifdef SPECTRAL_OPERATOR_DERIVATIVE
 	//D1
 	for (size_t i = 0; i < N; ++i)
 	{
@@ -126,11 +126,13 @@ void mk_fourier_spectral_operators(size_t N, double a, double b) {
 	}
 
 	//D2
+#ifdef USE_ACCELERATE_FRAMEWORK
 	sq_matrix(D1, D2, N);
-	#endif
+#endif
+#endif
 
 	// Console output for debugging
-	#ifdef PRINT_SPECTRAL_OPERATORS
+#if defined(PRINT_SPECTRAL_OPERATORS) && defined(SPECTRAL_OPERATOR_DERIVATIVE)
 		puts("x");
         print_vector(x, N);
         #ifdef SPECTRAL_OPERATOR_DERIVATIVE
@@ -140,7 +142,7 @@ void mk_fourier_spectral_operators(size_t N, double a, double b) {
         print_matrix(D2, N);
         #endif
         puts("\n");
-	#endif
+#endif
 }
 
 /*
@@ -187,10 +189,10 @@ free all allocated memory
 */
 void free_all_external() {
 	free(x);
-	#ifdef SPECTRAL_OPERATOR_DERIVATIVE
+#ifdef SPECTRAL_OPERATOR_DERIVATIVE
 	free(D1);
 	free(D2);
-	#endif
+#endif
 
 	free(field);
     free(frw_a);

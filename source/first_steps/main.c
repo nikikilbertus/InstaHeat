@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <omp.h>
+#include <fftw3.h>
+#include <time.h>
 #include "main.h"
 #include "setup.h"
 #include "RK4_stepper.h"
@@ -24,6 +27,20 @@ double *frw_a;
 double *rho;
 
 int main(int argc, const char * argv[]) {
+int threadnum, threadinit;
+
+threadinit = fftw_init_threads();
+if (threadinit == 0)
+{
+    fputs("Could not initialize fftw threads.", stderr);
+    exit(EXIT_FAILURE);
+}
+
+threadnum = GRIDPOINTS_SPATIAL > 1000 ? omp_get_max_threads() : 1;
+
+fftw_plan_with_nthreads(threadnum);
+
+DEBUG(printf("Initialized fftw with %d threads\n\n", threadnum));
 
 #ifdef RUN_TESTS_ONLY
     pars.dt = 0.1;
@@ -33,8 +50,10 @@ int main(int argc, const char * argv[]) {
     return 0;
 #endif
 
+    clock_t start = clock();
+
     int count = 0;
-    for (double dt = 0.1; dt > 0.001; dt -= 0.01, count++)
+    for (double dt = 0.1; dt > 1e-2; dt /= 2., count++)
     {
     	pars.dt = dt;
     	allocate_and_initialize_all(&pars);
@@ -47,6 +66,13 @@ int main(int argc, const char * argv[]) {
         print_vector_to_file(rho, pars.Nt, 1, prefix_rho, count);
     	free_all_external();
     }
+
+    clock_t end = clock();
+
+    fftw_cleanup_threads();
+
+    double secs = (double)(end - start) / CLOCKS_PER_SEC;
+    DEBUG(printf("main took %f seconds.\n\n", secs));
 
     return 0;
 }

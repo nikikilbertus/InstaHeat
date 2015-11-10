@@ -1,6 +1,6 @@
 TARGET = first_steps
-LIBS = -L /usr/local/lib -lfftw3 -lm -framework Accelerate
-CC = gcc
+LIBS = -L /usr/local/lib -lfftw3_omp -lfftw3 -lm -fopenmp
+CC = gcc-5
 CFLAGS = -ansi -std=c99 -O3 -g -Wall -I /usr/local/include
 
 .PHONY: default all clean
