@@ -1,8 +1,10 @@
-Nfiles = 4;
-Nx = 501;
+Nfiles = 10;
+Nx = 51;
 sol = @(x,t) zeros(size(x)); %sin(x) .* cos(t);
-dtf = @(filenum) 0.1 * 2.^(-filenum);
+dtf = @(filenum) 0.1 -filenum *0.01; %0.1 * 2.^(-filenum);
 finaltime = 10;
+
+[~, ~, x] = mkSpectralOperators({Nx, 'fourier'});
 
 choice = questdlg('Show plots?', 'Display options', 'Yes', 'No', 'Yes');
 
@@ -15,12 +17,12 @@ end
 
 errs = zeros(Nfiles, 1);
 energyloss = zeros(Nfiles, 1);
+Tf = zeros(Nfiles, Nx);
 for i = 0:Nfiles-1
-    [errs(i+1), energyloss(i+1)] = ...
-        analyzeResult(i, Nx, sol, finaltime, dtf, plotopt);
+    [errs(i+1), energyloss(i+1), Tf(i+1, : )] = ...
+        analyzeResult(i, Nx, x, sol, finaltime, dtf, plotopt);
 end
 dt = dtf(linspace(0, Nfiles-1, Nfiles));
-dt = flip(dt);
 
 % slope = logfit(dt', errs, 'loglog');
 % title(['error on Tf depending on dt, exp = ' num2str(slope)])
@@ -31,3 +33,21 @@ title(['power = ' num2str(slope)])
 xlabel('dt')
 ylabel('energyloss')
 shg; pause();
+
+dnormsf = zeros(Nfiles-1,1);
+for i = 1:Nfiles-1
+   dnormsf(i) = norm( Tf(i+1, : ) - Tf(i, : ) );
+end
+
+ddt = zeros(5,Nfiles-1);
+for i = 1:5
+    ddt(i, : ) = abs(diff(dt.^i));
+    plot(ddt(i,:), dnormsf, 'o');
+    xlabel(['dt(i+1)^' num2str(i) ' - dt(i)^' num2str(i)]);
+    ylabel('err(i+1) - err(i)');
+    shg;
+    pause();
+    plot(dnormsf'./ddt(i,:));
+    shg;
+    pause();
+end

@@ -1,4 +1,4 @@
-function [err, energyloss] = analyzeResult(num, Nx, sol, tf, dtf, plotopt)
+function [err, energyloss, Tf] = analyzeResult(num, Nx, x, sol, tf, dtf, plotopt)
 
 prefix = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/';
 name = [prefix 'field_00' int2str(num) '.txt'];
@@ -10,7 +10,6 @@ if ceil(tf / dt) ~= Nt
     error('somethings wrong, check the parameters!')
 end
 t = linspace(0, (Nt-1) * dt, Nt);
-[~, ~, x] = mkSpectralOperators({Nx, 'fourier'});
 
 shapedField = reshape(rawField, 2*Nx, Nt);
 phi = shapedField(1:Nx, : );
@@ -72,6 +71,8 @@ end
 % [X, T] = meshgrid(x, t);
 % exact = sol(X, T);
 % err = norm(exact(end, : ) - phi( : , end)');
+
+Tf = phi( : , end);
 err = 0;
 
 end
