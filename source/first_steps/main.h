@@ -40,13 +40,13 @@ mathematical constants
 simulation parameters
 */
 // Number of gridpoints (needs to be odd for fourier grid)
-#define GRIDPOINTS_SPATIAL 		(51)
+#define GRIDPOINTS_SPATIAL 		(101)
 // timestep
 #define DELTA_T					(-0.1)
 // starttime (initial time)
 #define INITIAL_TIME 			(0.0)
 // final time
-#define FINAL_TIME	 			(10)
+#define FINAL_TIME	 			(1.5)
 // boundaries of spatial region
 #define SPATIAL_LOWER_BOUND		(-PI)
 #define SPATIAL_UPPER_BOUND 	(PI)

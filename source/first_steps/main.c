@@ -57,7 +57,7 @@ int main(int argc, const char * argv[]) {
 #endif
 
     int count = 0;
-    for (double dt = 0.1; dt > 1e-2; dt /= 2., count++)
+    for (double dt = 0.01; dt > 1e-3; dt /= 2., count++)
     {
     	pars.dt = dt;
     	allocate_and_initialize_all(&pars);
