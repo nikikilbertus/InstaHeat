@@ -57,7 +57,7 @@ simulation parameters
 // starttime (initial time)
 #define INITIAL_TIME 			(0.0)
 // final time
-#define FINAL_TIME	 			(PI)
+#define FINAL_TIME	 			(10)
 // boundaries of spatial region
 #define SPATIAL_LOWER_BOUND		(-PI)
 #define SPATIAL_UPPER_BOUND 	(PI)
