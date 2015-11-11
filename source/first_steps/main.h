@@ -80,16 +80,15 @@ typedef struct {
 extern parameters_t pars;
 
 /*
-gridpoints: x; spectral operators (matrices for first and second order
-derivatives: D1, D2)
+spatial gridpoints
 */
-extern double *x, *D1, *D2;
+extern double *x;
 
 /*
 GENERAL REMARKS
-D1,D2 as suffix indicates 1st and 2nd order spatial derivatives
-
-in the variable field we save phi and dphi
+- D1,D2 as suffix indicates 1st and 2nd order spatial derivatives
+- d as prefix indicates a temporal derivative
+- in the variable 'field' we save phi and dphi
 */
 
 // solutions for the field we evolve its temporal derivative

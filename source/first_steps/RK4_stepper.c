@@ -14,10 +14,10 @@ void run_RK4_stepper(parameters_t *pars) {
 
 	double a1, a2, a3, a4, tmp_a;
 	double *k1, *k2, *k3, *k4, *tmp_k;
-	k1  = malloc(N2 * sizeof *k1);
-	k2  = malloc(N2 * sizeof *k2);
-	k3  = malloc(N2 * sizeof *k3);
-	k4  = malloc(N2 * sizeof *k4);
+	k1    = malloc(N2 * sizeof *k1);
+	k2    = malloc(N2 * sizeof *k2);
+	k3    = malloc(N2 * sizeof *k3);
+	k4    = malloc(N2 * sizeof *k4);
 	tmp_k = malloc(N2 * sizeof *tmp_k);
 
 	if (!(k1 && k2 && k3 && k4 && tmp_k))
@@ -122,6 +122,9 @@ void run_RK4_stepper(parameters_t *pars) {
 	RUNTIME_INFO(printf("Finished RK4 time evolution in: %f seconds.\n\n", secs));
 }
 
+/*
+compute the right hand side of the pde (first order in time)
+*/
 double mk_velocities(double *f, double a, double *result, size_t N) {
 	size_t N2 = 2 * N;
 	double current_rho = mk_rho(f, a, N);

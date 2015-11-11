@@ -49,7 +49,7 @@ void allocate_external(size_t Nx, size_t Nt) {
 
     //solutions for the field and the temporal derivative (we are saving each
     //timestep: 2 * Nx * Nt space)
-    field = calloc(N2 * Nt, sizeof *field);
+    field = fftw_malloc(N2 * Nt, sizeof *field);
     if (!field)
     {
     	fputs("Allocating memory failed.", stderr);
@@ -159,7 +159,7 @@ free all allocated memory
 */
 void free_all_external() {
 	free(x);
-	free(field);
+	fftw_free(field);
     free(frw_a);
     free(rho);
     fftw_free(cfftw_tmp);

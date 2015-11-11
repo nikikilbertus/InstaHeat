@@ -31,6 +31,9 @@ complex *cfftw_tmp;
 // general purpose 2*N double memory block for temporary use
 double *dmisc_tmp;
 
+/*
+--------------------------------main--------------------------------------------
+*/
 int main(int argc, const char * argv[]) {
     clock_t start = clock();
 

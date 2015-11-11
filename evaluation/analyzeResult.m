@@ -72,7 +72,7 @@ end
 % exact = sol(X, T);
 % err = norm(exact(end, : ) - phi( : , end)');
 
-Tf = phi( : , end);
+Tf = phi( : , round(floor(tf) / dt));
 err = 0;
 
 end
