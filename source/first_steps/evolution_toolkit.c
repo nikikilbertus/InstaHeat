@@ -3,55 +3,37 @@
 #include <math.h>
 #include <complex.h>
 #include <fftw3.h>
-// #include <Accelerate/Accelerate.h>
 #include "evolution_toolkit.h"
 #include "main.h"
 
 void fft_D1(double *in, double *out, size_t N) {
 	size_t nc = N / 2 + 1;
-	fftw_complex *tmp;
 	fftw_plan p_fw;
 	fftw_plan p_bw;
 
-	tmp = fftw_malloc(nc * sizeof *tmp);
-	if (!tmp)
-	{
-		fputs("Allocating memory failed.", stderr);
-    	exit(EXIT_FAILURE);
-	}
-
-	p_fw = fftw_plan_dft_r2c_1d(N, in, tmp, FFTW_ESTIMATE);
+	p_fw = fftw_plan_dft_r2c_1d(N, in, cfftw_tmp, FFTW_ESTIMATE);
 	fftw_execute(p_fw);
 
 	double L = pars.b - pars.a;
 	double complex factor = 2. * PI * I / L;
 	for (size_t i = 0; i < nc; ++i)
 	{
-		tmp[i] *= factor * i / N;
+		cfftw_tmp[i] *= factor * i / N;
 	}
 
-	p_bw = fftw_plan_dft_c2r_1d(N, tmp, out, FFTW_ESTIMATE);
+	p_bw = fftw_plan_dft_c2r_1d(N, cfftw_tmp, out, FFTW_ESTIMATE);
 	fftw_execute(p_bw);
 
 	fftw_destroy_plan(p_fw);
 	fftw_destroy_plan(p_bw);
-	fftw_free(tmp);
 }
 
 void fft_D2(double *in, double *out, size_t N) {
 	size_t nc = N / 2 + 1;
-	fftw_complex *tmp;
 	fftw_plan p_fw;
 	fftw_plan p_bw;
 
-	tmp = fftw_malloc(nc * sizeof *tmp);
-	if (!tmp)
-	{
-		fputs("Allocating memory failed.", stderr);
-    	exit(EXIT_FAILURE);
-	}
-
-	p_fw = fftw_plan_dft_r2c_1d(N, in, tmp, FFTW_ESTIMATE);
+	p_fw = fftw_plan_dft_r2c_1d(N, in, cfftw_tmp, FFTW_ESTIMATE);
 	fftw_execute(p_fw);
 
 	#if defined(ENABLE_FFT_FILTER) && defined(ENABLE_ADAPTIVE_FILTER)
@@ -63,7 +45,7 @@ void fft_D2(double *in, double *out, size_t N) {
 
 		for (size_t i = 0; i < nc; ++i)
 		{
-			absval = cabs(tmp[i]);
+			absval = cabs(cfftw_tmp[i]);
 			power_spec[i] = absval * absval;
 			total += power_spec[i];
 			// printf("%zu: %f\n", i, absval);
@@ -90,15 +72,14 @@ void fft_D2(double *in, double *out, size_t N) {
 	double factor = - 4. * PI * PI / (L*L);
 	for (size_t i = 0; i < nc; ++i)
 	{
-		tmp[i] *= (factor * i * i) / N;
+		cfftw_tmp[i] *= (factor * i * i) / N;
 	}
 
-	p_bw = fftw_plan_dft_c2r_1d(N, tmp, out, FFTW_ESTIMATE);
+	p_bw = fftw_plan_dft_c2r_1d(N, cfftw_tmp, out, FFTW_ESTIMATE);
 	fftw_execute(p_bw);
 
 	fftw_destroy_plan(p_fw);
 	fftw_destroy_plan(p_bw);
-	fftw_free(tmp);
 }
 
 void fft_apply_filter(double *in, size_t N) {
@@ -120,32 +101,27 @@ void fft_apply_filter(double *in, size_t N) {
 			  , stderr);
 	}
 
-	double *window;
-	fftw_complex *tmp;
-	fftw_plan p_fw;
-	fftw_plan p_bw;
-
-	window = malloc(nc * sizeof *window);
-	tmp = fftw_malloc(nc * sizeof *tmp);
-	if (!tmp || !window)
+	double *window = malloc(nc * sizeof *window);
+	if (!window)
 	{
 		fputs("Allocating memory failed.", stderr);
     	exit(EXIT_FAILURE);
 	}
-
 	mk_filter_window(window, nmax, nc);
 
+	fftw_plan p_fw;
+	fftw_plan p_bw;
 	// we filter the field and its temporal derivative
 	for (size_t i = 0; i <= N; i += N)
 	{
-		p_fw = fftw_plan_dft_r2c_1d(N, in + i, tmp, FFTW_ESTIMATE);
-		p_bw = fftw_plan_dft_c2r_1d(N, tmp, in + i, FFTW_ESTIMATE);
+		p_fw = fftw_plan_dft_r2c_1d(N, in + i, cfftw_tmp, FFTW_ESTIMATE);
+		p_bw = fftw_plan_dft_c2r_1d(N, cfftw_tmp, in + i, FFTW_ESTIMATE);
 
 		fftw_execute(p_fw);
 
 		for (size_t j = 0; j < nc; ++j)
 		{
-			tmp[j] *= window[j] / N;
+			cfftw_tmp[j] *= window[j] / N;
 		}
 
 		fftw_execute(p_bw);
@@ -153,7 +129,6 @@ void fft_apply_filter(double *in, size_t N) {
 
 	fftw_destroy_plan(p_fw);
 	fftw_destroy_plan(p_bw);
-	fftw_free(tmp);
 	free(window);
 }
 
@@ -174,59 +149,4 @@ inline double filter_window_function(double x) {
 	// return exp(1. + 1. / ( pow(x, 8) - 1. ));
 	// return 0.5 * ( 1. + cos( pow(x, 8) * PI ) );
 	// return 0.0;
-}
-
-#ifdef USE_ACCELERATE_FRAMEWORK
-#ifdef SPECTRAL_OPERATOR_DERIVATIVE
-void spectral_op_D2(double *in, double *out, size_t N) {
-	matrix_vector(D2, in, out, N);
-}
-#endif
-
-//****************************** matrix/vector operations
-/*
-matrix-matrix and matrix-vector function wrapper
-*/
-void matrix_matrix(double *matrixA, double *matrixB, double *result, size_t N) {
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, N, N, N, 1.0,
-    				matrixA, N, matrixB, N, 0.0, result, N);
-}
-
-void sq_matrix(double *matrix, double *result, size_t N) {
-    matrix_matrix(matrix, matrix, result, N);
-}
-
-void matrix_vector(double *matrix, double *vector, double *result, size_t N) {
-    cblas_dgemv(CblasColMajor, CblasNoTrans, N, N, 1.0,
-    				matrix, N, vector, 1, 0.0, result, 1);
-}
-#endif
-
-//****************************** printing functions
-/*
-for debugging mostly, watch out for colomn_major vs row_major in lapack routines
-*/
-void print_matrix(double *matrix, size_t N){
-    for (size_t i = 0; i < N; i++)
-    {
-        for (size_t j = 0; j < N; j++)
-        {
-            printf("%f\t", matrix[j*N+i]);
-        }
-        printf("\n");
-    }
-}
-
-void print_vector(double *vector, size_t N) {
-    for (size_t i = 0; i < N; i++)
-    {
-        printf("%f\n", vector[i]);
-    }
-}
-
-/*
-conversion from 2D to 1D indices
-*/
-size_t idx(size_t N, size_t row, size_t col) {
-	return row * N + col;
 }

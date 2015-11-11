@@ -2,34 +2,23 @@
 #define __MAIN__
 
 #include <stddef.h>
+#include <complex.h>
 
 /*
 macros for debugging, testing and printing additional information during
 execution
 */
-#define DEBUG_MODE
+#define SHOW_RUNTIME_INFO
 // #define RUN_TESTS_ONLY
-// #define PRINT_SPECTRAL_OPERATORS
-// #define PRINT_INITIAL_CONDITIONS
+// #define DEBUG
 
-#ifdef DEBUG_MODE
-#define DEBUG(f) do {\
+#ifdef SHOW_RUNTIME_INFO
+#define RUNTIME_INFO(f) do {\
 		(f); \
 	} while (0)
 #else
-#define DEBUG(f)
+#define RUNTIME_INFO(f)
 #endif
-
-/*
-Use accelerate framework?
-*/
-// #define USE_ACCELERATE_FRAMEWORK
-
-/*
-choose the differentiation procedure by defining either one of the two
-*/
-// #define SPECTRAL_OPERATOR_DERIVATIVE
-#define FFT_DERIVATIVE
 
 /*
 check for NaNs during time evolution
@@ -111,5 +100,8 @@ extern double *frw_a;
 
 // total energy of the field
 extern double *rho;
+
+// default array for real to complex dfts
+extern complex *cfftw_tmp;
 
 #endif

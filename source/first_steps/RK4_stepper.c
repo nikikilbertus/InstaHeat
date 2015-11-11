@@ -27,22 +27,17 @@ void run_RK4_stepper(parameters_t *pars) {
 	}
 	size_t os, new_os;
 
-	DEBUG(puts("Starting RK4 time evolution with:"));
-	DEBUG(printf("initial time: %f\n", pars->ti));
-	DEBUG(printf("final time: %f\n", pars->tf));
-	DEBUG(printf("time step dt: %f\n", dt));
-	DEBUG(printf("number of steps: %zu\n", Nt));
-#if defined(SPECTRAL_OPERATOR_DERIVATIVE) && defined(USE_ACCELERATE_FRAMEWORK)
-		DEBUG(puts("Using multiplication (lapack) by spectral"
-				   "operators for spatial derivatives."));
-#endif
-#ifdef FFT_DERIVATIVE
-		DEBUG(puts("Using DFT (fftw3) for spatial derivatives."));
-#endif
+	RUNTIME_INFO(puts("Starting RK4 time evolution with:"));
+	RUNTIME_INFO(printf("initial time: %f\n", pars->ti));
+	RUNTIME_INFO(printf("final time: %f\n", pars->tf));
+	RUNTIME_INFO(printf("time step dt: %f\n", dt));
+	RUNTIME_INFO(printf("number of steps: %zu\n", Nt));
+	RUNTIME_INFO(puts("Using DFT (fftw3) for spatial derivatives."));
+
 #ifdef ENABLE_FFT_FILTER
-		DEBUG(puts("Frequency cutoff filtering enabled."));
+		RUNTIME_INFO(puts("Frequency cutoff filtering enabled."));
 #else
-		DEBUG(puts("Filtering disabled."));
+		RUNTIME_INFO(puts("Filtering disabled."));
 #endif
 
 	clock_t start = clock();
@@ -124,7 +119,7 @@ void run_RK4_stepper(parameters_t *pars) {
 	free(tmp_k);
 
 	double secs = (double)(end - start) / CLOCKS_PER_SEC;
-	DEBUG(printf("Finished RK4 time evolution in: %f seconds.\n\n", secs));
+	RUNTIME_INFO(printf("Finished RK4 time evolution in: %f seconds.\n\n", secs));
 }
 
 double mk_velocities(double *f, double a, double *result, size_t N) {
@@ -136,12 +131,8 @@ double mk_velocities(double *f, double a, double *result, size_t N) {
 	{
 		result[i] = f[N + i];
 	}
-#if defined(USE_ACCELERATE_FRAMEWORK) && defined(SPECTRAL_OPERATOR_DERIVATIVE)
-		spectral_op_D2(f, result + N, N);
-#endif
-#ifdef FFT_DERIVATIVE
-		fft_D2(f, result + N, N);
-#endif
+
+	fft_D2(f, result + N, N);
 
 	for (size_t i = N; i < N2; ++i)
 	{

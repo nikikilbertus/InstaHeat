@@ -24,7 +24,7 @@ void print_vector_to_file(double *v, size_t N, size_t row_skip,
         prefix = "vector";
     }
 
-    DEBUG(printf("Start writing %s to file...\n", prefix));
+    RUNTIME_INFO(printf("Start writing %s to file...\n", prefix));
 
     size_t prefix_length = strlen(prefix);
 	char filename[prefix_length + (sizeof "../../../data/_000.txt")];
@@ -44,7 +44,7 @@ void print_vector_to_file(double *v, size_t N, size_t row_skip,
     	fprintf(vector_f, "%.15f\n", v[i]);
     }
     fclose(vector_f);
-    DEBUG(puts("Finished writing to file.\n"));
+    RUNTIME_INFO(puts("Finished writing to file.\n"));
 }
 
 /*
@@ -68,7 +68,7 @@ void print_matrix_to_file(double *A, size_t N, size_t M, size_t row_skip,
         prefix = "matrix";
     }
 
-    DEBUG(printf("Start writing %s to file...\n", prefix));
+    RUNTIME_INFO(printf("Start writing %s to file...\n", prefix));
 
     size_t prefix_length = strlen(prefix);
     char filename[prefix_length + (sizeof "../../../data/_000.txt")];
@@ -92,5 +92,5 @@ void print_matrix_to_file(double *A, size_t N, size_t M, size_t row_skip,
     	fputs("\n", matrix_f);
     }
     fclose(matrix_f);
-    DEBUG(puts("Finished writing to file.\n"));
+    RUNTIME_INFO(puts("Finished writing to file.\n"));
 }

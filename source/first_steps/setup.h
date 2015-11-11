@@ -13,5 +13,7 @@ void mk_initial_conditions(size_t N, double (*f_init)(double),
 double phi_init(double x);
 double dphi_init(double x);
 void free_all_external();
+void print_matrix(double *matrix, size_t N);
+void print_vector(double *vector, size_t N);
 
 #endif

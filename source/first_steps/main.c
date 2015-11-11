@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <complex.h>
 #include <omp.h>
 #include <fftw3.h>
 #include <time.h>
@@ -12,10 +13,8 @@
 // simulation parameters
 parameters_t pars;
 
-//grid and spectral operators
+// spatial grid points
 double *x;
-double *D1;
-double *D2;
 
 // evolution of the field and spatial derivatives (2*Nx * Nt space required)
 double *field;
@@ -26,21 +25,22 @@ double *frw_a;
 // evolution of the total energy of the field
 double *rho;
 
+// default array to save fourier coefficients from real to complex transform
+complex *cfftw_tmp;
+
 int main(int argc, const char * argv[]) {
-int threadnum, threadinit;
+    clock_t start = clock();
 
-threadinit = fftw_init_threads();
-if (threadinit == 0)
-{
-    fputs("Could not initialize fftw threads.", stderr);
-    exit(EXIT_FAILURE);
-}
-
-threadnum = GRIDPOINTS_SPATIAL > 1000 ? omp_get_max_threads() : 1;
-
-fftw_plan_with_nthreads(threadnum);
-
-DEBUG(printf("Initialized fftw with %d threads\n\n", threadnum));
+    int threadnum, threadinit;
+    threadinit = fftw_init_threads();
+    if (threadinit == 0)
+    {
+        fputs("Could not initialize fftw threads.", stderr);
+        exit(EXIT_FAILURE);
+    }
+    threadnum = GRIDPOINTS_SPATIAL > 1000 ? omp_get_max_threads() : 1;
+    fftw_plan_with_nthreads(threadnum);
+    RUNTIME_INFO(printf("Initialized fftw with %d thread(s)\n\n", threadnum));
 
 #ifdef RUN_TESTS_ONLY
     pars.dt = 0.1;
@@ -49,8 +49,6 @@ DEBUG(printf("Initialized fftw with %d threads\n\n", threadnum));
     free_all_external();
     return 0;
 #endif
-
-    clock_t start = clock();
 
     int count = 0;
     for (double dt = 0.1; dt > 1e-2; dt /= 2., count++)
@@ -66,13 +64,10 @@ DEBUG(printf("Initialized fftw with %d threads\n\n", threadnum));
         print_vector_to_file(rho, pars.Nt, 1, prefix_rho, count);
     	free_all_external();
     }
-
-    clock_t end = clock();
-
     fftw_cleanup_threads();
 
+    clock_t end = clock();
     double secs = (double)(end - start) / CLOCKS_PER_SEC;
-    DEBUG(printf("main took %f seconds.\n\n", secs));
-
+    RUNTIME_INFO(printf("main took %f seconds.\n\n", secs));
     return 0;
 }
