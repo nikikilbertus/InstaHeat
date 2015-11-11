@@ -162,7 +162,8 @@ void free_all_external() {
 	free(field);
     free(frw_a);
     free(rho);
-    free(cfftw_tmp);
+    fftw_free(cfftw_tmp);
+    free(dmisc_tmp);
 	RUNTIME_INFO(puts("Memory from all external variables freed.\n"));
 }
 
