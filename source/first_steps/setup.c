@@ -80,6 +80,14 @@ void allocate_external(size_t Nx, size_t Nt) {
         fputs("Allocating memory failed.", stderr);
         exit(EXIT_FAILURE);
     }
+
+    // general purpose 2*N double memory block for temporary use
+    dmisc_tmp = calloc(N2, sizeof *dmisc_tmp);
+    if (!dmisc_tmp)
+    {
+        fputs("Allocating memory failed.", stderr);
+        exit(EXIT_FAILURE);
+    }
 }
 
 /*

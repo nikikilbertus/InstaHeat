@@ -1,8 +1,8 @@
 Nfiles = 4;
-Nx = 31;
+Nx = 51;
 sol = @(x,t) zeros(size(x)); %sin(x) .* cos(t);
 dtf = @(filenum) 0.1 * 2.^(-filenum); %0.1 -filenum *0.01;
-finaltime = 100;
+finaltime = 10;
 
 [~, ~, x] = mkSpectralOperators({Nx, 'fourier'});
 

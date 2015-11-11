@@ -28,6 +28,9 @@ double *rho;
 // default array to save fourier coefficients from real to complex transform
 complex *cfftw_tmp;
 
+// general purpose 2*N double memory block for temporary use
+double *dmisc_tmp;
+
 int main(int argc, const char * argv[]) {
     clock_t start = clock();
 

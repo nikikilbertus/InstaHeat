@@ -38,7 +38,7 @@ void fft_D2(double *in, double *out, size_t N) {
 
 	#if defined(ENABLE_FFT_FILTER) && defined(ENABLE_ADAPTIVE_FILTER)
 	{
-		double *power_spec = malloc(nc * sizeof *power_spec);
+		double *power_spec = dmisc_tmp;
 		double absval;
 		double cpsd = CPSD_FRACTION, threshold;
 		double total = 0.0, fraction = 0.0;
@@ -48,9 +48,7 @@ void fft_D2(double *in, double *out, size_t N) {
 			absval = cabs(cfftw_tmp[i]);
 			power_spec[i] = absval * absval;
 			total += power_spec[i];
-			// printf("%zu: %f\n", i, absval);
 		}
-		// puts("\n\n");
 
 		threshold = cpsd * total;
 		for (size_t i = 0; i < nc; ++i)
@@ -60,11 +58,12 @@ void fft_D2(double *in, double *out, size_t N) {
 			{
 				pars.cutoff_fraction =
 							fmax(0.0, (double)(nc - i - 3) / (double)nc);
-				printf("cutoff was set to: %f\n", pars.cutoff_fraction);
+				#ifdef DEBUG
+					printf("cutoff was set to: %f\n", pars.cutoff_fraction);
+				#endif
 				break;
 			}
 		}
-		free(power_spec);
 	}
 	#endif
 
@@ -101,12 +100,7 @@ void fft_apply_filter(double *in, size_t N) {
 			  , stderr);
 	}
 
-	double *window = malloc(nc * sizeof *window);
-	if (!window)
-	{
-		fputs("Allocating memory failed.", stderr);
-    	exit(EXIT_FAILURE);
-	}
+	double *window = dmisc_tmp;
 	mk_filter_window(window, nmax, nc);
 
 	fftw_plan p_fw;
@@ -129,7 +123,6 @@ void fft_apply_filter(double *in, size_t N) {
 
 	fftw_destroy_plan(p_fw);
 	fftw_destroy_plan(p_bw);
-	free(window);
 }
 
 void mk_filter_window(double *window, size_t nmax, size_t nc) {

@@ -101,7 +101,10 @@ extern double *frw_a;
 // total energy of the field
 extern double *rho;
 
-// default array for real to complex dfts
+// default array and plans for real to complex dfts
 extern complex *cfftw_tmp;
+
+// general purpose 2*N double memory block for temporary use
+extern double *dmisc_tmp;
 
 #endif
