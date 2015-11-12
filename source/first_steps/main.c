@@ -14,7 +14,7 @@
 parameters_t pars;
 
 // spatial grid points
-double *x;
+double *grid;
 
 // evolution of the field and spatial derivatives (2*Nx * Nt space required)
 double *field;
@@ -44,7 +44,7 @@ int main(int argc, const char * argv[]) {
         fputs("Could not initialize fftw threads.", stderr);
         exit(EXIT_FAILURE);
     }
-    threadnum = GRIDPOINTS_SPATIAL > 1000 ? omp_get_max_threads() : 1;
+    threadnum = GRIDPOINTS_TOTAL > 5000 ? omp_get_max_threads() : 1;
     fftw_plan_with_nthreads(threadnum);
     RUNTIME_INFO(printf("Initialized fftw with %d thread(s)\n\n", threadnum));
 
@@ -56,6 +56,10 @@ int main(int argc, const char * argv[]) {
     return 0;
 #endif
 
+    size_t Nx = pars.x.N;
+    size_t Ny = pars.y.N;
+    size_t Nz = pars.z.N;
+
     int count = 0;
     for (double dt = 0.01; dt > 1e-3; dt /= 2., count++)
     {
@@ -63,7 +67,8 @@ int main(int argc, const char * argv[]) {
     	allocate_and_initialize_all(&pars);
     	run_RK4_stepper(&pars);
         char *prefix_field = "field";
-		print_vector_to_file(field, 2*pars.Nx*pars.Nt, 1, prefix_field, count);
+		print_vector_to_file(field, 2 * (Nx * Ny * Nz) * pars.Nt, 1,
+                                prefix_field, count);
         char *prefix_frw_a = "a";
         print_vector_to_file(frw_a, pars.Nt, 1, prefix_frw_a, count);
         char *prefix_rho = "energy";

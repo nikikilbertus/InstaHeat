@@ -40,7 +40,10 @@ mathematical constants
 simulation parameters
 */
 // Number of gridpoints (needs to be odd for fourier grid)
-#define GRIDPOINTS_SPATIAL 		(101)
+#define GRIDPOINTS_X  			(51)
+#define GRIDPOINTS_Y  			(51)
+#define GRIDPOINTS_Z  			(51)
+#define GRIDPOINTS_TOTAL		((GRIDPOINTS_X)*(GRIDPOINTS_Y)*(GRIDPOINTS_Z))
 // timestep
 #define DELTA_T					(-0.1)
 // starttime (initial time)
@@ -48,8 +51,12 @@ simulation parameters
 // final time
 #define FINAL_TIME	 			(1.5)
 // boundaries of spatial region
-#define SPATIAL_LOWER_BOUND		(-PI)
-#define SPATIAL_UPPER_BOUND 	(PI)
+#define SPATIAL_LOWER_BOUND_X	(-PI)
+#define SPATIAL_UPPER_BOUND_X 	(PI)
+#define SPATIAL_LOWER_BOUND_Y	(-PI)
+#define SPATIAL_UPPER_BOUND_Y 	(PI)
+#define SPATIAL_LOWER_BOUND_Z	(-PI)
+#define SPATIAL_UPPER_BOUND_Z 	(PI)
 // mass parameter
 #define MASS 					(1.0)
 // coupling in a phi4 potential
@@ -61,11 +68,28 @@ simulation parameters
 // power spectral density)
 #define CPSD_FRACTION 			(0.99)
 
+// conversion form 3D indices to 1D index
+#define idx(i,j,k) 	((k) + GRIDPOINTS_Z * ( (j) + GRIDPOINTS_Y * (i)))
+// #define idx_z(lin) 	( (lin) % GRIDPOINTS_Z )
+// #define idx_y(lin) 	( (lin - (idx_z(lin)) / GRIDPOINTS_Z) % GRIDPOINTS_Y )
+// #define idx_x(lin) 	( ( (lin - (idx_z(lin)) / GRIDPOINTS_Z) - (idx_y(lin)) ) / GRIDPOINTS_Y )
+
+/*
+representing one dimension of a multi dimensional grid
+*/
+typedef struct {
+	size_t N;
+	double a;
+	double b
+}grid_dimension_t;
+
 /*
 simulation parameters struct
 */
 typedef struct {
-	size_t Nx; // Number of gridpoints in spatial direction (odd for fourier)
+	grid_dimension_t x;
+	grid_dimension_t y;
+	grid_dimension_t z;
 	size_t Nt; // Number of timesteps
 	size_t nt; // counter for timesteps (not currently used)
 	double t;  // current time (not currently used)
@@ -82,11 +106,11 @@ extern parameters_t pars;
 /*
 spatial gridpoints
 */
-extern double *x;
+extern double *grid;
 
 /*
 GENERAL REMARKS
-- D1,D2 as suffix indicates 1st and 2nd order spatial derivatives
+- Dx/y/z as suffix indicates spatial derivatives
 - d as prefix indicates a temporal derivative
 - in the variable 'field' we save phi and dphi
 */
@@ -103,7 +127,7 @@ extern double *rho;
 // default array and plans for real to complex dfts
 extern complex *cfftw_tmp;
 
-// general purpose 2*N double memory block for temporary use
+// general purpose memory block for temporary use
 extern double *dmisc_tmp;
 
 #endif

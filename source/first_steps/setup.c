@@ -8,25 +8,27 @@
 void allocate_and_initialize_all(parameters_t *pars) {
 	initialize_parameters(pars);
 	RUNTIME_INFO(puts("Initialized parameters.\n"));
-	size_t Nx = pars->Nx;
-	size_t Nt = pars->Nt;
-    double a = pars->a;
-	double b = pars->b;
-    allocate_external(Nx, Nt);
+    allocate_external(pars);
     RUNTIME_INFO(puts("Allocated memory for all external variables.\n"));
-    mk_fourier_spectral_operators(Nx, a, b);
+    mk_grid(pars);
     RUNTIME_INFO(puts("Constructed fourier gridpoint.\n"));
-    mk_initial_conditions(Nx, phi_init, dphi_init);
+    mk_initial_conditions(pars, phi_init, dphi_init);
     RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
 }
 
 void initialize_parameters(parameters_t *pars) {
-	pars->Nx = GRIDPOINTS_SPATIAL;
-	pars->dt = DELTA_T > 0 ? DELTA_T : pars->dt;
-	pars->ti = INITIAL_TIME;
-	pars->tf = FINAL_TIME;
-	pars->a  = SPATIAL_LOWER_BOUND;
-	pars->b  = SPATIAL_UPPER_BOUND;
+	pars->x.N = GRIDPOINTS_X;
+    pars->y.N = GRIDPOINTS_Y;
+    pars->z.N = GRIDPOINTS_Z;
+	pars->dt  = DELTA_T > 0 ? DELTA_T : pars->dt;
+	pars->ti  = INITIAL_TIME;
+	pars->tf  = FINAL_TIME;
+	pars->x.a = SPATIAL_LOWER_BOUND_X;
+	pars->x.b = SPATIAL_UPPER_BOUND_X;
+    pars->y.a = SPATIAL_LOWER_BOUND_Y;
+    pars->y.b = SPATIAL_UPPER_BOUND_Y;
+    pars->z.a = SPATIAL_LOWER_BOUND_Z;
+    pars->z.b = SPATIAL_UPPER_BOUND_Z;
 	pars->Nt = ceil((pars->tf - pars->ti) / pars->dt);
 	pars->nt = 0;
 	pars->t  = 0.0;
@@ -36,11 +38,14 @@ void initialize_parameters(parameters_t *pars) {
 /*
 allocate memory and initialize all external variables
 */
-void allocate_external(size_t Nx, size_t Nt) {
-    size_t N2 = Nx * Nx;
+void allocate_external(parameters_t *pars) {
+    size_t Nx = pars->x.N;
+    size_t Ny = pars->y.N;
+    size_t Nz = pars->z.N;
+    size_t Ntot = Nx * Ny * Nz;
 
     //grid points
-    x  = malloc(Nx * sizeof *x);
+    grid = malloc((Nx + Ny + Nz) * sizeof *grid);
     if (!x)
     {
     	fputs("Allocating memory failed.", stderr);
@@ -49,7 +54,7 @@ void allocate_external(size_t Nx, size_t Nt) {
 
     //solutions for the field and the temporal derivative (we are saving each
     //timestep: 2 * Nx * Nt space)
-    field = fftw_malloc(N2 * Nt * sizeof *field);
+    field = fftw_malloc(2 * Ntot * Nt * sizeof *field );
     if (!field)
     {
     	fputs("Allocating memory failed.", stderr);
@@ -73,16 +78,19 @@ void allocate_external(size_t Nx, size_t Nt) {
     }
 
     // default array to save fourier coefficients from real to complex transform
-    size_t nc = Nx / 2 + 1;
-    cfftw_tmp = fftw_malloc(nc * sizeof *cfftw_tmp);
+    size_t ncx = Nx / 2 + 1;
+    size_t ncy = Ny / 2 + 1;
+    size_t ncz = Nz / 2 + 1;
+    size_t nctot = ncx * ncy * ncz;
+    cfftw_tmp = fftw_malloc(nctot * sizeof *cfftw_tmp);
     if (!cfftw_tmp)
     {
         fputs("Allocating memory failed.", stderr);
         exit(EXIT_FAILURE);
     }
 
-    // general purpose 2*N double memory block for temporary use
-    dmisc_tmp = calloc(N2, sizeof *dmisc_tmp);
+    // general purpose double memory block for temporary use
+    dmisc_tmp = calloc(2 * Ntot, sizeof *dmisc_tmp);
     if (!dmisc_tmp)
     {
         fputs("Allocating memory failed.", stderr);
@@ -97,22 +105,46 @@ void allocate_external(size_t Nx, size_t Nt) {
 	allocated before calling this function
 	see mathematica notebook spectral_operators for further info
 */
-void mk_fourier_spectral_operators(size_t N, double a, double b) {
-	if (N <= 0 || N%2 == 0)
+void mk_grid(parameters_t *pars) {
+    size_t Nx = pars->x.N;
+    size_t Ny = pars->y.N;
+    size_t Nz = pars->z.N;
+    double ax = pars->x.a;
+    double bx = pars->x.b;
+    double ay = pars->y.a;
+    double by = pars->y.b;
+    double az = pars->z.a;
+    double bz = pars->z.b;
+
+	if (Nx <= 0 || Nx%2 == 0 || Ny <= 0 || Ny%2 == 0 || Nz <= 0 || Nz%2 == 0)
 	{
 		fputs("Need an odd number of gridpoints for a fourier grid", stderr);
 	}
 
 	// Grid points
-	for (size_t i = 0; i < N; ++i)
+	for (size_t i = 0; i < Nx; ++i)
 	{
-		x[i] = a + (b - a) * i / N;
+		grid[i] = ax + (bx - ax) * i / Nx;
 	}
+    for (size_t i = Nx; i < Nx+Ny; ++i)
+    {
+        grid[i] = ay + (by - ay) * i / Ny;
+    }
+    for (size_t i = Nx+Ny; i < Nx+Ny+Nz; ++i)
+    {
+        grid[i] = az + (bz - az) * i / Nz;
+    }
 
     // Console output for debugging
 #ifdef DEBUG
 		puts("x");
-        print_vector(x, N);
+        print_vector(grid, Nx);
+        puts("\n");
+        puts("y");
+        print_vector(grid + Nx, Ny);
+        puts("\n");
+        puts("z");
+        print_vector(grid + Nx + Ny, Nz);
         puts("\n");
 #endif
 }
@@ -120,37 +152,54 @@ void mk_fourier_spectral_operators(size_t N, double a, double b) {
 /*
 setup initial conditions for the field
 */
-void mk_initial_conditions(size_t N, double (*f_init)(double),
-								double (*df_init)(double)) {
-    for (size_t i = 0; i < N; ++i)
+void mk_initial_conditions(parameters_t *pars) {
+    size_t Nx = pars->x.N;
+    size_t Ny = pars->y.N;
+    size_t Nz = pars->z.N;
+    size_t Ntot = Nx * Ny * Nz;
+    size_t osx, osy, osz;
+    double x, y, z;
+
+    for (size_t i = 0; i < Nx; ++i)
     {
-        field[i] = f_init(x[i]);
-        field[N+i] = df_init(x[i]);
+        x = grid[i];
+        osx = i * Ny * Nz;
+        for (size_t j = 0; j < Ny; ++j)
+        {
+            y = grid[Nx + j];
+            osy = osx + j * Nz;
+            for (size_t k = 0; k < Nz; ++k)
+            {
+                z = grid[Nx + Ny + k];
+                field[osy + k] = phi_init(x, y, z);
+                field[Ntot + osy + k] = dphi_init(x, y, z);
+            }
+        }
     }
+
     frw_a[0] = 1.0;
 
     // Console output for debugging
 #ifdef DEBUG
     	puts("phi");
-        print_vector(field, N);
+        print_vector(field, Ntot);
         puts("\ndphi");
-        print_vector(field + N, N);
+        print_vector(field + Ntot, Ntot);
         puts("\n");
 #endif
 }
 
 /*
-example test functions for initial conditions
-when using fourier grid points, those need to be periodic in the spatial domain
-specified by LOW_BND and UP_BND in main.h
+example functions for initial conditions
+those need to be periodic in the spatial domain
 */
-double phi_init(double x) {
-	return sin(x);
+double phi_init(double x, double y, double z) {
+	return sin(x) * sin(y) * sin(z);
 	// return tanh(pow(x, 8));
 }
 
-double dphi_init(double x) {
-	// return -sin(x);
+double dphi_init(double x, double y, double z) {
+	// return -sin(x) * sin(y) * sin(z);
 	return 0.0;
 }
 
@@ -158,7 +207,7 @@ double dphi_init(double x) {
 free all allocated memory
 */
 void free_all_external() {
-	free(x);
+	free(grid);
 	fftw_free(field);
     free(frw_a);
     free(rho);
