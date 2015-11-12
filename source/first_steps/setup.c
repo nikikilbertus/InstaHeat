@@ -77,21 +77,25 @@ void allocate_external(parameters_t *pars) {
         exit(EXIT_FAILURE);
     }
 
-    // default array to save fourier coefficients from real to complex transform
+    // default arrays to save coefficients of real to complex transforms
     size_t ncx = Nx / 2 + 1;
     size_t ncy = Ny / 2 + 1;
     size_t ncz = Nz / 2 + 1;
-    size_t nctot = ncx * ncy * ncz;
-    cfftw_tmp = fftw_malloc(nctot * sizeof *cfftw_tmp);
-    if (!cfftw_tmp)
+
+    cfftw_tmp_x = fftw_malloc(ncx * Ny * Nz * sizeof *cfftw_tmp_x);
+    cfftw_tmp_y = fftw_malloc(ncy * Nx * Nz * sizeof *cfftw_tmp_y);
+    cfftw_tmp_z = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_z);
+    if (!cfftw_tmp_x || !cfftw_tmp_y || !cfftw_tmp_z)
     {
         fputs("Allocating memory failed.", stderr);
         exit(EXIT_FAILURE);
     }
 
-    // general purpose double memory block for temporary use
-    dmisc_tmp = calloc(2 * Ntot, sizeof *dmisc_tmp);
-    if (!dmisc_tmp)
+    // general purpose double memory blocks for temporary use
+    dmisc_tmp_x = calloc(2 * Ntot, sizeof *dmisc_tmp_x);
+    dmisc_tmp_y = calloc(2 * Ntot, sizeof *dmisc_tmp_y);
+    dmisc_tmp_z = calloc(2 * Ntot, sizeof *dmisc_tmp_z);
+    if (!dmisc_tmp_x || !dmisc_tmp_y || !dmisc_tmp_z)
     {
         fputs("Allocating memory failed.", stderr);
         exit(EXIT_FAILURE);

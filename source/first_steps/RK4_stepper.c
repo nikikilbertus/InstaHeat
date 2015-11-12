@@ -7,18 +7,21 @@
 #include "evolution_toolkit.h"
 
 void run_RK4_stepper(parameters_t *pars) {
-	size_t N  = pars->Nx;
-	size_t N2 = 2 * N;
+	size_t Nx  = pars->x.N;
+	size_t Ny  = pars->y.N;
+	size_t Nz  = pars->z.N;
+	size_t Ntot = Nx * Ny * Nz;
+	size_t Ntot2 = 2 * Ntot;
 	size_t Nt = pars->Nt;
 	double dt = pars->dt;
 
 	double a1, a2, a3, a4, tmp_a;
 	double *k1, *k2, *k3, *k4, *tmp_k;
-	k1    = malloc(N2 * sizeof *k1);
-	k2    = malloc(N2 * sizeof *k2);
-	k3    = malloc(N2 * sizeof *k3);
-	k4    = malloc(N2 * sizeof *k4);
-	tmp_k = malloc(N2 * sizeof *tmp_k);
+	k1    = fftw_malloc(Ntot2 * sizeof *k1);
+	k2    = fftw_malloc(Ntot2 * sizeof *k2);
+	k3    = fftw_malloc(Ntot2 * sizeof *k3);
+	k4    = fftw_malloc(Ntot2 * sizeof *k4);
+	tmp_k = fftw_malloc(Ntot2 * sizeof *tmp_k);
 
 	if (!(k1 && k2 && k3 && k4 && tmp_k))
 	{
@@ -44,13 +47,13 @@ void run_RK4_stepper(parameters_t *pars) {
 
 	for (size_t nt = 0; nt < Nt - 1; ++nt)
 	{
-		os = nt * N2;
+		os = nt * Ntot2;
 
 		// k1 & a1
 		a1 = mk_velocities(field + os, frw_a[nt], k1, N);
 
 		// k2 & k2
-		for (size_t i = 0; i < N2; ++i)
+		for (size_t i = 0; i < Ntot2; ++i)
 		{
 			tmp_k[i] = field[os+i] + dt * k1[i] / 2.0;
 		}
@@ -58,7 +61,7 @@ void run_RK4_stepper(parameters_t *pars) {
 		a2 = mk_velocities(tmp_k, tmp_a, k2, N);
 
 		// k3 & a3
-		for (size_t i = 0; i < N2; ++i)
+		for (size_t i = 0; i < Ntot2; ++i)
 		{
 			tmp_k[i] = field[os+i] + dt * k2[i] / 2.0;
 		}
@@ -66,7 +69,7 @@ void run_RK4_stepper(parameters_t *pars) {
 		a3 = mk_velocities(tmp_k, tmp_a, k3, N);
 
 		// k4 & a4
-		for (size_t i = 0; i < N2; ++i)
+		for (size_t i = 0; i < Ntot2; ++i)
 		{
 			tmp_k[i] = field[os+i] + dt * k3[i];
 		}
@@ -74,8 +77,8 @@ void run_RK4_stepper(parameters_t *pars) {
 		a4 = mk_velocities(tmp_k, tmp_a, k4, N);
 
 		// perform one time step for the field and a
-		new_os = os + N2;
-		for (size_t i = 0; i < N2; ++i)
+		new_os = os + Ntot2;
+		for (size_t i = 0; i < Ntot2; ++i)
 		{
 			field[new_os+i] = field[os+i] +
 						dt * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]) / 6.0;
@@ -91,7 +94,7 @@ void run_RK4_stepper(parameters_t *pars) {
 #endif
 
 #ifdef CHECK_FOR_NAN
-			for (size_t i = 0; i < N2; ++i)
+			for (size_t i = 0; i < Ntot2; ++i)
 			{
 				if (isnan(field[new_os+i]))
 				{
@@ -112,11 +115,11 @@ void run_RK4_stepper(parameters_t *pars) {
 
 	clock_t end = clock();
 
-	free(k1);
-	free(k2);
-	free(k3);
-	free(k4);
-	free(tmp_k);
+	fftw_free(k1);
+	fftw_free(k2);
+	fftw_free(k3);
+	fftw_free(k4);
+	fftw_free(tmp_k);
 
 	double secs = (double)(end - start) / CLOCKS_PER_SEC;
 	RUNTIME_INFO(printf("Finished RK4 time evolution in: %f seconds.\n\n", secs));
@@ -125,7 +128,7 @@ void run_RK4_stepper(parameters_t *pars) {
 /*
 compute the right hand side of the pde (first order in time)
 */
-double mk_velocities(double *f, double a, double *result, size_t N) {
+double mk_velocities(double *f, double a, double *result, parameters_t *pars) {
 	size_t N2 = 2 * N;
 	double current_rho = mk_rho(f, a, N);
 	double hubble = sqrt(current_rho / 3.0);

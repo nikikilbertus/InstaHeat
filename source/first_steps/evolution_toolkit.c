@@ -6,29 +6,115 @@
 #include "evolution_toolkit.h"
 #include "main.h"
 
-void fft_D1(double *in, double *out, size_t N) {
-	size_t nc = N / 2 + 1;
+void fft_D1(double *in, double *out, int direction, parameters_t *pars) {
+	Nx = pars->x.N;
+	Ny = pars->y.N;
+	Nz = pars->z.N;
+
+	double a, b;
+
+	fftw_complex *out;
+	int N, rank, howmany, idist, odist, istride, ostride;
+
+	switch (diection) {
+		case 1:
+			N = Nx;
+			nc = N / 2 + 1;
+			Neffx = nc;
+			Neffy = Ny;
+			Neffz = Nz;
+			howmany = Ny * Nz;
+			idist   = 1;
+			odist   = 1;
+			istride = Ny * Nz;
+			ostride = istride;
+			out = cfftw_tmp_x;
+			a = pars->x.a;
+			b = pars->x.b;
+			break;
+		case 2:
+			N = Ny;
+			nc = N / 2 + 1;
+			Neffx = Nx;
+			Neffy = nc;
+			Neffz = Nz;
+			howmany = Nx * Nz;
+			idist   = 1; // TODO: that one's a bitch, see notes
+			odist   = 1; // TODO
+			istride = Nz;
+			ostride = istride;
+			out = cfftw_tmp_y;
+			a = pars->y.a;
+			b = pars->y.b;
+			break;
+		case 3:
+			N = Nz;
+			nc = N / 2 + 1;
+			Neffx = Nx;
+			Neffy = Ny;
+			Neffz = nc;
+			howmany = Nx * Ny;
+			idist   = Nz;
+			odist   = nc;
+			istride = 1;
+			ostride = istride;
+			out = cfftw_tmp_z;
+			a = pars->z.a;
+			b = pars->z.b;
+			break;
+		default:
+			fputs("Direction must be 1 (x), 2 (y) or 3 (z).", stderr);
+			exit(EXIT_FAILURE);
+	}
+
+	rank = 1;
+	int n[] = {N};
+	int *inembed = n;
+	int *onembed = n;
+
 	fftw_plan p_fw;
 	fftw_plan p_bw;
 
-	p_fw = fftw_plan_dft_r2c_1d(N, in, cfftw_tmp, FFTW_ESTIMATE);
+	p_fw = fftw_plan_many_dft_r2c(rank, n, howmany, in, inembed, istride, idist,
+								out, onembed, ostride, odist, FFTW_ESTIMATE);
 	fftw_execute(p_fw);
 
-	double L = pars.b - pars.a;
-	double complex factor = 2. * PI * I / L;
-	for (size_t i = 0; i < nc; ++i)
+	// todo correct differentiation
+	double L = b - a;
+	double complex factor = 2. * PI * I / (L * N);
+	size_t osx, osy;
+	for (size_t i = 0; i < Neffx; ++i)
 	{
-		cfftw_tmp[i] *= factor * i / N;
+		osx = i * Neffy * Neffz;
+		for (size_t j = 0; j < Neffy; ++j)
+		{
+			osy = osx + j * Neffz;
+			for (size_t k = 0; k < Neffz; ++k)
+			{
+				switch (direction) {
+					case 1:
+						out[osy + k] *= (factor * i);
+						break;
+					case 2:
+						out[osy + k] *= (factor * j);
+						break;
+					case 3:
+						out[osy + k] *= (factor * k);
+						break;
+				}
+			}
+		}
 	}
 
-	p_bw = fftw_plan_dft_c2r_1d(N, cfftw_tmp, out, FFTW_ESTIMATE);
+	p_bw = fftw_plan_many_dft_c2r(rank, n, howmany, out, inembed, istride, idist,
+								in, onembed, ostride, odist, FFTW_ESTIMATE);
 	fftw_execute(p_bw);
 
 	fftw_destroy_plan(p_fw);
 	fftw_destroy_plan(p_bw);
 }
 
-void fft_D2(double *in, double *out, size_t N) {
+void fft_D2(double *in, double *out, int direction, parameters_t *pars) {
 	size_t nc = N / 2 + 1;
 	fftw_plan p_fw;
 	fftw_plan p_bw;

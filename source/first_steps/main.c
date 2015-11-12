@@ -26,10 +26,14 @@ double *frw_a;
 double *rho;
 
 // default array to save fourier coefficients from real to complex transform
-complex *cfftw_tmp;
+complex *cfftw_tmp_x;
+complex *cfftw_tmp_y;
+complex *cfftw_tmp_z;
 
-// general purpose 2*N double memory block for temporary use
-double *dmisc_tmp;
+// general purpose double memory blocks for temporary use
+double *dmisc_tmp_x;
+double *dmisc_tmp_y;
+double *dmisc_tmp_z;
 
 /*
 --------------------------------main--------------------------------------------
