@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <fftw3.h>
 #include "RK4_stepper.h"
 #include "main.h"
 #include "evolution_toolkit.h"
@@ -50,7 +51,7 @@ void run_RK4_stepper(parameters_t *pars) {
 		os = nt * Ntot2;
 
 		// k1 & a1
-		a1 = mk_velocities(field + os, frw_a[nt], k1, N);
+		a1 = mk_velocities(field + os, frw_a[nt], k1, pars);
 
 		// k2 & k2
 		for (size_t i = 0; i < Ntot2; ++i)
@@ -58,7 +59,7 @@ void run_RK4_stepper(parameters_t *pars) {
 			tmp_k[i] = field[os+i] + dt * k1[i] / 2.0;
 		}
 		tmp_a = frw_a[nt] + dt * a1 / 2.0;
-		a2 = mk_velocities(tmp_k, tmp_a, k2, N);
+		a2 = mk_velocities(tmp_k, tmp_a, k2, pars);
 
 		// k3 & a3
 		for (size_t i = 0; i < Ntot2; ++i)
@@ -66,7 +67,7 @@ void run_RK4_stepper(parameters_t *pars) {
 			tmp_k[i] = field[os+i] + dt * k2[i] / 2.0;
 		}
 		tmp_a = frw_a[nt] + dt * a2 / 2.0;
-		a3 = mk_velocities(tmp_k, tmp_a, k3, N);
+		a3 = mk_velocities(tmp_k, tmp_a, k3, pars);
 
 		// k4 & a4
 		for (size_t i = 0; i < Ntot2; ++i)
@@ -74,7 +75,7 @@ void run_RK4_stepper(parameters_t *pars) {
 			tmp_k[i] = field[os+i] + dt * k3[i];
 		}
 		tmp_a = frw_a[nt] + dt * a3;
-		a4 = mk_velocities(tmp_k, tmp_a, k4, N);
+		a4 = mk_velocities(tmp_k, tmp_a, k4, pars);
 
 		// perform one time step for the field and a
 		new_os = os + Ntot2;
@@ -86,11 +87,11 @@ void run_RK4_stepper(parameters_t *pars) {
 
 		frw_a[nt + 1] = frw_a[nt] + dt * (a1 + 2.0 * a2 + 2.0 * a3 + a4) / 6.0;
 
-		rho[nt] = mk_rho(field + os, frw_a[nt], N);
+		rho[nt] = mk_rho(field + os, frw_a[nt], pars);
 
 		// apply filter
 #ifdef ENABLE_FFT_FILTER
-		fft_apply_filter(field + new_os, N);
+		fft_apply_filter(field + new_os, pars);
 #endif
 
 #ifdef CHECK_FOR_NAN
@@ -111,7 +112,7 @@ void run_RK4_stepper(parameters_t *pars) {
 	}
 
 	// compute the final 00 component of the stress energy
-	rho[Nt - 1] = mk_rho(field + 2 * N * (Nt - 1), frw_a[Nt - 1], N);
+	rho[Nt - 1] = mk_rho(field + Ntot2 * (Nt - 1), frw_a[Nt - 1], pars);
 
 	clock_t end = clock();
 
@@ -122,29 +123,34 @@ void run_RK4_stepper(parameters_t *pars) {
 	fftw_free(tmp_k);
 
 	double secs = (double)(end - start) / CLOCKS_PER_SEC;
-	RUNTIME_INFO(printf("Finished RK4 time evolution in: %f seconds.\n\n", secs));
+	RUNTIME_INFO(printf("Finished time evolution in: %f seconds.\n\n", secs));
 }
 
 /*
 compute the right hand side of the pde (first order in time)
 */
 double mk_velocities(double *f, double a, double *result, parameters_t *pars) {
-	size_t N2 = 2 * N;
-	double current_rho = mk_rho(f, a, N);
+	size_t Nx  = pars->x.N;
+	size_t Ny  = pars->y.N;
+	size_t Nz  = pars->z.N;
+	size_t Ntot = Nx * Ny * Nz;
+	size_t Ntot2 = 2 * Ntot;
+
+	double current_rho = mk_rho(f, a, pars);
 	double hubble = sqrt(current_rho / 3.0);
 
-	for (size_t i = 0; i < N; ++i)
+	for (size_t i = 0; i < Ntot; ++i)
 	{
-		result[i] = f[N + i];
+		result[i] = f[Ntot + i];
 	}
 
-	fft_D2(f, result + N, N);
+	mk_laplacian(f, result + Ntot, pars);
 
-	for (size_t i = N; i < N2; ++i)
+	for (size_t i = Ntot; i < Ntot2; ++i)
 	{
 		result[i] /= (a * a);
 		result[i] -= ( 3.0 * hubble * f[i]
-						+ potential_prime_term(f[i - N]) );
+						+ potential_prime_term(f[i - Ntot]) );
 	}
 	return a * hubble;
 }
@@ -170,26 +176,31 @@ inline double potential_prime_term(double f) {
 /*
 compute average 00 component of stress energy
 */
-double mk_rho(double *f, double a, size_t N) {
+double mk_rho(double *f, double a, parameters_t *pars) {
+	size_t Nx  = pars->x.N;
+	size_t Ny  = pars->y.N;
+	size_t Nz  = pars->z.N;
+	size_t Ntot = Nx * Ny * Nz;
+
 	double T00 = 0.0;
 
-	double *fD1 = malloc(N * sizeof *fD1);
-	if (!fD1)
+	double *f_grad2 = malloc(Ntot * sizeof *f_grad2);
+	if (!f_grad2)
 	{
 		fputs("Allocating memory failed.", stderr);
     	exit(EXIT_FAILURE);
 	}
 
-	fft_D1(f, fD1, N);
+	mk_gradient_squared(f, f_grad2, pars);
 
-	double ft, fxa;
-	for (size_t i = 0; i < N; ++i)
+	double ft, f_grad_a;
+	for (size_t i = 0; i < Ntot; ++i)
 	{
-		ft = f[N + i];
-		fxa = fD1[i] / a;
-		T00 += (ft * ft + fxa * fxa) / 2. + potential(f[i]);
+		ft = f[Ntot + i];
+		f_grad_a = f_grad2[i] / a;
+		T00 += (ft * ft + f_grad_a * f_grad_a) / 2. + potential(f[i]);
 	}
 
-	free(fD1);
-	return T00 / N;
+	free(f_grad2);
+	return T00 / Ntot;
 }

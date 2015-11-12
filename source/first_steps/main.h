@@ -80,7 +80,7 @@ representing one dimension of a multi dimensional grid
 typedef struct {
 	size_t N;
 	double a;
-	double b
+	double b;
 }grid_dimension_t;
 
 /*

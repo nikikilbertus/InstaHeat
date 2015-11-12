@@ -12,7 +12,7 @@ void allocate_and_initialize_all(parameters_t *pars) {
     RUNTIME_INFO(puts("Allocated memory for all external variables.\n"));
     mk_grid(pars);
     RUNTIME_INFO(puts("Constructed fourier gridpoint.\n"));
-    mk_initial_conditions(pars, phi_init, dphi_init);
+    mk_initial_conditions(pars);
     RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
 }
 
@@ -43,10 +43,11 @@ void allocate_external(parameters_t *pars) {
     size_t Ny = pars->y.N;
     size_t Nz = pars->z.N;
     size_t Ntot = Nx * Ny * Nz;
+    size_t Nt = pars->Nt;
 
     //grid points
     grid = malloc((Nx + Ny + Nz) * sizeof *grid);
-    if (!x)
+    if (!grid)
     {
     	fputs("Allocating memory failed.", stderr);
     	exit(EXIT_FAILURE);
@@ -92,9 +93,9 @@ void allocate_external(parameters_t *pars) {
     }
 
     // general purpose double memory blocks for temporary use
-    dmisc_tmp_x = calloc(2 * Ntot, sizeof *dmisc_tmp_x);
-    dmisc_tmp_y = calloc(2 * Ntot, sizeof *dmisc_tmp_y);
-    dmisc_tmp_z = calloc(2 * Ntot, sizeof *dmisc_tmp_z);
+    dmisc_tmp_x = fftw_malloc(2 * Ntot * sizeof *dmisc_tmp_x);
+    dmisc_tmp_y = fftw_malloc(2 * Ntot * sizeof *dmisc_tmp_y);
+    dmisc_tmp_z = fftw_malloc(2 * Ntot * sizeof *dmisc_tmp_z);
     if (!dmisc_tmp_x || !dmisc_tmp_y || !dmisc_tmp_z)
     {
         fputs("Allocating memory failed.", stderr);
@@ -161,7 +162,7 @@ void mk_initial_conditions(parameters_t *pars) {
     size_t Ny = pars->y.N;
     size_t Nz = pars->z.N;
     size_t Ntot = Nx * Ny * Nz;
-    size_t osx, osy, osz;
+    size_t osx, osy;
     double x, y, z;
 
     for (size_t i = 0; i < Nx; ++i)
@@ -215,8 +216,12 @@ void free_all_external() {
 	fftw_free(field);
     free(frw_a);
     free(rho);
-    fftw_free(cfftw_tmp);
-    free(dmisc_tmp);
+    fftw_free(cfftw_tmp_x);
+    fftw_free(cfftw_tmp_y);
+    fftw_free(cfftw_tmp_z);
+    fftw_free(dmisc_tmp_x);
+    fftw_free(dmisc_tmp_y);
+    fftw_free(dmisc_tmp_z);
 	RUNTIME_INFO(puts("Memory from all external variables freed.\n"));
 }
 
