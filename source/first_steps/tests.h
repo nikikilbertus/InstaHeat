@@ -11,6 +11,7 @@ void test_mk_gradient(parameters_t *pars);
 void test_mk_laplacian(parameters_t *pars);
 void test_fft_apply_filter(parameters_t *pars);
 double test_func(double x, double y, double z);
+double test_func_gradsq(double x, double y, double z);
 double test_func_lap(double x, double y, double z);
 double test_func_Dx(double x, double y, double z);
 double test_func_Dy(double x, double y, double z);

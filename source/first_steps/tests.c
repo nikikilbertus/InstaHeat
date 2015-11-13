@@ -143,7 +143,29 @@ void test_fft_second_derivative(parameters_t *pars) {
 }
 
 void test_mk_gradient(parameters_t *pars) {
-    //todo
+    size_t Nx = pars->x.N;
+    size_t Ny = pars->y.N;
+    size_t Nz = pars->z.N;
+    size_t Ntot = Nx * Ny * Nz;
+
+    mk_gradient_squared(field, dmisc_tmp_x, pars);
+    fill_field(dmisc_tmp_x + Ntot, test_func_gradsq, pars);
+    puts("test mk gradient squared:");
+    if (are_fields_equal(dmisc_tmp_x, pars) == 0)
+    {
+        puts("passed\n");
+    }
+    else
+    {
+        puts("failed\n");
+    }
+#ifdef DEBUG
+        puts("testgradsq");
+        print_vector(dmisc_tmp_x, Ntot);
+        puts("exact");
+        print_vector(dmisc_tmp_x + Ntot, Ntot);
+        puts("\n");
+#endif
 }
 
 void test_mk_laplacian(parameters_t *pars) {
@@ -178,6 +200,13 @@ void test_fft_apply_filter(parameters_t *pars) {
 
 double test_func(double x, double y, double z) {
     return sin(x) * sin(y) * sin(z);
+}
+
+double test_func_gradsq(double x, double y, double z) {
+    double grad_x = test_func_Dx(x,y,z);
+    // double grad_y = test_func_Dy(x,y,z);
+    double grad_z = test_func_Dz(x,y,z);
+    return  grad_x * grad_x + grad_z * grad_z; // + grad_y * grad_y
 }
 
 double test_func_lap(double x, double y, double z) {

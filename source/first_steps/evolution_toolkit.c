@@ -159,14 +159,14 @@ void mk_gradient_squared(double *in, double *out, parameters_t *pars) {
 	size_t Ntot = Nx * Ny * Nz;
 
 	fft_D(in, dmisc_tmp_x, 1, 1, pars);
-	fft_D(in, dmisc_tmp_y, 2, 1, pars);
+	// fft_D(in, dmisc_tmp_y, 2, 1, pars);
 	fft_D(in, dmisc_tmp_z, 3, 1, pars);
 
 	double gx, gy, gz;
 	for (size_t i = 0; i < Ntot; ++i)
 	{
 		gx = dmisc_tmp_x[i];
-		gy = dmisc_tmp_y[i];
+		gy = 0.0; //dmisc_tmp_y[i];
 		gz = dmisc_tmp_z[i];
 		out[i] = gx * gx + gy * gy + gz * gz;
 	}
