@@ -87,7 +87,6 @@ void run_RK4_stepper(parameters_t *pars) {
 
 		rho[nt] = mk_rho(field + os, frw_a[nt], N);
 
-		// apply filter
 #ifdef ENABLE_FFT_FILTER
 		fft_apply_filter(field + new_os, N);
 #endif
