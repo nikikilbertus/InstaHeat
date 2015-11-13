@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <fftw3.h>
 #include "RK4_stepper.h"
 #include "main.h"
 #include "evolution_toolkit.h"
@@ -14,11 +15,11 @@ void run_RK4_stepper(parameters_t *pars) {
 
 	double a1, a2, a3, a4, tmp_a;
 	double *k1, *k2, *k3, *k4, *tmp_k;
-	k1    = malloc(N2 * sizeof *k1);
-	k2    = malloc(N2 * sizeof *k2);
-	k3    = malloc(N2 * sizeof *k3);
-	k4    = malloc(N2 * sizeof *k4);
-	tmp_k = malloc(N2 * sizeof *tmp_k);
+	k1    = fftw_malloc(N2 * sizeof *k1);
+	k2    = fftw_malloc(N2 * sizeof *k2);
+	k3    = fftw_malloc(N2 * sizeof *k3);
+	k4    = fftw_malloc(N2 * sizeof *k4);
+	tmp_k = fftw_malloc(N2 * sizeof *tmp_k);
 
 	if (!(k1 && k2 && k3 && k4 && tmp_k))
 	{
@@ -112,11 +113,11 @@ void run_RK4_stepper(parameters_t *pars) {
 
 	clock_t end = clock();
 
-	free(k1);
-	free(k2);
-	free(k3);
-	free(k4);
-	free(tmp_k);
+	fftw_free(k1);
+	fftw_free(k2);
+	fftw_free(k3);
+	fftw_free(k4);
+	fftw_free(tmp_k);
 
 	double secs = (double)(end - start) / CLOCKS_PER_SEC;
 	RUNTIME_INFO(printf("Finished RK4 time evolution in: %f seconds.\n\n", secs));
