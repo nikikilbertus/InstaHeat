@@ -121,9 +121,9 @@ void mk_grid(parameters_t *pars) {
     double az = pars->z.a;
     double bz = pars->z.b;
 
-	if (Nx <= 0 || Nx%2 == 0 || Ny <= 0 || Ny%2 == 0 || Nz <= 0 || Nz%2 == 0)
+	if (Nx <= 0 || Ny <= 0 || Nz <= 0)
 	{
-		fputs("Need an odd number of gridpoints for a fourier grid", stderr);
+		fputs("Need positive number of gridpoints", stderr);
 	}
 
 	// Grid points
@@ -133,11 +133,11 @@ void mk_grid(parameters_t *pars) {
 	}
     for (size_t i = Nx; i < Nx+Ny; ++i)
     {
-        grid[i] = ay + (by - ay) * i / Ny;
+        grid[i] = ay + (by - ay) * (i-Nx) / Ny;
     }
     for (size_t i = Nx+Ny; i < Nx+Ny+Nz; ++i)
     {
-        grid[i] = az + (bz - az) * i / Nz;
+        grid[i] = az + (bz - az) * (i-Nx-Ny) / Nz;
     }
 
     // Console output for debugging

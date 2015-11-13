@@ -55,7 +55,7 @@ int main(int argc, const char * argv[]) {
 #ifdef RUN_TESTS_ONLY
     pars.dt = 0.1;
     allocate_and_initialize_all(&pars);
-    run_all_tests();
+    run_all_tests(&pars);
     free_all_external();
     return 0;
 #endif

@@ -9,7 +9,7 @@ macros for debugging, testing and printing additional information during
 execution
 */
 #define SHOW_RUNTIME_INFO
-// #define RUN_TESTS_ONLY
+#define RUN_TESTS_ONLY
 // #define DEBUG
 
 #ifdef SHOW_RUNTIME_INFO
@@ -40,9 +40,9 @@ mathematical constants
 simulation parameters
 */
 // Number of gridpoints (needs to be odd for fourier grid)
-#define GRIDPOINTS_X  			(11)
-#define GRIDPOINTS_Y  			(11)
-#define GRIDPOINTS_Z  			(11)
+#define GRIDPOINTS_X  			(16)
+#define GRIDPOINTS_Y  			(16)
+#define GRIDPOINTS_Z  			(16)
 #define GRIDPOINTS_TOTAL		((GRIDPOINTS_X)*(GRIDPOINTS_Y)*(GRIDPOINTS_Z))
 // timestep
 #define DELTA_T					(-0.1)

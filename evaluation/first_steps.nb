@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     68625,       1968]
-NotebookOptionsPosition[     63805,       1827]
-NotebookOutlinePosition[     64183,       1844]
-CellTagsIndexPosition[     64140,       1841]
+NotebookDataLength[     68779,       1972]
+NotebookOptionsPosition[     63917,       1830]
+NotebookOutlinePosition[     64295,       1847]
+CellTagsIndexPosition[     64252,       1844]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -1823,7 +1823,10 @@ Cell[BoxData[{
   3.655764862125753*^9}, {3.65576489375073*^9, 3.6557648954786673`*^9}, {
   3.655764962067686*^9, 3.6557650003150177`*^9}, {3.6557651161081343`*^9, 
   3.655765150044228*^9}}]
-}, Open  ]]
+}, Open  ]],
+
+Cell["tests for differentiation", "Section",
+ CellChangeTimes->{{3.65636054188503*^9, 3.656360547171227*^9}}]
 },
 WindowSize->{810, 851},
 WindowMargins->{{278, Automatic}, {Automatic, 0}},
@@ -1969,7 +1972,8 @@ Cell[60786, 1739, 105, 1, 67, "Section"],
 Cell[60894, 1742, 120, 2, 27, "Input"],
 Cell[61017, 1746, 1841, 53, 105, "Input"],
 Cell[62861, 1801, 928, 23, 58, "Input"]
-}, Open  ]]
+}, Open  ]],
+Cell[63804, 1827, 109, 1, 67, "Section"]
 }
 ]
 *)

@@ -6,7 +6,15 @@
 #include "evolution_toolkit.h"
 #include "main.h"
 
-void fft_D1(double *in, double *out, int direction, parameters_t *pars) {
+void fft_D(double *in, double *out, int direction, int order,
+						parameters_t *pars) {
+
+	if (direction < 1 || direction > 3 || order < 1 || order > 2)
+	{
+		fputs("Derivatives must be in directions 1,2,3 of orders 1,2.", stderr);
+		exit(EXIT_FAILURE);
+	}
+
 	size_t Nx = pars->x.N;
 	size_t Ny = pars->y.N;
 	size_t Nz = pars->z.N;
@@ -77,12 +85,19 @@ void fft_D1(double *in, double *out, int direction, parameters_t *pars) {
 	fftw_plan p_bw;
 
 	p_fw = fftw_plan_many_dft_r2c(rank, n, howmany, in, inembed, istride, idist,
-								fftw_tmp, onembed, ostride, odist, FFTW_ESTIMATE);
+							fftw_tmp, onembed, ostride, odist, FFTW_ESTIMATE);
 	fftw_execute(p_fw);
 
-	// todo correct differentiation
 	double L = b - a;
-	double complex factor = 2. * PI * I / (L * N);
+	double complex factor;
+	if (order == 1)
+	{
+		factor = 2. * PI * I / (L * N);
+	}
+	else if (order == 2)
+	{
+		factor = - 4. * PI * PI / (L * L * N);
+	}
 	size_t osx, osy;
 	for (size_t i = 0; i < Neffx; ++i)
 	{
@@ -95,16 +110,50 @@ void fft_D1(double *in, double *out, int direction, parameters_t *pars) {
 				switch (direction) {
 					case 1:
 						fftw_tmp[osy + k] *= (factor * i);
+						if (order == 2)
+						{
+							fftw_tmp[osy + k] *= i;
+						}
 						break;
 					case 2:
 						fftw_tmp[osy + k] *= (factor * j);
+						if (order == 2)
+						{
+							fftw_tmp[osy + k] *= j;
+						}
 						break;
 					case 3:
 						fftw_tmp[osy + k] *= (factor * k);
+						if (order == 2)
+						{
+							fftw_tmp[osy + k] *= k;
+						}
 						break;
 				}
 			}
 		}
+	}
+
+	switch (direction) {
+		case 1:
+			idist   = 1;
+			odist   = 1;
+			istride = Ny * Nz;
+			ostride = istride;
+			break;
+		case 2:
+			idist   = 1; // TODO: that one's a bitch, see notes
+			odist   = 1; // TODO
+			istride = Nz;
+			ostride = istride;
+			break;
+		case 3:
+			idist   = nc;
+			odist   = Nz;
+			break;
+		default:
+			fputs("Direction must be 1 (x), 2 (y) or 3 (z).", stderr);
+			exit(EXIT_FAILURE);
 	}
 
 	p_bw = fftw_plan_many_dft_c2r(rank, n, howmany, fftw_tmp, inembed, istride,
@@ -115,39 +164,87 @@ void fft_D1(double *in, double *out, int direction, parameters_t *pars) {
 	fftw_destroy_plan(p_bw);
 }
 
-void fft_D2(double *in, double *out, int direction, parameters_t *pars) {
-	//TODO
-// 	size_t nc = N / 2 + 1;
-// 	fftw_plan p_fw;
-// 	fftw_plan p_bw;
-
-// 	p_fw = fftw_plan_dft_r2c_1d(N, in, cfftw_tmp, FFTW_ESTIMATE);
-// 	fftw_execute(p_fw);
-
-// #if defined(ENABLE_FFT_FILTER) && defined(ENABLE_ADAPTIVE_FILTER)
-// 	set_adaptive_cutoff_fraction(nc);
-// #endif
-
-// 	double L = pars.b - pars.a;
-// 	double factor = - 4. * PI * PI / (L*L);
-// 	for (size_t i = 0; i < nc; ++i)
-// 	{
-// 		cfftw_tmp[i] *= (factor * i * i) / N;
-// 	}
-
-// 	p_bw = fftw_plan_dft_c2r_1d(N, cfftw_tmp, out, FFTW_ESTIMATE);
-// 	fftw_execute(p_bw);
-
-// 	fftw_destroy_plan(p_fw);
-// 	fftw_destroy_plan(p_bw);
-}
-
 void mk_gradient_squared(double *in, double *out, parameters_t *pars) {
-	//TODO
+	size_t Nx = pars->x.N;
+	size_t Ny = pars->y.N;
+	size_t Nz = pars->z.N;
+	size_t Ntot = Nx * Ny * Nz;
+
+	fft_D(in, dmisc_tmp_x, 1, 1, pars);
+	fft_D(in, dmisc_tmp_y, 2, 1, pars);
+	fft_D(in, dmisc_tmp_z, 3, 1, pars);
+
+	double gx, gy, gz;
+	for (size_t i = 0; i < Ntot; ++i)
+	{
+		gx = dmisc_tmp_x[i];
+		gy = dmisc_tmp_y[i];
+		gz = dmisc_tmp_z[i];
+		out[i] = gx * gx + gy * gy + gz * gz;
+	}
 }
 
 void mk_laplacian(double *in, double *out, parameters_t *pars) {
-	//TODO
+	size_t Nx = pars->x.N;
+	size_t Ny = pars->y.N;
+	size_t Nz = pars->z.N;
+	size_t Ntot = Nx * Ny * Nz;
+	size_t ncz = Nz / 2 + 1;
+
+	fftw_plan p_fw;
+	fftw_plan p_bw;
+
+	p_fw = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, in, cfftw_tmp_z, FFTW_ESTIMATE);
+	fftw_execute(p_fw);
+
+	double Lx, Ly, Lz;
+	Lx = pars->x.b - pars->x.a;
+	Ly = pars->y.b - pars->y.a;
+	Lz = pars->z.b - pars->z.a;
+
+	double factor_x = -4. * PI * PI / (Lx * Lx);
+	double factor_y = -4. * PI * PI / (Ly * Ly);
+	double factor_z = -4. * PI * PI / (Lz * Lz);
+
+	double k_sq;
+	size_t osx, osy;
+	for (size_t i = 0; i < Nx; ++i)
+	{
+		osx = i * Ny * ncz;
+		for (size_t j = 0; j < Ny; ++j)
+		{
+			osy = osx + j * ncz;
+			for (size_t k = 0; k < ncz; ++k)
+			{
+				k_sq = factor_z * k * k;
+
+				if (i > Nx / 2)
+				{
+					k_sq += factor_x * (Nx - i) * (Nx - i);
+				}
+				else
+				{
+					k_sq += factor_x * i * i;
+				}
+
+				if (j > Ny / 2)
+				{
+					k_sq += factor_y * (Ny - j) * (Ny - j);
+				}
+				else
+				{
+					k_sq += factor_y * j * j;
+				}
+				cfftw_tmp_z[osy + k] *= k_sq / Ntot;
+			}
+		}
+	}
+
+	p_bw = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, cfftw_tmp_z, out, FFTW_ESTIMATE);
+	fftw_execute(p_bw);
+
+	fftw_destroy_plan(p_fw);
+	fftw_destroy_plan(p_bw);
 }
 
 void set_adaptive_cutoff_fraction(size_t nc) {
