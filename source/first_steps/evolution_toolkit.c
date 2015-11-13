@@ -134,26 +134,14 @@ void fft_D(double *in, double *out, int direction, int order,
 		}
 	}
 
-	switch (direction) {
-		case 1:
-			idist   = 1;
-			odist   = 1;
-			istride = Ny * Nz;
-			ostride = istride;
-			break;
-		case 2:
-			idist   = 1; // TODO: that one's a bitch, see notes
-			odist   = 1; // TODO
-			istride = Nz;
-			ostride = istride;
-			break;
-		case 3:
-			idist   = nc;
-			odist   = Nz;
-			break;
-		default:
-			fputs("Direction must be 1 (x), 2 (y) or 3 (z).", stderr);
-			exit(EXIT_FAILURE);
+	if (direction == 2)
+	{
+		//todo
+	}
+	if (direction == 3)
+	{
+		idist   = nc;
+		odist   = Nz;
 	}
 
 	p_bw = fftw_plan_many_dft_c2r(rank, n, howmany, fftw_tmp, inembed, istride,

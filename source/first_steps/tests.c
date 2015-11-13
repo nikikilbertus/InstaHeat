@@ -9,6 +9,8 @@
 void run_all_tests(parameters_t *pars) {
     test_fft_first_derivative(pars);
     test_fft_second_derivative(pars);
+    test_mk_laplacian(pars);
+    test_mk_gradient(pars);
     test_fft_apply_filter(pars);
 }
 
@@ -145,7 +147,29 @@ void test_mk_gradient(parameters_t *pars) {
 }
 
 void test_mk_laplacian(parameters_t *pars) {
-    //todo
+    size_t Nx = pars->x.N;
+    size_t Ny = pars->y.N;
+    size_t Nz = pars->z.N;
+    size_t Ntot = Nx * Ny * Nz;
+
+    mk_laplacian(field, dmisc_tmp_x, pars);
+    fill_field(dmisc_tmp_x + Ntot, test_func_lap, pars);
+    puts("test mk laplacian:");
+    if (are_fields_equal(dmisc_tmp_x, pars) == 0)
+    {
+        puts("passed\n");
+    }
+    else
+    {
+        puts("failed\n");
+    }
+#ifdef DEBUG
+        puts("testlap");
+        print_vector(dmisc_tmp_x, Ntot);
+        puts("exact");
+        print_vector(dmisc_tmp_x + Ntot, Ntot);
+        puts("\n");
+#endif
 }
 
 void test_fft_apply_filter(parameters_t *pars) {
@@ -154,6 +178,10 @@ void test_fft_apply_filter(parameters_t *pars) {
 
 double test_func(double x, double y, double z) {
     return sin(x) * sin(y) * sin(z);
+}
+
+double test_func_lap(double x, double y, double z) {
+    return -3.0 * sin(x) * sin(y) * sin(z);
 }
 
 double test_func_Dx(double x, double y, double z) {
