@@ -1,0 +1,11 @@
+syntax: glob
+
+# annyoing Desktop Services Store files from Mac OS
+*.DS_Store
+
+# object files and executable
+*.o
+*prog
+*.txt
+
+*~
