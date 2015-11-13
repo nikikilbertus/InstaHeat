@@ -35,6 +35,9 @@ double *dmisc_tmp_x;
 double *dmisc_tmp_y;
 double *dmisc_tmp_z;
 
+// times all dfts for timing analysis
+double fftw_time = 0.0;
+
 /*
 --------------------------------main--------------------------------------------
 */
@@ -83,6 +86,7 @@ int main(int argc, const char * argv[]) {
 
     clock_t end = clock();
     double secs = (double)(end - start) / CLOCKS_PER_SEC;
-    RUNTIME_INFO(printf("main took %f seconds.\n\n", secs));
+    RUNTIME_INFO(printf("main took %f seconds.\n", secs));
+    RUNTIME_INFO(printf("fftw took %f seconds.\n\n", fftw_time));
     return 0;
 }

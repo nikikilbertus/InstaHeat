@@ -39,24 +39,24 @@ void test_fft_first_derivative(parameters_t *pars) {
         puts("\n");
 #endif
 
-    // fft_D(field, dmisc_tmp_y, 2, 1, pars);
-    // fill_field(dmisc_tmp_y + Ntot, test_func_Dy, pars);
-    // puts("test first derivative in y direction:");
-    // if (are_fields_equal(dmisc_tmp_y, pars) == 0)
-    // {
-    //     puts("passed\n");
-    // }
-    // else
-    // {
-    //     puts("failed\n");
-    // }
-// #ifdef DEBUG
-//         puts("testDy");
-//         print_vector(dmisc_tmp_y, Ntot);
-//         puts("exact");
-//         print_vector(dmisc_tmp_y + Ntot, Ntot);
-//         puts("\n");
-// #endif
+    fft_D(field, dmisc_tmp_y, 2, 1, pars);
+    fill_field(dmisc_tmp_y + Ntot, test_func_Dy, pars);
+    puts("test first derivative in y direction:");
+    if (are_fields_equal(dmisc_tmp_y, pars) == 0)
+    {
+        puts("passed\n");
+    }
+    else
+    {
+        puts("failed\n");
+    }
+#ifdef DEBUG
+        puts("testDy");
+        print_vector(dmisc_tmp_y, Ntot);
+        puts("exact");
+        print_vector(dmisc_tmp_y + Ntot, Ntot);
+        puts("\n");
+#endif
 
     fft_D(field, dmisc_tmp_z, 3, 1, pars);
     fill_field(dmisc_tmp_z + Ntot, test_func_Dz, pars);
@@ -103,17 +103,17 @@ void test_fft_second_derivative(parameters_t *pars) {
         puts("\n");
 #endif
 
-    // fft_D(field, dmisc_tmp_y, 2, 2, pars);
-    // fill_field(dmisc_tmp_y + Ntot, test_func_D2, pars);
-    // puts("test second derivative in y direction:");
-    // if (are_fields_equal(dmisc_tmp_y, pars) == 0)
-    // {
-    //     puts("passed\n");
-    // }
-    // else
-    // {
-    //     puts("failed\n");
-    // }
+    fft_D(field, dmisc_tmp_y, 2, 2, pars);
+    fill_field(dmisc_tmp_y + Ntot, test_func_D2, pars);
+    puts("test second derivative in y direction:");
+    if (are_fields_equal(dmisc_tmp_y, pars) == 0)
+    {
+        puts("passed\n");
+    }
+    else
+    {
+        puts("failed\n");
+    }
 #ifdef DEBUG
         puts("testDyy");
         print_vector(dmisc_tmp_y, Ntot);
@@ -204,9 +204,9 @@ double test_func(double x, double y, double z) {
 
 double test_func_gradsq(double x, double y, double z) {
     double grad_x = test_func_Dx(x,y,z);
-    // double grad_y = test_func_Dy(x,y,z);
+    double grad_y = test_func_Dy(x,y,z);
     double grad_z = test_func_Dz(x,y,z);
-    return  grad_x * grad_x + grad_z * grad_z; // + grad_y * grad_y
+    return grad_x * grad_x + grad_y * grad_y + grad_z * grad_z;
 }
 
 double test_func_lap(double x, double y, double z) {

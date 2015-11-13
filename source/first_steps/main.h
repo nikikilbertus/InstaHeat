@@ -134,4 +134,6 @@ extern double *dmisc_tmp_x;
 extern double *dmisc_tmp_y;
 extern double *dmisc_tmp_z;
 
+extern double fftw_time;
+
 #endif
