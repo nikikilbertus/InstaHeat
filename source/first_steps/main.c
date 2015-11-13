@@ -63,9 +63,9 @@ int main(int argc, const char * argv[]) {
     return 0;
 #endif
 
-    size_t Nx = pars.x.N;
-    size_t Ny = pars.y.N;
-    size_t Nz = pars.z.N;
+    // size_t Nx = pars.x.N;
+    // size_t Ny = pars.y.N;
+    // size_t Nz = pars.z.N;
 
     int count = 0;
     for (double dt = 0.01; dt > 1e-3; dt /= 2., count++)
@@ -73,20 +73,22 @@ int main(int argc, const char * argv[]) {
     	pars.dt = dt;
     	allocate_and_initialize_all(&pars);
     	run_RK4_stepper(&pars);
-        char *prefix_field = "field";
-		print_vector_to_file(field, 2 * (Nx * Ny * Nz) * pars.Nt, 1,
-                                prefix_field, count);
+        // char *prefix_field = "field";
+		// print_vector_to_file(field, 2 * (Nx * Ny * Nz) * pars.Nt, 1,
+  //                               prefix_field, count);
         char *prefix_frw_a = "a";
         print_vector_to_file(frw_a, pars.Nt, 1, prefix_frw_a, count);
         char *prefix_rho = "energy";
         print_vector_to_file(rho, pars.Nt, 1, prefix_rho, count);
     	free_all_external();
+        break;
     }
     fftw_cleanup_threads();
 
     clock_t end = clock();
     double secs = (double)(end - start) / CLOCKS_PER_SEC;
     RUNTIME_INFO(printf("main took %f seconds.\n", secs));
-    RUNTIME_INFO(printf("fftw took %f seconds.\n\n", fftw_time));
+    RUNTIME_INFO(printf("fftw took %f seconds (%.2f %%).\n\n",
+                                    fftw_time, 100.*(fftw_time/secs)));
     return 0;
 }

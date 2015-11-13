@@ -9,7 +9,7 @@ macros for debugging, testing and printing additional information during
 execution
 */
 #define SHOW_RUNTIME_INFO
-#define RUN_TESTS_ONLY
+// #define RUN_TESTS_ONLY
 // #define DEBUG
 
 #ifdef SHOW_RUNTIME_INFO
@@ -49,7 +49,7 @@ simulation parameters
 // starttime (initial time)
 #define INITIAL_TIME 			(0.0)
 // final time
-#define FINAL_TIME	 			(1.1)
+#define FINAL_TIME	 			(100.0)
 // boundaries of spatial region
 #define SPATIAL_LOWER_BOUND_X	(-PI)
 #define SPATIAL_UPPER_BOUND_X 	(PI)
