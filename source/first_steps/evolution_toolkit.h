@@ -4,7 +4,8 @@
 #include <stddef.h>
 #include "main.h"
 
-void fft_D(double *in, double *out, int direction, int order, parameters_t *pars);
+void fft_D(double *in, double *out, int direction, int order,
+						parameters_t *pars);
 void mk_gradient_squared(double *in, double *out, parameters_t *pars);
 void mk_laplacian(double *in, double *out, parameters_t *pars);
 void set_adaptive_cutoff_fraction(size_t nc);
