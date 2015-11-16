@@ -20,10 +20,10 @@ void test_fft_first_derivative(parameters_t *pars) {
     size_t Nz = pars->z.N;
     size_t Ntot = Nx * Ny * Nz;
 
-    fft_D(field, dmisc_tmp_x, 1, 1, pars);
-    fill_field(dmisc_tmp_x + Ntot, test_func_Dx, pars);
+    fft_D(field, dtmp_x, 1, 1, pars);
+    fill_field(dtmp_x + Ntot, test_func_Dx, pars);
     puts("test first derivative in x direction:");
-    if (are_fields_equal(dmisc_tmp_x, pars) == 0)
+    if (are_fields_equal(dtmp_x, pars) == 0)
     {
         puts("passed\n");
     }
@@ -33,16 +33,16 @@ void test_fft_first_derivative(parameters_t *pars) {
     }
 #ifdef DEBUG
         puts("testDx");
-        print_vector(dmisc_tmp_x, Ntot);
+        print_vector(dtmp_x, Ntot);
         puts("exact");
-        print_vector(dmisc_tmp_x + Ntot, Ntot);
+        print_vector(dtmp_x + Ntot, Ntot);
         puts("\n");
 #endif
 
-    fft_D(field, dmisc_tmp_y, 2, 1, pars);
-    fill_field(dmisc_tmp_y + Ntot, test_func_Dy, pars);
+    fft_D(field, dtmp_y, 2, 1, pars);
+    fill_field(dtmp_y + Ntot, test_func_Dy, pars);
     puts("test first derivative in y direction:");
-    if (are_fields_equal(dmisc_tmp_y, pars) == 0)
+    if (are_fields_equal(dtmp_y, pars) == 0)
     {
         puts("passed\n");
     }
@@ -52,16 +52,16 @@ void test_fft_first_derivative(parameters_t *pars) {
     }
 #ifdef DEBUG
         puts("testDy");
-        print_vector(dmisc_tmp_y, Ntot);
+        print_vector(dtmp_y, Ntot);
         puts("exact");
-        print_vector(dmisc_tmp_y + Ntot, Ntot);
+        print_vector(dtmp_y + Ntot, Ntot);
         puts("\n");
 #endif
 
-    fft_D(field, dmisc_tmp_z, 3, 1, pars);
-    fill_field(dmisc_tmp_z + Ntot, test_func_Dz, pars);
+    fft_D(field, dtmp_z, 3, 1, pars);
+    fill_field(dtmp_z + Ntot, test_func_Dz, pars);
     puts("test first derivative in z direction:");
-    if (are_fields_equal(dmisc_tmp_z, pars) == 0)
+    if (are_fields_equal(dtmp_z, pars) == 0)
     {
         puts("passed\n");
     }
@@ -71,9 +71,9 @@ void test_fft_first_derivative(parameters_t *pars) {
     }
 #ifdef DEBUG
         puts("testDz");
-        print_vector(dmisc_tmp_z, Ntot);
+        print_vector(dtmp_z, Ntot);
         puts("exact");
-        print_vector(dmisc_tmp_z + Ntot, Ntot);
+        print_vector(dtmp_z + Ntot, Ntot);
         puts("\n");
 #endif
 }
@@ -84,10 +84,10 @@ void test_fft_second_derivative(parameters_t *pars) {
     size_t Nz = pars->z.N;
     size_t Ntot = Nx * Ny * Nz;
 
-    fft_D(field, dmisc_tmp_x, 1, 2, pars);
-    fill_field(dmisc_tmp_x + Ntot, test_func_D2, pars);
+    fft_D(field, dtmp_x, 1, 2, pars);
+    fill_field(dtmp_x + Ntot, test_func_D2, pars);
     puts("test second derivative in x direction:");
-    if (are_fields_equal(dmisc_tmp_x, pars) == 0)
+    if (are_fields_equal(dtmp_x, pars) == 0)
     {
         puts("passed\n");
     }
@@ -97,16 +97,16 @@ void test_fft_second_derivative(parameters_t *pars) {
     }
 #ifdef DEBUG
         puts("testDxx");
-        print_vector(dmisc_tmp_x, Ntot);
+        print_vector(dtmp_x, Ntot);
         puts("exact");
-        print_vector(dmisc_tmp_x + Ntot, Ntot);
+        print_vector(dtmp_x + Ntot, Ntot);
         puts("\n");
 #endif
 
-    fft_D(field, dmisc_tmp_y, 2, 2, pars);
-    fill_field(dmisc_tmp_y + Ntot, test_func_D2, pars);
+    fft_D(field, dtmp_y, 2, 2, pars);
+    fill_field(dtmp_y + Ntot, test_func_D2, pars);
     puts("test second derivative in y direction:");
-    if (are_fields_equal(dmisc_tmp_y, pars) == 0)
+    if (are_fields_equal(dtmp_y, pars) == 0)
     {
         puts("passed\n");
     }
@@ -116,16 +116,16 @@ void test_fft_second_derivative(parameters_t *pars) {
     }
 #ifdef DEBUG
         puts("testDyy");
-        print_vector(dmisc_tmp_y, Ntot);
+        print_vector(dtmp_y, Ntot);
         puts("exact");
-        print_vector(dmisc_tmp_y + Ntot, Ntot);
+        print_vector(dtmp_y + Ntot, Ntot);
         puts("\n");
 #endif
 
-    fft_D(field, dmisc_tmp_z, 3, 2, pars);
-    fill_field(dmisc_tmp_z + Ntot, test_func_D2, pars);
+    fft_D(field, dtmp_z, 3, 2, pars);
+    fill_field(dtmp_z + Ntot, test_func_D2, pars);
     puts("test second derivative in z direction:");
-    if (are_fields_equal(dmisc_tmp_z, pars) == 0)
+    if (are_fields_equal(dtmp_z, pars) == 0)
     {
         puts("passed\n");
     }
@@ -135,9 +135,9 @@ void test_fft_second_derivative(parameters_t *pars) {
     }
 #ifdef DEBUG
         puts("testDzz");
-        print_vector(dmisc_tmp_z, Ntot);
+        print_vector(dtmp_z, Ntot);
         puts("exact");
-        print_vector(dmisc_tmp_z + Ntot, Ntot);
+        print_vector(dtmp_z + Ntot, Ntot);
         puts("\n");
 #endif
 }
@@ -148,10 +148,10 @@ void test_mk_gradient(parameters_t *pars) {
     size_t Nz = pars->z.N;
     size_t Ntot = Nx * Ny * Nz;
 
-    mk_gradient_squared(field, dmisc_tmp_x, pars);
-    fill_field(dmisc_tmp_x + Ntot, test_func_gradsq, pars);
+    mk_gradient_squared(field, dtmp_x, pars);
+    fill_field(dtmp_x + Ntot, test_func_gradsq, pars);
     puts("test mk gradient squared:");
-    if (are_fields_equal(dmisc_tmp_x, pars) == 0)
+    if (are_fields_equal(dtmp_x, pars) == 0)
     {
         puts("passed\n");
     }
@@ -161,9 +161,9 @@ void test_mk_gradient(parameters_t *pars) {
     }
 #ifdef DEBUG
         puts("testgradsq");
-        print_vector(dmisc_tmp_x, Ntot);
+        print_vector(dtmp_x, Ntot);
         puts("exact");
-        print_vector(dmisc_tmp_x + Ntot, Ntot);
+        print_vector(dtmp_x + Ntot, Ntot);
         puts("\n");
 #endif
 }
@@ -174,10 +174,10 @@ void test_mk_laplacian(parameters_t *pars) {
     size_t Nz = pars->z.N;
     size_t Ntot = Nx * Ny * Nz;
 
-    mk_laplacian(field, dmisc_tmp_x, pars);
-    fill_field(dmisc_tmp_x + Ntot, test_func_lap, pars);
+    mk_laplacian(field, dtmp_x, pars);
+    fill_field(dtmp_x + Ntot, test_func_lap, pars);
     puts("test mk laplacian:");
-    if (are_fields_equal(dmisc_tmp_x, pars) == 0)
+    if (are_fields_equal(dtmp_x, pars) == 0)
     {
         puts("passed\n");
     }
@@ -187,9 +187,9 @@ void test_mk_laplacian(parameters_t *pars) {
     }
 #ifdef DEBUG
         puts("testlap");
-        print_vector(dmisc_tmp_x, Ntot);
+        print_vector(dtmp_x, Ntot);
         puts("exact");
-        print_vector(dmisc_tmp_x + Ntot, Ntot);
+        print_vector(dtmp_x + Ntot, Ntot);
         puts("\n");
 #endif
 }

@@ -49,7 +49,7 @@ simulation parameters
 // starttime (initial time)
 #define INITIAL_TIME 			(0.0)
 // final time
-#define FINAL_TIME	 			(100.0)
+#define FINAL_TIME	 			(10.0)
 // boundaries of spatial region
 #define SPATIAL_LOWER_BOUND_X	(-PI)
 #define SPATIAL_UPPER_BOUND_X 	(PI)
@@ -130,9 +130,9 @@ extern complex *cfftw_tmp_y;
 extern complex *cfftw_tmp_z;
 
 // general purpose memory block for temporary use
-extern double *dmisc_tmp_x;
-extern double *dmisc_tmp_y;
-extern double *dmisc_tmp_z;
+extern double *dtmp_x;
+extern double *dtmp_y;
+extern double *dtmp_z;
 
 extern double fftw_time;
 

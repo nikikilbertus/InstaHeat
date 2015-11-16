@@ -31,9 +31,9 @@ complex *cfftw_tmp_y;
 complex *cfftw_tmp_z;
 
 // general purpose double memory blocks for temporary use
-double *dmisc_tmp_x;
-double *dmisc_tmp_y;
-double *dmisc_tmp_z;
+double *dtmp_x;
+double *dtmp_y;
+double *dtmp_z;
 
 // times all dfts for timing analysis
 double fftw_time = 0.0;
@@ -63,25 +63,32 @@ int main(int argc, const char * argv[]) {
     return 0;
 #endif
 
-    // size_t Nx = pars.x.N;
-    // size_t Ny = pars.y.N;
-    // size_t Nz = pars.z.N;
-
     int count = 0;
     for (double dt = 0.01; dt > 1e-3; dt /= 2., count++)
     {
     	pars.dt = dt;
     	allocate_and_initialize_all(&pars);
+
+        size_t Nx = pars.x.N;
+        size_t Ny = pars.y.N;
+        size_t Nz = pars.z.N;
+        size_t Ntot = Nx * Ny * Nz;
+        size_t os = 2 * Ntot * (pars.Nt - 1);
+
     	run_RK4_stepper(&pars);
-        // char *prefix_field = "field";
-		// print_vector_to_file(field, 2 * (Nx * Ny * Nz) * pars.Nt, 1,
-  //                               prefix_field, count);
+
+        char *prefix_field = "field";
+		print_vector_to_file(field + os, Ntot, 1,
+                                prefix_field, count);
+
         char *prefix_frw_a = "a";
         print_vector_to_file(frw_a, pars.Nt, 1, prefix_frw_a, count);
+
         char *prefix_rho = "energy";
         print_vector_to_file(rho, pars.Nt, 1, prefix_rho, count);
+
     	free_all_external();
-        break;
+        // break;
     }
     fftw_cleanup_threads();
 

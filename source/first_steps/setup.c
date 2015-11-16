@@ -93,10 +93,10 @@ void allocate_external(parameters_t *pars) {
     }
 
     // general purpose double memory blocks for temporary use
-    dmisc_tmp_x = fftw_malloc(2 * Ntot * sizeof *dmisc_tmp_x);
-    dmisc_tmp_y = fftw_malloc(2 * Ntot * sizeof *dmisc_tmp_y);
-    dmisc_tmp_z = fftw_malloc(2 * Ntot * sizeof *dmisc_tmp_z);
-    if (!dmisc_tmp_x || !dmisc_tmp_y || !dmisc_tmp_z)
+    dtmp_x = fftw_malloc(2 * Ntot * sizeof *dtmp_x);
+    dtmp_y = fftw_malloc(2 * Ntot * sizeof *dtmp_y);
+    dtmp_z = fftw_malloc(2 * Ntot * sizeof *dtmp_z);
+    if (!dtmp_x || !dtmp_y || !dtmp_z)
     {
         fputs("Allocating memory failed.", stderr);
         exit(EXIT_FAILURE);
@@ -219,9 +219,9 @@ void free_all_external() {
     fftw_free(cfftw_tmp_x);
     fftw_free(cfftw_tmp_y);
     fftw_free(cfftw_tmp_z);
-    fftw_free(dmisc_tmp_x);
-    fftw_free(dmisc_tmp_y);
-    fftw_free(dmisc_tmp_z);
+    fftw_free(dtmp_x);
+    fftw_free(dtmp_y);
+    fftw_free(dtmp_z);
 	RUNTIME_INFO(puts("Memory from all external variables freed.\n"));
 }
 
