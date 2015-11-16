@@ -53,10 +53,10 @@ void run_RK4_stepper(parameters_t *pars) {
 		// k1 & a1
 		a1 = mk_velocities(field + os, frw_a[nt], k1, pars);
 
-		// k2 & k2
+		// k2 & a2
 		for (size_t i = 0; i < Ntot2; ++i)
 		{
-			tmp_k[i] = field[os+i] + dt * k1[i] / 2.0;
+			tmp_k[i] = field[os + i] + dt * k1[i] / 2.0;
 		}
 		tmp_a = frw_a[nt] + dt * a1 / 2.0;
 		a2 = mk_velocities(tmp_k, tmp_a, k2, pars);
@@ -64,7 +64,7 @@ void run_RK4_stepper(parameters_t *pars) {
 		// k3 & a3
 		for (size_t i = 0; i < Ntot2; ++i)
 		{
-			tmp_k[i] = field[os+i] + dt * k2[i] / 2.0;
+			tmp_k[i] = field[os + i] + dt * k2[i] / 2.0;
 		}
 		tmp_a = frw_a[nt] + dt * a2 / 2.0;
 		a3 = mk_velocities(tmp_k, tmp_a, k3, pars);
@@ -72,7 +72,7 @@ void run_RK4_stepper(parameters_t *pars) {
 		// k4 & a4
 		for (size_t i = 0; i < Ntot2; ++i)
 		{
-			tmp_k[i] = field[os+i] + dt * k3[i];
+			tmp_k[i] = field[os + i] + dt * k3[i];
 		}
 		tmp_a = frw_a[nt] + dt * a3;
 		a4 = mk_velocities(tmp_k, tmp_a, k4, pars);
@@ -81,7 +81,7 @@ void run_RK4_stepper(parameters_t *pars) {
 		new_os = os + Ntot2;
 		for (size_t i = 0; i < Ntot2; ++i)
 		{
-			field[new_os+i] = field[os+i] +
+			field[new_os + i] = field[os + i] +
 						dt * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]) / 6.0;
 		}
 
@@ -89,12 +89,11 @@ void run_RK4_stepper(parameters_t *pars) {
 
 		rho[nt] = mk_rho(field + os, frw_a[nt], pars);
 
-		// apply filter
-#ifdef ENABLE_FFT_FILTER
+	#ifdef ENABLE_FFT_FILTER
 		fft_apply_filter(field + new_os, pars);
-#endif
+	#endif
 
-#ifdef CHECK_FOR_NAN
+	#ifdef CHECK_FOR_NAN
 			for (size_t i = 0; i < Ntot2; ++i)
 			{
 				if (isnan(field[new_os+i]))
@@ -108,7 +107,7 @@ void run_RK4_stepper(parameters_t *pars) {
 				fprintf(stderr,
 						"A nan value was discovered in timestep: %zu \n", nt);
 			}
-#endif
+	#endif
 	}
 
 	// compute the final 00 component of the stress energy
@@ -127,7 +126,7 @@ void run_RK4_stepper(parameters_t *pars) {
 }
 
 /*
-compute the right hand side of the pde (first order in time)
+compute the right hand side of the pde, ie the first order temporal derivatives
 */
 double mk_velocities(double *f, double a, double *result, parameters_t *pars) {
 	size_t Nx  = pars->x.N;
@@ -193,12 +192,12 @@ double mk_rho(double *f, double a, parameters_t *pars) {
 
 	mk_gradient_squared(f, f_grad2, pars);
 
-	double ft, f_grad_a;
+	double ft, f_grad2_a;
 	for (size_t i = 0; i < Ntot; ++i)
 	{
 		ft = f[Ntot + i];
-		f_grad_a = f_grad2[i] / a;
-		T00 += (ft * ft + f_grad_a * f_grad_a) / 2. + potential(f[i]);
+		f_grad2_a = f_grad2[i] / (a * a);
+		T00 += (ft * ft + f_grad2_a) / 2. + potential(f[i]);
 	}
 
 	free(f_grad2);
