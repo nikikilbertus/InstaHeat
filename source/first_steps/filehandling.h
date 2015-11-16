@@ -3,9 +3,9 @@
 
 #include <stddef.h>
 
-void print_vector_to_file(double *v, size_t N, size_t row_skip,
-							char *prefix, int filenumber);
-void print_matrix_to_file(double *A, size_t N, size_t M, size_t row_skip,
-                            size_t col_skip, char *prefix, int filenumber);
+void file_create_empty(char *filename);
+void file_append_1d(double *v, size_t N, size_t row_skip, char *filename);
+void file_append_2d(double *A, size_t N, size_t M, size_t row_skip,
+                            size_t col_skip, char *filename);
 
 #endif

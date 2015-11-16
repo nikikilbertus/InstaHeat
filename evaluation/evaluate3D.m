@@ -12,7 +12,7 @@ for num = 0:Nfiles-1
     name = [prefix 'a_00' int2str(num) '.txt'];
     frwa = csvread(name);
 
-    name = [prefix 'energy_00' int2str(num) '.txt'];
+    name = [prefix 'rho_00' int2str(num) '.txt'];
     rho = csvread(name);
 
     name = [prefix 'field_00' int2str(num) '.txt'];

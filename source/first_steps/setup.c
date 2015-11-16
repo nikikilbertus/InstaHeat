@@ -33,6 +33,14 @@ void initialize_parameters(parameters_t *pars) {
 	pars->nt = 0;
 	pars->t  = 0.0;
     pars->cutoff_fraction = CUTOFF_FRACTION;
+    #ifndef WRITE_OUT_LAST_ONLY
+    if (WRITE_OUT_SIZE < 0)
+    {
+        RUNTIME_INFO(puts("WARNING: Only part of the evolution is written to "
+                        "disc. Some timesteps in the end might be missing!"));
+    }
+    pars->file_row_skip = WRITE_OUT_SIZE < 0 ? 1 : (pars->Nt / WRITE_OUT_SIZE);
+    #endif
 }
 
 /*
@@ -44,6 +52,9 @@ void allocate_external(parameters_t *pars) {
     size_t Nz   = pars->z.N;
     size_t Ntot = Nx * Ny * Nz;
     size_t Nt   = pars->Nt;
+
+    // some space for the file names
+    pars->field_name = calloc(FILE_NAME_BUFFER_SIZE, sizeof *pars->field_name);
 
     //grid points
     grid = malloc((Nx + Ny + Nz) * sizeof *grid);
@@ -211,7 +222,8 @@ double dphi_init(double x, double y, double z) {
 /*
 free all allocated memory
 */
-void free_all_external() {
+void free_all_external(parameters_t *pars) {
+    free(pars->field_name);
 	free(grid);
 	fftw_free(field);
     free(frw_a);

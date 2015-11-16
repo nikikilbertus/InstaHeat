@@ -32,6 +32,12 @@ apply a frequency cutoff based filter during the time evolution
 // #define ENABLE_ADAPTIVE_FILTER
 
 /*
+paths to files
+*/
+#define DATAPATH				"../../../data/"
+#define FILE_NAME_BUFFER_SIZE	(64)
+
+/*
 mathematical constants
 */
 #define PI (3.141592653589793238462643383279)
@@ -57,6 +63,10 @@ simulation parameters
 #define SPATIAL_UPPER_BOUND_Y 	(PI)
 #define SPATIAL_LOWER_BOUND_Z	(-PI)
 #define SPATIAL_UPPER_BOUND_Z 	(PI)
+// what fraction of the evolution should be written to disc
+#define WRITE_OUT_SIZE			(-1)
+// if defined, only the last timeslice is written to file
+#define WRITE_OUT_LAST_ONLY
 // mass parameter
 #define MASS 					(1.0)
 // coupling in a phi4 potential
@@ -99,6 +109,8 @@ typedef struct {
 	double a;  // lower boundary of spatial domain
 	double b;  // upper boudnary of spatial domain
 	double cutoff_fraction; // used in spectral filtering during time evolution
+	char *field_name;
+	size_t file_row_skip;
 }parameters_t;
 
 extern parameters_t pars;

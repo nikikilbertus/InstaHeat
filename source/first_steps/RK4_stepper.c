@@ -6,6 +6,7 @@
 #include "RK4_stepper.h"
 #include "main.h"
 #include "evolution_toolkit.h"
+#include "filehandling.h"
 
 void run_RK4_stepper(parameters_t *pars) {
 	size_t Nx  = pars->x.N;
@@ -84,12 +85,18 @@ void run_RK4_stepper(parameters_t *pars) {
 
 		frw_a[nt + 1] = frw_a[nt] + dt * (a1 + 2.0 * a2 + 2.0 * a3 + a4) / 6.0;
 
+		#ifndef WRITE_OUT_LAST_ONLY
+		if (nt % pars->file_row_skip == 0)
+		{
+			file_append_1d(field, Ntot, 1, pars->field_name);
+		}
+		#endif
 
-	#ifdef ENABLE_FFT_FILTER
-		fft_apply_filter(field, pars);
-	#endif
+		#ifdef ENABLE_FFT_FILTER
+			fft_apply_filter(field, pars);
+		#endif
 
-	#ifdef CHECK_FOR_NAN
+		#ifdef CHECK_FOR_NAN
 			for (size_t i = 0; i < Ntot2; ++i)
 			{
 				if (isnan(field[i]))
@@ -103,12 +110,16 @@ void run_RK4_stepper(parameters_t *pars) {
 				fprintf(stderr,
 						"A nan value was discovered in timestep: %zu \n", nt);
 			}
-	#endif
+		#endif
 	}
 
 	// compute the final 00 component of the stress energy
 	rho[Nt - 1] = mk_rho(field, frw_a[Nt - 1], pars);
 
+	// write out last time slice
+	#ifdef WRITE_OUT_LAST_ONLY
+		file_append_1d(field, Ntot, 1, pars->field_name);
+	#endif
 	clock_t end = clock();
 
 	fftw_free(k1);

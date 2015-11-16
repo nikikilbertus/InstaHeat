@@ -3,36 +3,42 @@
 #include <string.h>
 #include "main.h"
 
+void file_create_empty(char *filename) {
+    if (filename == NULL)
+    {
+        fputs("Filename is NULL.", stderr);
+        exit(EXIT_FAILURE);
+    }
+    FILE *empty;
+    empty = fopen(filename, "w");
+    if (!empty)
+    {
+        fputs("Could not open file.", stderr);
+        exit(EXIT_FAILURE);
+    }
+    fclose(empty);
+}
+
 /*
 print a N \times 1 vector to a .txt file with the name "<prefix>_<filenumber>".
 row_skip: only print every row_skip-th entry
 */
-void print_vector_to_file(double *v, size_t N, size_t row_skip,
-							char *prefix, int filenumber) {
-	if (filenumber < 0 || filenumber > 999)
-	{
-		fputs("Filenumber should not exceed three digits.", stderr);
-		exit(EXIT_FAILURE);
-	}
+void file_append_1d(double *data, size_t N, size_t row_skip, char *filename) {
 	if (row_skip < 1)
 	{
 		fputs("Skip amount has to be at least 1.", stderr);
 		exit(EXIT_FAILURE);
 	}
-    if (prefix == NULL)
+    if (filename == NULL)
     {
-        prefix = "vector";
+        fputs("Filename is NULL.", stderr);
+        exit(EXIT_FAILURE);
     }
 
-    RUNTIME_INFO(printf("Start writing %s to file...\n", prefix));
-
-    size_t prefix_length = strlen(prefix);
-	char filename[prefix_length + (sizeof "../../../data/_000.txt")];
-    sprintf(filename, "../../../data/%s_%03d.txt", prefix, filenumber);
+    RUNTIME_INFO(puts("Start writing to file..."));
 
     FILE *vector_f;
-    vector_f = fopen(filename, "w");
-
+    vector_f = fopen(filename, "a");
     if (!vector_f)
     {
     	fputs("Could not open file.", stderr);
@@ -41,7 +47,7 @@ void print_vector_to_file(double *v, size_t N, size_t row_skip,
 
     for (size_t i = 0; i < N; i+=row_skip)
     {
-    	fprintf(vector_f, "%.15f\n", v[i]);
+    	fprintf(vector_f, "%f\n", data[i]);
     }
     fclose(vector_f);
     RUNTIME_INFO(puts("Finished writing to file.\n"));
@@ -51,32 +57,23 @@ void print_vector_to_file(double *v, size_t N, size_t row_skip,
 print a N \times M matrix to a .txt file with the name "<prefix>_<filenumber>".
 row_skip and col_skip: only every <>-th row/column is printed
 */
-void print_matrix_to_file(double *A, size_t N, size_t M, size_t row_skip,
-                            size_t col_skip, char *prefix, int filenumber) {
-	if (filenumber < 0 || filenumber > 999)
-	{
-		fputs("Filenumber should not exceed three digits.", stderr);
-		return;
-	}
+void file_append_2d(double *data, size_t N, size_t M, size_t row_skip,
+                            size_t col_skip, char *filename) {
 	if (row_skip < 1 || col_skip < 1)
 	{
 		fputs("Skip amount has to be at least 1.", stderr);
 		return;
 	}
-    if (prefix == NULL)
+    if (filename == NULL)
     {
-        prefix = "matrix";
+        fputs("Filename is NULL.", stderr);
+        exit(EXIT_FAILURE);
     }
 
-    RUNTIME_INFO(printf("Start writing %s to file...\n", prefix));
-
-    size_t prefix_length = strlen(prefix);
-    char filename[prefix_length + (sizeof "../../../data/_000.txt")];
-    sprintf(filename, "../../../data/%s_%03d.txt", prefix, filenumber);
+    RUNTIME_INFO(puts("Start writing to file..."));
 
     FILE *matrix_f;
-    matrix_f = fopen(filename, "w");
-
+    matrix_f = fopen(filename, "a");
     if (!matrix_f)
     {
     	fputs("Could not open file.", stderr);
@@ -87,7 +84,7 @@ void print_matrix_to_file(double *A, size_t N, size_t M, size_t row_skip,
     {
     	for (size_t j = 0; j < M; j+=col_skip)
     	{
-    		fprintf(matrix_f, "%.15f, ", A[i*N+j]);
+    		fprintf(matrix_f, "%f, ", data[i*N+j]);
     	}
     	fputs("\n", matrix_f);
     }

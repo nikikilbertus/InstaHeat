@@ -11,7 +11,7 @@ void mk_grid(parameters_t *pars);
 void mk_initial_conditions(parameters_t *pars);
 double phi_init(double x, double y, double z);
 double dphi_init(double x, double y, double z);
-void free_all_external();
+void free_all_external(parameters_t *pars);
 void print_matrix(double *matrix, size_t N);
 void print_vector(double *vector, size_t N);
 

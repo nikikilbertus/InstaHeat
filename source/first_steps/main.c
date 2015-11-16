@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <complex.h>
 #include <omp.h>
 #include <fftw3.h>
@@ -68,21 +69,33 @@ int main(int argc, const char * argv[]) {
     {
     	pars.dt = dt;
     	allocate_and_initialize_all(&pars);
+        // size_t Ntot = pars.x.N * pars.y.N * pars.z.N;
+
+        char filename[32];
+        sprintf(filename, "field_%03d.txt", count);
+        strcpy(pars.field_name, DATAPATH);
+        strcat(pars.field_name, filename);
+        file_create_empty(pars.field_name);
 
         run_RK4_stepper(&pars);
 
-        size_t Ntot = pars.x.N * pars.y.N * pars.z.N;
-        char *prefix_field = "field";
-		print_vector_to_file(field, Ntot, 1,
-                                prefix_field, count);
+        char filename_a[32];
+        char filepath_a[64];
+        sprintf(filename_a, "a_%03d.txt", count);
+        strcpy(filepath_a, DATAPATH);
+        strcat(filepath_a, filename_a);
+        file_create_empty(filepath_a);
+        file_append_1d(frw_a, pars.Nt, 1, filepath_a);
 
-        char *prefix_frw_a = "a";
-        print_vector_to_file(frw_a, pars.Nt, 1, prefix_frw_a, count);
+        char filename_rho[32];
+        char filepath_rho[64];
+        sprintf(filename_rho, "rho_%03d.txt", count);
+        strcpy(filepath_rho, DATAPATH);
+        strcat(filepath_rho, filename_rho);
+        file_create_empty(filepath_rho);
+        file_append_1d(rho, pars.Nt, 1, filepath_rho);
 
-        char *prefix_rho = "energy";
-        print_vector_to_file(rho, pars.Nt, 1, prefix_rho, count);
-
-    	free_all_external();
+    	free_all_external(&pars);
         // break;
     }
     fftw_cleanup_threads();
