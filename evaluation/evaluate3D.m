@@ -14,17 +14,16 @@ for num = 0:Nfiles-1
        error('somethings wrong, check the parameters!') 
     end
 
-    [max,I] = findpeaks(rho);
-       
-    
-    loglog(frwa, rho);
-    title(['dt = ' num2str(dt)]);
+%     [max,I] = findpeaks(rho);
+%     loglog(frwa, rho);
+%     hold on;
+%     slopeup = logfit(frwa(I), rho(I), 'loglog');
+    slopeup = logfit(frwa, rho, 'loglog');
+    title(['dt = ' num2str(dt) ', slope = ' num2str(slopeup)]);
     xlabel('a')
     ylabel('rho');
-    hold on;
-    slopeup = logfit(frwa(I), rho(I), 'loglog');
-    legend('data', ['slope = ' num2str(slopeup)]);
-    hold off;
+%     legend('data', ['slope = ' num2str(slopeup)]);
+%     hold off;
     shg;
     pause();
 end
