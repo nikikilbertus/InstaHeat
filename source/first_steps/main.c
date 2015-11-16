@@ -16,7 +16,7 @@ parameters_t pars;
 // spatial grid points
 double *grid;
 
-// evolution of the field and spatial derivatives (2*Nx * Nt space required)
+// current field and temporal derivatives
 double *field;
 
 // evolution of the scale parameter a for the FRW equations
@@ -69,16 +69,11 @@ int main(int argc, const char * argv[]) {
     	pars.dt = dt;
     	allocate_and_initialize_all(&pars);
 
-        size_t Nx = pars.x.N;
-        size_t Ny = pars.y.N;
-        size_t Nz = pars.z.N;
-        size_t Ntot = Nx * Ny * Nz;
-        size_t os = 2 * Ntot * (pars.Nt - 1);
+        run_RK4_stepper(&pars);
 
-    	run_RK4_stepper(&pars);
-
+        size_t Ntot = pars.x.N * pars.y.N * pars.z.N;
         char *prefix_field = "field";
-		print_vector_to_file(field + os, Ntot, 1,
+		print_vector_to_file(field, Ntot, 1,
                                 prefix_field, count);
 
         char *prefix_frw_a = "a";

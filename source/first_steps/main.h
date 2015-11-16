@@ -69,7 +69,7 @@ simulation parameters
 #define CPSD_FRACTION 			(0.99)
 
 // conversion form 3D indices to 1D index
-#define idx(i,j,k) 	((k) + GRIDPOINTS_Z * ( (j) + GRIDPOINTS_Y * (i)))
+// #define idx(i,j,k) 	((k) + GRIDPOINTS_Z * ( (j) + GRIDPOINTS_Y * (i)))
 // #define idx_z(lin) 	( (lin) % GRIDPOINTS_Z )
 // #define idx_y(lin) 	( (lin - (idx_z(lin)) / GRIDPOINTS_Z) % GRIDPOINTS_Y )
 // #define idx_x(lin) 	( ( (lin - (idx_z(lin)) / GRIDPOINTS_Z) - (idx_y(lin)) ) / GRIDPOINTS_Y )
@@ -115,7 +115,7 @@ GENERAL REMARKS
 - in the variable 'field' we save phi and dphi
 */
 
-// solutions for the field we evolve its temporal derivative
+// solutions for the field we evolve and its temporal derivative
 extern double *field;
 
 // solution for the FRW euqations
@@ -129,7 +129,7 @@ extern complex *cfftw_tmp_x;
 extern complex *cfftw_tmp_y;
 extern complex *cfftw_tmp_z;
 
-// general purpose memory block for temporary use
+// general purpose memory block for temporary use (eg for gradient)
 extern double *dtmp_x;
 extern double *dtmp_y;
 extern double *dtmp_z;

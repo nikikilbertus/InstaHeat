@@ -39,11 +39,11 @@ void initialize_parameters(parameters_t *pars) {
 allocate memory and initialize all external variables
 */
 void allocate_external(parameters_t *pars) {
-    size_t Nx = pars->x.N;
-    size_t Ny = pars->y.N;
-    size_t Nz = pars->z.N;
+    size_t Nx   = pars->x.N;
+    size_t Ny   = pars->y.N;
+    size_t Nz   = pars->z.N;
     size_t Ntot = Nx * Ny * Nz;
-    size_t Nt = pars->Nt;
+    size_t Nt   = pars->Nt;
 
     //grid points
     grid = malloc((Nx + Ny + Nz) * sizeof *grid);
@@ -55,7 +55,7 @@ void allocate_external(parameters_t *pars) {
 
     //solutions for the field and the temporal derivative (we are saving each
     //timestep: 2 * Nx * Nt space)
-    field = fftw_malloc(2 * Ntot * Nt * sizeof *field );
+    field = fftw_malloc(2 * Ntot * sizeof *field );
     if (!field)
     {
     	fputs("Allocating memory failed.", stderr);
@@ -227,7 +227,7 @@ void free_all_external() {
 
 //****************************** printing functions
 /*
-for debugging mostly, watch out for colomn_major vs row_major in lapack routines
+for debugging mostly
 */
 void print_matrix(double *matrix, size_t N){
     for (size_t i = 0; i < N; i++)

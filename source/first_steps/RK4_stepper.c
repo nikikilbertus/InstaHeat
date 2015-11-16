@@ -29,7 +29,6 @@ void run_RK4_stepper(parameters_t *pars) {
 		fputs("Allocating memory failed.", stderr);
     	exit(EXIT_FAILURE);
 	}
-	size_t os, new_os;
 
 	RUNTIME_INFO(puts("Starting RK4 time evolution with:"));
 	RUNTIME_INFO(printf("initial time: %f\n", pars->ti));
@@ -48,16 +47,13 @@ void run_RK4_stepper(parameters_t *pars) {
 
 	for (size_t nt = 0; nt < Nt - 1; ++nt)
 	{
-
-		os = nt * Ntot2;
-
 		// k1 & a1
-		a1 = mk_velocities(field + os, frw_a[nt], k1, pars);
+		a1 = mk_velocities(field, frw_a[nt], k1, pars);
 
 		// k2 & a2
 		for (size_t i = 0; i < Ntot2; ++i)
 		{
-			tmp_k[i] = field[os + i] + dt * k1[i] / 2.0;
+			tmp_k[i] = field[i] + dt * k1[i] / 2.0;
 		}
 		tmp_a = frw_a[nt] + dt * a1 / 2.0;
 		a2 = mk_velocities(tmp_k, tmp_a, k2, pars);
@@ -65,7 +61,7 @@ void run_RK4_stepper(parameters_t *pars) {
 		// k3 & a3
 		for (size_t i = 0; i < Ntot2; ++i)
 		{
-			tmp_k[i] = field[os + i] + dt * k2[i] / 2.0;
+			tmp_k[i] = field[i] + dt * k2[i] / 2.0;
 		}
 		tmp_a = frw_a[nt] + dt * a2 / 2.0;
 		a3 = mk_velocities(tmp_k, tmp_a, k3, pars);
@@ -73,32 +69,30 @@ void run_RK4_stepper(parameters_t *pars) {
 		// k4 & a4
 		for (size_t i = 0; i < Ntot2; ++i)
 		{
-			tmp_k[i] = field[os + i] + dt * k3[i];
+			tmp_k[i] = field[i] + dt * k3[i];
 		}
 		tmp_a = frw_a[nt] + dt * a3;
 		a4 = mk_velocities(tmp_k, tmp_a, k4, pars);
 
-		rho[nt] = mk_rho(field + os, frw_a[nt], pars);
+		rho[nt] = mk_rho(field, frw_a[nt], pars);
 
 		// perform one time step for the field and a
-		new_os = os + Ntot2;
 		for (size_t i = 0; i < Ntot2; ++i)
 		{
-			field[new_os + i] = field[os + i] +
-						dt * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]) / 6.0;
+			field[i] += dt * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]) / 6.0;
 		}
 
 		frw_a[nt + 1] = frw_a[nt] + dt * (a1 + 2.0 * a2 + 2.0 * a3 + a4) / 6.0;
 
 
 	#ifdef ENABLE_FFT_FILTER
-		fft_apply_filter(field + new_os, pars);
+		fft_apply_filter(field, pars);
 	#endif
 
 	#ifdef CHECK_FOR_NAN
 			for (size_t i = 0; i < Ntot2; ++i)
 			{
-				if (isnan(field[new_os+i]))
+				if (isnan(field[i]))
 				{
 					fprintf(stderr,
 						"A nan value was discovered in timestep: %zu \n", nt);
@@ -113,7 +107,7 @@ void run_RK4_stepper(parameters_t *pars) {
 	}
 
 	// compute the final 00 component of the stress energy
-	rho[Nt - 1] = mk_rho(field + Ntot2 * (Nt - 1), frw_a[Nt - 1], pars);
+	rho[Nt - 1] = mk_rho(field, frw_a[Nt - 1], pars);
 
 	clock_t end = clock();
 
