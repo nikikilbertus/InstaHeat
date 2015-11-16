@@ -48,6 +48,7 @@ void run_RK4_stepper(parameters_t *pars) {
 
 	for (size_t nt = 0; nt < Nt - 1; ++nt)
 	{
+
 		os = nt * Ntot2;
 
 		// k1 & a1
@@ -77,6 +78,8 @@ void run_RK4_stepper(parameters_t *pars) {
 		tmp_a = frw_a[nt] + dt * a3;
 		a4 = mk_velocities(tmp_k, tmp_a, k4, pars);
 
+		rho[nt] = mk_rho(field + os, frw_a[nt], pars);
+
 		// perform one time step for the field and a
 		new_os = os + Ntot2;
 		for (size_t i = 0; i < Ntot2; ++i)
@@ -87,7 +90,6 @@ void run_RK4_stepper(parameters_t *pars) {
 
 		frw_a[nt + 1] = frw_a[nt] + dt * (a1 + 2.0 * a2 + 2.0 * a3 + a4) / 6.0;
 
-		rho[nt] = mk_rho(field + os, frw_a[nt], pars);
 
 	#ifdef ENABLE_FFT_FILTER
 		fft_apply_filter(field + new_os, pars);
