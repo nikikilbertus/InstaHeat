@@ -63,8 +63,9 @@ int main(int argc, const char * argv[]) {
         fputs("Could not initialize fftw threads.", stderr);
         exit(EXIT_FAILURE);
     }
-    // threadnum = GRIDPOINTS_TOTAL > 5000 ? omp_get_max_threads() : 1;
     threadnum = 1;
+    // omp_set_num_threads(threadnum);
+    // threadnum = GRIDPOINTS_TOTAL > 5000 ? omp_get_max_threads() : 1;
     fftw_plan_with_nthreads(threadnum);
     RUNTIME_INFO(printf("Initialized fftw with %d thread(s)\n\n", threadnum));
 
@@ -90,21 +91,8 @@ int main(int argc, const char * argv[]) {
 
         run_RK4_stepper(&pars);
 
-        char filename_a[32];
-        char filepath_a[64];
-        sprintf(filename_a, "a_%03d.txt", count);
-        strcpy(filepath_a, DATAPATH);
-        strcat(filepath_a, filename_a);
-        file_create_empty(filepath_a);
-        file_append_1d(frw_a, pars.Nt, 1, filepath_a);
-
-        char filename_rho[32];
-        char filepath_rho[64];
-        sprintf(filename_rho, "rho_%03d.txt", count);
-        strcpy(filepath_rho, DATAPATH);
-        strcat(filepath_rho, filename_rho);
-        file_create_empty(filepath_rho);
-        file_append_1d(rho, pars.Nt, 1, filepath_rho);
+        file_single_write_1d(frw_a, pars.Nt, 1, "a", count);
+        file_single_write_1d(rho, pars.Nt, 1, "rho", count);
 
     	free_and_destroy_all(&pars);
         break;

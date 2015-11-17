@@ -1,8 +1,8 @@
 Nfiles = 1;
 dtf = @(filenum) 0.01 * 2.^(-filenum); %0.1 -filenum *0.01;
-Nx = 64;
-Ny = 64;
-Nz = 64;
+Nx = 16;
+Ny = 16;
+Nz = 16;
 Ntot = Nx * Ny * Nz;
 
 fields = zeros(Nfiles, Ntot);

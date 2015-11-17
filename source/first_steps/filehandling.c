@@ -1,16 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "filehandling.h"
 #include "main.h"
 
-void file_create_empty(char *filename) {
-    if (filename == NULL)
+/*
+shortcut for writing a single vector to a new file.
+the filepath is composed, the file is created/emptied and the data is written.
+row_skip: only print every row_skip-th entry
+*/
+void file_single_write_1d(double *data, size_t N, size_t row_skip,
+                            char *name, int number) {
+    int length = strlen(DATAPATH) + 32;
+    char filepath[length];
+    char suffix[16];
+    sprintf(suffix, "_%03d.txt", number);
+    strcpy(filepath, DATAPATH);
+    strcat(filepath, name);
+    strcat(filepath, suffix);
+    file_create_empty(filepath);
+    file_append_1d(data, N, row_skip, filepath);
+}
+
+/*
+create empty file <filepath>
+*/
+void file_create_empty(char *filepath) {
+    if (filepath == NULL)
     {
-        fputs("Filename is NULL.", stderr);
+        fputs("Filepath is NULL.", stderr);
         exit(EXIT_FAILURE);
     }
     FILE *empty;
-    empty = fopen(filename, "w");
+    empty = fopen(filepath, "w");
     if (!empty)
     {
         fputs("Could not open file.", stderr);
@@ -20,25 +42,25 @@ void file_create_empty(char *filename) {
 }
 
 /*
-print a N \times 1 vector to a .txt file with the name "<prefix>_<filenumber>".
+append a N \times 1 vector to a file with the path <filepath>.
 row_skip: only print every row_skip-th entry
 */
-void file_append_1d(double *data, size_t N, size_t row_skip, char *filename) {
+void file_append_1d(double *data, size_t N, size_t row_skip, char *filepath) {
 	if (row_skip < 1)
 	{
 		fputs("Skip amount has to be at least 1.", stderr);
 		exit(EXIT_FAILURE);
 	}
-    if (filename == NULL)
+    if (filepath == NULL)
     {
-        fputs("Filename is NULL.", stderr);
+        fputs("Filepath is NULL.", stderr);
         exit(EXIT_FAILURE);
     }
 
     RUNTIME_INFO(puts("Start writing to file..."));
 
     FILE *vector_f;
-    vector_f = fopen(filename, "a");
+    vector_f = fopen(filepath, "a");
     if (!vector_f)
     {
     	fputs("Could not open file.", stderr);
@@ -54,26 +76,26 @@ void file_append_1d(double *data, size_t N, size_t row_skip, char *filename) {
 }
 
 /*
-print a N \times M matrix to a .txt file with the name "<prefix>_<filenumber>".
+append a N \times M matrix to a file with the path <filepath>.
 row_skip and col_skip: only every <>-th row/column is printed
 */
 void file_append_2d(double *data, size_t N, size_t M, size_t row_skip,
-                            size_t col_skip, char *filename) {
+                            size_t col_skip, char *filepath) {
 	if (row_skip < 1 || col_skip < 1)
 	{
 		fputs("Skip amount has to be at least 1.", stderr);
 		return;
 	}
-    if (filename == NULL)
+    if (filepath == NULL)
     {
-        fputs("Filename is NULL.", stderr);
+        fputs("Filepath is NULL.", stderr);
         exit(EXIT_FAILURE);
     }
 
     RUNTIME_INFO(puts("Start writing to file..."));
 
     FILE *matrix_f;
-    matrix_f = fopen(filename, "a");
+    matrix_f = fopen(filepath, "a");
     if (!matrix_f)
     {
     	fputs("Could not open file.", stderr);

@@ -35,7 +35,7 @@ apply a frequency cutoff based filter during the time evolution
 /*
 the plan flag used for fftw plans
 */
-#define FFTW_DEFAULT_FLAG 		FFTW_MEASURE
+#define FFTW_DEFAULT_FLAG 		FFTW_ESTIMATE
 
 /*
 paths to files
@@ -52,16 +52,16 @@ mathematical constants
 simulation parameters
 */
 // Number of gridpoints (needs to be odd for fourier grid)
-#define GRIDPOINTS_X  			(64)
-#define GRIDPOINTS_Y  			(64)
-#define GRIDPOINTS_Z  			(64)
+#define GRIDPOINTS_X  			(16)
+#define GRIDPOINTS_Y  			(16)
+#define GRIDPOINTS_Z  			(16)
 #define GRIDPOINTS_TOTAL		((GRIDPOINTS_X)*(GRIDPOINTS_Y)*(GRIDPOINTS_Z))
 // timestep
 #define DELTA_T					(-0.1)
 // starttime (initial time)
 #define INITIAL_TIME 			(0.0)
 // final time
-#define FINAL_TIME	 			(10.0)
+#define FINAL_TIME	 			(100.0)
 // boundaries of spatial region
 #define SPATIAL_LOWER_BOUND_X	(-PI)
 #define SPATIAL_UPPER_BOUND_X 	(PI)
