@@ -1,19 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <complex.h>
+#include <time.h>
 #include <fftw3.h>
 #include "setup.h"
 #include "main.h"
 
 void allocate_and_initialize_all(parameters_t *pars) {
 	initialize_parameters(pars);
-	RUNTIME_INFO(puts("Initialized parameters.\n"));
     allocate_external(pars);
-    RUNTIME_INFO(puts("Allocated memory for all external variables.\n"));
     mk_grid(pars);
-    RUNTIME_INFO(puts("Constructed fourier gridpoint.\n"));
+    mk_fftw_plans(pars);
     mk_initial_conditions(pars);
-    RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
 }
 
 void initialize_parameters(parameters_t *pars) {
@@ -41,6 +40,7 @@ void initialize_parameters(parameters_t *pars) {
     }
     pars->file_row_skip = WRITE_OUT_SIZE < 0 ? 1 : (pars->Nt / WRITE_OUT_SIZE);
     #endif
+    RUNTIME_INFO(puts("Initialized parameters.\n"));
 }
 
 /*
@@ -66,7 +66,7 @@ void allocate_external(parameters_t *pars) {
 
     //solutions for the field and the temporal derivative (we are saving each
     //timestep: 2 * Nx * Nt space)
-    field = fftw_malloc(2 * Ntot * sizeof *field );
+    field = fftw_malloc(2 * Ntot * sizeof *field);
     if (!field)
     {
     	fputs("Allocating memory failed.", stderr);
@@ -112,6 +112,7 @@ void allocate_external(parameters_t *pars) {
         fputs("Allocating memory failed.", stderr);
         exit(EXIT_FAILURE);
     }
+    RUNTIME_INFO(puts("Allocated memory for external variables.\n"));
 }
 
 /*
@@ -152,7 +153,7 @@ void mk_grid(parameters_t *pars) {
     }
 
     // Console output for debugging
-#ifdef DEBUG
+    #ifdef DEBUG
 		puts("x");
         print_vector(grid, Nx);
         puts("\n");
@@ -162,7 +163,68 @@ void mk_grid(parameters_t *pars) {
         puts("z");
         print_vector(grid + Nx + Ny, Nz);
         puts("\n");
-#endif
+    #endif
+    RUNTIME_INFO(puts("Constructed gridpoints.\n"));
+}
+
+/*
+create all fftw plans, IMPORTANT: create BEFORE initializsing arrays!
+*/
+void mk_fftw_plans(parameters_t *pars) {
+    size_t Nx = pars->x.N;
+    size_t Ny = pars->y.N;
+    size_t Nz = pars->z.N;
+
+    clock_t start = clock();
+    p_fw_laplacian = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, field, cfftw_tmp_z,
+                                            FFTW_DEFAULT_FLAG);
+    p_bw_laplacian = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, cfftw_tmp_z, field,
+                                            FFTW_DEFAULT_FLAG);
+    int rank = 1;
+    int nx[] = {Nx};
+    int howmany = Ny * Nz;
+    int *inembed = nx;
+    int istride = Ny * Nz;
+    int idist = 1;
+    int *onembed = nx;
+    int ostride = istride;
+    int odist = 1;
+    p_fw_Dx = fftw_plan_many_dft_r2c(rank, nx, howmany, field, inembed, istride,
+                idist, cfftw_tmp_x, onembed, ostride, odist, FFTW_DEFAULT_FLAG);
+    p_bw_Dx = fftw_plan_many_dft_c2r(rank, nx, howmany, cfftw_tmp_x, inembed,
+            istride, idist, field, onembed, ostride, odist, FFTW_DEFAULT_FLAG);
+
+    int ny[] = {Ny};
+    howmany = Nz;
+    inembed = ny;
+    istride = Nz;
+    idist   = 1;
+    onembed = ny;
+    ostride = istride;
+    odist   = 1;
+    p_fw_Dy = fftw_plan_many_dft_r2c(rank, ny, howmany, field, inembed, istride,
+                idist, cfftw_tmp_y, onembed, ostride, odist, FFTW_DEFAULT_FLAG);
+    p_bw_Dy = fftw_plan_many_dft_c2r(rank, ny, howmany, cfftw_tmp_y, inembed,
+            istride, idist, field, onembed, ostride, odist, FFTW_DEFAULT_FLAG);
+
+    int nz[] = {Nz};
+    howmany = Nx * Ny;
+    inembed = nz;
+    istride = 1;
+    idist = Nz;
+    onembed = nz;
+    ostride = istride;
+    odist = Nz / 2 + 1;
+    p_fw_Dz = fftw_plan_many_dft_r2c(rank, nz, howmany, field, inembed, istride,
+                idist, cfftw_tmp_z, onembed, ostride, odist, FFTW_DEFAULT_FLAG);
+    idist   = odist;
+    odist   = Nz;
+    p_bw_Dz = fftw_plan_many_dft_c2r(rank, nz, howmany, cfftw_tmp_z, inembed,
+            istride, idist, field, onembed, ostride, odist, FFTW_DEFAULT_FLAG);
+
+    clock_t end = clock();
+    fftw_time_plan += (double)(end - start) / CLOCKS_PER_SEC;
+    RUNTIME_INFO(puts("Created fftw plans.\n"));
 }
 
 /*
@@ -196,13 +258,14 @@ void mk_initial_conditions(parameters_t *pars) {
     frw_a[0] = 1.0;
 
     // Console output for debugging
-#ifdef DEBUG
+    #ifdef DEBUG
     	puts("phi");
         print_vector(field, Ntot);
         puts("\ndphi");
         print_vector(field + Ntot, Ntot);
         puts("\n");
-#endif
+    #endif
+    RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
 }
 
 /*
@@ -219,13 +282,33 @@ double dphi_init(double x, double y, double z) {
 	return 0.0;
 }
 
+void free_and_destroy_all(parameters_t *pars) {
+    destroy_fftw_plans();
+    free_all_external(pars);
+}
+
+/*
+destroy all fftw plans
+*/
+void destroy_fftw_plans() {
+    fftw_destroy_plan(p_fw_laplacian);
+    fftw_destroy_plan(p_bw_laplacian);
+    fftw_destroy_plan(p_fw_Dx);
+    fftw_destroy_plan(p_bw_Dx);
+    fftw_destroy_plan(p_fw_Dy);
+    fftw_destroy_plan(p_bw_Dy);
+    fftw_destroy_plan(p_fw_Dz);
+    fftw_destroy_plan(p_bw_Dz);
+    RUNTIME_INFO(puts("Destroyed fftw plans.\n"));
+}
+
 /*
 free all allocated memory
 */
 void free_all_external(parameters_t *pars) {
     free(pars->field_name);
-	free(grid);
-	fftw_free(field);
+    free(grid);
+    fftw_free(field);
     free(frw_a);
     free(rho);
     fftw_free(cfftw_tmp_x);
@@ -234,7 +317,7 @@ void free_all_external(parameters_t *pars) {
     fftw_free(dtmp_x);
     fftw_free(dtmp_y);
     fftw_free(dtmp_z);
-	RUNTIME_INFO(puts("Memory from all external variables freed.\n"));
+	RUNTIME_INFO(puts("Freed external variables.\n"));
 }
 
 //****************************** printing functions

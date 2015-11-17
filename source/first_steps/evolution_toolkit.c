@@ -16,23 +16,17 @@ void fft_D(double *in, double *out, int direction, int order,
 		exit(EXIT_FAILURE);
 	}
 
-	// y direction needs separate treatment
-	if (direction == 2)
-	{
-		fft_Dy(in, out, order, pars);
-		return;
-	}
-
 	size_t Nx = pars->x.N;
 	size_t Ny = pars->y.N;
 	size_t Nz = pars->z.N;
 
-	size_t Neffx, Neffy, Neffz, nc;
+	size_t N, Neffx, Neffy, Neffz, nc, ios = 0, oos = 0;
 	double a, b;
 
 	fftw_complex *fftw_tmp;
-	int N, rank, howmany, idist, odist, istride, ostride;
 
+	// forward dft
+	clock_t start = clock();
 	switch (direction) {
 		case 1:
 			N = Nx;
@@ -40,14 +34,26 @@ void fft_D(double *in, double *out, int direction, int order,
 			Neffx = nc;
 			Neffy = Ny;
 			Neffz = Nz;
-			howmany = Ny * Nz;
-			idist   = 1;
-			odist   = 1;
-			istride = Ny * Nz;
-			ostride = istride;
-			fftw_tmp = cfftw_tmp_x;
 			a = pars->x.a;
 			b = pars->x.b;
+			fftw_tmp = cfftw_tmp_x;
+			fftw_execute_dft_r2c(p_fw_Dx, in, fftw_tmp);
+			break;
+		case 2:
+			N = Ny;
+			nc = N / 2 + 1;
+			Neffx = Nx;
+			Neffy = nc;
+			Neffz = Nz;
+			a = pars->y.a;
+			b = pars->y.b;
+			fftw_tmp = cfftw_tmp_y;
+			ios = N * Nz;
+			oos = nc * Nz;
+			for (size_t i = 0; i < Nx; ++i)
+			{
+				fftw_execute_dft_r2c(p_fw_Dy, in + i * ios, fftw_tmp + i * oos);
+			}
 			break;
 		case 3:
 			N = Nz;
@@ -55,37 +61,19 @@ void fft_D(double *in, double *out, int direction, int order,
 			Neffx = Nx;
 			Neffy = Ny;
 			Neffz = nc;
-			howmany = Nx * Ny;
-			idist   = Nz;
-			odist   = nc;
-			istride = 1;
-			ostride = istride;
-			fftw_tmp = cfftw_tmp_z;
 			a = pars->z.a;
 			b = pars->z.b;
+			fftw_tmp = cfftw_tmp_z;
+			fftw_execute_dft_r2c(p_fw_Dz, in, fftw_tmp);
 			break;
 		default:
 			fputs("Direction must be 1 (x), 2 (y) or 3 (z).", stderr);
 			exit(EXIT_FAILURE);
 	}
-
-	rank = 1;
-	int n[] = {N};
-	int *inembed = n;
-	int *onembed = n;
-
-	fftw_plan p_fw;
-	fftw_plan p_bw;
-
-	clock_t start = clock();
-
-	p_fw = fftw_plan_many_dft_r2c(rank, n, howmany, in, inembed, istride, idist,
-							fftw_tmp, onembed, ostride, odist, FFTW_ESTIMATE);
-	fftw_execute(p_fw);
-
 	clock_t end = clock();
-	fftw_time += (double)(end - start) / CLOCKS_PER_SEC;
+	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
 
+	// differentiation in fourier space
 	double L = b - a;
 	double complex factor;
 	if (order == 1)
@@ -105,141 +93,53 @@ void fft_D(double *in, double *out, int direction, int order,
 			osy = osx + j * Neffz;
 			for (size_t k = 0; k < Neffz; ++k)
 			{
-				if (direction == 1)
+
+				switch (direction)
 				{
-					fftw_tmp[osy + k] *= (factor * i);
-					if (order == 2)
-					{
-						fftw_tmp[osy + k] *= i;
-					}
-				}
-				if (direction == 3)
-				{
-					fftw_tmp[osy + k] *= (factor * k);
-					if (order == 2)
-					{
-						fftw_tmp[osy + k] *= k;
-					}
+					case 1:
+						fftw_tmp[osy + k] *= (factor * i);
+						if (order == 2)
+						{
+							fftw_tmp[osy + k] *= i;
+						}
+						break;
+					case 2:
+						fftw_tmp[osy + k] *= (factor * j);
+						if (order == 2)
+						{
+							fftw_tmp[osy + k] *= j;
+						}
+						break;
+					case 3:
+						fftw_tmp[osy + k] *= (factor * k);
+						if (order == 2)
+						{
+							fftw_tmp[osy + k] *= k;
+						}
+						break;
 				}
 			}
 		}
 	}
 
-	if (direction == 3)
-	{
-		idist   = nc;
-		odist   = Nz;
-	}
-
+	// backward dft
 	start = clock();
-
-	p_bw = fftw_plan_many_dft_c2r(rank, n, howmany, fftw_tmp, inembed, istride,
-							idist, out, onembed, ostride, odist, FFTW_ESTIMATE);
-	fftw_execute(p_bw);
-
-	end = clock();
-	fftw_time += (double)(end - start) / CLOCKS_PER_SEC;
-
-	fftw_destroy_plan(p_fw);
-	fftw_destroy_plan(p_bw);
-}
-
-void fft_Dy(double *in, double *out, int order, parameters_t *pars) {
-	if (order < 1 || order > 2)
-	{
-		fputs("Derivatives must be of order 1 or 2.", stderr);
-		exit(EXIT_FAILURE);
-	}
-	size_t Nx = pars->x.N;
-	size_t Ny = pars->y.N;
-	size_t Nz = pars->z.N;
-
-	size_t Neffx, Neffy, Neffz, nc;
-	double a, b;
-
-	fftw_complex *fftw_tmp;
-	int N, rank, howmany, idist, odist, istride, ostride;
-
-	N = Ny;
-	nc = N / 2 + 1;
-	Neffx = Nx;
-	Neffy = nc;
-	Neffz = Nz;
-	howmany = Nz;
-	idist   = 1;
-	odist   = 1;
-	istride = Nz;
-	ostride = istride;
-	fftw_tmp = cfftw_tmp_y;
-	a = pars->y.a;
-	b = pars->y.b;
-
-	rank = 1;
-	int n[] = {N};
-	int *inembed = n;
-	int *onembed = n;
-
-	size_t ios = N * Nz;
-	size_t oos = nc * Nz;
-
-	fftw_plan p_fw;
-	fftw_plan p_bw;
-
-	clock_t start = clock();
-
-	for (size_t i = 0; i < Nx; ++i)
-	{
-		p_fw = fftw_plan_many_dft_r2c(rank, n, howmany,
-					in + i * ios, inembed, istride, idist,
-					fftw_tmp + i * oos,	onembed, ostride, odist, FFTW_ESTIMATE);
-		fftw_execute(p_fw);
-		fftw_destroy_plan(p_fw);
-	}
-
-	clock_t end = clock();
-	fftw_time += (double)(end - start) / CLOCKS_PER_SEC;
-
-	double L = b - a;
-	double complex factor;
-	if (order == 1)
-	{
-		factor = 2. * PI * I / (L * N);
-	}
-	else if (order == 2)
-	{
-		factor = - 4. * PI * PI / (L * L * N);
-	}
-	size_t osx, osy;
-	for (size_t i = 0; i < Neffx; ++i)
-	{
-		osx = i * Neffy * Neffz;
-		for (size_t j = 0; j < Neffy; ++j)
-		{
-			osy = osx + j * Neffz;
-			for (size_t k = 0; k < Neffz; ++k)
+	switch (direction) {
+		case 1:
+			fftw_execute_dft_c2r(p_bw_Dx, fftw_tmp, out);
+			break;
+		case 2:
+			for (size_t i = 0; i < Nx; ++i)
 			{
-				fftw_tmp[osy + k] *= (factor * j);
-				if (order == 2)
-				{
-					fftw_tmp[osy + k] *= j;
-				}
+				fftw_execute_dft_c2r(p_bw_Dy, fftw_tmp + i*oos, out + i*ios);
 			}
-		}
+			break;
+		case 3:
+			fftw_execute_dft_c2r(p_bw_Dz, fftw_tmp, out);
+			break;
 	}
-
-	start = clock();
-
-	for (size_t i = 0; i < Nx; ++i)
-	{
-		p_bw = fftw_plan_many_dft_c2r(rank, n, howmany,
-					fftw_tmp + i * oos, inembed, istride, idist,
-					out + i * ios, onembed, ostride, odist, FFTW_ESTIMATE);
-		fftw_execute(p_bw);
-		fftw_destroy_plan(p_bw);
-	}
-
 	end = clock();
-	fftw_time += (double)(end - start) / CLOCKS_PER_SEC;
+	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
 }
 
 void mk_gradient_squared(double *in, double *out, parameters_t *pars) {
@@ -269,16 +169,10 @@ void mk_laplacian(double *in, double *out, parameters_t *pars) {
 	size_t Ntot = Nx * Ny * Nz;
 	size_t ncz = Nz / 2 + 1;
 
-	fftw_plan p_fw;
-	fftw_plan p_bw;
-
 	clock_t start = clock();
-
-	p_fw = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, in, cfftw_tmp_z, FFTW_ESTIMATE);
-	fftw_execute(p_fw);
-
+	fftw_execute_dft_r2c(p_fw_laplacian, in, cfftw_tmp_z);
 	clock_t end = clock();
-	fftw_time += (double)(end - start) / CLOCKS_PER_SEC;
+	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
 
 	double Lx, Ly, Lz;
 	Lx = pars->x.b - pars->x.a;
@@ -324,15 +218,9 @@ void mk_laplacian(double *in, double *out, parameters_t *pars) {
 	}
 
 	start = clock();
-
-	p_bw = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, cfftw_tmp_z, out, FFTW_ESTIMATE);
-	fftw_execute(p_bw);
-
+	fftw_execute_dft_c2r(p_bw_laplacian, cfftw_tmp_z, out);
 	end = clock();
-	fftw_time += (double)(end - start) / CLOCKS_PER_SEC;
-
-	fftw_destroy_plan(p_fw);
-	fftw_destroy_plan(p_bw);
+	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
 }
 
 void set_adaptive_cutoff_fraction(size_t nc) {
@@ -394,8 +282,8 @@ void fft_apply_filter(double *in, parameters_t *pars) {
 	// // we filter the field and its temporal derivative
 	// for (size_t i = 0; i <= N; i += N)
 	// {
-	// 	p_fw = fftw_plan_dft_r2c_1d(N, in + i, cfftw_tmp, FFTW_ESTIMATE);
-	// 	p_bw = fftw_plan_dft_c2r_1d(N, cfftw_tmp, in + i, FFTW_ESTIMATE);
+	// 	p_fw = fftw_plan_dft_r2c_1d(N, in + i, cfftw_tmp, FFTW_DEFAULT_FLAG);
+	// 	p_bw = fftw_plan_dft_c2r_1d(N, cfftw_tmp, in + i, FFTW_DEFAULT_FLAG);
 
 	// 	fftw_execute(p_fw);
 
@@ -411,15 +299,15 @@ void fft_apply_filter(double *in, parameters_t *pars) {
 	// fftw_destroy_plan(p_bw);
 }
 
-void mk_filter_window(double *window, size_t nmax, size_t nc) {
+void mk_filter_window(double *out, size_t cutoffindex, size_t windowlength) {
 
-	for (size_t i = 0; i < nmax; ++i)
+	for (size_t i = 0; i < cutoffindex; ++i)
 	{
-		window[i] = filter_window_function((double)i / nmax);
+		out[i] = filter_window_function((double)i / cutoffindex);
 	}
-	for (size_t i = nmax; i < nc; ++i)
+	for (size_t i = cutoffindex; i < windowlength; ++i)
 	{
-		window[i] = 0.0;
+		out[i] = 0.0;
 	}
 }
 

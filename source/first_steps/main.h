@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <complex.h>
+#include <fftw3.h>
 
 /*
 macros for debugging, testing and printing additional information during
@@ -32,6 +33,11 @@ apply a frequency cutoff based filter during the time evolution
 // #define ENABLE_ADAPTIVE_FILTER
 
 /*
+the plan flag used for fftw plans
+*/
+#define FFTW_DEFAULT_FLAG 		FFTW_MEASURE
+
+/*
 paths to files
 */
 #define DATAPATH				"../../../data/"
@@ -46,9 +52,9 @@ mathematical constants
 simulation parameters
 */
 // Number of gridpoints (needs to be odd for fourier grid)
-#define GRIDPOINTS_X  			(16)
-#define GRIDPOINTS_Y  			(16)
-#define GRIDPOINTS_Z  			(16)
+#define GRIDPOINTS_X  			(64)
+#define GRIDPOINTS_Y  			(64)
+#define GRIDPOINTS_Z  			(64)
 #define GRIDPOINTS_TOTAL		((GRIDPOINTS_X)*(GRIDPOINTS_Y)*(GRIDPOINTS_Z))
 // timestep
 #define DELTA_T					(-0.1)
@@ -146,6 +152,17 @@ extern double *dtmp_x;
 extern double *dtmp_y;
 extern double *dtmp_z;
 
-extern double fftw_time;
+// frequently used fftw plans
+extern fftw_plan p_fw_laplacian;
+extern fftw_plan p_bw_laplacian;
+extern fftw_plan p_fw_Dx;
+extern fftw_plan p_bw_Dx;
+extern fftw_plan p_fw_Dy;
+extern fftw_plan p_bw_Dy;
+extern fftw_plan p_fw_Dz;
+extern fftw_plan p_bw_Dz;
+
+extern double fftw_time_exe;
+extern double fftw_time_plan;
 
 #endif

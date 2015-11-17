@@ -36,8 +36,19 @@ double *dtmp_x;
 double *dtmp_y;
 double *dtmp_z;
 
+// frequently reused fftw plans
+fftw_plan p_fw_laplacian;
+fftw_plan p_bw_laplacian;
+fftw_plan p_fw_Dx;
+fftw_plan p_bw_Dx;
+fftw_plan p_fw_Dy;
+fftw_plan p_bw_Dy;
+fftw_plan p_fw_Dz;
+fftw_plan p_bw_Dz;
+
 // times all dfts for timing analysis
-double fftw_time = 0.0;
+double fftw_time_exe  = 0.0;
+double fftw_time_plan = 0.0;
 
 /*
 --------------------------------main--------------------------------------------
@@ -52,7 +63,8 @@ int main(int argc, const char * argv[]) {
         fputs("Could not initialize fftw threads.", stderr);
         exit(EXIT_FAILURE);
     }
-    threadnum = GRIDPOINTS_TOTAL > 5000 ? omp_get_max_threads() : 1;
+    // threadnum = GRIDPOINTS_TOTAL > 5000 ? omp_get_max_threads() : 1;
+    threadnum = 1;
     fftw_plan_with_nthreads(threadnum);
     RUNTIME_INFO(printf("Initialized fftw with %d thread(s)\n\n", threadnum));
 
@@ -60,7 +72,7 @@ int main(int argc, const char * argv[]) {
     pars.dt = 0.1;
     allocate_and_initialize_all(&pars);
     run_all_tests(&pars);
-    free_all_external();
+    free_and_destroy_all(&pars);
     return 0;
 #endif
 
@@ -69,7 +81,6 @@ int main(int argc, const char * argv[]) {
     {
     	pars.dt = dt;
     	allocate_and_initialize_all(&pars);
-        // size_t Ntot = pars.x.N * pars.y.N * pars.z.N;
 
         char filename[32];
         sprintf(filename, "field_%03d.txt", count);
@@ -95,15 +106,17 @@ int main(int argc, const char * argv[]) {
         file_create_empty(filepath_rho);
         file_append_1d(rho, pars.Nt, 1, filepath_rho);
 
-    	free_all_external(&pars);
-        // break;
+    	free_and_destroy_all(&pars);
+        break;
     }
     fftw_cleanup_threads();
 
     clock_t end = clock();
     double secs = (double)(end - start) / CLOCKS_PER_SEC;
     RUNTIME_INFO(printf("main took %f seconds.\n", secs));
-    RUNTIME_INFO(printf("fftw took %f seconds (%.2f %%).\n\n",
-                                    fftw_time, 100.*(fftw_time/secs)));
+    RUNTIME_INFO(printf("fftw execution took %f seconds (%.2f %%).\n\n",
+                                fftw_time_exe, 100.*(fftw_time_exe/secs)));
+    RUNTIME_INFO(printf("fftw planning took %f seconds (%.2f %%).\n\n",
+                                fftw_time_plan, 100.*(fftw_time_plan/secs)));
     return 0;
 }
