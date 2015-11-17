@@ -1,7 +1,7 @@
 TARGET = first_steps
-LIBS = -L /usr/local/lib -fopenmp -lfftw3_omp -lfftw3 -lm
+LIBS = -L /usr/local/lib -lfftw3_omp -lfftw3 -lm -fopenmp -lprofiler
 CC = gcc-5
-CFLAGS = -ansi -std=c99 -O3 -g -Wall -fopenmp -I /usr/local/include
+CFLAGS = -ansi -std=c99 -fopenmp -O3 -g -Wall -I /usr/local/include
 
 .PHONY: default all clean
 

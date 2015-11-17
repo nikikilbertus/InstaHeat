@@ -5,6 +5,7 @@
 #include <omp.h>
 #include <fftw3.h>
 #include <time.h>
+#include <gperftools/profiler.h>
 #include "main.h"
 #include "setup.h"
 #include "RK4_stepper.h"
@@ -89,7 +90,9 @@ int main(int argc, const char * argv[]) {
         strcat(pars.field_name, filename);
         file_create_empty(pars.field_name);
 
+        ProfilerStart("testprofile.prof");
         run_RK4_stepper(&pars);
+        ProfilerStop();
 
         file_single_write_1d(frw_a, pars.Nt, 1, "a", count);
         file_single_write_1d(rho, pars.Nt, 1, "rho", count);
