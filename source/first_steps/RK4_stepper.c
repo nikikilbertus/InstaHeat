@@ -118,6 +118,12 @@ void run_RK4_stepper(parameters_t *pars) {
 
 	// write out last time slice
 	#ifdef WRITE_OUT_LAST_ONLY
+		if (fabs(pars->tf - (Nt - 1) * dt) > 1e-10)
+		{
+			RUNTIME_INFO(fputs("The time of the last step does not coincide "
+								"with the specified final time.", stderr));
+		}
+		RUNTIME_INFO(printf("Writing out at tf = %f \n", (Nt - 1) * dt));
 		file_append_1d(field, Ntot, 1, pars->field_name);
 	#endif
 	clock_t end = clock();
@@ -150,11 +156,9 @@ double mk_velocities(double *f, double a, double *result, parameters_t *pars) {
 		result[i] = f[Ntot + i];
 	}
 
-	mk_laplacian(f, result + Ntot, pars);
-
 	for (size_t i = Ntot; i < Ntot2; ++i)
 	{
-		result[i] /= (a * a);
+		result[i] = dtmp_lap[i - Ntot] / (a * a);
 		result[i] -= ( 3.0 * hubble * f[i]
 						+ potential_prime_term(f[i - Ntot]) );
 	}
@@ -190,23 +194,14 @@ double mk_rho(double *f, double a, parameters_t *pars) {
 
 	double T00 = 0.0;
 
-	double *f_grad2 = malloc(Ntot * sizeof *f_grad2);
-	if (!f_grad2)
-	{
-		fputs("Allocating memory failed.", stderr);
-    	exit(EXIT_FAILURE);
-	}
+	mk_gradient_squared_and_laplacian(f, dtmp_grad2, dtmp_lap, pars);
 
-	mk_gradient_squared(f, f_grad2, pars);
-
-	double ft, f_grad2_a;
+	double ft, grad2_a;
 	for (size_t i = 0; i < Ntot; ++i)
 	{
 		ft = f[Ntot + i];
-		f_grad2_a = f_grad2[i] / (a * a);
-		T00 += (ft * ft + f_grad2_a) / 2. + potential(f[i]);
+		grad2_a = dtmp_grad2[i] / (a * a);
+		T00 += (ft * ft + grad2_a) / 2. + potential(f[i]);
 	}
-
-	free(f_grad2);
 	return T00 / Ntot;
 }

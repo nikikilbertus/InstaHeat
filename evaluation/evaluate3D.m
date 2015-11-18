@@ -1,8 +1,8 @@
-Nfiles = 1;
-dtf = @(filenum) 0.01 * 2.^(-filenum); %0.1 -filenum *0.01;
-Nx = 128;
-Ny = 128;
-Nz = 128;
+Nfiles = 6;
+dtf = @(filenum) 1 * 2.^(-filenum); %0.1 -filenum *0.01;
+Nx = 16;
+Ny = 16;
+Nz = 16;
 Ntot = Nx * Ny * Nz;
 
 fields = zeros(Nfiles, Ntot);
@@ -43,17 +43,17 @@ if Nfiles > 3
     for i = 1:Nfiles-1
        dnormsf(i) = norm( fields(i+1, : ) - fields(i, : ) );
     end
-
+    
+    I = dnormsf > 0;
+    I(1) = 0;
+    dnormsfeff = dnormsf(I);
     ddt = zeros(5, Nfiles - 1);
     for i = 1:4
         ddt(i, : ) = abs(diff(dt.^i));
-        plot(ddt(i,:), dnormsf, 'o');
+        ddteff = ddt(i, I);
+        plot(ddteff, dnormsfeff, '-o');
         xlabel(['dt(i+1)^' num2str(i) ' - dt(i)^' num2str(i)]);
         ylabel('err(i+1) - err(i)');
-        shg;
-        pause();
-        plot(dnormsf'./ddt(i,:), 'o');
-        ylabel(['(err(i+1) - err(i)) / (dt(i+1)^' num2str(i) ' - dt(i)^' num2str(i) ')']);
         shg;
         pause();
     end

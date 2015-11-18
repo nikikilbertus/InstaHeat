@@ -6,6 +6,8 @@
 
 void fft_D(double *in, double *out, int direction, int order,
 						parameters_t *pars);
+void mk_gradient_squared_and_laplacian(double *in, double *grad2,
+							double *laplacian, parameters_t *pars);
 void mk_gradient_squared(double *in, double *out, parameters_t *pars);
 void mk_laplacian(double *in, double *out, parameters_t *pars);
 void set_adaptive_cutoff_fraction(size_t nc);

@@ -7,11 +7,12 @@
 #include "evolution_toolkit.h"
 
 void run_all_tests(parameters_t *pars) {
-    test_fft_first_derivative(pars);
-    test_fft_second_derivative(pars);
-    test_mk_laplacian(pars);
+    // test_fft_first_derivative(pars);
+    // test_fft_second_derivative(pars);
+    // test_mk_laplacian(pars);
     test_mk_gradient(pars);
-    test_fft_apply_filter(pars);
+    test_mk_gradient_squared_and_laplacian(pars);
+    // test_fft_apply_filter(pars);
 }
 
 void test_fft_first_derivative(parameters_t *pars) {
@@ -23,7 +24,7 @@ void test_fft_first_derivative(parameters_t *pars) {
     fft_D(field, dtmp_x, 1, 1, pars);
     fill_field(dtmp_x + Ntot, test_func_Dx, pars);
     puts("test first derivative in x direction:");
-    if (are_fields_equal(dtmp_x, pars) == 0)
+    if (are_fields_equal(dtmp_x, dtmp_x + Ntot, pars) == 0)
     {
         puts("passed\n");
     }
@@ -42,7 +43,7 @@ void test_fft_first_derivative(parameters_t *pars) {
     fft_D(field, dtmp_y, 2, 1, pars);
     fill_field(dtmp_y + Ntot, test_func_Dy, pars);
     puts("test first derivative in y direction:");
-    if (are_fields_equal(dtmp_y, pars) == 0)
+    if (are_fields_equal(dtmp_y, dtmp_y + Ntot, pars) == 0)
     {
         puts("passed\n");
     }
@@ -61,7 +62,7 @@ void test_fft_first_derivative(parameters_t *pars) {
     fft_D(field, dtmp_z, 3, 1, pars);
     fill_field(dtmp_z + Ntot, test_func_Dz, pars);
     puts("test first derivative in z direction:");
-    if (are_fields_equal(dtmp_z, pars) == 0)
+    if (are_fields_equal(dtmp_z, dtmp_z + Ntot, pars) == 0)
     {
         puts("passed\n");
     }
@@ -87,7 +88,7 @@ void test_fft_second_derivative(parameters_t *pars) {
     fft_D(field, dtmp_x, 1, 2, pars);
     fill_field(dtmp_x + Ntot, test_func_D2, pars);
     puts("test second derivative in x direction:");
-    if (are_fields_equal(dtmp_x, pars) == 0)
+    if (are_fields_equal(dtmp_x, dtmp_x + Ntot, pars) == 0)
     {
         puts("passed\n");
     }
@@ -106,7 +107,7 @@ void test_fft_second_derivative(parameters_t *pars) {
     fft_D(field, dtmp_y, 2, 2, pars);
     fill_field(dtmp_y + Ntot, test_func_D2, pars);
     puts("test second derivative in y direction:");
-    if (are_fields_equal(dtmp_y, pars) == 0)
+    if (are_fields_equal(dtmp_y, dtmp_y + Ntot, pars) == 0)
     {
         puts("passed\n");
     }
@@ -125,7 +126,7 @@ void test_fft_second_derivative(parameters_t *pars) {
     fft_D(field, dtmp_z, 3, 2, pars);
     fill_field(dtmp_z + Ntot, test_func_D2, pars);
     puts("test second derivative in z direction:");
-    if (are_fields_equal(dtmp_z, pars) == 0)
+    if (are_fields_equal(dtmp_z, dtmp_z + Ntot, pars) == 0)
     {
         puts("passed\n");
     }
@@ -151,7 +152,7 @@ void test_mk_gradient(parameters_t *pars) {
     mk_gradient_squared(field, dtmp_x, pars);
     fill_field(dtmp_x + Ntot, test_func_gradsq, pars);
     puts("test mk gradient squared:");
-    if (are_fields_equal(dtmp_x, pars) == 0)
+    if (are_fields_equal(dtmp_x, dtmp_x + Ntot, pars) == 0)
     {
         puts("passed\n");
     }
@@ -177,7 +178,7 @@ void test_mk_laplacian(parameters_t *pars) {
     mk_laplacian(field, dtmp_x, pars);
     fill_field(dtmp_x + Ntot, test_func_lap, pars);
     puts("test mk laplacian:");
-    if (are_fields_equal(dtmp_x, pars) == 0)
+    if (are_fields_equal(dtmp_x, dtmp_x + Ntot, pars) == 0)
     {
         puts("passed\n");
     }
@@ -190,6 +191,74 @@ void test_mk_laplacian(parameters_t *pars) {
         print_vector(dtmp_x, Ntot);
         puts("exact");
         print_vector(dtmp_x + Ntot, Ntot);
+        puts("\n");
+#endif
+}
+
+void test_mk_gradient_squared_and_laplacian(parameters_t *pars) {
+    size_t Nx = pars->x.N;
+    size_t Ny = pars->y.N;
+    size_t Nz = pars->z.N;
+    size_t Ntot = Nx * Ny * Nz;
+
+    mk_gradient_squared_and_laplacian(field, dtmp_grad2, dtmp_lap, pars);
+    puts("test mk gradient squared and laplacian:");
+    fill_field(dtmp_x + Ntot, test_func_Dx, pars);
+    if (are_fields_equal(dtmp_x, dtmp_x + Ntot, pars) == 0)
+    {
+        puts("Dx passed\n");
+    }
+    else
+    {
+        puts("Dx failed\n");
+    }
+    fill_field(dtmp_y + Ntot, test_func_Dy, pars);
+    if (are_fields_equal(dtmp_y, dtmp_y + Ntot, pars) == 0)
+    {
+        puts("Dy passed\n");
+    }
+    else
+    {
+        puts("Dy failed\n");
+    }
+    fill_field(dtmp_z + Ntot, test_func_Dz, pars);
+    if (are_fields_equal(dtmp_z, dtmp_z + Ntot, pars) == 0)
+    {
+        puts("Dz passed\n");
+    }
+    else
+    {
+        puts("Dz failed\n");
+    }
+
+    fill_field(dtmp_x + Ntot, test_func_gradsq, pars);
+    fill_field(dtmp_y + Ntot, test_func_lap, pars);
+    if (are_fields_equal(dtmp_x + Ntot, dtmp_grad2, pars) == 0)
+    {
+        puts("gradient squared passed\n");
+    }
+    else
+    {
+        puts("gradient squared failed\n");
+    }
+    if (are_fields_equal(dtmp_y + Ntot, dtmp_lap, pars) == 0)
+    {
+        puts("laplace passed\n");
+    }
+    else
+    {
+        puts("laplace failed\n");
+    }
+#ifdef DEBUG
+        puts("testgradsq");
+        print_vector(dtmp_grad2, Ntot);
+        puts("exact");
+        print_vector(dtmp_x, Ntot);
+        puts("\n");
+        puts("testlap");
+        print_vector(dtmp_lap, Ntot);
+        puts("exact");
+        print_vector(dtmp_y, Ntot);
         puts("\n");
 #endif
 }
@@ -254,7 +323,7 @@ void fill_field(double *f, double (*func)(double, double, double),
     }
 }
 
-int are_fields_equal(double *f, parameters_t *pars) {
+int are_fields_equal(double *f, double *g, parameters_t *pars) {
     size_t Nx = pars->x.N;
     size_t Ny = pars->y.N;
     size_t Nz = pars->z.N;
@@ -262,7 +331,7 @@ int are_fields_equal(double *f, parameters_t *pars) {
 
     for (size_t i = 0; i < Ntot; ++i)
     {
-        if (equal(f[i], f[Ntot + i]) != 0)
+        if (equal(f[i], g[i]) != 0)
         {
             return -1;
         }

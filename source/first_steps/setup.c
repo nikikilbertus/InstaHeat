@@ -28,7 +28,7 @@ void initialize_parameters(parameters_t *pars) {
     pars->y.b = SPATIAL_UPPER_BOUND_Y;
     pars->z.a = SPATIAL_LOWER_BOUND_Z;
     pars->z.b = SPATIAL_UPPER_BOUND_Z;
-	pars->Nt = ceil((pars->tf - pars->ti) / pars->dt);
+	pars->Nt = ceil((pars->tf - pars->ti) / pars->dt) + 1;
 	pars->nt = 0;
 	pars->t  = 0.0;
     pars->cutoff_fraction = CUTOFF_FRACTION;
@@ -97,7 +97,11 @@ void allocate_external(parameters_t *pars) {
     cfftw_tmp_x = fftw_malloc(ncx * Ny * Nz * sizeof *cfftw_tmp_x);
     cfftw_tmp_y = fftw_malloc(ncy * Nx * Nz * sizeof *cfftw_tmp_y);
     cfftw_tmp_z = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_z);
-    if (!cfftw_tmp_x || !cfftw_tmp_y || !cfftw_tmp_z)
+    cfftw_tmp_zx = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_zx);
+    cfftw_tmp_zy = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_zy);
+    cfftw_tmp_zz = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_zz);
+    if (!cfftw_tmp_x || !cfftw_tmp_y || !cfftw_tmp_z ||
+        !cfftw_tmp_zx || !cfftw_tmp_zy || !cfftw_tmp_zz)
     {
         fputs("Allocating memory failed.", stderr);
         exit(EXIT_FAILURE);
@@ -107,7 +111,9 @@ void allocate_external(parameters_t *pars) {
     dtmp_x = fftw_malloc(2 * Ntot * sizeof *dtmp_x);
     dtmp_y = fftw_malloc(2 * Ntot * sizeof *dtmp_y);
     dtmp_z = fftw_malloc(2 * Ntot * sizeof *dtmp_z);
-    if (!dtmp_x || !dtmp_y || !dtmp_z)
+    dtmp_grad2 = fftw_malloc(Ntot * sizeof *dtmp_grad2);
+    dtmp_lap = fftw_malloc(Ntot * sizeof *dtmp_lap);
+    if (!dtmp_x || !dtmp_y || !dtmp_z || !dtmp_grad2 || !dtmp_lap)
     {
         fputs("Allocating memory failed.", stderr);
         exit(EXIT_FAILURE);
@@ -314,9 +320,14 @@ void free_all_external(parameters_t *pars) {
     fftw_free(cfftw_tmp_x);
     fftw_free(cfftw_tmp_y);
     fftw_free(cfftw_tmp_z);
+    fftw_free(cfftw_tmp_zx);
+    fftw_free(cfftw_tmp_zy);
+    fftw_free(cfftw_tmp_zz);
     fftw_free(dtmp_x);
     fftw_free(dtmp_y);
     fftw_free(dtmp_z);
+    fftw_free(dtmp_grad2);
+    fftw_free(dtmp_lap);
 	RUNTIME_INFO(puts("Freed external variables.\n"));
 }
 

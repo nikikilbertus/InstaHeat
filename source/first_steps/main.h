@@ -12,6 +12,7 @@ execution
 #define SHOW_RUNTIME_INFO
 // #define RUN_TESTS_ONLY
 // #define DEBUG
+// #define ENABLE_PROFILER
 
 #ifdef SHOW_RUNTIME_INFO
 #define RUNTIME_INFO(f) do {\
@@ -52,16 +53,16 @@ mathematical constants
 simulation parameters
 */
 // Number of gridpoints (needs to be odd for fourier grid)
-#define GRIDPOINTS_X  			(32)
-#define GRIDPOINTS_Y  			(32)
-#define GRIDPOINTS_Z  			(32)
+#define GRIDPOINTS_X  			(16)
+#define GRIDPOINTS_Y  			(16)
+#define GRIDPOINTS_Z  			(16)
 #define GRIDPOINTS_TOTAL		((GRIDPOINTS_X)*(GRIDPOINTS_Y)*(GRIDPOINTS_Z))
 // timestep
 #define DELTA_T					(-0.1)
 // starttime (initial time)
 #define INITIAL_TIME 			(0.0)
 // final time
-#define FINAL_TIME	 			(10.0)
+#define FINAL_TIME	 			(100.0)
 // boundaries of spatial region
 #define SPATIAL_LOWER_BOUND_X	(-PI)
 #define SPATIAL_UPPER_BOUND_X 	(PI)
@@ -146,11 +147,16 @@ extern double *rho;
 extern complex *cfftw_tmp_x;
 extern complex *cfftw_tmp_y;
 extern complex *cfftw_tmp_z;
+extern complex *cfftw_tmp_zx;
+extern complex *cfftw_tmp_zy;
+extern complex *cfftw_tmp_zz;
 
 // general purpose memory block for temporary use (eg for gradient)
 extern double *dtmp_x;
 extern double *dtmp_y;
 extern double *dtmp_z;
+extern double *dtmp_grad2;
+extern double *dtmp_lap;
 
 // frequently used fftw plans
 extern fftw_plan p_fw_laplacian;

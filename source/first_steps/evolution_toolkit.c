@@ -27,7 +27,8 @@ void fft_D(double *in, double *out, int direction, int order,
 
 	// forward dft
 	clock_t start = clock();
-	switch (direction) {
+	switch (direction)
+	{
 		case 1:
 			N = Nx;
 			nc = N / 2 + 1;
@@ -124,7 +125,8 @@ void fft_D(double *in, double *out, int direction, int order,
 
 	// backward dft
 	start = clock();
-	switch (direction) {
+	switch (direction)
+	{
 		case 1:
 			fftw_execute_dft_c2r(p_bw_Dx, fftw_tmp, out);
 			break;
@@ -140,6 +142,118 @@ void fft_D(double *in, double *out, int direction, int order,
 	}
 	end = clock();
 	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
+}
+
+void mk_gradient_squared_and_laplacian(double *in, double *grad2,
+							double *laplacian, parameters_t *pars) {
+	size_t Nx = pars->x.N;
+	size_t Ny = pars->y.N;
+	size_t Nz = pars->z.N;
+	size_t Ntot = Nx * Ny * Nz;
+	size_t ncz = Nz / 2 + 1;
+
+	clock_t start = clock();
+	fftw_execute_dft_r2c(p_fw_laplacian, in, cfftw_tmp_z);
+	clock_t end = clock();
+	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
+
+	double Lx = pars->x.b - pars->x.a;
+	double Ly = pars->y.b - pars->y.a;
+	double Lz = pars->z.b - pars->z.a;
+
+	complex prefac = 2. * PI * I;
+	complex factor_x = prefac / (Lx * Ntot);
+	complex factor_y = prefac / (Ly * Ntot);
+	complex factor_z = prefac / (Lz * Ntot);
+
+	double prefac2 = -4. * PI *PI;
+	double factor_x2 = prefac2 / (Lx * Lx * Ntot);
+	double factor_y2 = prefac2 / (Ly * Ly * Ntot);
+	double factor_z2 = prefac2 / (Lz * Lz * Ntot);
+	double k_sq;
+
+	size_t osx, osy, id;
+	for (size_t i = 0; i < Nx; ++i)
+	{
+		osx = i * Ny * ncz;
+		for (size_t j = 0; j < Ny; ++j)
+		{
+			osy = osx + j * ncz;
+			for (size_t k = 0; k < ncz; ++k)
+			{
+				id = osy + k;
+
+				// for lagrangian
+				k_sq = factor_z2 * k * k;
+
+				// x derivative
+				if (i > Nx / 2)
+				{
+					cfftw_tmp_zx[id] = cfftw_tmp_z[id] * factor_x
+														* ((int)i - (int)Nx);
+					k_sq += factor_x2 * (Nx - i) * (Nx - i);
+				}
+				else if (2 * i == Nx)
+				{
+					cfftw_tmp_zx[id] = 0.0;
+					k_sq += factor_x2 * i * i;
+				}
+				else
+				{
+					cfftw_tmp_zx[id] = cfftw_tmp_z[id] * factor_x * i;
+					k_sq += factor_x2 * i * i;
+				}
+
+				// y derivative
+				if (j > Ny / 2)
+				{
+					cfftw_tmp_zy[id] = cfftw_tmp_z[id] * factor_y
+														* ((int)j - (int)Ny);
+					k_sq += factor_y2 * (Ny - j) * (Ny - j);
+				}
+				else if (2 * j == Ny)
+				{
+					cfftw_tmp_zy[id] = 0.0;
+					k_sq += factor_y2 * j * j;
+				}
+				else
+				{
+					cfftw_tmp_zy[id] = cfftw_tmp_z[id] * factor_y * j;
+					k_sq += factor_y2 * j * j;
+				}
+
+				// z derivative
+				if (k == ncz - 1)
+				{
+					cfftw_tmp_zz[id] = 0.0;
+				}
+				else
+				{
+					cfftw_tmp_zz[id] = cfftw_tmp_z[id] * factor_z * k;
+				}
+
+				// lagrangian
+				cfftw_tmp_z[id] *= k_sq;
+			}
+		}
+	}
+
+	start = clock();
+	fftw_execute_dft_c2r(p_bw_laplacian, cfftw_tmp_zx, dtmp_x);
+	fftw_execute_dft_c2r(p_bw_laplacian, cfftw_tmp_zy, dtmp_y);
+	fftw_execute_dft_c2r(p_bw_laplacian, cfftw_tmp_zz, dtmp_z);
+	fftw_execute_dft_c2r(p_bw_laplacian, cfftw_tmp_z,  laplacian);
+	end = clock();
+	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
+
+	double gx, gy, gz;
+	for (size_t i = 0; i < Ntot; ++i)
+	{
+		gx = dtmp_x[i];
+		gy = dtmp_y[i];
+		gz = dtmp_z[i];
+		grad2[i] = gx * gx + gy * gy + gz * gz;
+	}
 }
 
 void mk_gradient_squared(double *in, double *out, parameters_t *pars) {
@@ -225,7 +339,7 @@ void mk_laplacian(double *in, double *out, parameters_t *pars) {
 
 void set_adaptive_cutoff_fraction(size_t nc) {
 	//TODO
-	// double *power_spec = dmisc_tmp;
+	// double *power_spec = dtmp_x;
 	// double absval;
 	// double cpsd = CPSD_FRACTION, threshold;
 	// double total = 0.0, fraction = 0.0;
@@ -273,7 +387,7 @@ void fft_apply_filter(double *in, parameters_t *pars) {
 	// 		  , stderr);
 	// }
 
-	// double *window = dmisc_tmp;
+	// double *window = dtmp_x;
 	// mk_filter_window(window, nmax, nc);
 
 	// fftw_plan p_fw;

@@ -31,11 +31,16 @@ double *rho;
 complex *cfftw_tmp_x;
 complex *cfftw_tmp_y;
 complex *cfftw_tmp_z;
+complex *cfftw_tmp_zx;
+complex *cfftw_tmp_zy;
+complex *cfftw_tmp_zz;
 
 // general purpose double memory blocks for temporary use
 double *dtmp_x;
 double *dtmp_y;
 double *dtmp_z;
+double *dtmp_grad2;
+double *dtmp_lap;
 
 // frequently reused fftw plans
 fftw_plan p_fw_laplacian;
@@ -79,7 +84,7 @@ int main(int argc, const char * argv[]) {
 #endif
 
     int count = 0;
-    for (double dt = 0.01; dt > 1e-3; dt /= 2., count++)
+    for (double dt = 0.4; dt > 1e-2; dt /= 2.0, count += 1)
     {
     	pars.dt = dt;
     	allocate_and_initialize_all(&pars);
@@ -90,15 +95,20 @@ int main(int argc, const char * argv[]) {
         strcat(pars.field_name, filename);
         file_create_empty(pars.field_name);
 
+        #ifdef ENABLE_PROFILER
         ProfilerStart("testprofile.prof");
+        #endif
+
         run_RK4_stepper(&pars);
+
+        #ifdef ENABLE_PROFILER
         ProfilerStop();
+        #endif
 
         file_single_write_1d(frw_a, pars.Nt, 1, "a", count);
         file_single_write_1d(rho, pars.Nt, 1, "rho", count);
 
     	free_and_destroy_all(&pars);
-        break;
     }
     fftw_cleanup_threads();
 
