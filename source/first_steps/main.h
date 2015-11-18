@@ -144,12 +144,10 @@ extern double *frw_a;
 extern double *rho;
 
 // default arrays for real to complex dfts
+extern complex *cfftw_tmp;
 extern complex *cfftw_tmp_x;
 extern complex *cfftw_tmp_y;
 extern complex *cfftw_tmp_z;
-extern complex *cfftw_tmp_zx;
-extern complex *cfftw_tmp_zy;
-extern complex *cfftw_tmp_zz;
 
 // general purpose memory block for temporary use (eg for gradient)
 extern double *dtmp_x;
@@ -158,15 +156,9 @@ extern double *dtmp_z;
 extern double *dtmp_grad2;
 extern double *dtmp_lap;
 
-// frequently used fftw plans
-extern fftw_plan p_fw_laplacian;
-extern fftw_plan p_bw_laplacian;
-extern fftw_plan p_fw_Dx;
-extern fftw_plan p_bw_Dx;
-extern fftw_plan p_fw_Dy;
-extern fftw_plan p_bw_Dy;
-extern fftw_plan p_fw_Dz;
-extern fftw_plan p_bw_Dz;
+// fftw plans
+extern fftw_plan p_fw_3d;
+extern fftw_plan p_bw_3d;
 
 extern double fftw_time_exe;
 extern double fftw_time_plan;

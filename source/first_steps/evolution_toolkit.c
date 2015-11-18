@@ -7,143 +7,6 @@
 #include "evolution_toolkit.h"
 #include "main.h"
 
-void fft_D(double *in, double *out, int direction, int order,
-						parameters_t *pars) {
-
-	if (direction < 1 || direction > 3 || order < 1 || order > 2)
-	{
-		fputs("Derivatives must be in directions 1,2,3 of orders 1,2.", stderr);
-		exit(EXIT_FAILURE);
-	}
-
-	size_t Nx = pars->x.N;
-	size_t Ny = pars->y.N;
-	size_t Nz = pars->z.N;
-
-	size_t N, Neffx, Neffy, Neffz, nc, ios = 0, oos = 0;
-	double a, b;
-
-	fftw_complex *fftw_tmp;
-
-	// forward dft
-	clock_t start = clock();
-	switch (direction)
-	{
-		case 1:
-			N = Nx;
-			nc = N / 2 + 1;
-			Neffx = nc;
-			Neffy = Ny;
-			Neffz = Nz;
-			a = pars->x.a;
-			b = pars->x.b;
-			fftw_tmp = cfftw_tmp_x;
-			fftw_execute_dft_r2c(p_fw_Dx, in, fftw_tmp);
-			break;
-		case 2:
-			N = Ny;
-			nc = N / 2 + 1;
-			Neffx = Nx;
-			Neffy = nc;
-			Neffz = Nz;
-			a = pars->y.a;
-			b = pars->y.b;
-			fftw_tmp = cfftw_tmp_y;
-			ios = N * Nz;
-			oos = nc * Nz;
-			for (size_t i = 0; i < Nx; ++i)
-			{
-				fftw_execute_dft_r2c(p_fw_Dy, in + i * ios, fftw_tmp + i * oos);
-			}
-			break;
-		case 3:
-			N = Nz;
-			nc = N / 2 + 1;
-			Neffx = Nx;
-			Neffy = Ny;
-			Neffz = nc;
-			a = pars->z.a;
-			b = pars->z.b;
-			fftw_tmp = cfftw_tmp_z;
-			fftw_execute_dft_r2c(p_fw_Dz, in, fftw_tmp);
-			break;
-		default:
-			fputs("Direction must be 1 (x), 2 (y) or 3 (z).", stderr);
-			exit(EXIT_FAILURE);
-	}
-	clock_t end = clock();
-	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
-
-	// differentiation in fourier space
-	double L = b - a;
-	double complex factor;
-	if (order == 1)
-	{
-		factor = 2. * PI * I / (L * N);
-	}
-	else if (order == 2)
-	{
-		factor = - 4. * PI * PI / (L * L * N);
-	}
-	size_t osx, osy;
-	for (size_t i = 0; i < Neffx; ++i)
-	{
-		osx = i * Neffy * Neffz;
-		for (size_t j = 0; j < Neffy; ++j)
-		{
-			osy = osx + j * Neffz;
-			for (size_t k = 0; k < Neffz; ++k)
-			{
-
-				switch (direction)
-				{
-					case 1:
-						fftw_tmp[osy + k] *= (factor * i);
-						if (order == 2)
-						{
-							fftw_tmp[osy + k] *= i;
-						}
-						break;
-					case 2:
-						fftw_tmp[osy + k] *= (factor * j);
-						if (order == 2)
-						{
-							fftw_tmp[osy + k] *= j;
-						}
-						break;
-					case 3:
-						fftw_tmp[osy + k] *= (factor * k);
-						if (order == 2)
-						{
-							fftw_tmp[osy + k] *= k;
-						}
-						break;
-				}
-			}
-		}
-	}
-
-	// backward dft
-	start = clock();
-	switch (direction)
-	{
-		case 1:
-			fftw_execute_dft_c2r(p_bw_Dx, fftw_tmp, out);
-			break;
-		case 2:
-			for (size_t i = 0; i < Nx; ++i)
-			{
-				fftw_execute_dft_c2r(p_bw_Dy, fftw_tmp + i*oos, out + i*ios);
-			}
-			break;
-		case 3:
-			fftw_execute_dft_c2r(p_bw_Dz, fftw_tmp, out);
-			break;
-	}
-	end = clock();
-	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
-}
-
 void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 							double *laplacian, parameters_t *pars) {
 	size_t Nx = pars->x.N;
@@ -153,7 +16,7 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	size_t ncz = Nz / 2 + 1;
 
 	clock_t start = clock();
-	fftw_execute_dft_r2c(p_fw_laplacian, in, cfftw_tmp_z);
+	fftw_execute_dft_r2c(p_fw_3d, in, cfftw_tmp);
 	clock_t end = clock();
 	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
 
@@ -189,60 +52,60 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 				// x derivative
 				if (i > Nx / 2)
 				{
-					cfftw_tmp_zx[id] = cfftw_tmp_z[id] * factor_x
+					cfftw_tmp_x[id] = cfftw_tmp[id] * factor_x
 														* ((int)i - (int)Nx);
 					k_sq += factor_x2 * (Nx - i) * (Nx - i);
 				}
 				else if (2 * i == Nx)
 				{
-					cfftw_tmp_zx[id] = 0.0;
+					cfftw_tmp_x[id] = 0.0;
 					k_sq += factor_x2 * i * i;
 				}
 				else
 				{
-					cfftw_tmp_zx[id] = cfftw_tmp_z[id] * factor_x * i;
+					cfftw_tmp_x[id] = cfftw_tmp[id] * factor_x * i;
 					k_sq += factor_x2 * i * i;
 				}
 
 				// y derivative
 				if (j > Ny / 2)
 				{
-					cfftw_tmp_zy[id] = cfftw_tmp_z[id] * factor_y
+					cfftw_tmp_y[id] = cfftw_tmp[id] * factor_y
 														* ((int)j - (int)Ny);
 					k_sq += factor_y2 * (Ny - j) * (Ny - j);
 				}
 				else if (2 * j == Ny)
 				{
-					cfftw_tmp_zy[id] = 0.0;
+					cfftw_tmp_y[id] = 0.0;
 					k_sq += factor_y2 * j * j;
 				}
 				else
 				{
-					cfftw_tmp_zy[id] = cfftw_tmp_z[id] * factor_y * j;
+					cfftw_tmp_y[id] = cfftw_tmp[id] * factor_y * j;
 					k_sq += factor_y2 * j * j;
 				}
 
 				// z derivative
 				if (k == ncz - 1)
 				{
-					cfftw_tmp_zz[id] = 0.0;
+					cfftw_tmp_z[id] = 0.0;
 				}
 				else
 				{
-					cfftw_tmp_zz[id] = cfftw_tmp_z[id] * factor_z * k;
+					cfftw_tmp_z[id] = cfftw_tmp[id] * factor_z * k;
 				}
 
 				// lagrangian
-				cfftw_tmp_z[id] *= k_sq;
+				cfftw_tmp[id] *= k_sq;
 			}
 		}
 	}
 
 	start = clock();
-	fftw_execute_dft_c2r(p_bw_laplacian, cfftw_tmp_zx, dtmp_x);
-	fftw_execute_dft_c2r(p_bw_laplacian, cfftw_tmp_zy, dtmp_y);
-	fftw_execute_dft_c2r(p_bw_laplacian, cfftw_tmp_zz, dtmp_z);
-	fftw_execute_dft_c2r(p_bw_laplacian, cfftw_tmp_z,  laplacian);
+	fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_x, dtmp_x);
+	fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_y, dtmp_y);
+	fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_z, dtmp_z);
+	fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp,  laplacian);
 	end = clock();
 	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
 
@@ -254,87 +117,6 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 		gz = dtmp_z[i];
 		grad2[i] = gx * gx + gy * gy + gz * gz;
 	}
-}
-
-void mk_gradient_squared(double *in, double *out, parameters_t *pars) {
-	size_t Nx = pars->x.N;
-	size_t Ny = pars->y.N;
-	size_t Nz = pars->z.N;
-	size_t Ntot = Nx * Ny * Nz;
-
-	fft_D(in, dtmp_x, 1, 1, pars);
-	fft_D(in, dtmp_y, 2, 1, pars);
-	fft_D(in, dtmp_z, 3, 1, pars);
-
-	double gx, gy, gz;
-	for (size_t i = 0; i < Ntot; ++i)
-	{
-		gx = dtmp_x[i];
-		gy = dtmp_y[i];
-		gz = dtmp_z[i];
-		out[i] = gx * gx + gy * gy + gz * gz;
-	}
-}
-
-void mk_laplacian(double *in, double *out, parameters_t *pars) {
-	size_t Nx = pars->x.N;
-	size_t Ny = pars->y.N;
-	size_t Nz = pars->z.N;
-	size_t Ntot = Nx * Ny * Nz;
-	size_t ncz = Nz / 2 + 1;
-
-	clock_t start = clock();
-	fftw_execute_dft_r2c(p_fw_laplacian, in, cfftw_tmp_z);
-	clock_t end = clock();
-	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
-
-	double Lx, Ly, Lz;
-	Lx = pars->x.b - pars->x.a;
-	Ly = pars->y.b - pars->y.a;
-	Lz = pars->z.b - pars->z.a;
-
-	double factor_x = -4. * PI * PI / (Lx * Lx);
-	double factor_y = -4. * PI * PI / (Ly * Ly);
-	double factor_z = -4. * PI * PI / (Lz * Lz);
-
-	double k_sq;
-	size_t osx, osy;
-	for (size_t i = 0; i < Nx; ++i)
-	{
-		osx = i * Ny * ncz;
-		for (size_t j = 0; j < Ny; ++j)
-		{
-			osy = osx + j * ncz;
-			for (size_t k = 0; k < ncz; ++k)
-			{
-				k_sq = factor_z * k * k;
-
-				if (i > Nx / 2)
-				{
-					k_sq += factor_x * (Nx - i) * (Nx - i);
-				}
-				else
-				{
-					k_sq += factor_x * i * i;
-				}
-
-				if (j > Ny / 2)
-				{
-					k_sq += factor_y * (Ny - j) * (Ny - j);
-				}
-				else
-				{
-					k_sq += factor_y * j * j;
-				}
-				cfftw_tmp_z[osy + k] *= k_sq / Ntot;
-			}
-		}
-	}
-
-	start = clock();
-	fftw_execute_dft_c2r(p_bw_laplacian, cfftw_tmp_z, out);
-	end = clock();
-	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
 }
 
 void set_adaptive_cutoff_fraction(size_t nc) {

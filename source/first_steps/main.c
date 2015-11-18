@@ -28,12 +28,10 @@ double *frw_a;
 double *rho;
 
 // default array to save fourier coefficients from real to complex transform
+complex *cfftw_tmp;
 complex *cfftw_tmp_x;
 complex *cfftw_tmp_y;
 complex *cfftw_tmp_z;
-complex *cfftw_tmp_zx;
-complex *cfftw_tmp_zy;
-complex *cfftw_tmp_zz;
 
 // general purpose double memory blocks for temporary use
 double *dtmp_x;
@@ -43,14 +41,8 @@ double *dtmp_grad2;
 double *dtmp_lap;
 
 // frequently reused fftw plans
-fftw_plan p_fw_laplacian;
-fftw_plan p_bw_laplacian;
-fftw_plan p_fw_Dx;
-fftw_plan p_bw_Dx;
-fftw_plan p_fw_Dy;
-fftw_plan p_bw_Dy;
-fftw_plan p_fw_Dz;
-fftw_plan p_bw_Dz;
+fftw_plan p_fw_3d;
+fftw_plan p_bw_3d;
 
 // times all dfts for timing analysis
 double fftw_time_exe  = 0.0;

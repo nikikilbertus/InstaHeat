@@ -90,18 +90,13 @@ void allocate_external(parameters_t *pars) {
     }
 
     // default arrays to save coefficients of real to complex transforms
-    size_t ncx = Nx / 2 + 1;
-    size_t ncy = Ny / 2 + 1;
     size_t ncz = Nz / 2 + 1;
 
-    cfftw_tmp_x = fftw_malloc(ncx * Ny * Nz * sizeof *cfftw_tmp_x);
-    cfftw_tmp_y = fftw_malloc(ncy * Nx * Nz * sizeof *cfftw_tmp_y);
+    cfftw_tmp   = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp);
+    cfftw_tmp_x = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_x);
+    cfftw_tmp_y = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_y);
     cfftw_tmp_z = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_z);
-    cfftw_tmp_zx = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_zx);
-    cfftw_tmp_zy = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_zy);
-    cfftw_tmp_zz = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_zz);
-    if (!cfftw_tmp_x || !cfftw_tmp_y || !cfftw_tmp_z ||
-        !cfftw_tmp_zx || !cfftw_tmp_zy || !cfftw_tmp_zz)
+    if (!cfftw_tmp || !cfftw_tmp_x || !cfftw_tmp_y || !cfftw_tmp_z)
     {
         fputs("Allocating memory failed.", stderr);
         exit(EXIT_FAILURE);
@@ -182,52 +177,10 @@ void mk_fftw_plans(parameters_t *pars) {
     size_t Nz = pars->z.N;
 
     clock_t start = clock();
-    p_fw_laplacian = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, field, cfftw_tmp_z,
+    p_fw_3d = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, field, cfftw_tmp,
                                             FFTW_DEFAULT_FLAG);
-    p_bw_laplacian = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, cfftw_tmp_z, field,
+    p_bw_3d = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, cfftw_tmp, field,
                                             FFTW_DEFAULT_FLAG);
-    int rank = 1;
-    int nx[] = {Nx};
-    int howmany = Ny * Nz;
-    int *inembed = nx;
-    int istride = Ny * Nz;
-    int idist = 1;
-    int *onembed = nx;
-    int ostride = istride;
-    int odist = 1;
-    p_fw_Dx = fftw_plan_many_dft_r2c(rank, nx, howmany, field, inembed, istride,
-                idist, cfftw_tmp_x, onembed, ostride, odist, FFTW_DEFAULT_FLAG);
-    p_bw_Dx = fftw_plan_many_dft_c2r(rank, nx, howmany, cfftw_tmp_x, inembed,
-            istride, idist, field, onembed, ostride, odist, FFTW_DEFAULT_FLAG);
-
-    int ny[] = {Ny};
-    howmany = Nz;
-    inembed = ny;
-    istride = Nz;
-    idist   = 1;
-    onembed = ny;
-    ostride = istride;
-    odist   = 1;
-    p_fw_Dy = fftw_plan_many_dft_r2c(rank, ny, howmany, field, inembed, istride,
-                idist, cfftw_tmp_y, onembed, ostride, odist, FFTW_DEFAULT_FLAG);
-    p_bw_Dy = fftw_plan_many_dft_c2r(rank, ny, howmany, cfftw_tmp_y, inembed,
-            istride, idist, field, onembed, ostride, odist, FFTW_DEFAULT_FLAG);
-
-    int nz[] = {Nz};
-    howmany = Nx * Ny;
-    inembed = nz;
-    istride = 1;
-    idist = Nz;
-    onembed = nz;
-    ostride = istride;
-    odist = Nz / 2 + 1;
-    p_fw_Dz = fftw_plan_many_dft_r2c(rank, nz, howmany, field, inembed, istride,
-                idist, cfftw_tmp_z, onembed, ostride, odist, FFTW_DEFAULT_FLAG);
-    idist   = odist;
-    odist   = Nz;
-    p_bw_Dz = fftw_plan_many_dft_c2r(rank, nz, howmany, cfftw_tmp_z, inembed,
-            istride, idist, field, onembed, ostride, odist, FFTW_DEFAULT_FLAG);
-
     clock_t end = clock();
     fftw_time_plan += (double)(end - start) / CLOCKS_PER_SEC;
     RUNTIME_INFO(puts("Created fftw plans.\n"));
@@ -297,14 +250,8 @@ void free_and_destroy_all(parameters_t *pars) {
 destroy all fftw plans
 */
 void destroy_fftw_plans() {
-    fftw_destroy_plan(p_fw_laplacian);
-    fftw_destroy_plan(p_bw_laplacian);
-    fftw_destroy_plan(p_fw_Dx);
-    fftw_destroy_plan(p_bw_Dx);
-    fftw_destroy_plan(p_fw_Dy);
-    fftw_destroy_plan(p_bw_Dy);
-    fftw_destroy_plan(p_fw_Dz);
-    fftw_destroy_plan(p_bw_Dz);
+    fftw_destroy_plan(p_fw_3d);
+    fftw_destroy_plan(p_bw_3d);
     RUNTIME_INFO(puts("Destroyed fftw plans.\n"));
 }
 
@@ -317,12 +264,10 @@ void free_all_external(parameters_t *pars) {
     fftw_free(field);
     free(frw_a);
     free(rho);
+    fftw_free(cfftw_tmp);
     fftw_free(cfftw_tmp_x);
     fftw_free(cfftw_tmp_y);
     fftw_free(cfftw_tmp_z);
-    fftw_free(cfftw_tmp_zx);
-    fftw_free(cfftw_tmp_zy);
-    fftw_free(cfftw_tmp_zz);
     fftw_free(dtmp_x);
     fftw_free(dtmp_y);
     fftw_free(dtmp_z);

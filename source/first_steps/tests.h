@@ -5,10 +5,6 @@
 #include "main.h"
 
 void run_all_tests(parameters_t *pars);
-void test_fft_first_derivative(parameters_t *pars);
-void test_fft_second_derivative(parameters_t *pars);
-void test_mk_gradient(parameters_t *pars);
-void test_mk_laplacian(parameters_t *pars);
 void test_mk_gradient_squared_and_laplacian(parameters_t *pars);
 void test_fft_apply_filter(parameters_t *pars);
 double test_func(double x, double y, double z);
