@@ -76,7 +76,7 @@ int main(int argc, const char * argv[]) {
 #endif
 
     int count = 0;
-    for (double dt = 0.4; dt > 1e-2; dt /= 2.0, count += 1)
+    for (double dt = 0.01; dt > 1e-3; dt /= 2.0, count += 1)
     {
     	pars.dt = dt;
     	allocate_and_initialize_all(&pars);
@@ -101,6 +101,7 @@ int main(int argc, const char * argv[]) {
         file_single_write_1d(rho, pars.Nt, 1, "rho", count);
 
     	free_and_destroy_all(&pars);
+        break;
     }
     fftw_cleanup_threads();
 
