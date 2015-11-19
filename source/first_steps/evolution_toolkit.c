@@ -6,6 +6,9 @@
 #include <fftw3.h>
 #include "evolution_toolkit.h"
 #include "main.h"
+#include "filehandling.h"
+
+evolution_flags_t evo_flags = {.filter = 0, .write_pow_spec = 0};
 
 void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 							double *laplacian, parameters_t *pars) {
@@ -19,6 +22,20 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	fftw_execute_dft_r2c(p_fw_3d, in, cfftw_tmp);
 	clock_t end = clock();
 	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
+
+	#ifdef ENABLE_FFT_FILTER
+		if (evo_flags.filter == 1)
+		{
+			fft_apply_filter(cfftw_tmp, pars);
+		}
+	#endif
+
+	#ifdef WRITE_OUT_POWER_SPECTRUM
+		if (evo_flags.write_pow_spec == 1)
+		{
+			mk_and_write_power_spectrum(cfftw_tmp, pars);
+		}
+	#endif
 
 	double Lx = pars->x.b - pars->x.a;
 	double Ly = pars->y.b - pars->y.a;
@@ -139,71 +156,128 @@ void set_adaptive_cutoff_fraction(size_t nc) {
 	// 	fraction += power_spec[i];
 	// 	if (fraction >= threshold)
 	// 	{
-	// 		pars.cutoff_fraction =
+	// 		pars->cutoff_fraction =
 	// 					fmax(0.0, (double)(nc - i - 3) / (double)nc);
 	// 		#ifdef DEBUG
-	// 			printf("cutoff was set to: %f\n", pars.cutoff_fraction);
+	// 			printf("cutoff was set to: %f\n", pars->cutoff_fraction);
 	// 		#endif
 	// 		break;
 	// 	}
 	// }
 }
 
-void fft_apply_filter(double *in, parameters_t *pars) {
-	//TODO
-	// double cutoff_fraction = pars.cutoff_fraction;
-	// if (cutoff_fraction < 0.0 || cutoff_fraction > 1.0)
-	// {
-	// 	fputs("cutoff_fraction must be between 0 and 1.", stderr);
- //    	exit(EXIT_FAILURE);
-	// }
-	// size_t nc = N / 2 + 1;
-	// size_t nmax = (size_t) fmin(nc, ceil(nc * (1.0 - cutoff_fraction)));
+void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
+	size_t Nx = pars->x.N;
+	size_t Ny = pars->y.N;
+	size_t Nz = pars->z.N;
+	size_t Ntot = Nx * Ny * Nz;
+	size_t ncz = Nz / 2 + 1;
 
-	// // warning if there is nothing to cut off
-	// if (nc == nmax)
-	// {
-	// 	fputs("Warning: filtering is enabled (ENABLE_FFT_FILTER "
-	// 		  "but the cutoff fraction is 0. FFT is performed"
-	// 		  "but nothing will be filtered -> Overhead!\n"
-	// 		  , stderr);
-	// }
+	double Lx = pars->x.b - pars->x.a;
+	double Ly = pars->y.b - pars->y.a;
+	double Lz = pars->z.b - pars->z.a;
 
-	// double *window = dtmp_x;
-	// mk_filter_window(window, nmax, nc);
+	double prefac2 = 4. * PI *PI;
+	double k_x2 = prefac2 / (Lx * Lx);
+	double k_y2 = prefac2 / (Ly * Ly);
+	double k_z2 = prefac2 / (Lz * Lz);
 
-	// fftw_plan p_fw;
-	// fftw_plan p_bw;
+	double k_min2 = 0.0;
+	double k_max2 = k_x2 * (Nx - 1)  * (Nx - 1) +
+					k_y2 * (Ny - 1)  * (Ny - 1) +
+					k_z2 * (ncz - 1) * (ncz - 1);
 
-	// // we filter the field and its temporal derivative
-	// for (size_t i = 0; i <= N; i += N)
-	// {
-	// 	p_fw = fftw_plan_dft_r2c_1d(N, in + i, cfftw_tmp, FFTW_DEFAULT_FLAG);
-	// 	p_bw = fftw_plan_dft_c2r_1d(N, cfftw_tmp, in + i, FFTW_DEFAULT_FLAG);
+	double dk2 = (k_max2 - k_min2) / pars->pow_spec_shells;
+	double k2_tmp = 0.0;
+	double pow_tmp = 0.0;
 
-	// 	fftw_execute(p_fw);
+	for (size_t i = 0; i < pars->pow_spec_shells; ++i)
+	{
+		pow_spec[i] = 0.0;
+	}
 
-	// 	for (size_t j = 0; j < nc; ++j)
-	// 	{
-	// 		cfftw_tmp[j] *= window[j] / N;
-	// 	}
+	size_t osx, osy, idx;
+	for (size_t i = 0; i < Nx; ++i)
+	{
+		osx = i * Ny * ncz;
+		for (size_t j = 0; j < Ny; ++j)
+		{
+			osy = osx + j * ncz;
+			for (size_t k = 0; k < ncz; ++k)
+			{
+				k2_tmp = k_z2 * k * k;
+				if (i > Nx / 2)
+				{
+					k2_tmp += k_x2 * (Nx - i) * (Nx - i);
+				}
+				else
+				{
+					k2_tmp += k_x2 * i * i;
+				}
 
-	// 	fftw_execute(p_bw);
-	// }
-
-	// fftw_destroy_plan(p_fw);
-	// fftw_destroy_plan(p_bw);
+				if (j > Ny / 2)
+				{
+					k2_tmp += k_x2 * (Ny - j) * (Ny - j);
+				}
+				else
+				{
+					k2_tmp += k_y2 * j * j;
+				}
+				pow_tmp = cabs(in[osy + k]);
+				idx = (int)(k2_tmp / dk2 - 1e-10);
+				pow_spec[idx] += pow_tmp * pow_tmp / (Ntot * Ntot);
+			}
+		}
+	}
+	file_append_by_name_1d(pow_spec, pars->pow_spec_shells, 1, POW_SPEC_NAME, 0);
 }
 
-void mk_filter_window(double *out, size_t cutoffindex, size_t windowlength) {
+void fft_apply_filter(fftw_complex *inout, parameters_t *pars) {
+	double cutoff_fraction = pars->cutoff_fraction;
+	if (cutoff_fraction < 0.0 || cutoff_fraction > 1.0)
+	{
+		fputs("cutoff_fraction must be between 0 and 1.", stderr);
+    	exit(EXIT_FAILURE);
+	}
+	size_t Nx = pars->x.N;
+	size_t Ny = pars->y.N;
+	size_t Nz = pars->z.N;
+	size_t ncz = Nz / 2 + 1;
+	size_t nxmax = (size_t) fmin(Nx, ceil(Nx * (1.0 - cutoff_fraction)));
+	size_t nymax = (size_t) fmin(Ny, ceil(Ny * (1.0 - cutoff_fraction)));
+	size_t nzmax = (size_t) fmin(ncz, ceil(ncz * (1.0 - cutoff_fraction)));
+
+	if (Nx == nxmax && Ny == nymax && ncz == nzmax)
+	{
+		fputs("Warning: filtering is enabled (ENABLE_FFT_FILTER "
+			  "but nothing will be cut off -> Overhead!\n", stderr);
+	}
+
+	size_t osx, osy;
+	for (size_t i = nxmax; i < Nx; ++i)
+	{
+		osx = i * Ny * ncz;
+		for (size_t j = nymax; j < Ny; ++j)
+		{
+			osy = osx + j * ncz;
+			for (size_t k = nzmax; k < ncz; ++k)
+			{
+				// might want to do filter window later
+				inout[osy + k] = 0.0;
+			}
+		}
+	}
+}
+
+void mk_filter_window(double *inout, size_t cutoffindex, size_t windowlength) {
 
 	for (size_t i = 0; i < cutoffindex; ++i)
 	{
-		out[i] = filter_window_function((double)i / cutoffindex);
+		inout[i] = filter_window_function((double)i / cutoffindex);
 	}
 	for (size_t i = cutoffindex; i < windowlength; ++i)
 	{
-		out[i] = 0.0;
+		inout[i] = 0.0;
 	}
 }
 

@@ -30,7 +30,7 @@ check for NaNs during time evolution
 /*
 apply a frequency cutoff based filter during the time evolution
 */
-// #define ENABLE_FFT_FILTER
+#define ENABLE_FFT_FILTER
 // #define ENABLE_ADAPTIVE_FILTER
 
 /*
@@ -45,6 +45,11 @@ paths to files
 #define FILE_NAME_BUFFER_SIZE	(64)
 
 /*
+should the power spectrum be written to disc
+*/
+#define WRITE_OUT_POWER_SPECTRUM
+
+/*
 mathematical constants
 */
 #define PI (3.141592653589793238462643383279)
@@ -52,17 +57,16 @@ mathematical constants
 /*
 simulation parameters
 */
-// Number of gridpoints (needs to be odd for fourier grid)
-#define GRIDPOINTS_X  			(32)
-#define GRIDPOINTS_Y  			(32)
-#define GRIDPOINTS_Z  			(32)
+#define GRIDPOINTS_X  			(16)
+#define GRIDPOINTS_Y  			(16)
+#define GRIDPOINTS_Z  			(16)
 #define GRIDPOINTS_TOTAL		((GRIDPOINTS_X)*(GRIDPOINTS_Y)*(GRIDPOINTS_Z))
-// timestep
+// timestep (negative value for manual adjustment)
 #define DELTA_T					(-0.1)
 // starttime (initial time)
 #define INITIAL_TIME 			(0.0)
 // final time
-#define FINAL_TIME	 			(10.0)
+#define FINAL_TIME	 			(100.0)
 // boundaries of spatial region
 #define SPATIAL_LOWER_BOUND_X	(-PI)
 #define SPATIAL_UPPER_BOUND_X 	(PI)
@@ -70,17 +74,21 @@ simulation parameters
 #define SPATIAL_UPPER_BOUND_Y 	(PI)
 #define SPATIAL_LOWER_BOUND_Z	(-PI)
 #define SPATIAL_UPPER_BOUND_Z 	(PI)
-// what fraction of the evolution should be written to disc
+#define POWER_SPECTRUM_SHELLS	(100)
+// how many timeslices in total should be written to disc (for negative
+// values every single timeslice is written to disc)
 #define WRITE_OUT_SIZE			(-1)
-// if defined, only the last timeslice is written to file
+// if defined, only the last timeslice is written to disc
 #define WRITE_OUT_LAST_ONLY
 // mass parameter
 #define MASS 					(1.0)
 // coupling in a phi4 potential
 #define COUPLING 				(1.0)
+// ``cosmological constant'' in potential
+#define LAMBDA					(0.1)
 // cutoff fraction used in spectral filtering during time evolution (disabled
 // when ENABLE_ADAPTIVE_FILTER)
-#define CUTOFF_FRACTION 		(0.5)
+#define CUTOFF_FRACTION 		(1.0/3.0)
 // in adaptive filtering, amount of energy required within cutoff (cumulative
 // power spectral density)
 #define CPSD_FRACTION 			(0.99)
@@ -101,23 +109,27 @@ typedef struct {
 }grid_dimension_t;
 
 /*
+encapsulate timing related parameters
+*/
+typedef struct {
+	size_t Nt; // Number of timesteps
+	double dt; // size of timestep delta t
+	double ti; // initial time
+	double tf; // final time
+}timing_t;
+
+/*
 simulation parameters struct
 */
 typedef struct {
 	grid_dimension_t x;
 	grid_dimension_t y;
 	grid_dimension_t z;
-	size_t Nt; // Number of timesteps
-	size_t nt; // counter for timesteps (not currently used)
-	double t;  // current time (not currently used)
-	double dt; // size of timestep delta t
-	double ti; // initial time
-	double tf; // final time
-	double a;  // lower boundary of spatial domain
-	double b;  // upper boudnary of spatial domain
+	timing_t t;
 	double cutoff_fraction; // used in spectral filtering during time evolution
 	char *field_name;
-	size_t file_row_skip;
+	size_t file_write_size;
+	size_t pow_spec_shells;
 }parameters_t;
 
 extern parameters_t pars;
@@ -140,8 +152,11 @@ extern double *field;
 // solution for the FRW euqations
 extern double *frw_a;
 
-// total energy of the field
+// T^{00} component of the field
 extern double *rho;
+
+// power spectrum
+extern double *pow_spec;
 
 // default arrays for real to complex dfts
 extern complex *cfftw_tmp;

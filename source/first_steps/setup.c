@@ -19,26 +19,29 @@ void initialize_parameters(parameters_t *pars) {
 	pars->x.N = GRIDPOINTS_X;
     pars->y.N = GRIDPOINTS_Y;
     pars->z.N = GRIDPOINTS_Z;
-	pars->dt  = DELTA_T > 0 ? DELTA_T : pars->dt;
-	pars->ti  = INITIAL_TIME;
-	pars->tf  = FINAL_TIME;
 	pars->x.a = SPATIAL_LOWER_BOUND_X;
 	pars->x.b = SPATIAL_UPPER_BOUND_X;
     pars->y.a = SPATIAL_LOWER_BOUND_Y;
     pars->y.b = SPATIAL_UPPER_BOUND_Y;
     pars->z.a = SPATIAL_LOWER_BOUND_Z;
     pars->z.b = SPATIAL_UPPER_BOUND_Z;
-	pars->Nt = ceil((pars->tf - pars->ti) / pars->dt) + 1;
-	pars->nt = 0;
-	pars->t  = 0.0;
+    pars->t.dt  = DELTA_T > 0 ? DELTA_T : pars->t.dt;
+    pars->t.ti  = INITIAL_TIME;
+    pars->t.tf  = FINAL_TIME;
+	pars->t.Nt  = ceil((pars->t.tf - pars->t.ti) / pars->t.dt) + 1;
     pars->cutoff_fraction = CUTOFF_FRACTION;
+    pars->pow_spec_shells = POWER_SPECTRUM_SHELLS;
     #ifndef WRITE_OUT_LAST_ONLY
-    if (WRITE_OUT_SIZE < 0)
+    if (WRITE_OUT_SIZE > 1)
     {
         RUNTIME_INFO(puts("WARNING: Only part of the evolution is written to "
                         "disc. Some timesteps in the end might be missing!"));
     }
-    pars->file_row_skip = WRITE_OUT_SIZE < 0 ? 1 : (pars->Nt / WRITE_OUT_SIZE);
+    else if (WRITE_OUT_SIZE < 0)
+    {
+        RUNTIME_INFO(puts("Writing every timeslice to disc."));
+    }
+    pars->file_write_size = WRITE_OUT_SIZE < 0 ? 1 : (pars->t.Nt / WRITE_OUT_SIZE);
     #endif
     RUNTIME_INFO(puts("Initialized parameters.\n"));
 }
@@ -51,43 +54,26 @@ void allocate_external(parameters_t *pars) {
     size_t Ny   = pars->y.N;
     size_t Nz   = pars->z.N;
     size_t Ntot = Nx * Ny * Nz;
-    size_t Nt   = pars->Nt;
+    size_t Nt   = pars->t.Nt;
 
     // some space for the file names
     pars->field_name = calloc(FILE_NAME_BUFFER_SIZE, sizeof *pars->field_name);
 
     //grid points
     grid = malloc((Nx + Ny + Nz) * sizeof *grid);
-    if (!grid)
-    {
-    	fputs("Allocating memory failed.", stderr);
-    	exit(EXIT_FAILURE);
-    }
 
     //solutions for the field and the temporal derivative (we are saving each
     //timestep: 2 * Nx * Nt space)
     field = fftw_malloc(2 * Ntot * sizeof *field);
-    if (!field)
-    {
-    	fputs("Allocating memory failed.", stderr);
-    	exit(EXIT_FAILURE);
-    }
 
     // solution for the scale parameter a: Nt space
     frw_a = calloc(Nt, sizeof *frw_a);
-    if (!frw_a)
-    {
-    	fputs("Allocating memory failed.", stderr);
-    	exit(EXIT_FAILURE);
-    }
 
     // T00 of the scalar field over time: Nt space
     rho = calloc(Nt, sizeof *rho);
-    if (!rho)
-    {
-        fputs("Allocating memory failed.", stderr);
-        exit(EXIT_FAILURE);
-    }
+
+    // power spectrum
+    pow_spec = calloc(pars->pow_spec_shells, sizeof *pow_spec);
 
     // default arrays to save coefficients of real to complex transforms
     size_t ncz = Nz / 2 + 1;
@@ -96,11 +82,6 @@ void allocate_external(parameters_t *pars) {
     cfftw_tmp_x = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_x);
     cfftw_tmp_y = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_y);
     cfftw_tmp_z = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_z);
-    if (!cfftw_tmp || !cfftw_tmp_x || !cfftw_tmp_y || !cfftw_tmp_z)
-    {
-        fputs("Allocating memory failed.", stderr);
-        exit(EXIT_FAILURE);
-    }
 
     // general purpose double memory blocks for temporary use
     dtmp_x = fftw_malloc(2 * Ntot * sizeof *dtmp_x);
@@ -108,7 +89,11 @@ void allocate_external(parameters_t *pars) {
     dtmp_z = fftw_malloc(2 * Ntot * sizeof *dtmp_z);
     dtmp_grad2 = fftw_malloc(Ntot * sizeof *dtmp_grad2);
     dtmp_lap = fftw_malloc(Ntot * sizeof *dtmp_lap);
-    if (!dtmp_x || !dtmp_y || !dtmp_z || !dtmp_grad2 || !dtmp_lap)
+
+    if (!( pars->field_name &&
+        grid && field && frw_a && rho && pow_spec &&
+        cfftw_tmp && cfftw_tmp_x && cfftw_tmp_y && cfftw_tmp_z &&
+        dtmp_x && dtmp_y && dtmp_z && dtmp_grad2 && dtmp_lap))
     {
         fputs("Allocating memory failed.", stderr);
         exit(EXIT_FAILURE);
@@ -232,7 +217,7 @@ example functions for initial conditions
 those need to be periodic in the spatial domain
 */
 double phi_init(double x, double y, double z) {
-	return sin(x) * sin(y) * sin(z);
+	return 0.5 + sin(10. * x) * sin(20. * y) * sin(15. * z);
 	// return tanh(pow(x, 8));
 }
 
@@ -264,6 +249,7 @@ void free_all_external(parameters_t *pars) {
     fftw_free(field);
     free(frw_a);
     free(rho);
+    free(pow_spec);
     fftw_free(cfftw_tmp);
     fftw_free(cfftw_tmp_x);
     fftw_free(cfftw_tmp_y);

@@ -14,8 +14,8 @@ void run_RK4_stepper(parameters_t *pars) {
 	size_t Nz  = pars->z.N;
 	size_t Ntot = Nx * Ny * Nz;
 	size_t Ntot2 = 2 * Ntot;
-	size_t Nt = pars->Nt;
-	double dt = pars->dt;
+	size_t Nt = pars->t.Nt;
+	double dt = pars->t.dt;
 
 	double a1, a2, a3, a4, tmp_a;
 	double *k1, *k2, *k3, *k4, *tmp_k;
@@ -32,24 +32,28 @@ void run_RK4_stepper(parameters_t *pars) {
 	}
 
 	RUNTIME_INFO(puts("Starting RK4 time evolution with:"));
-	RUNTIME_INFO(printf("initial time: %f\n", pars->ti));
-	RUNTIME_INFO(printf("final time: %f\n", pars->tf));
+	RUNTIME_INFO(printf("initial time: %f\n", pars->t.ti));
+	RUNTIME_INFO(printf("final time: %f\n", pars->t.tf));
 	RUNTIME_INFO(printf("time step dt: %f\n", dt));
 	RUNTIME_INFO(printf("number of steps: %zu\n", Nt));
 	RUNTIME_INFO(puts("Using DFT (fftw3) for spatial derivatives."));
 
-#ifdef ENABLE_FFT_FILTER
+	#ifdef ENABLE_FFT_FILTER
 		RUNTIME_INFO(puts("Frequency cutoff filtering enabled."));
-#else
+	#else
 		RUNTIME_INFO(puts("Filtering disabled."));
-#endif
+	#endif
 
 	clock_t start = clock();
 
 	for (size_t nt = 0; nt < Nt - 1; ++nt)
 	{
+		evo_flags.filter = 1;
+		evo_flags.write_pow_spec = 1;
 		// k1 & a1
 		a1 = mk_velocities(field, frw_a[nt], k1, pars);
+		evo_flags.filter = 0;
+		evo_flags.write_pow_spec = 0;
 
 		// k2 & a2
 		for (size_t i = 0; i < Ntot2; ++i)
@@ -86,14 +90,11 @@ void run_RK4_stepper(parameters_t *pars) {
 		frw_a[nt + 1] = frw_a[nt] + dt * (a1 + 2.0 * a2 + 2.0 * a3 + a4) / 6.0;
 
 		#ifndef WRITE_OUT_LAST_ONLY
-		if (nt % pars->file_row_skip == 0)
+		if (nt % pars->file_write_size == 0)
 		{
 			file_append_1d(field, Ntot, 1, pars->field_name);
+			RUNTIME_INFO(printf("Writing to disc at t = %f \n", nt * dt));
 		}
-		#endif
-
-		#ifdef ENABLE_FFT_FILTER
-			fft_apply_filter(field, pars);
 		#endif
 
 		#ifdef CHECK_FOR_NAN
@@ -118,12 +119,12 @@ void run_RK4_stepper(parameters_t *pars) {
 
 	// write out last time slice
 	#ifdef WRITE_OUT_LAST_ONLY
-		if (fabs(pars->tf - (Nt - 1) * dt) > 1e-10)
+		if (fabs(pars->t.tf - (Nt - 1) * dt) > 1e-10)
 		{
 			RUNTIME_INFO(fputs("The time of the last step does not coincide "
 								"with the specified final time.", stderr));
 		}
-		RUNTIME_INFO(printf("Writing out at tf = %f \n", (Nt - 1) * dt));
+		RUNTIME_INFO(printf("Writing to disc at tf = %f \n", (Nt - 1) * dt));
 		file_append_1d(field, Ntot, 1, pars->field_name);
 	#endif
 	clock_t end = clock();
@@ -171,16 +172,21 @@ potential_prime_term, the derivative is not computed automatically yet
 TODO: change that?
 */
 inline double potential(double f){
+	double lambda = 10.0;
+	return LAMBDA / (1. + exp(-lambda * f));
 	// return MASS * MASS * f * f / 2.0;
 	// return MASS * MASS * f * f / 2.0 + COUPLING * f * f * f * f / 24.0;
-	return 0.0;
+	// return 0.0;
 }
 
 inline double potential_prime_term(double f) {
+	double lambda = 10.0;
+	double tmp = exp(lambda * f);
+	return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
 	// return MASS * MASS * f;
 	// return MASS * MASS * f + COUPLING * f * f * f / 6.0;
 	// return 20.0 * tanh(pow(f, 50));
-	return 0.0;
+	// return 0.0;
 }
 
 /*

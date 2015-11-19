@@ -11,6 +11,7 @@ row_skip: only print every row_skip-th entry
 */
 void file_single_write_1d(double *data, size_t N, size_t row_skip,
                             char *name, int number) {
+    RUNTIME_INFO(puts("Start writing to file..."));
     int length = strlen(DATAPATH) + 32;
     char filepath[length];
     char suffix[16];
@@ -20,6 +21,7 @@ void file_single_write_1d(double *data, size_t N, size_t row_skip,
     strcat(filepath, suffix);
     file_create_empty(filepath);
     file_append_1d(data, N, row_skip, filepath);
+    RUNTIME_INFO(puts("Finished writing to file."));
 }
 
 /*
@@ -31,6 +33,7 @@ void file_create_empty(char *filepath) {
         fputs("Filepath is NULL.", stderr);
         exit(EXIT_FAILURE);
     }
+    RUNTIME_INFO(puts("Create empty file..."));
     FILE *empty;
     empty = fopen(filepath, "w");
     if (!empty)
@@ -39,6 +42,37 @@ void file_create_empty(char *filepath) {
         exit(EXIT_FAILURE);
     }
     fclose(empty);
+    RUNTIME_INFO(puts("File created."));
+}
+
+/*
+create empty file by name, path is determined
+*/
+void file_create_empty_by_name(char *name, int number) {
+    int length = strlen(DATAPATH) + 32;
+    char filepath[length];
+    char suffix[16];
+    sprintf(suffix, "_%03d.txt", number);
+    strcpy(filepath, DATAPATH);
+    strcat(filepath, name);
+    strcat(filepath, suffix);
+    file_create_empty(filepath);
+}
+
+/*
+append a N \times 1 vector to a file with the given name, the path is determined
+row_skip: only print every row_skip-th entry
+*/
+void file_append_by_name_1d(double *data, size_t N, size_t row_skip,
+                                char *name, int number) {
+    int length = strlen(DATAPATH) + 32;
+    char filepath[length];
+    char suffix[16];
+    sprintf(suffix, "_%03d.txt", number);
+    strcpy(filepath, DATAPATH);
+    strcat(filepath, name);
+    strcat(filepath, suffix);
+    file_append_1d(data, N, row_skip, filepath);
 }
 
 /*
@@ -57,8 +91,6 @@ void file_append_1d(double *data, size_t N, size_t row_skip, char *filepath) {
         exit(EXIT_FAILURE);
     }
 
-    RUNTIME_INFO(puts("Start writing to file..."));
-
     FILE *vector_f;
     vector_f = fopen(filepath, "a");
     if (!vector_f)
@@ -72,7 +104,6 @@ void file_append_1d(double *data, size_t N, size_t row_skip, char *filepath) {
     	fprintf(vector_f, "%f\n", data[i]);
     }
     fclose(vector_f);
-    RUNTIME_INFO(puts("Finished writing to file.\n"));
 }
 
 /*
@@ -92,8 +123,6 @@ void file_append_2d(double *data, size_t N, size_t M, size_t row_skip,
         exit(EXIT_FAILURE);
     }
 
-    RUNTIME_INFO(puts("Start writing to file..."));
-
     FILE *matrix_f;
     matrix_f = fopen(filepath, "a");
     if (!matrix_f)
@@ -111,5 +140,4 @@ void file_append_2d(double *data, size_t N, size_t M, size_t row_skip,
     	fputs("\n", matrix_f);
     }
     fclose(matrix_f);
-    RUNTIME_INFO(puts("Finished writing to file.\n"));
 }

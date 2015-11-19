@@ -27,6 +27,9 @@ double *frw_a;
 // evolution of the total energy of the field
 double *rho;
 
+// power spectrum
+double *pow_spec;
+
 // default array to save fourier coefficients from real to complex transform
 complex *cfftw_tmp;
 complex *cfftw_tmp_x;
@@ -68,7 +71,7 @@ int main(int argc, const char * argv[]) {
     RUNTIME_INFO(printf("Initialized fftw with %d thread(s)\n\n", threadnum));
 
 #ifdef RUN_TESTS_ONLY
-    pars.dt = 0.1;
+    pars.t.dt = 0.1;
     allocate_and_initialize_all(&pars);
     run_all_tests(&pars);
     free_and_destroy_all(&pars);
@@ -78,8 +81,9 @@ int main(int argc, const char * argv[]) {
     int count = 0;
     for (double dt = 0.01; dt > 1e-3; dt /= 2.0, count += 1)
     {
-    	pars.dt = dt;
+    	pars.t.dt = dt;
     	allocate_and_initialize_all(&pars);
+        file_create_empty_by_name("pow_spec", 0);
 
         char filename[32];
         sprintf(filename, "field_%03d.txt", count);
@@ -97,8 +101,8 @@ int main(int argc, const char * argv[]) {
         ProfilerStop();
         #endif
 
-        file_single_write_1d(frw_a, pars.Nt, 1, "a", count);
-        file_single_write_1d(rho, pars.Nt, 1, "rho", count);
+        file_single_write_1d(frw_a, pars.t.Nt, 1, "a", count);
+        file_single_write_1d(rho, pars.t.Nt, 1, "rho", count);
 
     	free_and_destroy_all(&pars);
         break;
