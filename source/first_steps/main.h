@@ -30,7 +30,7 @@ check for NaNs during time evolution
 /*
 apply a frequency cutoff based filter during the time evolution
 */
-#define ENABLE_FFT_FILTER
+// #define ENABLE_FFT_FILTER
 // #define ENABLE_ADAPTIVE_FILTER
 
 /*
@@ -66,7 +66,7 @@ simulation parameters
 // starttime (initial time)
 #define INITIAL_TIME 			(0.0)
 // final time
-#define FINAL_TIME	 			(100.0)
+#define FINAL_TIME	 			(500.0)
 // boundaries of spatial region
 #define SPATIAL_LOWER_BOUND_X	(-PI)
 #define SPATIAL_UPPER_BOUND_X 	(PI)
@@ -78,6 +78,7 @@ simulation parameters
 // how many timeslices in total should be written to disc (for negative
 // values every single timeslice is written to disc)
 #define WRITE_OUT_SIZE			(-1)
+#define WRITE_OUT_SIZE_POW_SPEC	(-1)
 // if defined, only the last timeslice is written to disc
 #define WRITE_OUT_LAST_ONLY
 // mass parameter
@@ -85,7 +86,7 @@ simulation parameters
 // coupling in a phi4 potential
 #define COUPLING 				(1.0)
 // ``cosmological constant'' in potential
-#define LAMBDA					(0.1)
+#define LAMBDA					(4.5e-6)
 // cutoff fraction used in spectral filtering during time evolution (disabled
 // when ENABLE_ADAPTIVE_FILTER)
 #define CUTOFF_FRACTION 		(1.0/3.0)
@@ -130,6 +131,7 @@ typedef struct {
 	char *field_name;
 	size_t file_write_size;
 	size_t pow_spec_shells;
+	size_t file_write_size_pow_spec;
 }parameters_t;
 
 extern parameters_t pars;

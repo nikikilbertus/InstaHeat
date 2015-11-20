@@ -41,7 +41,21 @@ void initialize_parameters(parameters_t *pars) {
     {
         RUNTIME_INFO(puts("Writing every timeslice to disc."));
     }
-    pars->file_write_size = WRITE_OUT_SIZE < 0 ? 1 : (pars->t.Nt / WRITE_OUT_SIZE);
+    pars->file_write_size = WRITE_OUT_SIZE < 0 ?
+                                    1 : (pars->t.Nt / WRITE_OUT_SIZE);
+    #endif
+    #ifdef WRITE_OUT_POWER_SPECTRUM
+    if (WRITE_OUT_SIZE_POW_SPEC > 1)
+    {
+        RUNTIME_INFO(puts("WARNING: Only part of the power spectrum is written "
+                    "to disc. Some timesteps in the end might be missing!"));
+    }
+    else if (WRITE_OUT_SIZE_POW_SPEC < 0)
+    {
+        RUNTIME_INFO(puts("Writing every timeslice to disc."));
+    }
+    pars->file_write_size_pow_spec = WRITE_OUT_SIZE < 0 ?
+                                    1 : (pars->t.Nt / WRITE_OUT_SIZE_POW_SPEC);
     #endif
     RUNTIME_INFO(puts("Initialized parameters.\n"));
 }
@@ -217,7 +231,9 @@ example functions for initial conditions
 those need to be periodic in the spatial domain
 */
 double phi_init(double x, double y, double z) {
-	return 0.5 + sin(10. * x) * sin(20. * y) * sin(15. * z);
+    double phi0 = 0.05;//0.03675; //0.1325;
+    double deltaphi = phi0 / 1.2;
+	return phi0 + deltaphi * sin(4. * x) * sin(2. * y) * sin(3. * z);
 	// return tanh(pow(x, 8));
 }
 

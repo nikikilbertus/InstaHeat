@@ -48,12 +48,23 @@ void run_RK4_stepper(parameters_t *pars) {
 
 	for (size_t nt = 0; nt < Nt - 1; ++nt)
 	{
-		evo_flags.filter = 1;
-		evo_flags.write_pow_spec = 1;
+		#ifdef ENABLE_FFT_FILTER
+			evo_flags.filter = 1;
+		#endif
+		#ifdef WRITE_OUT_POWER_SPECTRUM
+			if (nt % pars->file_write_size_pow_spec == 0)
+			{
+				evo_flags.write_pow_spec = 1;
+			}
+		#endif
 		// k1 & a1
 		a1 = mk_velocities(field, frw_a[nt], k1, pars);
-		evo_flags.filter = 0;
-		evo_flags.write_pow_spec = 0;
+		#ifdef ENABLE_FFT_FILTER
+			evo_flags.filter = 0;
+		#endif
+		#ifdef WRITE_OUT_POWER_SPECTRUM
+			evo_flags.write_pow_spec = 0;
+		#endif
 
 		// k2 & a2
 		for (size_t i = 0; i < Ntot2; ++i)
@@ -167,25 +178,46 @@ double mk_velocities(double *f, double a, double *result, parameters_t *pars) {
 }
 
 /*
-A small selection of potentials one can try, make sure to set the corresponding
+A selection of potentials one can try, make sure to set the corresponding
 potential_prime_term, the derivative is not computed automatically yet
 TODO: change that?
 */
 inline double potential(double f){
-	double lambda = 10.0;
-	return LAMBDA / (1. + exp(-lambda * f));
+	double lambda = 100.0;
+	return LAMBDA / (1.0 + exp(-lambda * f));
+
+	// double theta, dtheta;
+	// if (f > 5.0)
+	// {
+	// 	theta = 1.0;
+	// }
+	// else if (f < -5.0)
+	// {
+	// 	theta = 0.0;
+	// }
+	// else
+	// {
+	// 	theta = 1.0 / (1.0 + exp(- 100.0 * f));
+	// }
+
 	// return MASS * MASS * f * f / 2.0;
+
 	// return MASS * MASS * f * f / 2.0 + COUPLING * f * f * f * f / 24.0;
+
 	// return 0.0;
 }
 
 inline double potential_prime_term(double f) {
-	double lambda = 10.0;
+	double lambda = 100.0;
 	double tmp = exp(lambda * f);
 	return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
+
 	// return MASS * MASS * f;
+
 	// return MASS * MASS * f + COUPLING * f * f * f / 6.0;
+
 	// return 20.0 * tanh(pow(f, 50));
+
 	// return 0.0;
 }
 

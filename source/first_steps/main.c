@@ -79,11 +79,13 @@ int main(int argc, const char * argv[]) {
 #endif
 
     int count = 0;
-    for (double dt = 0.01; dt > 1e-3; dt /= 2.0, count += 1)
+    for (double dt = 0.05; dt > 1e-3; dt /= 2.0, count += 1)
     {
     	pars.t.dt = dt;
     	allocate_and_initialize_all(&pars);
+        #ifdef WRITE_OUT_POWER_SPECTRUM
         file_create_empty_by_name("pow_spec", 0);
+        #endif
 
         char filename[32];
         sprintf(filename, "field_%03d.txt", count);

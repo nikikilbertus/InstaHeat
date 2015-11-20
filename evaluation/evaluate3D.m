@@ -4,6 +4,7 @@ Nx = 16;
 Ny = 16;
 Nz = 16;
 Ntot = Nx * Ny * Nz;
+powSpecWriteOutSize = 1001;
 
 fields = zeros(Nfiles, Ntot);
 for num = 0:Nfiles-1
@@ -15,15 +16,15 @@ for num = 0:Nfiles-1
     Nt = length(frwa);
     t = linspace(0, (Nt - 1) * dt, Nt);
     
-    semilogy(t, frwa);
+    plot(t, log(frwa));
     xlabel('time');
-    ylabel('a');
+    ylabel('log(a)');
     shg;
     pause;
     
     name = [prefix 'rho_00' int2str(num) '.txt'];
     rho = csvread(name);
-
+    H = sqrt(rho / 3);
 %     I = (t>0.1) & (t<0.5);
 %     tfit = t(I);
 %     loglog(t, rho, tfit, tfit.^(-1) * max(rho(I)) / tfit(1)^(-1));
@@ -33,6 +34,22 @@ for num = 0:Nfiles-1
     shg;
     pause;
   
+    plot(t, H);
+    xlabel('time');
+    ylabel('H');
+    shg;
+    pause;
+    
+%     name = [prefix 'field_00' int2str(num) '.txt'];
+%     phi = csvread(name);
+%     phi = reshape(phi, Ntot, length(phi) / Ntot);
+%     phiavg = mean(phi);
+%     plot(phiavg);
+%     xlabel('time');
+%     ylabel('phi');
+%     shg;
+%     pause;
+
     name = [prefix 'field_00' int2str(num) '.txt'];
     fields(num + 1, : ) = csvread(name);
     
@@ -44,13 +61,31 @@ for num = 0:Nfiles-1
 %     loglog(frwa, rho);
 %     hold on;
 %     slopeup = logfit(frwa(I), rho(I), 'loglog');
-    slopeup = logfit(frwa, rho, 'loglog');
-    loglog(frwa, rho, frwa, frwa.^(-4));
+%     slopeup = logfit(frwa, rho, 'loglog');
+%     title(['dt = ' num2str(dt) ', slope = ' num2str(slopeup)]);
+%     xlabel('a')
+%     ylabel('rho');
+%     shg;
+%     pause;
+    
+    loglog(frwa, rho, frwa, frwa.^(-4) * rho(1));
     title(['dt = ' num2str(dt) ', slope = -4']);
     xlabel('a')
     ylabel('rho');
-%     legend('data', ['slope = ' num2str(slopeup)]);
-%     hold off;
+    shg;
+    pause;
+    
+%     slopeup = logfit(frwa, H, 'loglog');
+%     title(['dt = ' num2str(dt) ', slope = ' num2str(slopeup)]);
+%     xlabel('a')
+%     ylabel('H');
+%     shg;
+%     pause;
+    
+    loglog(frwa, H, frwa, frwa.^(-2) * H(1));
+    title(['dt = ' num2str(dt) ', slope = -2']);
+    xlabel('a')
+    ylabel('H');
     shg;
     pause;
 end
