@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <complex.h>
-#include <time.h>
+#include <omp.h>
 #include <fftw3.h>
 #include "evolution_toolkit.h"
 #include "main.h"
@@ -18,10 +18,10 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	size_t Ntot = Nx * Ny * Nz;
 	size_t ncz = Nz / 2 + 1;
 
-	clock_t start = clock();
+	double start =  get_wall_time();
 	fftw_execute_dft_r2c(p_fw_3d, in, cfftw_tmp);
-	clock_t end = clock();
-	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
+	double end =  get_wall_time();
+	fftw_time_exe += end - start;
 
 	#ifdef ENABLE_FFT_FILTER
 		if (evo_flags.filter == 1)
@@ -53,6 +53,7 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	double k_sq;
 
 	size_t osx, osy, id;
+	#pragma omp parallel for private(osx, osy, id, k_sq)
 	for (size_t i = 0; i < Nx; ++i)
 	{
 		osx = i * Ny * ncz;
@@ -118,15 +119,16 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 		}
 	}
 
-	start = clock();
+	start =  get_wall_time();
 	fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_x, dtmp_x);
 	fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_y, dtmp_y);
 	fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_z, dtmp_z);
 	fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp,  laplacian);
-	end = clock();
-	fftw_time_exe += (double)(end - start) / CLOCKS_PER_SEC;
+	end =  get_wall_time();
+	fftw_time_exe += end - start;
 
 	double gx, gy, gz;
+	#pragma omp parallel for private(gx, gy, gz)
 	for (size_t i = 0; i < Ntot; ++i)
 	{
 		gx = dtmp_x[i];
@@ -136,36 +138,6 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	}
 }
 
-void set_adaptive_cutoff_fraction(size_t nc) {
-	//TODO
-	// double *power_spec = dtmp_x;
-	// double absval;
-	// double cpsd = CPSD_FRACTION, threshold;
-	// double total = 0.0, fraction = 0.0;
-
-	// for (size_t i = 0; i < nc; ++i)
-	// {
-	// 	absval = cabs(cfftw_tmp[i]);
-	// 	power_spec[i] = absval * absval;
-	// 	total += power_spec[i];
-	// }
-
-	// threshold = cpsd * total;
-	// for (size_t i = 0; i < nc; ++i)
-	// {
-	// 	fraction += power_spec[i];
-	// 	if (fraction >= threshold)
-	// 	{
-	// 		pars->cutoff_fraction =
-	// 					fmax(0.0, (double)(nc - i - 3) / (double)nc);
-	// 		#ifdef DEBUG
-	// 			printf("cutoff was set to: %f\n", pars->cutoff_fraction);
-	// 		#endif
-	// 		break;
-	// 	}
-	// }
-}
-
 void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 	size_t Nx = pars->x.N;
 	size_t Ny = pars->y.N;
@@ -173,6 +145,7 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 	size_t Ntot = Nx * Ny * Nz;
 	size_t ncz = Nz / 2 + 1;
 
+	// todo[performance]: precompute bins only once and reuse
 	double Lx = pars->x.b - pars->x.a;
 	double Ly = pars->y.b - pars->y.a;
 	double Lz = pars->z.b - pars->z.a;
@@ -191,12 +164,16 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 	double k2_tmp = 0.0;
 	double pow_tmp = 0.0;
 
+	// printf("k_max2 = %f\n", k_max2);
+
+	#pragma omp parallel for
 	for (size_t i = 0; i < pars->pow_spec_shells; ++i)
 	{
 		pow_spec[i] = 0.0;
 	}
 
 	size_t osx, osy, idx;
+	#pragma omp parallel for private(osx, osy, idx, pow_tmp, k2_tmp)
 	for (size_t i = 0; i < Nx; ++i)
 	{
 		osx = i * Ny * ncz;
@@ -205,27 +182,33 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 			osy = osx + j * ncz;
 			for (size_t k = 0; k < ncz; ++k)
 			{
-				k2_tmp = k_z2 * k * k;
-				if (i > Nx / 2)
-				{
-					k2_tmp += k_x2 * (Nx - i) * (Nx - i);
-				}
-				else
-				{
-					k2_tmp += k_x2 * i * i;
-				}
-
-				if (j > Ny / 2)
-				{
-					k2_tmp += k_x2 * (Ny - j) * (Ny - j);
-				}
-				else
-				{
-					k2_tmp += k_y2 * j * j;
-				}
 				pow_tmp = cabs(in[osy + k]);
-				idx = (int)(k2_tmp / dk2 - 1e-10);
-				pow_spec[idx] += pow_tmp * pow_tmp / (Ntot * Ntot);
+				if (pow_tmp > 0.0)
+				{
+					k2_tmp = 2.0 * k_z2 * k * k;
+					if (i > Nx / 2)
+					{
+						k2_tmp += k_x2 * (Nx - i) * (Nx - i);
+					}
+					else
+					{
+						k2_tmp += k_x2 * i * i;
+					}
+
+					if (j > Ny / 2)
+					{
+						k2_tmp += k_x2 * (Ny - j) * (Ny - j);
+					}
+					else
+					{
+						k2_tmp += k_y2 * j * j;
+					}
+					// printf("k2_tmp = %f\n", k2_tmp);
+					idx = (int)(k2_tmp / dk2 - 1e-10);
+					// printf("index = %zu\n", idx);
+					pow_spec[idx] += pow_tmp * pow_tmp / Ntot;
+					// printf("power = %f\n\n", pow_spec[idx]);
+				}
 			}
 		}
 	}
@@ -254,6 +237,7 @@ void fft_apply_filter(fftw_complex *inout, parameters_t *pars) {
 	}
 
 	size_t osx, osy;
+	#pragma omp parallel for private(osx, osy)
 	for (size_t i = nxmax; i < Nx; ++i)
 	{
 		osx = i * Ny * ncz;
@@ -271,10 +255,12 @@ void fft_apply_filter(fftw_complex *inout, parameters_t *pars) {
 
 void mk_filter_window(double *inout, size_t cutoffindex, size_t windowlength) {
 
+	#pragma omp parallel for
 	for (size_t i = 0; i < cutoffindex; ++i)
 	{
 		inout[i] = filter_window_function((double)i / cutoffindex);
 	}
+	#pragma omp parallel for
 	for (size_t i = cutoffindex; i < windowlength; ++i)
 	{
 		inout[i] = 0.0;

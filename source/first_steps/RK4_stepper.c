@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <time.h>
+#include <omp.h>
 #include <fftw3.h>
 #include "RK4_stepper.h"
 #include "main.h"
@@ -44,7 +44,7 @@ void run_RK4_stepper(parameters_t *pars) {
 		RUNTIME_INFO(puts("Filtering disabled."));
 	#endif
 
-	clock_t start = clock();
+	double start = get_wall_time();
 
 	for (size_t nt = 0; nt < Nt - 1; ++nt)
 	{
@@ -57,6 +57,14 @@ void run_RK4_stepper(parameters_t *pars) {
 				evo_flags.write_pow_spec = 1;
 			}
 		#endif
+		#ifndef WRITE_OUT_LAST_ONLY
+		if (nt % pars->file_write_size == 0)
+		{
+			file_append_1d(field, Ntot, 1, pars->field_name);
+			RUNTIME_INFO(printf("Writing to disc at t = %f \n", nt * dt));
+		}
+		#endif
+
 		// k1 & a1
 		a1 = mk_velocities(field, frw_a[nt], k1, pars);
 		#ifdef ENABLE_FFT_FILTER
@@ -67,6 +75,7 @@ void run_RK4_stepper(parameters_t *pars) {
 		#endif
 
 		// k2 & a2
+		#pragma omp parallel for
 		for (size_t i = 0; i < Ntot2; ++i)
 		{
 			tmp_k[i] = field[i] + dt * k1[i] / 2.0;
@@ -75,6 +84,7 @@ void run_RK4_stepper(parameters_t *pars) {
 		a2 = mk_velocities(tmp_k, tmp_a, k2, pars);
 
 		// k3 & a3
+		#pragma omp parallel for
 		for (size_t i = 0; i < Ntot2; ++i)
 		{
 			tmp_k[i] = field[i] + dt * k2[i] / 2.0;
@@ -83,6 +93,7 @@ void run_RK4_stepper(parameters_t *pars) {
 		a3 = mk_velocities(tmp_k, tmp_a, k3, pars);
 
 		// k4 & a4
+		#pragma omp parallel for
 		for (size_t i = 0; i < Ntot2; ++i)
 		{
 			tmp_k[i] = field[i] + dt * k3[i];
@@ -93,6 +104,7 @@ void run_RK4_stepper(parameters_t *pars) {
 		rho[nt] = mk_rho(field, frw_a[nt], pars);
 
 		// perform one time step for the field and a
+		#pragma omp parallel for
 		for (size_t i = 0; i < Ntot2; ++i)
 		{
 			field[i] += dt * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]) / 6.0;
@@ -100,15 +112,8 @@ void run_RK4_stepper(parameters_t *pars) {
 
 		frw_a[nt + 1] = frw_a[nt] + dt * (a1 + 2.0 * a2 + 2.0 * a3 + a4) / 6.0;
 
-		#ifndef WRITE_OUT_LAST_ONLY
-		if (nt % pars->file_write_size == 0)
-		{
-			file_append_1d(field, Ntot, 1, pars->field_name);
-			RUNTIME_INFO(printf("Writing to disc at t = %f \n", nt * dt));
-		}
-		#endif
-
 		#ifdef CHECK_FOR_NAN
+			#pragma omp parallel for
 			for (size_t i = 0; i < Ntot2; ++i)
 			{
 				if (isnan(field[i]))
@@ -138,7 +143,7 @@ void run_RK4_stepper(parameters_t *pars) {
 		RUNTIME_INFO(printf("Writing to disc at tf = %f \n", (Nt - 1) * dt));
 		file_append_1d(field, Ntot, 1, pars->field_name);
 	#endif
-	clock_t end = clock();
+	double end = get_wall_time();
 
 	fftw_free(k1);
 	fftw_free(k2);
@@ -146,7 +151,7 @@ void run_RK4_stepper(parameters_t *pars) {
 	fftw_free(k4);
 	fftw_free(tmp_k);
 
-	double secs = (double)(end - start) / CLOCKS_PER_SEC;
+	double secs = end - start;
 	RUNTIME_INFO(printf("Finished time evolution in: %f seconds.\n\n", secs));
 }
 
@@ -163,23 +168,25 @@ double mk_velocities(double *f, double a, double *result, parameters_t *pars) {
 	double current_rho = mk_rho(f, a, pars);
 	double hubble = sqrt(current_rho / 3.0);
 
+	#pragma omp parallel for
 	for (size_t i = 0; i < Ntot; ++i)
 	{
 		result[i] = f[Ntot + i];
 	}
 
+	#pragma omp parallel for
 	for (size_t i = Ntot; i < Ntot2; ++i)
 	{
 		result[i] = dtmp_lap[i - Ntot] / (a * a);
 		result[i] -= ( 3.0 * hubble * f[i]
-						+ potential_prime_term(f[i - Ntot]) );
+						+ potential_prime(f[i - Ntot]) );
 	}
 	return a * hubble;
 }
 
 /*
 A selection of potentials one can try, make sure to set the corresponding
-potential_prime_term, the derivative is not computed automatically yet
+potential_prime, the derivative is not computed automatically yet
 TODO: change that?
 */
 inline double potential(double f){
@@ -207,7 +214,7 @@ inline double potential(double f){
 	// return 0.0;
 }
 
-inline double potential_prime_term(double f) {
+inline double potential_prime(double f) {
 	double lambda = 100.0;
 	double tmp = exp(lambda * f);
 	return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
@@ -235,6 +242,7 @@ double mk_rho(double *f, double a, parameters_t *pars) {
 	mk_gradient_squared_and_laplacian(f, dtmp_grad2, dtmp_lap, pars);
 
 	double ft, grad2_a;
+	#pragma omp parallel for default(shared) private(ft, grad2_a) reduction(+:T00)
 	for (size_t i = 0; i < Ntot; ++i)
 	{
 		ft = f[Ntot + i];

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <complex.h>
-#include <time.h>
+#include <omp.h>
 #include <fftw3.h>
 #include "setup.h"
 #include "main.h"
@@ -175,13 +175,13 @@ void mk_fftw_plans(parameters_t *pars) {
     size_t Ny = pars->y.N;
     size_t Nz = pars->z.N;
 
-    clock_t start = clock();
+    double start =  get_wall_time();
     p_fw_3d = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, field, cfftw_tmp,
                                             FFTW_DEFAULT_FLAG);
     p_bw_3d = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, cfftw_tmp, field,
                                             FFTW_DEFAULT_FLAG);
-    clock_t end = clock();
-    fftw_time_plan += (double)(end - start) / CLOCKS_PER_SEC;
+    double end =  get_wall_time();
+    fftw_time_plan += end - start;
     RUNTIME_INFO(puts("Created fftw plans.\n"));
 }
 
@@ -196,6 +196,14 @@ void mk_initial_conditions(parameters_t *pars) {
     size_t osx, osy;
     double x, y, z;
 
+    // random phases
+    srand(1113);
+    double *theta = calloc(6, sizeof *theta);
+    for (size_t i = 0; i < 6; ++i)
+    {
+        theta[i] = 2.0 * PI * (double)rand() / (double)RAND_MAX;
+    }
+
     for (size_t i = 0; i < Nx; ++i)
     {
         x = grid[i];
@@ -207,7 +215,7 @@ void mk_initial_conditions(parameters_t *pars) {
             for (size_t k = 0; k < Nz; ++k)
             {
                 z = grid[Nx + Ny + k];
-                field[osy + k] = phi_init(x, y, z);
+                field[osy + k] = phi_init(x, y, z, theta);
                 field[Ntot + osy + k] = dphi_init(x, y, z);
             }
         }
@@ -223,6 +231,8 @@ void mk_initial_conditions(parameters_t *pars) {
         print_vector(field + Ntot, Ntot);
         puts("\n");
     #endif
+
+    free(theta);
     RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
 }
 
@@ -230,10 +240,14 @@ void mk_initial_conditions(parameters_t *pars) {
 example functions for initial conditions
 those need to be periodic in the spatial domain
 */
-double phi_init(double x, double y, double z) {
-    double phi0 = 0.05;//0.03675; //0.1325;
-    double deltaphi = phi0 / 1.2;
-	return phi0 + deltaphi * sin(4. * x) * sin(2. * y) * sin(3. * z);
+double phi_init(double x, double y, double z, double *phases) {
+    double frac = 0.2;
+    double phi0 = 0.73 * frac;
+    double deltaphi = phi0 / frac;
+	return phi0 + deltaphi *
+                (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
+                 cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) +
+                 cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5]));
 	// return tanh(pow(x, 8));
 }
 

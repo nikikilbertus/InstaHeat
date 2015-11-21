@@ -5,6 +5,7 @@
 #include <omp.h>
 #include <fftw3.h>
 #include <time.h>
+#include <sys/time.h>
 #include <gperftools/profiler.h>
 #include "main.h"
 #include "setup.h"
@@ -55,7 +56,9 @@ double fftw_time_plan = 0.0;
 --------------------------------main--------------------------------------------
 */
 int main(int argc, const char * argv[]) {
-    clock_t start = clock();
+
+    double start, end;
+    start = get_wall_time();
 
     int threadnum, threadinit;
     threadinit = fftw_init_threads();
@@ -65,10 +68,10 @@ int main(int argc, const char * argv[]) {
         exit(EXIT_FAILURE);
     }
     threadnum = 1;
-    // omp_set_num_threads(threadnum);
+    omp_set_num_threads(threadnum);
     // threadnum = GRIDPOINTS_TOTAL > 5000 ? omp_get_max_threads() : 1;
     fftw_plan_with_nthreads(threadnum);
-    RUNTIME_INFO(printf("Initialized fftw with %d thread(s)\n\n", threadnum));
+    RUNTIME_INFO(printf("Initialized openmp with %d thread(s)\n\n", threadnum));
 
 #ifdef RUN_TESTS_ONLY
     pars.t.dt = 0.1;
@@ -111,12 +114,21 @@ int main(int argc, const char * argv[]) {
     }
     fftw_cleanup_threads();
 
-    clock_t end = clock();
-    double secs = (double)(end - start) / CLOCKS_PER_SEC;
+    end = get_wall_time();
+    double secs = end - start;
     RUNTIME_INFO(printf("main took %f seconds.\n", secs));
     RUNTIME_INFO(printf("fftw execution took %f seconds (%.2f %%).\n\n",
                                 fftw_time_exe, 100.*(fftw_time_exe/secs)));
     RUNTIME_INFO(printf("fftw planning took %f seconds (%.2f %%).\n\n",
                                 fftw_time_plan, 100.*(fftw_time_plan/secs)));
     return 0;
+}
+
+double get_wall_time(){
+    struct timeval time;
+    if (gettimeofday(&time,NULL)){
+        RUNTIME_INFO(fputs("Could not get wall time.", stderr));
+        return 0.0;
+    }
+    return (double)time.tv_sec + (double)time.tv_usec * .000001;
 }

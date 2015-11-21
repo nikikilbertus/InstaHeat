@@ -16,7 +16,6 @@ extern evolution_flags_t evo_flags;
 
 void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 							double *laplacian, parameters_t *pars);
-void set_adaptive_cutoff_fraction(size_t nc);
 void fft_apply_filter(fftw_complex *inout, parameters_t *pars);
 void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars);
 void mk_filter_window(double *out, size_t cutoffindex, size_t windowlength);

@@ -1,12 +1,13 @@
 Nfiles = 1;
 dtf = @(filenum) 0.01 * 2.^(-filenum); %0.1 -filenum *0.01;
-Nx = 16;
-Ny = 16;
-Nz = 16;
+Nx = 64;
+Ny = 64;
+Nz = 64;
 Ntot = Nx * Ny * Nz;
-powSpecWriteOutSize = 1001;
+fieldWriteOutSize = 100;
+powSpecWriteOutSize = 100;
 
-fields = zeros(Nfiles, Ntot);
+fields = zeros(Nfiles, fieldWriteOutSize * Ntot);
 for num = 0:Nfiles-1
     dt = dtf(num);
     prefix = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/';
@@ -16,39 +17,22 @@ for num = 0:Nfiles-1
     Nt = length(frwa);
     t = linspace(0, (Nt - 1) * dt, Nt);
     
-    plot(t, log(frwa));
-    xlabel('time');
-    ylabel('log(a)');
-    shg;
-    pause;
-    
     name = [prefix 'rho_00' int2str(num) '.txt'];
     rho = csvread(name);
     H = sqrt(rho / 3);
 %     I = (t>0.1) & (t<0.5);
 %     tfit = t(I);
 %     loglog(t, rho, tfit, tfit.^(-1) * max(rho(I)) / tfit(1)^(-1));
-    semilogy(t, rho);
-    xlabel('time');
-    ylabel('rho');
-    shg;
-    pause;
-  
-    plot(t, H);
-    xlabel('time');
-    ylabel('H');
-    shg;
-    pause;
     
-%     name = [prefix 'field_00' int2str(num) '.txt'];
-%     phi = csvread(name);
-%     phi = reshape(phi, Ntot, length(phi) / Ntot);
-%     phiavg = mean(phi);
-%     plot(phiavg);
-%     xlabel('time');
-%     ylabel('phi');
-%     shg;
-%     pause;
+    name = [prefix 'field_00' int2str(num) '.txt'];
+    phi = csvread(name);
+    phi = reshape(phi, Ntot, length(phi) / Ntot);
+    phiavg = mean(phi);
+    plot(phiavg);
+    xlabel('time');
+    ylabel('<phi>');
+    shg;
+    pause;
 
     name = [prefix 'field_00' int2str(num) '.txt'];
     fields(num + 1, : ) = csvread(name);
@@ -94,14 +78,31 @@ Nt = length(rho);
 prefix = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/';
 name = [prefix 'pow_spec_000.txt'];
 powspec = csvread(name);
-powspec = reshape(powspec, length(powspec) / (Nt-1), Nt-1);
-surf(powspec(2:end , : ));
-% set(gca, 'ZScale', 'log');
-shading interp; lighting phong;
-ylabel('|k|');
-xlabel('nt');
-shg;
-pause;
+powspec = reshape(powspec, length(powspec) / (powSpecWriteOutSize), powSpecWriteOutSize);
+for j=1:2
+    surf(log(powspec(j:20, : ) + 1));
+    % set(gca, 'ZScale', 'log');
+    shading interp; lighting phong;
+    zlabel('log')
+    ylabel('|k|');
+    xlabel('nt');
+    shg;
+    pause;
+end
+
+if powSpecWriteOutSize == fieldWriteOutSize
+    parseval = zeros(1, fieldWriteOutSize);
+    for i = 1:fieldWriteOutSize
+    parseval(i) = abs(sqrt(sum(powspec(:,i))) - norm(fields(1, (i-1)*Ntot+1 : i*Ntot)));
+    parseval = parseval ./ sqrt(sum(powspec(:,i)));
+    end
+    semilogy(parseval);
+    title(['parseval, max error = ' num2str(max(parseval))]);
+    xlabel('t');
+    ylabel('abs(||phi(k)|| - ||phi(x)||) / ||phi(k)||');
+    shg;
+    pause;
+end
 
 if Nfiles > 3
     dt = dtf(linspace(0, Nfiles-1, Nfiles));

@@ -5,6 +5,8 @@
 #include <complex.h>
 #include <fftw3.h>
 
+double get_wall_time();
+
 /*
 macros for debugging, testing and printing additional information during
 execution
@@ -28,10 +30,11 @@ check for NaNs during time evolution
 // #define CHECK_FOR_NAN
 
 /*
-apply a frequency cutoff based filter during the time evolution
+apply a frequency cutoff filter during the time evolution
 */
 // #define ENABLE_FFT_FILTER
-// #define ENABLE_ADAPTIVE_FILTER
+// cutoff fraction used in spectral filtering
+#define CUTOFF_FRACTION 		(1.0/3.0)
 
 /*
 the plan flag used for fftw plans
@@ -39,15 +42,23 @@ the plan flag used for fftw plans
 #define FFTW_DEFAULT_FLAG 		FFTW_ESTIMATE
 
 /*
-paths to files
-*/
-#define DATAPATH				"../../../data/"
-#define FILE_NAME_BUFFER_SIZE	(64)
-
-/*
 should the power spectrum be written to disc
 */
 #define WRITE_OUT_POWER_SPECTRUM
+// how many bins for |k| are used in the computation of the power spectrum
+#define POWER_SPECTRUM_SHELLS	(70)
+// number of timeslices written to disc ( < 0 --> write out all)
+#define WRITE_OUT_SIZE_POW_SPEC	(100)
+
+/*
+file handling and write to disc parameters
+*/
+// number of timeslices written to disc ( < 0 --> write out all)
+#define WRITE_OUT_SIZE			(100)
+// ifdef: write only last timeslice to disc regardless of WRITE_OUT_SIZE
+// #define WRITE_OUT_LAST_ONLY
+#define DATAPATH				"../../../data/" // where to write the files
+#define FILE_NAME_BUFFER_SIZE	(64) // maximal length of file names
 
 /*
 mathematical constants
@@ -57,42 +68,25 @@ mathematical constants
 /*
 simulation parameters
 */
+// spatial
 #define GRIDPOINTS_X  			(16)
 #define GRIDPOINTS_Y  			(16)
 #define GRIDPOINTS_Z  			(16)
 #define GRIDPOINTS_TOTAL		((GRIDPOINTS_X)*(GRIDPOINTS_Y)*(GRIDPOINTS_Z))
-// timestep (negative value for manual adjustment)
-#define DELTA_T					(-0.1)
-// starttime (initial time)
-#define INITIAL_TIME 			(0.0)
-// final time
-#define FINAL_TIME	 			(500.0)
-// boundaries of spatial region
 #define SPATIAL_LOWER_BOUND_X	(-PI)
 #define SPATIAL_UPPER_BOUND_X 	(PI)
 #define SPATIAL_LOWER_BOUND_Y	(-PI)
 #define SPATIAL_UPPER_BOUND_Y 	(PI)
 #define SPATIAL_LOWER_BOUND_Z	(-PI)
 #define SPATIAL_UPPER_BOUND_Z 	(PI)
-#define POWER_SPECTRUM_SHELLS	(100)
-// how many timeslices in total should be written to disc (for negative
-// values every single timeslice is written to disc)
-#define WRITE_OUT_SIZE			(-1)
-#define WRITE_OUT_SIZE_POW_SPEC	(-1)
-// if defined, only the last timeslice is written to disc
-#define WRITE_OUT_LAST_ONLY
-// mass parameter
+// temporal
+#define DELTA_T					(-0.1) // negative for manual adjustment
+#define INITIAL_TIME 			(0.0)
+#define FINAL_TIME	 			(250.0)
+// potential
 #define MASS 					(1.0)
-// coupling in a phi4 potential
-#define COUPLING 				(1.0)
-// ``cosmological constant'' in potential
-#define LAMBDA					(4.5e-6)
-// cutoff fraction used in spectral filtering during time evolution (disabled
-// when ENABLE_ADAPTIVE_FILTER)
-#define CUTOFF_FRACTION 		(1.0/3.0)
-// in adaptive filtering, amount of energy required within cutoff (cumulative
-// power spectral density)
-#define CPSD_FRACTION 			(0.99)
+#define COUPLING 				(1.0) // coupling in a phi4 potential
+#define LAMBDA					(1.876e-4) // "cosmological constant"
 
 // conversion form 3D indices to 1D index
 // #define idx(i,j,k) 	((k) + GRIDPOINTS_Z * ( (j) + GRIDPOINTS_Y * (i)))
@@ -120,6 +114,10 @@ typedef struct {
 }timing_t;
 
 /*
+file handling parameters
+*/
+
+/*
 simulation parameters struct
 */
 typedef struct {
@@ -141,14 +139,7 @@ spatial gridpoints
 */
 extern double *grid;
 
-/*
-GENERAL REMARKS
-- Dx/y/z as suffix indicates spatial derivatives
-- d as prefix indicates a temporal derivative
-- in the variable 'field' we save phi and dphi
-*/
-
-// solutions for the field we evolve and its temporal derivative
+// solutions for the scalar field we evolve and its temporal derivative
 extern double *field;
 
 // solution for the FRW euqations
@@ -177,6 +168,7 @@ extern double *dtmp_lap;
 extern fftw_plan p_fw_3d;
 extern fftw_plan p_bw_3d;
 
+// monitoring the time taken by certain parts
 extern double fftw_time_exe;
 extern double fftw_time_plan;
 

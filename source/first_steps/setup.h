@@ -10,7 +10,7 @@ void allocate_external(parameters_t *pars);
 void mk_grid(parameters_t *pars);
 void mk_fftw_plans(parameters_t *pars);
 void mk_initial_conditions(parameters_t *pars);
-double phi_init(double x, double y, double z);
+double phi_init(double x, double y, double z, double *phases);
 double dphi_init(double x, double y, double z);
 void free_and_destroy_all(parameters_t *pars);
 void destroy_fftw_plans();
