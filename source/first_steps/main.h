@@ -44,21 +44,27 @@ the plan flag used for fftw plans
 /*
 should the power spectrum be written to disc
 */
-#define WRITE_OUT_POWER_SPECTRUM
+#define POWER_SPECTRUM_MODE		(2) // default
 // how many bins for |k| are used in the computation of the power spectrum
-#define POWER_SPECTRUM_SHELLS	(70)
+#define POWER_SPECTRUM_BINS		(70)
 // number of timeslices written to disc ( < 0 --> write out all)
-#define WRITE_OUT_SIZE_POW_SPEC	(100)
+#define POWER_SPECTRUM_NUMBER	(100)
+// name of the file for the power spectrum
+#define POWER_SPECTRUM_NAME		("pow_spec_000")
 
 /*
 file handling and write to disc parameters
 */
+#define FIELD_MODE				(2) // default
 // number of timeslices written to disc ( < 0 --> write out all)
-#define WRITE_OUT_SIZE			(100)
-// ifdef: write only last timeslice to disc regardless of WRITE_OUT_SIZE
-// #define WRITE_OUT_LAST_ONLY
-#define DATAPATH				"../../../data/" // where to write the files
-#define FILE_NAME_BUFFER_SIZE	(64) // maximal length of file names
+#define FIELD_NUMBER			(100)
+// name of the file for the field
+#define FIELD_NAME				("field_000")
+
+// where to write the files
+#define DATAPATH				("../../../data/")
+// maximal length of file names
+#define FILE_NAME_BUFFER_SIZE	(64)
 
 /*
 mathematical constants
@@ -115,7 +121,22 @@ typedef struct {
 
 /*
 file handling parameters
+mode: 0 - write nothing, 1 - write last only, 2 - write according to num/skip
+3- write every timeslice
 */
+typedef struct {
+	uint8_t mode_field;
+	size_t num_field;
+	size_t skip_field;
+	uint8_t mode_powspec;
+	size_t num_powspec;
+	size_t skip_powspec;
+	size_t bins_powspec;
+	size_t filename_buf;
+	char *name_field;
+	char *name_powspec;
+	char *datapath;
+}file_parameters_t;
 
 /*
 simulation parameters struct
@@ -126,10 +147,7 @@ typedef struct {
 	grid_dimension_t z;
 	timing_t t;
 	double cutoff_fraction; // used in spectral filtering during time evolution
-	char *field_name;
-	size_t file_write_size;
-	size_t pow_spec_shells;
-	size_t file_write_size_pow_spec;
+	file_parameters_t file;
 }parameters_t;
 
 extern parameters_t pars;

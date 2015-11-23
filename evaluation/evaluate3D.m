@@ -1,8 +1,9 @@
 Nfiles = 1;
 dtf = @(filenum) 0.01 * 2.^(-filenum); %0.1 -filenum *0.01;
-Nx = 64;
-Ny = 64;
-Nz = 64;
+Nx = 16;
+Ny = 16;
+Nz = 16;
+dtf = @(filenum) Nx / 1000;
 Ntot = Nx * Ny * Nz;
 fieldWriteOutSize = 100;
 powSpecWriteOutSize = 100;
@@ -33,9 +34,6 @@ for num = 0:Nfiles-1
     ylabel('<phi>');
     shg;
     pause;
-
-    name = [prefix 'field_00' int2str(num) '.txt'];
-    fields(num + 1, : ) = csvread(name);
     
     if length(frwa) ~= length(rho)
        error('somethings wrong, check the parameters!') 
@@ -93,7 +91,7 @@ end
 if powSpecWriteOutSize == fieldWriteOutSize
     parseval = zeros(1, fieldWriteOutSize);
     for i = 1:fieldWriteOutSize
-    parseval(i) = abs(sqrt(sum(powspec(:,i))) - norm(fields(1, (i-1)*Ntot+1 : i*Ntot)));
+    parseval(i) = abs(sqrt(sum(powspec(:,i))) - norm(phi(:, i)));
     parseval = parseval ./ sqrt(sum(powspec(:,i)));
     end
     semilogy(parseval);

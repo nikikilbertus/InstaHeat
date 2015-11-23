@@ -82,19 +82,13 @@ int main(int argc, const char * argv[]) {
 #endif
 
     int count = 0;
-    for (double dt = 0.05; dt > 1e-3; dt /= 2.0, count += 1)
+    for (double dt = 0.1; dt > 1e-3; dt /= 2.0, count += 1)
     {
-    	pars.t.dt = dt;
+    	pars.t.dt = (double)GRIDPOINTS_X / 1000.0;//dt;
     	allocate_and_initialize_all(&pars);
-        #ifdef WRITE_OUT_POWER_SPECTRUM
-        file_create_empty_by_name("pow_spec", 0);
-        #endif
 
-        char filename[32];
-        sprintf(filename, "field_%03d.txt", count);
-        strcpy(pars.field_name, DATAPATH);
-        strcat(pars.field_name, filename);
-        file_create_empty(pars.field_name);
+        file_create_empty_by_name(pars.file.name_field);
+        file_create_empty_by_name(pars.file.name_powspec);
 
         #ifdef ENABLE_PROFILER
         ProfilerStart("testprofile.prof");
@@ -106,8 +100,8 @@ int main(int argc, const char * argv[]) {
         ProfilerStop();
         #endif
 
-        file_single_write_1d(frw_a, pars.t.Nt, 1, "a", count);
-        file_single_write_1d(rho, pars.t.Nt, 1, "rho", count);
+        file_single_write_by_name_1d(frw_a, pars.t.Nt, 1, "a_000");
+        file_single_write_by_name_1d(rho, pars.t.Nt, 1, "rho_000");
 
     	free_and_destroy_all(&pars);
         break;
@@ -117,7 +111,7 @@ int main(int argc, const char * argv[]) {
     end = get_wall_time();
     double secs = end - start;
     RUNTIME_INFO(printf("main took %f seconds.\n", secs));
-    RUNTIME_INFO(printf("fftw execution took %f seconds (%.2f %%).\n\n",
+    RUNTIME_INFO(printf("fftw execution took %f seconds (%.2f %%).\n",
                                 fftw_time_exe, 100.*(fftw_time_exe/secs)));
     RUNTIME_INFO(printf("fftw planning took %f seconds (%.2f %%).\n\n",
                                 fftw_time_plan, 100.*(fftw_time_plan/secs)));

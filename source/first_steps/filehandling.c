@@ -9,25 +9,24 @@ shortcut for writing a single vector to a new file.
 the filepath is composed, the file is created/emptied and the data is written.
 row_skip: only print every row_skip-th entry
 */
-void file_single_write_1d(double *data, size_t N, size_t row_skip,
-                            char *name, int number) {
+void file_single_write_by_name_1d(double *data, size_t N, size_t row_skip,
+                            char *name) {
     RUNTIME_INFO(puts("Start writing to file..."));
     int length = strlen(DATAPATH) + 32;
     char filepath[length];
-    char suffix[16];
-    sprintf(suffix, "_%03d.txt", number);
+    char suffix[] = ".txt";
     strcpy(filepath, DATAPATH);
     strcat(filepath, name);
     strcat(filepath, suffix);
-    file_create_empty(filepath);
-    file_append_1d(data, N, row_skip, filepath);
+    file_create_empty_by_path(filepath);
+    file_append_by_path_1d(data, N, row_skip, filepath);
     RUNTIME_INFO(puts("Finished writing to file."));
 }
 
 /*
 create empty file <filepath>
 */
-void file_create_empty(char *filepath) {
+void file_create_empty_by_path(char *filepath) {
     if (filepath == NULL)
     {
         fputs("Filepath is NULL.", stderr);
@@ -48,15 +47,14 @@ void file_create_empty(char *filepath) {
 /*
 create empty file by name, path is determined
 */
-void file_create_empty_by_name(char *name, int number) {
+void file_create_empty_by_name(char *name) {
     int length = strlen(DATAPATH) + 32;
     char filepath[length];
-    char suffix[16];
-    sprintf(suffix, "_%03d.txt", number);
+    char suffix[] = ".txt";
     strcpy(filepath, DATAPATH);
     strcat(filepath, name);
     strcat(filepath, suffix);
-    file_create_empty(filepath);
+    file_create_empty_by_path(filepath);
 }
 
 /*
@@ -64,22 +62,22 @@ append a N \times 1 vector to a file with the given name, the path is determined
 row_skip: only print every row_skip-th entry
 */
 void file_append_by_name_1d(double *data, size_t N, size_t row_skip,
-                                char *name, int number) {
+                                char *name) {
     int length = strlen(DATAPATH) + 32;
     char filepath[length];
-    char suffix[16];
-    sprintf(suffix, "_%03d.txt", number);
+    char suffix[] = ".txt";
     strcpy(filepath, DATAPATH);
     strcat(filepath, name);
     strcat(filepath, suffix);
-    file_append_1d(data, N, row_skip, filepath);
+    file_append_by_path_1d(data, N, row_skip, filepath);
 }
 
 /*
 append a N \times 1 vector to a file with the path <filepath>.
 row_skip: only print every row_skip-th entry
 */
-void file_append_1d(double *data, size_t N, size_t row_skip, char *filepath) {
+void file_append_by_path_1d(double *data, size_t N, size_t row_skip,
+                                char *filepath) {
 	if (row_skip < 1)
 	{
 		fputs("Skip amount has to be at least 1.", stderr);
@@ -109,6 +107,7 @@ void file_append_1d(double *data, size_t N, size_t row_skip, char *filepath) {
 /*
 append a N \times M matrix to a file with the path <filepath>.
 row_skip and col_skip: only every <>-th row/column is printed
+deprecated
 */
 void file_append_2d(double *data, size_t N, size_t M, size_t row_skip,
                             size_t col_skip, char *filepath) {

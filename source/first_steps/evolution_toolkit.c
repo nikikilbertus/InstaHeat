@@ -30,12 +30,10 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 		}
 	#endif
 
-	#ifdef WRITE_OUT_POWER_SPECTRUM
-		if (evo_flags.write_pow_spec == 1)
-		{
-			mk_and_write_power_spectrum(cfftw_tmp, pars);
-		}
-	#endif
+	if (evo_flags.write_pow_spec == 1)
+	{
+		mk_and_write_power_spectrum(cfftw_tmp, pars);
+	}
 
 	double Lx = pars->x.b - pars->x.a;
 	double Ly = pars->y.b - pars->y.a;
@@ -144,6 +142,7 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 	size_t Nz = pars->z.N;
 	size_t Ntot = Nx * Ny * Nz;
 	size_t ncz = Nz / 2 + 1;
+	size_t bins = pars->file.bins_powspec;
 
 	// todo[performance]: precompute bins only once and reuse
 	double Lx = pars->x.b - pars->x.a;
@@ -160,14 +159,12 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 					k_y2 * (Ny - 1)  * (Ny - 1) +
 					k_z2 * (ncz - 1) * (ncz - 1);
 
-	double dk2 = (k_max2 - k_min2) / pars->pow_spec_shells;
+	double dk2 = (k_max2 - k_min2) / bins;
 	double k2_tmp = 0.0;
 	double pow_tmp = 0.0;
 
-	// printf("k_max2 = %f\n", k_max2);
-
 	#pragma omp parallel for
-	for (size_t i = 0; i < pars->pow_spec_shells; ++i)
+	for (size_t i = 0; i < bins; ++i)
 	{
 		pow_spec[i] = 0.0;
 	}
@@ -203,16 +200,13 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 					{
 						k2_tmp += k_y2 * j * j;
 					}
-					// printf("k2_tmp = %f\n", k2_tmp);
 					idx = (int)(k2_tmp / dk2 - 1e-10);
-					// printf("index = %zu\n", idx);
 					pow_spec[idx] += pow_tmp * pow_tmp / Ntot;
-					// printf("power = %f\n\n", pow_spec[idx]);
 				}
 			}
 		}
 	}
-	file_append_by_name_1d(pow_spec, pars->pow_spec_shells, 1, POW_SPEC_NAME, 0);
+	file_append_by_name_1d(pow_spec, bins, 1, pars->file.name_powspec);
 }
 
 void fft_apply_filter(fftw_complex *inout, parameters_t *pars) {

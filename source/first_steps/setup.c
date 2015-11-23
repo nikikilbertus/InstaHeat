@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <complex.h>
 #include <omp.h>
@@ -25,38 +26,87 @@ void initialize_parameters(parameters_t *pars) {
     pars->y.b = SPATIAL_UPPER_BOUND_Y;
     pars->z.a = SPATIAL_LOWER_BOUND_Z;
     pars->z.b = SPATIAL_UPPER_BOUND_Z;
+
     pars->t.dt  = DELTA_T > 0 ? DELTA_T : pars->t.dt;
     pars->t.ti  = INITIAL_TIME;
     pars->t.tf  = FINAL_TIME;
 	pars->t.Nt  = ceil((pars->t.tf - pars->t.ti) / pars->t.dt) + 1;
+
     pars->cutoff_fraction = CUTOFF_FRACTION;
-    pars->pow_spec_shells = POWER_SPECTRUM_SHELLS;
-    #ifndef WRITE_OUT_LAST_ONLY
-    if (WRITE_OUT_SIZE > 1)
+
+    pars->file.datapath = calloc(strlen(DATAPATH) + 1,
+                                    sizeof *pars->file.datapath);
+    pars->file.name_field = calloc(pars->file.filename_buf,
+                                    sizeof *pars->file.name_field);
+    pars->file.name_powspec = calloc(pars->file.filename_buf,
+                                    sizeof *pars->file.name_field);;
+
+    if (!pars->file.datapath || !pars->file.name_field || !pars->file.name_powspec)
     {
-        RUNTIME_INFO(puts("WARNING: Only part of the evolution is written to "
-                        "disc. Some timesteps in the end might be missing!"));
+        fputs("Allocating memory failed.", stderr);
+        exit(EXIT_FAILURE);
     }
-    else if (WRITE_OUT_SIZE < 0)
+
+    strcpy(pars->file.datapath, DATAPATH);
+    pars->file.filename_buf = FILE_NAME_BUFFER_SIZE;
+
+    pars->file.mode_field = FIELD_MODE;
+    switch (pars->file.mode_field)
     {
-        RUNTIME_INFO(puts("Writing every timeslice to disc."));
-    }
-    pars->file_write_size = WRITE_OUT_SIZE < 0 ?
-                                    1 : (pars->t.Nt / WRITE_OUT_SIZE);
-    #endif
-    #ifdef WRITE_OUT_POWER_SPECTRUM
-    if (WRITE_OUT_SIZE_POW_SPEC > 1)
-    {
-        RUNTIME_INFO(puts("WARNING: Only part of the power spectrum is written "
+        case 0:
+            pars->file.num_field = 0;
+            pars->file.skip_field = pars->t.Nt + 1;
+            RUNTIME_INFO(puts("Not writing field to disc."));
+            break;
+        case 1:
+            pars->file.num_field = 0;
+            pars->file.skip_field = pars->t.Nt - 1;
+            RUNTIME_INFO(puts("Writing field only at last timeslice to disc."));
+            break;
+        case 2:
+            pars->file.num_field = FIELD_NUMBER;
+            pars->file.skip_field = pars->t.Nt / FIELD_NUMBER;
+            RUNTIME_INFO(puts("WARNING: Only part of the evolution is written "
                     "to disc. Some timesteps in the end might be missing!"));
+            break;
+        case 3:
+            pars->file.num_field = pars->t.Nt;
+            pars->file.skip_field = 1;
+            RUNTIME_INFO(puts("Writing field at every timeslice to disc."));
+            break;
     }
-    else if (WRITE_OUT_SIZE_POW_SPEC < 0)
+    strcpy(pars->file.name_field, FIELD_NAME);
+
+    pars->file.mode_powspec = POWER_SPECTRUM_MODE;
+    switch (pars->file.mode_powspec)
     {
-        RUNTIME_INFO(puts("Writing every timeslice to disc."));
+        case 0:
+            pars->file.num_powspec = 0;
+            pars->file.skip_powspec = pars->t.Nt + 1;
+            RUNTIME_INFO(puts("Not writing power spectrum to disc."));
+            break;
+        case 1:
+            pars->file.num_powspec = 0;
+            pars->file.skip_powspec = pars->t.Nt - 1;
+            RUNTIME_INFO(puts("Writing power spectrum only at last timeslice "
+                                "to disc."));
+            break;
+        case 2:
+            pars->file.num_powspec = POWER_SPECTRUM_NUMBER;
+            pars->file.skip_powspec = pars->t.Nt / POWER_SPECTRUM_NUMBER;
+            RUNTIME_INFO(puts("WARNING: Only part of the power spectrum is "
+            "written to disc. Some timesteps in the end might be missing!"));
+            break;
+        case 3:
+            pars->file.num_powspec = pars->t.Nt;
+            pars->file.skip_powspec = 1;
+            RUNTIME_INFO(puts("Writing power spectrum at every timeslice "
+                                "to disc."));
+            break;
     }
-    pars->file_write_size_pow_spec = WRITE_OUT_SIZE < 0 ?
-                                    1 : (pars->t.Nt / WRITE_OUT_SIZE_POW_SPEC);
-    #endif
+    pars->file.bins_powspec = POWER_SPECTRUM_BINS;
+    strcpy(pars->file.name_powspec, POWER_SPECTRUM_NAME);
+
     RUNTIME_INFO(puts("Initialized parameters.\n"));
 }
 
@@ -69,9 +119,6 @@ void allocate_external(parameters_t *pars) {
     size_t Nz   = pars->z.N;
     size_t Ntot = Nx * Ny * Nz;
     size_t Nt   = pars->t.Nt;
-
-    // some space for the file names
-    pars->field_name = calloc(FILE_NAME_BUFFER_SIZE, sizeof *pars->field_name);
 
     //grid points
     grid = malloc((Nx + Ny + Nz) * sizeof *grid);
@@ -87,7 +134,7 @@ void allocate_external(parameters_t *pars) {
     rho = calloc(Nt, sizeof *rho);
 
     // power spectrum
-    pow_spec = calloc(pars->pow_spec_shells, sizeof *pow_spec);
+    pow_spec = calloc(pars->file.bins_powspec, sizeof *pow_spec);
 
     // default arrays to save coefficients of real to complex transforms
     size_t ncz = Nz / 2 + 1;
@@ -104,8 +151,7 @@ void allocate_external(parameters_t *pars) {
     dtmp_grad2 = fftw_malloc(Ntot * sizeof *dtmp_grad2);
     dtmp_lap = fftw_malloc(Ntot * sizeof *dtmp_lap);
 
-    if (!( pars->field_name &&
-        grid && field && frw_a && rho && pow_spec &&
+    if (!(grid && field && frw_a && rho && pow_spec &&
         cfftw_tmp && cfftw_tmp_x && cfftw_tmp_y && cfftw_tmp_z &&
         dtmp_x && dtmp_y && dtmp_z && dtmp_grad2 && dtmp_lap))
     {
@@ -274,7 +320,9 @@ void destroy_fftw_plans() {
 free all allocated memory
 */
 void free_all_external(parameters_t *pars) {
-    free(pars->field_name);
+    free(pars->file.datapath);
+    free(pars->file.name_field);
+    free(pars->file.name_powspec);
     free(grid);
     fftw_free(field);
     free(frw_a);

@@ -46,33 +46,33 @@ void run_RK4_stepper(parameters_t *pars) {
 
 	double start = get_wall_time();
 
+	size_t write_count_field = 0, write_count_powspec = 0;
+
 	for (size_t nt = 0; nt < Nt - 1; ++nt)
 	{
 		#ifdef ENABLE_FFT_FILTER
 			evo_flags.filter = 1;
 		#endif
-		#ifdef WRITE_OUT_POWER_SPECTRUM
-			if (nt % pars->file_write_size_pow_spec == 0)
-			{
-				evo_flags.write_pow_spec = 1;
-			}
-		#endif
-		#ifndef WRITE_OUT_LAST_ONLY
-		if (nt % pars->file_write_size == 0)
+		if (nt % pars->file.skip_powspec == 0 &&
+			write_count_powspec < pars->file.num_powspec)
 		{
-			file_append_1d(field, Ntot, 1, pars->field_name);
-			RUNTIME_INFO(printf("Writing to disc at t = %f \n", nt * dt));
+			evo_flags.write_pow_spec = 1;
+			write_count_powspec += 1;
 		}
-		#endif
+		if (nt % pars->file.skip_field == 0 &&
+			write_count_field < pars->file.num_field)
+		{
+			file_append_by_name_1d(field, Ntot, 1, pars->file.name_field);
+			write_count_field += 1;
+			RUNTIME_INFO(printf("Writing field to disc at t = %f \n", nt * dt));
+		}
 
 		// k1 & a1
 		a1 = mk_velocities(field, frw_a[nt], k1, pars);
 		#ifdef ENABLE_FFT_FILTER
 			evo_flags.filter = 0;
 		#endif
-		#ifdef WRITE_OUT_POWER_SPECTRUM
-			evo_flags.write_pow_spec = 0;
-		#endif
+		evo_flags.write_pow_spec = 0;
 
 		// k2 & a2
 		#pragma omp parallel for
@@ -134,15 +134,17 @@ void run_RK4_stepper(parameters_t *pars) {
 	rho[Nt - 1] = mk_rho(field, frw_a[Nt - 1], pars);
 
 	// write out last time slice
-	#ifdef WRITE_OUT_LAST_ONLY
+	if (pars->file.mode_field == 1)
+	{
 		if (fabs(pars->t.tf - (Nt - 1) * dt) > 1e-10)
 		{
 			RUNTIME_INFO(fputs("The time of the last step does not coincide "
 								"with the specified final time.", stderr));
 		}
-		RUNTIME_INFO(printf("Writing to disc at tf = %f \n", (Nt - 1) * dt));
-		file_append_1d(field, Ntot, 1, pars->field_name);
-	#endif
+		RUNTIME_INFO(printf("Writing field at tf = %f \n", (Nt - 1) * dt));
+		file_append_by_name_1d(field, Ntot, 1, pars->file.name_field);
+	}
+
 	double end = get_wall_time();
 
 	fftw_free(k1);
