@@ -1,9 +1,9 @@
 Nfiles = 1;
-dtf = @(filenum) 0.01 * 2.^(-filenum); %0.1 -filenum *0.01;
-Nx = 16;
-Ny = 16;
-Nz = 16;
-dtf = @(filenum) Nx / 1000;
+dtf = @(filenum) 0.1 * 2.^(-filenum); %0.1 -filenum *0.01;
+Nx = 32;
+Ny = 32;
+Nz = 32;
+%dtf = @(filenum) 2 * pi / Nx / 10;
 Ntot = Nx * Ny * Nz;
 fieldWriteOutSize = 100;
 powSpecWriteOutSize = 100;
@@ -78,26 +78,26 @@ name = [prefix 'pow_spec_000.txt'];
 powspec = csvread(name);
 powspec = reshape(powspec, length(powspec) / (powSpecWriteOutSize), powSpecWriteOutSize);
 for j=1:2
-    surf(log(powspec(j:20, : ) + 1));
-    % set(gca, 'ZScale', 'log');
+    surf(log(powspec(j:end, : )+1e-10));
+%     set(gca, 'ZScale', 'log');
     shading interp; lighting phong;
     zlabel('log')
     ylabel('|k|');
     xlabel('nt');
     shg;
     pause;
+    contourf
 end
 
 if powSpecWriteOutSize == fieldWriteOutSize
     parseval = zeros(1, fieldWriteOutSize);
     for i = 1:fieldWriteOutSize
     parseval(i) = abs(sqrt(sum(powspec(:,i))) - norm(phi(:, i)));
-    parseval = parseval ./ sqrt(sum(powspec(:,i)));
     end
-    semilogy(parseval);
+    plot(parseval);
     title(['parseval, max error = ' num2str(max(parseval))]);
     xlabel('t');
-    ylabel('abs(||phi(k)|| - ||phi(x)||) / ||phi(k)||');
+    ylabel('||phi(k)|| - ||phi(x)||');
     shg;
     pause;
 end

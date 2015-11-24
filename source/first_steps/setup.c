@@ -287,7 +287,7 @@ example functions for initial conditions
 those need to be periodic in the spatial domain
 */
 double phi_init(double x, double y, double z, double *phases) {
-    double frac = 0.2;
+    double frac = 0.4;
     double phi0 = 0.73 * frac;
     double deltaphi = phi0 / frac;
 	return phi0 + deltaphi *

@@ -25,6 +25,11 @@ execution
 #endif
 
 /*
+how many threads to use for openmp parallelization
+*/
+#define THREAD_NUMBER			(4)
+
+/*
 check for NaNs during time evolution
 */
 // #define CHECK_FOR_NAN
@@ -44,10 +49,10 @@ the plan flag used for fftw plans
 /*
 should the power spectrum be written to disc
 */
-#define POWER_SPECTRUM_MODE		(2) // default
+#define POWER_SPECTRUM_MODE		(2) // default: 2
 // how many bins for |k| are used in the computation of the power spectrum
-#define POWER_SPECTRUM_BINS		(70)
-// number of timeslices written to disc ( < 0 --> write out all)
+#define POWER_SPECTRUM_BINS		(30)
+// number of timeslices written to disc
 #define POWER_SPECTRUM_NUMBER	(100)
 // name of the file for the power spectrum
 #define POWER_SPECTRUM_NAME		("pow_spec_000")
@@ -55,8 +60,8 @@ should the power spectrum be written to disc
 /*
 file handling and write to disc parameters
 */
-#define FIELD_MODE				(2) // default
-// number of timeslices written to disc ( < 0 --> write out all)
+#define FIELD_MODE				(2) // default: 2
+// number of timeslices written to disc
 #define FIELD_NUMBER			(100)
 // name of the file for the field
 #define FIELD_NAME				("field_000")
@@ -75,9 +80,9 @@ mathematical constants
 simulation parameters
 */
 // spatial
-#define GRIDPOINTS_X  			(16)
-#define GRIDPOINTS_Y  			(16)
-#define GRIDPOINTS_Z  			(16)
+#define GRIDPOINTS_X  			(32)
+#define GRIDPOINTS_Y  			(32)
+#define GRIDPOINTS_Z  			(32)
 #define GRIDPOINTS_TOTAL		((GRIDPOINTS_X)*(GRIDPOINTS_Y)*(GRIDPOINTS_Z))
 #define SPATIAL_LOWER_BOUND_X	(-PI)
 #define SPATIAL_UPPER_BOUND_X 	(PI)

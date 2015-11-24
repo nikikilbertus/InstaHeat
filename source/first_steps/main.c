@@ -67,7 +67,7 @@ int main(int argc, const char * argv[]) {
         fputs("Could not initialize fftw threads.", stderr);
         exit(EXIT_FAILURE);
     }
-    threadnum = 1;
+    threadnum = THREAD_NUMBER;
     omp_set_num_threads(threadnum);
     // threadnum = GRIDPOINTS_TOTAL > 5000 ? omp_get_max_threads() : 1;
     fftw_plan_with_nthreads(threadnum);
@@ -84,8 +84,8 @@ int main(int argc, const char * argv[]) {
     int count = 0;
     for (double dt = 0.1; dt > 1e-3; dt /= 2.0, count += 1)
     {
-    	pars.t.dt = (double)GRIDPOINTS_X / 1000.0;//dt;
-    	allocate_and_initialize_all(&pars);
+    	pars.t.dt = dt;//1.0 / GRIDPOINTS_X;
+        allocate_and_initialize_all(&pars);
 
         file_create_empty_by_name(pars.file.name_field);
         file_create_empty_by_name(pars.file.name_powspec);
@@ -120,7 +120,7 @@ int main(int argc, const char * argv[]) {
 
 double get_wall_time(){
     struct timeval time;
-    if (gettimeofday(&time,NULL)){
+    if (gettimeofday(&time, NULL)){
         RUNTIME_INFO(fputs("Could not get wall time.", stderr));
         return 0.0;
     }

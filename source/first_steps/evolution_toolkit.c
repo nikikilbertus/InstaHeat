@@ -23,17 +23,18 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	double end =  get_wall_time();
 	fftw_time_exe += end - start;
 
+
+	if (evo_flags.write_pow_spec == 1)
+	{
+		mk_and_write_power_spectrum(cfftw_tmp, pars);
+	}
+
 	#ifdef ENABLE_FFT_FILTER
 		if (evo_flags.filter == 1)
 		{
 			fft_apply_filter(cfftw_tmp, pars);
 		}
 	#endif
-
-	if (evo_flags.write_pow_spec == 1)
-	{
-		mk_and_write_power_spectrum(cfftw_tmp, pars);
-	}
 
 	double Lx = pars->x.b - pars->x.a;
 	double Ly = pars->y.b - pars->y.a;
@@ -141,6 +142,8 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 	size_t Ny = pars->y.N;
 	size_t Nz = pars->z.N;
 	size_t Ntot = Nx * Ny * Nz;
+	size_t ncx = Nx / 2 + 1;
+	size_t ncy = Ny / 2 + 1;
 	size_t ncz = Nz / 2 + 1;
 	size_t bins = pars->file.bins_powspec;
 
@@ -155,13 +158,13 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 	double k_z2 = prefac2 / (Lz * Lz);
 
 	double k_min2 = 0.0;
-	double k_max2 = k_x2 * (Nx - 1)  * (Nx - 1) +
-					k_y2 * (Ny - 1)  * (Ny - 1) +
-					k_z2 * (ncz - 1) * (ncz - 1);
+	double k_max2 = k_x2 * (Nx/2) * (Nx/2) +
+					k_y2 * (Ny/2) * (Ny/2) +
+					k_z2 * (Nz/2) * (Nz/2);
 
 	double dk2 = (k_max2 - k_min2) / bins;
 	double k2_tmp = 0.0;
-	double pow_tmp = 0.0;
+	double pow2_tmp = 0.0;
 
 	#pragma omp parallel for
 	for (size_t i = 0; i < bins; ++i)
@@ -170,7 +173,7 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 	}
 
 	size_t osx, osy, idx;
-	#pragma omp parallel for private(osx, osy, idx, pow_tmp, k2_tmp)
+	// todo parallelize?
 	for (size_t i = 0; i < Nx; ++i)
 	{
 		osx = i * Ny * ncz;
@@ -179,10 +182,17 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 			osy = osx + j * ncz;
 			for (size_t k = 0; k < ncz; ++k)
 			{
-				pow_tmp = cabs(in[osy + k]);
-				if (pow_tmp > 0.0)
+				if (k == 0 || 2 * k == Nz)
 				{
-					k2_tmp = 2.0 * k_z2 * k * k;
+					pow2_tmp = in[osy + k] * conj(in[osy + k]);
+				}
+				else
+				{
+					pow2_tmp = 2.0 * in[osy + k] * conj(in[osy + k]);
+				}
+				if (pow2_tmp > 0.0)
+				{
+					k2_tmp = k_z2 * k * k;
 					if (i > Nx / 2)
 					{
 						k2_tmp += k_x2 * (Nx - i) * (Nx - i);
@@ -194,14 +204,14 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 
 					if (j > Ny / 2)
 					{
-						k2_tmp += k_x2 * (Ny - j) * (Ny - j);
+						k2_tmp += k_y2 * (Ny - j) * (Ny - j);
 					}
 					else
 					{
 						k2_tmp += k_y2 * j * j;
 					}
-					idx = (int)(k2_tmp / dk2 - 1e-10);
-					pow_spec[idx] += pow_tmp * pow_tmp / Ntot;
+					idx = (int)(k2_tmp / dk2 - 1e-7);
+					pow_spec[idx] += pow2_tmp / Ntot;
 				}
 			}
 		}
