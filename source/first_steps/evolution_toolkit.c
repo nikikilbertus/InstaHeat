@@ -142,8 +142,8 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 	size_t Ny = pars->y.N;
 	size_t Nz = pars->z.N;
 	size_t Ntot = Nx * Ny * Nz;
-	size_t ncx = Nx / 2 + 1;
-	size_t ncy = Ny / 2 + 1;
+	// size_t ncx = Nx / 2 + 1;
+	// size_t ncy = Ny / 2 + 1;
 	size_t ncz = Nz / 2 + 1;
 	size_t bins = pars->file.bins_powspec;
 
