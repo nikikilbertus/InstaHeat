@@ -157,9 +157,7 @@ typedef struct {
 
 extern parameters_t pars;
 
-/*
-spatial gridpoints
-*/
+// spatial gridpoints
 extern double *grid;
 
 // solutions for the scalar field we evolve and its temporal derivative
