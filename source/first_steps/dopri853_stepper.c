@@ -23,7 +23,12 @@ void integrate(parameters_t *pars) {
 	RUNTIME_INFO(printf("max number of steps: %zu\n", dp.MAX_STEPS));
 	RUNTIME_INFO(printf("relative tolerance: %f, "
 						"absolute tolerance: %f\n", dp.r_tol, dp.a_tol));
-	RUNTIME_INFO(puts("Using DFT (fftw3) for spatial derivatives.\n"));
+	RUNTIME_INFO(puts("Using DFT (fftw3) for spatial derivatives."));
+	#ifdef ENABLE_FFT_FILTER
+		RUNTIME_INFO(puts("Frequency cutoff filtering enabled.\n"));
+	#else
+		RUNTIME_INFO(puts("Filtering disabled.\n"));
+	#endif
 
 	df_a = mk_velocities_new(dp.t, field, f_a, dfield, pars);
 	if (dp.dense)
@@ -192,7 +197,13 @@ void perform_step(const double dt_try, parameters_t *pars) {
 			exit(EXIT_FAILURE);
 		}
 	}
+	#ifdef ENABLE_FFT_FILTER
+			evo_flags.filter = 1;
+	#endif
 	df_a_new = mk_velocities_new(dp.t + dt, field_new, f_a_new, dfield_new, pars);
+	#ifdef ENABLE_FFT_FILTER
+			evo_flags.filter = 0;
+	#endif
 	if (dp.dense)
 	{
 		// prepare_dense_output(dt);
