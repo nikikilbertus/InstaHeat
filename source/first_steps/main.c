@@ -20,10 +20,14 @@ parameters_t pars;
 double *grid;
 
 // current field and temporal derivatives
-double *field;
+double *field, *field_new;
+double *dfield, *dfield_new;
+
 
 // evolution of the scale parameter a for the FRW equations
 double *frw_a;
+double f_a, df_a;
+double f_a_new, df_a_new;
 
 // evolution of the total energy of the field
 double *rho;

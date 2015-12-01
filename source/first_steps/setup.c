@@ -125,7 +125,10 @@ void allocate_external(parameters_t *pars) {
 
     //solutions for the field and the temporal derivative (we are saving each
     //timestep: 2 * Nx * Nt space)
-    field = fftw_malloc(2 * Ntot * sizeof *field);
+    field      = fftw_malloc(2 * Ntot * sizeof *field);
+    field_new  = fftw_malloc(2 * Ntot * sizeof *field_new);
+    dfield     = fftw_malloc(2 * Ntot * sizeof *dfield);
+    dfield_new = fftw_malloc(2 * Ntot * sizeof *dfield_new);
 
     // solution for the scale parameter a: Nt space
     frw_a = calloc(Nt, sizeof *frw_a);
@@ -325,6 +328,9 @@ void free_all_external(parameters_t *pars) {
     free(pars->file.name_powspec);
     free(grid);
     fftw_free(field);
+    fftw_free(field_new);
+    fftw_free(dfield);
+    fftw_free(dfield_new);
     free(frw_a);
     free(rho);
     free(pow_spec);

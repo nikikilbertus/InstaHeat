@@ -72,9 +72,11 @@ file handling and write to disc parameters
 #define FILE_NAME_BUFFER_SIZE	(64)
 
 /*
-mathematical constants
+mathematical constants and macros
 */
 #define PI (3.141592653589793238462643383279)
+#define MAX(x, y)				((x) > (y) ? (x) : (y))
+#define MIN(x, y)				((x) > (y) ? (y) : (x))
 
 /*
 simulation parameters
@@ -161,10 +163,13 @@ extern parameters_t pars;
 extern double *grid;
 
 // solutions for the scalar field we evolve and its temporal derivative
-extern double *field;
+extern double *field, *dfield;
+extern double *field_new, *dfield_new;
 
 // solution for the FRW euqations
 extern double *frw_a;
+extern double f_a, df_a;
+extern double f_a_new, df_a_new;
 
 // T^{00} component of the field
 extern double *rho;

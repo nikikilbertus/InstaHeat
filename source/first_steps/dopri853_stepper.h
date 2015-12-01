@@ -2,6 +2,7 @@
 #define __DOPRI853_STEPPER__
 
 #include <stddef.h>
+#include "main.h"
 
 typedef struct {
 double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,
@@ -33,10 +34,24 @@ extern dopri853_constants_t dpc;
 typedef struct {
 	double t;
     double t_old;
+    double ti;
+    double tf;
+    double dt;
     double dt_did;
     double dt_next;
+    double dt_min;
+    size_t Ntot2;
+    size_t MAX_STEPS;
+    int n_ok;
+    int n_bad;
+    int n_var;
+    int n_stp;
+    double beta, alpha;
+    double safe;
+    double minscale, maxscale;
 	double a_tol, r_tol;
 	double err_old;
+	int reject;
 	double eps;
     int dense;
 }dopri853_control_t;
@@ -44,18 +59,22 @@ typedef struct {
 extern dopri853_control_t dp;
 
 typedef struct {
-	double* k1, k2, k3, k4, k5, k6, k7, k8, k9, k10, k_tmp;
-	double* yerr, yerr2;
-	double* rcont1, rcont2, rcont3, rcont4, rcont5, rcont6, rcont7, rcont8;
-	double a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a_tmp;
+	double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;
+	double *yerr, *yerr2;
+	double *rcont1, *rcont2, *rcont3, *rcont4, *rcont5, *rcont6, *rcont7, *rcont8;
+	double a2, a3, a4, a5, a6, a7, a8, a9, a10, a_tmp;
 }dopri853_values_t;
 
 extern dopri853_values_t dpv;
 
+void integrate(parameters_t *pars);
+void initialize_dopri853(parameters_t *pars);
 void allocate_dopri853_values();
-void perform_step();
-void try_step();
+void destroy_dopri853_values();
+void perform_step(const double dt_try, parameters_t *pars);
 double error(const double dt);
-
+int success(const double err, double *dt);
+void try_step(const double dt, parameters_t *pars);
+double mk_velocities_new(double t, double *f, double a, double *result, parameters_t *pars);
 
 #endif
