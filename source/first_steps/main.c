@@ -11,6 +11,7 @@
 #include "setup.h"
 #include "RK4_stepper.h"
 #include "filehandling.h"
+#include "dopri853_stepper.h"
 #include "tests.h"
 
 // simulation parameters
@@ -86,26 +87,27 @@ int main(int argc, const char * argv[]) {
 #endif
 
     int count = 0;
-    for (double dt = 0.1; dt > 1e-3; dt /= 2.0, count += 1)
+    for (double dt = 0.01; dt > 1e-3; dt /= 2.0, count += 1)
     {
     	pars.t.dt = dt;//1.0 / GRIDPOINTS_X;
         allocate_and_initialize_all(&pars);
 
-        file_create_empty_by_name(pars.file.name_field);
-        file_create_empty_by_name(pars.file.name_powspec);
+        // file_create_empty_by_name(pars.file.name_field);
+        // file_create_empty_by_name(pars.file.name_powspec);
 
         #ifdef ENABLE_PROFILER
         ProfilerStart("testprofile.prof");
         #endif
 
-        run_RK4_stepper(&pars);
+        // run_RK4_stepper(&pars);
+        integrate(&pars);
 
         #ifdef ENABLE_PROFILER
         ProfilerStop();
         #endif
 
-        file_single_write_by_name_1d(frw_a, pars.t.Nt, 1, "a_000");
-        file_single_write_by_name_1d(rho, pars.t.Nt, 1, "rho_000");
+        // file_single_write_by_name_1d(frw_a, pars.t.Nt, 1, "a_000");
+        // file_single_write_by_name_1d(rho, pars.t.Nt, 1, "rho_000");
 
     	free_and_destroy_all(&pars);
         break;

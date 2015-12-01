@@ -15,6 +15,16 @@ dopri853_values_t dpv;
 void integrate(parameters_t *pars) {
 	initialize_dopri853(pars);
 	allocate_dopri853_values();
+	RUNTIME_INFO(puts("Starting dopri853 integration with:"));
+	RUNTIME_INFO(printf("initial time: %f\n", dp.ti));
+	RUNTIME_INFO(printf("final time: %f\n", dp.tf));
+	RUNTIME_INFO(printf("initial time step dt: %f\n", dp.dt));
+	RUNTIME_INFO(printf("minimal time step dt: %f\n", dp.dt_min));
+	RUNTIME_INFO(printf("max number of steps: %zu\n", dp.MAX_STEPS));
+	RUNTIME_INFO(printf("relative tolerance: %f, "
+						"absolute tolerance: %f\n", dp.r_tol, dp.a_tol));
+	RUNTIME_INFO(puts("Using DFT (fftw3) for spatial derivatives.\n"));
+
 	df_a = mk_velocities_new(dp.t, field, f_a, dfield, pars);
 	if (dp.dense)
 	{
@@ -26,9 +36,10 @@ void integrate(parameters_t *pars) {
 	}
 	for (dp.n_stp = 0; dp.n_stp < dp.MAX_STEPS; ++dp.n_stp)
 	{
-		if (dp.t + dp.dt > dp.tf)
+		if (dp.t + dp.dt * 1.0001 > dp.tf)
 		{
 			dp.dt = dp.tf - dp.t;
+			RUNTIME_INFO(printf("overshoot, new dt = %f\n", dp.dt));
 		}
 		perform_step(dp.dt, pars);
 		if (dp.dt_did == dp.dt)
@@ -47,7 +58,7 @@ void integrate(parameters_t *pars) {
 		{
 			// out.save(x,y)
 		}
-		if (dp.t > dp.tf)
+		if (dp.t >= dp.tf)
 		{
 			// for (size_t i = 0; i < dp.Ntot2; ++i)
 			// {
@@ -57,7 +68,7 @@ void integrate(parameters_t *pars) {
 			// {
 			// 	out.save(x,y)
 			// }
-			return;
+			break;
 		}
 		if (fabs(dp.dt_next) <= dp.dt_min)
 		{
@@ -65,7 +76,12 @@ void integrate(parameters_t *pars) {
 			exit(EXIT_FAILURE);
 		}
 		dp.dt = dp.dt_next;
+		RUNTIME_INFO(printf("step: %d, next dt: %f\n", dp.n_stp, dp.dt));
 	}
+	RUNTIME_INFO(puts("finished dopri853 with:"));
+	RUNTIME_INFO(printf("steps: %d\n", dp.n_stp + 1));
+	RUNTIME_INFO(printf("good steps: %d\n", dp.n_ok));
+	RUNTIME_INFO(printf("bad steps: %d\n\n", dp.n_bad));
 	destroy_dopri853_values();
 }
 
@@ -77,8 +93,12 @@ void initialize_dopri853(parameters_t *pars) {
     dp.dt = pars->t.dt;
     dp.dt_did = 0.0;
     dp.dt_next = pars->t.dt;
+    dp.dt_min = 1.0e-5;
     dp.Ntot2 = 2 * (pars->x.N * pars->y.N * pars->z.N);
     dp.MAX_STEPS = 50000;
+    dp.n_stp = 0;
+    dp.n_ok = 0;
+    dp.n_bad = 0;
     dp.beta  = 0.0;
  	dp.alpha = 1.0/8.0 - dp.beta * 0.2;
  	dp.safe = 0.9;
@@ -90,6 +110,7 @@ void initialize_dopri853(parameters_t *pars) {
 	dp.reject = 0;
 	dp.eps = DBL_EPSILON;
     //dp.dense ;
+    RUNTIME_INFO(puts("Initialized dopri853 parameters.\n"));
 }
 
 void allocate_dopri853_values() {
@@ -126,7 +147,7 @@ void allocate_dopri853_values() {
         fputs("Allocating memory failed.", stderr);
         exit(EXIT_FAILURE);
     }
-    RUNTIME_INFO(puts("Allocated memory for external variables.\n"));
+    RUNTIME_INFO(puts("Allocated memory for dopri853 variables.\n"));
 }
 
 void destroy_dopri853_values() {
@@ -152,6 +173,7 @@ void destroy_dopri853_values() {
     free(dpv.rcont6);
     free(dpv.rcont7);
     free(dpv.rcont8);
+    RUNTIME_INFO(puts("Freed memory of dopri853 variables.\n"));
 }
 
 void perform_step(const double dt_try, parameters_t *pars) {
@@ -169,34 +191,35 @@ void perform_step(const double dt_try, parameters_t *pars) {
 			fputs("Stepsize underflow", stderr);
 			exit(EXIT_FAILURE);
 		}
-		df_a_new = mk_velocities_new(dp.t + dt, field_new, f_a_new, dfield_new, pars);
-		if (dp.dense)
-		{
-			// prepare_dense_output(dt);
-		}
-		#pragma omp parallel for
-		for (size_t i = 0; i < dp.Ntot2; ++i)
-		{
-			dfield[i] = dfield_new[i];
-			field[i] = field_new[i];
-		}
-		df_a = df_a_new;
-		f_a = f_a_new;
-		dp.t_old = dp.t;
-		dp.t += (dp.dt_did = dt);
-		//dp.dt_next = con.dt_next;
 	}
+	df_a_new = mk_velocities_new(dp.t + dt, field_new, f_a_new, dfield_new, pars);
+	if (dp.dense)
+	{
+		// prepare_dense_output(dt);
+	}
+	#pragma omp parallel for
+	for (size_t i = 0; i < dp.Ntot2; ++i)
+	{
+		dfield[i] = dfield_new[i];
+		field[i] = field_new[i];
+	}
+	df_a = df_a_new;
+	f_a = f_a_new;
+	dp.t_old = dp.t;
+	dp.t += (dp.dt_did = dt);
+	//dp.dt_next = con.dt_next;
 }
 
 double error(const double dt) {
 	size_t N = dp.Ntot2;
 
 	double err = 0.0, err2 = 0.0, sk, deno;
+	// TODO[performance] parallelize with reduction to err2, err
 	for (size_t i = 0; i < N; ++i)
 	{
 		sk = dp.a_tol + dp.r_tol * MAX(fabs(field[i]), fabs(field_new[i]));
-		err2 += sqrt(dpv.yerr[i] / sk);
-		err  += sqrt(dpv.yerr2[i] / sk);
+		err2 += (dpv.yerr[i] / sk) * (dpv.yerr[i] / sk);
+		err  += (dpv.yerr2[i] / sk) * (dpv.yerr2[i] / sk);
 	}
 	deno = err + 0.01 * err2;
 	if (deno <= 0.0)
@@ -415,8 +438,8 @@ void try_step(const double dt, parameters_t *pars) {
 	#pragma omp parallel for
 	for (i = 0; i < Ntot2; ++i)
 	{
-		dpv.yerr[i] = dpv.k4[i] - dpc.bhh1 * dfield[i] - dpc.bhh2 * dpv.k9[i] -
-					  dpc.bhh3 * dpv.k3[i];
+		dpv.yerr[i]  = dpv.k4[i] - dpc.bhh1 * dfield[i] - dpc.bhh2 * dpv.k9[i] -
+					   dpc.bhh3 * dpv.k3[i];
 		dpv.yerr2[i] = dpc.er1 * dfield[i] + dpc.er6 * dpv.k6[i] +
 					   dpc.er7 * dpv.k7[i] + dpc.er8 * dpv.k8[i] +
 					   dpc.er9 * dpv.k9[i] + dpc.er10 * dpv.k10[i] +

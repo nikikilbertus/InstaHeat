@@ -271,6 +271,7 @@ void mk_initial_conditions(parameters_t *pars) {
     }
 
     frw_a[0] = 1.0;
+    f_a = 1.0;
 
     // Console output for debugging
     #ifdef DEBUG

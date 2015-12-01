@@ -95,7 +95,7 @@ simulation parameters
 // temporal
 #define DELTA_T					(-0.1) // negative for manual adjustment
 #define INITIAL_TIME 			(0.0)
-#define FINAL_TIME	 			(250.0)
+#define FINAL_TIME	 			(10.0)
 // potential
 #define MASS 					(1.0)
 #define COUPLING 				(1.0) // coupling in a phi4 potential

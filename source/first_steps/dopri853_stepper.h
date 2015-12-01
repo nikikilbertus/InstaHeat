@@ -42,10 +42,9 @@ typedef struct {
     double dt_min;
     size_t Ntot2;
     size_t MAX_STEPS;
+    int n_stp;
     int n_ok;
     int n_bad;
-    int n_var;
-    int n_stp;
     double beta, alpha;
     double safe;
     double minscale, maxscale;
