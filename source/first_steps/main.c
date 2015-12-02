@@ -20,18 +20,23 @@ parameters_t pars;
 // spatial grid points
 double *grid;
 
+// time slices
+double *time_buf;
+
 // current field and temporal derivatives
 double *field, *field_new;
 double *dfield, *dfield_new;
-
+double *field_buf;
 
 // evolution of the scale parameter a for the FRW equations
 double *frw_a;
 double f_a, df_a;
 double f_a_new, df_a_new;
+double *a_buf;
 
 // evolution of the total energy of the field
 double *rho;
+double *rho_buf;
 
 // power spectrum
 double *pow_spec;

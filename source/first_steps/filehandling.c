@@ -8,14 +8,14 @@
 void h5_create_empty_by_path(char *name) {
     hsize_t rank = 2;
     // TODO DELETE AFTER TESTING
-    hsize_t N = 10;//pars.Ntot;
+    hsize_t N = pars.Ntot;
     herr_t status;
 
     // create file
     hid_t file = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     pars.file.id = file;
 
-    // --------------------------phi------------------------------------------
+    // --------------------------phi--------------------------------------------
     // create dataspace for the phi
     hsize_t dims[2] = {WRITE_OUT_BUFFER_NUMBER, N};
     hsize_t max_dims[2] = {H5S_UNLIMITED, N};
@@ -95,32 +95,77 @@ void h5_create_empty_by_path(char *name) {
     status = H5Sclose(dspace_rho);
 }
 
-void h5_append_dataset_by_id_2d(hid_t dset, double *field,
-                                    hsize_t N, hsize_t Nt) {
-    const hsize_t rank = 2;
+void h5_write_buffers() {
+    hsize_t Nt = WRITE_OUT_BUFFER_NUMBER;
+    hsize_t N = pars.Ntot;
+    hsize_t rank;
     herr_t status;
 
+    // --------------------------phi--------------------------------------------
+    rank = 2;
+    hid_t dset = pars.file.dset_phi;
     hsize_t add_dims[2] = {Nt, N};
-    hid_t mem_space = H5Screate_simple(rank, add_dims, NULL);
 
-    hid_t dataspace = H5Dget_space(dset);
+    hid_t mem_space = H5Screate_simple(rank, add_dims, NULL);
+    hid_t dspace = H5Dget_space(dset);
     hsize_t curr_dims[rank];
     hsize_t max_dims[rank];
-    H5Sget_simple_extent_dims(dataspace, curr_dims, max_dims);
-
+    H5Sget_simple_extent_dims(dspace, curr_dims, max_dims);
     hsize_t new_dims[2] = {curr_dims[0] + Nt, N};
     H5Dset_extent(dset, new_dims);
-
     hsize_t start_dims[2] = {curr_dims[0] + 1, 0};
-    H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start_dims, NULL,
+    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
                             add_dims, NULL);
-    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dataspace, H5P_DEFAULT, field);
+    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, field_buf);
 
     H5Sclose(mem_space);
-    H5Sclose(dataspace);
+    H5Sclose(dspace);
+
+    // --------------------------time-------------------------------------------
+    rank = 1;
+    dset = pars.file.dset_time;
+
+    mem_space = H5Screate_simple(rank, add_dims, NULL);
+    dspace = H5Dget_space(dset);
+    H5Dset_extent(dset, new_dims);
+    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
+                            add_dims, NULL);
+    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, time_buf);
+
+    H5Sclose(mem_space);
+    H5Sclose(dspace);
+
+    // --------------------------a----------------------------------------------
+    rank = 1;
+    dset = pars.file.dset_a;
+
+    mem_space = H5Screate_simple(rank, add_dims, NULL);
+    dspace = H5Dget_space(dset);
+    H5Dset_extent(dset, new_dims);
+    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
+                            add_dims, NULL);
+    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, a_buf);
+
+    H5Sclose(mem_space);
+    H5Sclose(dspace);
+
+    // --------------------------time-------------------------------------------
+    rank = 1;
+    dset = pars.file.dset_rho;
+
+    mem_space = H5Screate_simple(rank, add_dims, NULL);
+    dspace = H5Dget_space(dset);
+    H5Dset_extent(dset, new_dims);
+    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
+                            add_dims, NULL);
+    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, rho_buf);
+
+    H5Sclose(mem_space);
+    H5Sclose(dspace);
 }
 
-void h5_close(hid_t file) {
+void h5_close() {
+    hid_t file = pars.file.id;
     H5Fflush(file, H5F_SCOPE_GLOBAL);
     hid_t obj_ids[10];
     hsize_t obj_count = H5Fget_obj_ids(file, H5F_OBJ_DATASET, -1, obj_ids);

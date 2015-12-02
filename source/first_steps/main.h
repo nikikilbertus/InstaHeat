@@ -171,17 +171,23 @@ extern parameters_t pars;
 // spatial gridpoints
 extern double *grid;
 
+// time slices buffer
+extern double *time_buf;
+
 // solutions for the scalar field we evolve and its temporal derivative
 extern double *field, *dfield;
 extern double *field_new, *dfield_new;
+extern double *field_buf;
 
 // solution for the FRW euqations
 extern double *frw_a;
 extern double f_a, df_a;
 extern double f_a_new, df_a_new;
+extern double *a_buf;
 
 // T^{00} component of the field
 extern double *rho;
+extern double *rho_buf;
 
 // power spectrum
 extern double *pow_spec;
