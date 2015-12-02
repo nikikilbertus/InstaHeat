@@ -6,6 +6,9 @@ syntax: glob
 # object files and executable
 *.o
 *prog
+
+# any data and input files (might allow .txt input files later)
 *.txt
+*.h5
 
 *~
