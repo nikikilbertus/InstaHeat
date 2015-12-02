@@ -66,14 +66,13 @@ typedef struct {
 
 extern dopri853_values_t dpv;
 
-void integrate(parameters_t *pars);
 void initialize_dopri853(parameters_t *pars);
-void allocate_dopri853_values();
-void destroy_dopri853_values();
+void run_dopri853(parameters_t *pars);
 void perform_step(const double dt_try, parameters_t *pars);
+void try_step(const double dt, parameters_t *pars);
 double error(const double dt);
 int success(const double err, double *dt);
-void try_step(const double dt, parameters_t *pars);
-double mk_velocities_new(double t, double *f, double a, double *result, parameters_t *pars);
+void allocate_dopri853_values();
+void destroy_dopri853_values();
 
 #endif

@@ -29,10 +29,11 @@ void initialize_parameters(parameters_t *pars) {
 
     pars->Ntot = pars->x.N * pars->y.N * pars->z.N;
 
-    pars->t.dt  = DELTA_T > 0 ? DELTA_T : pars->t.dt;
-    pars->t.ti  = INITIAL_TIME;
-    pars->t.tf  = FINAL_TIME;
-	pars->t.Nt  = ceil((pars->t.tf - pars->t.ti) / pars->t.dt) + 1;
+    pars->t.dt = DELTA_T > 0 ? DELTA_T : pars->t.dt;
+    pars->t.t  = INITIAL_TIME;
+    pars->t.ti = INITIAL_TIME;
+    pars->t.tf = FINAL_TIME;
+	pars->t.Nt = ceil((pars->t.tf - pars->t.ti) / pars->t.dt) + 1;
 
     pars->cutoff_fraction = CUTOFF_FRACTION;
 

@@ -1,8 +1,135 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "hdf5.h"
 #include "filehandling.h"
 #include "main.h"
+
+void h5_create_empty_by_path(char *name) {
+    hsize_t rank = 2;
+    // TODO DELETE AFTER TESTING
+    hsize_t N = 10;//pars.Ntot;
+    herr_t status;
+
+    // create file
+    hid_t file = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    pars.file.id = file;
+
+    // --------------------------phi------------------------------------------
+    // create dataspace for the phi
+    hsize_t dims[2] = {WRITE_OUT_BUFFER_NUMBER, N};
+    hsize_t max_dims[2] = {H5S_UNLIMITED, N};
+    hid_t dspace_phi = H5Screate_simple(rank, dims, max_dims);
+
+    // create property list for the phi
+    hid_t plist_phi = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_layout(plist_phi, H5D_CHUNKED);
+    hsize_t chunk_dims[2] = {WRITE_OUT_BUFFER_NUMBER, N};
+    H5Pset_chunk(plist_phi, rank, chunk_dims);
+
+    // create dataset for the phi
+    hid_t dset_phi = H5Dcreate(file, "phi", H5T_NATIVE_DOUBLE,
+                            dspace_phi, H5P_DEFAULT, plist_phi, H5P_DEFAULT);
+    pars.file.dset_phi = dset_phi;
+
+    // close property list and dataspace
+    status = H5Pclose(plist_phi);
+    status = H5Sclose(dspace_phi);
+
+    // --------------------------time-------------------------------------------
+    // create dataspace for the time
+    rank = 1;
+    dims[0] = WRITE_OUT_BUFFER_NUMBER;
+    max_dims[0] = H5S_UNLIMITED;
+    hid_t dspace_time = H5Screate_simple(rank, dims, max_dims);
+
+    // create property list for the time
+    hid_t plist_time = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_layout(plist_time, H5D_CHUNKED);
+    chunk_dims[0] = WRITE_OUT_BUFFER_NUMBER;
+    H5Pset_chunk(plist_time, rank, chunk_dims);
+
+    // create dataset for the time
+    hid_t dset_time = H5Dcreate(file, "time", H5T_NATIVE_DOUBLE,
+                            dspace_time, H5P_DEFAULT, plist_time, H5P_DEFAULT);
+    pars.file.dset_time = dset_time;
+
+    // close property list and dspace_time
+    status = H5Pclose(plist_time);
+    status = H5Sclose(dspace_time);
+
+    // ---------------------------a---------------------------------------------
+    // create dataspace for the a
+    hid_t dspace_a = H5Screate_simple(rank, dims, max_dims);
+
+    // create property list for the a
+    hid_t plist_a = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_layout(plist_a, H5D_CHUNKED);
+    H5Pset_chunk(plist_a, rank, chunk_dims);
+
+    // create dataset for the a
+    hid_t dset_a = H5Dcreate(file, "a", H5T_NATIVE_DOUBLE,
+                            dspace_a, H5P_DEFAULT, plist_a, H5P_DEFAULT);
+    pars.file.dset_a = dset_a;
+
+    // close property list and dspace_a
+    status = H5Pclose(plist_a);
+    status = H5Sclose(dspace_a);
+
+    // ---------------------------rho-------------------------------------------
+    // create dataspace for the rho
+    hid_t dspace_rho = H5Screate_simple(rank, dims, max_dims);
+
+    // create property list for the rho
+    hid_t plist_rho = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_layout(plist_rho, H5D_CHUNKED);
+    H5Pset_chunk(plist_rho, rank, chunk_dims);
+
+    // create dataset for the rho
+    hid_t dset_rho = H5Dcreate(file, "rho", H5T_NATIVE_DOUBLE,
+                            dspace_rho, H5P_DEFAULT, plist_rho, H5P_DEFAULT);
+    pars.file.dset_rho = dset_rho;
+
+    // close property list and dspace_rho
+    status = H5Pclose(plist_rho);
+    status = H5Sclose(dspace_rho);
+}
+
+void h5_append_dataset_by_id_2d(hid_t dset, double *field,
+                                    hsize_t N, hsize_t Nt) {
+    const hsize_t rank = 2;
+    herr_t status;
+
+    hsize_t add_dims[2] = {Nt, N};
+    hid_t mem_space = H5Screate_simple(rank, add_dims, NULL);
+
+    hid_t dataspace = H5Dget_space(dset);
+    hsize_t curr_dims[rank];
+    hsize_t max_dims[rank];
+    H5Sget_simple_extent_dims(dataspace, curr_dims, max_dims);
+
+    hsize_t new_dims[2] = {curr_dims[0] + Nt, N};
+    H5Dset_extent(dset, new_dims);
+
+    hsize_t start_dims[2] = {curr_dims[0] + 1, 0};
+    H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start_dims, NULL,
+                            add_dims, NULL);
+    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dataspace, H5P_DEFAULT, field);
+
+    H5Sclose(mem_space);
+    H5Sclose(dataspace);
+}
+
+void h5_close(hid_t file) {
+    H5Fflush(file, H5F_SCOPE_GLOBAL);
+    hid_t obj_ids[10];
+    hsize_t obj_count = H5Fget_obj_ids(file, H5F_OBJ_DATASET, -1, obj_ids);
+    for (hsize_t i = 0; i < obj_count; ++i)
+    {
+        H5Dclose(obj_ids[i]);
+    }
+    H5Fclose(file);
+}
 
 /*
 shortcut for writing a single vector to a new file.

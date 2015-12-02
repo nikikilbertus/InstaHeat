@@ -6,14 +6,41 @@
 #include <fftw3.h>
 #include "dopri853_stepper.h"
 #include "main.h"
-#include "RK4_stepper.h"
 #include "evolution_toolkit.h"
 #include "filehandling.h"
 
 dopri853_control_t dp;
 dopri853_values_t dpv;
 
-void integrate(parameters_t *pars) {
+void initialize_dopri853(parameters_t *pars) {
+	dp.t = pars->t.ti;
+    dp.t_old = pars->t.ti;
+    dp.ti = pars->t.ti;
+    dp.tf = pars->t.tf;
+    dp.dt = pars->t.dt;
+    dp.dt_did = 0.0;
+    dp.dt_next = pars->t.dt;
+    dp.dt_min = 1.0e-5;
+    dp.Ntot2 = 2 * (pars->x.N * pars->y.N * pars->z.N);
+    dp.MAX_STEPS = 50000;
+    dp.n_stp = 0;
+    dp.n_ok = 0;
+    dp.n_bad = 0;
+    dp.beta  = 0.0;
+ 	dp.alpha = 1.0/8.0 - dp.beta * 0.2;
+ 	dp.safe = 0.9;
+ 	dp.minscale = 0.333;
+ 	dp.maxscale = 6.0;
+	dp.a_tol = 1.0e-5;
+	dp.r_tol = dp.a_tol;
+	dp.err_old = 1.0e-4;
+	dp.reject = 0;
+	dp.eps = DBL_EPSILON;
+    //dp.dense ;
+    RUNTIME_INFO(puts("Initialized dopri853 parameters.\n"));
+}
+
+void run_dopri853(parameters_t *pars) {
 	initialize_dopri853(pars);
 	allocate_dopri853_values();
 	RUNTIME_INFO(puts("Starting dopri853 integration with:"));
@@ -32,11 +59,11 @@ void integrate(parameters_t *pars) {
 		RUNTIME_INFO(puts("Filtering disabled.\n"));
 	#endif
 
-	df_a = mk_velocities_new(dp.t, field, f_a, dfield, pars);
+	df_a = mk_velocities(dp.t, field, f_a, dfield, pars);
 	file_append_by_name_1d(&f_a, 1, 1, "frw_a");
 	file_append_by_name_1d(&dp.t, 1, 1, "t");
+	//TODO[performance]: get rid of extra call to mk_rho
 	double rho_write = mk_rho(field, f_a, pars);
-	//TODO[performance]: perform that somewhere else to get rid of extra call to mk_rho
 	file_append_by_name_1d(&rho_write, 1, 1, "rho");
 	file_append_by_name_1d(field, pars->Ntot, 1, pars->file.name_field);
 	// if (dp.dense)
@@ -65,6 +92,7 @@ void integrate(parameters_t *pars) {
 		}
 		file_append_by_name_1d(&f_a, 1, 1, "frw_a");
 		file_append_by_name_1d(&dp.t, 1, 1, "t");
+		//TODO[performance]: get rid of extra call to mk_rho
 		rho_write = mk_rho(field, f_a, pars);
 		file_append_by_name_1d(&rho_write, 1, 1, "rho");
 		file_append_by_name_1d(field, pars->Ntot, 1, pars->file.name_field);
@@ -103,32 +131,217 @@ void integrate(parameters_t *pars) {
 	destroy_dopri853_values();
 }
 
-void initialize_dopri853(parameters_t *pars) {
-	dp.t = pars->t.ti;
-    dp.t_old = pars->t.ti;
-    dp.ti = pars->t.ti;
-    dp.tf = pars->t.tf;
-    dp.dt = pars->t.dt;
-    dp.dt_did = 0.0;
-    dp.dt_next = pars->t.dt;
-    dp.dt_min = 1.0e-5;
-    dp.Ntot2 = 2 * (pars->x.N * pars->y.N * pars->z.N);
-    dp.MAX_STEPS = 50000;
-    dp.n_stp = 0;
-    dp.n_ok = 0;
-    dp.n_bad = 0;
-    dp.beta  = 0.0;
- 	dp.alpha = 1.0/8.0 - dp.beta * 0.2;
- 	dp.safe = 0.9;
- 	dp.minscale = 0.333;
- 	dp.maxscale = 6.0;
-	dp.a_tol = 1.0e-5;
-	dp.r_tol = dp.a_tol;
-	dp.err_old = 1.0e-4;
-	dp.reject = 0;
-	dp.eps = DBL_EPSILON;
-    //dp.dense ;
-    RUNTIME_INFO(puts("Initialized dopri853 parameters.\n"));
+void perform_step(const double dt_try, parameters_t *pars) {
+	double dt = dt_try;
+	for ( ; ; )
+	{
+		try_step(dt, pars);
+		double err = error(dt);
+		if (success(err, &dt))
+		{
+			break;
+		}
+		if (fabs(dt) <= fabs(dp.t) * dp.eps)
+		{
+			fputs("Stepsize underflow", stderr);
+			exit(EXIT_FAILURE);
+		}
+	}
+	#ifdef ENABLE_FFT_FILTER
+			evo_flags.filter = 1;
+	#endif
+	evo_flags.write_pow_spec = 1;
+	df_a_new = mk_velocities(dp.t + dt, field_new, f_a_new, dfield_new, pars);
+	#ifdef ENABLE_FFT_FILTER
+			evo_flags.filter = 0;
+	#endif
+	evo_flags.write_pow_spec = 0;
+	if (dp.dense)
+	{
+		// prepare_dense_output(dt);
+	}
+	#pragma omp parallel for
+	for (size_t i = 0; i < dp.Ntot2; ++i)
+	{
+		dfield[i] = dfield_new[i];
+		field[i] = field_new[i];
+	}
+	df_a = df_a_new;
+	f_a = f_a_new;
+	dp.t_old = dp.t;
+	dp.t += (dp.dt_did = dt);
+	//dp.dt_next = con.dt_next;
+}
+
+void try_step(const double dt, parameters_t *pars) {
+	size_t i;
+	double t = dp.t;
+	size_t Ntot2 = dp.Ntot2;
+	// ------------ 1 ------------
+	// dpv.a1 = mk_velocities(t, field, f_a, dpv.k1, pars);
+
+	// ------------ 2 ------------
+	#pragma omp parallel for
+	for (i = 0; i < Ntot2; ++i)
+	{
+		dpv.k_tmp[i] = field[i] + dt * dpc.a21 * dfield[i];
+	}
+	dpv.a_tmp = f_a + dt * dpc.a21 * df_a;
+	dpv.a2 = mk_velocities(t + dpc.c2 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k2, pars);
+
+	// ------------ 3 ------------
+	#pragma omp parallel for
+	for (i = 0; i < Ntot2; ++i)
+	{
+		dpv.k_tmp[i] = field[i] + dt *
+			(dpc.a31 * dfield[i] + dpc.a32 * dpv.k2[i]);
+	}
+	dpv.a_tmp = f_a + dt * (dpc.a31 * df_a + dpc.a32 * dpv.a2);
+	dpv.a3 = mk_velocities(t + dpc.c3 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k3, pars);
+
+	// ------------ 4 ------------
+	#pragma omp parallel for
+	for (i = 0; i < Ntot2; ++i)
+	{
+		dpv.k_tmp[i] = field[i] + dt *
+			(dpc.a41 * dfield[i] + dpc.a43 * dpv.k3[i]);
+	}
+	dpv.a_tmp = f_a + dt * (dpc.a41 * df_a + dpc.a43 * dpv.a3);
+	dpv.a4 = mk_velocities(t + dpc.c4 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k4, pars);
+
+	// ------------ 5 ------------
+	#pragma omp parallel for
+	for (i = 0; i < Ntot2; ++i)
+	{
+		dpv.k_tmp[i] = field[i] + dt *
+			(dpc.a51 * dfield[i] + dpc.a53 * dpv.k3[i] + dpc.a54 * dpv.k4[i]);
+	}
+	dpv.a_tmp = f_a + dt * (dpc.a51 * df_a + dpc.a53 * dpv.a3 + dpc.a54 * dpv.a4);
+	dpv.a5 = mk_velocities(t + dpc.c5 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k5, pars);
+
+	// ------------ 6 ------------
+	#pragma omp parallel for
+	for (i = 0; i < Ntot2; ++i)
+	{
+		dpv.k_tmp[i] = field[i] + dt *
+			(dpc.a61 * dfield[i] + dpc.a64 * dpv.k4[i] + dpc.a65 * dpv.k5[i]);
+	}
+	dpv.a_tmp = f_a + dt * (dpc.a61 * df_a + dpc.a64 * dpv.a4 + dpc.a65 * dpv.a5);
+	dpv.a6 = mk_velocities(t + dpc.c6 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k6, pars);
+
+	// ------------ 7 ------------
+	#pragma omp parallel for
+	for (i = 0; i < Ntot2; ++i)
+	{
+		dpv.k_tmp[i] = field[i] + dt *
+			(dpc.a71 * dfield[i] + dpc.a74 * dpv.k4[i] + dpc.a75 * dpv.k5[i] +
+			 dpc.a76 * dpv.k6[i]);
+	}
+	dpv.a_tmp = f_a + dt *
+			(dpc.a71 * df_a + dpc.a74 * dpv.a4 + dpc.a75 * dpv.a5 +
+			 dpc.a76 * dpv.a6);
+	dpv.a7 = mk_velocities(t + dpc.c7 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k7, pars);
+
+	// ------------ 8 ------------
+	#pragma omp parallel for
+	for (i = 0; i < Ntot2; ++i)
+	{
+		dpv.k_tmp[i] = field[i] + dt *
+			(dpc.a81 * dfield[i] + dpc.a84 * dpv.k4[i] + dpc.a85 * dpv.k5[i] +
+			 dpc.a86 * dpv.k6[i] + dpc.a87 * dpv.k7[i]);
+	}
+	dpv.a_tmp = f_a + dt *
+			(dpc.a81 * df_a + dpc.a84 * dpv.a4 + dpc.a85 * dpv.a5 +
+			 dpc.a86 * dpv.a6 + dpc.a87 * dpv.a7);
+	dpv.a8 = mk_velocities(t + dpc.c8 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k8, pars);
+
+	// ------------ 9 ------------
+	#pragma omp parallel for
+	for (i = 0; i < Ntot2; ++i)
+	{
+		dpv.k_tmp[i] = field[i] + dt *
+			(dpc.a91 * dfield[i] + dpc.a94 * dpv.k4[i] + dpc.a95 * dpv.k5[i] +
+			 dpc.a96 * dpv.k6[i] + dpc.a97 * dpv.k7[i] + dpc.a98 * dpv.k8[i]);
+	}
+	dpv.a_tmp = f_a + dt *
+			(dpc.a91 * df_a + dpc.a94 * dpv.a4 + dpc.a95 * dpv.a5 +
+			 dpc.a96 * dpv.a6 + dpc.a97 * dpv.a7 + dpc.a98 * dpv.a8);
+	dpv.a9 = mk_velocities(t + dpc.c9 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k9, pars);
+
+	// ------------ 10 ------------
+	#pragma omp parallel for
+	for (i = 0; i < Ntot2; ++i)
+	{
+		dpv.k_tmp[i] = field[i] + dt *
+			(dpc.a101 * dfield[i] + dpc.a104 * dpv.k4[i] + dpc.a105 * dpv.k5[i] +
+			 dpc.a106 * dpv.k6[i] + dpc.a107 * dpv.k7[i] + dpc.a108 * dpv.k8[i] +
+			 dpc.a109 * dpv.k9[i]);
+	}
+	dpv.a_tmp = f_a + dt *
+			(dpc.a101 * df_a + dpc.a104 * dpv.a4 + dpc.a105 * dpv.a5 +
+			 dpc.a106 * dpv.a6 + dpc.a107 * dpv.a7 + dpc.a108 * dpv.a8 +
+			 dpc.a109 * dpv.a9);
+	dpv.a10 = mk_velocities(t + dpc.c10 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k10, pars);
+
+	// ------------ 11 ------------
+	#pragma omp parallel for
+	for (i = 0; i < Ntot2; ++i)
+	{
+		dpv.k_tmp[i] = field[i] + dt *
+			(dpc.a111 * dfield[i] + dpc.a114 * dpv.k4[i] + dpc.a115 * dpv.k5[i] +
+			 dpc.a116 * dpv.k6[i] + dpc.a117 * dpv.k7[i] + dpc.a118 * dpv.k8[i] +
+			 dpc.a119 * dpv.k9[i] + dpc.a1110 * dpv.k10[i]);
+	}
+	dpv.a_tmp = f_a + dt *
+			(dpc.a111 * df_a + dpc.a114 * dpv.a4 + dpc.a115 * dpv.a5 +
+			 dpc.a116 * dpv.a6 + dpc.a117 * dpv.a7 + dpc.a118 * dpv.a8 +
+			 dpc.a119 * dpv.a9 + dpc.a1110 * dpv.a10);
+	dpv.a2 = mk_velocities(t + dpc.c11 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k2, pars);
+
+	// ------------ new dt ------------
+	double tpdt = t + dt;
+
+	// ------------ 12 ------------
+	#pragma omp parallel for
+	for (i = 0; i < Ntot2; ++i)
+	{
+		dpv.k_tmp[i] = field[i] + dt *
+			(dpc.a121 * dfield[i] + dpc.a124 * dpv.k4[i] + dpc.a125 * dpv.k5[i] +
+			 dpc.a126 * dpv.k6[i] + dpc.a127 * dpv.k7[i] + dpc.a128 * dpv.k8[i] +
+			 dpc.a129 * dpv.k9[i] + dpc.a1210 * dpv.k10[i] + dpc.a1211 * dpv.k2[i]);
+	}
+	dpv.a_tmp = f_a + dt *
+			(dpc.a121 * df_a + dpc.a124 * dpv.a4 + dpc.a125 * dpv.a5 +
+			 dpc.a126 * dpv.a6 + dpc.a127 * dpv.a7 + dpc.a128 * dpv.a8 +
+			 dpc.a129 * dpv.a9 + dpc.a1210 * dpv.a10 + dpc.a1211 * dpv.a2);
+	dpv.a3 = mk_velocities(tpdt, dpv.k_tmp, dpv.a_tmp, dpv.k3, pars);
+
+	// ------------ step ahead ------------
+	#pragma omp parallel for
+	for (i = 0; i < Ntot2; ++i)
+	{
+		dpv.k4[i] = dpc.b1 * dfield[i] + dpc.b6 * dpv.k6[i] + dpc.b7 * dpv.k7[i] +
+					dpc.b8 * dpv.k8[i] + dpc.b9 * dpv.k9[i] + dpc.b10 * dpv.k10[i] +
+					dpc.b11 * dpv.k2[i] + dpc.b12 * dpv.k3[i];
+
+		field_new[i] = field[i] + dt * dpv.k4[i];
+	}
+	dpv.a4 = dpc.b1 * df_a + dpc.b6 * dpv.a6 + dpc.b7 * dpv.a7 +
+			 dpc.b8 * dpv.a8 + dpc.b9 * dpv.a9 + dpc.b10 * dpv.a10 +
+			 dpc.b11 * dpv.a2 + dpc.b12 * dpv.a3;
+	f_a_new = f_a + dt * dpv.a4;
+
+	// ------------ error estimates ------------
+	#pragma omp parallel for
+	for (i = 0; i < Ntot2; ++i)
+	{
+		dpv.yerr[i]  = dpv.k4[i] - dpc.bhh1 * dfield[i] - dpc.bhh2 * dpv.k9[i] -
+					   dpc.bhh3 * dpv.k3[i];
+		dpv.yerr2[i] = dpc.er1 * dfield[i] + dpc.er6 * dpv.k6[i] +
+					   dpc.er7 * dpv.k7[i] + dpc.er8 * dpv.k8[i] +
+					   dpc.er9 * dpv.k9[i] + dpc.er10 * dpv.k10[i] +
+					   dpc.er11 * dpv.k2[i] + dpc.er12 * dpv.k3[i];
+	}
 }
 
 void allocate_dopri853_values() {
@@ -166,74 +379,6 @@ void allocate_dopri853_values() {
         exit(EXIT_FAILURE);
     }
     RUNTIME_INFO(puts("Allocated memory for dopri853 variables.\n"));
-}
-
-void destroy_dopri853_values() {
-	free(dpv.k2);
-	free(dpv.k3);
-	free(dpv.k4);
-	free(dpv.k5);
-	free(dpv.k6);
-	free(dpv.k7);
-	free(dpv.k8);
-	free(dpv.k9);
-	free(dpv.k10);
-    free(dpv.k_tmp);
-
-    free(dpv.yerr);
-    free(dpv.yerr2);
-
-    free(dpv.rcont1);
-    free(dpv.rcont2);
-    free(dpv.rcont3);
-    free(dpv.rcont4);
-    free(dpv.rcont5);
-    free(dpv.rcont6);
-    free(dpv.rcont7);
-    free(dpv.rcont8);
-    RUNTIME_INFO(puts("Freed memory of dopri853 variables.\n"));
-}
-
-void perform_step(const double dt_try, parameters_t *pars) {
-	double dt = dt_try;
-	for ( ; ; )
-	{
-		try_step(dt, pars);
-		double err = error(dt);
-		if (success(err, &dt))
-		{
-			break;
-		}
-		if (fabs(dt) <= fabs(dp.t) * dp.eps)
-		{
-			fputs("Stepsize underflow", stderr);
-			exit(EXIT_FAILURE);
-		}
-	}
-	#ifdef ENABLE_FFT_FILTER
-			evo_flags.filter = 1;
-	#endif
-	evo_flags.write_pow_spec = 1;
-	df_a_new = mk_velocities_new(dp.t + dt, field_new, f_a_new, dfield_new, pars);
-	#ifdef ENABLE_FFT_FILTER
-			evo_flags.filter = 0;
-	#endif
-	evo_flags.write_pow_spec = 0;
-	if (dp.dense)
-	{
-		// prepare_dense_output(dt);
-	}
-	#pragma omp parallel for
-	for (size_t i = 0; i < dp.Ntot2; ++i)
-	{
-		dfield[i] = dfield_new[i];
-		field[i] = field_new[i];
-	}
-	df_a = df_a_new;
-	f_a = f_a_new;
-	dp.t_old = dp.t;
-	dp.t += (dp.dt_did = dt);
-	//dp.dt_next = con.dt_next;
 }
 
 double error(const double dt) {
@@ -302,199 +447,28 @@ int success(const double err, double *dt) {
 	}
 }
 
-void try_step(const double dt, parameters_t *pars) {
-	size_t i;
-	double t = dp.t;
-	size_t Ntot2 = dp.Ntot2;
-	// ------------ 1 ------------
-	// dpv.a1 = mk_velocities_new(t, field, f_a, dpv.k1, pars);
+void destroy_dopri853_values() {
+	free(dpv.k2);
+	free(dpv.k3);
+	free(dpv.k4);
+	free(dpv.k5);
+	free(dpv.k6);
+	free(dpv.k7);
+	free(dpv.k8);
+	free(dpv.k9);
+	free(dpv.k10);
+    free(dpv.k_tmp);
 
-	// ------------ 2 ------------
-	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
-	{
-		dpv.k_tmp[i] = field[i] + dt * dpc.a21 * dfield[i];
-	}
-	dpv.a_tmp = f_a + dt * dpc.a21 * df_a;
-	dpv.a2 = mk_velocities_new(t + dpc.c2 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k2, pars);
+    free(dpv.yerr);
+    free(dpv.yerr2);
 
-	// ------------ 3 ------------
-	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
-	{
-		dpv.k_tmp[i] = field[i] + dt *
-			(dpc.a31 * dfield[i] + dpc.a32 * dpv.k2[i]);
-	}
-	dpv.a_tmp = f_a + dt * (dpc.a31 * df_a + dpc.a32 * dpv.a2);
-	dpv.a3 = mk_velocities_new(t + dpc.c3 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k3, pars);
-
-	// ------------ 4 ------------
-	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
-	{
-		dpv.k_tmp[i] = field[i] + dt *
-			(dpc.a41 * dfield[i] + dpc.a43 * dpv.k3[i]);
-	}
-	dpv.a_tmp = f_a + dt * (dpc.a41 * df_a + dpc.a43 * dpv.a3);
-	dpv.a4 = mk_velocities_new(t + dpc.c4 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k4, pars);
-
-	// ------------ 5 ------------
-	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
-	{
-		dpv.k_tmp[i] = field[i] + dt *
-			(dpc.a51 * dfield[i] + dpc.a53 * dpv.k3[i] + dpc.a54 * dpv.k4[i]);
-	}
-	dpv.a_tmp = f_a + dt * (dpc.a51 * df_a + dpc.a53 * dpv.a3 + dpc.a54 * dpv.a4);
-	dpv.a5 = mk_velocities_new(t + dpc.c5 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k5, pars);
-
-	// ------------ 6 ------------
-	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
-	{
-		dpv.k_tmp[i] = field[i] + dt *
-			(dpc.a61 * dfield[i] + dpc.a64 * dpv.k4[i] + dpc.a65 * dpv.k5[i]);
-	}
-	dpv.a_tmp = f_a + dt * (dpc.a61 * df_a + dpc.a64 * dpv.a4 + dpc.a65 * dpv.a5);
-	dpv.a6 = mk_velocities_new(t + dpc.c6 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k6, pars);
-
-	// ------------ 7 ------------
-	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
-	{
-		dpv.k_tmp[i] = field[i] + dt *
-			(dpc.a71 * dfield[i] + dpc.a74 * dpv.k4[i] + dpc.a75 * dpv.k5[i] +
-			 dpc.a76 * dpv.k6[i]);
-	}
-	dpv.a_tmp = f_a + dt *
-			(dpc.a71 * df_a + dpc.a74 * dpv.a4 + dpc.a75 * dpv.a5 +
-			 dpc.a76 * dpv.a6);
-	dpv.a7 = mk_velocities_new(t + dpc.c7 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k7, pars);
-
-	// ------------ 8 ------------
-	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
-	{
-		dpv.k_tmp[i] = field[i] + dt *
-			(dpc.a81 * dfield[i] + dpc.a84 * dpv.k4[i] + dpc.a85 * dpv.k5[i] +
-			 dpc.a86 * dpv.k6[i] + dpc.a87 * dpv.k7[i]);
-	}
-	dpv.a_tmp = f_a + dt *
-			(dpc.a81 * df_a + dpc.a84 * dpv.a4 + dpc.a85 * dpv.a5 +
-			 dpc.a86 * dpv.a6 + dpc.a87 * dpv.a7);
-	dpv.a8 = mk_velocities_new(t + dpc.c8 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k8, pars);
-
-	// ------------ 9 ------------
-	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
-	{
-		dpv.k_tmp[i] = field[i] + dt *
-			(dpc.a91 * dfield[i] + dpc.a94 * dpv.k4[i] + dpc.a95 * dpv.k5[i] +
-			 dpc.a96 * dpv.k6[i] + dpc.a97 * dpv.k7[i] + dpc.a98 * dpv.k8[i]);
-	}
-	dpv.a_tmp = f_a + dt *
-			(dpc.a91 * df_a + dpc.a94 * dpv.a4 + dpc.a95 * dpv.a5 +
-			 dpc.a96 * dpv.a6 + dpc.a97 * dpv.a7 + dpc.a98 * dpv.a8);
-	dpv.a9 = mk_velocities_new(t + dpc.c9 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k9, pars);
-
-	// ------------ 10 ------------
-	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
-	{
-		dpv.k_tmp[i] = field[i] + dt *
-			(dpc.a101 * dfield[i] + dpc.a104 * dpv.k4[i] + dpc.a105 * dpv.k5[i] +
-			 dpc.a106 * dpv.k6[i] + dpc.a107 * dpv.k7[i] + dpc.a108 * dpv.k8[i] +
-			 dpc.a109 * dpv.k9[i]);
-	}
-	dpv.a_tmp = f_a + dt *
-			(dpc.a101 * df_a + dpc.a104 * dpv.a4 + dpc.a105 * dpv.a5 +
-			 dpc.a106 * dpv.a6 + dpc.a107 * dpv.a7 + dpc.a108 * dpv.a8 +
-			 dpc.a109 * dpv.a9);
-	dpv.a10 = mk_velocities_new(t + dpc.c10 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k10, pars);
-
-	// ------------ 11 ------------
-	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
-	{
-		dpv.k_tmp[i] = field[i] + dt *
-			(dpc.a111 * dfield[i] + dpc.a114 * dpv.k4[i] + dpc.a115 * dpv.k5[i] +
-			 dpc.a116 * dpv.k6[i] + dpc.a117 * dpv.k7[i] + dpc.a118 * dpv.k8[i] +
-			 dpc.a119 * dpv.k9[i] + dpc.a1110 * dpv.k10[i]);
-	}
-	dpv.a_tmp = f_a + dt *
-			(dpc.a111 * df_a + dpc.a114 * dpv.a4 + dpc.a115 * dpv.a5 +
-			 dpc.a116 * dpv.a6 + dpc.a117 * dpv.a7 + dpc.a118 * dpv.a8 +
-			 dpc.a119 * dpv.a9 + dpc.a1110 * dpv.a10);
-	dpv.a2 = mk_velocities_new(t + dpc.c11 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k2, pars);
-
-	// ------------ new dt ------------
-	double tpdt = t + dt;
-
-	// ------------ 12 ------------
-	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
-	{
-		dpv.k_tmp[i] = field[i] + dt *
-			(dpc.a121 * dfield[i] + dpc.a124 * dpv.k4[i] + dpc.a125 * dpv.k5[i] +
-			 dpc.a126 * dpv.k6[i] + dpc.a127 * dpv.k7[i] + dpc.a128 * dpv.k8[i] +
-			 dpc.a129 * dpv.k9[i] + dpc.a1210 * dpv.k10[i] + dpc.a1211 * dpv.k2[i]);
-	}
-	dpv.a_tmp = f_a + dt *
-			(dpc.a121 * df_a + dpc.a124 * dpv.a4 + dpc.a125 * dpv.a5 +
-			 dpc.a126 * dpv.a6 + dpc.a127 * dpv.a7 + dpc.a128 * dpv.a8 +
-			 dpc.a129 * dpv.a9 + dpc.a1210 * dpv.a10 + dpc.a1211 * dpv.a2);
-	dpv.a3 = mk_velocities_new(tpdt, dpv.k_tmp, dpv.a_tmp, dpv.k3, pars);
-
-	// ------------ step ahead ------------
-	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
-	{
-		dpv.k4[i] = dpc.b1 * dfield[i] + dpc.b6 * dpv.k6[i] + dpc.b7 * dpv.k7[i] +
-					dpc.b8 * dpv.k8[i] + dpc.b9 * dpv.k9[i] + dpc.b10 * dpv.k10[i] +
-					dpc.b11 * dpv.k2[i] + dpc.b12 * dpv.k3[i];
-
-		field_new[i] = field[i] + dt * dpv.k4[i];
-	}
-	dpv.a4 = dpc.b1 * df_a + dpc.b6 * dpv.a6 + dpc.b7 * dpv.a7 +
-			 dpc.b8 * dpv.a8 + dpc.b9 * dpv.a9 + dpc.b10 * dpv.a10 +
-			 dpc.b11 * dpv.a2 + dpc.b12 * dpv.a3;
-	f_a_new = f_a + dt * dpv.a4;
-
-	// ------------ error estimates ------------
-	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
-	{
-		dpv.yerr[i]  = dpv.k4[i] - dpc.bhh1 * dfield[i] - dpc.bhh2 * dpv.k9[i] -
-					   dpc.bhh3 * dpv.k3[i];
-		dpv.yerr2[i] = dpc.er1 * dfield[i] + dpc.er6 * dpv.k6[i] +
-					   dpc.er7 * dpv.k7[i] + dpc.er8 * dpv.k8[i] +
-					   dpc.er9 * dpv.k9[i] + dpc.er10 * dpv.k10[i] +
-					   dpc.er11 * dpv.k2[i] + dpc.er12 * dpv.k3[i];
-	}
-}
-
-/*
-compute the right hand side of the pde, ie the first order temporal derivatives
-*/
-double mk_velocities_new(double t, double *f, double a, double *result, parameters_t *pars) {
-	size_t Ntot = pars->Ntot;
-	size_t Ntot2 = 2 * Ntot;
-
-	double current_rho = mk_rho(f, a, pars);
-	double hubble = sqrt(current_rho / 3.0);
-
-	#pragma omp parallel for
-	for (size_t i = 0; i < Ntot; ++i)
-	{
-		result[i] = f[Ntot + i];
-	}
-
-	#pragma omp parallel for
-	for (size_t i = Ntot; i < Ntot2; ++i)
-	{
-		result[i] = dtmp_lap[i - Ntot] / (a * a);
-		result[i] -= ( 3.0 * hubble * f[i]
-						+ potential_prime(f[i - Ntot]) );
-	}
-	return a * hubble;
+    free(dpv.rcont1);
+    free(dpv.rcont2);
+    free(dpv.rcont3);
+    free(dpv.rcont4);
+    free(dpv.rcont5);
+    free(dpv.rcont6);
+    free(dpv.rcont7);
+    free(dpv.rcont8);
+    RUNTIME_INFO(puts("Freed memory of dopri853 variables.\n"));
 }

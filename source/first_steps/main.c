@@ -62,6 +62,10 @@ double fftw_time_plan = 0.0;
 */
 int main(int argc, const char * argv[]) {
 
+    h5_create_empty_by_path("test.h5");
+    h5_close(pars.file.id);
+    return 0;
+
     double start, end;
     start = get_wall_time();
 
@@ -102,8 +106,8 @@ int main(int argc, const char * argv[]) {
         ProfilerStart("testprofile.prof");
         #endif
 
-        // run_RK4_stepper(&pars);
-        integrate(&pars);
+        // run_rk4(&pars);
+        run_dopri853(&pars);
 
         #ifdef ENABLE_PROFILER
         ProfilerStop();

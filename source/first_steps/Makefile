@@ -1,7 +1,9 @@
 TARGET = first_steps
 LIBS = -L /usr/local/lib -lfftw3_omp -lfftw3 -lm -fopenmp -lprofiler
-CC = gcc-5
+CC = h5cc
 CFLAGS = -std=c99 -fopenmp -O3 -g -Wall -I /usr/local/include
+export HDF5_CC = gcc-5
+export HDF5_CLINKER = gcc-5
 
 .PHONY: default all clean
 

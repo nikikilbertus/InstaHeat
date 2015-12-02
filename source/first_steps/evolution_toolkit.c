@@ -257,6 +257,97 @@ void fft_apply_filter(fftw_complex *inout, parameters_t *pars) {
 	}
 }
 
+/*
+compute the right hand side of the pde, ie the first order temporal derivatives
+*/
+double mk_velocities(double t, double *f, double a, double *result, parameters_t *pars) {
+	size_t Ntot = pars->Ntot;
+	size_t Ntot2 = 2 * Ntot;
+
+	double current_rho = mk_rho(f, a, pars);
+	double hubble = sqrt(current_rho / 3.0);
+
+	#pragma omp parallel for
+	for (size_t i = 0; i < Ntot; ++i)
+	{
+		result[i] = f[Ntot + i];
+	}
+
+	#pragma omp parallel for
+	for (size_t i = Ntot; i < Ntot2; ++i)
+	{
+		result[i] = dtmp_lap[i - Ntot] / (a * a);
+		result[i] -= ( 3.0 * hubble * f[i]
+						+ potential_prime(f[i - Ntot]) );
+	}
+	return a * hubble;
+}
+
+/*
+A selection of potentials one can try, make sure to set the corresponding
+potential_prime, the derivative is not computed automatically yet
+TODO: change that?
+*/
+inline double potential(double f){
+	double lambda = 100.0;
+	return LAMBDA / (1.0 + exp(-lambda * f));
+
+	// double theta, dtheta;
+	// if (f > 5.0)
+	// {
+	// 	theta = 1.0;
+	// }
+	// else if (f < -5.0)
+	// {
+	// 	theta = 0.0;
+	// }
+	// else
+	// {
+	// 	theta = 1.0 / (1.0 + exp(- 100.0 * f));
+	// }
+
+	// return MASS * MASS * f * f / 2.0;
+
+	// return MASS * MASS * f * f / 2.0 + COUPLING * f * f * f * f / 24.0;
+
+	// return 0.0;
+}
+
+inline double potential_prime(double f) {
+	double lambda = 100.0;
+	double tmp = exp(lambda * f);
+	return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
+
+	// return MASS * MASS * f;
+
+	// return MASS * MASS * f + COUPLING * f * f * f / 6.0;
+
+	// return 20.0 * tanh(pow(f, 50));
+
+	// return 0.0;
+}
+
+/*
+compute average 00 component of stress energy
+*/
+double mk_rho(double *f, double a, parameters_t *pars) {
+	size_t Ntot = pars->Ntot;
+
+	double T00 = 0.0;
+
+	mk_gradient_squared_and_laplacian(f, dtmp_grad2, dtmp_lap, pars);
+
+	double ft, grad2_a;
+	#pragma omp parallel for default(shared) private(ft, grad2_a) reduction(+:T00)
+	for (size_t i = 0; i < Ntot; ++i)
+	{
+		ft = f[Ntot + i];
+		grad2_a = dtmp_grad2[i] / (a * a);
+		T00 += (ft * ft + grad2_a) / 2. + potential(f[i]);
+	}
+	return T00 / Ntot;
+}
+
 void mk_filter_window(double *inout, size_t cutoffindex, size_t windowlength) {
 
 	#pragma omp parallel for

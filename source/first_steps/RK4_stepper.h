@@ -4,10 +4,6 @@
 #include <stddef.h>
 #include "main.h"
 
-void run_RK4_stepper(parameters_t *pars);
-double mk_velocities(double *f, double a, double *result, parameters_t *pars);
-extern double potential(double f);
-extern double potential_prime(double f);
-double mk_rho(double *f, double a, parameters_t *pars);
+void run_rk4(parameters_t *pars);
 
 #endif

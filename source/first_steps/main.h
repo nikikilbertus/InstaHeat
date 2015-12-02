@@ -70,6 +70,8 @@ file handling and write to disc parameters
 #define DATAPATH				("../../../data/")
 // maximal length of file names
 #define FILE_NAME_BUFFER_SIZE	(64)
+// how many timeslices to keep in memory before write out
+#define WRITE_OUT_BUFFER_NUMBER		(20)
 
 /*
 mathematical constants and macros
@@ -124,6 +126,7 @@ typedef struct {
 	double dt; // size of timestep delta t
 	double ti; // initial time
 	double tf; // final time
+	double t;
 }timing_t;
 
 /*
@@ -143,6 +146,11 @@ typedef struct {
 	char *name_field;
 	char *name_powspec;
 	char *datapath;
+	size_t id;
+	size_t dset_phi;
+	size_t dset_time;
+	size_t dset_a;
+	size_t dset_rho;
 }file_parameters_t;
 
 /*
