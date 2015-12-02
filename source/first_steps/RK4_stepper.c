@@ -9,10 +9,7 @@
 #include "filehandling.h"
 
 void run_RK4_stepper(parameters_t *pars) {
-	size_t Nx  = pars->x.N;
-	size_t Ny  = pars->y.N;
-	size_t Nz  = pars->z.N;
-	size_t Ntot = Nx * Ny * Nz;
+	size_t Ntot = pars->Ntot;
 	size_t Ntot2 = 2 * Ntot;
 	size_t Nt = pars->t.Nt;
 	double dt = pars->t.dt;
@@ -161,10 +158,7 @@ void run_RK4_stepper(parameters_t *pars) {
 compute the right hand side of the pde, ie the first order temporal derivatives
 */
 double mk_velocities(double *f, double a, double *result, parameters_t *pars) {
-	size_t Nx  = pars->x.N;
-	size_t Ny  = pars->y.N;
-	size_t Nz  = pars->z.N;
-	size_t Ntot = Nx * Ny * Nz;
+	size_t Ntot = pars->Ntot;
 	size_t Ntot2 = 2 * Ntot;
 
 	double current_rho = mk_rho(f, a, pars);
@@ -234,10 +228,7 @@ inline double potential_prime(double f) {
 compute average 00 component of stress energy
 */
 double mk_rho(double *f, double a, parameters_t *pars) {
-	size_t Nx  = pars->x.N;
-	size_t Ny  = pars->y.N;
-	size_t Nz  = pars->z.N;
-	size_t Ntot = Nx * Ny * Nz;
+	size_t Ntot = pars->Ntot;
 
 	double T00 = 0.0;
 

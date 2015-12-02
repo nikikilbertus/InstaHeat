@@ -92,8 +92,11 @@ int main(int argc, const char * argv[]) {
     	pars.t.dt = dt;//1.0 / GRIDPOINTS_X;
         allocate_and_initialize_all(&pars);
 
-        // file_create_empty_by_name(pars.file.name_field);
-        // file_create_empty_by_name(pars.file.name_powspec);
+        file_create_empty_by_name(pars.file.name_field);
+        file_create_empty_by_name(pars.file.name_powspec);
+        file_create_empty_by_name("frw_a");
+        file_create_empty_by_name("rho");
+        file_create_empty_by_name("t");
 
         #ifdef ENABLE_PROFILER
         ProfilerStart("testprofile.prof");

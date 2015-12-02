@@ -49,7 +49,7 @@ the plan flag used for fftw plans
 /*
 should the power spectrum be written to disc
 */
-#define POWER_SPECTRUM_MODE		(2) // default: 2
+#define POWER_SPECTRUM_MODE		(3) // default: 2
 // how many bins for |k| are used in the computation of the power spectrum
 #define POWER_SPECTRUM_BINS		(30)
 // number of timeslices written to disc
@@ -95,7 +95,7 @@ simulation parameters
 // temporal
 #define DELTA_T					(-0.1) // negative for manual adjustment
 #define INITIAL_TIME 			(0.0)
-#define FINAL_TIME	 			(10.0)
+#define FINAL_TIME	 			(250.0)
 // potential
 #define MASS 					(1.0)
 #define COUPLING 				(1.0) // coupling in a phi4 potential
@@ -152,6 +152,7 @@ typedef struct {
 	grid_dimension_t x;
 	grid_dimension_t y;
 	grid_dimension_t z;
+	size_t Ntot;
 	timing_t t;
 	double cutoff_fraction; // used in spectral filtering during time evolution
 	file_parameters_t file;

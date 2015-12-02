@@ -8,6 +8,7 @@
 #include "main.h"
 #include "RK4_stepper.h"
 #include "evolution_toolkit.h"
+#include "filehandling.h"
 
 dopri853_control_t dp;
 dopri853_values_t dpv;
@@ -24,6 +25,7 @@ void integrate(parameters_t *pars) {
 	RUNTIME_INFO(printf("relative tolerance: %f, "
 						"absolute tolerance: %f\n", dp.r_tol, dp.a_tol));
 	RUNTIME_INFO(puts("Using DFT (fftw3) for spatial derivatives."));
+
 	#ifdef ENABLE_FFT_FILTER
 		RUNTIME_INFO(puts("Frequency cutoff filtering enabled.\n"));
 	#else
@@ -31,14 +33,20 @@ void integrate(parameters_t *pars) {
 	#endif
 
 	df_a = mk_velocities_new(dp.t, field, f_a, dfield, pars);
-	if (dp.dense)
-	{
-		//out.out(-1,x,y,s,h)
-	}
-	else
-	{
-		//out.save(x,y)
-	}
+	file_append_by_name_1d(&f_a, 1, 1, "frw_a");
+	file_append_by_name_1d(&dp.t, 1, 1, "t");
+	double rho_write = mk_rho(field, f_a, pars);
+	//TODO[performance]: perform that somewhere else to get rid of extra call to mk_rho
+	file_append_by_name_1d(&rho_write, 1, 1, "rho");
+	file_append_by_name_1d(field, pars->Ntot, 1, pars->file.name_field);
+	// if (dp.dense)
+	// {
+	// 	//out.out(-1,x,y,s,h)
+	// }
+	// else
+	// {
+	// 	//out.save(x,y)
+	// }
 	for (dp.n_stp = 0; dp.n_stp < dp.MAX_STEPS; ++dp.n_stp)
 	{
 		if (dp.t + dp.dt * 1.0001 > dp.tf)
@@ -55,14 +63,19 @@ void integrate(parameters_t *pars) {
 		{
 			++dp.n_bad;
 		}
-		if (dp.dense)
-		{
-			// out.out(dp.n_stp,x,y,s,s.hdid)
-		}
-		else
-		{
-			// out.save(x,y)
-		}
+		file_append_by_name_1d(&f_a, 1, 1, "frw_a");
+		file_append_by_name_1d(&dp.t, 1, 1, "t");
+		rho_write = mk_rho(field, f_a, pars);
+		file_append_by_name_1d(&rho_write, 1, 1, "rho");
+		file_append_by_name_1d(field, pars->Ntot, 1, pars->file.name_field);
+		// if (dp.dense)
+		// {
+		// 	// out.out(dp.n_stp,x,y,s,s.hdid)
+		// }
+		// else
+		// {
+		// 	// out.save(x,y)
+		// }
 		if (dp.t >= dp.tf)
 		{
 			// for (size_t i = 0; i < dp.Ntot2; ++i)
@@ -200,10 +213,12 @@ void perform_step(const double dt_try, parameters_t *pars) {
 	#ifdef ENABLE_FFT_FILTER
 			evo_flags.filter = 1;
 	#endif
+	evo_flags.write_pow_spec = 1;
 	df_a_new = mk_velocities_new(dp.t + dt, field_new, f_a_new, dfield_new, pars);
 	#ifdef ENABLE_FFT_FILTER
 			evo_flags.filter = 0;
 	#endif
+	evo_flags.write_pow_spec = 0;
 	if (dp.dense)
 	{
 		// prepare_dense_output(dt);
@@ -462,10 +477,7 @@ void try_step(const double dt, parameters_t *pars) {
 compute the right hand side of the pde, ie the first order temporal derivatives
 */
 double mk_velocities_new(double t, double *f, double a, double *result, parameters_t *pars) {
-	size_t Nx  = pars->x.N;
-	size_t Ny  = pars->y.N;
-	size_t Nz  = pars->z.N;
-	size_t Ntot = Nx * Ny * Nz;
+	size_t Ntot = pars->Ntot;
 	size_t Ntot2 = 2 * Ntot;
 
 	double current_rho = mk_rho(f, a, pars);

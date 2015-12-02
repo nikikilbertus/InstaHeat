@@ -15,7 +15,7 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	size_t Nx = pars->x.N;
 	size_t Ny = pars->y.N;
 	size_t Nz = pars->z.N;
-	size_t Ntot = Nx * Ny * Nz;
+	size_t Ntot = pars->Ntot;
 	size_t ncz = Nz / 2 + 1;
 
 	double start =  get_wall_time();
@@ -141,7 +141,7 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 	size_t Nx = pars->x.N;
 	size_t Ny = pars->y.N;
 	size_t Nz = pars->z.N;
-	size_t Ntot = Nx * Ny * Nz;
+	size_t Ntot = pars->Ntot;
 	// size_t ncx = Nx / 2 + 1;
 	// size_t ncy = Ny / 2 + 1;
 	size_t ncz = Nz / 2 + 1;

@@ -27,6 +27,8 @@ void initialize_parameters(parameters_t *pars) {
     pars->z.a = SPATIAL_LOWER_BOUND_Z;
     pars->z.b = SPATIAL_UPPER_BOUND_Z;
 
+    pars->Ntot = pars->x.N * pars->y.N * pars->z.N;
+
     pars->t.dt  = DELTA_T > 0 ? DELTA_T : pars->t.dt;
     pars->t.ti  = INITIAL_TIME;
     pars->t.tf  = FINAL_TIME;
