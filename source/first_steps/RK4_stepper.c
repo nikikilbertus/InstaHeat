@@ -42,7 +42,9 @@ void run_rk4(parameters_t *pars) {
 		RUNTIME_INFO(puts("Filtering disabled."));
 	#endif
 
+	#ifdef SHOW_TIMING_INFO
 	double start = get_wall_time();
+	#endif
 
 	for (size_t nt = 0; nt < Nt - 1; ++nt)
 	{
@@ -105,23 +107,6 @@ void run_rk4(parameters_t *pars) {
 
 		t += dt;
 		pars->t.t = t;
-
-		#ifdef CHECK_FOR_NAN
-			#pragma omp parallel for
-			for (size_t i = 0; i < Ntot2; ++i)
-			{
-				if (isnan(field[i]))
-				{
-					fprintf(stderr,
-						"A nan value was discovered in timestep: %zu \n", nt);
-				}
-			}
-			if (isnan(f_a))
-			{
-				fprintf(stderr,
-						"A nan value was discovered in timestep: %zu \n", nt);
-			}
-		#endif
 	}
 
 	// make sure to write out last time slice
@@ -135,14 +120,16 @@ void run_rk4(parameters_t *pars) {
 							"with the specified final time.", stderr));
 	}
 
+	RUNTIME_INFO(puts("Finished rk4"));
+	#ifdef SHOW_TIMING_INFO
 	double end = get_wall_time();
+	double secs = end - start;
+	RUNTIME_INFO(printf("time: %f seconds\n\n", secs));
+	#endif
 
 	fftw_free(k1);
 	fftw_free(k2);
 	fftw_free(k3);
 	fftw_free(k4);
 	fftw_free(tmp_k);
-
-	double secs = end - start;
-	RUNTIME_INFO(printf("Finished time evolution in: %f seconds.\n\n", secs));
 }

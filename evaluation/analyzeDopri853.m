@@ -1,25 +1,55 @@
-Nx = 32;
-Ny = 32;
-Nz = 32;
+Nx = 16;
+Ny = 16;
+Nz = 16;
 Ntot = Nx * Ny * Nz;
 prefix = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/';
 name = [prefix 'run.h5'];
 
-t = h5read(name, 'time');
+t = h5read(name, '/time');
 
-a = h5read(name, 'a');
+a = h5read(name, '/a');
 
-rho = h5read(name, 'rho');
+rho = h5read(name, '/rho');
 
-phi = h5read(name, 'phi');
+H = sqrt(rho / 3);
 
-name = [prefix 'pow_spec_000.txt'];
-rawPowspec = csvread(name);
+phi = h5read(name, '/phi');
 
-name = [prefix 'field_000.txt'];
-rawField = csvread(name);
+powspec = h5read(name, '/power_spectrum');
 
 Nt = length(t);
-powspec = reshape(rawPowspec, length(rawPowspec)/(Nt-1), Nt-1);
-phi = reshape(rawField, Ntot, Nt);
+
 phiAvg = mean(phi);
+
+loglog(a, rho, a, a.^(-4) * rho(1));
+title('slope = -4');
+xlabel('a')
+ylabel('rho');
+shg;
+pause;
+
+loglog(a, H, a, a.^(-2) * H(1));
+title('slope = -2');
+xlabel('a')
+ylabel('H');
+shg;
+pause;
+
+surf(log(powspec+1e-10));
+shading interp; lighting phong;
+zlabel('log')
+ylabel('|k|');
+xlabel('nt');
+shg;
+pause;
+
+parseval = zeros(1, Nt);
+for i = 1:Nt
+parseval(i) = abs(sqrt(sum(powspec(:,i))) - norm(phi(:, i)));
+end
+plot(parseval);
+title(['parseval, max error = ' num2str(max(parseval))]);
+xlabel('t');
+ylabel('||phi(k)|| - ||phi(x)||');
+shg;
+pause;

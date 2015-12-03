@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <omp.h>
 #include "hdf5.h"
 #include "filehandling.h"
@@ -126,6 +127,10 @@ void h5_write_buffers_to_disk(hsize_t Nt) {
     // of reading it from the file each time
     // static hsize_t counter;
 
+    #ifdef SHOW_TIMING_INFO
+    double start = get_wall_time();
+    #endif
+
     // --------------------------phi--------------------------------------------
     rank = 2;
     hid_t dset = pars.file.dset_phi;
@@ -212,6 +217,11 @@ void h5_write_buffers_to_disk(hsize_t Nt) {
 
     H5Sclose(mem_space);
     H5Sclose(dspace);
+
+    #ifdef SHOW_TIMING_INFO
+    double end = get_wall_time();
+    h5_time_write += end - start;
+    #endif
 }
 
 void save() {
@@ -225,6 +235,13 @@ void save() {
     for (size_t i = 0; i < N; ++i)
     {
         field_buf[os + i] = field[i];
+        #ifdef CHECK_FOR_NAN
+        if (isnan(field[i]))
+        {
+            fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
+            exit(EXIT_FAILURE);
+        }
+        #endif
     }
 
     os = index * bins;
@@ -232,11 +249,26 @@ void save() {
     for (size_t i = 0; i < bins; ++i)
     {
         pow_spec_buf[os + i] = pow_spec[i];
+        #ifdef CHECK_FOR_NAN
+        if (isnan(pow_spec[i]))
+        {
+            fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
+            exit(EXIT_FAILURE);
+        }
+        #endif
     }
 
     time_buf[index] = pars.t.t;
     f_a_buf[index] = f_a;
     rho_buf[index] = rho;
+
+    #ifdef CHECK_FOR_NAN
+    if (isnan(pars.t.t) || isnan(f_a) || isnan(rho))
+    {
+        fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
+            exit(EXIT_FAILURE);
+    }
+    #endif
 
     if (index == Nt - 1)
     {

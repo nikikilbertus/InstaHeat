@@ -54,9 +54,9 @@ void run_dopri853(parameters_t *pars) {
 	RUNTIME_INFO(puts("Using DFT (fftw3) for spatial derivatives."));
 
 	#ifdef ENABLE_FFT_FILTER
-		RUNTIME_INFO(puts("Frequency cutoff filtering enabled.\n"));
+	RUNTIME_INFO(puts("Frequency cutoff filtering enabled.\n"));
 	#else
-		RUNTIME_INFO(puts("Filtering disabled.\n"));
+	RUNTIME_INFO(puts("Filtering disabled.\n"));
 	#endif
 
 	evo_flags.compute_pow_spec = 1;
@@ -72,7 +72,9 @@ void run_dopri853(parameters_t *pars) {
 	// 	//out.save(x,y)
 	// }
 
+	#ifdef SHOW_TIMING_INFO
 	double start = get_wall_time();
+	#endif
 
 	for (dp.n_stp = 0; dp.n_stp < dp.max_steps; ++dp.n_stp)
 	{
@@ -90,7 +92,7 @@ void run_dopri853(parameters_t *pars) {
 		{
 			++dp.n_bad;
 		}
-		RUNTIME_INFO(printf("did step: %d, with dt: %f\n", dp.n_stp, dp.dt_did));
+		RUNTIME_INFO(printf("did step: %d with dt: %f\n", dp.n_stp, dp.dt_did));
 		//TODO[performance]: get rid of extra call to mk_rho
 		if ((dp.n_stp + 1) % pars->file.skip == 0)
 		{
@@ -128,12 +130,17 @@ void run_dopri853(parameters_t *pars) {
 		dp.dt = dp.dt_next;
 	}
 
+	#ifdef SHOW_TIMING_INFO
 	double end = get_wall_time();
+	double secs = end - start;
+	#endif
 
 	destroy_dopri853_values();
 
-	double secs = end - start;
-	RUNTIME_INFO(printf("Finished dopri853 in: %f seconds:\n", secs));
+	RUNTIME_INFO(puts("Finished dopri853"));
+	#ifdef SHOW_TIMING_INFO
+	RUNTIME_INFO(printf("time: %f seconds\n", secs));
+	#endif
 	RUNTIME_INFO(printf("steps: %d\n", dp.n_stp + 1));
 	RUNTIME_INFO(printf("good steps: %d\n", dp.n_ok));
 	RUNTIME_INFO(printf("bad steps: %d\n\n", dp.n_bad));
@@ -156,11 +163,11 @@ void perform_step(const double dt_try, parameters_t *pars) {
 		}
 	}
 	#ifdef ENABLE_FFT_FILTER
-			evo_flags.filter = 1;
+	evo_flags.filter = 1;
 	#endif
 	df_a_new = mk_velocities(dp.t + dt, field_new, f_a_new, dfield_new, pars);
 	#ifdef ENABLE_FFT_FILTER
-			evo_flags.filter = 0;
+	evo_flags.filter = 0;
 	#endif
 	// if (dp.dense)
 	// {

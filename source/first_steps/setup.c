@@ -166,13 +166,17 @@ void mk_fftw_plans(parameters_t *pars) {
     size_t Ny = pars->y.N;
     size_t Nz = pars->z.N;
 
+    #ifdef SHOW_TIMING_INFO
     double start =  get_wall_time();
+    #endif
     p_fw_3d = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, field, cfftw_tmp,
                                             FFTW_DEFAULT_FLAG);
     p_bw_3d = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, cfftw_tmp, field,
                                             FFTW_DEFAULT_FLAG);
+    #ifdef SHOW_TIMING_INFO
     double end =  get_wall_time();
     fftw_time_plan += end - start;
+    #endif
     RUNTIME_INFO(puts("Created fftw plans.\n"));
 }
 

@@ -61,22 +61,24 @@ fftw_plan p_bw_3d;
 // time all dfts for timing analysis
 double fftw_time_exe  = 0.0;
 double fftw_time_plan = 0.0;
+double h5_time_write = 0.0;
 
 /*
 --------------------------------main--------------------------------------------
 */
 int main(int argc, const char * argv[]) {
 
+    #ifdef SHOW_TIMING_INFO
     double start, end;
     start = get_wall_time();
-
+    #endif
 
     #ifdef RUN_TESTS_ONLY
-        //pars.t.dt = 0.1;
-        allocate_and_initialize_all(&pars);
-        run_all_tests(&pars);
-        free_and_destroy_all(&pars);
-        return 0;
+    //pars.t.dt = 0.1;
+    allocate_and_initialize_all(&pars);
+    run_all_tests(&pars);
+    free_and_destroy_all(&pars);
+    return 0;
     #endif
 
     allocate_and_initialize_all(&pars);
@@ -98,13 +100,17 @@ int main(int argc, const char * argv[]) {
     free_and_destroy_all(&pars);
     fftw_cleanup_threads();
 
+    #ifdef SHOW_TIMING_INFO
     end = get_wall_time();
     double secs = end - start;
     RUNTIME_INFO(printf("main took %f seconds.\n", secs));
     RUNTIME_INFO(printf("fftw execution took %f seconds (%.2f %%).\n",
                                 fftw_time_exe, 100.*(fftw_time_exe/secs)));
-    RUNTIME_INFO(printf("fftw planning took %f seconds (%.2f %%).\n\n",
+    RUNTIME_INFO(printf("fftw planning took %f seconds (%.2f %%).\n",
                                 fftw_time_plan, 100.*(fftw_time_plan/secs)));
+    RUNTIME_INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
+                                h5_time_write, 100.*(h5_time_write/secs)));
+    #endif
     return 0;
 }
 
@@ -122,6 +128,7 @@ void initialize_threading() {
     RUNTIME_INFO(printf("Running omp & fftw with %d thread(s)\n\n", threadnum));
 }
 
+#ifdef SHOW_TIMING_INFO
 double get_wall_time(){
     struct timeval time;
     if (gettimeofday(&time, NULL)){
@@ -130,3 +137,4 @@ double get_wall_time(){
     }
     return (double)time.tv_sec + (double)time.tv_usec * .000001;
 }
+#endif

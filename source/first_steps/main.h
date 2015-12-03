@@ -5,16 +5,15 @@
 #include <complex.h>
 #include <fftw3.h>
 
-double get_wall_time();
-
 /*
 macros for debugging, testing and printing additional information during
 execution
 */
 #define SHOW_RUNTIME_INFO
+#define SHOW_TIMING_INFO
 // #define RUN_TESTS_ONLY
-// #define DEBUG
 // #define ENABLE_PROFILER
+// #define DEBUG
 
 #ifdef SHOW_RUNTIME_INFO
 #define RUNTIME_INFO(f) do {\
@@ -37,7 +36,7 @@ check for NaNs during time evolution
 /*
 apply a frequency cutoff filter during the time evolution
 */
-// #define ENABLE_FFT_FILTER
+#define ENABLE_FFT_FILTER
 // cutoff fraction used in spectral filtering
 #define CUTOFF_FRACTION 		(1.0/3.0)
 
@@ -50,7 +49,7 @@ the plan flag used for fftw plans
 should the power spectrum be written to disk
 */
 // how many bins for |k| are used in the computation of the power spectrum
-#define POWER_SPECTRUM_BINS		(30)
+#define POWER_SPECTRUM_BINS		(100)
 
 /*
 file handling and write to disk parameters
@@ -60,7 +59,7 @@ file handling and write to disk parameters
 // how many timeslices to keep in memory before write out
 #define WRITE_OUT_BUFFER_NUMBER	(20)
 // how many timeslices to skip in between (1 to write each)
-#define TIME_STEP_SKIPS  (1)
+#define TIME_STEP_SKIPS  		(1)
 
 /*
 mathematical constants and macros
@@ -73,9 +72,9 @@ mathematical constants and macros
 simulation parameters
 */
 // spatial
-#define GRIDPOINTS_X  			(16)
-#define GRIDPOINTS_Y  			(16)
-#define GRIDPOINTS_Z  			(16)
+#define GRIDPOINTS_X  			(32)
+#define GRIDPOINTS_Y  			(32)
+#define GRIDPOINTS_Z  			(32)
 #define GRIDPOINTS_TOTAL		((GRIDPOINTS_X)*(GRIDPOINTS_Y)*(GRIDPOINTS_Z))
 #define SPATIAL_LOWER_BOUND_X	(-PI)
 #define SPATIAL_UPPER_BOUND_X 	(PI)
@@ -86,7 +85,7 @@ simulation parameters
 // temporal
 #define DELTA_T					(0.1) // negative for manual adjustment
 #define INITIAL_TIME 			(0.0)
-#define FINAL_TIME	 			(10.0)
+#define FINAL_TIME	 			(500.0)
 #define MAX_STEPS				(50000)
 #define MINIMAL_DELTA_T			(1.0e-5)
 // potential
@@ -201,5 +200,10 @@ extern fftw_plan p_bw_3d;
 // monitoring the time taken by certain parts
 extern double fftw_time_exe;
 extern double fftw_time_plan;
+extern double h5_time_write;
+
+#ifdef SHOW_TIMING_INFO
+double get_wall_time();
+#endif
 
 #endif
