@@ -187,11 +187,17 @@ void save() {
         field_buf[os + i] = field[i];
     }
 
+    size_t bins = pars.file.bins_powspec;
+    os = index * bins;
+    #pragma omp parallel for
+    for (size_t i = 0; i < bins; ++i)
+    {
+        pow_spec_buf[os + i] = pow_spec[i];
+    }
+
     time_buf[index] = pars.t.t;
     f_a_buf[index] = f_a;
     rho_buf[index] = rho;
-
-    //TODO: power spectrum
 
     if (index == Nt - 1)
     {

@@ -25,7 +25,7 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 
 	if (evo_flags.compute_pow_spec == 1)
 	{
-		mk_and_write_power_spectrum(cfftw_tmp, pars);
+		mk_power_spectrum(cfftw_tmp, pars);
 	}
 
 	#ifdef ENABLE_FFT_FILTER
@@ -136,7 +136,7 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	}
 }
 
-void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
+void mk_power_spectrum(fftw_complex *in, parameters_t *pars) {
 	size_t Nx = pars->x.N;
 	size_t Ny = pars->y.N;
 	size_t Nz = pars->z.N;
@@ -213,7 +213,6 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 			}
 		}
 	}
-	// file_append_by_name_1d(pow_spec, bins, 1, pars->file.name_powspec);
 }
 
 void fft_apply_filter(fftw_complex *inout, parameters_t *pars) {

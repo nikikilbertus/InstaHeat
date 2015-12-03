@@ -21,7 +21,7 @@ double mk_velocities(double t, double *f, double a, double *result, parameters_t
 extern double potential(double f);
 extern double potential_prime(double f);
 double mk_rho(double *f, double a, parameters_t *pars);
-void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars);
+void mk_power_spectrum(fftw_complex *in, parameters_t *pars);
 void mk_filter_window(double *out, size_t cutoffindex, size_t windowlength);
 extern double filter_window_function(double x);
 

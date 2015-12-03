@@ -59,7 +59,9 @@ void run_dopri853(parameters_t *pars) {
 		RUNTIME_INFO(puts("Filtering disabled.\n"));
 	#endif
 
+	evo_flags.compute_pow_spec = 1;
 	df_a = mk_velocities(dp.t, field, f_a, dfield, pars);
+	evo_flags.compute_pow_spec = 0;
 	save();
 	// if (dp.dense)
 	// {
@@ -92,7 +94,9 @@ void run_dopri853(parameters_t *pars) {
 		//TODO[performance]: get rid of extra call to mk_rho
 		if ((dp.n_stp + 1) % pars->file.skip == 0)
 		{
+			evo_flags.compute_pow_spec = 1;
 			rho = mk_rho(field, f_a, pars);
+			evo_flags.compute_pow_spec = 0;
 			save();
 		}
 		// if (dp.dense)
@@ -154,15 +158,10 @@ void perform_step(const double dt_try, parameters_t *pars) {
 	#ifdef ENABLE_FFT_FILTER
 			evo_flags.filter = 1;
 	#endif
-	if ((dp.n_stp + 1) % pars->file.skip == 0)
-	{
-		evo_flags.compute_pow_spec = 1;
-	}
 	df_a_new = mk_velocities(dp.t + dt, field_new, f_a_new, dfield_new, pars);
 	#ifdef ENABLE_FFT_FILTER
 			evo_flags.filter = 0;
 	#endif
-	evo_flags.compute_pow_spec = 0;
 	// if (dp.dense)
 	// {
 	// 	// prepare_dense_output(dt);
@@ -178,7 +177,6 @@ void perform_step(const double dt_try, parameters_t *pars) {
 	dp.t_old = dp.t;
 	dp.t += (dp.dt_did = dt);
 	pars->t.t = dp.t;
-	//dp.dt_next = con.dt_next;
 }
 
 void try_step(const double dt, parameters_t *pars) {
@@ -186,7 +184,7 @@ void try_step(const double dt, parameters_t *pars) {
 	double t = dp.t;
 	size_t Ntot2 = dp.Ntot2;
 	// ------------ 1 ------------
-	// dpv.a1 = mk_velocities(t, field, f_a, dpv.k1, pars);
+	// is already done in perform_step
 
 	// ------------ 2 ------------
 	#pragma omp parallel for
@@ -391,9 +389,9 @@ void allocate_dopri853_values() {
 
 double error(const double dt) {
 	size_t N = dp.Ntot2;
-
 	double err = 0.0, err2 = 0.0, sk, deno;
-	// TODO[performance] parallelize with reduction to err2, err
+
+	#pragma omp parallel for default(shared) private(sk) reduction(+:err,err2)
 	for (size_t i = 0; i < N; ++i)
 	{
 		sk = dp.a_tol + dp.r_tol * MAX(fabs(field[i]), fabs(field_new[i]));
@@ -414,8 +412,8 @@ int success(const double err, double *dt) {
 	double safe  = dp.safe;
 	double minscale = dp.minscale;
 	double maxscale = dp.maxscale;
-
 	double scale;
+
 	if (err <= 1.0)
 	{
 		if (err == 0.0)
