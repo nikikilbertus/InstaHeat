@@ -8,7 +8,7 @@
 #include "main.h"
 #include "filehandling.h"
 
-evolution_flags_t evo_flags = {.filter = 0, .write_pow_spec = 0};
+evolution_flags_t evo_flags = {.filter = 0, .compute_pow_spec = 0};
 
 void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 							double *laplacian, parameters_t *pars) {
@@ -23,8 +23,7 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	double end =  get_wall_time();
 	fftw_time_exe += end - start;
 
-
-	if (evo_flags.write_pow_spec == 1)
+	if (evo_flags.compute_pow_spec == 1)
 	{
 		mk_and_write_power_spectrum(cfftw_tmp, pars);
 	}
@@ -142,8 +141,6 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 	size_t Ny = pars->y.N;
 	size_t Nz = pars->z.N;
 	size_t Ntot = pars->Ntot;
-	// size_t ncx = Nx / 2 + 1;
-	// size_t ncy = Ny / 2 + 1;
 	size_t ncz = Nz / 2 + 1;
 	size_t bins = pars->file.bins_powspec;
 
@@ -216,7 +213,7 @@ void mk_and_write_power_spectrum(fftw_complex *in, parameters_t *pars) {
 			}
 		}
 	}
-	file_append_by_name_1d(pow_spec, bins, 1, pars->file.name_powspec);
+	// file_append_by_name_1d(pow_spec, bins, 1, pars->file.name_powspec);
 }
 
 void fft_apply_filter(fftw_complex *inout, parameters_t *pars) {
@@ -260,12 +257,13 @@ void fft_apply_filter(fftw_complex *inout, parameters_t *pars) {
 /*
 compute the right hand side of the pde, ie the first order temporal derivatives
 */
-double mk_velocities(double t, double *f, double a, double *result, parameters_t *pars) {
+double mk_velocities(double t, double *f, double a, double *result,
+												parameters_t *pars) {
 	size_t Ntot = pars->Ntot;
 	size_t Ntot2 = 2 * Ntot;
 
-	double current_rho = mk_rho(f, a, pars);
-	double hubble = sqrt(current_rho / 3.0);
+	rho = mk_rho(f, a, pars);
+	double hubble = sqrt(rho / 3.0);
 
 	#pragma omp parallel for
 	for (size_t i = 0; i < Ntot; ++i)

@@ -5,8 +5,9 @@
 #include "hdf5.h"
 
 void h5_create_empty_by_path(char *name);
-void h5_write_buffers();
+void h5_write_buffers_to_disk(hsize_t Nt);
 void h5_close();
+void save();
 void file_single_write_by_name_1d(double *data, size_t N, size_t row_skip,
                             char *name);
 void file_create_empty_by_path(char *filepath);

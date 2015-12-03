@@ -60,12 +60,7 @@ void run_dopri853(parameters_t *pars) {
 	#endif
 
 	df_a = mk_velocities(dp.t, field, f_a, dfield, pars);
-	file_append_by_name_1d(&f_a, 1, 1, "frw_a");
-	file_append_by_name_1d(&dp.t, 1, 1, "t");
-	//TODO[performance]: get rid of extra call to mk_rho
-	double rho_write = mk_rho(field, f_a, pars);
-	file_append_by_name_1d(&rho_write, 1, 1, "rho");
-	file_append_by_name_1d(field, pars->Ntot, 1, pars->file.name_field);
+	save();
 	// if (dp.dense)
 	// {
 	// 	//out.out(-1,x,y,s,h)
@@ -90,12 +85,13 @@ void run_dopri853(parameters_t *pars) {
 		{
 			++dp.n_bad;
 		}
-		file_append_by_name_1d(&f_a, 1, 1, "frw_a");
-		file_append_by_name_1d(&dp.t, 1, 1, "t");
+		RUNTIME_INFO(printf("did step: %d, with dt: %f\n", dp.n_stp, dp.dt_did));
 		//TODO[performance]: get rid of extra call to mk_rho
-		rho_write = mk_rho(field, f_a, pars);
-		file_append_by_name_1d(&rho_write, 1, 1, "rho");
-		file_append_by_name_1d(field, pars->Ntot, 1, pars->file.name_field);
+		if ((dp.n_stp + 1) % pars->file.skip == 0)
+		{
+			rho = mk_rho(field, f_a, pars);
+			save();
+		}
 		// if (dp.dense)
 		// {
 		// 	// out.out(dp.n_stp,x,y,s,s.hdid)
@@ -110,10 +106,11 @@ void run_dopri853(parameters_t *pars) {
 			// {
 			// 	ystart[i] = y[i];
 			// }
-			// if (...)
-			// {
-			// 	out.save(x,y)
-			// }
+			size_t index = pars->file.index;
+			if (index != 0 && time_buf[index - 1] < dp.t)
+			{
+				save();
+			}
 			break;
 		}
 		if (fabs(dp.dt_next) <= dp.dt_min)
@@ -122,7 +119,6 @@ void run_dopri853(parameters_t *pars) {
 			exit(EXIT_FAILURE);
 		}
 		dp.dt = dp.dt_next;
-		RUNTIME_INFO(printf("step: %d, next dt: %f\n", dp.n_stp, dp.dt));
 	}
 	RUNTIME_INFO(puts("finished dopri853 with:"));
 	RUNTIME_INFO(printf("steps: %d\n", dp.n_stp + 1));
@@ -150,16 +146,19 @@ void perform_step(const double dt_try, parameters_t *pars) {
 	#ifdef ENABLE_FFT_FILTER
 			evo_flags.filter = 1;
 	#endif
-	evo_flags.write_pow_spec = 1;
+	if ((dp.n_stp + 1) % pars->file.skip == 0)
+	{
+		evo_flags.compute_pow_spec = 1;
+	}
 	df_a_new = mk_velocities(dp.t + dt, field_new, f_a_new, dfield_new, pars);
 	#ifdef ENABLE_FFT_FILTER
 			evo_flags.filter = 0;
 	#endif
-	evo_flags.write_pow_spec = 0;
-	if (dp.dense)
-	{
-		// prepare_dense_output(dt);
-	}
+	evo_flags.compute_pow_spec = 0;
+	// if (dp.dense)
+	// {
+	// 	// prepare_dense_output(dt);
+	// }
 	#pragma omp parallel for
 	for (size_t i = 0; i < dp.Ntot2; ++i)
 	{
@@ -170,6 +169,7 @@ void perform_step(const double dt_try, parameters_t *pars) {
 	f_a = f_a_new;
 	dp.t_old = dp.t;
 	dp.t += (dp.dt_did = dt);
+	pars->t.t = dp.t;
 	//dp.dt_next = con.dt_next;
 }
 

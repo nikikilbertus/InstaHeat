@@ -9,7 +9,7 @@
 
 typedef struct {
 	uint8_t filter;
-	uint8_t write_pow_spec;
+	uint8_t compute_pow_spec;
 }evolution_flags_t;
 
 extern evolution_flags_t evo_flags;

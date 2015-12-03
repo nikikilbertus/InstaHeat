@@ -29,17 +29,17 @@ double *dfield, *dfield_new;
 double *field_buf;
 
 // evolution of the scale parameter a for the FRW equations
-double *frw_a;
 double f_a, df_a;
 double f_a_new, df_a_new;
-double *a_buf;
+double *f_a_buf;
 
 // evolution of the total energy of the field
-double *rho;
+double rho;
 double *rho_buf;
 
 // power spectrum
 double *pow_spec;
+double *pow_spec_buf;
 
 // default array to save fourier coefficients from real to complex transform
 complex *cfftw_tmp;
@@ -67,10 +67,6 @@ double fftw_time_plan = 0.0;
 */
 int main(int argc, const char * argv[]) {
 
-    h5_create_empty_by_path("test.h5");
-    h5_close(pars.file.id);
-    return 0;
-
     double start, end;
     start = get_wall_time();
 
@@ -83,47 +79,33 @@ int main(int argc, const char * argv[]) {
     }
     threadnum = THREAD_NUMBER;
     omp_set_num_threads(threadnum);
-    // threadnum = GRIDPOINTS_TOTAL > 5000 ? omp_get_max_threads() : 1;
     fftw_plan_with_nthreads(threadnum);
     RUNTIME_INFO(printf("Initialized openmp with %d thread(s)\n\n", threadnum));
 
 #ifdef RUN_TESTS_ONLY
-    pars.t.dt = 0.1;
+    //pars.t.dt = 0.1;
     allocate_and_initialize_all(&pars);
     run_all_tests(&pars);
     free_and_destroy_all(&pars);
     return 0;
 #endif
 
-    int count = 0;
-    for (double dt = 0.01; dt > 1e-3; dt /= 2.0, count += 1)
-    {
-    	pars.t.dt = dt;//1.0 / GRIDPOINTS_X;
-        allocate_and_initialize_all(&pars);
+    allocate_and_initialize_all(&pars);
+    h5_create_empty_by_path(DATAPATH);
 
-        file_create_empty_by_name(pars.file.name_field);
-        file_create_empty_by_name(pars.file.name_powspec);
-        file_create_empty_by_name("frw_a");
-        file_create_empty_by_name("rho");
-        file_create_empty_by_name("t");
+    #ifdef ENABLE_PROFILER
+    ProfilerStart("testprofile.prof");
+    #endif
 
-        #ifdef ENABLE_PROFILER
-        ProfilerStart("testprofile.prof");
-        #endif
+    // run_rk4(&pars);
+    run_dopri853(&pars);
 
-        // run_rk4(&pars);
-        run_dopri853(&pars);
+    #ifdef ENABLE_PROFILER
+    ProfilerStop();
+    #endif
 
-        #ifdef ENABLE_PROFILER
-        ProfilerStop();
-        #endif
-
-        // file_single_write_by_name_1d(frw_a, pars.t.Nt, 1, "a_000");
-        // file_single_write_by_name_1d(rho, pars.t.Nt, 1, "rho_000");
-
-    	free_and_destroy_all(&pars);
-        break;
-    }
+    h5_close(pars.file.id);
+    free_and_destroy_all(&pars);
     fftw_cleanup_threads();
 
     end = get_wall_time();

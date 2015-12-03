@@ -44,34 +44,23 @@ apply a frequency cutoff filter during the time evolution
 /*
 the plan flag used for fftw plans
 */
-#define FFTW_DEFAULT_FLAG 		FFTW_ESTIMATE
+#define FFTW_DEFAULT_FLAG 		(FFTW_ESTIMATE)
 
 /*
-should the power spectrum be written to disc
+should the power spectrum be written to disk
 */
-#define POWER_SPECTRUM_MODE		(3) // default: 2
 // how many bins for |k| are used in the computation of the power spectrum
 #define POWER_SPECTRUM_BINS		(30)
-// number of timeslices written to disc
-#define POWER_SPECTRUM_NUMBER	(100)
-// name of the file for the power spectrum
-#define POWER_SPECTRUM_NAME		("pow_spec_000")
 
 /*
-file handling and write to disc parameters
+file handling and write to disk parameters
 */
-#define FIELD_MODE				(2) // default: 2
-// number of timeslices written to disc
-#define FIELD_NUMBER			(100)
-// name of the file for the field
-#define FIELD_NAME				("field_000")
-
-// where to write the files
-#define DATAPATH				("../../../data/")
-// maximal length of file names
-#define FILE_NAME_BUFFER_SIZE	(64)
+// file name
+#define DATAPATH				("../../../data/run.h5")
 // how many timeslices to keep in memory before write out
-#define WRITE_OUT_BUFFER_NUMBER		(20)
+#define WRITE_OUT_BUFFER_NUMBER	(20)
+// how many timeslices to skip in between (1 to write each)
+#define TIME_SLICE_SKIP_NUMBER  (1)
 
 /*
 mathematical constants and macros
@@ -84,9 +73,9 @@ mathematical constants and macros
 simulation parameters
 */
 // spatial
-#define GRIDPOINTS_X  			(32)
-#define GRIDPOINTS_Y  			(32)
-#define GRIDPOINTS_Z  			(32)
+#define GRIDPOINTS_X  			(16)
+#define GRIDPOINTS_Y  			(16)
+#define GRIDPOINTS_Z  			(16)
 #define GRIDPOINTS_TOTAL		((GRIDPOINTS_X)*(GRIDPOINTS_Y)*(GRIDPOINTS_Z))
 #define SPATIAL_LOWER_BOUND_X	(-PI)
 #define SPATIAL_UPPER_BOUND_X 	(PI)
@@ -95,19 +84,13 @@ simulation parameters
 #define SPATIAL_LOWER_BOUND_Z	(-PI)
 #define SPATIAL_UPPER_BOUND_Z 	(PI)
 // temporal
-#define DELTA_T					(-0.1) // negative for manual adjustment
+#define DELTA_T					(0.1) // negative for manual adjustment
 #define INITIAL_TIME 			(0.0)
-#define FINAL_TIME	 			(250.0)
+#define FINAL_TIME	 			(10.0)
 // potential
 #define MASS 					(1.0)
-#define COUPLING 				(1.0) // coupling in a phi4 potential
+#define COUPLING 				(1.0)      // coupling in a phi4 potential
 #define LAMBDA					(1.876e-4) // "cosmological constant"
-
-// conversion form 3D indices to 1D index
-// #define idx(i,j,k) 	((k) + GRIDPOINTS_Z * ( (j) + GRIDPOINTS_Y * (i)))
-// #define idx_z(lin) 	( (lin) % GRIDPOINTS_Z )
-// #define idx_y(lin) 	( (lin - (idx_z(lin)) / GRIDPOINTS_Z) % GRIDPOINTS_Y )
-// #define idx_x(lin) 	( ( (lin - (idx_z(lin)) / GRIDPOINTS_Z) - (idx_y(lin)) ) / GRIDPOINTS_Y )
 
 /*
 representing one dimension of a multi dimensional grid
@@ -123,34 +106,25 @@ encapsulate timing related parameters
 */
 typedef struct {
 	size_t Nt; // Number of timesteps
-	double dt; // size of timestep delta t
+	double dt; // size of (initial) timestep delta t
 	double ti; // initial time
 	double tf; // final time
-	double t;
+	double t;  // current time
 }timing_t;
 
 /*
 file handling parameters
-mode: 0 - write nothing, 1 - write last only, 2 - write according to num/skip
-3- write every timeslice
 */
 typedef struct {
-	uint8_t mode_field;
-	size_t num_field;
-	size_t skip_field;
-	uint8_t mode_powspec;
-	size_t num_powspec;
-	size_t skip_powspec;
-	size_t bins_powspec;
-	size_t filename_buf;
-	char *name_field;
-	char *name_powspec;
-	char *datapath;
-	size_t id;
-	size_t dset_phi;
-	size_t dset_time;
-	size_t dset_a;
-	size_t dset_rho;
+	size_t id;			// h5 file id of the output file
+	size_t dset_phi;	// h5 data set id of the field phi
+	size_t dset_time;	// h5 data set id of the time
+	size_t dset_a;		// h5 data set id of the scaling parameter a
+	size_t dset_rho;	// h5 data set id of the energy density rho
+	size_t index;		// current index within the buffers
+	size_t buf_size;	// size of the buffer before dump to disk
+	size_t skip;		// how many timesteps to skip in between write out
+	size_t bins_powspec; // how many bins are used for the power spectrum
 }file_parameters_t;
 
 /*
@@ -180,17 +154,17 @@ extern double *field_new, *dfield_new;
 extern double *field_buf;
 
 // solution for the FRW euqations
-extern double *frw_a;
 extern double f_a, df_a;
 extern double f_a_new, df_a_new;
-extern double *a_buf;
+extern double *f_a_buf;
 
 // T^{00} component of the field
-extern double *rho;
+extern double rho;
 extern double *rho_buf;
 
 // power spectrum
 extern double *pow_spec;
+extern double *pow_spec_buf;
 
 // default arrays for real to complex dfts
 extern complex *cfftw_tmp;
