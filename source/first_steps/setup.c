@@ -9,11 +9,26 @@
 #include "main.h"
 
 void allocate_and_initialize_all(parameters_t *pars) {
+    initialize_threading();
 	initialize_parameters(pars);
     allocate_external(pars);
     mk_grid(pars);
     mk_fftw_plans(pars);
     mk_initial_conditions(pars);
+}
+
+void initialize_threading() {
+    int threadnum, threadinit;
+    threadinit = fftw_init_threads();
+    if (threadinit == 0)
+    {
+        fputs("Could not initialize fftw threads.", stderr);
+        exit(EXIT_FAILURE);
+    }
+    threadnum = THREAD_NUMBER;
+    omp_set_num_threads(threadnum);
+    fftw_plan_with_nthreads(threadnum);
+    RUNTIME_INFO(printf("Running omp & fftw with %d thread(s)\n\n", threadnum));
 }
 
 void initialize_parameters(parameters_t *pars) {

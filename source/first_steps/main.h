@@ -5,12 +5,19 @@
 #include <complex.h>
 #include <fftw3.h>
 
+// -------------------mathematical constants and macros-------------------------
+#define PI (3.141592653589793238462643383279)
+#define MAX(x, y)				((x) > (y) ? (x) : (y))
+#define MIN(x, y)				((x) > (y) ? (y) : (x))
+
+
 /*
-macros for debugging, testing and printing additional information during
-execution
+compiler switches for debugging, testing, profiling and additional information
+during execution
 */
 #define SHOW_RUNTIME_INFO
 #define SHOW_TIMING_INFO
+// #define CHECK_FOR_NAN
 // #define RUN_TESTS_ONLY
 // #define ENABLE_PROFILER
 // #define DEBUG
@@ -23,54 +30,30 @@ execution
 #define RUNTIME_INFO(f)
 #endif
 
-/*
-how many threads to use for openmp parallelization
-*/
+
+// -----------------------simulation preferences--------------------------------
+// how many threads to use for openmp parallelization (also used by fftw)
 #define THREAD_NUMBER			(4)
-
-/*
-check for NaNs during time evolution
-*/
-// #define CHECK_FOR_NAN
-
-/*
-apply a frequency cutoff filter during the time evolution
-*/
+// the plan flag used for fftw plans
+#define FFTW_DEFAULT_FLAG 		(FFTW_ESTIMATE)
+// apply a frequency cutoff filter during the time evolution (compiler switch)
 #define ENABLE_FFT_FILTER
 // cutoff fraction used in spectral filtering
 #define CUTOFF_FRACTION 		(1.0/3.0)
 
-/*
-the plan flag used for fftw plans
-*/
-#define FFTW_DEFAULT_FLAG 		(FFTW_ESTIMATE)
 
-/*
-should the power spectrum be written to disk
-*/
-// how many bins for |k| are used in the computation of the power spectrum
-#define POWER_SPECTRUM_BINS		(100)
-
-/*
-file handling and write to disk parameters
-*/
+// ------------file handling parameters for writing to disk---------------------
 // file name
 #define DATAPATH				("../../../data/run.h5")
 // how many timeslices to keep in memory before write out
 #define WRITE_OUT_BUFFER_NUMBER	(20)
-// how many timeslices to skip in between (1 to write each)
+// how many timeslices to skip in between writing to file (1 to write each)
 #define TIME_STEP_SKIPS  		(1)
+// how many bins for |k| are used in the computation of the power spectrum
+#define POWER_SPECTRUM_BINS		(100)
 
-/*
-mathematical constants and macros
-*/
-#define PI (3.141592653589793238462643383279)
-#define MAX(x, y)				((x) > (y) ? (x) : (y))
-#define MIN(x, y)				((x) > (y) ? (y) : (x))
 
-/*
-simulation parameters
-*/
+// ------------------simulation parameters--------------------------------------
 // spatial
 #define GRIDPOINTS_X  			(32)
 #define GRIDPOINTS_Y  			(32)
@@ -93,9 +76,7 @@ simulation parameters
 #define COUPLING 				(1.0)      // coupling in a phi4 potential
 #define LAMBDA					(1.876e-4) // "cosmological constant"
 
-/*
-additional parameters for dopri853
-*/
+// -------------------additional parameters for dopri853------------------------
 // adaptive timesteps
 #define BETA  					(0.0)
 // ALPHA is determined atomatically as 1.0/8.0 - BETA * 0.2
@@ -105,18 +86,16 @@ additional parameters for dopri853
 #define RELATIVE_TOLERANCE		(1.0e-5)
 #define ABSOLUTE_TOLERANCE		(1.0e-5)
 
-/*
-representing one dimension of a multi dimensional grid
-*/
+
+// ------------------------typedefs---------------------------------------------
+// representing one dimension of a multi dimensional grid
 typedef struct {
 	size_t N;
 	double a;
 	double b;
 }grid_dimension_t;
 
-/*
-encapsulate timing related parameters
-*/
+// encapsulate timing related parameters
 typedef struct {
 	size_t Nt; // Number of timesteps
 	double dt; // size of (initial) timestep delta t
@@ -125,9 +104,7 @@ typedef struct {
 	double t;  // current time
 }timing_t;
 
-/*
-file handling parameters
-*/
+//file handling parameters
 typedef struct {
 	size_t id;			// h5 file id of the output file
 	size_t dset_phi;	// h5 data set id of the field phi
@@ -141,9 +118,7 @@ typedef struct {
 	size_t bins_powspec; // how many bins are used for the power spectrum
 }file_parameters_t;
 
-/*
-simulation parameters struct
-*/
+// simulation parameters struct
 typedef struct {
 	grid_dimension_t x;
 	grid_dimension_t y;
@@ -154,6 +129,9 @@ typedef struct {
 	file_parameters_t file;
 }parameters_t;
 
+
+// --------------------------global variables-----------------------------------
+// simulation parameters
 extern parameters_t pars;
 
 // spatial gridpoints
@@ -172,7 +150,7 @@ extern double f_a, df_a;
 extern double f_a_new, df_a_new;
 extern double *f_a_buf;
 
-// T^{00} component of the field
+// energy density rho  = T^{00}_{\phi}
 extern double rho;
 extern double *rho_buf;
 
@@ -202,6 +180,7 @@ extern double fftw_time_exe;
 extern double fftw_time_plan;
 extern double h5_time_write;
 
+// for timing information during execution
 #ifdef SHOW_TIMING_INFO
 double get_wall_time();
 #endif

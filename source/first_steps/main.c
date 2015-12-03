@@ -14,6 +14,9 @@
 #include "dopri853_stepper.h"
 #include "tests.h"
 
+/*
+--------------------------------global variables--------------------------------
+*/
 // simulation parameters
 parameters_t pars;
 
@@ -74,7 +77,6 @@ int main(int argc, const char * argv[]) {
     #endif
 
     #ifdef RUN_TESTS_ONLY
-    //pars.t.dt = 0.1;
     allocate_and_initialize_all(&pars);
     run_all_tests(&pars);
     free_and_destroy_all(&pars);
@@ -114,20 +116,9 @@ int main(int argc, const char * argv[]) {
     return 0;
 }
 
-void initialize_threading() {
-    int threadnum, threadinit;
-    threadinit = fftw_init_threads();
-    if (threadinit == 0)
-    {
-        fputs("Could not initialize fftw threads.", stderr);
-        exit(EXIT_FAILURE);
-    }
-    threadnum = THREAD_NUMBER;
-    omp_set_num_threads(threadnum);
-    fftw_plan_with_nthreads(threadnum);
-    RUNTIME_INFO(printf("Running omp & fftw with %d thread(s)\n\n", threadnum));
-}
-
+/*
+--------------------------------timing------------------------------------------
+*/
 #ifdef SHOW_TIMING_INFO
 double get_wall_time(){
     struct timeval time;

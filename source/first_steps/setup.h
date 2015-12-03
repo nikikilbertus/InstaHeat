@@ -5,6 +5,7 @@
 #include "main.h"
 
 void allocate_and_initialize_all(parameters_t *pars);
+void initialize_threading();
 void initialize_parameters(parameters_t *pars);
 void allocate_external(parameters_t *pars);
 void mk_grid(parameters_t *pars);
