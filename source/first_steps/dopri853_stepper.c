@@ -31,7 +31,7 @@ void initialize_dopri853(parameters_t *pars) {
  	dp.safe = 0.9;
  	dp.minscale = 0.333;
  	dp.maxscale = 6.0;
-	dp.a_tol = 1.0e-5;
+	dp.a_tol = 1.0e-7;
 	dp.r_tol = dp.a_tol;
 	dp.err_old = 1.0e-4;
 	dp.reject = 0;
@@ -69,6 +69,9 @@ void run_dopri853(parameters_t *pars) {
 	// {
 	// 	//out.save(x,y)
 	// }
+
+	double start = get_wall_time();
+
 	for (dp.n_stp = 0; dp.n_stp < dp.MAX_STEPS; ++dp.n_stp)
 	{
 		if (dp.t + dp.dt * 1.0001 > dp.tf)
@@ -120,11 +123,16 @@ void run_dopri853(parameters_t *pars) {
 		}
 		dp.dt = dp.dt_next;
 	}
-	RUNTIME_INFO(puts("finished dopri853 with:"));
+
+	double end = get_wall_time();
+
+	destroy_dopri853_values();
+
+	double secs = end - start;
+	RUNTIME_INFO(printf("Finished dopri853 in: %f seconds:\n", secs));
 	RUNTIME_INFO(printf("steps: %d\n", dp.n_stp + 1));
 	RUNTIME_INFO(printf("good steps: %d\n", dp.n_ok));
 	RUNTIME_INFO(printf("bad steps: %d\n\n", dp.n_bad));
-	destroy_dopri853_values();
 }
 
 void perform_step(const double dt_try, parameters_t *pars) {
