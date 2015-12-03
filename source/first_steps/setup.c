@@ -39,7 +39,9 @@ void initialize_parameters(parameters_t *pars) {
 
     pars->file.index = 0;
     pars->file.buf_size = WRITE_OUT_BUFFER_NUMBER;
-    pars->file.skip = TIME_SLICE_SKIP_NUMBER;
+    pars->file.skip = TIME_STEP_SKIPS;
+
+    pars->file.bins_powspec = POWER_SPECTRUM_BINS;
 
     RUNTIME_INFO(puts("Initialized parameters.\n"));
 }

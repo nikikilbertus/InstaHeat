@@ -60,7 +60,7 @@ file handling and write to disk parameters
 // how many timeslices to keep in memory before write out
 #define WRITE_OUT_BUFFER_NUMBER	(20)
 // how many timeslices to skip in between (1 to write each)
-#define TIME_SLICE_SKIP_NUMBER  (1)
+#define TIME_STEP_SKIPS  (1)
 
 /*
 mathematical constants and macros
@@ -87,10 +87,24 @@ simulation parameters
 #define DELTA_T					(0.1) // negative for manual adjustment
 #define INITIAL_TIME 			(0.0)
 #define FINAL_TIME	 			(10.0)
+#define MAX_STEPS				(50000)
+#define MINIMAL_DELTA_T			(1.0e-5)
 // potential
 #define MASS 					(1.0)
 #define COUPLING 				(1.0)      // coupling in a phi4 potential
 #define LAMBDA					(1.876e-4) // "cosmological constant"
+
+/*
+additional parameters for dopri853
+*/
+// adaptive timesteps
+#define BETA  					(0.0)
+// ALPHA is determined atomatically as 1.0/8.0 - BETA * 0.2
+#define SMALLEST_SCALING		(0.333)
+#define LARGEST_SCALING			(6.0)
+#define SAFE 					(0.9)
+#define RELATIVE_TOLERANCE		(1.0e-5)
+#define ABSOLUTE_TOLERANCE		(1.0e-5)
 
 /*
 representing one dimension of a multi dimensional grid
@@ -118,6 +132,7 @@ file handling parameters
 typedef struct {
 	size_t id;			// h5 file id of the output file
 	size_t dset_phi;	// h5 data set id of the field phi
+	size_t dset_powspec;// h5 data set id of the power spectrum
 	size_t dset_time;	// h5 data set id of the time
 	size_t dset_a;		// h5 data set id of the scaling parameter a
 	size_t dset_rho;	// h5 data set id of the energy density rho

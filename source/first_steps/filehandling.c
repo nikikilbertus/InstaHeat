@@ -10,6 +10,7 @@ void h5_create_empty_by_path(char *name) {
     hsize_t rank = 2;
     hsize_t N = pars.Ntot;
     hsize_t Nt = pars.file.buf_size;
+    hsize_t bins = pars.file.bins_powspec;
 
     // create file
     hid_t file = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -36,17 +37,38 @@ void h5_create_empty_by_path(char *name) {
     H5Pclose(plist_phi);
     H5Sclose(dspace_phi);
 
+    // --------------------------power spectrum---------------------------------
+    // create dataspace for the power_spectrum
+    dims[1] = bins;
+    max_dims[1] = bins;
+    hid_t dspace_powspec = H5Screate_simple(rank, dims, max_dims);
+
+    // create property list for the power_spectrum
+    hid_t plist_powspec = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_layout(plist_powspec, H5D_CHUNKED);
+    chunk_dims[1] = bins;
+    H5Pset_chunk(plist_powspec, rank, chunk_dims);
+
+    // create dataset for the power_spectrum
+    hid_t dset_powspec = H5Dcreate(file, "power_spectrum", H5T_NATIVE_DOUBLE,
+                    dspace_powspec, H5P_DEFAULT, plist_powspec, H5P_DEFAULT);
+    pars.file.dset_powspec = dset_powspec;
+
+    // close property list and dataspace
+    H5Pclose(plist_powspec);
+    H5Sclose(dspace_powspec);
+
     // --------------------------time-------------------------------------------
     // create dataspace for the time
     rank = 1;
-    dims[0] = 0;
-    max_dims[0] = H5S_UNLIMITED;
+    // dims[0] = 0;
+    // max_dims[0] = H5S_UNLIMITED;
     hid_t dspace_time = H5Screate_simple(rank, dims, max_dims);
 
     // create property list for the time
     hid_t plist_time = H5Pcreate(H5P_DATASET_CREATE);
     H5Pset_layout(plist_time, H5D_CHUNKED);
-    chunk_dims[0] = Nt;
+    // chunk_dims[0] = Nt;
     H5Pset_chunk(plist_time, rank, chunk_dims);
 
     // create dataset for the time
@@ -93,13 +115,12 @@ void h5_create_empty_by_path(char *name) {
     // close property list and dspace_rho
     H5Pclose(plist_rho);
     H5Sclose(dspace_rho);
-
-    // TODO: power spectrum
     RUNTIME_INFO(puts("Created hdf5 file with datasets for phi, t, a, rho.\n"));
 }
 
 void h5_write_buffers_to_disk(hsize_t Nt) {
     hsize_t N = pars.Ntot;
+    hsize_t bins = pars.file.bins_powspec;
     hsize_t rank;
     // TODO[performance] maybe use static variable to count dataset size instead
     // of reading it from the file each time
@@ -108,8 +129,8 @@ void h5_write_buffers_to_disk(hsize_t Nt) {
     // --------------------------phi--------------------------------------------
     rank = 2;
     hid_t dset = pars.file.dset_phi;
-    hsize_t add_dims[2] = {Nt, N};
 
+    hsize_t add_dims[2] = {Nt, N};
     hid_t mem_space = H5Screate_simple(rank, add_dims, NULL);
     hid_t dspace = H5Dget_space(dset);
     hsize_t curr_dims[rank];
@@ -122,7 +143,26 @@ void h5_write_buffers_to_disk(hsize_t Nt) {
     hsize_t start_dims[2] = {curr_dims[0], 0};
     H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
                             add_dims, NULL);
-    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, field_buf);
+    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT,
+                    field_buf);
+
+    H5Sclose(mem_space);
+    H5Sclose(dspace);
+
+    // --------------------------power spectrum---------------------------------
+    dset = pars.file.dset_powspec;
+
+    add_dims[1] = bins;
+    mem_space = H5Screate_simple(rank, add_dims, NULL);
+    dspace = H5Dget_space(dset);
+    new_dims[1] = bins;
+    H5Dset_extent(dset, new_dims);
+    dspace = H5Dget_space(dset);
+
+    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
+                            add_dims, NULL);
+    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT,
+                    pow_spec_buf);
 
     H5Sclose(mem_space);
     H5Sclose(dspace);
@@ -135,6 +175,7 @@ void h5_write_buffers_to_disk(hsize_t Nt) {
     dspace = H5Dget_space(dset);
     H5Dset_extent(dset, new_dims);
     dspace = H5Dget_space(dset);
+
     H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
                             add_dims, NULL);
     H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, time_buf);
@@ -143,13 +184,13 @@ void h5_write_buffers_to_disk(hsize_t Nt) {
     H5Sclose(dspace);
 
     // --------------------------a----------------------------------------------
-    rank = 1;
     dset = pars.file.dset_a;
 
     mem_space = H5Screate_simple(rank, add_dims, NULL);
     dspace = H5Dget_space(dset);
     H5Dset_extent(dset, new_dims);
     dspace = H5Dget_space(dset);
+
     H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
                             add_dims, NULL);
     H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, f_a_buf);
@@ -158,36 +199,34 @@ void h5_write_buffers_to_disk(hsize_t Nt) {
     H5Sclose(dspace);
 
     // --------------------------rho--------------------------------------------
-    rank = 1;
     dset = pars.file.dset_rho;
 
     mem_space = H5Screate_simple(rank, add_dims, NULL);
     dspace = H5Dget_space(dset);
     H5Dset_extent(dset, new_dims);
     dspace = H5Dget_space(dset);
+
     H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
                             add_dims, NULL);
     H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, rho_buf);
 
     H5Sclose(mem_space);
     H5Sclose(dspace);
-
-    // TODO: power spectrum
 }
 
 void save() {
-    size_t index = pars.file.index;
+    hsize_t index = pars.file.index;
     hsize_t Nt = pars.file.buf_size;
-    size_t N = pars.Ntot;
+    hsize_t N = pars.Ntot;
+    hsize_t bins = pars.file.bins_powspec;
 
-    size_t os = index * N;
+    hsize_t os = index * N;
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
     {
         field_buf[os + i] = field[i];
     }
 
-    size_t bins = pars.file.bins_powspec;
     os = index * bins;
     #pragma omp parallel for
     for (size_t i = 0; i < bins; ++i)
@@ -220,7 +259,7 @@ void h5_close() {
     H5Fflush(file, H5F_SCOPE_GLOBAL);
     hid_t obj_ids[10];
     hsize_t obj_count = H5Fget_obj_ids(file, H5F_OBJ_DATASET, -1, obj_ids);
-    for (hsize_t i = 0; i < obj_count; ++i)
+    for (size_t i = 0; i < obj_count; ++i)
     {
         H5Dclose(obj_ids[i]);
     }

@@ -41,7 +41,7 @@ typedef struct {
     double dt_next;
     double dt_min;
     size_t Ntot2;
-    size_t MAX_STEPS;
+    size_t max_steps;
     int n_stp;
     int n_ok;
     int n_bad;

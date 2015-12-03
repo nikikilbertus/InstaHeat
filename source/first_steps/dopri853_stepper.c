@@ -20,19 +20,19 @@ void initialize_dopri853(parameters_t *pars) {
     dp.dt = pars->t.dt;
     dp.dt_did = 0.0;
     dp.dt_next = pars->t.dt;
-    dp.dt_min = 1.0e-5;
+    dp.dt_min = MINIMAL_DELTA_T;
     dp.Ntot2 = 2 * (pars->x.N * pars->y.N * pars->z.N);
-    dp.MAX_STEPS = 50000;
+    dp.max_steps = MAX_STEPS;
     dp.n_stp = 0;
     dp.n_ok = 0;
     dp.n_bad = 0;
-    dp.beta  = 0.0;
+    dp.beta  = BETA;
  	dp.alpha = 1.0/8.0 - dp.beta * 0.2;
- 	dp.safe = 0.9;
- 	dp.minscale = 0.333;
- 	dp.maxscale = 6.0;
-	dp.a_tol = 1.0e-7;
-	dp.r_tol = dp.a_tol;
+ 	dp.safe = SAFE;
+ 	dp.minscale = SMALLEST_SCALING;
+ 	dp.maxscale = LARGEST_SCALING;
+	dp.a_tol = ABSOLUTE_TOLERANCE;
+	dp.r_tol = RELATIVE_TOLERANCE;
 	dp.err_old = 1.0e-4;
 	dp.reject = 0;
 	dp.eps = DBL_EPSILON;
@@ -48,7 +48,7 @@ void run_dopri853(parameters_t *pars) {
 	RUNTIME_INFO(printf("final time: %f\n", dp.tf));
 	RUNTIME_INFO(printf("initial time step dt: %f\n", dp.dt));
 	RUNTIME_INFO(printf("minimal time step dt: %f\n", dp.dt_min));
-	RUNTIME_INFO(printf("max number of steps: %zu\n", dp.MAX_STEPS));
+	RUNTIME_INFO(printf("max number of steps: %zu\n", dp.max_steps));
 	RUNTIME_INFO(printf("relative tolerance: %f, "
 						"absolute tolerance: %f\n", dp.r_tol, dp.a_tol));
 	RUNTIME_INFO(puts("Using DFT (fftw3) for spatial derivatives."));
@@ -74,7 +74,7 @@ void run_dopri853(parameters_t *pars) {
 
 	double start = get_wall_time();
 
-	for (dp.n_stp = 0; dp.n_stp < dp.MAX_STEPS; ++dp.n_stp)
+	for (dp.n_stp = 0; dp.n_stp < dp.max_steps; ++dp.n_stp)
 	{
 		if (dp.t + dp.dt * 1.0001 > dp.tf)
 		{

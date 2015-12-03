@@ -3,15 +3,15 @@ Ny = 32;
 Nz = 32;
 Ntot = Nx * Ny * Nz;
 prefix = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/';
+name = [prefix 'run.h5'];
 
-name = [prefix 't.txt'];
-t = csvread(name);
+t = h5read(name, 'time');
 
-name = [prefix 'frw_a.txt'];
-a = csvread(name);
+a = h5read(name, 'a');
 
-name = [prefix 'rho.txt'];
-rho = csvread(name);
+rho = h5read(name, 'rho');
+
+phi = h5read(name, 'phi');
 
 name = [prefix 'pow_spec_000.txt'];
 rawPowspec = csvread(name);

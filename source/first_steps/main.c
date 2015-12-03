@@ -20,28 +20,28 @@ parameters_t pars;
 // spatial grid points
 double *grid;
 
-// time slices
+// time buffer for write out
 double *time_buf;
 
-// current field and temporal derivatives
+// scalar field phi and temporal derivative plus buffer for write out
 double *field, *field_new;
 double *dfield, *dfield_new;
 double *field_buf;
 
-// evolution of the scale parameter a for the FRW equations
+// scale parameter a and temporal derivative plus buffer for write out
 double f_a, df_a;
 double f_a_new, df_a_new;
 double *f_a_buf;
 
-// evolution of the total energy of the field
+// total energy density rho of the field plus buffer for write out
 double rho;
 double *rho_buf;
 
-// power spectrum
+// power spectrum plus buffer for write out
 double *pow_spec;
 double *pow_spec_buf;
 
-// default array to save fourier coefficients from real to complex transform
+// general purpose complex double memory blocks for temporary use
 complex *cfftw_tmp;
 complex *cfftw_tmp_x;
 complex *cfftw_tmp_y;
@@ -58,7 +58,7 @@ double *dtmp_lap;
 fftw_plan p_fw_3d;
 fftw_plan p_bw_3d;
 
-// times all dfts for timing analysis
+// time all dfts for timing analysis
 double fftw_time_exe  = 0.0;
 double fftw_time_plan = 0.0;
 
@@ -70,25 +70,14 @@ int main(int argc, const char * argv[]) {
     double start, end;
     start = get_wall_time();
 
-    int threadnum, threadinit;
-    threadinit = fftw_init_threads();
-    if (threadinit == 0)
-    {
-        fputs("Could not initialize fftw threads.", stderr);
-        exit(EXIT_FAILURE);
-    }
-    threadnum = THREAD_NUMBER;
-    omp_set_num_threads(threadnum);
-    fftw_plan_with_nthreads(threadnum);
-    RUNTIME_INFO(printf("Initialized openmp with %d thread(s)\n\n", threadnum));
 
-#ifdef RUN_TESTS_ONLY
-    //pars.t.dt = 0.1;
-    allocate_and_initialize_all(&pars);
-    run_all_tests(&pars);
-    free_and_destroy_all(&pars);
-    return 0;
-#endif
+    #ifdef RUN_TESTS_ONLY
+        //pars.t.dt = 0.1;
+        allocate_and_initialize_all(&pars);
+        run_all_tests(&pars);
+        free_and_destroy_all(&pars);
+        return 0;
+    #endif
 
     allocate_and_initialize_all(&pars);
     h5_create_empty_by_path(DATAPATH);
@@ -97,6 +86,7 @@ int main(int argc, const char * argv[]) {
     ProfilerStart("testprofile.prof");
     #endif
 
+    // main call to integration routine
     // run_rk4(&pars);
     run_dopri853(&pars);
 
@@ -116,6 +106,20 @@ int main(int argc, const char * argv[]) {
     RUNTIME_INFO(printf("fftw planning took %f seconds (%.2f %%).\n\n",
                                 fftw_time_plan, 100.*(fftw_time_plan/secs)));
     return 0;
+}
+
+void initialize_threading() {
+    int threadnum, threadinit;
+    threadinit = fftw_init_threads();
+    if (threadinit == 0)
+    {
+        fputs("Could not initialize fftw threads.", stderr);
+        exit(EXIT_FAILURE);
+    }
+    threadnum = THREAD_NUMBER;
+    omp_set_num_threads(threadnum);
+    fftw_plan_with_nthreads(threadnum);
+    RUNTIME_INFO(printf("Running omp & fftw with %d thread(s)\n\n", threadnum));
 }
 
 double get_wall_time(){
