@@ -70,6 +70,8 @@ void perform_step(const double dt_try, parameters_t *pars);
 void try_step(const double dt, parameters_t *pars);
 double error(const double dt);
 int success(const double err, double *dt);
+void prepare_dense_output(const double dt, parameters_t *pars);
+double dense_output(const size_t i, const double t, const double dt);
 void allocate_dopri853_values();
 void destroy_dopri853_values();
 
