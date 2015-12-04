@@ -9,7 +9,6 @@
 #define MAX(x, y)				((x) > (y) ? (x) : (y))
 #define MIN(x, y)				((x) > (y) ? (y) : (x))
 
-
 /*
 compiler switches for debugging, testing, profiling and additional information
 during execution
@@ -29,17 +28,15 @@ during execution
 #define RUNTIME_INFO(f)
 #endif
 
-
 // -----------------------simulation preferences--------------------------------
 // how many threads to use for openmp parallelization (also used by fftw)
 #define THREAD_NUMBER			(4)
 // the plan flag used for fftw plans
 #define FFTW_DEFAULT_FLAG 		(FFTW_ESTIMATE)
 // apply a frequency cutoff filter during the time evolution (compiler switch)
-#define ENABLE_FFT_FILTER
+// #define ENABLE_FFT_FILTER
 // cutoff fraction used in spectral filtering
 #define CUTOFF_FRACTION 		(1.0/3.0)
-
 
 // ------------file handling parameters for writing to disk---------------------
 // file name
@@ -50,7 +47,6 @@ during execution
 #define TIME_STEP_SKIPS  		(1)
 // how many bins for |k| are used in the computation of the power spectrum
 #define POWER_SPECTRUM_BINS		(100)
-
 
 // ------------------simulation parameters--------------------------------------
 // spatial
@@ -65,7 +61,7 @@ during execution
 #define SPATIAL_LOWER_BOUND_Z	(-PI)
 #define SPATIAL_UPPER_BOUND_Z 	(PI)
 // temporal
-#define DELTA_T					(0.1) // negative for manual adjustment
+#define DELTA_T					(0.01) // negative for manual adjustment
 #define INITIAL_TIME 			(0.0)
 #define FINAL_TIME	 			(500.0)
 #define MAX_STEPS				(50000)
@@ -82,8 +78,8 @@ during execution
 #define SMALLEST_SCALING		(0.333)
 #define LARGEST_SCALING			(6.0)
 #define SAFE 					(0.9)
-#define RELATIVE_TOLERANCE		(1.0e-5)
-#define ABSOLUTE_TOLERANCE		(1.0e-5)
+#define RELATIVE_TOLERANCE		(1.0e-9)
+#define ABSOLUTE_TOLERANCE		(1.0e-9)
 
 
 // ------------------------typedefs---------------------------------------------
@@ -92,6 +88,7 @@ typedef struct {
 	size_t N;
 	double a;
 	double b;
+	double L;
 }grid_dimension_t;
 
 // encapsulate timing related parameters

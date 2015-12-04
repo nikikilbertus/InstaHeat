@@ -33,15 +33,15 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	}
 
 	#ifdef ENABLE_FFT_FILTER
-		if (evo_flags.filter == 1)
-		{
-			fft_apply_filter(cfftw_tmp, pars);
-		}
+	if (evo_flags.filter == 1)
+	{
+		fft_apply_filter(cfftw_tmp, pars);
+	}
 	#endif
 
-	double Lx = pars->x.b - pars->x.a;
-	double Ly = pars->y.b - pars->y.a;
-	double Lz = pars->z.b - pars->z.a;
+	double Lx = pars->x.L;
+	double Ly = pars->y.L;
+	double Lz = pars->z.L;
 
 	complex prefac = 2. * PI * I;
 	complex factor_x = prefac / (Lx * Ntot);
@@ -153,9 +153,9 @@ void mk_power_spectrum(fftw_complex *in, parameters_t *pars) {
 	size_t bins = pars->file.bins_powspec;
 
 	// todo[performance]: precompute bins only once and reuse
-	double Lx = pars->x.b - pars->x.a;
-	double Ly = pars->y.b - pars->y.a;
-	double Lz = pars->z.b - pars->z.a;
+	double Lx = pars->x.L;
+	double Ly = pars->y.L;
+	double Lz = pars->z.L;
 
 	double prefac2 = 4. * PI *PI;
 	double k_x2 = prefac2 / (Lx * Lx);
@@ -223,6 +223,7 @@ void mk_power_spectrum(fftw_complex *in, parameters_t *pars) {
 	}
 }
 
+//TODO[bug] get this right. is powspec still wrong?
 void fft_apply_filter(fftw_complex *inout, parameters_t *pars) {
 	double cutoff_fraction = pars->cutoff_fraction;
 	if (cutoff_fraction < 0.0 || cutoff_fraction > 1.0)
@@ -230,35 +231,71 @@ void fft_apply_filter(fftw_complex *inout, parameters_t *pars) {
 		fputs("cutoff_fraction must be between 0 and 1.", stderr);
     	exit(EXIT_FAILURE);
 	}
+
 	size_t Nx = pars->x.N;
 	size_t Ny = pars->y.N;
 	size_t Nz = pars->z.N;
 	size_t ncz = Nz / 2 + 1;
-	size_t nxmax = (size_t) fmin(Nx, ceil(Nx * (1.0 - cutoff_fraction)));
-	size_t nymax = (size_t) fmin(Ny, ceil(Ny * (1.0 - cutoff_fraction)));
-	size_t nzmax = (size_t) fmin(ncz, ceil(ncz * (1.0 - cutoff_fraction)));
 
-	if (Nx == nxmax && Ny == nymax && ncz == nzmax)
-	{
-		fputs("Warning: filtering is enabled (ENABLE_FFT_FILTER "
-			  "but nothing will be cut off -> Overhead!\n", stderr);
-	}
+	double Lx = pars->x.L;
+	double Ly = pars->y.L;
+	double Lz = pars->z.L;
 
-	size_t osx, osy;
-	#pragma omp parallel for private(osx, osy)
-	for (size_t i = nxmax; i < Nx; ++i)
+	double prefac2 = 4. * PI *PI;
+	double k2_x = prefac2 / (Lx * Lx);
+	double k2_y = prefac2 / (Ly * Ly);
+	double k2_z = prefac2 / (Lz * Lz);
+
+	// size_t nxmax = (size_t) fmin(Nx, ceil(Nx * (1.0 - cutoff_fraction)));
+	// size_t nymax = (size_t) fmin(Ny, ceil(Ny * (1.0 - cutoff_fraction)));
+	// size_t nzmax = (size_t) fmin(ncz, ceil(ncz * (1.0 - cutoff_fraction)));
+
+	double k2_max = (1.0 - cutoff_fraction) *
+					(k2_x * (Nx/2) * (Nx/2) + k2_y * (Ny/2) * (Ny/2) +
+					 k2_z * (Nz/2) * (Nz/2));
+	double k2_tmp = 0.0;
+
+	size_t osx, osy, nok = 0, nbad = 0;
+	#pragma omp parallel for private(osx, osy, k2_tmp) reduction(+:nok, nbad)
+	for (size_t i = 0; i < Nx; ++i)
 	{
 		osx = i * Ny * ncz;
-		for (size_t j = nymax; j < Ny; ++j)
+		for (size_t j = 0; j < Ny; ++j)
 		{
 			osy = osx + j * ncz;
-			for (size_t k = nzmax; k < ncz; ++k)
+			for (size_t k = 0; k < ncz; ++k)
 			{
-				// might want to do filter window later
-				inout[osy + k] = 0.0;
+				k2_tmp = k2_z * k * k;
+				if (i > Nx / 2)
+				{
+					k2_tmp += k2_x * (Nx - i) * (Nx - i);
+				}
+				else
+				{
+					k2_tmp += k2_x * i * i;
+				}
+				if (j > Ny / 2)
+				{
+					k2_tmp += k2_y * (Ny - j) * (Ny - j);
+				}
+				else
+				{
+					k2_tmp += k2_y * j * j;
+				}
+				if (k2_tmp > k2_max)
+				{
+					// maybe use a filter window?
+					inout[osy + k] = 0.0;
+					++nbad;
+				}
+				else
+				{
+					++nok;
+				}
 			}
 		}
 	}
+	RUNTIME_INFO(printf("filtered: %f\n", (double)nbad / (double)(nok + nbad)));
 }
 
 /*

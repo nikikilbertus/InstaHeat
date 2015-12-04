@@ -36,10 +36,13 @@ void initialize_parameters(parameters_t *pars) {
     pars->z.N = GRIDPOINTS_Z;
 	pars->x.a = SPATIAL_LOWER_BOUND_X;
 	pars->x.b = SPATIAL_UPPER_BOUND_X;
+    pars->x.L = pars->x.b - pars->x.a;
     pars->y.a = SPATIAL_LOWER_BOUND_Y;
     pars->y.b = SPATIAL_UPPER_BOUND_Y;
+    pars->y.L = pars->y.b - pars->y.a;
     pars->z.a = SPATIAL_LOWER_BOUND_Z;
     pars->z.b = SPATIAL_UPPER_BOUND_Z;
+    pars->z.L = pars->z.b - pars->z.a;
 
     pars->Ntot = pars->x.N * pars->y.N * pars->z.N;
 

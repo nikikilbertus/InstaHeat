@@ -35,6 +35,12 @@ ylabel('H');
 shg;
 pause;
 
+plot(t, phiAvg);
+xlabel('t')
+ylabel('<phi>');
+shg;
+pause;
+
 surf(log(powspec+1e-10));
 shading interp; lighting phong;
 zlabel('log')

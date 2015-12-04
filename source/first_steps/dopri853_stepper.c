@@ -93,6 +93,14 @@ void run_dopri853(parameters_t *pars) {
 			++dp.n_bad;
 		}
 		RUNTIME_INFO(printf("did step: %d with dt: %f\n", dp.n_stp, dp.dt_did));
+		// if (dp.dense)
+		// {
+		// 	// out.out(dp.n_stp, dp.t, field, dp.dt_did)
+		// }
+		// else
+		// {
+		// 	// out.save(x,y)
+		// }
 		//TODO[performance]: get rid of extra call to mk_rho
 		if ((dp.n_stp + 1) % pars->file.skip == 0)
 		{
@@ -101,20 +109,8 @@ void run_dopri853(parameters_t *pars) {
 			evo_flags.compute_pow_spec = 0;
 			save();
 		}
-		// if (dp.dense)
-		// {
-		// 	// out.out(dp.n_stp,x,y,s,s.hdid)
-		// }
-		// else
-		// {
-		// 	// out.save(x,y)
-		// }
 		if (dp.t >= dp.tf)
 		{
-			// for (size_t i = 0; i < dp.Ntot2; ++i)
-			// {
-			// 	ystart[i] = y[i];
-			// }
 			size_t index = pars->file.index;
 			if (index != 0 && time_buf[index - 1] < dp.t)
 			{
@@ -169,10 +165,12 @@ void perform_step(const double dt_try, parameters_t *pars) {
 	#ifdef ENABLE_FFT_FILTER
 	evo_flags.filter = 0;
 	#endif
-	// if (dp.dense)
-	// {
-	// 	// prepare_dense_output(dt);
-	// }
+	#ifdef ENABLE_DENSE_OUTPUT
+	if (dp.dense)
+	{
+		prepare_dense_output(dt, pars);
+	}
+	#endif
 	#pragma omp parallel for
 	for (size_t i = 0; i < dp.Ntot2; ++i)
 	{
