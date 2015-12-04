@@ -21,7 +21,7 @@ void initialize_dopri853(parameters_t *pars) {
     dp.dt_did = 0.0;
     dp.dt_next = pars->t.dt;
     dp.dt_min = MINIMAL_DELTA_T;
-    dp.Ntot2 = 2 * (pars->x.N * pars->y.N * pars->z.N);
+    dp.Ntot2 = 2 * pars->Ntot;
     dp.max_steps = MAX_STEPS;
     dp.n_stp = 0;
     dp.n_ok = 0;
