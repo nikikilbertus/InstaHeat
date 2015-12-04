@@ -11,11 +11,11 @@
 evolution_flags_t evo_flags = {.filter = 0, .compute_pow_spec = 0};
 
 void mk_gradient_squared_and_laplacian(double *in, double *grad2,
-							double *laplacian, parameters_t *pars) {
-	size_t Nx = pars->x.N;
-	size_t Ny = pars->y.N;
-	size_t Nz = pars->z.N;
-	size_t Ntot = pars->Ntot;
+											double *laplacian) {
+	size_t Nx = pars.x.N;
+	size_t Ny = pars.y.N;
+	size_t Nz = pars.z.N;
+	size_t Ntot = pars.Ntot;
 	size_t ncz = Nz / 2 + 1;
 
 	#ifdef SHOW_TIMING_INFO
@@ -29,19 +29,19 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 
 	if (evo_flags.compute_pow_spec == 1)
 	{
-		mk_power_spectrum(cfftw_tmp, pars);
+		mk_power_spectrum(cfftw_tmp);
 	}
 
 	#ifdef ENABLE_FFT_FILTER
 	if (evo_flags.filter == 1)
 	{
-		fft_apply_filter(cfftw_tmp, pars);
+		fft_apply_filter(cfftw_tmp);
 	}
 	#endif
 
-	double Lx = pars->x.L;
-	double Ly = pars->y.L;
-	double Lz = pars->z.L;
+	double Lx = pars.x.L;
+	double Ly = pars.y.L;
+	double Lz = pars.z.L;
 
 	complex prefac = 2. * PI * I;
 	complex factor_x = prefac / (Lx * Ntot);
@@ -144,18 +144,18 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	}
 }
 
-void mk_power_spectrum(fftw_complex *in, parameters_t *pars) {
-	size_t Nx = pars->x.N;
-	size_t Ny = pars->y.N;
-	size_t Nz = pars->z.N;
-	size_t Ntot = pars->Ntot;
+void mk_power_spectrum(fftw_complex *in) {
+	size_t Nx = pars.x.N;
+	size_t Ny = pars.y.N;
+	size_t Nz = pars.z.N;
+	size_t Ntot = pars.Ntot;
 	size_t ncz = Nz / 2 + 1;
-	size_t bins = pars->file.bins_powspec;
+	size_t bins = pars.file.bins_powspec;
 
 	// todo[performance]: precompute bins only once and reuse
-	double Lx = pars->x.L;
-	double Ly = pars->y.L;
-	double Lz = pars->z.L;
+	double Lx = pars.x.L;
+	double Ly = pars.y.L;
+	double Lz = pars.z.L;
 
 	double prefac2 = 4. * PI *PI;
 	double k_x2 = prefac2 / (Lx * Lx);
@@ -224,22 +224,22 @@ void mk_power_spectrum(fftw_complex *in, parameters_t *pars) {
 }
 
 //TODO[bug] get this right. is powspec still wrong?
-void fft_apply_filter(fftw_complex *inout, parameters_t *pars) {
-	double cutoff_fraction = pars->cutoff_fraction;
+void fft_apply_filter(fftw_complex *inout) {
+	double cutoff_fraction = pars.cutoff_fraction;
 	if (cutoff_fraction < 0.0 || cutoff_fraction > 1.0)
 	{
 		fputs("cutoff_fraction must be between 0 and 1.", stderr);
     	exit(EXIT_FAILURE);
 	}
 
-	size_t Nx = pars->x.N;
-	size_t Ny = pars->y.N;
-	size_t Nz = pars->z.N;
+	size_t Nx = pars.x.N;
+	size_t Ny = pars.y.N;
+	size_t Nz = pars.z.N;
 	size_t ncz = Nz / 2 + 1;
 
-	double Lx = pars->x.L;
-	double Ly = pars->y.L;
-	double Lz = pars->z.L;
+	double Lx = pars.x.L;
+	double Ly = pars.y.L;
+	double Lz = pars.z.L;
 
 	double prefac2 = 4. * PI *PI;
 	double k2_x = prefac2 / (Lx * Lx);
@@ -301,12 +301,11 @@ void fft_apply_filter(fftw_complex *inout, parameters_t *pars) {
 /*
 compute the right hand side of the pde, ie the first order temporal derivatives
 */
-double mk_velocities(double t, double *f, double a, double *result,
-												parameters_t *pars) {
-	size_t Ntot = pars->Ntot;
+double mk_velocities(double t, double *f, double a, double *result) {
+	size_t Ntot = pars.Ntot;
 	size_t Ntot2 = 2 * Ntot;
 
-	rho = mk_rho(f, a, pars);
+	rho = mk_rho(f, a);
 	double hubble = sqrt(rho / 3.0);
 
 	#pragma omp parallel for
@@ -372,12 +371,12 @@ inline double potential_prime(double f) {
 /*
 compute average 00 component of stress energy
 */
-double mk_rho(double *f, double a, parameters_t *pars) {
-	size_t Ntot = pars->Ntot;
+double mk_rho(double *f, double a) {
+	size_t Ntot = pars.Ntot;
 
 	double T00 = 0.0;
 
-	mk_gradient_squared_and_laplacian(f, dtmp_grad2, dtmp_lap, pars);
+	mk_gradient_squared_and_laplacian(f, dtmp_grad2, dtmp_lap);
 
 	double ft, grad2_a;
 	#pragma omp parallel for default(shared) private(ft, grad2_a) reduction(+:T00)

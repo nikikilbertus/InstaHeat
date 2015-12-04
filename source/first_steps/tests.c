@@ -6,21 +6,18 @@
 #include "setup.h"
 #include "evolution_toolkit.h"
 
-void run_all_tests(parameters_t *pars) {
-    test_mk_gradient_squared_and_laplacian(pars);
-    // test_fft_apply_filter(pars);
+void run_all_tests() {
+    test_mk_gradient_squared_and_laplacian();
+    // test_fft_apply_filter();
 }
 
-void test_mk_gradient_squared_and_laplacian(parameters_t *pars) {
-    size_t Nx = pars->x.N;
-    size_t Ny = pars->y.N;
-    size_t Nz = pars->z.N;
-    size_t Ntot = Nx * Ny * Nz;
+void test_mk_gradient_squared_and_laplacian() {
+    size_t Ntot = pars.Ntot;
 
-    mk_gradient_squared_and_laplacian(field, dtmp_grad2, dtmp_lap, pars);
+    mk_gradient_squared_and_laplacian(field, dtmp_grad2, dtmp_lap);
     puts("test mk gradient squared and laplacian:");
-    fill_field(dtmp_x + Ntot, test_func_Dx, pars);
-    if (are_fields_equal(dtmp_x, dtmp_x + Ntot, pars) == 0)
+    fill_field(dtmp_x + Ntot, test_func_Dx);
+    if (are_fields_equal(dtmp_x, dtmp_x + Ntot) == 0)
     {
         puts("Dx passed\n");
     }
@@ -28,8 +25,8 @@ void test_mk_gradient_squared_and_laplacian(parameters_t *pars) {
     {
         puts("Dx failed\n");
     }
-    fill_field(dtmp_y + Ntot, test_func_Dy, pars);
-    if (are_fields_equal(dtmp_y, dtmp_y + Ntot, pars) == 0)
+    fill_field(dtmp_y + Ntot, test_func_Dy);
+    if (are_fields_equal(dtmp_y, dtmp_y + Ntot) == 0)
     {
         puts("Dy passed\n");
     }
@@ -37,8 +34,8 @@ void test_mk_gradient_squared_and_laplacian(parameters_t *pars) {
     {
         puts("Dy failed\n");
     }
-    fill_field(dtmp_z + Ntot, test_func_Dz, pars);
-    if (are_fields_equal(dtmp_z, dtmp_z + Ntot, pars) == 0)
+    fill_field(dtmp_z + Ntot, test_func_Dz);
+    if (are_fields_equal(dtmp_z, dtmp_z + Ntot) == 0)
     {
         puts("Dz passed\n");
     }
@@ -47,9 +44,9 @@ void test_mk_gradient_squared_and_laplacian(parameters_t *pars) {
         puts("Dz failed\n");
     }
 
-    fill_field(dtmp_x + Ntot, test_func_gradsq, pars);
-    fill_field(dtmp_y + Ntot, test_func_lap, pars);
-    if (are_fields_equal(dtmp_x + Ntot, dtmp_grad2, pars) == 0)
+    fill_field(dtmp_x + Ntot, test_func_gradsq);
+    fill_field(dtmp_y + Ntot, test_func_lap);
+    if (are_fields_equal(dtmp_x + Ntot, dtmp_grad2) == 0)
     {
         puts("gradient squared passed\n");
     }
@@ -57,7 +54,7 @@ void test_mk_gradient_squared_and_laplacian(parameters_t *pars) {
     {
         puts("gradient squared failed\n");
     }
-    if (are_fields_equal(dtmp_y + Ntot, dtmp_lap, pars) == 0)
+    if (are_fields_equal(dtmp_y + Ntot, dtmp_lap) == 0)
     {
         puts("laplace passed\n");
     }
@@ -79,7 +76,7 @@ void test_mk_gradient_squared_and_laplacian(parameters_t *pars) {
 #endif
 }
 
-void test_fft_apply_filter(parameters_t *pars) {
+void test_fft_apply_filter() {
     //todo
 }
 
@@ -114,11 +111,10 @@ double test_func_D2(double x, double y, double z) {
     return -sin(x) * sin(y) * sin(z);
 }
 
-void fill_field(double *f, double (*func)(double, double, double),
-                parameters_t *pars) {
-    size_t Nx = pars->x.N;
-    size_t Ny = pars->y.N;
-    size_t Nz = pars->z.N;
+void fill_field(double *f, double (*func)(double, double, double)) {
+    size_t Nx = pars.x.N;
+    size_t Ny = pars.y.N;
+    size_t Nz = pars.z.N;
     size_t osx, osy;
     double x, y, z;
 
@@ -139,11 +135,8 @@ void fill_field(double *f, double (*func)(double, double, double),
     }
 }
 
-int are_fields_equal(double *f, double *g, parameters_t *pars) {
-    size_t Nx = pars->x.N;
-    size_t Ny = pars->y.N;
-    size_t Nz = pars->z.N;
-    size_t Ntot = Nx * Ny * Nz;
+int are_fields_equal(double *f, double *g) {
+    size_t Ntot = pars.Ntot;
 
     for (size_t i = 0; i < Ntot; ++i)
     {

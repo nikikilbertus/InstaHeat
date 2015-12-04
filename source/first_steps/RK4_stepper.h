@@ -3,6 +3,6 @@
 
 #include "main.h"
 
-void run_rk4(parameters_t *pars);
+void run_rk4();
 
 #endif

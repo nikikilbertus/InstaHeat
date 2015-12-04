@@ -72,13 +72,13 @@ int main(int argc, const char * argv[]) {
     #endif
 
     #ifdef RUN_TESTS_ONLY
-    allocate_and_initialize_all(&pars);
-    run_all_tests(&pars);
-    free_and_destroy_all(&pars);
+    allocate_and_initialize_all();
+    run_all_tests();
+    free_and_destroy_all();
     return 0;
     #endif
 
-    allocate_and_initialize_all(&pars);
+    allocate_and_initialize_all();
     h5_create_empty_by_path(DATAPATH);
 
     #ifdef ENABLE_PROFILER
@@ -86,15 +86,15 @@ int main(int argc, const char * argv[]) {
     #endif
 
     // main call to integration routine
-    // run_rk4(&pars);
-    run_dopri853(&pars);
+    // run_rk4();
+    run_dopri853();
 
     #ifdef ENABLE_PROFILER
     ProfilerStop();
     #endif
 
     h5_close(pars.file.id);
-    free_and_destroy_all(&pars);
+    free_and_destroy_all();
     fftw_cleanup_threads();
 
     #ifdef SHOW_TIMING_INFO

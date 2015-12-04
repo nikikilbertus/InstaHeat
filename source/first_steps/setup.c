@@ -7,13 +7,13 @@
 #include "setup.h"
 #include "main.h"
 
-void allocate_and_initialize_all(parameters_t *pars) {
+void allocate_and_initialize_all() {
     initialize_threading();
-	initialize_parameters(pars);
-    allocate_external(pars);
-    mk_grid(pars);
-    mk_fftw_plans(pars);
-    mk_initial_conditions(pars);
+	initialize_parameters();
+    allocate_external();
+    mk_grid();
+    mk_fftw_plans();
+    mk_initial_conditions();
 }
 
 void initialize_threading() {
@@ -30,35 +30,35 @@ void initialize_threading() {
     RUNTIME_INFO(printf("Running omp & fftw with %d thread(s)\n\n", threadnum));
 }
 
-void initialize_parameters(parameters_t *pars) {
-	pars->x.N = GRIDPOINTS_X;
-    pars->y.N = GRIDPOINTS_Y;
-    pars->z.N = GRIDPOINTS_Z;
-	pars->x.a = SPATIAL_LOWER_BOUND_X;
-	pars->x.b = SPATIAL_UPPER_BOUND_X;
-    pars->x.L = pars->x.b - pars->x.a;
-    pars->y.a = SPATIAL_LOWER_BOUND_Y;
-    pars->y.b = SPATIAL_UPPER_BOUND_Y;
-    pars->y.L = pars->y.b - pars->y.a;
-    pars->z.a = SPATIAL_LOWER_BOUND_Z;
-    pars->z.b = SPATIAL_UPPER_BOUND_Z;
-    pars->z.L = pars->z.b - pars->z.a;
+void initialize_parameters() {
+	pars.x.N = GRIDPOINTS_X;
+    pars.y.N = GRIDPOINTS_Y;
+    pars.z.N = GRIDPOINTS_Z;
+	pars.x.a = SPATIAL_LOWER_BOUND_X;
+	pars.x.b = SPATIAL_UPPER_BOUND_X;
+    pars.x.L = pars.x.b - pars.x.a;
+    pars.y.a = SPATIAL_LOWER_BOUND_Y;
+    pars.y.b = SPATIAL_UPPER_BOUND_Y;
+    pars.y.L = pars.y.b - pars.y.a;
+    pars.z.a = SPATIAL_LOWER_BOUND_Z;
+    pars.z.b = SPATIAL_UPPER_BOUND_Z;
+    pars.z.L = pars.z.b - pars.z.a;
 
-    pars->Ntot = pars->x.N * pars->y.N * pars->z.N;
+    pars.Ntot = pars.x.N * pars.y.N * pars.z.N;
 
-    pars->t.dt = DELTA_T > 0 ? DELTA_T : pars->t.dt;
-    pars->t.t  = INITIAL_TIME;
-    pars->t.ti = INITIAL_TIME;
-    pars->t.tf = FINAL_TIME;
-	pars->t.Nt = ceil((pars->t.tf - pars->t.ti) / pars->t.dt) + 1;
+    pars.t.dt = DELTA_T > 0 ? DELTA_T : pars.t.dt;
+    pars.t.t  = INITIAL_TIME;
+    pars.t.ti = INITIAL_TIME;
+    pars.t.tf = FINAL_TIME;
+	pars.t.Nt = ceil((pars.t.tf - pars.t.ti) / pars.t.dt) + 1;
 
-    pars->cutoff_fraction = CUTOFF_FRACTION;
+    pars.cutoff_fraction = CUTOFF_FRACTION;
 
-    pars->file.index = 0;
-    pars->file.buf_size = WRITE_OUT_BUFFER_NUMBER;
-    pars->file.skip = TIME_STEP_SKIPS;
+    pars.file.index = 0;
+    pars.file.buf_size = WRITE_OUT_BUFFER_NUMBER;
+    pars.file.skip = TIME_STEP_SKIPS;
 
-    pars->file.bins_powspec = POWER_SPECTRUM_BINS;
+    pars.file.bins_powspec = POWER_SPECTRUM_BINS;
 
     RUNTIME_INFO(puts("Initialized parameters.\n"));
 }
@@ -66,13 +66,13 @@ void initialize_parameters(parameters_t *pars) {
 /*
 allocate memory and initialize all external variables
 */
-void allocate_external(parameters_t *pars) {
-    size_t Nx   = pars->x.N;
-    size_t Ny   = pars->y.N;
-    size_t Nz   = pars->z.N;
-    size_t Ntot = pars->Ntot;
-    size_t buf_size = pars->file.buf_size;
-    size_t bins = pars->file.bins_powspec;
+void allocate_external() {
+    size_t Nx   = pars.x.N;
+    size_t Ny   = pars.y.N;
+    size_t Nz   = pars.z.N;
+    size_t Ntot = pars.Ntot;
+    size_t buf_size = pars.file.buf_size;
+    size_t bins = pars.file.bins_powspec;
 
     //grid points
     grid = malloc((Nx + Ny + Nz) * sizeof *grid);
@@ -130,16 +130,16 @@ void allocate_external(parameters_t *pars) {
 	allocated before calling this function
 	see mathematica notebook spectral_operators for further info
 */
-void mk_grid(parameters_t *pars) {
-    size_t Nx = pars->x.N;
-    size_t Ny = pars->y.N;
-    size_t Nz = pars->z.N;
-    double ax = pars->x.a;
-    double bx = pars->x.b;
-    double ay = pars->y.a;
-    double by = pars->y.b;
-    double az = pars->z.a;
-    double bz = pars->z.b;
+void mk_grid() {
+    size_t Nx = pars.x.N;
+    size_t Ny = pars.y.N;
+    size_t Nz = pars.z.N;
+    double ax = pars.x.a;
+    double bx = pars.x.b;
+    double ay = pars.y.a;
+    double by = pars.y.b;
+    double az = pars.z.a;
+    double bz = pars.z.b;
 
 	if (Nx <= 0 || Ny <= 0 || Nz <= 0)
 	{
@@ -178,10 +178,10 @@ void mk_grid(parameters_t *pars) {
 /*
 create all fftw plans, IMPORTANT: create BEFORE initializing arrays!
 */
-void mk_fftw_plans(parameters_t *pars) {
-    size_t Nx = pars->x.N;
-    size_t Ny = pars->y.N;
-    size_t Nz = pars->z.N;
+void mk_fftw_plans() {
+    size_t Nx = pars.x.N;
+    size_t Ny = pars.y.N;
+    size_t Nz = pars.z.N;
 
     #ifdef SHOW_TIMING_INFO
     double start =  get_wall_time();
@@ -200,10 +200,10 @@ void mk_fftw_plans(parameters_t *pars) {
 /*
 setup initial conditions for the field
 */
-void mk_initial_conditions(parameters_t *pars) {
-    size_t Nx = pars->x.N;
-    size_t Ny = pars->y.N;
-    size_t Nz = pars->z.N;
+void mk_initial_conditions() {
+    size_t Nx = pars.x.N;
+    size_t Ny = pars.y.N;
+    size_t Nz = pars.z.N;
     size_t Ntot = Nx * Ny * Nz;
     size_t osx, osy;
     double x, y, z;
@@ -268,9 +268,9 @@ double dphi_init(double x, double y, double z) {
 	return 0.0;
 }
 
-void free_and_destroy_all(parameters_t *pars) {
+void free_and_destroy_all() {
     destroy_fftw_plans();
-    free_all_external(pars);
+    free_all_external();
 }
 
 /*
@@ -285,7 +285,7 @@ void destroy_fftw_plans() {
 /*
 free all allocated memory
 */
-void free_all_external(parameters_t *pars) {
+void free_all_external() {
     free(grid);
     fftw_free(field);
     fftw_free(field_new);

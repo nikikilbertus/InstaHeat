@@ -8,12 +8,12 @@
 #include "evolution_toolkit.h"
 #include "filehandling.h"
 
-void run_rk4(parameters_t *pars) {
-	size_t Ntot = pars->Ntot;
+void run_rk4() {
+	size_t Ntot = pars.Ntot;
 	size_t Ntot2 = 2 * Ntot;
-	size_t Nt = pars->t.Nt;
-	double dt = pars->t.dt;
-	double t = pars->t.t;
+	size_t Nt = pars.t.Nt;
+	double dt = pars.t.dt;
+	double t = pars.t.t;
 
 	double a1, a2, a3, a4, tmp_a;
 	double *k1, *k2, *k3, *k4, *tmp_k;
@@ -30,8 +30,8 @@ void run_rk4(parameters_t *pars) {
 	}
 
 	RUNTIME_INFO(puts("Starting RK4 time evolution with:"));
-	RUNTIME_INFO(printf("initial time: %f\n", pars->t.ti));
-	RUNTIME_INFO(printf("final time: %f\n", pars->t.tf));
+	RUNTIME_INFO(printf("initial time: %f\n", pars.t.ti));
+	RUNTIME_INFO(printf("final time: %f\n", pars.t.tf));
 	RUNTIME_INFO(printf("time step dt: %f\n", dt));
 	RUNTIME_INFO(printf("number of steps: %zu\n", Nt));
 	RUNTIME_INFO(puts("Using DFT (fftw3) for spatial derivatives."));
@@ -51,13 +51,13 @@ void run_rk4(parameters_t *pars) {
 		#ifdef ENABLE_FFT_FILTER
 			evo_flags.filter = 1;
 		#endif
-		if (nt % pars->file.skip == 0)
+		if (nt % pars.file.skip == 0)
 		{
 			evo_flags.compute_pow_spec = 1;
 		}
 
 		// k1 & a1
-		a1 = mk_velocities(t, field, f_a, k1, pars);
+		a1 = mk_velocities(t, field, f_a, k1);
 		#ifdef ENABLE_FFT_FILTER
 			evo_flags.filter = 0;
 		#endif
@@ -70,7 +70,7 @@ void run_rk4(parameters_t *pars) {
 			tmp_k[i] = field[i] + dt * k1[i] / 2.0;
 		}
 		tmp_a = f_a + dt * a1 / 2.0;
-		a2 = mk_velocities(t + dt / 2.0, tmp_k, tmp_a, k2, pars);
+		a2 = mk_velocities(t + dt / 2.0, tmp_k, tmp_a, k2);
 
 		// k3 & a3
 		#pragma omp parallel for
@@ -79,7 +79,7 @@ void run_rk4(parameters_t *pars) {
 			tmp_k[i] = field[i] + dt * k2[i] / 2.0;
 		}
 		tmp_a = f_a + dt * a2 / 2.0;
-		a3 = mk_velocities(t + dt / 2.0, tmp_k, tmp_a, k3, pars);
+		a3 = mk_velocities(t + dt / 2.0, tmp_k, tmp_a, k3);
 
 		// k4 & a4
 		#pragma omp parallel for
@@ -88,11 +88,11 @@ void run_rk4(parameters_t *pars) {
 			tmp_k[i] = field[i] + dt * k3[i];
 		}
 		tmp_a = f_a + dt * a3;
-		a4 = mk_velocities(t + dt, tmp_k, tmp_a, k4, pars);
+		a4 = mk_velocities(t + dt, tmp_k, tmp_a, k4);
 
-		rho = mk_rho(field, f_a, pars);
+		rho = mk_rho(field, f_a);
 
-		if (nt % pars->file.skip == 0)
+		if (nt % pars.file.skip == 0)
 		{
 			save();
 		}
@@ -106,15 +106,15 @@ void run_rk4(parameters_t *pars) {
 		f_a += dt * (a1 + 2.0 * a2 + 2.0 * a3 + a4) / 6.0;
 
 		t += dt;
-		pars->t.t = t;
+		pars.t.t = t;
 	}
 
 	// make sure to write out last time slice
-	rho = mk_rho(field, f_a, pars);
+	rho = mk_rho(field, f_a);
 	save();
 
 	// info about last timeslice
-	if (fabs(pars->t.tf - pars->t.t) > 1e-10)
+	if (fabs(pars.t.tf - pars.t.t) > 1e-10)
 	{
 		RUNTIME_INFO(fputs("The time of the last step does not coincide "
 							"with the specified final time.", stderr));

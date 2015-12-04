@@ -64,13 +64,13 @@ extern dopri853_constants_t dpc;
 extern dopri853_control_t dp;
 extern dopri853_values_t dpv;
 
-void initialize_dopri853(parameters_t *pars);
-void run_dopri853(parameters_t *pars);
-void perform_step(const double dt_try, parameters_t *pars);
-void try_step(const double dt, parameters_t *pars);
+void initialize_dopri853();
+void run_dopri853();
+void perform_step(const double dt_try);
+void try_step(const double dt);
 double error(const double dt);
 int success(const double err, double *dt);
-void prepare_dense_output(const double dt, parameters_t *pars);
+void prepare_dense_output(const double dt);
 double dense_output(const size_t i, const double t, const double dt);
 void allocate_dopri853_values();
 void destroy_dopri853_values();
