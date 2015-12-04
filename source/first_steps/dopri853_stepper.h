@@ -1,7 +1,6 @@
 #ifndef __DOPRI853_STEPPER__
 #define __DOPRI853_STEPPER__
 
-#include <stddef.h>
 #include "main.h"
 
 typedef struct {
@@ -29,8 +28,6 @@ d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,
 d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;
 }dopri853_constants_t;
 
-extern dopri853_constants_t dpc;
-
 typedef struct {
 	double t;
     double t_old;
@@ -55,15 +52,16 @@ typedef struct {
     int dense;
 }dopri853_control_t;
 
-extern dopri853_control_t dp;
-
 typedef struct {
 	double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;
 	double *yerr, *yerr2;
-	double *rcont1, *rcont2, *rcont3, *rcont4, *rcont5, *rcont6, *rcont7, *rcont8;
+	double *rcont1, *rcont2, *rcont3, *rcont4,
+		   *rcont5, *rcont6, *rcont7, *rcont8;
 	double a2, a3, a4, a5, a6, a7, a8, a9, a10, a_tmp;
 }dopri853_values_t;
 
+extern dopri853_constants_t dpc;
+extern dopri853_control_t dp;
 extern dopri853_values_t dpv;
 
 void initialize_dopri853(parameters_t *pars);

@@ -1,7 +1,6 @@
 #ifndef __FILEHANDLING__
 #define __FILEHANDLING__
 
-#include <stddef.h>
 #include "hdf5.h"
 
 void h5_create_empty_by_path(char *name);

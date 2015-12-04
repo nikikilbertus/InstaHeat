@@ -19,11 +19,11 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	size_t ncz = Nz / 2 + 1;
 
 	#ifdef SHOW_TIMING_INFO
-	double start =  get_wall_time();
+	double start = get_wall_time();
 	#endif
 	fftw_execute_dft_r2c(p_fw_3d, in, cfftw_tmp);
 	#ifdef SHOW_TIMING_INFO
-	double end =  get_wall_time();
+	double end = get_wall_time();
 	fftw_time_exe += end - start;
 	#endif
 
@@ -122,14 +122,14 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	}
 
 	#ifdef SHOW_TIMING_INFO
-	start =  get_wall_time();
+	start = get_wall_time();
 	#endif
 	fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_x, dtmp_x);
 	fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_y, dtmp_y);
 	fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_z, dtmp_z);
 	fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp,  laplacian);
 	#ifdef SHOW_TIMING_INFO
-	end =  get_wall_time();
+	end = get_wall_time();
 	fftw_time_exe += end - start;
 	#endif
 

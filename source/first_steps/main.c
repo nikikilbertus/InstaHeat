@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <complex.h>
 #include <omp.h>
 #include <fftw3.h>
@@ -10,13 +9,11 @@
 #include "main.h"
 #include "setup.h"
 #include "RK4_stepper.h"
-#include "filehandling.h"
 #include "dopri853_stepper.h"
+#include "filehandling.h"
 #include "tests.h"
 
-/*
---------------------------------global variables--------------------------------
-*/
+// -----------------------------global variables--------------------------------
 // simulation parameters
 parameters_t pars;
 
@@ -66,9 +63,7 @@ double fftw_time_exe  = 0.0;
 double fftw_time_plan = 0.0;
 double h5_time_write = 0.0;
 
-/*
---------------------------------main--------------------------------------------
-*/
+// -----------------------------main--------------------------------------------
 int main(int argc, const char * argv[]) {
 
     #ifdef SHOW_TIMING_INFO
@@ -116,9 +111,7 @@ int main(int argc, const char * argv[]) {
     return 0;
 }
 
-/*
---------------------------------timing------------------------------------------
-*/
+// -----------------------------timing------------------------------------------
 #ifdef SHOW_TIMING_INFO
 double get_wall_time(){
     struct timeval time;

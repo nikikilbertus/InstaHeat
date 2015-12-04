@@ -1,7 +1,6 @@
 #ifndef __tests__
 #define __tests__
 
-#include <stddef.h>
 #include "main.h"
 
 void run_all_tests(parameters_t *pars);

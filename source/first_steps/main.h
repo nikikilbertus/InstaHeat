@@ -1,7 +1,6 @@
 #ifndef __MAIN__
 #define __MAIN__
 
-#include <stddef.h>
 #include <complex.h>
 #include <fftw3.h>
 

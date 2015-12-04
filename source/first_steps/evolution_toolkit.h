@@ -5,8 +5,6 @@
 #include <fftw3.h>
 #include "main.h"
 
-#define POW_SPEC_NAME "pow_spec"
-
 typedef struct {
 	uint8_t filter;
 	uint8_t compute_pow_spec;
