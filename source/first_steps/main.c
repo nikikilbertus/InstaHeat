@@ -28,9 +28,7 @@ double *field, *field_new;
 double *dfield, *dfield_new;
 double *field_buf;
 
-// scale parameter a and temporal derivative plus buffer for write out
-double f_a, df_a;
-double f_a_new, df_a_new;
+// buffer for scaling parameter a
 double *f_a_buf;
 
 // total energy density rho of the field plus buffer for write out

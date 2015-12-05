@@ -12,12 +12,12 @@ void run_all_tests() {
 }
 
 void test_mk_gradient_squared_and_laplacian() {
-    size_t Ntot = pars.Ntot;
+    size_t N = pars.N;
 
     mk_gradient_squared_and_laplacian(field, dtmp_grad2, dtmp_lap);
     puts("test mk gradient squared and laplacian:");
-    fill_field(dtmp_x + Ntot, test_func_Dx);
-    if (are_fields_equal(dtmp_x, dtmp_x + Ntot) == 0)
+    fill_field(dtmp_x + N, test_func_Dx);
+    if (are_fields_equal(dtmp_x, dtmp_x + N) == 0)
     {
         puts("Dx passed\n");
     }
@@ -25,8 +25,8 @@ void test_mk_gradient_squared_and_laplacian() {
     {
         puts("Dx failed\n");
     }
-    fill_field(dtmp_y + Ntot, test_func_Dy);
-    if (are_fields_equal(dtmp_y, dtmp_y + Ntot) == 0)
+    fill_field(dtmp_x + N, test_func_Dy);
+    if (are_fields_equal(dtmp_y, dtmp_x + N) == 0)
     {
         puts("Dy passed\n");
     }
@@ -34,8 +34,8 @@ void test_mk_gradient_squared_and_laplacian() {
     {
         puts("Dy failed\n");
     }
-    fill_field(dtmp_z + Ntot, test_func_Dz);
-    if (are_fields_equal(dtmp_z, dtmp_z + Ntot) == 0)
+    fill_field(dtmp_x + N, test_func_Dz);
+    if (are_fields_equal(dtmp_z, dtmp_x + N) == 0)
     {
         puts("Dz passed\n");
     }
@@ -44,9 +44,9 @@ void test_mk_gradient_squared_and_laplacian() {
         puts("Dz failed\n");
     }
 
-    fill_field(dtmp_x + Ntot, test_func_gradsq);
-    fill_field(dtmp_y + Ntot, test_func_lap);
-    if (are_fields_equal(dtmp_x + Ntot, dtmp_grad2) == 0)
+    fill_field(dtmp_x, test_func_gradsq);
+    fill_field(dtmp_y, test_func_lap);
+    if (are_fields_equal(dtmp_x, dtmp_grad2) == 0)
     {
         puts("gradient squared passed\n");
     }
@@ -54,7 +54,7 @@ void test_mk_gradient_squared_and_laplacian() {
     {
         puts("gradient squared failed\n");
     }
-    if (are_fields_equal(dtmp_y + Ntot, dtmp_lap) == 0)
+    if (are_fields_equal(dtmp_y, dtmp_lap) == 0)
     {
         puts("laplace passed\n");
     }
@@ -64,14 +64,14 @@ void test_mk_gradient_squared_and_laplacian() {
     }
 #ifdef DEBUG
         puts("testgradsq");
-        print_vector(dtmp_grad2, Ntot);
+        print_vector(dtmp_grad2, N);
         puts("exact");
-        print_vector(dtmp_x, Ntot);
+        print_vector(dtmp_x, N);
         puts("\n");
         puts("testlap");
-        print_vector(dtmp_lap, Ntot);
+        print_vector(dtmp_lap, N);
         puts("exact");
-        print_vector(dtmp_y, Ntot);
+        print_vector(dtmp_y, N);
         puts("\n");
 #endif
 }
@@ -136,9 +136,7 @@ void fill_field(double *f, double (*func)(double, double, double)) {
 }
 
 int are_fields_equal(double *f, double *g) {
-    size_t Ntot = pars.Ntot;
-
-    for (size_t i = 0; i < Ntot; ++i)
+    for (size_t i = 0; i < pars.N; ++i)
     {
         if (equal(f[i], g[i]) != 0)
         {

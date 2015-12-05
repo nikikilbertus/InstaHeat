@@ -37,7 +37,6 @@ typedef struct {
     double dt_did;
     double dt_next;
     double dt_min;
-    size_t Ntot2;
     size_t max_steps;
     int n_stp;
     int n_ok;
@@ -57,7 +56,6 @@ typedef struct {
 	double *yerr, *yerr2;
 	double *rcont1, *rcont2, *rcont3, *rcont4,
 		   *rcont5, *rcont6, *rcont7, *rcont8;
-	double a2, a3, a4, a5, a6, a7, a8, a9, a10, a_tmp;
 }dopri853_values_t;
 
 extern dopri853_constants_t dpc;

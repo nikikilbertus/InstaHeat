@@ -15,10 +15,10 @@ extern evolution_flags_t evo_flags;
 void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 												double *laplacian);
 void fft_apply_filter(fftw_complex *inout);
-double mk_velocities(double t, double *f, double a, double *result);
+void mk_velocities(double t, double *f, double *result);
 extern double potential(double f);
 extern double potential_prime(double f);
-double mk_rho(double *f, double a);
+double mk_rho(double *f);
 void mk_power_spectrum(fftw_complex *in);
 void mk_filter_window(double *out, size_t cutoffindex, size_t windowlength);
 extern double filter_window_function(double x);

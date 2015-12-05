@@ -44,7 +44,7 @@ void initialize_parameters() {
     pars.z.b = SPATIAL_UPPER_BOUND_Z;
     pars.z.L = pars.z.b - pars.z.a;
 
-    pars.Ntot = pars.x.N * pars.y.N * pars.z.N;
+    pars.N = pars.x.N * pars.y.N * pars.z.N;
 
     pars.t.dt = DELTA_T > 0 ? DELTA_T : pars.t.dt;
     pars.t.t  = INITIAL_TIME;
@@ -70,7 +70,9 @@ void allocate_external() {
     size_t Nx   = pars.x.N;
     size_t Ny   = pars.y.N;
     size_t Nz   = pars.z.N;
-    size_t Ntot = pars.Ntot;
+    size_t N    = pars.N;
+    size_t N2   = 2 * N;
+    size_t Ntot = N2 + 1;
     size_t buf_size = pars.file.buf_size;
     size_t bins = pars.file.bins_powspec;
 
@@ -78,20 +80,20 @@ void allocate_external() {
     grid = malloc((Nx + Ny + Nz) * sizeof *grid);
 
     //solutions for the field and the temporal derivative
-    field      = fftw_malloc(2 * Ntot * sizeof *field);
-    field_new  = fftw_malloc(2 * Ntot * sizeof *field_new);
-    dfield     = fftw_malloc(2 * Ntot * sizeof *dfield);
-    dfield_new = fftw_malloc(2 * Ntot * sizeof *dfield_new);
+    field      = fftw_malloc(Ntot * sizeof *field);
+    field_new  = fftw_malloc(Ntot * sizeof *field_new);
+    dfield     = fftw_malloc(Ntot * sizeof *dfield);
+    dfield_new = fftw_malloc(Ntot * sizeof *dfield_new);
     // write out buffer for the field phi
-    field_buf = calloc(buf_size * 2 * Ntot, sizeof *field_buf);
+    field_buf = calloc(buf_size * N, sizeof *field_buf);
 
-    // write out buffer for a
+    // write out buffer for time
     time_buf = calloc(buf_size, sizeof *time_buf);
 
     // write out buffer for a
     f_a_buf = calloc(buf_size, sizeof *f_a_buf);
 
-    // write out buffer for a
+    // write out buffer for rho
     rho_buf = calloc(buf_size, sizeof *rho_buf);
 
     // power spectrum and write out buffer
@@ -106,14 +108,14 @@ void allocate_external() {
     cfftw_tmp_z = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_z);
 
     // general purpose double memory blocks for temporary use
-    dtmp_x = fftw_malloc(2 * Ntot * sizeof *dtmp_x);
-    dtmp_y = fftw_malloc(2 * Ntot * sizeof *dtmp_y);
-    dtmp_z = fftw_malloc(2 * Ntot * sizeof *dtmp_z);
-    dtmp_grad2 = fftw_malloc(Ntot * sizeof *dtmp_grad2);
-    dtmp_lap = fftw_malloc(Ntot * sizeof *dtmp_lap);
+    dtmp_x = fftw_malloc(Ntot * sizeof *dtmp_x); // used in dopri853 (dense)
+    dtmp_y = fftw_malloc(N * sizeof *dtmp_y);
+    dtmp_z = fftw_malloc(N * sizeof *dtmp_z);
+    dtmp_grad2 = fftw_malloc(N * sizeof *dtmp_grad2);
+    dtmp_lap = fftw_malloc(N * sizeof *dtmp_lap);
 
     if (!(grid && field && field_new && dfield && dfield_new && field_buf &&
-        time_buf && f_a_buf && rho_buf && pow_spec && pow_spec_buf &&
+        time_buf && rho_buf && pow_spec && pow_spec_buf &&
         cfftw_tmp && cfftw_tmp_x && cfftw_tmp_y && cfftw_tmp_z &&
         dtmp_x && dtmp_y && dtmp_z && dtmp_grad2 && dtmp_lap))
     {
@@ -204,7 +206,7 @@ void mk_initial_conditions() {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
-    size_t Ntot = Nx * Ny * Nz;
+    size_t N = pars.N;
     size_t osx, osy;
     double x, y, z;
 
@@ -228,19 +230,22 @@ void mk_initial_conditions() {
             {
                 z = grid[Nx + Ny + k];
                 field[osy + k] = phi_init(x, y, z, theta);
-                field[Ntot + osy + k] = dphi_init(x, y, z);
+                field[N + osy + k] = dphi_init(x, y, z);
             }
         }
     }
 
-    f_a = 1.0;
+    // initialize a
+    field[2 * N] = 1.0;
 
     // Console output for debugging
     #ifdef DEBUG
     	puts("phi");
-        print_vector(field, Ntot);
+        print_vector(field, N);
         puts("\ndphi");
-        print_vector(field + Ntot, Ntot);
+        print_vector(field + N, N);
+        puts("\na");
+        print_vector(field + 2 * N, 1);
         puts("\n");
     #endif
 

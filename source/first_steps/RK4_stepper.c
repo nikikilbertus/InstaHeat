@@ -9,19 +9,19 @@
 #include "filehandling.h"
 
 void run_rk4() {
-	size_t Ntot = pars.Ntot;
-	size_t Ntot2 = 2 * Ntot;
+	size_t N = pars.N;
+	size_t N2 = 2 * N;
+	size_t Ntot = N2 + 1;
 	size_t Nt = pars.t.Nt;
 	double dt = pars.t.dt;
 	double t = pars.t.t;
 
-	double a1, a2, a3, a4, tmp_a;
 	double *k1, *k2, *k3, *k4, *tmp_k;
-	k1    = fftw_malloc(Ntot2 * sizeof *k1);
-	k2    = fftw_malloc(Ntot2 * sizeof *k2);
-	k3    = fftw_malloc(Ntot2 * sizeof *k3);
-	k4    = fftw_malloc(Ntot2 * sizeof *k4);
-	tmp_k = fftw_malloc(Ntot2 * sizeof *tmp_k);
+	k1    = fftw_malloc(Ntot * sizeof *k1);
+	k2    = fftw_malloc(Ntot * sizeof *k2);
+	k3    = fftw_malloc(Ntot * sizeof *k3);
+	k4    = fftw_malloc(Ntot * sizeof *k4);
+	tmp_k = fftw_malloc(Ntot * sizeof *tmp_k);
 
 	if (!(k1 && k2 && k3 && k4 && tmp_k))
 	{
@@ -57,7 +57,7 @@ void run_rk4() {
 		}
 
 		// k1 & a1
-		a1 = mk_velocities(t, field, f_a, k1);
+		mk_velocities(t, field, k1);
 		#ifdef ENABLE_FFT_FILTER
 			evo_flags.filter = 0;
 		#endif
@@ -65,32 +65,29 @@ void run_rk4() {
 
 		// k2 & a2
 		#pragma omp parallel for
-		for (size_t i = 0; i < Ntot2; ++i)
+		for (size_t i = 0; i < Ntot; ++i)
 		{
 			tmp_k[i] = field[i] + dt * k1[i] / 2.0;
 		}
-		tmp_a = f_a + dt * a1 / 2.0;
-		a2 = mk_velocities(t + dt / 2.0, tmp_k, tmp_a, k2);
+		mk_velocities(t + dt / 2.0, tmp_k, k2);
 
 		// k3 & a3
 		#pragma omp parallel for
-		for (size_t i = 0; i < Ntot2; ++i)
+		for (size_t i = 0; i < Ntot; ++i)
 		{
 			tmp_k[i] = field[i] + dt * k2[i] / 2.0;
 		}
-		tmp_a = f_a + dt * a2 / 2.0;
-		a3 = mk_velocities(t + dt / 2.0, tmp_k, tmp_a, k3);
+		mk_velocities(t + dt / 2.0, tmp_k, k3);
 
 		// k4 & a4
 		#pragma omp parallel for
-		for (size_t i = 0; i < Ntot2; ++i)
+		for (size_t i = 0; i < Ntot; ++i)
 		{
 			tmp_k[i] = field[i] + dt * k3[i];
 		}
-		tmp_a = f_a + dt * a3;
-		a4 = mk_velocities(t + dt, tmp_k, tmp_a, k4);
+		mk_velocities(t + dt, tmp_k, k4);
 
-		rho = mk_rho(field, f_a);
+		rho = mk_rho(field);
 
 		if (nt % pars.file.skip == 0)
 		{
@@ -99,18 +96,17 @@ void run_rk4() {
 
 		// perform one time step for the field and a
 		#pragma omp parallel for
-		for (size_t i = 0; i < Ntot2; ++i)
+		for (size_t i = 0; i < Ntot; ++i)
 		{
 			field[i] += dt * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]) / 6.0;
 		}
-		f_a += dt * (a1 + 2.0 * a2 + 2.0 * a3 + a4) / 6.0;
 
 		t += dt;
 		pars.t.t = t;
 	}
 
 	// make sure to write out last time slice
-	rho = mk_rho(field, f_a);
+	rho = mk_rho(field);
 	save();
 
 	// info about last timeslice

@@ -15,7 +15,7 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	size_t Nx = pars.x.N;
 	size_t Ny = pars.y.N;
 	size_t Nz = pars.z.N;
-	size_t Ntot = pars.Ntot;
+	size_t N = pars.N;
 	size_t ncz = Nz / 2 + 1;
 
 	#ifdef SHOW_TIMING_INFO
@@ -44,14 +44,14 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 	double Lz = pars.z.L;
 
 	complex prefac = 2. * PI * I;
-	complex factor_x = prefac / (Lx * Ntot);
-	complex factor_y = prefac / (Ly * Ntot);
-	complex factor_z = prefac / (Lz * Ntot);
+	complex factor_x = prefac / (Lx * N);
+	complex factor_y = prefac / (Ly * N);
+	complex factor_z = prefac / (Lz * N);
 
 	double prefac2 = -4. * PI *PI;
-	double factor_x2 = prefac2 / (Lx * Lx * Ntot);
-	double factor_y2 = prefac2 / (Ly * Ly * Ntot);
-	double factor_z2 = prefac2 / (Lz * Lz * Ntot);
+	double factor_x2 = prefac2 / (Lx * Lx * N);
+	double factor_y2 = prefac2 / (Ly * Ly * N);
+	double factor_z2 = prefac2 / (Lz * Lz * N);
 	double k_sq;
 
 	size_t osx, osy, id;
@@ -135,7 +135,7 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
 
 	double gx, gy, gz;
 	#pragma omp parallel for private(gx, gy, gz)
-	for (size_t i = 0; i < Ntot; ++i)
+	for (size_t i = 0; i < N; ++i)
 	{
 		gx = dtmp_x[i];
 		gy = dtmp_y[i];
@@ -148,7 +148,7 @@ void mk_power_spectrum(fftw_complex *in) {
 	size_t Nx = pars.x.N;
 	size_t Ny = pars.y.N;
 	size_t Nz = pars.z.N;
-	size_t Ntot = pars.Ntot;
+	size_t N = pars.N;
 	size_t ncz = Nz / 2 + 1;
 	size_t bins = pars.file.bins_powspec;
 
@@ -216,7 +216,7 @@ void mk_power_spectrum(fftw_complex *in) {
 						k2_tmp += k_y2 * j * j;
 					}
 					idx = (int)(k2_tmp / dk2 - 1e-7);
-					pow_spec[idx] += pow2_tmp / Ntot;
+					pow_spec[idx] += pow2_tmp / N;
 				}
 			}
 		}
@@ -301,27 +301,28 @@ void fft_apply_filter(fftw_complex *inout) {
 /*
 compute the right hand side of the pde, ie the first order temporal derivatives
 */
-double mk_velocities(double t, double *f, double a, double *result) {
-	size_t Ntot = pars.Ntot;
-	size_t Ntot2 = 2 * Ntot;
+void mk_velocities(double t, double *f, double *result) {
+	size_t N = pars.N;
+	size_t N2 = 2 * N;
+	double a = f[N2];
 
-	rho = mk_rho(f, a);
+	rho = mk_rho(f);
 	double hubble = sqrt(rho / 3.0);
 
 	#pragma omp parallel for
-	for (size_t i = 0; i < Ntot; ++i)
+	for (size_t i = 0; i < N; ++i)
 	{
-		result[i] = f[Ntot + i];
+		result[i] = f[N + i];
 	}
 
 	#pragma omp parallel for
-	for (size_t i = Ntot; i < Ntot2; ++i)
+	for (size_t i = N; i < N2; ++i)
 	{
-		result[i] = dtmp_lap[i - Ntot] / (a * a);
+		result[i] = dtmp_lap[i - N] / (a * a);
 		result[i] -= ( 3.0 * hubble * f[i]
-						+ potential_prime(f[i - Ntot]) );
+						+ potential_prime(f[i - N]) );
 	}
-	return a * hubble;
+	result[N2] = a * hubble;
 }
 
 /*
@@ -371,22 +372,22 @@ inline double potential_prime(double f) {
 /*
 compute average 00 component of stress energy
 */
-double mk_rho(double *f, double a) {
-	size_t Ntot = pars.Ntot;
-
+double mk_rho(double *f) {
+	size_t N = pars.N;
+	double a = f[2 * N];
 	double T00 = 0.0;
 
 	mk_gradient_squared_and_laplacian(f, dtmp_grad2, dtmp_lap);
 
-	double ft, grad2_a;
-	#pragma omp parallel for default(shared) private(ft, grad2_a) reduction(+:T00)
-	for (size_t i = 0; i < Ntot; ++i)
+	double df, grad2_a;
+	#pragma omp parallel for default(shared) private(df, grad2_a) reduction(+:T00)
+	for (size_t i = 0; i < N; ++i)
 	{
-		ft = f[Ntot + i];
+		df = f[N + i];
 		grad2_a = dtmp_grad2[i] / (a * a);
-		T00 += (ft * ft + grad2_a) / 2. + potential(f[i]);
+		T00 += (df * df + grad2_a) / 2. + potential(f[i]);
 	}
-	return T00 / Ntot;
+	return T00 / N;
 }
 
 void mk_filter_window(double *inout, size_t cutoffindex, size_t windowlength) {

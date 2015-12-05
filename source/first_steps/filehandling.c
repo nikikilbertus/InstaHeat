@@ -8,7 +8,7 @@
 
 void h5_create_empty_by_path(char *name) {
     hsize_t rank = 2;
-    hsize_t N = pars.Ntot;
+    hsize_t N = pars.N;
     hsize_t Nt = pars.file.buf_size;
     hsize_t bins = pars.file.bins_powspec;
 
@@ -61,14 +61,11 @@ void h5_create_empty_by_path(char *name) {
     // --------------------------time-------------------------------------------
     // create dataspace for the time
     rank = 1;
-    // dims[0] = 0;
-    // max_dims[0] = H5S_UNLIMITED;
     hid_t dspace_time = H5Screate_simple(rank, dims, max_dims);
 
     // create property list for the time
     hid_t plist_time = H5Pcreate(H5P_DATASET_CREATE);
     H5Pset_layout(plist_time, H5D_CHUNKED);
-    // chunk_dims[0] = Nt;
     H5Pset_chunk(plist_time, rank, chunk_dims);
 
     // create dataset for the time
@@ -119,7 +116,7 @@ void h5_create_empty_by_path(char *name) {
 }
 
 void h5_write_buffers_to_disk(hsize_t Nt) {
-    hsize_t N = pars.Ntot;
+    hsize_t N = pars.N;
     hsize_t bins = pars.file.bins_powspec;
     hsize_t rank;
     // TODO[performance] maybe use static variable to count dataset size instead
@@ -226,7 +223,7 @@ void h5_write_buffers_to_disk(hsize_t Nt) {
 void save() {
     hsize_t index = pars.file.index;
     hsize_t Nt = pars.file.buf_size;
-    hsize_t N = pars.Ntot;
+    hsize_t N = pars.N;
     hsize_t bins = pars.file.bins_powspec;
 
     hsize_t os = index * N;
@@ -258,11 +255,11 @@ void save() {
     }
 
     time_buf[index] = pars.t.t;
-    f_a_buf[index] = f_a;
+    f_a_buf[index] = field[2 * N];
     rho_buf[index] = rho;
 
     #ifdef CHECK_FOR_NAN
-    if (isnan(pars.t.t) || isnan(f_a) || isnan(rho))
+    if (isnan(pars.t.t) || isnan(field[2 * N]) || isnan(rho))
     {
         fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
             exit(EXIT_FAILURE);

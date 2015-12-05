@@ -119,7 +119,7 @@ typedef struct {
 	grid_dimension_t x;
 	grid_dimension_t y;
 	grid_dimension_t z;
-	size_t Ntot;
+	size_t N;
 	timing_t t;
 	double cutoff_fraction; // used in spectral filtering during time evolution
 	file_parameters_t file;
@@ -141,9 +141,7 @@ extern double *field, *dfield;
 extern double *field_new, *dfield_new;
 extern double *field_buf;
 
-// solution for the FRW euqations
-extern double f_a, df_a;
-extern double f_a_new, df_a_new;
+// buffer for scaling parameter a
 extern double *f_a_buf;
 
 // energy density rho  = T^{00}_{\phi}

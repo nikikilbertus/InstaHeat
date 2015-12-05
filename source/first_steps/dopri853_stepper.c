@@ -21,7 +21,6 @@ void initialize_dopri853() {
     dp.dt_did = 0.0;
     dp.dt_next = pars.t.dt;
     dp.dt_min = MINIMAL_DELTA_T;
-    dp.Ntot2 = 2 * pars.Ntot;
     dp.max_steps = MAX_STEPS;
     dp.n_stp = 0;
     dp.n_ok = 0;
@@ -60,7 +59,7 @@ void run_dopri853() {
 	#endif
 
 	evo_flags.compute_pow_spec = 1;
-	df_a = mk_velocities(dp.t, field, f_a, dfield);
+	mk_velocities(dp.t, field, dfield);
 	evo_flags.compute_pow_spec = 0;
 	save();
 	// if (dp.dense)
@@ -105,7 +104,7 @@ void run_dopri853() {
 		if ((dp.n_stp + 1) % pars.file.skip == 0)
 		{
 			evo_flags.compute_pow_spec = 1;
-			rho = mk_rho(field, f_a);
+			rho = mk_rho(field);
 			evo_flags.compute_pow_spec = 0;
 			save();
 		}
@@ -143,6 +142,7 @@ void run_dopri853() {
 }
 
 void perform_step(const double dt_try) {
+	size_t Ntot = 2 * pars.N + 1;
 	double dt = dt_try;
 	for ( ; ; )
 	{
@@ -161,7 +161,7 @@ void perform_step(const double dt_try) {
 	#ifdef ENABLE_FFT_FILTER
 	evo_flags.filter = 1;
 	#endif
-	df_a_new = mk_velocities(dp.t + dt, field_new, f_a_new, dfield_new);
+	mk_velocities(dp.t + dt, field_new, dfield_new);
 	#ifdef ENABLE_FFT_FILTER
 	evo_flags.filter = 0;
 	#endif
@@ -172,13 +172,11 @@ void perform_step(const double dt_try) {
 	}
 	#endif
 	#pragma omp parallel for
-	for (size_t i = 0; i < dp.Ntot2; ++i)
+	for (size_t i = 0; i < Ntot; ++i)
 	{
 		dfield[i] = dfield_new[i];
 		field[i] = field_new[i];
 	}
-	df_a = df_a_new;
-	f_a = f_a_new;
 	dp.t_old = dp.t;
 	dp.t += (dp.dt_did = dt);
 	pars.t.t = dp.t;
@@ -187,149 +185,123 @@ void perform_step(const double dt_try) {
 void try_step(const double dt) {
 	size_t i;
 	double t = dp.t;
-	size_t Ntot2 = dp.Ntot2;
+	size_t Ntot = 2 * pars.N + 1;
 	// ------------ 1 ------------
 	// is already done in perform_step
 
 	// ------------ 2 ------------
 	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
+	for (i = 0; i < Ntot; ++i)
 	{
 		dpv.k_tmp[i] = field[i] + dt * dpc.a21 * dfield[i];
 	}
-	dpv.a_tmp = f_a + dt * dpc.a21 * df_a;
-	dpv.a2 = mk_velocities(t + dpc.c2 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k2);
+	mk_velocities(t + dpc.c2 * dt, dpv.k_tmp, dpv.k2);
 
 	// ------------ 3 ------------
 	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
+	for (i = 0; i < Ntot; ++i)
 	{
 		dpv.k_tmp[i] = field[i] + dt *
 			(dpc.a31 * dfield[i] + dpc.a32 * dpv.k2[i]);
 	}
-	dpv.a_tmp = f_a + dt * (dpc.a31 * df_a + dpc.a32 * dpv.a2);
-	dpv.a3 = mk_velocities(t + dpc.c3 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k3);
+	mk_velocities(t + dpc.c3 * dt, dpv.k_tmp, dpv.k3);
 
 	// ------------ 4 ------------
 	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
+	for (i = 0; i < Ntot; ++i)
 	{
 		dpv.k_tmp[i] = field[i] + dt *
 			(dpc.a41 * dfield[i] + dpc.a43 * dpv.k3[i]);
 	}
-	dpv.a_tmp = f_a + dt * (dpc.a41 * df_a + dpc.a43 * dpv.a3);
-	dpv.a4 = mk_velocities(t + dpc.c4 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k4);
+	mk_velocities(t + dpc.c4 * dt, dpv.k_tmp, dpv.k4);
 
 	// ------------ 5 ------------
 	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
+	for (i = 0; i < Ntot; ++i)
 	{
 		dpv.k_tmp[i] = field[i] + dt *
 			(dpc.a51 * dfield[i] + dpc.a53 * dpv.k3[i] + dpc.a54 * dpv.k4[i]);
 	}
-	dpv.a_tmp = f_a + dt * (dpc.a51 * df_a + dpc.a53 * dpv.a3 + dpc.a54 * dpv.a4);
-	dpv.a5 = mk_velocities(t + dpc.c5 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k5);
+	mk_velocities(t + dpc.c5 * dt, dpv.k_tmp, dpv.k5);
 
 	// ------------ 6 ------------
 	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
+	for (i = 0; i < Ntot; ++i)
 	{
 		dpv.k_tmp[i] = field[i] + dt *
 			(dpc.a61 * dfield[i] + dpc.a64 * dpv.k4[i] + dpc.a65 * dpv.k5[i]);
 	}
-	dpv.a_tmp = f_a + dt * (dpc.a61 * df_a + dpc.a64 * dpv.a4 + dpc.a65 * dpv.a5);
-	dpv.a6 = mk_velocities(t + dpc.c6 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k6);
+	mk_velocities(t + dpc.c6 * dt, dpv.k_tmp, dpv.k6);
 
 	// ------------ 7 ------------
 	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
+	for (i = 0; i < Ntot; ++i)
 	{
 		dpv.k_tmp[i] = field[i] + dt *
 			(dpc.a71 * dfield[i] + dpc.a74 * dpv.k4[i] + dpc.a75 * dpv.k5[i] +
 			 dpc.a76 * dpv.k6[i]);
 	}
-	dpv.a_tmp = f_a + dt *
-			(dpc.a71 * df_a + dpc.a74 * dpv.a4 + dpc.a75 * dpv.a5 +
-			 dpc.a76 * dpv.a6);
-	dpv.a7 = mk_velocities(t + dpc.c7 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k7);
+	mk_velocities(t + dpc.c7 * dt, dpv.k_tmp, dpv.k7);
 
 	// ------------ 8 ------------
 	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
+	for (i = 0; i < Ntot; ++i)
 	{
 		dpv.k_tmp[i] = field[i] + dt *
 			(dpc.a81 * dfield[i] + dpc.a84 * dpv.k4[i] + dpc.a85 * dpv.k5[i] +
 			 dpc.a86 * dpv.k6[i] + dpc.a87 * dpv.k7[i]);
 	}
-	dpv.a_tmp = f_a + dt *
-			(dpc.a81 * df_a + dpc.a84 * dpv.a4 + dpc.a85 * dpv.a5 +
-			 dpc.a86 * dpv.a6 + dpc.a87 * dpv.a7);
-	dpv.a8 = mk_velocities(t + dpc.c8 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k8);
+	mk_velocities(t + dpc.c8 * dt, dpv.k_tmp, dpv.k8);
 
 	// ------------ 9 ------------
 	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
+	for (i = 0; i < Ntot; ++i)
 	{
 		dpv.k_tmp[i] = field[i] + dt *
 			(dpc.a91 * dfield[i] + dpc.a94 * dpv.k4[i] + dpc.a95 * dpv.k5[i] +
 			 dpc.a96 * dpv.k6[i] + dpc.a97 * dpv.k7[i] + dpc.a98 * dpv.k8[i]);
 	}
-	dpv.a_tmp = f_a + dt *
-			(dpc.a91 * df_a + dpc.a94 * dpv.a4 + dpc.a95 * dpv.a5 +
-			 dpc.a96 * dpv.a6 + dpc.a97 * dpv.a7 + dpc.a98 * dpv.a8);
-	dpv.a9 = mk_velocities(t + dpc.c9 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k9);
+	mk_velocities(t + dpc.c9 * dt, dpv.k_tmp, dpv.k9);
 
 	// ------------ 10 ------------
 	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
+	for (i = 0; i < Ntot; ++i)
 	{
 		dpv.k_tmp[i] = field[i] + dt *
 			(dpc.a101 * dfield[i] + dpc.a104 * dpv.k4[i] + dpc.a105 * dpv.k5[i] +
 			 dpc.a106 * dpv.k6[i] + dpc.a107 * dpv.k7[i] + dpc.a108 * dpv.k8[i] +
 			 dpc.a109 * dpv.k9[i]);
 	}
-	dpv.a_tmp = f_a + dt *
-			(dpc.a101 * df_a + dpc.a104 * dpv.a4 + dpc.a105 * dpv.a5 +
-			 dpc.a106 * dpv.a6 + dpc.a107 * dpv.a7 + dpc.a108 * dpv.a8 +
-			 dpc.a109 * dpv.a9);
-	dpv.a10 = mk_velocities(t + dpc.c10 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k10);
+	mk_velocities(t + dpc.c10 * dt, dpv.k_tmp, dpv.k10);
 
 	// ------------ 11 ------------
 	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
+	for (i = 0; i < Ntot; ++i)
 	{
 		dpv.k_tmp[i] = field[i] + dt *
 			(dpc.a111 * dfield[i] + dpc.a114 * dpv.k4[i] + dpc.a115 * dpv.k5[i] +
 			 dpc.a116 * dpv.k6[i] + dpc.a117 * dpv.k7[i] + dpc.a118 * dpv.k8[i] +
 			 dpc.a119 * dpv.k9[i] + dpc.a1110 * dpv.k10[i]);
 	}
-	dpv.a_tmp = f_a + dt *
-			(dpc.a111 * df_a + dpc.a114 * dpv.a4 + dpc.a115 * dpv.a5 +
-			 dpc.a116 * dpv.a6 + dpc.a117 * dpv.a7 + dpc.a118 * dpv.a8 +
-			 dpc.a119 * dpv.a9 + dpc.a1110 * dpv.a10);
-	dpv.a2 = mk_velocities(t + dpc.c11 * dt, dpv.k_tmp, dpv.a_tmp, dpv.k2);
+	mk_velocities(t + dpc.c11 * dt, dpv.k_tmp, dpv.k2);
 
 	// ------------ new dt ------------
 	double tpdt = t + dt;
 
 	// ------------ 12 ------------
 	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
+	for (i = 0; i < Ntot; ++i)
 	{
 		dpv.k_tmp[i] = field[i] + dt *
 			(dpc.a121 * dfield[i] + dpc.a124 * dpv.k4[i] + dpc.a125 * dpv.k5[i] +
 			 dpc.a126 * dpv.k6[i] + dpc.a127 * dpv.k7[i] + dpc.a128 * dpv.k8[i] +
 			 dpc.a129 * dpv.k9[i] + dpc.a1210 * dpv.k10[i] + dpc.a1211 * dpv.k2[i]);
 	}
-	dpv.a_tmp = f_a + dt *
-			(dpc.a121 * df_a + dpc.a124 * dpv.a4 + dpc.a125 * dpv.a5 +
-			 dpc.a126 * dpv.a6 + dpc.a127 * dpv.a7 + dpc.a128 * dpv.a8 +
-			 dpc.a129 * dpv.a9 + dpc.a1210 * dpv.a10 + dpc.a1211 * dpv.a2);
-	dpv.a3 = mk_velocities(tpdt, dpv.k_tmp, dpv.a_tmp, dpv.k3);
+	mk_velocities(tpdt, dpv.k_tmp, dpv.k3);
 
 	// ------------ step ahead ------------
 	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
+	for (i = 0; i < Ntot; ++i)
 	{
 		dpv.k4[i] = dpc.b1 * dfield[i] + dpc.b6 * dpv.k6[i] + dpc.b7 * dpv.k7[i] +
 					dpc.b8 * dpv.k8[i] + dpc.b9 * dpv.k9[i] + dpc.b10 * dpv.k10[i] +
@@ -337,14 +309,10 @@ void try_step(const double dt) {
 
 		field_new[i] = field[i] + dt * dpv.k4[i];
 	}
-	dpv.a4 = dpc.b1 * df_a + dpc.b6 * dpv.a6 + dpc.b7 * dpv.a7 +
-			 dpc.b8 * dpv.a8 + dpc.b9 * dpv.a9 + dpc.b10 * dpv.a10 +
-			 dpc.b11 * dpv.a2 + dpc.b12 * dpv.a3;
-	f_a_new = f_a + dt * dpv.a4;
 
 	// ------------ error estimates ------------
 	#pragma omp parallel for
-	for (i = 0; i < Ntot2; ++i)
+	for (i = 0; i < Ntot; ++i)
 	{
 		dpv.yerr[i]  = dpv.k4[i] - dpc.bhh1 * dfield[i] - dpc.bhh2 * dpv.k9[i] -
 					   dpc.bhh3 * dpv.k3[i];
@@ -356,11 +324,11 @@ void try_step(const double dt) {
 }
 
 double error(const double dt) {
-	size_t N = dp.Ntot2;
+	size_t Ntot = 2 * pars.N + 1;
 	double err = 0.0, err2 = 0.0, sk, deno;
 
 	#pragma omp parallel for default(shared) private(sk) reduction(+:err,err2)
-	for (size_t i = 0; i < N; ++i)
+	for (size_t i = 0; i < Ntot; ++i)
 	{
 		sk = dp.a_tol + dp.r_tol * MAX(fabs(field[i]), fabs(field_new[i]));
 		err2 += (dpv.yerr[i] / sk) * (dpv.yerr[i] / sk);
@@ -371,7 +339,7 @@ double error(const double dt) {
 	{
 		deno = 1.0;
 	}
-	return dt * err * sqrt(1.0 / (N * deno));
+	return dt * err * sqrt(1.0 / (Ntot * deno));
 }
 
 int success(const double err, double *dt) {
@@ -422,13 +390,13 @@ int success(const double err, double *dt) {
 }
 
 void prepare_dense_output(const double dt) {
-	size_t N = dp.Ntot2 / 2;
+	size_t Ntot = 2 * pars.N + 1;
 	double t = dp.t;
-	double fdiff, bspl, atmp;
+	double fdiff, bspl;
 	double *ftmp = dtmp_x;
 
 	#pragma omp parallel for private(fdiff, bspl)
- 	for (size_t i = 0; i < N; ++i)
+ 	for (size_t i = 0; i < Ntot; ++i)
 	{
 		dpv.rcont1[i] = field[i];
 
@@ -463,7 +431,7 @@ void prepare_dense_output(const double dt) {
 
 	// first of three extra function evaluations
 	#pragma omp parallel for
-	for (size_t i = 0; i < N; ++i)
+	for (size_t i = 0; i < Ntot; ++i)
 	{
 		ftmp[i] = field[i] + dt *
 			(dpc.a141 * dfield[i] + dpc.a147 * dpv.k7[i] +
@@ -471,15 +439,11 @@ void prepare_dense_output(const double dt) {
 			 dpc.a1410 * dpv.k10[i] + dpc.a1411 * dpv.k2[i] +
 			 dpc.a1412 * dpv.k3[i]  + dpc.a1413 * dfield_new[i]);
 	}
-	atmp = f_a + dt *
-			(dpc.a141 * df_a + dpc.a147 * dpv.a7 + dpc.a148 * dpv.a8 +
-			 dpc.a149 * dpv.a9 + dpc.a1410 * dpv.a10 + dpc.a1411 * dpv.a2 +
-			 dpc.a1412 * dpv.a3 + dpc.a1413 * df_a_new);
-	dpv.a10 = mk_velocities(t + dpc.c14 * dt, ftmp, atmp, dpv.k10);
+	mk_velocities(t + dpc.c14 * dt, ftmp, dpv.k10);
 
 	// second of three extra function evaluations
 	#pragma omp parallel for
-	for (size_t i = 0; i < N; ++i)
+	for (size_t i = 0; i < Ntot; ++i)
 	{
 		ftmp[i] = field[i] + dt *
 			(dpc.a151 * dfield[i] + dpc.a156 * dpv.k6[i] +
@@ -487,15 +451,11 @@ void prepare_dense_output(const double dt) {
 			 dpc.a1511 * dpv.k2[i] + dpc.a1512 * dpv.k3[i] +
 			 dpc.a1513 * dfield_new[i] + dpc.a1514 * dpv.k10[i]);
 	}
-	atmp = f_a + dt *
-			(dpc.a151 * df_a + dpc.a156 * dpv.a6 + dpc.a157 * dpv.a7 +
-			 dpc.a158 * dpv.a8 + dpc.a1511 * dpv.a2 + dpc.a1512 * dpv.a3 +
-			 dpc.a1513 * df_a_new + dpc.a1514 * dpv.a10);
-	dpv.a2 = mk_velocities(t + dpc.c15 * dt, ftmp, atmp, dpv.k2);
+	mk_velocities(t + dpc.c15 * dt, ftmp, dpv.k2);
 
 	// third of three extra function evaluations
 	#pragma omp parallel for
-	for (size_t i = 0; i < N; ++i)
+	for (size_t i = 0; i < Ntot; ++i)
 	{
 		ftmp[i] = field[i] + dt *
 			(dpc.a161 * dfield[i] + dpc.a166 * dpv.k6[i] +
@@ -503,14 +463,10 @@ void prepare_dense_output(const double dt) {
 			 dpc.a169 * dpv.k9[i] + dpc.a1613 * dfield_new[i] +
 			 dpc.a1614 * dpv.k10[i] + dpc.a1615 * dpv.k2[i]);
 	}
-	atmp = f_a + dt *
-			(dpc.a161 * df_a + dpc.a166 * dpv.a6 + dpc.a167 * dpv.a7 +
-			 dpc.a168 * dpv.a8 + dpc.a169 * dpv.a9 + dpc.a1613 * df_a_new +
-			 dpc.a1614 * dpv.a10 + dpc.a1615 * dpv.a2);
-	dpv.a3 = mk_velocities(t + dpc.c16 * dt, ftmp, atmp, dpv.k3);
+	mk_velocities(t + dpc.c16 * dt, ftmp, dpv.k3);
 
 	#pragma omp parallel for
-	for (size_t i = 0; i < N; ++i)
+	for (size_t i = 0; i < Ntot; ++i)
 	{
 		dpv.rcont5[i] = dt *
 			(dpv.rcont5[i] + dpc.d413 * dfield_new[i] + dpc.d414 * dpv.k10[i] +
@@ -536,30 +492,30 @@ double dense_output(const size_t i, const double t, const double dt) {
 }
 
 void allocate_dopri853_values() {
-	size_t N = dp.Ntot2;
+	size_t Ntot = 2 * pars.N + 1;
 
-	dpv.k2    = fftw_malloc(N * sizeof *dpv.k2);
-	dpv.k3    = fftw_malloc(N * sizeof *dpv.k3);
-	dpv.k4    = fftw_malloc(N * sizeof *dpv.k4);
-	dpv.k5    = fftw_malloc(N * sizeof *dpv.k5);
-	dpv.k6    = fftw_malloc(N * sizeof *dpv.k6);
-	dpv.k7    = fftw_malloc(N * sizeof *dpv.k7);
-	dpv.k8    = fftw_malloc(N * sizeof *dpv.k8);
-	dpv.k9    = fftw_malloc(N * sizeof *dpv.k9);
-	dpv.k10   = fftw_malloc(N * sizeof *dpv.k10);
-    dpv.k_tmp = fftw_malloc(N * sizeof *dpv.k_tmp);
+	dpv.k2    = fftw_malloc(Ntot * sizeof *dpv.k2);
+	dpv.k3    = fftw_malloc(Ntot * sizeof *dpv.k3);
+	dpv.k4    = fftw_malloc(Ntot * sizeof *dpv.k4);
+	dpv.k5    = fftw_malloc(Ntot * sizeof *dpv.k5);
+	dpv.k6    = fftw_malloc(Ntot * sizeof *dpv.k6);
+	dpv.k7    = fftw_malloc(Ntot * sizeof *dpv.k7);
+	dpv.k8    = fftw_malloc(Ntot * sizeof *dpv.k8);
+	dpv.k9    = fftw_malloc(Ntot * sizeof *dpv.k9);
+	dpv.k10   = fftw_malloc(Ntot * sizeof *dpv.k10);
+    dpv.k_tmp = fftw_malloc(Ntot * sizeof *dpv.k_tmp);
 
-    dpv.yerr  = fftw_malloc(N * sizeof *dpv.yerr);
-    dpv.yerr2 = fftw_malloc(N * sizeof *dpv.yerr2);
+    dpv.yerr  = fftw_malloc(Ntot * sizeof *dpv.yerr);
+    dpv.yerr2 = fftw_malloc(Ntot * sizeof *dpv.yerr2);
 
-    dpv.rcont1 = fftw_malloc(N * sizeof *dpv.rcont1);
-    dpv.rcont2 = fftw_malloc(N * sizeof *dpv.rcont2);
-    dpv.rcont3 = fftw_malloc(N * sizeof *dpv.rcont3);
-    dpv.rcont4 = fftw_malloc(N * sizeof *dpv.rcont4);
-    dpv.rcont5 = fftw_malloc(N * sizeof *dpv.rcont5);
-    dpv.rcont6 = fftw_malloc(N * sizeof *dpv.rcont6);
-    dpv.rcont7 = fftw_malloc(N * sizeof *dpv.rcont7);
-    dpv.rcont8 = fftw_malloc(N * sizeof *dpv.rcont8);
+    dpv.rcont1 = fftw_malloc(Ntot * sizeof *dpv.rcont1);
+    dpv.rcont2 = fftw_malloc(Ntot * sizeof *dpv.rcont2);
+    dpv.rcont3 = fftw_malloc(Ntot * sizeof *dpv.rcont3);
+    dpv.rcont4 = fftw_malloc(Ntot * sizeof *dpv.rcont4);
+    dpv.rcont5 = fftw_malloc(Ntot * sizeof *dpv.rcont5);
+    dpv.rcont6 = fftw_malloc(Ntot * sizeof *dpv.rcont6);
+    dpv.rcont7 = fftw_malloc(Ntot * sizeof *dpv.rcont7);
+    dpv.rcont8 = fftw_malloc(Ntot * sizeof *dpv.rcont8);
 
     if (!(dpv.k2 && dpv.k3 && dpv.k4 && dpv.k5 && dpv.k6 && dpv.k7 && dpv.k8 &&
     	  dpv.k9 && dpv.k10 && dpv.k_tmp && dpv.yerr && dpv.yerr2 &&
