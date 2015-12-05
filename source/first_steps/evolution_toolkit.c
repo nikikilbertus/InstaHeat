@@ -237,26 +237,12 @@ void fft_apply_filter(fftw_complex *inout) {
 	size_t Nz = pars.z.N;
 	size_t ncz = Nz / 2 + 1;
 
-	double Lx = pars.x.L;
-	double Ly = pars.y.L;
-	double Lz = pars.z.L;
-
-	double prefac2 = 4. * PI *PI;
-	double k2_x = prefac2 / (Lx * Lx);
-	double k2_y = prefac2 / (Ly * Ly);
-	double k2_z = prefac2 / (Lz * Lz);
-
-	// size_t nxmax = (size_t) fmin(Nx, ceil(Nx * (1.0 - cutoff_fraction)));
-	// size_t nymax = (size_t) fmin(Ny, ceil(Ny * (1.0 - cutoff_fraction)));
-	// size_t nzmax = (size_t) fmin(ncz, ceil(ncz * (1.0 - cutoff_fraction)));
-
-	double k2_max = (1.0 - cutoff_fraction) *
-					(k2_x * (Nx/2) * (Nx/2) + k2_y * (Ny/2) * (Ny/2) +
-					 k2_z * (Nz/2) * (Nz/2));
-	double k2_tmp = 0.0;
+	size_t imax = (size_t) fmin(Nx, ceil(Nx * (1.0 - cutoff_fraction)));
+	size_t jmax = (size_t) fmin(Ny, ceil(Ny * (1.0 - cutoff_fraction)));
+	size_t kmax = (size_t) fmin(ncz, ceil(ncz * (1.0 - cutoff_fraction)));
 
 	size_t osx, osy, nok = 0, nbad = 0;
-	#pragma omp parallel for private(osx, osy, k2_tmp) reduction(+:nok, nbad)
+	#pragma omp parallel for private(osx, osy) reduction(+:nok, nbad)
 	for (size_t i = 0; i < Nx; ++i)
 	{
 		osx = i * Ny * ncz;
@@ -265,26 +251,8 @@ void fft_apply_filter(fftw_complex *inout) {
 			osy = osx + j * ncz;
 			for (size_t k = 0; k < ncz; ++k)
 			{
-				k2_tmp = k2_z * k * k;
-				if (i > Nx / 2)
+				if (k > kmax || j > jmax || i > imax)
 				{
-					k2_tmp += k2_x * (Nx - i) * (Nx - i);
-				}
-				else
-				{
-					k2_tmp += k2_x * i * i;
-				}
-				if (j > Ny / 2)
-				{
-					k2_tmp += k2_y * (Ny - j) * (Ny - j);
-				}
-				else
-				{
-					k2_tmp += k2_y * j * j;
-				}
-				if (k2_tmp > k2_max)
-				{
-					// maybe use a filter window?
 					inout[osy + k] = 0.0;
 					++nbad;
 				}
@@ -295,6 +263,62 @@ void fft_apply_filter(fftw_complex *inout) {
 			}
 		}
 	}
+
+	// double Lx = pars.x.L;
+	// double Ly = pars.y.L;
+	// double Lz = pars.z.L;
+
+	// double prefac2 = 4. * PI *PI;
+	// double k2_x = prefac2 / (Lx * Lx);
+	// double k2_y = prefac2 / (Ly * Ly);
+	// double k2_z = prefac2 / (Lz * Lz);
+
+
+	// double k2_max = (1.0 - cutoff_fraction) *
+	// 				(k2_x * (Nx/2) * (Nx/2) + k2_y * (Ny/2) * (Ny/2) +
+	// 				 k2_z * (Nz/2) * (Nz/2));
+	// double k2_tmp = 0.0;
+
+	// size_t osx, osy, nok = 0, nbad = 0;
+	// #pragma omp parallel for private(osx, osy, k2_tmp) reduction(+:nok, nbad)
+	// for (size_t i = 0; i < Nx; ++i)
+	// {
+	// 	osx = i * Ny * ncz;
+	// 	for (size_t j = 0; j < Ny; ++j)
+	// 	{
+	// 		osy = osx + j * ncz;
+	// 		for (size_t k = 0; k < ncz; ++k)
+	// 		{
+	// 			k2_tmp = k2_z * k * k;
+	// 			if (i > Nx / 2)
+	// 			{
+	// 				k2_tmp += k2_x * (Nx - i) * (Nx - i);
+	// 			}
+	// 			else
+	// 			{
+	// 				k2_tmp += k2_x * i * i;
+	// 			}
+	// 			if (j > Ny / 2)
+	// 			{
+	// 				k2_tmp += k2_y * (Ny - j) * (Ny - j);
+	// 			}
+	// 			else
+	// 			{
+	// 				k2_tmp += k2_y * j * j;
+	// 			}
+	// 			if (k2_tmp > k2_max)
+	// 			{
+	// 				// maybe use a filter window?
+	// 				inout[osy + k] = 0.0;
+	// 				++nbad;
+	// 			}
+	// 			else
+	// 			{
+	// 				++nok;
+	// 			}
+	// 		}
+	// 	}
+	// }
 	RUNTIME_INFO(printf("filtered: %f\n", (double)nbad / (double)(nok + nbad)));
 }
 
@@ -331,22 +355,9 @@ potential_prime, the derivative is not computed automatically yet
 TODO: change that?
 */
 inline double potential(double f){
-	double lambda = 100.0;
-	return LAMBDA / (1.0 + exp(-lambda * f));
-
-	// double theta, dtheta;
-	// if (f > 5.0)
-	// {
-	// 	theta = 1.0;
-	// }
-	// else if (f < -5.0)
-	// {
-	// 	theta = 0.0;
-	// }
-	// else
-	// {
-	// 	theta = 1.0 / (1.0 + exp(- 100.0 * f));
-	// }
+	return 0.0;
+	// double lambda = 100.0;
+	// return LAMBDA / (1.0 + exp(-lambda * f));
 
 	// return MASS * MASS * f * f / 2.0;
 
@@ -356,9 +367,10 @@ inline double potential(double f){
 }
 
 inline double potential_prime(double f) {
-	double lambda = 100.0;
-	double tmp = exp(lambda * f);
-	return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
+	return 0.0;
+	// double lambda = 100.0;
+	// double tmp = exp(lambda * f);
+	// return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
 
 	// return MASS * MASS * f;
 

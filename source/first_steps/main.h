@@ -46,7 +46,7 @@ during execution
 // how many timeslices to skip in between writing to file (1 to write each)
 #define TIME_STEP_SKIPS  		(1)
 // how many bins for |k| are used in the computation of the power spectrum
-#define POWER_SPECTRUM_BINS		(100)
+#define POWER_SPECTRUM_BINS		(50)
 
 // ------------------simulation parameters--------------------------------------
 // spatial
@@ -63,7 +63,7 @@ during execution
 // temporal
 #define DELTA_T					(0.01) // negative for manual adjustment
 #define INITIAL_TIME 			(0.0)
-#define FINAL_TIME	 			(500.0)
+#define FINAL_TIME	 			(250.0)
 #define MAX_STEPS				(50000)
 #define MINIMAL_DELTA_T			(1.0e-5)
 // potential
@@ -78,8 +78,8 @@ during execution
 #define SMALLEST_SCALING		(0.333)
 #define LARGEST_SCALING			(6.0)
 #define SAFE 					(0.9)
-#define RELATIVE_TOLERANCE		(1.0e-9)
-#define ABSOLUTE_TOLERANCE		(1.0e-9)
+#define RELATIVE_TOLERANCE		(1.0e-10)
+#define ABSOLUTE_TOLERANCE		(1.0e-10)
 
 
 // ------------------------typedefs---------------------------------------------

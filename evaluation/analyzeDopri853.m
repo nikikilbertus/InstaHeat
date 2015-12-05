@@ -41,7 +41,7 @@ ylabel('<phi>');
 shg;
 pause;
 
-surf(log(powspec+1e-10));
+surf(log(powspec));
 shading interp; lighting phong;
 zlabel('log')
 ylabel('|k|');
