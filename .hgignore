@@ -11,4 +11,6 @@ syntax: glob
 *.txt
 *.h5
 
+# temporary files such as vim undo and vim swap files
 *~
+*.swp

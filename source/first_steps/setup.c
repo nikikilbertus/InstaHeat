@@ -9,7 +9,7 @@
 
 void allocate_and_initialize_all() {
     initialize_threading();
-	initialize_parameters();
+    initialize_parameters();
     allocate_external();
     mk_grid();
     mk_fftw_plans();
@@ -31,11 +31,11 @@ void initialize_threading() {
 }
 
 void initialize_parameters() {
-	pars.x.N = GRIDPOINTS_X;
+    pars.x.N = GRIDPOINTS_X;
     pars.y.N = GRIDPOINTS_Y;
     pars.z.N = GRIDPOINTS_Z;
-	pars.x.a = SPATIAL_LOWER_BOUND_X;
-	pars.x.b = SPATIAL_UPPER_BOUND_X;
+    pars.x.a = SPATIAL_LOWER_BOUND_X;
+    pars.x.b = SPATIAL_UPPER_BOUND_X;
     pars.x.L = pars.x.b - pars.x.a;
     pars.y.a = SPATIAL_LOWER_BOUND_Y;
     pars.y.b = SPATIAL_UPPER_BOUND_Y;
@@ -50,7 +50,7 @@ void initialize_parameters() {
     pars.t.t  = INITIAL_TIME;
     pars.t.ti = INITIAL_TIME;
     pars.t.tf = FINAL_TIME;
-	pars.t.Nt = ceil((pars.t.tf - pars.t.ti) / pars.t.dt) + 1;
+    pars.t.Nt = ceil((pars.t.tf - pars.t.ti) / pars.t.dt) + 1;
 
     pars.cutoff_fraction = CUTOFF_FRACTION;
 
@@ -126,11 +126,11 @@ void allocate_external() {
 }
 
 /*
-	make the N fourier spectral gridpoints for the interval [a, b],
-	and the spectral operators (N \times N matrices) for first and second order
-	derivatives; x, D1 and D2 need to be initialized and memory needs to be
-	allocated before calling this function
-	see mathematica notebook spectral_operators for further info
+    make the N fourier spectral gridpoints for the interval [a, b],
+    and the spectral operators (N \times N matrices) for first and second order
+    derivatives; x, D1 and D2 need to be initialized and memory needs to be
+    allocated before calling this function
+    see mathematica notebook spectral_operators for further info
 */
 void mk_grid() {
     size_t Nx = pars.x.N;
@@ -143,16 +143,16 @@ void mk_grid() {
     double az = pars.z.a;
     double bz = pars.z.b;
 
-	if (Nx <= 0 || Ny <= 0 || Nz <= 0)
-	{
-		fputs("Need positive number of gridpoints", stderr);
-	}
+    if (Nx <= 0 || Ny <= 0 || Nz <= 0)
+    {
+        fputs("Need positive number of gridpoints", stderr);
+    }
 
-	// Grid points
-	for (size_t i = 0; i < Nx; ++i)
-	{
-		grid[i] = ax + (bx - ax) * i / Nx;
-	}
+    // Grid points
+    for (size_t i = 0; i < Nx; ++i)
+    {
+        grid[i] = ax + (bx - ax) * i / Nx;
+    }
     for (size_t i = Nx; i < Nx+Ny; ++i)
     {
         grid[i] = ay + (by - ay) * (i-Nx) / Ny;
@@ -164,7 +164,7 @@ void mk_grid() {
 
     // Console output for debugging
     #ifdef DEBUG
-		puts("x");
+        puts("x");
         print_vector(grid, Nx);
         puts("\n");
         puts("y");
@@ -240,7 +240,7 @@ void mk_initial_conditions() {
 
     // Console output for debugging
     #ifdef DEBUG
-    	puts("phi");
+        puts("phi");
         print_vector(field, N);
         puts("\ndphi");
         print_vector(field + N, N);
@@ -261,16 +261,16 @@ double phi_init(double x, double y, double z, double *phases) {
     double frac = 0.4;
     double phi0 = 0.73 * frac;
     double deltaphi = phi0 / frac;
-	return phi0 + deltaphi *
+    return phi0 + deltaphi *
                 (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
                  cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) +
                  cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5]));
-	// return tanh(pow(x, 8));
+    // return tanh(pow(x, 8));
 }
 
 double dphi_init(double x, double y, double z) {
-	// return -sin(x) * sin(y) * sin(z);
-	return 0.0;
+    // return -sin(x) * sin(y) * sin(z);
+    return 0.0;
 }
 
 void free_and_destroy_all() {
@@ -311,7 +311,7 @@ void free_all_external() {
     fftw_free(dtmp_z);
     fftw_free(dtmp_grad2);
     fftw_free(dtmp_lap);
-	RUNTIME_INFO(puts("Freed external variables.\n"));
+    RUNTIME_INFO(puts("Freed external variables.\n"));
 }
 
 //****************************** printing functions

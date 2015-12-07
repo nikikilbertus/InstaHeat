@@ -6,14 +6,14 @@
 #include "main.h"
 
 typedef struct {
-	uint8_t filter;
-	uint8_t compute_pow_spec;
+    uint8_t filter;
+    uint8_t compute_pow_spec;
 }evolution_flags_t;
 
 extern evolution_flags_t evo_flags;
 
 void mk_gradient_squared_and_laplacian(double *in, double *grad2,
-												double *laplacian);
+                                                double *laplacian);
 void fft_apply_filter(fftw_complex *inout);
 void mk_velocities(double t, double *f, double *result);
 extern double potential(double f);
