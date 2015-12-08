@@ -27,17 +27,17 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
     fftw_time_exe += end - start;
     #endif
 
-    if (evo_flags.compute_pow_spec == 1)
-    {
-        mk_power_spectrum(cfftw_tmp);
-    }
-
     #ifdef ENABLE_FFT_FILTER
     if (evo_flags.filter == 1)
     {
         fft_apply_filter(cfftw_tmp);
     }
     #endif
+
+    if (evo_flags.compute_pow_spec == 1)
+    {
+        mk_power_spectrum(cfftw_tmp);
+    }
 
     double Lx = pars.x.L;
     double Ly = pars.y.L;
@@ -235,11 +235,13 @@ void fft_apply_filter(fftw_complex *inout) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
+    size_t ncx = Nx / 2 + 1;
+    size_t ncy = Ny / 2 + 1;
     size_t ncz = Nz / 2 + 1;
 
-    size_t imax = (size_t) fmin(Nx, ceil(Nx * (1.0 - cutoff_fraction)));
-    size_t jmax = (size_t) fmin(Ny, ceil(Ny * (1.0 - cutoff_fraction)));
-    size_t kmax = (size_t) fmin(ncz, ceil(ncz * (1.0 - cutoff_fraction)));
+    size_t imax = (size_t) floor(ncx * (1.0 - cutoff_fraction));
+    size_t jmax = (size_t) floor(ncy * (1.0 - cutoff_fraction));
+    size_t kmax = (size_t) floor(ncz * (1.0 - cutoff_fraction));
 
     size_t osx, osy, nok = 0, nbad = 0;
     #pragma omp parallel for private(osx, osy) reduction(+:nok, nbad)
@@ -251,7 +253,9 @@ void fft_apply_filter(fftw_complex *inout) {
             osy = osx + j * ncz;
             for (size_t k = 0; k < ncz; ++k)
             {
-                if (k > kmax || j > jmax || i > imax)
+                if ( k >= kmax ||
+                    (j >= jmax && j <= (Ny - jmax)) ||
+                    (i >= imax && i <= (Nx - imax)) )
                 {
                     inout[osy + k] = 0.0;
                     ++nbad;
@@ -355,9 +359,9 @@ potential_prime, the derivative is not computed automatically yet
 TODO: change that?
 */
 inline double potential(double f){
-    return 0.0;
-    // double lambda = 100.0;
-    // return LAMBDA / (1.0 + exp(-lambda * f));
+    // return 0.0;
+    double lambda = 100.0;
+    return LAMBDA / (1.0 + exp(-lambda * f));
 
     // return MASS * MASS * f * f / 2.0;
 
@@ -367,10 +371,10 @@ inline double potential(double f){
 }
 
 inline double potential_prime(double f) {
-    return 0.0;
-    // double lambda = 100.0;
-    // double tmp = exp(lambda * f);
-    // return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
+    // return 0.0;
+    double lambda = 100.0;
+    double tmp = exp(lambda * f);
+    return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
 
     // return MASS * MASS * f;
 

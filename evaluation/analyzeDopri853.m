@@ -41,7 +41,19 @@ ylabel('<phi>');
 shg;
 pause;
 
-surf(log(powspec));
+h = surf(log(1e-10 * ones(size(powspec))));
+hold on;
+g = surf(log(powspec));
+hold off;
+shading interp; lighting phong;
+set(h,'FaceColor',[1 0 0],'FaceAlpha',0.7,'EdgeAlpha', 0);
+zlabel('log')
+ylabel('|k|');
+xlabel('nt');
+shg;
+pause;
+
+g = surf(log(powspec + 1e-10));
 shading interp; lighting phong;
 zlabel('log')
 ylabel('|k|');
@@ -51,7 +63,7 @@ pause;
 
 parseval = zeros(1, Nt);
 for i = 1:Nt
-parseval(i) = abs(sqrt(sum(powspec(:,i))) - norm(phi(:, i)));
+parseval(i) = (abs(sqrt(sum(powspec(:,i))) - norm(phi(:, i))) );
 end
 plot(parseval);
 title(['parseval, max error = ' num2str(max(parseval))]);

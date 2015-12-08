@@ -44,15 +44,15 @@ during execution
 // how many timeslices to keep in memory before write out
 #define WRITE_OUT_BUFFER_NUMBER (20)
 // how many timeslices to skip in between writing to file (1 to write each)
-#define TIME_STEP_SKIPS         (1)
+#define TIME_STEP_SKIPS         (20)
 // how many bins for |k| are used in the computation of the power spectrum
 #define POWER_SPECTRUM_BINS     (50)
 
 // ------------------simulation parameters--------------------------------------
 // spatial
-#define GRIDPOINTS_X            (32)
-#define GRIDPOINTS_Y            (32)
-#define GRIDPOINTS_Z            (32)
+#define GRIDPOINTS_X            (64)
+#define GRIDPOINTS_Y            (64)
+#define GRIDPOINTS_Z            (64)
 #define GRIDPOINTS_TOTAL        ((GRIDPOINTS_X)*(GRIDPOINTS_Y)*(GRIDPOINTS_Z))
 #define SPATIAL_LOWER_BOUND_X   (-PI)
 #define SPATIAL_UPPER_BOUND_X   (PI)
@@ -78,8 +78,8 @@ during execution
 #define SMALLEST_SCALING        (0.333)
 #define LARGEST_SCALING         (6.0)
 #define SAFE                    (0.9)
-#define RELATIVE_TOLERANCE      (1.0e-10)
-#define ABSOLUTE_TOLERANCE      (1.0e-10)
+#define RELATIVE_TOLERANCE      (1.0e-7)
+#define ABSOLUTE_TOLERANCE      (1.0e-7)
 
 
 // ------------------------typedefs---------------------------------------------

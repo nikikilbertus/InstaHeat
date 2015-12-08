@@ -104,17 +104,18 @@ void run_dopri853() {
         if ((dp.n_stp + 1) % pars.file.skip == 0)
         {
             evo_flags.compute_pow_spec = 1;
+            // #ifdef ENABLE_FFT_FILTER
+            // evo_flags.filter = 1;
+            // #endif
             rho = mk_rho(field);
+            // #ifdef ENABLE_FFT_FILTER
+            // evo_flags.filter = 0;
+            // #endif
             evo_flags.compute_pow_spec = 0;
             save();
         }
         if (dp.t >= dp.tf)
         {
-            size_t index = pars.file.index;
-            if (index != 0 && time_buf[index - 1] < dp.t)
-            {
-                    save();
-            }
             break;
         }
         if (fabs(dp.dt_next) <= dp.dt_min)
@@ -123,6 +124,20 @@ void run_dopri853() {
             exit(EXIT_FAILURE);
         }
         dp.dt = dp.dt_next;
+    }
+    size_t index = pars.file.index;
+    if (index != 0 && time_buf[index - 1] < dp.t)
+    {
+        evo_flags.compute_pow_spec = 1;
+        // #ifdef ENABLE_FFT_FILTER
+        // evo_flags.filter = 1;
+        // #endif
+        rho = mk_rho(field);
+        // #ifdef ENABLE_FFT_FILTER
+        // evo_flags.filter = 0;
+        // #endif
+        evo_flags.compute_pow_spec = 0;
+        save();
     }
 
     #ifdef SHOW_TIMING_INFO
@@ -158,13 +173,13 @@ void perform_step(const double dt_try) {
             exit(EXIT_FAILURE);
         }
     }
-    #ifdef ENABLE_FFT_FILTER
-    evo_flags.filter = 1;
-    #endif
+    // #ifdef ENABLE_FFT_FILTER
+    // evo_flags.filter = 1;
+    // #endif
     mk_velocities(dp.t + dt, field_new, dfield_new);
-    #ifdef ENABLE_FFT_FILTER
-    evo_flags.filter = 0;
-    #endif
+    // #ifdef ENABLE_FFT_FILTER
+    // evo_flags.filter = 0;
+    // #endif
     #ifdef ENABLE_DENSE_OUTPUT
     if (dp.dense)
     {
