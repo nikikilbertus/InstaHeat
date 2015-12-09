@@ -68,6 +68,7 @@ void perform_step(const double dt_try);
 void try_step(const double dt);
 double error(const double dt);
 int success(const double err, double *dt);
+void prepare_and_save_timeslice();
 void prepare_dense_output(const double dt);
 double dense_output(const size_t i, const double t, const double dt);
 void allocate_dopri853_values();

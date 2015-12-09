@@ -27,13 +27,6 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
     fftw_time_exe += end - start;
     #endif
 
-    #ifdef ENABLE_FFT_FILTER
-    if (evo_flags.filter == 1)
-    {
-        fft_apply_filter(cfftw_tmp);
-    }
-    #endif
-
     if (evo_flags.compute_pow_spec == 1)
     {
         mk_power_spectrum(cfftw_tmp);
@@ -48,7 +41,7 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
     complex factor_y = prefac / (Ly * N);
     complex factor_z = prefac / (Lz * N);
 
-    double prefac2 = -4. * PI *PI;
+    double prefac2 = -4. * PI * PI;
     double factor_x2 = prefac2 / (Lx * Lx * N);
     double factor_y2 = prefac2 / (Ly * Ly * N);
     double factor_z2 = prefac2 / (Lz * Lz * N);
@@ -157,17 +150,15 @@ void mk_power_spectrum(fftw_complex *in) {
     double Ly = pars.y.L;
     double Lz = pars.z.L;
 
-    double prefac2 = 4. * PI *PI;
-    double k_x2 = prefac2 / (Lx * Lx);
-    double k_y2 = prefac2 / (Ly * Ly);
-    double k_z2 = prefac2 / (Lz * Lz);
+    double k_x2 = 1.0 / (Lx * Lx);
+    double k_y2 = 1.0 / (Ly * Ly);
+    double k_z2 = 1.0 / (Lz * Lz);
 
-    double k_min2 = 0.0;
     double k_max2 = k_x2 * (Nx/2) * (Nx/2) +
                     k_y2 * (Ny/2) * (Ny/2) +
                     k_z2 * (Nz/2) * (Nz/2);
 
-    double dk2 = (k_max2 - k_min2) / bins;
+    double dk2 = k_max2 / bins;
     double k2_tmp = 0.0;
     double pow2_tmp = 0.0;
 
@@ -215,7 +206,7 @@ void mk_power_spectrum(fftw_complex *in) {
                     {
                         k2_tmp += k_y2 * j * j;
                     }
-                    idx = (int)(k2_tmp / dk2 - 1e-7);
+                    idx = (int)(k2_tmp / dk2 - 1e-10);
                     pow_spec[idx] += pow2_tmp / N;
                 }
             }
@@ -223,8 +214,34 @@ void mk_power_spectrum(fftw_complex *in) {
     }
 }
 
-//TODO[bug] get this right. is powspec still wrong?
-void fft_apply_filter(fftw_complex *inout) {
+void apply_filter_real(double *inout) {
+    size_t N = pars.N;
+
+    #ifdef SHOW_TIMING_INFO
+    double start = get_wall_time();
+    #endif
+    fftw_execute_dft_r2c(p_fw_3d, inout, cfftw_tmp);
+    fftw_execute_dft_r2c(p_fw_3d, inout + N, cfftw_tmp_x);
+    #ifdef SHOW_TIMING_INFO
+    double end = get_wall_time();
+    fftw_time_exe += end - start;
+    #endif
+    
+    apply_filter_fourier(cfftw_tmp);
+    apply_filter_fourier(cfftw_tmp_x);
+
+    #ifdef SHOW_TIMING_INFO
+    start = get_wall_time();
+    #endif
+    fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp, inout);
+    fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_x, inout + N);
+    #ifdef SHOW_TIMING_INFO
+    end = get_wall_time();
+    fftw_time_exe += end - start;
+    #endif
+}
+
+void apply_filter_fourier(fftw_complex *inout) {
     double cutoff_fraction = pars.cutoff_fraction;
     if (cutoff_fraction < 0.0 || cutoff_fraction > 1.0)
     {
@@ -235,14 +252,16 @@ void fft_apply_filter(fftw_complex *inout) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
-    size_t ncx = Nx / 2 + 1;
-    size_t ncy = Ny / 2 + 1;
     size_t ncz = Nz / 2 + 1;
 
-    size_t imax = (size_t) floor(ncx * (1.0 - cutoff_fraction));
-    size_t jmax = (size_t) floor(ncy * (1.0 - cutoff_fraction));
-    size_t kmax = (size_t) floor(ncz * (1.0 - cutoff_fraction));
+    size_t i_a = (size_t) floor((Nx / 2) * (1.0 - cutoff_fraction));
+    size_t i_b = Nx - i_a;
+    size_t j_a = (size_t) floor((Ny / 2) * (1.0 - cutoff_fraction));
+    size_t j_b = Ny - j_a;
+    size_t k_a = (size_t) floor((Nz / 2) * (1.0 - cutoff_fraction));
 
+    // TODO[performance]: run loop only over _a to _b in each dimension for two
+    // thirds rule, leave it like that for possible fourier smoothing
     size_t osx, osy, nok = 0, nbad = 0;
     #pragma omp parallel for private(osx, osy) reduction(+:nok, nbad)
     for (size_t i = 0; i < Nx; ++i)
@@ -253,9 +272,9 @@ void fft_apply_filter(fftw_complex *inout) {
             osy = osx + j * ncz;
             for (size_t k = 0; k < ncz; ++k)
             {
-                if ( k >= kmax ||
-                    (j >= jmax && j <= (Ny - jmax)) ||
-                    (i >= imax && i <= (Nx - imax)) )
+                if ( k >= k_a ||
+                    (j >= j_a && j <= j_b) ||
+                    (i >= i_a && i <= i_b) )
                 {
                     inout[osy + k] = 0.0;
                     ++nbad;
@@ -267,62 +286,6 @@ void fft_apply_filter(fftw_complex *inout) {
             }
         }
     }
-
-    // double Lx = pars.x.L;
-    // double Ly = pars.y.L;
-    // double Lz = pars.z.L;
-
-    // double prefac2 = 4. * PI *PI;
-    // double k2_x = prefac2 / (Lx * Lx);
-    // double k2_y = prefac2 / (Ly * Ly);
-    // double k2_z = prefac2 / (Lz * Lz);
-
-
-    // double k2_max = (1.0 - cutoff_fraction) *
-    //              (k2_x * (Nx/2) * (Nx/2) + k2_y * (Ny/2) * (Ny/2) +
-    //               k2_z * (Nz/2) * (Nz/2));
-    // double k2_tmp = 0.0;
-
-    // size_t osx, osy, nok = 0, nbad = 0;
-    // #pragma omp parallel for private(osx, osy, k2_tmp) reduction(+:nok, nbad)
-    // for (size_t i = 0; i < Nx; ++i)
-    // {
-    //  osx = i * Ny * ncz;
-    //  for (size_t j = 0; j < Ny; ++j)
-    //  {
-    //      osy = osx + j * ncz;
-    //      for (size_t k = 0; k < ncz; ++k)
-    //      {
-    //          k2_tmp = k2_z * k * k;
-    //          if (i > Nx / 2)
-    //          {
-    //              k2_tmp += k2_x * (Nx - i) * (Nx - i);
-    //          }
-    //          else
-    //          {
-    //              k2_tmp += k2_x * i * i;
-    //          }
-    //          if (j > Ny / 2)
-    //          {
-    //              k2_tmp += k2_y * (Ny - j) * (Ny - j);
-    //          }
-    //          else
-    //          {
-    //              k2_tmp += k2_y * j * j;
-    //          }
-    //          if (k2_tmp > k2_max)
-    //          {
-    //              // maybe use a filter window?
-    //              inout[osy + k] = 0.0;
-    //              ++nbad;
-    //          }
-    //          else
-    //          {
-    //              ++nok;
-    //          }
-    //      }
-    //  }
-    // }
     RUNTIME_INFO(printf("filtered: %f\n", (double)nbad / (double)(nok + nbad)));
 }
 
@@ -421,7 +384,8 @@ void mk_filter_window(double *inout, size_t cutoffindex, size_t windowlength) {
 }
 
 inline double filter_window_function(double x) {
-    return 1. - tanh( 1. / ( 1. - pow(x, 8) ) - 1. );
+    return exp(-36.0 * pow(x, 36));
+    // return 1. - tanh( 1. / ( 1. - pow(x, 8) ) - 1. );
     // return exp(1. + 1. / ( pow(x, 8) - 1. ));
     // return 0.5 * ( 1. + cos( pow(x, 8) * PI ) );
     // return 0.0;

@@ -111,9 +111,10 @@ int main(int argc, const char * argv[]) {
 
 // -----------------------------timing------------------------------------------
 #ifdef SHOW_TIMING_INFO
-double get_wall_time(){
+double get_wall_time() {
     struct timeval time;
-    if (gettimeofday(&time, NULL)){
+    if (gettimeofday(&time, NULL))
+    {
         RUNTIME_INFO(fputs("Could not get wall time.", stderr));
         return 0.0;
     }

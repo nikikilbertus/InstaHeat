@@ -62,13 +62,10 @@ void run_dopri853() {
     mk_velocities(dp.t, field, dfield);
     evo_flags.compute_pow_spec = 0;
     save();
+
     // if (dp.dense)
     // {
     //  //out.out(-1,x,y,s,h)
-    // }
-    // else
-    // {
-    //  //out.save(x,y)
     // }
 
     #ifdef SHOW_TIMING_INFO
@@ -92,27 +89,16 @@ void run_dopri853() {
             ++dp.n_bad;
         }
         RUNTIME_INFO(printf("did step: %d with dt: %f\n", dp.n_stp, dp.dt_did));
+
         // if (dp.dense)
         // {
         //      // out.out(dp.n_stp, dp.t, field, dp.dt_did)
         // }
-        // else
-        // {
-        //      // out.save(x,y)
-        // }
+
         //TODO[performance]: get rid of extra call to mk_rho
         if ((dp.n_stp + 1) % pars.file.skip == 0)
         {
-            evo_flags.compute_pow_spec = 1;
-            // #ifdef ENABLE_FFT_FILTER
-            // evo_flags.filter = 1;
-            // #endif
-            rho = mk_rho(field);
-            // #ifdef ENABLE_FFT_FILTER
-            // evo_flags.filter = 0;
-            // #endif
-            evo_flags.compute_pow_spec = 0;
-            save();
+            prepare_and_save_timeslice();
         }
         if (dp.t >= dp.tf)
         {
@@ -125,19 +111,11 @@ void run_dopri853() {
         }
         dp.dt = dp.dt_next;
     }
+
     size_t index = pars.file.index;
     if (index != 0 && time_buf[index - 1] < dp.t)
     {
-        evo_flags.compute_pow_spec = 1;
-        // #ifdef ENABLE_FFT_FILTER
-        // evo_flags.filter = 1;
-        // #endif
-        rho = mk_rho(field);
-        // #ifdef ENABLE_FFT_FILTER
-        // evo_flags.filter = 0;
-        // #endif
-        evo_flags.compute_pow_spec = 0;
-        save();
+        prepare_and_save_timeslice();
     }
 
     #ifdef SHOW_TIMING_INFO
@@ -173,24 +151,23 @@ void perform_step(const double dt_try) {
             exit(EXIT_FAILURE);
         }
     }
-    // #ifdef ENABLE_FFT_FILTER
-    // evo_flags.filter = 1;
-    // #endif
-    mk_velocities(dp.t + dt, field_new, dfield_new);
-    // #ifdef ENABLE_FFT_FILTER
-    // evo_flags.filter = 0;
-    // #endif
-    #ifdef ENABLE_DENSE_OUTPUT
-    if (dp.dense)
-    {
-        prepare_dense_output(dt);
-    }
+    #ifdef ENABLE_FFT_FILTER
+        apply_filter_real(field_new);
     #endif
+    mk_velocities(dp.t + dt, field_new, dfield_new);
+    
+    // #ifdef ENABLE_DENSE_OUTPUT
+    // if (dp.dense)
+    // {
+    //     prepare_dense_output(dt);
+    // }
+    // #endif
+
     #pragma omp parallel for
     for (size_t i = 0; i < Ntot; ++i)
     {
-        dfield[i] = dfield_new[i];
         field[i] = field_new[i];
+        dfield[i] = dfield_new[i];
     }
     dp.t_old = dp.t;
     dp.t += (dp.dt_did = dt);
@@ -402,6 +379,13 @@ int success(const double err, double *dt) {
         dp.reject = 1;
         return 0;
     }
+}
+
+void prepare_and_save_timeslice() {
+    evo_flags.compute_pow_spec = 1;
+    rho = mk_rho(field);
+    evo_flags.compute_pow_spec = 0;
+    save();
 }
 
 void prepare_dense_output(const double dt) {

@@ -34,7 +34,7 @@ during execution
 // the plan flag used for fftw plans
 #define FFTW_DEFAULT_FLAG       (FFTW_ESTIMATE)
 // apply a frequency cutoff filter during the time evolution (compiler switch)
-// #define ENABLE_FFT_FILTER
+#define ENABLE_FFT_FILTER
 // cutoff fraction used in spectral filtering
 #define CUTOFF_FRACTION         (1.0/3.0)
 
@@ -44,7 +44,7 @@ during execution
 // how many timeslices to keep in memory before write out
 #define WRITE_OUT_BUFFER_NUMBER (20)
 // how many timeslices to skip in between writing to file (1 to write each)
-#define TIME_STEP_SKIPS         (20)
+#define TIME_STEP_SKIPS         (10)
 // how many bins for |k| are used in the computation of the power spectrum
 #define POWER_SPECTRUM_BINS     (50)
 
@@ -78,9 +78,8 @@ during execution
 #define SMALLEST_SCALING        (0.333)
 #define LARGEST_SCALING         (6.0)
 #define SAFE                    (0.9)
-#define RELATIVE_TOLERANCE      (1.0e-7)
-#define ABSOLUTE_TOLERANCE      (1.0e-7)
-
+#define RELATIVE_TOLERANCE      (1.0e-6)
+#define ABSOLUTE_TOLERANCE      (1.0e-6)
 
 // ------------------------typedefs---------------------------------------------
 // representing one dimension of a multi dimensional grid
