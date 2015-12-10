@@ -25,7 +25,7 @@ void run_rk4() {
 
     if (!(k1 && k2 && k3 && k4 && tmp_k))
     {
-        fputs("Allocating memory failed.", stderr);
+        fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
     }
 
@@ -34,67 +34,75 @@ void run_rk4() {
     RUNTIME_INFO(printf("final time: %f\n", pars.t.tf));
     RUNTIME_INFO(printf("time step dt: %f\n", dt));
     RUNTIME_INFO(printf("number of steps: %zu\n", Nt));
-    RUNTIME_INFO(puts("Using DFT (fftw3) for spatial derivatives."));
-
     #ifdef ENABLE_FFT_FILTER
-        RUNTIME_INFO(puts("Frequency cutoff filtering enabled."));
+        RUNTIME_INFO(puts("Frequency cutoff filtering enabled.\n"));
     #else
-        RUNTIME_INFO(puts("Filtering disabled."));
+        RUNTIME_INFO(puts("Filtering disabled.\n"));
     #endif
 
     #ifdef SHOW_TIMING_INFO
     double start = get_wall_time();
     #endif
 
-    for (size_t nt = 0; nt < Nt - 1; ++nt)
+    for (size_t nt = 0; t < pars.t.tf; ++nt)
     {
         #ifdef ENABLE_FFT_FILTER
-            evo_flags.filter = 1;
+            #ifdef SHOW_TIMING_INFO
+            double start = get_wall_time();
+            #endif
+            apply_filter_real(field);
+            #ifdef SHOW_TIMING_INFO
+            double end = get_wall_time();
+            filter_time += end - start;
+            #endif
         #endif
+
+        // to precisely reach final time in the last step, change dt
+        if (t + dt * 1.0001 > pars.t.tf)
+        {
+            dt = pars.t.tf - t;
+            pars.t.dt = dt;
+            RUNTIME_INFO(printf("overshoot, new dt = %f\n", dt));
+        }
+
+        // step 1 (and write out data if required)
         if (nt % pars.file.skip == 0)
         {
             evo_flags.compute_pow_spec = 1;
+            mk_rhs(t, field, k1);
+            evo_flags.compute_pow_spec = 0;
+            save();
+        }
+        else
+        {
+            mk_rhs(t, field, k1);
         }
 
-        // k1 & a1
-        mk_velocities(t, field, k1);
-        #ifdef ENABLE_FFT_FILTER
-            evo_flags.filter = 0;
-        #endif
-        evo_flags.compute_pow_spec = 0;
-
-        // k2 & a2
+        // step 2
         #pragma omp parallel for
         for (size_t i = 0; i < Ntot; ++i)
         {
             tmp_k[i] = field[i] + dt * k1[i] / 2.0;
         }
-        mk_velocities(t + dt / 2.0, tmp_k, k2);
+        mk_rhs(t + dt / 2.0, tmp_k, k2);
 
-        // k3 & a3
+        // step 3
         #pragma omp parallel for
         for (size_t i = 0; i < Ntot; ++i)
         {
             tmp_k[i] = field[i] + dt * k2[i] / 2.0;
         }
-        mk_velocities(t + dt / 2.0, tmp_k, k3);
+        mk_rhs(t + dt / 2.0, tmp_k, k3);
 
-        // k4 & a4
+        // step 4
         #pragma omp parallel for
         for (size_t i = 0; i < Ntot; ++i)
         {
             tmp_k[i] = field[i] + dt * k3[i];
         }
-        mk_velocities(t + dt, tmp_k, k4);
+        mk_rhs(t + dt, tmp_k, k4);
 
-        rho = mk_rho(field);
-
-        if (nt % pars.file.skip == 0)
-        {
-            save();
-        }
-
-        // perform one time step for the field and a
+        // perform time step
         #pragma omp parallel for
         for (size_t i = 0; i < Ntot; ++i)
         {
@@ -106,14 +114,13 @@ void run_rk4() {
     }
 
     // make sure to write out last time slice
-    rho = mk_rho(field);
-    save();
+    prepare_and_save_timeslice();
 
     // info about last timeslice
     if (fabs(pars.t.tf - pars.t.t) > 1e-10)
     {
-        RUNTIME_INFO(fputs("The time of the last step does not coincide "
-                            "with the specified final time.", stderr));
+        RUNTIME_INFO(puts("The time of the last step does not coincide "
+                          "with the specified final time."));
     }
 
     RUNTIME_INFO(puts("Finished rk4"));

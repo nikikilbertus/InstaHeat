@@ -29,6 +29,13 @@ typedef struct {
 }dopri853_constants_t;
 
 typedef struct {
+	double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;
+	double *yerr, *yerr2;
+	double *rcont1, *rcont2, *rcont3, *rcont4,
+		   *rcont5, *rcont6, *rcont7, *rcont8;
+}dopri853_values_t;
+
+typedef struct {
 	double t;
     double t_old;
     double ti;
@@ -48,19 +55,12 @@ typedef struct {
 	double err_old;
 	int reject;
 	double eps;
-    int dense;
+    int dense; // currently unused
 }dopri853_control_t;
 
-typedef struct {
-	double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;
-	double *yerr, *yerr2;
-	double *rcont1, *rcont2, *rcont3, *rcont4,
-		   *rcont5, *rcont6, *rcont7, *rcont8;
-}dopri853_values_t;
-
-extern dopri853_constants_t dpc;
-extern dopri853_control_t dp;
-extern dopri853_values_t dpv;
+extern dopri853_constants_t dpc; // Dormand Prince Constants
+extern dopri853_values_t dpv; // Dormand Prince Values
+extern dopri853_control_t dp; // Dormand Prince (controls)
 
 void initialize_dopri853();
 void run_dopri853();
@@ -68,10 +68,9 @@ void perform_step(const double dt_try);
 void try_step(const double dt);
 double error(const double dt);
 int success(const double err, double *dt);
-void prepare_and_save_timeslice();
 void prepare_dense_output(const double dt);
 double dense_output(const size_t i, const double t, const double dt);
 void allocate_dopri853_values();
-void destroy_dopri853_values();
+void free_dopri853_values();
 
 #endif

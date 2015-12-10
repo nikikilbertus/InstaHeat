@@ -280,7 +280,7 @@ void apply_filter_fourier(fftw_complex *inout) {
 /*
 compute the right hand side of the pde, ie the first order temporal derivatives
 */
-void mk_velocities(double t, double *f, double *result) {
+void mk_rhs(double t, double *f, double *result) {
     size_t N = pars.N;
     size_t N2 = 2 * N;
     double a = f[N2];
@@ -305,7 +305,7 @@ void mk_velocities(double t, double *f, double *result) {
 }
 
 /*
-compute average 00 component of stress energy
+compute averaged energy density rho, i.e. 00 component of stress energy
 */
 double mk_rho(double *f) {
     size_t N = pars.N;
@@ -382,4 +382,11 @@ inline double filter_window_function(double x) {
     // return exp(1. + 1. / ( pow(x, 8) - 1. ));
     // return 0.5 * ( 1. + cos( pow(x, 8) * PI ) );
     // return 0.0;
+}
+
+void prepare_and_save_timeslice() {
+    evo_flags.compute_pow_spec = 1;
+    rho = mk_rho(field);
+    evo_flags.compute_pow_spec = 0;
+    save();
 }

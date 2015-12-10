@@ -21,7 +21,7 @@ void initialize_threading() {
     threadinit = fftw_init_threads();
     if (threadinit == 0)
     {
-        fputs("Could not initialize fftw threads.", stderr);
+        fputs("Could not initialize fftw threads.\n", stderr);
         exit(EXIT_FAILURE);
     }
     threadnum = omp_get_max_threads(); // THREAD_NUMBER;
@@ -119,7 +119,7 @@ void allocate_external() {
         cfftw_tmp && cfftw_tmp_x && cfftw_tmp_y && cfftw_tmp_z &&
         dtmp_x && dtmp_y && dtmp_z && dtmp_grad2 && dtmp_lap))
     {
-        fputs("Allocating memory failed.", stderr);
+        fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
     }
     RUNTIME_INFO(puts("Allocated memory for external variables.\n"));
@@ -143,12 +143,13 @@ void mk_grid() {
     double az = pars.z.a;
     double bz = pars.z.b;
 
-	if (Nx <= 0 || Ny <= 0 || Nz <= 0)
+	if (Nx < 1 || Ny < 1 || Nz < 1)
 	{
-		fputs("Need positive number of gridpoints", stderr);
+		fputs("Need positive number of gridpoints\n", stderr);
+        exit(EXIT_FAILURE);
 	}
 
-	// Grid points
+	// set up the grid points
 	for (size_t i = 0; i < Nx; ++i)
 	{
 		grid[i] = ax + (bx - ax) * i / Nx;
@@ -162,7 +163,6 @@ void mk_grid() {
         grid[i] = az + (bz - az) * (i-Nx-Ny) / Nz;
     }
 
-    // Console output for debugging
     #ifdef DEBUG
 		puts("x");
         print_vector(grid, Nx);
@@ -218,6 +218,7 @@ void mk_initial_conditions() {
         theta[i] = 2.0 * PI * (double)rand() / (double)RAND_MAX;
     }
 
+    // initialize the field
     for (size_t i = 0; i < Nx; ++i)
     {
         x = grid[i];
@@ -279,16 +280,17 @@ double dphi_init(double x, double y, double z) {
 }
 
 void free_and_destroy_all() {
-    destroy_fftw_plans();
+    destroy_and_cleanup_fftw();
     free_external();
 }
 
 /*
 destroy all fftw plans
 */
-void destroy_fftw_plans() {
+void destroy_and_cleanup_fftw() {
     fftw_destroy_plan(p_fw_3d);
     fftw_destroy_plan(p_bw_3d);
+    fftw_cleanup_threads();
     RUNTIME_INFO(puts("Destroyed fftw plans.\n"));
 }
 

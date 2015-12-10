@@ -35,7 +35,7 @@ void initialize_dopri853() {
     dp.err_old = 1.0e-4;
     dp.reject = 0;
     dp.eps = DBL_EPSILON;
-    //dp.dense ;
+    dp.dense = 0; // currently unused
     RUNTIME_INFO(puts("Initialized dopri853 parameters.\n"));
 }
 
@@ -54,8 +54,6 @@ void run_dopri853() {
 
     #ifdef ENABLE_FFT_FILTER
     RUNTIME_INFO(puts("Frequency cutoff filtering enabled.\n"));
-    RUNTIME_INFO(printf("Cutting off about %.2f %% of all modes.\n\n",
-                100.0 - 100.0 * pow(1.0 - pars.cutoff_fraction, 3)));
     #else
     RUNTIME_INFO(puts("Filtering disabled.\n"));
     #endif
@@ -64,14 +62,9 @@ void run_dopri853() {
     //     apply_filter_real(field);
     // #endif
     evo_flags.compute_pow_spec = 1;
-    mk_velocities(dp.t, field, dfield);
+    mk_rhs(dp.t, field, dfield);
     evo_flags.compute_pow_spec = 0;
     save();
-
-    // if (dp.dense)
-    // {
-    //  //out.out(-1,x,y,s,h)
-    // }
 
     #ifdef SHOW_TIMING_INFO
     double start = get_wall_time();
@@ -128,7 +121,7 @@ void run_dopri853() {
     double secs = end - start;
     #endif
 
-    destroy_dopri853_values();
+    free_dopri853_values();
 
     RUNTIME_INFO(puts("Finished dopri853"));
     #ifdef SHOW_TIMING_INFO
@@ -166,15 +159,8 @@ void perform_step(const double dt_try) {
         filter_time += end - start;
         #endif
     #endif
-    mk_velocities(dp.t + dt, field_new, dfield_new);
+    mk_rhs(dp.t + dt, field_new, dfield_new);
     
-    // #ifdef ENABLE_DENSE_OUTPUT
-    // if (dp.dense)
-    // {
-    //     prepare_dense_output(dt);
-    // }
-    // #endif
-
     #pragma omp parallel for
     for (size_t i = 0; i < Ntot; ++i)
     {
@@ -199,7 +185,7 @@ void try_step(const double dt) {
     {
         dpv.k_tmp[i] = field[i] + dt * dpc.a21 * dfield[i];
     }
-    mk_velocities(t + dpc.c2 * dt, dpv.k_tmp, dpv.k2);
+    mk_rhs(t + dpc.c2 * dt, dpv.k_tmp, dpv.k2);
 
     // ------------ 3 ------------
     #pragma omp parallel for
@@ -208,7 +194,7 @@ void try_step(const double dt) {
         dpv.k_tmp[i] = field[i] + dt *
             (dpc.a31 * dfield[i] + dpc.a32 * dpv.k2[i]);
     }
-    mk_velocities(t + dpc.c3 * dt, dpv.k_tmp, dpv.k3);
+    mk_rhs(t + dpc.c3 * dt, dpv.k_tmp, dpv.k3);
 
     // ------------ 4 ------------
     #pragma omp parallel for
@@ -217,7 +203,7 @@ void try_step(const double dt) {
         dpv.k_tmp[i] = field[i] + dt *
             (dpc.a41 * dfield[i] + dpc.a43 * dpv.k3[i]);
     }
-    mk_velocities(t + dpc.c4 * dt, dpv.k_tmp, dpv.k4);
+    mk_rhs(t + dpc.c4 * dt, dpv.k_tmp, dpv.k4);
 
     // ------------ 5 ------------
     #pragma omp parallel for
@@ -226,7 +212,7 @@ void try_step(const double dt) {
         dpv.k_tmp[i] = field[i] + dt *
             (dpc.a51 * dfield[i] + dpc.a53 * dpv.k3[i] + dpc.a54 * dpv.k4[i]);
     }
-    mk_velocities(t + dpc.c5 * dt, dpv.k_tmp, dpv.k5);
+    mk_rhs(t + dpc.c5 * dt, dpv.k_tmp, dpv.k5);
 
     // ------------ 6 ------------
     #pragma omp parallel for
@@ -235,7 +221,7 @@ void try_step(const double dt) {
         dpv.k_tmp[i] = field[i] + dt *
             (dpc.a61 * dfield[i] + dpc.a64 * dpv.k4[i] + dpc.a65 * dpv.k5[i]);
     }
-    mk_velocities(t + dpc.c6 * dt, dpv.k_tmp, dpv.k6);
+    mk_rhs(t + dpc.c6 * dt, dpv.k_tmp, dpv.k6);
 
     // ------------ 7 ------------
     #pragma omp parallel for
@@ -245,7 +231,7 @@ void try_step(const double dt) {
             (dpc.a71 * dfield[i] + dpc.a74 * dpv.k4[i] + dpc.a75 * dpv.k5[i] +
              dpc.a76 * dpv.k6[i]);
     }
-    mk_velocities(t + dpc.c7 * dt, dpv.k_tmp, dpv.k7);
+    mk_rhs(t + dpc.c7 * dt, dpv.k_tmp, dpv.k7);
 
     // ------------ 8 ------------
     #pragma omp parallel for
@@ -255,7 +241,7 @@ void try_step(const double dt) {
             (dpc.a81 * dfield[i] + dpc.a84 * dpv.k4[i] + dpc.a85 * dpv.k5[i] +
              dpc.a86 * dpv.k6[i] + dpc.a87 * dpv.k7[i]);
     }
-    mk_velocities(t + dpc.c8 * dt, dpv.k_tmp, dpv.k8);
+    mk_rhs(t + dpc.c8 * dt, dpv.k_tmp, dpv.k8);
 
     // ------------ 9 ------------
     #pragma omp parallel for
@@ -265,7 +251,7 @@ void try_step(const double dt) {
             (dpc.a91 * dfield[i] + dpc.a94 * dpv.k4[i] + dpc.a95 * dpv.k5[i] +
              dpc.a96 * dpv.k6[i] + dpc.a97 * dpv.k7[i] + dpc.a98 * dpv.k8[i]);
     }
-    mk_velocities(t + dpc.c9 * dt, dpv.k_tmp, dpv.k9);
+    mk_rhs(t + dpc.c9 * dt, dpv.k_tmp, dpv.k9);
 
     // ------------ 10 ------------
     #pragma omp parallel for
@@ -276,7 +262,7 @@ void try_step(const double dt) {
              dpc.a106 * dpv.k6[i] + dpc.a107 * dpv.k7[i] + dpc.a108 * dpv.k8[i] +
              dpc.a109 * dpv.k9[i]);
     }
-    mk_velocities(t + dpc.c10 * dt, dpv.k_tmp, dpv.k10);
+    mk_rhs(t + dpc.c10 * dt, dpv.k_tmp, dpv.k10);
 
     // ------------ 11 ------------
     #pragma omp parallel for
@@ -287,7 +273,7 @@ void try_step(const double dt) {
              dpc.a116 * dpv.k6[i] + dpc.a117 * dpv.k7[i] + dpc.a118 * dpv.k8[i] +
              dpc.a119 * dpv.k9[i] + dpc.a1110 * dpv.k10[i]);
     }
-    mk_velocities(t + dpc.c11 * dt, dpv.k_tmp, dpv.k2);
+    mk_rhs(t + dpc.c11 * dt, dpv.k_tmp, dpv.k2);
 
     // ------------ new dt ------------
     double tpdt = t + dt;
@@ -301,7 +287,7 @@ void try_step(const double dt) {
              dpc.a126 * dpv.k6[i] + dpc.a127 * dpv.k7[i] + dpc.a128 * dpv.k8[i] +
              dpc.a129 * dpv.k9[i] + dpc.a1210 * dpv.k10[i] + dpc.a1211 * dpv.k2[i]);
     }
-    mk_velocities(tpdt, dpv.k_tmp, dpv.k3);
+    mk_rhs(tpdt, dpv.k_tmp, dpv.k3);
 
     // ------------ step ahead ------------
     #pragma omp parallel for
@@ -393,13 +379,6 @@ int success(const double err, double *dt) {
     }
 }
 
-void prepare_and_save_timeslice() {
-    evo_flags.compute_pow_spec = 1;
-    rho = mk_rho(field);
-    evo_flags.compute_pow_spec = 0;
-    save();
-}
-
 void prepare_dense_output(const double dt) {
     size_t Ntot = 2 * pars.N + 1;
     double t = dp.t;
@@ -450,7 +429,7 @@ void prepare_dense_output(const double dt) {
              dpc.a1410 * dpv.k10[i] + dpc.a1411 * dpv.k2[i] +
              dpc.a1412 * dpv.k3[i]  + dpc.a1413 * dfield_new[i]);
     }
-    mk_velocities(t + dpc.c14 * dt, ftmp, dpv.k10);
+    mk_rhs(t + dpc.c14 * dt, ftmp, dpv.k10);
 
     // second of three extra function evaluations
     #pragma omp parallel for
@@ -462,7 +441,7 @@ void prepare_dense_output(const double dt) {
              dpc.a1511 * dpv.k2[i] + dpc.a1512 * dpv.k3[i] +
              dpc.a1513 * dfield_new[i] + dpc.a1514 * dpv.k10[i]);
     }
-    mk_velocities(t + dpc.c15 * dt, ftmp, dpv.k2);
+    mk_rhs(t + dpc.c15 * dt, ftmp, dpv.k2);
 
     // third of three extra function evaluations
     #pragma omp parallel for
@@ -474,7 +453,7 @@ void prepare_dense_output(const double dt) {
              dpc.a169 * dpv.k9[i] + dpc.a1613 * dfield_new[i] +
              dpc.a1614 * dpv.k10[i] + dpc.a1615 * dpv.k2[i]);
     }
-    mk_velocities(t + dpc.c16 * dt, ftmp, dpv.k3);
+    mk_rhs(t + dpc.c16 * dt, ftmp, dpv.k3);
 
     #pragma omp parallel for
     for (size_t i = 0; i < Ntot; ++i)
@@ -539,7 +518,7 @@ void allocate_dopri853_values() {
     RUNTIME_INFO(puts("Allocated memory for dopri853 variables.\n"));
 }
 
-void destroy_dopri853_values() {
+void free_dopri853_values() {
     free(dpv.k2);
     free(dpv.k3);
     free(dpv.k4);

@@ -65,16 +65,16 @@ double h5_time_write = 0.0;
 // -----------------------------main--------------------------------------------
 int main(int argc, const char * argv[]) {
 
-    #ifdef SHOW_TIMING_INFO
-    double start, end;
-    start = get_wall_time();
-    #endif
-
     #ifdef RUN_TESTS_ONLY
     allocate_and_initialize_all();
     run_all_tests();
     free_and_destroy_all();
     return 0;
+    #endif
+
+    #ifdef SHOW_TIMING_INFO
+    double start, end;
+    start = get_wall_time();
     #endif
 
     allocate_and_initialize_all();
@@ -94,7 +94,6 @@ int main(int argc, const char * argv[]) {
 
     h5_close(pars.file.id);
     free_and_destroy_all();
-    fftw_cleanup_threads();
 
     #ifdef SHOW_TIMING_INFO
     end = get_wall_time();
@@ -104,10 +103,8 @@ int main(int argc, const char * argv[]) {
                                 fftw_time_exe, 100.*(fftw_time_exe/secs)));
     RUNTIME_INFO(printf("fftw planning took %f seconds (%.2f %%).\n",
                                 fftw_time_plan, 100.*(fftw_time_plan/secs)));
-    #ifdef ENABLE_FFT_FILTER
     RUNTIME_INFO(printf("fft filtering took %f seconds (%.2f %%).\n",
                                 filter_time, 100.*(filter_time/secs)));
-    #endif
     RUNTIME_INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
                                 h5_time_write, 100.*(h5_time_write/secs)));
     #endif
@@ -120,9 +117,9 @@ double get_wall_time() {
     struct timeval time;
     if (gettimeofday(&time, NULL))
     {
-        RUNTIME_INFO(fputs("Could not get wall time.", stderr));
+        RUNTIME_INFO(puts("Could not get wall time, reurning 0.\n"));
         return 0.0;
     }
-    return (double)time.tv_sec + (double)time.tv_usec * .000001;
+    return (double)time.tv_sec + (double)time.tv_usec * 0.000001;
 }
 #endif
