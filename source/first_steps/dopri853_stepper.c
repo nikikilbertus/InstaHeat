@@ -54,10 +54,15 @@ void run_dopri853() {
 
     #ifdef ENABLE_FFT_FILTER
     RUNTIME_INFO(puts("Frequency cutoff filtering enabled.\n"));
+    RUNTIME_INFO(printf("Cutting off about %.2f %% of all modes.\n\n",
+                100.0 - 100.0 * pow(1.0 - pars.cutoff_fraction, 3)));
     #else
     RUNTIME_INFO(puts("Filtering disabled.\n"));
     #endif
 
+    // #ifdef ENABLE_FFT_FILTER
+    //     apply_filter_real(field);
+    // #endif
     evo_flags.compute_pow_spec = 1;
     mk_velocities(dp.t, field, dfield);
     evo_flags.compute_pow_spec = 0;

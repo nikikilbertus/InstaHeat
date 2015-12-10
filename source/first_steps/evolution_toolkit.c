@@ -249,21 +249,22 @@ void apply_filter_fourier(fftw_complex *inout) {
         exit(EXIT_FAILURE);
     }
 
+    size_t N = pars.N;
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
     size_t ncz = Nz / 2 + 1;
 
-    size_t i_a = (size_t) floor((Nx / 2) * (1.0 - cutoff_fraction));
-    size_t i_b = Nx - i_a;
-    size_t j_a = (size_t) floor((Ny / 2) * (1.0 - cutoff_fraction));
-    size_t j_b = Ny - j_a;
-    size_t k_a = (size_t) floor((Nz / 2) * (1.0 - cutoff_fraction));
+    // size_t i_a = (size_t) ((Nx / 2) * (1.0 - cutoff_fraction));
+    // size_t i_b = Nx - i_a;
+    // size_t j_a = (size_t) ((Ny / 2) * (1.0 - cutoff_fraction));
+    // size_t j_b = Ny - j_a;
+    // size_t k_a = (size_t) ((Nz / 2) * (1.0 - cutoff_fraction));
 
     // TODO[performance]: run loop only over _a to _b in each dimension for two
     // thirds rule, leave it like that for possible fourier smoothing
-    size_t osx, osy, nok = 0, nbad = 0;
-    #pragma omp parallel for private(osx, osy) reduction(+:nok, nbad)
+    size_t osx, osy;
+    #pragma omp parallel for private(osx, osy)
     for (size_t i = 0; i < Nx; ++i)
     {
         osx = i * Ny * ncz;
@@ -272,21 +273,25 @@ void apply_filter_fourier(fftw_complex *inout) {
             osy = osx + j * ncz;
             for (size_t k = 0; k < ncz; ++k)
             {
-                if ( k >= k_a ||
-                    (j >= j_a && j <= j_b) ||
-                    (i >= i_a && i <= i_b) )
-                {
-                    inout[osy + k] = 0.0;
-                    ++nbad;
-                }
-                else
-                {
-                    ++nok;
-                }
+                inout[osy + k] *= filter_window_function(2.0 *
+                    (i > Nx / 2 ? Nx - i : i) / (double) Nx);
+                inout[osy + k] *= filter_window_function(2.0 *
+                    (j > Ny / 2 ? Ny - j : j) / (double) Ny);
+                inout[osy + k] *=
+                    filter_window_function(2.0 * k / (double) Nz) / N;
+                // if ( k >= k_a ||
+                //     (j >= j_a && j <= j_b) ||
+                //     (i >= i_a && i <= i_b) )
+                // {
+                //     inout[osy + k] = 0.0;
+                // }
+                // else
+                // {
+                //     inout[osy + k] /= N;
+                // }
             }
         }
     }
-    RUNTIME_INFO(printf("filtered: %f\n", (double)nbad / (double)(nok + nbad)));
 }
 
 /*
@@ -317,38 +322,6 @@ void mk_velocities(double t, double *f, double *result) {
 }
 
 /*
-A selection of potentials one can try, make sure to set the corresponding
-potential_prime, the derivative is not computed automatically yet
-TODO: change that?
-*/
-inline double potential(double f){
-    // return 0.0;
-    double lambda = 100.0;
-    return LAMBDA / (1.0 + exp(-lambda * f));
-
-    // return MASS * MASS * f * f / 2.0;
-
-    // return MASS * MASS * f * f / 2.0 + COUPLING * f * f * f * f / 24.0;
-
-    // return 0.0;
-}
-
-inline double potential_prime(double f) {
-    // return 0.0;
-    double lambda = 100.0;
-    double tmp = exp(lambda * f);
-    return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
-
-    // return MASS * MASS * f;
-
-    // return MASS * MASS * f + COUPLING * f * f * f / 6.0;
-
-    // return 20.0 * tanh(pow(f, 50));
-
-    // return 0.0;
-}
-
-/*
 compute average 00 component of stress energy
 */
 double mk_rho(double *f) {
@@ -367,6 +340,53 @@ double mk_rho(double *f) {
         T00 += (df * df + grad2_a) / 2. + potential(f[i]);
     }
     return T00 / N;
+}
+
+/*
+A selection of potentials one can try, make sure to set the corresponding
+potential_prime, the derivative is not computed automatically yet
+TODO: change that?
+*/
+inline double potential(double f) {
+    // higgs metastability potential
+    // double a = 0.01, b = 1.0, lambda = 1.0e-10;
+    // return (f == 0.0) ? lambda :
+    //     lambda + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) +
+    //     b * pow(f, 6);
+
+    // notch or step potential
+    // double lambda = 100.0;
+    // return LAMBDA / (1.0 + exp(-lambda * f));
+
+    // standard f squared potential
+    // return MASS * MASS * f * f / 2.0;
+
+    // standard f to the fourth (with f squared) potential
+    // return MASS * MASS * f * f / 2.0 + COUPLING * f * f * f * f / 24.0;
+
+    return 0.0;
+}
+
+inline double potential_prime(double f) {
+    // higgs metastability potential
+    // double a = 0.01, b = 1.0;
+    // return (f == 0.0) ? 0 :
+    //     4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) -
+    //     (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0))
+    //     + 6.0 * b * pow(f, 5);
+
+    // notch or step potential
+    // double lambda = 100.0;
+    // double tmp = exp(lambda * f);
+    // return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
+
+    // standard f squared potential
+    // return MASS * MASS * f;
+
+    // standard f to the fourth (with f squared) potential
+    // return MASS * MASS * f + COUPLING * f * f * f / 6.0;
+
+    return 0.0;
 }
 
 void mk_filter_window(double *inout, size_t cutoffindex, size_t windowlength) {

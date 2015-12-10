@@ -14,7 +14,9 @@ void run_all_tests() {
 void test_mk_gradient_squared_and_laplacian() {
     size_t N = pars.N;
 
+    fill_field(field, test_func);
     mk_gradient_squared_and_laplacian(field, dtmp_grad2, dtmp_lap);
+    
     puts("test mk gradient squared and laplacian:");
     fill_field(dtmp_x + N, test_func_Dx);
     if (are_fields_equal(dtmp_x, dtmp_x + N) == 0)
@@ -80,10 +82,6 @@ void test_fft_apply_filter() {
     //todo
 }
 
-double test_func(double x, double y, double z) {
-    return sin(x) * sin(y) * sin(z);
-}
-
 double test_func_gradsq(double x, double y, double z) {
     double grad_x = test_func_Dx(x,y,z);
     double grad_y = test_func_Dy(x,y,z);
@@ -92,23 +90,53 @@ double test_func_gradsq(double x, double y, double z) {
 }
 
 double test_func_lap(double x, double y, double z) {
-    return -3.0 * sin(x) * sin(y) * sin(z);
+    return test_func_D2x(x, y, z) + test_func_D2y(x, y, z) +
+        test_func_D2z(x, y, z); 
+}
+
+double test_func(double x, double y, double z) {
+    return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
+        cos(2.0 * x) * cos(y) * cos(4.0 * z); 
+    // return sin(x) * sin(y) * sin(z);
 }
 
 double test_func_Dx(double x, double y, double z) {
-    return cos(x) * sin(y) * sin(z);
+    return -2.0 * exp(-2. * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
+        cos(y) * cos(4.0 * z) * (2.0 * x * cos(2.0 * x) + sin(2.0 * x));
+    // return cos(x) * sin(y) * sin(z);
 }
 
 double test_func_Dy(double x, double y, double z) {
-    return sin(x) * cos(y) * sin(z);
+    return -exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
+        cos(2.0 * x) * cos(4.0 * z) * (8.0 * y * cos(y) + sin(y));
+    // return sin(x) * cos(y) * sin(z);
 }
 
 double test_func_Dz(double x, double y, double z) {
-    return sin(x) * sin(y) * cos(z);
+    return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
+        cos(2.0 * x) * cos(y) * (-3.0 * z * cos(4.0 * z) - 4.0 * sin(4.0 * z));
+    // return sin(x) * sin(y) * cos(z);
 }
 
-double test_func_D2(double x, double y, double z) {
-    return -sin(x) * sin(y) * sin(z);
+double test_func_D2x(double x, double y, double z) {
+    return 8.0 * exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
+        cos(y) * cos(4.0 * z) * ((-1.0 + 2.0 * pow(x, 2)) * cos(2.0 * x) +
+                2.0 * x * sin(2.0 * x));
+    // return -sin(x) * sin(y) * sin(z); 
+}
+
+double test_func_D2y(double x, double y, double z) {
+    return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
+        cos(2.0 * x) * cos(4.0 * z) * ((-9.0 + 64.0 * pow(y, 2)) * cos(y) +
+                16.0 * y * sin(y));
+    // return -sin(x) * sin(y) * sin(z); 
+}
+
+double test_func_D2z(double x, double y, double z) {
+    return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
+        cos(2.0 * x) * cos(y) * ((-19.0 + 9.0 * pow(z, 2)) * cos(4.0 * z) +
+                24.0 * z * sin(4.0 * z));
+    // return -sin(x) * sin(y) * sin(z); 
 }
 
 void fill_field(double *f, double (*func)(double, double, double)) {
@@ -147,5 +175,5 @@ int are_fields_equal(double *f, double *g) {
 }
 
 int equal(double a, double b) {
-    return fabs(a - b) < 1e-8 ? 0 : -1;
+    return fabs(a - b) < 1e-4 ? 0 : -1;
 }
