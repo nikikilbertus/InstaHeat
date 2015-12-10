@@ -376,20 +376,6 @@ inline double potential_prime(double f) {
     return 0.0;
 }
 
-void mk_filter_window(double *inout, size_t cutoffindex, size_t windowlength) {
-
-    #pragma omp parallel for
-    for (size_t i = 0; i < cutoffindex; ++i)
-    {
-        inout[i] = filter_window_function((double)i / cutoffindex);
-    }
-    #pragma omp parallel for
-    for (size_t i = cutoffindex; i < windowlength; ++i)
-    {
-        inout[i] = 0.0;
-    }
-}
-
 inline double filter_window_function(double x) {
     return exp(-36.0 * pow(x, 36));
     // return 1. - tanh( 1. / ( 1. - pow(x, 8) ) - 1. );
