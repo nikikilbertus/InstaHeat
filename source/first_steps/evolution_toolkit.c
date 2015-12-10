@@ -245,7 +245,7 @@ void apply_filter_fourier(fftw_complex *inout) {
     double cutoff_fraction = pars.cutoff_fraction;
     if (cutoff_fraction < 0.0 || cutoff_fraction > 1.0)
     {
-        fputs("cutoff_fraction must be between 0 and 1.", stderr);
+        fputs("cutoff_fraction must be between 0 and 1.\n", stderr);
         exit(EXIT_FAILURE);
     }
 
@@ -254,12 +254,6 @@ void apply_filter_fourier(fftw_complex *inout) {
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
     size_t ncz = Nz / 2 + 1;
-
-    // size_t i_a = (size_t) ((Nx / 2) * (1.0 - cutoff_fraction));
-    // size_t i_b = Nx - i_a;
-    // size_t j_a = (size_t) ((Ny / 2) * (1.0 - cutoff_fraction));
-    // size_t j_b = Ny - j_a;
-    // size_t k_a = (size_t) ((Nz / 2) * (1.0 - cutoff_fraction));
 
     // TODO[performance]: run loop only over _a to _b in each dimension for two
     // thirds rule, leave it like that for possible fourier smoothing
@@ -279,16 +273,6 @@ void apply_filter_fourier(fftw_complex *inout) {
                     (j > Ny / 2 ? Ny - j : j) / (double) Ny);
                 inout[osy + k] *=
                     filter_window_function(2.0 * k / (double) Nz) / N;
-                // if ( k >= k_a ||
-                //     (j >= j_a && j <= j_b) ||
-                //     (i >= i_a && i <= i_b) )
-                // {
-                //     inout[osy + k] = 0.0;
-                // }
-                // else
-                // {
-                //     inout[osy + k] /= N;
-                // }
             }
         }
     }
@@ -349,10 +333,12 @@ TODO: change that?
 */
 inline double potential(double f) {
     // higgs metastability potential
-    // double a = 0.01, b = 1.0, lambda = 1.0e-10;
-    // return (f == 0.0) ? lambda :
-    //     lambda + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) +
-    //     b * pow(f, 6);
+    double lambda = 7.0e-4;
+    double l = lambda / 1.0e-10;
+    double a = 0.01 * l, b = 1.0 * l;
+    return f == 0.0 ? lambda :
+        (lambda + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) +
+        b * pow(f, 6));
 
     // notch or step potential
     // double lambda = 100.0;
@@ -364,16 +350,18 @@ inline double potential(double f) {
     // standard f to the fourth (with f squared) potential
     // return MASS * MASS * f * f / 2.0 + COUPLING * f * f * f * f / 24.0;
 
-    return 0.0;
+    // return 0.0;
 }
 
 inline double potential_prime(double f) {
     // higgs metastability potential
-    // double a = 0.01, b = 1.0;
-    // return (f == 0.0) ? 0 :
-    //     4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) -
-    //     (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0))
-    //     + 6.0 * b * pow(f, 5);
+    double lambda = 7.0e-4;
+    double l = lambda / 1.0e-10;
+    double a = 0.01 * l, b = 1.0 * l;
+    return f == 0.0 ? 0 :
+        (4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) -
+        (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0))
+        + 6.0 * b * pow(f, 5));
 
     // notch or step potential
     // double lambda = 100.0;

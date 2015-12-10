@@ -24,7 +24,7 @@ void initialize_threading() {
         fputs("Could not initialize fftw threads.", stderr);
         exit(EXIT_FAILURE);
     }
-    threadnum = THREAD_NUMBER;
+    threadnum = omp_get_max_threads(); // THREAD_NUMBER;
     omp_set_num_threads(threadnum);
     fftw_plan_with_nthreads(threadnum);
     RUNTIME_INFO(printf("Running omp & fftw with %d thread(s)\n\n", threadnum));
@@ -258,20 +258,23 @@ example functions for initial conditions
 those need to be periodic in the spatial domain
 */
 double phi_init(double x, double y, double z, double *phases) {
-    return cos(x) * cos(y) * cos(z);
+    // for higgs metastability potential
+    double phi0 = 0.02;
+    double lambda = 10.0;
+    return phi0 * 0.125 * (1.0 + cos(x)) * (1.0 + cos(y)) * (1.0 + cos(z)) *
+        exp(-lambda * (x * x + y * y + z * z));
 
-    double frac = 0.4;
-    double phi0 = 0.73 * frac;
-    double deltaphi = phi0 / frac;
-	return phi0 + deltaphi *
-                (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
-                 cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) +
-                 cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5]));
-	// return tanh(pow(x, 8));
+    // for notch or step potential simulations
+    // double frac = 0.4;
+    // double phi0 = 0.73 * frac;
+    // double deltaphi = phi0 / frac;
+	// return phi0 + deltaphi *
+    //             (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
+    //              cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) +
+    //              cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5]));
 }
 
 double dphi_init(double x, double y, double z) {
-	// return -sin(x) * sin(y) * sin(z);
 	return 0.0;
 }
 

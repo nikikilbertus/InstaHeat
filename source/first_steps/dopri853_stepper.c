@@ -111,7 +111,7 @@ void run_dopri853() {
         }
         if (fabs(dp.dt_next) <= dp.dt_min)
         {
-            fputs("Step size too small.", stderr);
+            fputs("Step size too small.\n", stderr);
             exit(EXIT_FAILURE);
         }
         dp.dt = dp.dt_next;
@@ -152,7 +152,7 @@ void perform_step(const double dt_try) {
         }
         if (fabs(dt) <= fabs(dp.t) * dp.eps)
         {
-            fputs("Stepsize underflow", stderr);
+            fputs("Stepsize underflow\n", stderr);
             exit(EXIT_FAILURE);
         }
     }
@@ -526,7 +526,7 @@ void allocate_dopri853_values() {
           dpv.rcont1 && dpv.rcont2 && dpv.rcont3 && dpv.rcont4 && dpv.rcont5 &&
           dpv.rcont6 && dpv.rcont7 && dpv.rcont8))
     {
-        fputs("Allocating memory failed.", stderr);
+        fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
     }
     RUNTIME_INFO(puts("Allocated memory for dopri853 variables.\n"));
