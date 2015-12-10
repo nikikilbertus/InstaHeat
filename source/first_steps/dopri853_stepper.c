@@ -157,7 +157,14 @@ void perform_step(const double dt_try) {
         }
     }
     #ifdef ENABLE_FFT_FILTER
+        #ifdef SHOW_TIMING_INFO
+        double start = get_wall_time();
+        #endif
         apply_filter_real(field_new);
+        #ifdef SHOW_TIMING_INFO
+        double end = get_wall_time();
+        filter_time += end - start;
+        #endif
     #endif
     mk_velocities(dp.t + dt, field_new, dfield_new);
     

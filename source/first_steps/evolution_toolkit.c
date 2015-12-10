@@ -10,8 +10,7 @@
 
 evolution_flags_t evo_flags = {.filter = 0, .compute_pow_spec = 0};
 
-void mk_gradient_squared_and_laplacian(double *in, double *grad2,
-                                            double *laplacian) {
+void mk_gradient_squared_and_laplacian(double *in, double *grad2, double *lap) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
@@ -120,7 +119,7 @@ void mk_gradient_squared_and_laplacian(double *in, double *grad2,
     fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_x, dtmp_x);
     fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_y, dtmp_y);
     fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_z, dtmp_z);
-    fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp,  laplacian);
+    fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp, lap);
     #ifdef SHOW_TIMING_INFO
     end = get_wall_time();
     fftw_time_exe += end - start;

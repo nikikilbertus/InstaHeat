@@ -280,7 +280,7 @@ double dphi_init(double x, double y, double z) {
 
 void free_and_destroy_all() {
     destroy_fftw_plans();
-    free_all_external();
+    free_external();
 }
 
 /*
@@ -295,7 +295,7 @@ void destroy_fftw_plans() {
 /*
 free all allocated memory
 */
-void free_all_external() {
+void free_external() {
     free(grid);
     fftw_free(field);
     fftw_free(field_new);

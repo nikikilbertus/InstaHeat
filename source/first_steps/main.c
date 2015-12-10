@@ -59,6 +59,7 @@ fftw_plan p_bw_3d;
 // time all dfts for timing analysis
 double fftw_time_exe  = 0.0;
 double fftw_time_plan = 0.0;
+double filter_time = 0.0;
 double h5_time_write = 0.0;
 
 // -----------------------------main--------------------------------------------
@@ -103,6 +104,10 @@ int main(int argc, const char * argv[]) {
                                 fftw_time_exe, 100.*(fftw_time_exe/secs)));
     RUNTIME_INFO(printf("fftw planning took %f seconds (%.2f %%).\n",
                                 fftw_time_plan, 100.*(fftw_time_plan/secs)));
+    #ifdef ENABLE_FFT_FILTER
+    RUNTIME_INFO(printf("fft filtering took %f seconds (%.2f %%).\n",
+                                filter_time, 100.*(filter_time/secs)));
+    #endif
     RUNTIME_INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
                                 h5_time_write, 100.*(h5_time_write/secs)));
     #endif

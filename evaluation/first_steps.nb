@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     81095,       2330]
-NotebookOptionsPosition[     75233,       2161]
-NotebookOutlinePosition[     75610,       2178]
-CellTagsIndexPosition[     75567,       2175]
+NotebookDataLength[     84523,       2425]
+NotebookOptionsPosition[     78379,       2249]
+NotebookOutlinePosition[     78756,       2266]
+CellTagsIndexPosition[     78713,       2263]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -2060,19 +2060,31 @@ Cell[BoxData[
  CellChangeTimes->{{3.6586787304590178`*^9, 3.658678732529181*^9}}],
 
 Cell[BoxData[
+ RowBox[{
+  RowBox[{"l", "=", 
+   SuperscriptBox["10", 
+    RowBox[{"-", "7"}]]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6586978746780777`*^9, 3.658697886201949*^9}, {
+  3.6587019813170843`*^9, 3.658701981398814*^9}}],
+
+Cell[BoxData[
  RowBox[{"repl", " ", "=", " ", 
   RowBox[{"{", 
    RowBox[{
     RowBox[{"a", " ", "\[Rule]", "  ", 
-     SuperscriptBox["10", 
-      RowBox[{"-", "2"}]]}], ",", " ", 
-    RowBox[{"b", " ", "\[Rule]", "  ", "1"}], ",", " ", 
+     RowBox[{
+      SuperscriptBox["10", 
+       RowBox[{"-", "2"}]], "/", "l"}]}], ",", " ", 
+    RowBox[{"b", " ", "\[Rule]", "  ", 
+     RowBox[{"1", "/", "l"}]}], ",", " ", 
     RowBox[{"\[CapitalLambda]", " ", "\[Rule]", " ", 
-     SuperscriptBox["10", 
-      RowBox[{"-", "10"}]]}]}], "}"}]}]], "Input",
+     RowBox[{
+      SuperscriptBox["10", 
+       RowBox[{"-", "10"}]], "/", "l"}]}]}], "}"}]}]], "Input",
  CellChangeTimes->{{3.658676150906073*^9, 3.6586761577835283`*^9}, {
   3.658676366714904*^9, 3.658676378370571*^9}, {3.658676424609541*^9, 
-  3.6586764576242228`*^9}, {3.658677130514017*^9, 3.658677135450574*^9}}],
+  3.6586764576242228`*^9}, {3.658677130514017*^9, 3.658677135450574*^9}, {
+  3.65869786452682*^9, 3.65869787131874*^9}}],
 
 Cell[BoxData[
  RowBox[{
@@ -2156,7 +2168,83 @@ Cell[BoxData[
     RowBox[{"Log", "[", "x", "]"}], 
     RowBox[{"Log", "[", "10", "]"}]]}], " ", "//", " ", "Simplify"}]], "Input",\
 
- CellChangeTimes->{{3.658677962931679*^9, 3.658678024546041*^9}}]
+ CellChangeTimes->{{3.658677962931679*^9, 3.658678024546041*^9}}],
+
+Cell[BoxData[
+ RowBox[{"replphi", " ", "=", " ", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"phi0", " ", "\[Rule]", " ", "0.04"}], ",", " ", 
+    RowBox[{"\[Lambda]", " ", "\[Rule]", " ", "20"}]}], "}"}]}]], "Input",
+ CellChangeTimes->{{3.6586956422035*^9, 3.658695674744548*^9}, {
+  3.658695875899352*^9, 3.658695878595769*^9}, {3.658696366281871*^9, 
+  3.658696393623845*^9}, {3.658702073616803*^9, 3.658702073767063*^9}}],
+
+Cell[BoxData[
+ RowBox[{"phi", " ", "=", " ", 
+  RowBox[{"phi0", " ", 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"Cos", "[", "x", "]"}], " ", "+", " ", "1"}], ")"}], 
+   RowBox[{
+    RowBox[{"Exp", "[", 
+     RowBox[{
+      RowBox[{"-", "\[Lambda]"}], " ", 
+      SuperscriptBox["x", "2"]}], "]"}], " ", "/", " ", "2"}], 
+   "k"}]}]], "Input",
+ CellChangeTimes->{{3.658695622542513*^9, 3.6586956401457148`*^9}, {
+   3.658695679432623*^9, 3.6586956900960712`*^9}, {3.658695854636318*^9, 
+   3.658695871916758*^9}, {3.658702099623028*^9, 3.658702100510827*^9}, 
+   3.6587030657376757`*^9}],
+
+Cell[BoxData[
+ RowBox[{"Plot", "[", 
+  RowBox[{
+   RowBox[{"phi", "  ", "/.", " ", "replphi"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", 
+     RowBox[{"-", "\[Pi]"}], ",", "\[Pi]"}], "}"}], ",", " ", 
+   RowBox[{"PlotRange", " ", "\[Rule]", " ", "All"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.658695692571021*^9, 3.6586957884530067`*^9}, 
+   3.658695865267981*^9}],
+
+Cell[BoxData[
+ RowBox[{"phitrunc", " ", "=", " ", 
+  RowBox[{"FourierSeries", "[", 
+   RowBox[{
+    RowBox[{"phi", " ", "/.", " ", "replphi"}], ",", " ", "x", ",", " ", 
+    "30"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.6586958280751*^9, 3.658695845899353*^9}, {
+  3.658695885114416*^9, 3.658695893183707*^9}, {3.658695937651341*^9, 
+  3.658695940411051*^9}, {3.658696051720496*^9, 3.6586960534242887`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Plot", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"Re", "[", "phitrunc", "]"}], ",", " ", 
+     RowBox[{"phi", " ", "/.", " ", "replphi"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", 
+     RowBox[{"-", "\[Pi]"}], ",", "\[Pi]"}], "}"}], ",", " ", 
+   RowBox[{"PlotRange", " ", "\[Rule]", " ", "All"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.658695907069496*^9, 3.6586959628498507`*^9}, {
+  3.658696000673581*^9, 3.658696014273355*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Plot", "[", 
+  RowBox[{
+   RowBox[{"Abs", "[", 
+    RowBox[{
+     RowBox[{"Re", "[", "phitrunc", "]"}], " ", "-", " ", 
+     RowBox[{"(", " ", 
+      RowBox[{"phi", " ", "/.", " ", "replphi"}], ")"}]}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", 
+     RowBox[{"-", "\[Pi]"}], ",", "\[Pi]"}], "}"}], ",", " ", 
+   RowBox[{"PlotRange", " ", "\[Rule]", " ", "All"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.658696035521145*^9, 3.658696043816153*^9}}]
 }, Open  ]]
 },
 WindowSize->{1428, 844},
@@ -2203,8 +2291,8 @@ Cell[11517, 338, 235, 5, 27, "Input"],
 Cell[11755, 345, 1584, 41, 79, "Input"],
 Cell[13342, 388, 526, 15, 51, "Input"],
 Cell[13871, 405, 516, 16, 47, "Input"],
-Cell[14390, 423, 1661, 45, 117, "Input"],
-Cell[16054, 470, 1000, 27, 43, "Input"],
+Cell[14390, 423, 1661, 45, 55, "Input"],
+Cell[16054, 470, 1000, 27, 27, "Input"],
 Cell[17057, 499, 231, 6, 27, "Input"],
 Cell[17291, 507, 129, 2, 27, "Input"],
 Cell[17423, 511, 331, 10, 27, "Input"],
@@ -2236,7 +2324,7 @@ Cell[30371, 865, 524, 14, 27, "Input"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[30932, 884, 229, 7, 67, "Section"],
-Cell[31164, 893, 4235, 106, 237, "Input"],
+Cell[31164, 893, 4235, 106, 207, "Input"],
 Cell[35402, 1001, 682, 18, 58, "Input"],
 Cell[36087, 1021, 686, 20, 62, "Input"],
 Cell[36776, 1043, 596, 17, 63, "Input"],
@@ -2323,14 +2411,21 @@ Cell[70372, 2022, 973, 26, 27, "Input"]
 Cell[CellGroupData[{
 Cell[71382, 2053, 114, 1, 67, "Section"],
 Cell[71499, 2056, 138, 3, 27, "Input"],
-Cell[71640, 2061, 584, 13, 33, "Input"],
-Cell[72227, 2076, 873, 21, 33, "Input"],
-Cell[73103, 2099, 502, 11, 27, "Input"],
-Cell[73608, 2112, 324, 8, 27, "Input"],
-Cell[73935, 2122, 220, 5, 27, "Input"],
-Cell[74158, 2129, 495, 10, 43, "Input"],
-Cell[74656, 2141, 263, 7, 33, "Input"],
-Cell[74922, 2150, 295, 8, 49, "Input"]
+Cell[71640, 2061, 232, 6, 30, "Input"],
+Cell[71875, 2069, 713, 17, 33, "Input"],
+Cell[72591, 2088, 873, 21, 33, "Input"],
+Cell[73467, 2111, 502, 11, 27, "Input"],
+Cell[73972, 2124, 324, 8, 27, "Input"],
+Cell[74299, 2134, 220, 5, 27, "Input"],
+Cell[74522, 2141, 495, 10, 43, "Input"],
+Cell[75020, 2153, 263, 7, 33, "Input"],
+Cell[75286, 2162, 295, 8, 49, "Input"],
+Cell[75584, 2172, 422, 8, 27, "Input"],
+Cell[76009, 2182, 587, 15, 33, "Input"],
+Cell[76599, 2199, 376, 9, 27, "Input"],
+Cell[76978, 2210, 410, 8, 27, "Input"],
+Cell[77391, 2220, 488, 12, 27, "Input"],
+Cell[77882, 2234, 481, 12, 27, "Input"]
 }, Open  ]]
 }
 ]

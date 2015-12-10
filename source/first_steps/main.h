@@ -171,6 +171,7 @@ extern fftw_plan p_bw_3d;
 // monitoring the time taken by certain parts
 extern double fftw_time_exe;
 extern double fftw_time_plan;
+extern double filter_time;
 extern double h5_time_write;
 
 // for timing information during execution

@@ -15,7 +15,7 @@ double phi_init(double x, double y, double z, double *phases);
 double dphi_init(double x, double y, double z);
 void free_and_destroy_all();
 void destroy_fftw_plans();
-void free_all_external();
+void free_external();
 void print_matrix(double *matrix, size_t N);
 void print_vector(double *vector, size_t N);
 
