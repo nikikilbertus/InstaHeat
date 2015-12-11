@@ -24,12 +24,17 @@ void initialize_threading() {
         fputs("Could not initialize fftw threads.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    threadnum = omp_get_max_threads(); // THREAD_NUMBER;
+    threadnum = THREAD_NUMBER <= 0 ? omp_get_max_threads() : THREAD_NUMBER;
     omp_set_num_threads(threadnum);
     fftw_plan_with_nthreads(threadnum);
     RUNTIME_INFO(printf("Running omp & fftw with %d thread(s)\n\n", threadnum));
 }
 
+/** 
+ *  initialize the values in the paramters_t pars variable, mostly from defines
+ *  in main.h; using the struct gives more flexibility than using the defines
+ *  throughout the code
+ */
 void initialize_parameters() {
 	pars.x.N = GRIDPOINTS_X;
     pars.y.N = GRIDPOINTS_Y;
@@ -46,26 +51,25 @@ void initialize_parameters() {
 
     pars.N = pars.x.N * pars.y.N * pars.z.N;
 
-    pars.t.dt = DELTA_T > 0 ? DELTA_T : pars.t.dt;
+    pars.t.dt = DELTA_T;
     pars.t.t  = INITIAL_TIME;
     pars.t.ti = INITIAL_TIME;
     pars.t.tf = FINAL_TIME;
 	pars.t.Nt = ceil((pars.t.tf - pars.t.ti) / pars.t.dt) + 1;
-
-    pars.cutoff_fraction = CUTOFF_FRACTION;
+    if (pars.t.Nt > MAX_STEPS)
+    {
+        fputs("Exeeding MAX_STEPS, decrease DELTA_T.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
 
     pars.file.index = 0;
     pars.file.buf_size = WRITE_OUT_BUFFER_NUMBER;
     pars.file.skip = TIME_STEP_SKIPS;
-
     pars.file.bins_powspec = POWER_SPECTRUM_BINS;
-
     RUNTIME_INFO(puts("Initialized parameters.\n"));
 }
 
-/*
-allocate memory and initialize all external variables
-*/
+// allocate memory for all external variables
 void allocate_external() {
     size_t Nx   = pars.x.N;
     size_t Ny   = pars.y.N;
@@ -76,32 +80,22 @@ void allocate_external() {
     size_t buf_size = pars.file.buf_size;
     size_t bins = pars.file.bins_powspec;
 
-    //grid points
     grid = malloc((Nx + Ny + Nz) * sizeof *grid);
-
-    //solutions for the field and the temporal derivative
-    field      = fftw_malloc(Ntot * sizeof *field);
-    field_new  = fftw_malloc(Ntot * sizeof *field_new);
-    dfield     = fftw_malloc(Ntot * sizeof *dfield);
-    dfield_new = fftw_malloc(Ntot * sizeof *dfield_new);
-    // write out buffer for the field phi
-    field_buf = calloc(buf_size * N, sizeof *field_buf);
-
-    // write out buffer for time
-    time_buf = calloc(buf_size, sizeof *time_buf);
-
-    // write out buffer for a
-    f_a_buf = calloc(buf_size, sizeof *f_a_buf);
-
-    // write out buffer for rho
-    rho_buf = calloc(buf_size, sizeof *rho_buf);
-
-    // power spectrum and write out buffer
-    pow_spec = calloc(bins, sizeof *pow_spec);
+    // note that the field contains the scalar field, its time deriv. and a
+    field        = fftw_malloc(Ntot * sizeof *field);
+    field_new    = fftw_malloc(Ntot * sizeof *field_new);
+    dfield       = fftw_malloc(Ntot * sizeof *dfield);
+    dfield_new   = fftw_malloc(Ntot * sizeof *dfield_new);
+    // this buffer only holds the scalar field (not the deriv. or a) 
+    field_buf    = calloc(buf_size * N, sizeof *field_buf);
+    time_buf     = calloc(buf_size, sizeof *time_buf);
+    f_a_buf      = calloc(buf_size, sizeof *f_a_buf);
+    rho_buf      = calloc(buf_size, sizeof *rho_buf);
+    pow_spec     = calloc(bins, sizeof *pow_spec);
     pow_spec_buf = calloc(buf_size * bins, sizeof *pow_spec_buf);
 
     // default arrays to save coefficients of real to complex transforms
-    size_t ncz = Nz / 2 + 1;
+    size_t ncz = Nz / 2 + 1; // see fftw3 documentation for this
     cfftw_tmp   = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp);
     cfftw_tmp_x = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_x);
     cfftw_tmp_y = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_y);
@@ -125,13 +119,7 @@ void allocate_external() {
     RUNTIME_INFO(puts("Allocated memory for external variables.\n"));
 }
 
-/*
-	make the N fourier spectral gridpoints for the interval [a, b],
-	and the spectral operators (N \times N matrices) for first and second order
-	derivatives; x, D1 and D2 need to be initialized and memory needs to be
-	allocated before calling this function
-	see mathematica notebook spectral_operators for further info
-*/
+// make the N fourier spectral gridpoints for the computational domain
 void mk_grid() {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -177,9 +165,8 @@ void mk_grid() {
     RUNTIME_INFO(puts("Constructed gridpoints.\n"));
 }
 
-/*
-create all fftw plans, IMPORTANT: create BEFORE initializing arrays!
-*/
+// create the fftw plans, IMPORTANT: create BEFORE initializing arrays, because
+// setting up the plans destroys the arrays!
 void mk_fftw_plans() {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -193,15 +180,12 @@ void mk_fftw_plans() {
     p_bw_3d = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, cfftw_tmp, field,
                                             FFTW_DEFAULT_FLAG);
     #ifdef SHOW_TIMING_INFO
-    double end =  get_wall_time();
-    fftw_time_plan += end - start;
+    fftw_time_plan += get_wall_time() - start;
     #endif
     RUNTIME_INFO(puts("Created fftw plans.\n"));
 }
 
-/*
-setup initial conditions for the field
-*/
+// setup initial conditions for the field
 void mk_initial_conditions() {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -210,7 +194,7 @@ void mk_initial_conditions() {
     size_t osx, osy;
     double x, y, z;
 
-    // random phases
+    // random phases used for analysis of notch and step potential
     srand(1113);
     double *theta = calloc(6, sizeof *theta);
     for (size_t i = 0; i < 6; ++i)
@@ -218,7 +202,7 @@ void mk_initial_conditions() {
         theta[i] = 2.0 * PI * (double)rand() / (double)RAND_MAX;
     }
 
-    // initialize the field
+    // initialize the scalar field and its temporal derivative
     for (size_t i = 0; i < Nx; ++i)
     {
         x = grid[i];
@@ -239,7 +223,7 @@ void mk_initial_conditions() {
     // initialize a
     field[2 * N] = 1.0;
 
-    // Console output for debugging
+    // console output for debugging
     #ifdef DEBUG
     	puts("phi");
         print_vector(field, N);
@@ -249,23 +233,20 @@ void mk_initial_conditions() {
         print_vector(field + 2 * N, 1);
         puts("\n");
     #endif
-
     free(theta);
     RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
 }
 
-/*
-example functions for initial conditions
-those need to be periodic in the spatial domain
-*/
-double phi_init(double x, double y, double z, double *phases) {
-    // for higgs metastability potential
-    double phi0 = 0.02;
+// initial values of the scalar field, make sure its periodic
+double phi_init(const double x, const double y, const double z,
+                                                const double *phases) {
+    // localized for higgs metastability potential
+    double phi0 = 0.04;
     double lambda = 10.0;
     return phi0 * 0.125 * (1.0 + cos(x)) * (1.0 + cos(y)) * (1.0 + cos(z)) *
         exp(-lambda * (x * x + y * y + z * z));
 
-    // for notch or step potential simulations
+    // some simple waves for notch or step potential simulations
     // double frac = 0.4;
     // double phi0 = 0.73 * frac;
     // double deltaphi = phi0 / frac;
@@ -275,7 +256,8 @@ double phi_init(double x, double y, double z, double *phases) {
     //              cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5]));
 }
 
-double dphi_init(double x, double y, double z) {
+// initial values of the time deriv. of the scalar field, make sure its periodic
+double dphi_init(const double x, const double y, const double z) {
 	return 0.0;
 }
 
@@ -284,9 +266,7 @@ void free_and_destroy_all() {
     free_external();
 }
 
-/*
-destroy all fftw plans
-*/
+// destroy the fftw plans and call cleanup for internal fftw3 cleanup
 void destroy_and_cleanup_fftw() {
     fftw_destroy_plan(p_fw_3d);
     fftw_destroy_plan(p_bw_3d);
@@ -294,9 +274,7 @@ void destroy_and_cleanup_fftw() {
     RUNTIME_INFO(puts("Destroyed fftw plans.\n"));
 }
 
-/*
-free all allocated memory
-*/
+// free memory of all global variables
 void free_external() {
     free(grid);
     fftw_free(field);
@@ -321,22 +299,9 @@ void free_external() {
 	RUNTIME_INFO(puts("Freed external variables.\n"));
 }
 
-//****************************** printing functions
-/*
-for debugging mostly
-*/
-void print_matrix(double *matrix, size_t N){
-    for (size_t i = 0; i < N; i++)
-    {
-        for (size_t j = 0; j < N; j++)
-        {
-            printf("%f\t", matrix[j*N+i]);
-        }
-        printf("\n");
-    }
-}
-
-void print_vector(double *vector, size_t N) {
+// -------------------------printing functions----------------------------------
+// for debugging mostly
+void print_vector(const double *vector, const size_t N) {
     for (size_t i = 0; i < N; i++)
     {
         printf("%f\n", vector[i]);

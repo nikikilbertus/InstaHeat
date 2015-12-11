@@ -11,12 +11,12 @@ void allocate_external();
 void mk_grid();
 void mk_fftw_plans();
 void mk_initial_conditions();
-double phi_init(double x, double y, double z, double *phases);
-double dphi_init(double x, double y, double z);
+double phi_init(const double x, const double y, const double z,
+        const double *phases);
+double dphi_init(const double x, const double y, const double z);
 void free_and_destroy_all();
 void destroy_and_cleanup_fftw();
 void free_external();
-void print_matrix(double *matrix, size_t N);
-void print_vector(double *vector, size_t N);
+void print_vector(const double *vector, const size_t N);
 
 #endif

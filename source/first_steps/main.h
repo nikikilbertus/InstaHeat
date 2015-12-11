@@ -5,7 +5,7 @@
 #include <fftw3.h>
 
 // -------------------mathematical constants and macros-------------------------
-#define PI (3.141592653589793238462643383279)
+#define PI                      (3.141592653589793238462643383279)
 #define MAX(x, y)               ((x) > (y) ? (x) : (y))
 #define MIN(x, y)               ((x) > (y) ? (y) : (x))
 
@@ -13,13 +13,14 @@
 compiler switches for debugging, testing, profiling and additional information
 during execution
 */
-#define SHOW_RUNTIME_INFO
-#define SHOW_TIMING_INFO
-// #define CHECK_FOR_NAN
-// #define RUN_TESTS_ONLY
-// #define ENABLE_PROFILER
-// #define DEBUG
+#define SHOW_RUNTIME_INFO // recommended
+#define SHOW_TIMING_INFO // recommended
+// #define CHECK_FOR_NAN // not recommended (performance)
+// #define ENABLE_PROFILER // only recommended for debugging
+// #define DEBUG // only recommended for debugging (huge output!)
+// #define RUN_TESTS_ONLY // testing only (tests.c)
 
+// always leave this here uncommented
 #ifdef SHOW_RUNTIME_INFO
 #define RUNTIME_INFO(f) do {\
         (f); \
@@ -30,30 +31,42 @@ during execution
 
 // -----------------------simulation preferences--------------------------------
 // how many threads to use for openmp parallelization (also used by fftw)
-#define THREAD_NUMBER           (4)
+// if <= 0, the return value of omp_get_max_threads() is used
+#define THREAD_NUMBER           (0)
 // the plan flag used for fftw plans
 #define FFTW_DEFAULT_FLAG       (FFTW_ESTIMATE)
-// apply a frequency cutoff filter during the time evolution (compiler switch)
-#define ENABLE_FFT_FILTER
-// cutoff fraction used in spectral filtering
-#define CUTOFF_FRACTION         (1.0/3.0)
+/** 
+ *  apply a frequency cutoff filter at each time step during the time evolution
+ *  (compiler switch) the specific cutoff (e.g. step function with certain
+ *  fraction (2/3 rule), or fourier smoothing) is determined by the function
+ *  filter_window_function in evolution_toolkit.c
+ */
+// #define ENABLE_FFT_FILTER
 
 // ------------file handling parameters for writing to disk---------------------
-// file name
+// the output is bundled in one .h5 file, enter path here
 #define DATAPATH                ("../../../data/run.h5")
-// how many timeslices to keep in memory before write out
+/**
+ *  write out data is buffered to not access hard drive too frequently (actually
+ *  there are several levels of buffering, since hdf5 does it's own buffering 
+ *  too), this parameter determines how many time slices are buffered before
+ *  writing them to disk, beware of the memory consumption of large buffers!
+ */
 #define WRITE_OUT_BUFFER_NUMBER (20)
-// how many timeslices to skip in between writing to file (1 to write each)
+// how many timeslices to skip in between writing to file (1: write out all)
 #define TIME_STEP_SKIPS         (10)
-// how many bins for |k| are used in the computation of the power spectrum
+/**
+ *  there is a (very crude and biased!) estimation of the power spectrum to
+ *  track stability, therefore we sum up fourier coefficients into bins
+ *  depending on the norm of their k vector, this gives the number of bins used
+ */
 #define POWER_SPECTRUM_BINS     (50)
 
-// ------------------simulation parameters--------------------------------------
+// ------------------computational domain---------------------------------------
 // spatial
 #define GRIDPOINTS_X            (64)
 #define GRIDPOINTS_Y            (64)
 #define GRIDPOINTS_Z            (64)
-#define GRIDPOINTS_TOTAL        ((GRIDPOINTS_X)*(GRIDPOINTS_Y)*(GRIDPOINTS_Z))
 #define SPATIAL_LOWER_BOUND_X   (-PI)
 #define SPATIAL_UPPER_BOUND_X   (PI)
 #define SPATIAL_LOWER_BOUND_Y   (-PI)
@@ -61,38 +74,41 @@ during execution
 #define SPATIAL_LOWER_BOUND_Z   (-PI)
 #define SPATIAL_UPPER_BOUND_Z   (PI)
 // temporal
-#define DELTA_T                 (0.001) // negative for manual adjustment
+// initial step size for adaptive stepping (dopri853) or fixed step size (RK4) 
+#define DELTA_T                 (0.001)
 #define INITIAL_TIME            (0.0)
 #define FINAL_TIME              (10.0)
-#define MAX_STEPS               (50000)
+#define MAX_STEPS               (1e6)
 #define MINIMAL_DELTA_T         (1.0e-5)
-// potential
+
+// ----------------parameters used in the potential-----------------------------
 #define MASS                    (1.0)
 #define COUPLING                (1.0)      // coupling in a phi4 potential
-#define LAMBDA                  (1.876e-4) // "cosmological constant"
+#define LAMBDA                  (1.87e-4) // "cosmological constant"
 
 // -------------------additional parameters for dopri853------------------------
-// adaptive timesteps
-#define BETA                    (0.0)
-// ALPHA is determined atomatically as 1.0/8.0 - BETA * 0.2
+// maximal/minimal rescaling of dt per step (don't change)
 #define SMALLEST_SCALING        (0.333)
 #define LARGEST_SCALING         (6.0)
+// internal parameters for determining the rescaling of dt (don't change)
+#define BETA                    (0.0) // ALPHA = 1.0/8.0 - BETA * 0.2
 #define SAFE                    (0.9)
-#define RELATIVE_TOLERANCE      (1.0e-8)
-#define ABSOLUTE_TOLERANCE      (1.0e-8)
+// error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
+#define RELATIVE_TOLERANCE      (1.0e-7)
+#define ABSOLUTE_TOLERANCE      (1.0e-7)
 
 // ------------------------typedefs---------------------------------------------
-// representing one dimension of a multi dimensional grid
+// representing one spatial dimension of a multi dimensional grid
 typedef struct {
-    size_t N;
-    double a;
-    double b;
-    double L;
+    size_t N; // number of gridpoints
+    double a; // lower bound of interval
+    double b; // upper bound of interval
+    double L; // lenght of the interval
 }grid_dimension_t;
 
 // encapsulate timing related parameters
 typedef struct {
-    size_t Nt; // Number of timesteps
+    size_t Nt; // number of timesteps (only relevant for fixed step size)
     double dt; // size of (initial) timestep delta t
     double ti; // initial time
     double tf; // final time
@@ -101,31 +117,42 @@ typedef struct {
 
 //file handling parameters
 typedef struct {
-    size_t id;          // h5 file id of the output file
-    size_t dset_phi;    // h5 data set id of the field phi
-    size_t dset_powspec;// h5 data set id of the power spectrum
-    size_t dset_time;   // h5 data set id of the time
-    size_t dset_a;      // h5 data set id of the scaling parameter a
-    size_t dset_rho;    // h5 data set id of the energy density rho
-    size_t index;       // current index within the buffers
-    size_t buf_size;    // size of the buffer before dump to disk
-    size_t skip;        // how many timesteps to skip in between write out
+    size_t id;           // h5 file id of the output file
+    size_t dset_phi;     // h5 data set id of the scalar field
+    size_t dset_powspec; // h5 data set id of the power spectrum
+    size_t dset_time;    // h5 data set id of the time
+    size_t dset_a;       // h5 data set id of the scaling parameter a
+    size_t dset_rho;     // h5 data set id of the energy density rho
+    size_t index;        // current index within the buffers
+    size_t buf_size;     // size of the buffer
+    size_t skip;         // how many timesteps to skip in between write out
     size_t bins_powspec; // how many bins are used for the power spectrum
 }file_parameters_t;
 
-// simulation parameters struct
+/**
+ *  simulation parameters
+ *  throughout all files holds:
+ *  Nx = number of grid points in the x direction
+ *  Ny = number of grid points in the y direction
+ *  Nz = number of grid points in the z direction
+ *  N  = number of gridpoints for the whole spatial grid = Nx * Ny * Nz
+ *  N2 = 2 * N
+ *  Ntot = number of scalar equations = 2 * N + 1 (N for scalar field, N for its
+ *  first temporal derivative, 1 for the FRW scaling parameter a)
+ */
 typedef struct {
     grid_dimension_t x;
     grid_dimension_t y;
     grid_dimension_t z;
     size_t N;
     timing_t t;
-    double cutoff_fraction; // used in spectral filtering during time evolution
     file_parameters_t file;
 }parameters_t;
 
-
 // --------------------------global variables-----------------------------------
+// we are using rather many global variables; that has the advantage of central
+// allocation/initialization and deallocation; it also saves a lot of typing
+
 // simulation parameters
 extern parameters_t pars;
 
@@ -135,7 +162,8 @@ extern double *grid;
 // time slices buffer
 extern double *time_buf;
 
-// solutions for the scalar field we evolve and its temporal derivative
+// the scalar field plus scaling parameter a we evolve, the temporal derivatives
+// and the buffer for the scalar field 
 extern double *field, *dfield;
 extern double *field_new, *dfield_new;
 extern double *field_buf;
@@ -143,11 +171,11 @@ extern double *field_buf;
 // buffer for scaling parameter a
 extern double *f_a_buf;
 
-// energy density rho  = T^{00}_{\phi}
+// energy density rho  = T^{00}_{\phi} and the buffer
 extern double rho;
 extern double *rho_buf;
 
-// power spectrum
+// power spectrum and the buffer
 extern double *pow_spec;
 extern double *pow_spec_buf;
 
@@ -157,7 +185,7 @@ extern complex *cfftw_tmp_x;
 extern complex *cfftw_tmp_y;
 extern complex *cfftw_tmp_z;
 
-// general purpose memory block for temporary use (eg for gradient)
+// general purpose memory blocks for temporary use (e.g. for gradient)
 extern double *dtmp_x;
 extern double *dtmp_y;
 extern double *dtmp_z;

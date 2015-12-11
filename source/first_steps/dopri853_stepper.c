@@ -117,8 +117,7 @@ void run_dopri853() {
     }
 
     #ifdef SHOW_TIMING_INFO
-    double end = get_wall_time();
-    double secs = end - start;
+    double secs = get_wall_time() - start;
     #endif
 
     free_dopri853_values();
@@ -150,14 +149,7 @@ void perform_step(const double dt_try) {
         }
     }
     #ifdef ENABLE_FFT_FILTER
-        #ifdef SHOW_TIMING_INFO
-        double start = get_wall_time();
-        #endif
-        apply_filter_real(field_new);
-        #ifdef SHOW_TIMING_INFO
-        double end = get_wall_time();
-        filter_time += end - start;
-        #endif
+    apply_filter_real(field_new);
     #endif
     mk_rhs(dp.t + dt, field_new, dfield_new);
     

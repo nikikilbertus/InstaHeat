@@ -47,14 +47,7 @@ void run_rk4() {
     for (size_t nt = 0; t < pars.t.tf; ++nt)
     {
         #ifdef ENABLE_FFT_FILTER
-            #ifdef SHOW_TIMING_INFO
-            double start = get_wall_time();
-            #endif
-            apply_filter_real(field);
-            #ifdef SHOW_TIMING_INFO
-            double end = get_wall_time();
-            filter_time += end - start;
-            #endif
+        apply_filter_real(field);
         #endif
 
         // to precisely reach final time in the last step, change dt
@@ -125,8 +118,7 @@ void run_rk4() {
 
     RUNTIME_INFO(puts("Finished rk4"));
     #ifdef SHOW_TIMING_INFO
-    double end = get_wall_time();
-    double secs = end - start;
+    double secs = get_wall_time() - start;
     RUNTIME_INFO(printf("time: %f seconds\n\n", secs));
     #endif
 

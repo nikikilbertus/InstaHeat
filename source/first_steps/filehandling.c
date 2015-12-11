@@ -6,7 +6,7 @@
 #include "filehandling.h"
 #include "main.h"
 
-void h5_create_empty_by_path(char *name) {
+void h5_create_empty_by_path(const char *name) {
     hsize_t rank = 2;
     hsize_t N = pars.N;
     hsize_t Nt = pars.file.buf_size;
@@ -115,7 +115,7 @@ void h5_create_empty_by_path(char *name) {
     RUNTIME_INFO(puts("Created hdf5 file with datasets for phi, t, a, rho.\n"));
 }
 
-void h5_write_buffers_to_disk(hsize_t Nt) {
+void h5_write_buffers_to_disk(const hsize_t Nt) {
     hsize_t N = pars.N;
     hsize_t bins = pars.file.bins_powspec;
     hsize_t rank;
