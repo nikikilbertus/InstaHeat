@@ -37,14 +37,14 @@ void initialize_threading() {
  */
 void initialize_parameters() {
 	pars.x.N = GRIDPOINTS_X;
-    pars.y.N = GRIDPOINTS_Y;
-    pars.z.N = GRIDPOINTS_Z;
 	pars.x.a = SPATIAL_LOWER_BOUND_X;
 	pars.x.b = SPATIAL_UPPER_BOUND_X;
     pars.x.L = pars.x.b - pars.x.a;
+    pars.y.N = GRIDPOINTS_Y;
     pars.y.a = SPATIAL_LOWER_BOUND_Y;
     pars.y.b = SPATIAL_UPPER_BOUND_Y;
     pars.y.L = pars.y.b - pars.y.a;
+    pars.z.N = GRIDPOINTS_Z;
     pars.z.a = SPATIAL_LOWER_BOUND_Z;
     pars.z.b = SPATIAL_UPPER_BOUND_Z;
     pars.z.L = pars.z.b - pars.z.a;
@@ -242,9 +242,10 @@ double phi_init(const double x, const double y, const double z,
                                                 const double *phases) {
     // localized for higgs metastability potential
     double phi0 = 0.04;
-    double lambda = 10.0;
+    double lambda = 20.0;
+    // return phi0 * 0.5 * (1.0 + cos(x)) * exp(-lambda * x * x);
     return phi0 * 0.125 * (1.0 + cos(x)) * (1.0 + cos(y)) * (1.0 + cos(z)) *
-        exp(-lambda * (x * x + y * y + z * z));
+       exp(-lambda * (x * x + y * y + z * z));
 
     // some simple waves for notch or step potential simulations
     // double frac = 0.4;

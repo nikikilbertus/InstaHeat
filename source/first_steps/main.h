@@ -29,20 +29,6 @@ during execution
 #define RUNTIME_INFO(f)
 #endif
 
-// -----------------------simulation preferences--------------------------------
-// how many threads to use for openmp parallelization (also used by fftw)
-// if <= 0, the return value of omp_get_max_threads() is used
-#define THREAD_NUMBER           (0)
-// the plan flag used for fftw plans
-#define FFTW_DEFAULT_FLAG       (FFTW_ESTIMATE)
-/** 
- *  apply a frequency cutoff filter at each time step during the time evolution
- *  (compiler switch) the specific cutoff (e.g. step function with certain
- *  fraction (2/3 rule), or fourier smoothing) is determined by the function
- *  filter_window_function in evolution_toolkit.c
- */
-// #define ENABLE_FFT_FILTER
-
 // ------------file handling parameters for writing to disk---------------------
 // the output is bundled in one .h5 file, enter path here
 #define DATAPATH                ("../../../data/run.h5")
@@ -62,6 +48,20 @@ during execution
  */
 #define POWER_SPECTRUM_BINS     (50)
 
+// -----------------------simulation preferences--------------------------------
+// how many threads to use for openmp parallelization (also used by fftw)
+// if <= 0, the return value of omp_get_max_threads() is used
+#define THREAD_NUMBER           (0)
+// the plan flag used for fftw plans
+#define FFTW_DEFAULT_FLAG       (FFTW_ESTIMATE)
+/** 
+ *  apply a frequency cutoff filter at each time step during the time evolution
+ *  (compiler switch) the specific cutoff (e.g. step function with certain
+ *  fraction (2/3 rule), or fourier smoothing) is determined by the function
+ *  filter_window_function in evolution_toolkit.c
+ */
+#define ENABLE_FFT_FILTER
+
 // ------------------computational domain---------------------------------------
 // spatial
 #define GRIDPOINTS_X            (64)
@@ -77,14 +77,14 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4) 
 #define DELTA_T                 (0.001)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (10.0)
+#define FINAL_TIME              (0.1)
 #define MAX_STEPS               (1e6)
 #define MINIMAL_DELTA_T         (1.0e-5)
 
 // ----------------parameters used in the potential-----------------------------
 #define MASS                    (1.0)
 #define COUPLING                (1.0)      // coupling in a phi4 potential
-#define LAMBDA                  (1.87e-4) // "cosmological constant"
+#define LAMBDA                  (7.8e-2) // "cosmological constant"
 
 // -------------------additional parameters for dopri853------------------------
 // maximal/minimal rescaling of dt per step (don't change)

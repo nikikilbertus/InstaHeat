@@ -17,15 +17,15 @@ Nt = length(t);
 
 phiAvg = mean(phi);
 
-% loglog(a, rho);
-logfit(a, rho, 'loglog')
+loglog(a, rho);
+% logfit(a, rho, 'loglog')
 xlabel('a')
 ylabel('rho');
 shg;
 pause;
 
-% loglog(a, H);
-logfit(a, H, 'loglog')
+loglog(a, H);
+% logfit(a, H, 'loglog')
 xlabel('a')
 ylabel('H');
 shg;
@@ -49,13 +49,13 @@ xlabel('nt');
 shg;
 pause;
 
-g = surf(log(powspec + 1e-10));
-shading interp; lighting phong;
-zlabel('log')
-ylabel('|k|');
-xlabel('nt');
-shg;
-pause;
+% surf(log(powspec + 1e-10));
+% shading interp; lighting phong;
+% zlabel('lin')
+% ylabel('|k|');
+% xlabel('nt');
+% shg;
+% pause;
 
 parseval = zeros(1, Nt);
 for i = 1:Nt
