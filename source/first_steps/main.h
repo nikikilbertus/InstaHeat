@@ -40,7 +40,7 @@ during execution
  */
 #define WRITE_OUT_BUFFER_NUMBER (20)
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (10)
+#define TIME_STEP_SKIPS         (50)
 /**
  *  there is a (very crude and biased!) estimation of the power spectrum to
  *  track stability, therefore we sum up fourier coefficients into bins
@@ -64,9 +64,9 @@ during execution
 
 // ------------------computational domain---------------------------------------
 // spatial
-#define GRIDPOINTS_X            (64)
-#define GRIDPOINTS_Y            (64)
-#define GRIDPOINTS_Z            (64)
+#define GRIDPOINTS_X            (128)
+#define GRIDPOINTS_Y            (128)
+#define GRIDPOINTS_Z            (128)
 #define SPATIAL_LOWER_BOUND_X   (-PI)
 #define SPATIAL_UPPER_BOUND_X   (PI)
 #define SPATIAL_LOWER_BOUND_Y   (-PI)
@@ -77,7 +77,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4) 
 #define DELTA_T                 (0.001)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (0.1)
+#define FINAL_TIME              (10.0)
 #define MAX_STEPS               (1e6)
 #define MINIMAL_DELTA_T         (1.0e-5)
 
@@ -94,8 +94,8 @@ during execution
 #define BETA                    (0.0) // ALPHA = 1.0/8.0 - BETA * 0.2
 #define SAFE                    (0.9)
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-7)
-#define ABSOLUTE_TOLERANCE      (1.0e-7)
+#define RELATIVE_TOLERANCE      (1.0e-9)
+#define ABSOLUTE_TOLERANCE      (1.0e-9)
 
 // ------------------------typedefs---------------------------------------------
 // representing one spatial dimension of a multi dimensional grid
