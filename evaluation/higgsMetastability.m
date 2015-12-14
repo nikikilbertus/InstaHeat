@@ -21,6 +21,7 @@ loglog(a, rho, a, a.^(-4) * rho(1));
 % logfit(a, rho, 'loglog')
 xlabel('a')
 ylabel('rho');
+legend('data', 'reference: a^{-4}');
 shg;
 pause;
 
@@ -29,6 +30,7 @@ loglog(a, H, a, a.^(-2) * H(1));
 % logfit(a, H, 'loglog')
 xlabel('a')
 ylabel('H');
+legend('data', 'reference: a^{-2}');
 shg;
 pause;
 
@@ -50,6 +52,7 @@ set(h,'FaceColor',[1 0 0],'FaceAlpha',0.7,'EdgeAlpha', 0);
 zlabel('log')
 ylabel('|k|');
 xlabel('nt');
+title('power spectrum estimation');
 shg;
 pause;
 

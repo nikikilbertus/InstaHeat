@@ -188,16 +188,16 @@ void mk_gradient_squared_and_laplacian(double *in) {
 // potential_prime, the derivative is not computed automatically
 // TODO: change that?
 inline double potential(const double f) {
-    // higgs metastability potential
-    double l = LAMBDA / 1.0e-10;
-    double a = 0.01 * l, b = 1.0 * l;
-    return f == 0.0 ? LAMBDA :
-        (LAMBDA + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) +
-        b * pow(f, 6));
-
     // notch or step potential (LAMBDA = 1.876e-4)
-    // double lambda = 100.0;
-    // return LAMBDA / (1.0 + exp(-lambda * f));
+    double lambda = 100.0;
+    return LAMBDA / (1.0 + exp(-lambda * f));
+
+    // higgs metastability potential
+    // double l = LAMBDA / 1.0e-10;
+    // double a = 0.01 * l, b = 1.0 * l;
+    // return f == 0.0 ? LAMBDA :
+    //     (LAMBDA + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) +
+    //     b * pow(f, 6));
 
     // standard f squared potential
     // return MASS * MASS * f * f / 2.0;
@@ -209,18 +209,18 @@ inline double potential(const double f) {
 }
 
 inline double potential_prime(const double f) {
-    // higgs metastability potential
-    double l = LAMBDA / 1.0e-10;
-    double a = 0.01 * l, b = 1.0 * l;
-    return f == 0.0 ? 0 :
-        (4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) -
-        (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0))
-        + 6.0 * b * pow(f, 5));
-
     // notch or step potential (LAMBDA = 1.876e-4)
-    // double lambda = 100.0;
-    // double tmp = exp(lambda * f);
-    // return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
+    double lambda = 100.0;
+    double tmp = exp(lambda * f);
+    return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
+
+    // higgs metastability potential
+    // double l = LAMBDA / 1.0e-10;
+    // double a = 0.01 * l, b = 1.0 * l;
+    // return f == 0.0 ? 0 :
+    //     (4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) -
+    //     (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0))
+    //     + 6.0 * b * pow(f, 5));
 
     // standard f squared potential
     // return MASS * MASS * f;

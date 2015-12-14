@@ -240,21 +240,21 @@ void mk_initial_conditions() {
 // initial values of the scalar field, make sure its periodic
 double phi_init(const double x, const double y, const double z,
                                                 const double *phases) {
-    // localized for higgs metastability potential
-    double phi0 = 0.04;
-    double lambda = 20.0;
-    // return phi0 * 0.5 * (1.0 + cos(x)) * exp(-lambda * x * x);
-    return phi0 * 0.125 * (1.0 + cos(x)) * (1.0 + cos(y)) * (1.0 + cos(z)) *
-       exp(-lambda * (x * x + y * y + z * z));
-
     // some simple waves for notch or step potential simulations
-    // double frac = 0.4;
-    // double phi0 = 0.73 * frac;
-    // double deltaphi = phi0 / frac;
-	// return phi0 + deltaphi *
-    //             (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
-    //              cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) +
-    //              cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5]));
+    double frac = 0.4; // vary the ratio between \phi_0 and \delta \phi
+    double phi0 = 0.73 * frac; // only vary if you know exactly why and what for
+    double deltaphi = phi0 / frac;
+    return phi0 + deltaphi *
+                (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
+                 cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) +
+                 cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5]));
+
+    // localized for higgs metastability potential
+    // double phi0 = 0.04;
+    // double lambda = 20.0;
+    // // return phi0 * 0.5 * (1.0 + cos(x)) * exp(-lambda * x * x);
+    // return phi0 * 0.125 * (1.0 + cos(x)) * (1.0 + cos(y)) * (1.0 + cos(z)) *
+    //    exp(-lambda * (x * x + y * y + z * z));
 }
 
 // initial values of the time deriv. of the scalar field, make sure its periodic

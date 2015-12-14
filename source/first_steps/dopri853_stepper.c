@@ -58,9 +58,6 @@ void run_dopri853() {
     RUNTIME_INFO(puts("Filtering disabled.\n"));
     #endif
 
-    // #ifdef ENABLE_FFT_FILTER
-    //     apply_filter_real(field);
-    // #endif
     evo_flags.compute_pow_spec = 1;
     mk_rhs(dp.t, field, dfield);
     evo_flags.compute_pow_spec = 0;

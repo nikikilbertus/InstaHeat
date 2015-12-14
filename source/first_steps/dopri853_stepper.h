@@ -29,14 +29,14 @@ typedef struct {
 }dopri853_constants_t;
 
 typedef struct {
-	double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;
-	double *yerr, *yerr2;
-	double *rcont1, *rcont2, *rcont3, *rcont4,
-		   *rcont5, *rcont6, *rcont7, *rcont8;
+        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;
+        double *yerr, *yerr2;
+        double *rcont1, *rcont2, *rcont3, *rcont4,
+               *rcont5, *rcont6, *rcont7, *rcont8;
 }dopri853_values_t;
 
 typedef struct {
-	double t;
+    double t;
     double t_old;
     double ti;
     double tf;
@@ -51,10 +51,10 @@ typedef struct {
     double beta, alpha;
     double safe;
     double minscale, maxscale;
-	double a_tol, r_tol;
-	double err_old;
-	int reject;
-	double eps;
+    double a_tol, r_tol;
+    double err_old;
+    int reject;
+    double eps;
     int dense; // currently unused
 }dopri853_control_t;
 
