@@ -156,7 +156,8 @@ typedef struct {
 
 // --------------------------global variables-----------------------------------
 // we are using rather many global variables; that has the advantage of central
-// allocation/initialization and deallocation; it also saves a lot of typing
+// one time allocation/initialization and deallocation;
+// it also saves a lot of typing
 
 // simulation parameters
 extern parameters_t pars;
