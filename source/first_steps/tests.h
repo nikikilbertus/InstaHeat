@@ -9,6 +9,7 @@ void test_fft_apply_filter();
 void test_solve_poisson_eq();
 double test_func_gradsq(const double x, const double y, const double z);
 double test_func_lap(const double x, const double y, const double z);
+double test_sol_poisson(const double x, const double y, const double z);
 double test_rhs_poisson(const double x, const double y, const double z);
 double test_func(const double x, const double y, const double z);
 double test_func_Dx(const double x, const double y, const double z);

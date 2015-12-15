@@ -285,7 +285,7 @@ void solve_poisson_eq() {
                 {
                     k_sq += factor_y2 * j * j;
                 }
-                if (k_sq > 1.0e-16)
+                if (k_sq < -1.0e-16)
                 {
                     // factor two comes from equation: grad^2 psi = rho / 2
                     // using 8 pi G = 1

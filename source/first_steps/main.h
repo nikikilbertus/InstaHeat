@@ -20,7 +20,7 @@ during execution
 // #define CHECK_FOR_NAN // not recommended (performance)
 // #define ENABLE_PROFILER // only recommended for debugging
 // #define DEBUG // only recommended for debugging (huge output!)
-// #define RUN_TESTS_ONLY // testing only (tests.c)
+#define RUN_TESTS_ONLY // testing only (tests.c)
 
 // always leave this here uncommented
 #ifdef SHOW_RUNTIME_INFO
