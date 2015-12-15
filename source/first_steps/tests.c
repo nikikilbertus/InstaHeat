@@ -9,6 +9,7 @@
 void run_all_tests() {
     test_mk_gradient_squared_and_laplacian();
     // test_fft_apply_filter();
+    test_solve_poisson_eq();
 }
 
 void test_mk_gradient_squared_and_laplacian() {
@@ -82,6 +83,24 @@ void test_fft_apply_filter() {
     //todo
 }
 
+void test_solve_poisson_eq() {
+    size_t N = pars.N;
+
+    fill_field(rho, test_func);
+    solve_poisson_eq();
+    
+    puts("test mk gradient squared and laplacian:");
+    fill_field(rho, test_sol_poisson);
+    if (are_fields_equal(rho, psi) == 0)
+    {
+        puts("solve poisson passed\n");
+    }
+    else
+    {
+        puts("solve poisson failed\n");
+    }
+}
+
 double test_func_gradsq(const double x, const double y, const double z) {
     double grad_x = test_func_Dx(x,y,z);
     double grad_y = test_func_Dy(x,y,z);
@@ -92,6 +111,14 @@ double test_func_gradsq(const double x, const double y, const double z) {
 double test_func_lap(const double x, const double y, const double z) {
     return test_func_D2x(x, y, z) + test_func_D2y(x, y, z) +
         test_func_D2z(x, y, z); 
+}
+
+double test_sol_poisson(const double x, const double y, const double z) {
+    return - sin(x) * sin(y) * sin(z) / 6.0;
+}
+
+double test_rhs_poisson(const double x, const double y, const double z) {
+    return sin(x) * sin(y) * sin(z);
 }
 
 double test_func(const double x, const double y, const double z) {
