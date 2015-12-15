@@ -18,8 +18,8 @@ void mk_rhs(const double t, double *f, double *result) {
     size_t N2 = 2 * N;
     double a = f[N2];
 
-    rho = mk_rho(f);
-    double hubble = sqrt(rho / 3.0);
+    rho_avg = mk_rho(f);
+    double hubble = sqrt(rho_avg / 3.0);
 
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
@@ -37,7 +37,7 @@ void mk_rhs(const double t, double *f, double *result) {
     result[N2] = a * hubble;
 }
 
-// compute averaged energy density rho, i.e. 00 component of stress energy
+// compute energy density rho, i.e. 00 of stress energy, return average value
 double mk_rho(double *f) {
     size_t N = pars.N;
     double a = f[2 * N];
@@ -51,7 +51,8 @@ double mk_rho(double *f) {
     {
         df = f[N + i];
         grad2_a = dtmp_grad2[i] / (a * a);
-        T00 += (df * df + grad2_a) / 2. + potential(f[i]);
+        rho[i] = (df * df + grad2_a) / 2. + potential(f[i]);
+        T00 += rho[i];
     }
     return T00 / N;
 }
@@ -469,7 +470,7 @@ inline double filter_window_function(const double x) {
 // point where everything is available anyway
 void prepare_and_save_timeslice() {
     evo_flags.compute_pow_spec = 1;
-    rho = mk_rho(field);
+    rho_avg = mk_rho(field);
     evo_flags.compute_pow_spec = 0;
     save();
 }

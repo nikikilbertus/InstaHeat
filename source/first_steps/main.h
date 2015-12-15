@@ -8,6 +8,8 @@
 #define PI                      (3.141592653589793238462643383279)
 #define MAX(x, y)               ((x) > (y) ? (x) : (y))
 #define MIN(x, y)               ((x) > (y) ? (y) : (x))
+// seed for random number generator in creation of initial conditions
+#define SEED                    (1113)
 
 /*
 compiler switches for debugging, testing, profiling and additional information
@@ -178,7 +180,8 @@ extern double *field_buf;
 extern double *f_a_buf;
 
 // energy density rho  = T^{00}_{\phi} and the buffer
-extern double rho;
+extern double rho_avg;
+extern double *rho;
 extern double *rho_buf;
 
 // power spectrum and the buffer

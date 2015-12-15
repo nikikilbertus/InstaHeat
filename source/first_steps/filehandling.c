@@ -256,10 +256,10 @@ void save() {
 
     time_buf[index] = pars.t.t;
     f_a_buf[index] = field[2 * N];
-    rho_buf[index] = rho;
+    rho_buf[index] = rho_avg;
 
     #ifdef CHECK_FOR_NAN
-    if (isnan(pars.t.t) || isnan(field[2 * N]) || isnan(rho))
+    if (isnan(pars.t.t) || isnan(field[2 * N]) || isnan(rho_avg))
     {
         fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
             exit(EXIT_FAILURE);

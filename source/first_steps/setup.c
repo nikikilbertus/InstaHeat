@@ -9,7 +9,7 @@
 
 void allocate_and_initialize_all() {
     initialize_threading();
-	initialize_parameters();
+    initialize_parameters();
     allocate_external();
     mk_grid();
     mk_fftw_plans();
@@ -36,9 +36,9 @@ void initialize_threading() {
  *  throughout the code
  */
 void initialize_parameters() {
-	pars.x.N = GRIDPOINTS_X;
-	pars.x.a = SPATIAL_LOWER_BOUND_X;
-	pars.x.b = SPATIAL_UPPER_BOUND_X;
+    pars.x.N = GRIDPOINTS_X;
+    pars.x.a = SPATIAL_LOWER_BOUND_X;
+    pars.x.b = SPATIAL_UPPER_BOUND_X;
     pars.x.L = pars.x.b - pars.x.a;
     pars.y.N = GRIDPOINTS_Y;
     pars.y.a = SPATIAL_LOWER_BOUND_Y;
@@ -55,7 +55,7 @@ void initialize_parameters() {
     pars.t.t  = INITIAL_TIME;
     pars.t.ti = INITIAL_TIME;
     pars.t.tf = FINAL_TIME;
-	pars.t.Nt = ceil((pars.t.tf - pars.t.ti) / pars.t.dt) + 1;
+    pars.t.Nt = ceil((pars.t.tf - pars.t.ti) / pars.t.dt) + 1;
     if (pars.t.Nt > MAX_STEPS)
     {
         fputs("Exeeding MAX_STEPS, decrease DELTA_T.\n", stderr);
@@ -90,6 +90,7 @@ void allocate_external() {
     field_buf    = calloc(buf_size * N, sizeof *field_buf);
     time_buf     = calloc(buf_size, sizeof *time_buf);
     f_a_buf      = calloc(buf_size, sizeof *f_a_buf);
+    rho          = fftw_malloc(N * sizeof *rho);
     rho_buf      = calloc(buf_size, sizeof *rho_buf);
     pow_spec     = calloc(bins, sizeof *pow_spec);
     pow_spec_buf = calloc(buf_size * bins, sizeof *pow_spec_buf);
@@ -109,7 +110,7 @@ void allocate_external() {
     dtmp_lap = fftw_malloc(N * sizeof *dtmp_lap);
 
     if (!(grid && field && field_new && dfield && dfield_new && field_buf &&
-        time_buf && rho_buf && pow_spec && pow_spec_buf &&
+        time_buf && rho && rho_buf && pow_spec && pow_spec_buf &&
         cfftw_tmp && cfftw_tmp_x && cfftw_tmp_y && cfftw_tmp_z &&
         dtmp_x && dtmp_y && dtmp_z && dtmp_grad2 && dtmp_lap))
     {
@@ -131,17 +132,17 @@ void mk_grid() {
     double az = pars.z.a;
     double bz = pars.z.b;
 
-	if (Nx < 1 || Ny < 1 || Nz < 1)
-	{
-		fputs("Need positive number of gridpoints\n", stderr);
+    if (Nx < 1 || Ny < 1 || Nz < 1)
+    {
+        fputs("Need positive number of gridpoints\n", stderr);
         exit(EXIT_FAILURE);
-	}
+    }
 
-	// set up the grid points
-	for (size_t i = 0; i < Nx; ++i)
-	{
-		grid[i] = ax + (bx - ax) * i / Nx;
-	}
+    // set up the grid points
+    for (size_t i = 0; i < Nx; ++i)
+    {
+        grid[i] = ax + (bx - ax) * i / Nx;
+    }
     for (size_t i = Nx; i < Nx+Ny; ++i)
     {
         grid[i] = ay + (by - ay) * (i-Nx) / Ny;
@@ -152,15 +153,15 @@ void mk_grid() {
     }
 
     #ifdef DEBUG
-		puts("x");
-        print_vector(grid, Nx);
-        puts("\n");
-        puts("y");
-        print_vector(grid + Nx, Ny);
-        puts("\n");
-        puts("z");
-        print_vector(grid + Nx + Ny, Nz);
-        puts("\n");
+    puts("x");
+    print_vector(grid, Nx);
+    puts("\n");
+    puts("y");
+    print_vector(grid + Nx, Ny);
+    puts("\n");
+    puts("z");
+    print_vector(grid + Nx + Ny, Nz);
+    puts("\n");
     #endif
     RUNTIME_INFO(puts("Constructed gridpoints.\n"));
 }
@@ -195,7 +196,7 @@ void mk_initial_conditions() {
     double x, y, z;
 
     // random phases used for analysis of notch and step potential
-    srand(1113);
+    srand(SEED);
     double *theta = calloc(6, sizeof *theta);
     for (size_t i = 0; i < 6; ++i)
     {
@@ -225,13 +226,13 @@ void mk_initial_conditions() {
 
     // console output for debugging
     #ifdef DEBUG
-    	puts("phi");
-        print_vector(field, N);
-        puts("\ndphi");
-        print_vector(field + N, N);
-        puts("\na");
-        print_vector(field + 2 * N, 1);
-        puts("\n");
+    puts("phi");
+    print_vector(field, N);
+    puts("\ndphi");
+    print_vector(field + N, N);
+    puts("\na");
+    print_vector(field + 2 * N, 1);
+    puts("\n");
     #endif
     free(theta);
     RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
@@ -259,7 +260,7 @@ double phi_init(const double x, const double y, const double z,
 
 // initial values of the time deriv. of the scalar field, make sure its periodic
 double dphi_init(const double x, const double y, const double z) {
-	return 0.0;
+    return 0.0;
 }
 
 void free_and_destroy_all() {
@@ -285,6 +286,7 @@ void free_external() {
     free(field_buf);
     free(time_buf);
     free(f_a_buf);
+    free(rho);
     free(rho_buf);
     free(pow_spec);
     free(pow_spec_buf);
@@ -297,10 +299,10 @@ void free_external() {
     fftw_free(dtmp_z);
     fftw_free(dtmp_grad2);
     fftw_free(dtmp_lap);
-	RUNTIME_INFO(puts("Freed external variables.\n"));
+    RUNTIME_INFO(puts("Freed external variables.\n"));
 }
 
-// -------------------------printing functions----------------------------------
+// -------------------------printing function-----------------------------------
 // for debugging mostly
 void print_vector(const double *vector, const size_t N) {
     for (size_t i = 0; i < N; i++)
