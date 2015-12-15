@@ -40,7 +40,7 @@ during execution
  */
 #define WRITE_OUT_BUFFER_NUMBER (20)
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (5)
+#define TIME_STEP_SKIPS         (30)
 /**
  *  there is a (very crude and biased!) estimation of the power spectrum to
  *  track stability, therefore we sum up fourier coefficients into bins
@@ -62,16 +62,16 @@ during execution
  *  for smaller grids, and simple (not too nonlinear) scenarios rather try to
  *  adjust tolerances and see what happens to the power spectrum
 */
-// #define ENABLE_FFT_FILTER
+#define ENABLE_FFT_FILTER
 
 // ------------------computational domain---------------------------------------
 // spatial
 // TODO currently one needs at least 2, better 4 points in each direction,
 // because only the 3d fftw is used. 2d and 1d will be properly implemented
 // soonish
-#define GRIDPOINTS_X            (32)
-#define GRIDPOINTS_Y            (32)
-#define GRIDPOINTS_Z            (32)
+#define GRIDPOINTS_X            (64)
+#define GRIDPOINTS_Y            (64)
+#define GRIDPOINTS_Z            (64)
 #define SPATIAL_LOWER_BOUND_X   (-PI)
 #define SPATIAL_UPPER_BOUND_X   (PI)
 #define SPATIAL_LOWER_BOUND_Y   (-PI)
@@ -80,16 +80,16 @@ during execution
 #define SPATIAL_UPPER_BOUND_Z   (PI)
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4) 
-#define DELTA_T                 (0.01)
+#define DELTA_T                 (0.001)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (250.0)
+#define FINAL_TIME              (0.5)
 #define MAX_STEPS               (1e6)
 #define MINIMAL_DELTA_T         (1.0e-5)
 
 // ----------------parameters used in the potential-----------------------------
 #define MASS                    (1.0)
 #define COUPLING                (1.0)      // coupling in a phi4 potential
-#define LAMBDA                  (1.876e-4) // "cosmological constant"
+#define LAMBDA                  (7.8e-2) // "cosmological constant"
 
 // -------------------additional parameters for dopri853------------------------
 // maximal/minimal rescaling of dt per step (don't change)
@@ -99,8 +99,8 @@ during execution
 #define BETA                    (0.0) // ALPHA = 1.0/8.0 - BETA * 0.2
 #define SAFE                    (0.9)
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-7)
-#define ABSOLUTE_TOLERANCE      (1.0e-7)
+#define RELATIVE_TOLERANCE      (1.0e-9)
+#define ABSOLUTE_TOLERANCE      (1.0e-9)
 
 // ------------------------typedefs---------------------------------------------
 // representing one spatial dimension of a multi dimensional grid

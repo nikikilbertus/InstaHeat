@@ -64,7 +64,7 @@ extern dopri853_control_t dp; // Dormand Prince (controls)
 
 void initialize_dopri853();
 void run_dopri853();
-void perform_step(const double dt_try);
+int perform_step(const double dt_try);
 void try_step(const double dt);
 double error(const double dt);
 int success(const double err, double *dt);

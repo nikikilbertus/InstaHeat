@@ -188,16 +188,16 @@ void mk_gradient_squared_and_laplacian(double *in) {
 // potential_prime, the derivative is not computed automatically
 // TODO: change that?
 inline double potential(const double f) {
-    // notch or step potential (LAMBDA = 1.876e-4)
-    double lambda = 100.0;
-    return LAMBDA / (1.0 + exp(-lambda * f));
-
     // higgs metastability potential
-    // double l = LAMBDA / 1.0e-10;
-    // double a = 0.01 * l, b = 1.0 * l;
-    // return f == 0.0 ? LAMBDA :
-    //     (LAMBDA + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) +
-    //     b * pow(f, 6));
+    double l = LAMBDA / 1.0e-10;
+    double a = 0.01 * l, b = 1.0 * l;
+    return f == 0.0 ? LAMBDA :
+        (LAMBDA + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) +
+        b * pow(f, 6));
+
+    // notch or step potential (LAMBDA = 1.876e-4)
+    // double lambda = 100.0;
+    // return LAMBDA / (1.0 + exp(-lambda * f));
 
     // standard f squared potential
     // return MASS * MASS * f * f / 2.0;
@@ -209,18 +209,18 @@ inline double potential(const double f) {
 }
 
 inline double potential_prime(const double f) {
-    // notch or step potential (LAMBDA = 1.876e-4)
-    double lambda = 100.0;
-    double tmp = exp(lambda * f);
-    return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
-
     // higgs metastability potential
-    // double l = LAMBDA / 1.0e-10;
-    // double a = 0.01 * l, b = 1.0 * l;
-    // return f == 0.0 ? 0 :
-    //     (4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) -
-    //     (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0))
-    //     + 6.0 * b * pow(f, 5));
+    double l = LAMBDA / 1.0e-10;
+    double a = 0.01 * l, b = 1.0 * l;
+    return f == 0.0 ? 0 :
+        (4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) -
+        (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0))
+        + 6.0 * b * pow(f, 5));
+
+    // notch or step potential (LAMBDA = 1.876e-4)
+    // double lambda = 100.0;
+    // double tmp = exp(lambda * f);
+    // return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
 
     // standard f squared potential
     // return MASS * MASS * f;
@@ -229,6 +229,81 @@ inline double potential_prime(const double f) {
     // return MASS * MASS * f + COUPLING * f * f * f / 6.0;
 
     // return 0.0;
+}
+
+void solve_poisson_eq(double *rhs) {
+    size_t Nx = pars.x.N;
+    size_t Ny = pars.y.N;
+    size_t Nz = pars.z.N;
+    size_t N = pars.N;
+    size_t Ntot = 2 * N + 1;
+    size_t ncz = Nz / 2 + 1;
+
+    #ifdef SHOW_TIMING_INFO
+    double start = get_wall_time();
+    #endif
+    fftw_execute_dft_r2c(p_fw_3d, rhs, cfftw_tmp);
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe += get_wall_time() - start;
+    #endif
+    
+    // TODO[performance]: precompute these factors only once and reuse them
+    double Lx = pars.x.L;
+    double Ly = pars.y.L;
+    double Lz = pars.z.L;
+
+    double prefac2 = -4. * PI * PI;
+    double factor_x2 = prefac2 * N / (Lx * Lx);
+    double factor_y2 = prefac2 * N / (Ly * Ly);
+    double factor_z2 = prefac2 * N / (Lz * Lz);
+    double k_sq;
+
+    size_t osx, osy;
+    #pragma omp parallel for private(osx, osy, k_sq)
+    for (size_t i = 0; i < Nx; ++i)
+    {
+        osx = i * Ny * ncz;
+        for (size_t j = 0; j < Ny; ++j)
+        {
+            osy = osx + j * ncz;
+            for (size_t k = 0; k < ncz; ++k)
+            {
+                k_sq = factor_z2 * k * k;
+                if (i > Nx / 2)
+                {
+                    k_sq += factor_x2 * (Nx - i) * (Nx - i);
+                }
+                else
+                {
+                    k_sq += factor_x2 * i * i;
+                }
+                if (j > Ny / 2)
+                {
+                    k_sq += factor_y2 * (Ny - j) * (Ny - j);
+                }
+                else
+                {
+                    k_sq += factor_y2 * j * j;
+                }
+                if (k_sq > 1.0e-16)
+                {
+                    cfftw_tmp[osy + k] /= k_sq;
+                }
+                else
+                {
+                    cfftw_tmp[osy + k] = 0.0;
+                }
+            }
+        }
+    }
+
+    #ifdef SHOW_TIMING_INFO
+    start = get_wall_time();
+    #endif
+    fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp, field + Ntot);
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe += get_wall_time() - start;
+    #endif
 }
 
 // computes a crude estimation of the power spectrum, more info in main.h

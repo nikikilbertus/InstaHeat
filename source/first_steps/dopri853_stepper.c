@@ -74,7 +74,10 @@ void run_dopri853() {
             dp.dt = dp.tf - dp.t;
             RUNTIME_INFO(printf("overshoot, new dt = %f\n", dp.dt));
         }
-        perform_step(dp.dt);
+        if (perform_step(dp.dt))
+        {
+            break;
+        }
         if (dp.dt_did == dp.dt)
         {
             ++dp.n_ok;
@@ -101,8 +104,8 @@ void run_dopri853() {
         }
         if (fabs(dp.dt_next) <= dp.dt_min)
         {
-            fputs("Step size too small.\n", stderr);
-            exit(EXIT_FAILURE);
+            fputs("Step size too small. Still exiting gracefully.\n", stderr);
+            break;
         }
         dp.dt = dp.dt_next;
     }
@@ -128,7 +131,7 @@ void run_dopri853() {
     RUNTIME_INFO(printf("bad steps: %d\n\n", dp.n_bad));
 }
 
-void perform_step(const double dt_try) {
+int perform_step(const double dt_try) {
     size_t Ntot = 2 * pars.N + 1;
     double dt = dt_try;
     for ( ; ; )
@@ -141,8 +144,8 @@ void perform_step(const double dt_try) {
         }
         if (fabs(dt) <= fabs(dp.t) * dp.eps)
         {
-            fputs("Stepsize underflow\n", stderr);
-            exit(EXIT_FAILURE);
+            fputs("Stepsize underflow. Still exiting gracefully.\n", stderr);
+            return 1;
         }
     }
     #ifdef ENABLE_FFT_FILTER
@@ -159,6 +162,7 @@ void perform_step(const double dt_try) {
     dp.t_old = dp.t;
     dp.t += (dp.dt_did = dt);
     pars.t.t = dp.t;
+    return 0;
 }
 
 void try_step(const double dt) {

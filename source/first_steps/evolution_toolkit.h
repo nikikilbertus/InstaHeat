@@ -19,6 +19,7 @@ double mk_rho(double *f);
 void mk_gradient_squared_and_laplacian(double *in);
 extern double potential(const double f);
 extern double potential_prime(const double f);
+void solve_poisson_eq(double *rhs);
 void mk_power_spectrum(const fftw_complex *in);
 void apply_filter_real(double *inout);
 void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout);
