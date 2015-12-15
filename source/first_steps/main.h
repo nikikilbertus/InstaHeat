@@ -176,6 +176,9 @@ extern double *field, *dfield;
 extern double *field_new, *dfield_new;
 extern double *field_buf;
 
+// the scalar perturbation psi
+extern double *psi;
+
 // buffer for scaling parameter a
 extern double *f_a_buf;
 

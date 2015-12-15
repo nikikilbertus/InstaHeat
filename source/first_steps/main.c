@@ -21,6 +21,7 @@ double *time_buf;
 double *field, *field_new;
 double *dfield, *dfield_new;
 double *field_buf;
+double *psi;
 double *f_a_buf;
 double rho_avg;
 double *rho;
