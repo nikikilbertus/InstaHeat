@@ -232,18 +232,17 @@ inline double potential_prime(const double f) {
     // return 0.0;
 }
 
-void solve_poisson_eq(double *rhs) {
+void solve_poisson_eq() {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
     size_t N = pars.N;
-    size_t Ntot = 2 * N + 1;
     size_t ncz = Nz / 2 + 1;
 
     #ifdef SHOW_TIMING_INFO
     double start = get_wall_time();
     #endif
-    fftw_execute_dft_r2c(p_fw_3d, rhs, cfftw_tmp);
+    fftw_execute_dft_r2c(p_fw_3d, rho, cfftw_tmp);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time() - start;
     #endif
@@ -288,7 +287,9 @@ void solve_poisson_eq(double *rhs) {
                 }
                 if (k_sq > 1.0e-16)
                 {
-                    cfftw_tmp[osy + k] /= k_sq;
+                    // factor two comes from equation: grad^2 psi = rho / 2
+                    // using 8 pi G = 1
+                    cfftw_tmp[osy + k] /= 2.0 * k_sq;
                 }
                 else
                 {
@@ -301,7 +302,7 @@ void solve_poisson_eq(double *rhs) {
     #ifdef SHOW_TIMING_INFO
     start = get_wall_time();
     #endif
-    fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp, field + Ntot);
+    fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp, psi);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time() - start;
     #endif
