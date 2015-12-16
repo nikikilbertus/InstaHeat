@@ -36,7 +36,7 @@ during execution
 #define DATAPATH                ("../../../data/run.h5")
 /**
  *  write out data is buffered to not access hard drive too frequently (actually
- *  there are several levels of buffering, since hdf5 does it's own buffering 
+ *  there are several levels of buffering, since hdf5 does it's own buffering
  *  too), this parameter determines how many time slices are buffered before
  *  writing them to disk, beware of the memory consumption of large buffers!
  */
@@ -56,7 +56,7 @@ during execution
 #define THREAD_NUMBER           (0)
 // the plan flag used for fftw plans
 #define FFTW_DEFAULT_FLAG       (FFTW_ESTIMATE)
-/** 
+/**
  *  apply a frequency cutoff filter at each time step during the time evolution
  *  (compiler switch) the specific cutoff (e.g. step function with certain
  *  fraction (2/3 rule), or fourier smoothing) is determined by the function
@@ -81,7 +81,7 @@ during execution
 #define SPATIAL_LOWER_BOUND_Z   (-PI)
 #define SPATIAL_UPPER_BOUND_Z   (PI)
 // temporal
-// initial step size for adaptive stepping (dopri853) or fixed step size (RK4) 
+// initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (0.001)
 #define INITIAL_TIME            (0.0)
 #define FINAL_TIME              (0.5)
@@ -171,7 +171,7 @@ extern double *grid;
 extern double *time_buf;
 
 // the scalar field plus scaling parameter a we evolve, the temporal derivatives
-// and the buffer for the scalar field 
+// and the buffer for the scalar field
 extern double *field, *dfield;
 extern double *field_new, *dfield_new;
 extern double *field_buf;
@@ -212,6 +212,7 @@ extern fftw_plan p_bw_3d;
 extern double fftw_time_exe;
 extern double fftw_time_plan;
 extern double filter_time;
+extern double poisson_time;
 extern double h5_time_write;
 
 // for timing information during execution

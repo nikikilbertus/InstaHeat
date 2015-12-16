@@ -240,13 +240,14 @@ void solve_poisson_eq() {
     size_t ncz = Nz / 2 + 1;
 
     #ifdef SHOW_TIMING_INFO
-    double start = get_wall_time();
+    double start_poisson = get_wall_time();
+    double start = start_poisson;
     #endif
     fftw_execute_dft_r2c(p_fw_3d, rho, cfftw_tmp);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time() - start;
     #endif
-    
+
     // TODO[performance]: precompute these factors only once and reuse them
     double Lx = pars.x.L;
     double Ly = pars.y.L;
@@ -305,6 +306,7 @@ void solve_poisson_eq() {
     fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp, psi);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time() - start;
+    poisson_time += get_wall_time();
     #endif
 }
 
@@ -403,7 +405,7 @@ void apply_filter_real(double *inout) {
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time() - start_fft;
     #endif
-    
+
     apply_filter_fourier(cfftw_tmp, cfftw_tmp_x);
 
     #ifdef SHOW_TIMING_INFO
@@ -444,8 +446,8 @@ void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout) {
                 y = filter_window_function(2.0 *
                     (j > Ny / 2 ? Ny - j : j) / (double) Ny);
                 z = filter_window_function(2.0 * k / (double) Nz) / (double) N;
-                inout[osy + k] *= x * y * z; 
-                dinout[osy + k] *= x * y * z; 
+                inout[osy + k] *= x * y * z;
+                dinout[osy + k] *= x * y * z;
             }
         }
     }

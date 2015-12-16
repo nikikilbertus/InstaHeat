@@ -61,6 +61,7 @@ void run_dopri853() {
     evo_flags.compute_pow_spec = 1;
     mk_rhs(dp.t, field, dfield);
     evo_flags.compute_pow_spec = 0;
+    solve_poisson_eq();
     save();
 
     #ifdef SHOW_TIMING_INFO
@@ -152,7 +153,8 @@ int perform_step(const double dt_try) {
     apply_filter_real(field_new);
     #endif
     mk_rhs(dp.t + dt, field_new, dfield_new);
-    
+    solve_poisson_eq();
+
     #pragma omp parallel for
     for (size_t i = 0; i < Ntot; ++i)
     {

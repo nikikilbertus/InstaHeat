@@ -42,6 +42,7 @@ fftw_plan p_bw_3d;
 double fftw_time_exe  = 0.0;
 double fftw_time_plan = 0.0;
 double filter_time = 0.0;
+double poisson_time = 0.0;
 double h5_time_write = 0.0;
 
 // -----------------------------main--------------------------------------------
@@ -80,13 +81,15 @@ int main(int argc, const char * argv[]) {
     double secs = get_wall_time() - start;
     RUNTIME_INFO(printf("main took %f seconds.\n", secs));
     RUNTIME_INFO(printf("fftw execution took %f seconds (%.2f %%).\n",
-                                fftw_time_exe, 100.*(fftw_time_exe/secs)));
+                        fftw_time_exe, 100. * (fftw_time_exe / secs)));
     RUNTIME_INFO(printf("fftw planning took %f seconds (%.2f %%).\n",
-                                fftw_time_plan, 100.*(fftw_time_plan/secs)));
+                        fftw_time_plan, 100. * (fftw_time_plan / secs)));
     RUNTIME_INFO(printf("fft filtering took %f seconds (%.2f %%).\n",
-                                filter_time, 100.*(filter_time/secs)));
+                        filter_time, 100. * (filter_time / secs)));
+    RUNTIME_INFO(printf("poisson equation took %f seconds (%.2f %%).\n",
+                        poisson_time, 100. * (poisson_time / secs)));
     RUNTIME_INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
-                                h5_time_write, 100.*(h5_time_write/secs)));
+                        h5_time_write, 100. * (h5_time_write / secs)));
     #endif
     return 0;
 }

@@ -30,7 +30,7 @@ void initialize_threading() {
     RUNTIME_INFO(printf("Running omp & fftw with %d thread(s)\n\n", threadnum));
 }
 
-/** 
+/**
  *  initialize the values in the paramters_t pars variable, mostly from defines
  *  in main.h; using the struct gives more flexibility than using the defines
  *  throughout the code
@@ -86,7 +86,7 @@ void allocate_external() {
     field_new    = fftw_malloc(Ntot * sizeof *field_new);
     dfield       = fftw_malloc(Ntot * sizeof *dfield);
     dfield_new   = fftw_malloc(Ntot * sizeof *dfield_new);
-    // this buffer only holds the scalar field (not the deriv. or a) 
+    // this buffer only holds the scalar field (not the deriv. or a)
     field_buf    = calloc(buf_size * N, sizeof *field_buf);
     psi          = fftw_malloc(N * sizeof *psi);
     time_buf     = calloc(buf_size, sizeof *time_buf);
@@ -140,14 +140,17 @@ void mk_grid() {
     }
 
     // set up the grid points
+    #pragma omp parallel for
     for (size_t i = 0; i < Nx; ++i)
     {
         grid[i] = ax + (bx - ax) * i / Nx;
     }
+    #pragma omp parallel for
     for (size_t i = Nx; i < Nx+Ny; ++i)
     {
         grid[i] = ay + (by - ay) * (i-Nx) / Ny;
     }
+    #pragma omp parallel for
     for (size_t i = Nx+Ny; i < Nx+Ny+Nz; ++i)
     {
         grid[i] = az + (bz - az) * (i-Nx-Ny) / Nz;
