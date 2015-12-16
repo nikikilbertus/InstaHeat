@@ -108,9 +108,11 @@ during execution
 // representing one spatial dimension of a multi dimensional grid
 typedef struct {
     size_t N; // number of gridpoints
+    size_t M; // depending on dimension, different upper bounds in for loops
     double a; // lower bound of interval
     double b; // upper bound of interval
-    double L; // lenght of the interval
+    complex k; // a factor used in computing k vectors: k = 2 pi I / L
+    double k2; // k2 = k*k = -4 pi^2 / L^2
 }grid_dimension_t;
 
 // encapsulate timing related parameters

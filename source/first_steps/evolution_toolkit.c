@@ -61,29 +61,10 @@ double mk_rho(double *f) {
 void mk_gradient_squared_and_laplacian(double *in) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
-    size_t Nz = pars.z.N;
     size_t N = pars.N;
-    size_t ncz = Nz / 2 + 1;
-    size_t Mx, My, Mz;
-
-    switch (pars.dim)
-    {
-        case 1:
-            Mx = Nx / 2 + 1;
-            My = 1;
-            Mz = 1;
-            break;
-        case 2:
-            Mx = Nx;
-            My = Ny / 2 + 1;
-            Mz = 1;
-            break;
-        case 3:
-            Mx = Nx;
-            My = Ny;
-            Mz = ncz;
-            break;
-    }
+    size_t Mx = pars.x.M;
+    size_t My = pars.y.M;
+    size_t Mz = pars.z.M;
 
     #ifdef SHOW_TIMING_INFO
     double start = get_wall_time();
@@ -98,22 +79,7 @@ void mk_gradient_squared_and_laplacian(double *in) {
         mk_power_spectrum(cfftw_tmp);
     }
 
-    // TODO[performance]: precompute these factors only once and reuse them
-    double Lx = pars.x.L;
-    double Ly = pars.y.L;
-    double Lz = pars.z.L;
-
-    complex prefac = 2. * PI * I;
-    complex factor_x = prefac / (Lx * N);
-    complex factor_y = prefac / (Ly * N);
-    complex factor_z = prefac / (Lz * N);
-
-    double prefac2 = -4. * PI * PI;
-    double factor_x2 = prefac2 / (Lx * Lx * N);
-    double factor_y2 = prefac2 / (Ly * Ly * N);
-    double factor_z2 = prefac2 / (Lz * Lz * N);
     double k_sq;
-
     size_t osx, osy, id;
     #pragma omp parallel for private(osx, osy, id, k_sq)
     for (size_t i = 0; i < Mx; ++i)
@@ -126,52 +92,52 @@ void mk_gradient_squared_and_laplacian(double *in) {
             {
                 id = osy + k;
                 // for laplacian
-                k_sq = factor_z2 * k * k;
+                k_sq = pars.z.k2 * k * k;
                 // x derivative
                 if (i > Nx / 2)
                 {
-                    cfftw_tmp_x[id] = cfftw_tmp[id] * factor_x
-                        * ((int)i - (int)Nx);
-                    k_sq += factor_x2 * (Nx - i) * (Nx - i);
+                    cfftw_tmp_x[id] = cfftw_tmp[id] * pars.x.k
+                        * ((int)i - (int)Nx) / N;
+                    k_sq += pars.x.k2 * (Nx - i) * (Nx - i);
                 }
                 else if (2 * i == Nx)
                 {
                     cfftw_tmp_x[id] = 0.0;
-                    k_sq += factor_x2 * i * i;
+                    k_sq += pars.x.k2 * i * i;
                 }
                 else
                 {
-                    cfftw_tmp_x[id] = cfftw_tmp[id] * factor_x * i;
-                    k_sq += factor_x2 * i * i;
+                    cfftw_tmp_x[id] = cfftw_tmp[id] * pars.x.k * i / N;
+                    k_sq += pars.x.k2 * i * i;
                 }
                 // y derivative
                 if (j > Ny / 2)
                 {
-                    cfftw_tmp_y[id] = cfftw_tmp[id] * factor_y
-                        * ((int)j - (int)Ny);
-                    k_sq += factor_y2 * (Ny - j) * (Ny - j);
+                    cfftw_tmp_y[id] = cfftw_tmp[id] * pars.y.k
+                        * ((int)j - (int)Ny) / N;
+                    k_sq += pars.y.k2 * (Ny - j) * (Ny - j);
                 }
                 else if (2 * j == Ny)
                 {
                     cfftw_tmp_y[id] = 0.0;
-                    k_sq += factor_y2 * j * j;
+                    k_sq += pars.y.k2 * j * j;
                 }
                 else
                 {
-                    cfftw_tmp_y[id] = cfftw_tmp[id] * factor_y * j;
-                    k_sq += factor_y2 * j * j;
+                    cfftw_tmp_y[id] = cfftw_tmp[id] * pars.y.k * j / N;
+                    k_sq += pars.y.k2 * j * j;
                 }
                 // z derivative
-                if (k == ncz - 1)
+                if (k == Mz - 1)
                 {
                     cfftw_tmp_z[id] = 0.0;
                 }
                 else
                 {
-                    cfftw_tmp_z[id] = cfftw_tmp[id] * factor_z * k;
+                    cfftw_tmp_z[id] = cfftw_tmp[id] * pars.z.k * k / N;
                 }
                 // laplacian
-                cfftw_tmp[id] *= k_sq;
+                cfftw_tmp[id] *= k_sq / N;
             }
         }
     }
@@ -261,29 +227,10 @@ inline double potential_prime(const double f) {
 void solve_poisson_eq() {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
-    size_t Nz = pars.z.N;
     size_t N = pars.N;
-    size_t Mx, My, Mz;
-
-    //TODO[performance]: compute Mx, My, Mz only once and reuse them
-    switch (pars.dim)
-    {
-        case 1:
-            Mx = Nx / 2 + 1;
-            My = 1;
-            Mz = 1;
-            break;
-        case 2:
-            Mx = Nx;
-            My = Ny / 2 + 1;
-            Mz = 1;
-            break;
-        case 3:
-            Mx = Nx;
-            My = Ny;
-            Mz = Nz / 2 + 1;
-            break;
-    }
+    size_t Mx = pars.x.M;
+    size_t My = pars.y.M;
+    size_t Mz = pars.z.M;
 
     #ifdef SHOW_TIMING_INFO
     double start_poisson = get_wall_time();
@@ -294,17 +241,7 @@ void solve_poisson_eq() {
     fftw_time_exe += get_wall_time() - start;
     #endif
 
-    // TODO[performance]: precompute these factors only once and reuse them
-    double Lx = pars.x.L;
-    double Ly = pars.y.L;
-    double Lz = pars.z.L;
-
-    double prefac2 = -4. * PI * PI;
-    double factor_x2 = prefac2 * N / (Lx * Lx);
-    double factor_y2 = prefac2 * N / (Ly * Ly);
-    double factor_z2 = prefac2 * N / (Lz * Lz);
     double k_sq;
-
     size_t osx, osy;
     #pragma omp parallel for private(osx, osy, k_sq)
     for (size_t i = 0; i < Mx; ++i)
@@ -315,28 +252,28 @@ void solve_poisson_eq() {
             osy = osx + j * Mz;
             for (size_t k = 0; k < Mz; ++k)
             {
-                k_sq = factor_z2 * k * k;
+                k_sq = pars.z.k2 * k * k;
                 if (i > Nx / 2)
                 {
-                    k_sq += factor_x2 * (Nx - i) * (Nx - i);
+                    k_sq += pars.x.k2 * (Nx - i) * (Nx - i);
                 }
                 else
                 {
-                    k_sq += factor_x2 * i * i;
+                    k_sq += pars.x.k2 * i * i;
                 }
                 if (j > Ny / 2)
                 {
-                    k_sq += factor_y2 * (Ny - j) * (Ny - j);
+                    k_sq += pars.y.k2 * (Ny - j) * (Ny - j);
                 }
                 else
                 {
-                    k_sq += factor_y2 * j * j;
+                    k_sq += pars.y.k2 * j * j;
                 }
                 if (k_sq < -1.0e-16)
                 {
                     // factor two comes from equation: grad^2 psi = rho / 2
                     // using 8 pi G = 1
-                    cfftw_tmp[osy + k] /= 2.0 * k_sq;
+                    cfftw_tmp[osy + k] /= 2.0 * k_sq * N;
                 }
                 else
                 {
@@ -364,40 +301,13 @@ void mk_power_spectrum(const fftw_complex *in) {
     size_t Nz = pars.z.N;
     size_t N = pars.N;
     size_t bins = pars.file.bins_powspec;
-    size_t Mx, My, Mz;
+    size_t Mx = pars.x.M;
+    size_t My = pars.y.M;
+    size_t Mz = pars.z.M;
 
-    switch (pars.dim)
-    {
-        case 1:
-            Mx = Nx / 2 + 1;
-            My = 1;
-            Mz = 1;
-            break;
-        case 2:
-            Mx = Nx;
-            My = Ny / 2 + 1;
-            Mz = 1;
-            break;
-        case 3:
-            Mx = Nx;
-            My = Ny;
-            Mz = Nz / 2 + 1;
-            break;
-    }
-
-    // todo[performance]: precompute bins only once and reuse
-    double Lx = pars.x.L;
-    double Ly = pars.y.L;
-    double Lz = pars.z.L;
-
-    double k_x2 = 1.0 / (Lx * Lx);
-    double k_y2 = 1.0 / (Ly * Ly);
-    double k_z2 = 1.0 / (Lz * Lz);
-
-    double k_max2 = k_x2 * (Nx/2) * (Nx/2) +
-                    k_y2 * (Ny/2) * (Ny/2) +
-                    k_z2 * (Nz/2) * (Nz/2);
-
+    double k_max2 = pars.x.k2 * (Nx/2) * (Nx/2) +
+                    pars.y.k2 * (Ny/2) * (Ny/2) +
+                    pars.z.k2 * (Nz/2) * (Nz/2);
     double dk2 = k_max2 / bins;
     double k2_tmp = 0.0;
     double pow2_tmp = 0.0;
@@ -428,23 +338,23 @@ void mk_power_spectrum(const fftw_complex *in) {
                 }
                 if (pow2_tmp > 0.0)
                 {
-                    k2_tmp = k_z2 * k * k;
+                    k2_tmp = pars.z.k2 * k * k;
                     if (i > Nx / 2)
                     {
-                        k2_tmp += k_x2 * (Nx - i) * (Nx - i);
+                        k2_tmp += pars.x.k2 * (Nx - i) * (Nx - i);
                     }
                     else
                     {
-                        k2_tmp += k_x2 * i * i;
+                        k2_tmp += pars.x.k2 * i * i;
                     }
 
                     if (j > Ny / 2)
                     {
-                        k2_tmp += k_y2 * (Ny - j) * (Ny - j);
+                        k2_tmp += pars.y.k2 * (Ny - j) * (Ny - j);
                     }
                     else
                     {
-                        k2_tmp += k_y2 * j * j;
+                        k2_tmp += pars.y.k2 * j * j;
                     }
                     idx = (int)(k2_tmp / dk2 - 1e-10);
                     pow_spec[idx] += pow2_tmp / N;
@@ -493,26 +403,9 @@ void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
-    size_t Mx, My, Mz;
-
-    switch (pars.dim)
-    {
-        case 1:
-            Mx = Nx / 2 + 1;
-            My = 1;
-            Mz = 1;
-            break;
-        case 2:
-            Mx = Nx;
-            My = Ny / 2 + 1;
-            Mz = 1;
-            break;
-        case 3:
-            Mx = Nx;
-            My = Ny;
-            Mz = Nz / 2 + 1;
-            break;
-    }
+    size_t Mx = pars.x.M;
+    size_t My = pars.y.M;
+    size_t Mz = pars.z.M;
 
     double x, y, z;
     size_t osx, osy;
@@ -529,9 +422,9 @@ void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout) {
                     (i > Nx / 2 ? Nx - i : i) / (double) Nx);
                 y = filter_window_function(2.0 *
                     (j > Ny / 2 ? Ny - j : j) / (double) Ny);
-                z = filter_window_function(2.0 * k / (double) Nz) / (double) N;
-                inout[osy + k] *= x * y * z;
-                dinout[osy + k] *= x * y * z;
+                z = filter_window_function(2.0 * k / (double) Nz);
+                inout[osy + k] *= x * y * z / (double) N;
+                dinout[osy + k] *= x * y * z / (double) N;
             }
         }
     }

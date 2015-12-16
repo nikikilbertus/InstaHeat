@@ -36,18 +36,21 @@ void initialize_threading() {
  *  throughout the code
  */
 void initialize_parameters() {
-    pars.x.N = GRIDPOINTS_X;
-    pars.x.a = SPATIAL_LOWER_BOUND_X;
-    pars.x.b = SPATIAL_UPPER_BOUND_X;
-    pars.x.L = pars.x.b - pars.x.a;
-    pars.y.N = GRIDPOINTS_Y;
-    pars.y.a = SPATIAL_LOWER_BOUND_Y;
-    pars.y.b = SPATIAL_UPPER_BOUND_Y;
-    pars.y.L = pars.y.b - pars.y.a;
-    pars.z.N = GRIDPOINTS_Z;
-    pars.z.a = SPATIAL_LOWER_BOUND_Z;
-    pars.z.b = SPATIAL_UPPER_BOUND_Z;
-    pars.z.L = pars.z.b - pars.z.a;
+    pars.x.N  = GRIDPOINTS_X;
+    pars.x.a  = SPATIAL_LOWER_BOUND_X;
+    pars.x.b  = SPATIAL_UPPER_BOUND_X;
+    pars.x.k  = 2. * PI * I / (pars.x.b - pars.x.a);
+    pars.x.k2 = -4. * PI * PI / ((pars.x.b - pars.x.a) * (pars.x.b - pars.x.a));
+    pars.y.N  = GRIDPOINTS_Y;
+    pars.y.a  = SPATIAL_LOWER_BOUND_Y;
+    pars.y.b  = SPATIAL_UPPER_BOUND_Y;
+    pars.y.k  = 2. * PI * I / (pars.y.b - pars.y.a);
+    pars.y.k2 = -4. * PI * PI / ((pars.y.b - pars.y.a) * (pars.y.b - pars.y.a));
+    pars.z.N  = GRIDPOINTS_Z;
+    pars.z.a  = SPATIAL_LOWER_BOUND_Z;
+    pars.z.b  = SPATIAL_UPPER_BOUND_Z;
+    pars.z.k  = 2. * PI * I / (pars.z.b - pars.z.a);
+    pars.z.k2 = -4. * PI * PI / ((pars.z.b - pars.z.a) * (pars.z.b - pars.z.a));
 
     // set the number of dimensions according to gridpoints in each direction
     pars.dim = 3;
@@ -59,6 +62,29 @@ void initialize_parameters() {
             pars.dim = 1;
         }
     }
+
+    // due to the memory usage of fftw, we need different upper bounds in for
+    // loops for depending on  the dimension, (the N gridpoints from the last
+    // dimension are transformed to floor(N/2)+1 points in fourier space)
+    switch (pars.dim)
+    {
+        case 1:
+            pars.x.M = pars.x.N / 2 + 1;
+            pars.y.M = 1;
+            pars.z.M = 1;
+            break;
+        case 2:
+            pars.x.M = pars.x.N;
+            pars.y.M = pars.y.N / 2 + 1;
+            pars.z.M = 1;
+            break;
+        case 3:
+            pars.x.M = pars.x.N;
+            pars.y.M = pars.y.N;
+            pars.z.M = pars.z.N / 2 + 1;
+            break;
+    }
+
     pars.N = pars.x.N * pars.y.N * pars.z.N;
 
     pars.t.dt = DELTA_T;
