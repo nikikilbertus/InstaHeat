@@ -258,13 +258,32 @@ inline double potential_prime(const double f) {
 }
 
 // solve the poisson equation Laplace(psi) = rho / 2 for scalar perturbations
-// TODO: so far only 3d is implemented, also do 2d and 1d
 void solve_poisson_eq() {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
     size_t N = pars.N;
-    size_t ncz = Nz / 2 + 1;
+    size_t Mx, My, Mz;
+
+    //TODO[performance]: compute Mx, My, Mz only once and reuse them
+    switch (pars.dim)
+    {
+        case 1:
+            Mx = Nx / 2 + 1;
+            My = 1;
+            Mz = 1;
+            break;
+        case 2:
+            Mx = Nx;
+            My = Ny / 2 + 1;
+            Mz = 1;
+            break;
+        case 3:
+            Mx = Nx;
+            My = Ny;
+            Mz = Nz / 2 + 1;
+            break;
+    }
 
     #ifdef SHOW_TIMING_INFO
     double start_poisson = get_wall_time();
@@ -288,13 +307,13 @@ void solve_poisson_eq() {
 
     size_t osx, osy;
     #pragma omp parallel for private(osx, osy, k_sq)
-    for (size_t i = 0; i < Nx; ++i)
+    for (size_t i = 0; i < Mx; ++i)
     {
-        osx = i * Ny * ncz;
-        for (size_t j = 0; j < Ny; ++j)
+        osx = i * My * Mz;
+        for (size_t j = 0; j < My; ++j)
         {
-            osy = osx + j * ncz;
-            for (size_t k = 0; k < ncz; ++k)
+            osy = osx + j * Mz;
+            for (size_t k = 0; k < Mz; ++k)
             {
                 k_sq = factor_z2 * k * k;
                 if (i > Nx / 2)
@@ -344,8 +363,27 @@ void mk_power_spectrum(const fftw_complex *in) {
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
     size_t N = pars.N;
-    size_t ncz = Nz / 2 + 1;
     size_t bins = pars.file.bins_powspec;
+    size_t Mx, My, Mz;
+
+    switch (pars.dim)
+    {
+        case 1:
+            Mx = Nx / 2 + 1;
+            My = 1;
+            Mz = 1;
+            break;
+        case 2:
+            Mx = Nx;
+            My = Ny / 2 + 1;
+            Mz = 1;
+            break;
+        case 3:
+            Mx = Nx;
+            My = Ny;
+            Mz = Nz / 2 + 1;
+            break;
+    }
 
     // todo[performance]: precompute bins only once and reuse
     double Lx = pars.x.L;
@@ -372,13 +410,13 @@ void mk_power_spectrum(const fftw_complex *in) {
 
     size_t osx, osy, idx;
     // todo parallelize?
-    for (size_t i = 0; i < Nx; ++i)
+    for (size_t i = 0; i < Mx; ++i)
     {
-        osx = i * Ny * ncz;
-        for (size_t j = 0; j < Ny; ++j)
+        osx = i * My * Mz;
+        for (size_t j = 0; j < My; ++j)
         {
-            osy = osx + j * ncz;
-            for (size_t k = 0; k < ncz; ++k)
+            osy = osx + j * Mz;
+            for (size_t k = 0; k < Mz; ++k)
             {
                 if (k == 0 || 2 * k == Nz)
                 {
@@ -455,18 +493,37 @@ void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
-    size_t ncz = Nz / 2 + 1;
+    size_t Mx, My, Mz;
+
+    switch (pars.dim)
+    {
+        case 1:
+            Mx = Nx / 2 + 1;
+            My = 1;
+            Mz = 1;
+            break;
+        case 2:
+            Mx = Nx;
+            My = Ny / 2 + 1;
+            Mz = 1;
+            break;
+        case 3:
+            Mx = Nx;
+            My = Ny;
+            Mz = Nz / 2 + 1;
+            break;
+    }
 
     double x, y, z;
     size_t osx, osy;
     #pragma omp parallel for private(osx, osy)
-    for (size_t i = 0; i < Nx; ++i)
+    for (size_t i = 0; i < Mx; ++i)
     {
-        osx = i * Ny * ncz;
-        for (size_t j = 0; j < Ny; ++j)
+        osx = i * My * Mz;
+        for (size_t j = 0; j < My; ++j)
         {
-            osy = osx + j * ncz;
-            for (size_t k = 0; k < ncz; ++k)
+            osy = osx + j * Mz;
+            for (size_t k = 0; k < Mz; ++k)
             {
                 x = filter_window_function(2.0 *
                     (i > Nx / 2 ? Nx - i : i) / (double) Nx);
