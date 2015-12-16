@@ -49,6 +49,16 @@ void initialize_parameters() {
     pars.z.b = SPATIAL_UPPER_BOUND_Z;
     pars.z.L = pars.z.b - pars.z.a;
 
+    // set the number of dimensions according to gridpoints in each direction
+    pars.dim = 3;
+    if (pars.z.N == 1)
+    {
+        pars.dim = 2;
+        if (pars.y.N == 1)
+        {
+            pars.dim = 1;
+        }
+    }
     pars.N = pars.x.N * pars.y.N * pars.z.N;
 
     pars.t.dt = DELTA_T;
@@ -66,7 +76,8 @@ void initialize_parameters() {
     pars.file.buf_size = WRITE_OUT_BUFFER_NUMBER;
     pars.file.skip = TIME_STEP_SKIPS;
     pars.file.bins_powspec = POWER_SPECTRUM_BINS;
-    RUNTIME_INFO(puts("Initialized parameters.\n"));
+    RUNTIME_INFO(printf("Initialized parameters (%zu dimensions.)\n\n",
+            pars.dim));
 }
 
 // allocate memory for all external variables
@@ -180,10 +191,30 @@ void mk_fftw_plans() {
     #ifdef SHOW_TIMING_INFO
     double start =  get_wall_time();
     #endif
-    p_fw_3d = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, field, cfftw_tmp,
-                                            FFTW_DEFAULT_FLAG);
-    p_bw_3d = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, cfftw_tmp, field,
-                                            FFTW_DEFAULT_FLAG);
+    switch (pars.dim)
+    {
+        case 1:
+            p_fw = fftw_plan_dft_r2c_1d(Nx, field, cfftw_tmp,
+                    FFTW_DEFAULT_FLAG);
+            p_bw = fftw_plan_dft_c2r_1d(Nx, cfftw_tmp, field,
+                    FFTW_DEFAULT_FLAG);
+            break;
+        case 2:
+            p_fw = fftw_plan_dft_r2c_2d(Nx, Ny, field, cfftw_tmp,
+                    FFTW_DEFAULT_FLAG);
+            p_bw = fftw_plan_dft_c2r_2d(Nx, Ny, cfftw_tmp, field,
+                    FFTW_DEFAULT_FLAG);
+            break;
+        case 3:
+            p_fw = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, field, cfftw_tmp,
+                    FFTW_DEFAULT_FLAG);
+            p_bw = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, cfftw_tmp, field,
+                    FFTW_DEFAULT_FLAG);
+            break;
+        default:
+            fputs("Dimension has to be 1, 2 or 3\n", stderr);
+            break;
+    }
     #ifdef SHOW_TIMING_INFO
     fftw_time_plan += get_wall_time() - start;
     #endif
@@ -274,8 +305,8 @@ void free_and_destroy_all() {
 
 // destroy the fftw plans and call cleanup for internal fftw3 cleanup
 void destroy_and_cleanup_fftw() {
-    fftw_destroy_plan(p_fw_3d);
-    fftw_destroy_plan(p_bw_3d);
+    fftw_destroy_plan(p_fw);
+    fftw_destroy_plan(p_bw);
     fftw_cleanup_threads();
     RUNTIME_INFO(puts("Destroyed fftw plans.\n"));
 }

@@ -101,6 +101,7 @@ void run_rk4() {
         {
             field[i] += dt * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]) / 6.0;
         }
+        // solve_poisson_eq();
 
         t += dt;
         pars.t.t = t;

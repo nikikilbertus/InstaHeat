@@ -31,8 +31,7 @@ void mk_rhs(const double t, double *f, double *result) {
     for (size_t i = N; i < N2; ++i)
     {
         result[i] = dtmp_lap[i - N] / (a * a);
-        result[i] -= ( 3.0 * hubble * f[i]
-                        + potential_prime(f[i - N]) );
+        result[i] -= ( 3.0 * hubble * f[i] + potential_prime(f[i - N]) );
     }
     result[N2] = a * hubble;
 }
@@ -45,13 +44,13 @@ double mk_rho(double *f) {
 
     mk_gradient_squared_and_laplacian(f);
 
-    double df, grad2_a;
-    #pragma omp parallel for default(shared) private(df, grad2_a) reduction(+:T00)
+    double df, grad2;
+    #pragma omp parallel for default(shared) private(df, grad2) reduction(+:T00)
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
-        grad2_a = dtmp_grad2[i] / (a * a);
-        rho[i] = (df * df + grad2_a) / 2. + potential(f[i]);
+        grad2 = dtmp_grad2[i] / (a * a);
+        rho[i] = (df * df + grad2) / 2. + potential(f[i]);
         T00 += rho[i];
     }
     return T00 / N;
@@ -65,11 +64,31 @@ void mk_gradient_squared_and_laplacian(double *in) {
     size_t Nz = pars.z.N;
     size_t N = pars.N;
     size_t ncz = Nz / 2 + 1;
+    size_t Mx, My, Mz;
+
+    switch (pars.dim)
+    {
+        case 1:
+            Mx = Nx / 2 + 1;
+            My = 1;
+            Mz = 1;
+            break;
+        case 2:
+            Mx = Nx;
+            My = Ny / 2 + 1;
+            Mz = 1;
+            break;
+        case 3:
+            Mx = Nx;
+            My = Ny;
+            Mz = ncz;
+            break;
+    }
 
     #ifdef SHOW_TIMING_INFO
     double start = get_wall_time();
     #endif
-    fftw_execute_dft_r2c(p_fw_3d, in, cfftw_tmp);
+    fftw_execute_dft_r2c(p_fw, in, cfftw_tmp);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time() - start;
     #endif
@@ -97,24 +116,22 @@ void mk_gradient_squared_and_laplacian(double *in) {
 
     size_t osx, osy, id;
     #pragma omp parallel for private(osx, osy, id, k_sq)
-    for (size_t i = 0; i < Nx; ++i)
+    for (size_t i = 0; i < Mx; ++i)
     {
-        osx = i * Ny * ncz;
-        for (size_t j = 0; j < Ny; ++j)
+        osx = i * My * Mz;
+        for (size_t j = 0; j < My; ++j)
         {
-            osy = osx + j * ncz;
-            for (size_t k = 0; k < ncz; ++k)
+            osy = osx + j * Mz;
+            for (size_t k = 0; k < Mz; ++k)
             {
                 id = osy + k;
-
-                // for lagrangian
+                // for laplacian
                 k_sq = factor_z2 * k * k;
-
                 // x derivative
                 if (i > Nx / 2)
                 {
                     cfftw_tmp_x[id] = cfftw_tmp[id] * factor_x
-                                                        * ((int)i - (int)Nx);
+                        * ((int)i - (int)Nx);
                     k_sq += factor_x2 * (Nx - i) * (Nx - i);
                 }
                 else if (2 * i == Nx)
@@ -127,12 +144,11 @@ void mk_gradient_squared_and_laplacian(double *in) {
                     cfftw_tmp_x[id] = cfftw_tmp[id] * factor_x * i;
                     k_sq += factor_x2 * i * i;
                 }
-
                 // y derivative
                 if (j > Ny / 2)
                 {
                     cfftw_tmp_y[id] = cfftw_tmp[id] * factor_y
-                                                        * ((int)j - (int)Ny);
+                        * ((int)j - (int)Ny);
                     k_sq += factor_y2 * (Ny - j) * (Ny - j);
                 }
                 else if (2 * j == Ny)
@@ -145,7 +161,6 @@ void mk_gradient_squared_and_laplacian(double *in) {
                     cfftw_tmp_y[id] = cfftw_tmp[id] * factor_y * j;
                     k_sq += factor_y2 * j * j;
                 }
-
                 // z derivative
                 if (k == ncz - 1)
                 {
@@ -155,8 +170,7 @@ void mk_gradient_squared_and_laplacian(double *in) {
                 {
                     cfftw_tmp_z[id] = cfftw_tmp[id] * factor_z * k;
                 }
-
-                // lagrangian
+                // laplacian
                 cfftw_tmp[id] *= k_sq;
             }
         }
@@ -165,23 +179,34 @@ void mk_gradient_squared_and_laplacian(double *in) {
     #ifdef SHOW_TIMING_INFO
     start = get_wall_time();
     #endif
-    fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_x, dtmp_x);
-    fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_y, dtmp_y);
-    fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_z, dtmp_z);
-    fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp, dtmp_lap);
+    fftw_execute_dft_c2r(p_bw, cfftw_tmp_x, dtmp_x);
+    if (pars.dim > 1)
+    {
+        fftw_execute_dft_c2r(p_bw, cfftw_tmp_y, dtmp_y);
+    }
+    if (pars.dim > 2)
+    {
+        fftw_execute_dft_c2r(p_bw, cfftw_tmp_z, dtmp_z);
+    }
+    fftw_execute_dft_c2r(p_bw, cfftw_tmp, dtmp_lap);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time() - start;
     #endif
 
     // gradient squared
-    double gx, gy, gz;
-    #pragma omp parallel for private(gx, gy, gz)
+    #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
     {
-        gx = dtmp_x[i];
-        gy = dtmp_y[i];
-        gz = dtmp_z[i];
-        dtmp_grad2[i] = gx * gx + gy * gy + gz * gz;
+        switch (pars.dim)
+        {
+            case 3:
+                dtmp_grad2[i] += dtmp_z[i] * dtmp_z[i];
+            case 2:
+                dtmp_grad2[i] += dtmp_y[i] * dtmp_y[i];
+            case 1:
+                dtmp_grad2[i] += dtmp_x[i] * dtmp_x[i];
+                break;
+        }
     }
 }
 
@@ -232,6 +257,8 @@ inline double potential_prime(const double f) {
     // return 0.0;
 }
 
+// solve the poisson equation Laplace(psi) = rho / 2 for scalar perturbations
+// TODO: so far only 3d is implemented, also do 2d and 1d
 void solve_poisson_eq() {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -243,7 +270,7 @@ void solve_poisson_eq() {
     double start_poisson = get_wall_time();
     double start = start_poisson;
     #endif
-    fftw_execute_dft_r2c(p_fw_3d, rho, cfftw_tmp);
+    fftw_execute_dft_r2c(p_fw, rho, cfftw_tmp);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time() - start;
     #endif
@@ -303,7 +330,7 @@ void solve_poisson_eq() {
     #ifdef SHOW_TIMING_INFO
     start = get_wall_time();
     #endif
-    fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp, psi);
+    fftw_execute_dft_c2r(p_bw, cfftw_tmp, psi);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time() - start;
     poisson_time += get_wall_time();
@@ -400,8 +427,8 @@ void apply_filter_real(double *inout) {
     #ifdef SHOW_TIMING_INFO
     double start_fft = get_wall_time();
     #endif
-    fftw_execute_dft_r2c(p_fw_3d, inout, cfftw_tmp);
-    fftw_execute_dft_r2c(p_fw_3d, inout + N, cfftw_tmp_x);
+    fftw_execute_dft_r2c(p_fw, inout, cfftw_tmp);
+    fftw_execute_dft_r2c(p_fw, inout + N, cfftw_tmp_x);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time() - start_fft;
     #endif
@@ -411,8 +438,8 @@ void apply_filter_real(double *inout) {
     #ifdef SHOW_TIMING_INFO
     start_fft = get_wall_time();
     #endif
-    fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp, inout);
-    fftw_execute_dft_c2r(p_bw_3d, cfftw_tmp_x, inout + N);
+    fftw_execute_dft_c2r(p_bw, cfftw_tmp, inout);
+    fftw_execute_dft_c2r(p_bw, cfftw_tmp_x, inout + N);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time() - start_fft;
     #endif

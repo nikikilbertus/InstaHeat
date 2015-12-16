@@ -152,6 +152,7 @@ typedef struct {
     grid_dimension_t y;
     grid_dimension_t z;
     size_t N;
+    size_t dim;
     timing_t t;
     file_parameters_t file;
 }parameters_t;
@@ -205,8 +206,8 @@ extern double *dtmp_grad2;
 extern double *dtmp_lap;
 
 // fftw plans
-extern fftw_plan p_fw_3d;
-extern fftw_plan p_bw_3d;
+extern fftw_plan p_fw;
+extern fftw_plan p_bw;
 
 // monitoring the time taken by certain parts
 extern double fftw_time_exe;

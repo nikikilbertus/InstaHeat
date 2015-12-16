@@ -61,7 +61,7 @@ void run_dopri853() {
     evo_flags.compute_pow_spec = 1;
     mk_rhs(dp.t, field, dfield);
     evo_flags.compute_pow_spec = 0;
-    solve_poisson_eq();
+    // solve_poisson_eq();
     save();
 
     #ifdef SHOW_TIMING_INFO
@@ -89,15 +89,9 @@ void run_dopri853() {
         }
         RUNTIME_INFO(printf("did step: %d with dt: %f\n", dp.n_stp, dp.dt_did));
 
-        // if (dp.dense)
-        // {
-        //      // out.out(dp.n_stp, dp.t, field, dp.dt_did)
-        // }
-
-        //TODO[performance]: get rid of extra call to mk_rho
         if ((dp.n_stp + 1) % pars.file.skip == 0)
         {
-            prepare_and_save_timeslice();
+            save();
         }
         if (dp.t >= dp.tf)
         {
@@ -152,8 +146,13 @@ int perform_step(const double dt_try) {
     #ifdef ENABLE_FFT_FILTER
     apply_filter_real(field_new);
     #endif
+    if ((dp.n_stp + 1) % pars.file.skip == 0)
+    {
+        evo_flags.compute_pow_spec = 1;
+    }
     mk_rhs(dp.t + dt, field_new, dfield_new);
-    solve_poisson_eq();
+    evo_flags.compute_pow_spec = 0;
+    // solve_poisson_eq();
 
     #pragma omp parallel for
     for (size_t i = 0; i < Ntot; ++i)
@@ -300,11 +299,11 @@ void try_step(const double dt) {
     for (i = 0; i < Ntot; ++i)
     {
         dpv.yerr[i]  = dpv.k4[i] - dpc.bhh1 * dfield[i] - dpc.bhh2 * dpv.k9[i] -
-                                   dpc.bhh3 * dpv.k3[i];
+                        dpc.bhh3 * dpv.k3[i];
         dpv.yerr2[i] = dpc.er1 * dfield[i] + dpc.er6 * dpv.k6[i] +
-                                   dpc.er7 * dpv.k7[i] + dpc.er8 * dpv.k8[i] +
-                                   dpc.er9 * dpv.k9[i] + dpc.er10 * dpv.k10[i] +
-                                   dpc.er11 * dpv.k2[i] + dpc.er12 * dpv.k3[i];
+                       dpc.er7 * dpv.k7[i] + dpc.er8 * dpv.k8[i] +
+                       dpc.er9 * dpv.k9[i] + dpc.er10 * dpv.k10[i] +
+                       dpc.er11 * dpv.k2[i] + dpc.er12 * dpv.k3[i];
     }
 }
 
