@@ -61,7 +61,7 @@ double mk_rho(double *f) {
 void mk_gradient_squared_and_laplacian(double *in) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
-    size_t N = pars.N;
+    size_t N  = pars.N;
     size_t Mx = pars.x.M;
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
@@ -163,15 +163,14 @@ void mk_gradient_squared_and_laplacian(double *in) {
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
     {
-        switch (pars.dim)
+        dtmp_grad2[i] = dtmp_x[i] * dtmp_x[i];
+        if (pars.dim > 1)
         {
-            case 3:
-                dtmp_grad2[i] += dtmp_z[i] * dtmp_z[i];
-            case 2:
-                dtmp_grad2[i] += dtmp_y[i] * dtmp_y[i];
-            case 1:
-                dtmp_grad2[i] += dtmp_x[i] * dtmp_x[i];
-                break;
+            dtmp_grad2[i] += dtmp_y[i] * dtmp_y[i];
+        }
+        if (pars.dim > 2)
+        {
+            dtmp_grad2[i] += dtmp_z[i] * dtmp_z[i];
         }
     }
 }

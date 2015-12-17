@@ -305,9 +305,20 @@ double phi_init(const double x, const double y, const double z,
     // localized for higgs metastability potential
     double phi0 = 0.04;
     double lambda = 20.0;
-    // return phi0 * 0.5 * (1.0 + cos(x)) * exp(-lambda * x * x);
-    return phi0 * 0.125 * (1.0 + cos(x)) * (1.0 + cos(y)) * (1.0 + cos(z)) *
-       exp(-lambda * (x * x + y * y + z * z));
+    if (pars.dim == 1)
+    {
+        return phi0 * 0.5 * (1.0 + cos(x)) * exp(-lambda * x * x);
+    }
+    else if (pars.dim == 2)
+    {
+        return phi0 * 0.25 * (1.0 + cos(x)) * (1.0 + cos(y)) *
+            exp(-lambda * (x * x + y * y));
+    }
+    else
+    {
+        return phi0 * 0.125 * (1.0 + cos(x)) * (1.0 + cos(y)) * (1.0 + cos(z)) *
+           exp(-lambda * (x * x + y * y + z * z));
+    }
 
     // some simple waves for notch or step potential simulations
     // double frac = 0.4; // vary the ratio between \phi_0 and \delta \phi

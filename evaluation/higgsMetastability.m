@@ -14,7 +14,8 @@ phiAvg = mean(phi);
 Nt = length(t);
 
 % start with some simple plots (rho over a with a^-4 for reference)
-loglog(a, rho, a, a.^(-4) * rho(1));
+loglog(a, rho);
+% loglog(a, rho, a, a.^(-4) * rho(1));
 % 'logfit' works only with logfit package at
 % http://www.mathworks.com/matlabcentral/fileexchange/29545
 % (just put the logfit.m file in the same folder as this one)
@@ -26,7 +27,8 @@ shg;
 pause;
 
 % H over a with a^-2 for reference
-loglog(a, H, a, a.^(-2) * H(1));
+loglog(a, H);
+% loglog(a, H, a, a.^(-2) * H(1));
 % logfit(a, H, 'loglog')
 xlabel('a')
 ylabel('H');
@@ -68,3 +70,13 @@ xlabel('t');
 ylabel('||phi(k)|| - ||phi(x)||');
 shg;
 pause;
+
+% a little movie of the 2d wavefunction
+N = sqrt(length(phi(:,i)));
+for i=1:Nt
+surf(reshape(phi(:,i),N,N))
+shading interp
+lighting phong
+shg;
+pause(0.1)
+end
