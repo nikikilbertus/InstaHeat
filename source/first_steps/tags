@@ -1,0 +1,386 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ABSOLUTE_TOLERANCE	main.h	/^#define ABSOLUTE_TOLERANCE /;"	d
+BETA	main.h	/^#define BETA /;"	d
+CC	Makefile	/^CC = h5cc$/;"	m
+CFLAGS	Makefile	/^CFLAGS = -std=c99 -fopenmp -O3 -g -Wall -I \/usr\/local\/include$/;"	m
+COUPLING	main.h	/^#define COUPLING /;"	d
+DATAPATH	main.h	/^#define DATAPATH /;"	d
+DELTA_T	main.h	/^#define DELTA_T /;"	d
+FFTW_DEFAULT_FLAG	main.h	/^#define FFTW_DEFAULT_FLAG /;"	d
+FINAL_TIME	main.h	/^#define FINAL_TIME /;"	d
+GRIDPOINTS_X	main.h	/^#define GRIDPOINTS_X /;"	d
+GRIDPOINTS_Y	main.h	/^#define GRIDPOINTS_Y /;"	d
+GRIDPOINTS_Z	main.h	/^#define GRIDPOINTS_Z /;"	d
+HDF5_CC	Makefile	/^export HDF5_CC = gcc-5$/;"	m
+HDF5_CLINKER	Makefile	/^export HDF5_CLINKER = gcc-5$/;"	m
+HEADERS	Makefile	/^HEADERS = $(wildcard *.h)$/;"	m
+INITIAL_TIME	main.h	/^#define INITIAL_TIME /;"	d
+LAMBDA	main.h	/^#define LAMBDA /;"	d
+LARGEST_SCALING	main.h	/^#define LARGEST_SCALING /;"	d
+LIBS	Makefile	/^LIBS = -L \/usr\/local\/lib -lfftw3_omp -lfftw3 -lm -fopenmp -lprofiler$/;"	m
+M	main.h	/^    size_t M;$/;"	m	struct:__anon5
+MASS	main.h	/^#define MASS /;"	d
+MAX	main.h	/^#define MAX(/;"	d
+MAX_STEPS	main.h	/^#define MAX_STEPS /;"	d
+MIN	main.h	/^#define MIN(/;"	d
+MINIMAL_DELTA_T	main.h	/^#define MINIMAL_DELTA_T /;"	d
+N	main.h	/^    size_t N; \/\/ number of gridpoints$/;"	m	struct:__anon5
+N	main.h	/^    size_t N;$/;"	m	struct:__anon8
+Nt	main.h	/^    size_t Nt; \/\/ number of timesteps (only relevant for fixed step size)$/;"	m	struct:__anon6
+OBJECTS	Makefile	/^OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))$/;"	m
+PI	main.h	/^#define PI /;"	d
+POWER_SPECTRUM_BINS	main.h	/^#define POWER_SPECTRUM_BINS /;"	d
+RELATIVE_TOLERANCE	main.h	/^#define RELATIVE_TOLERANCE /;"	d
+RUNTIME_INFO	main.h	/^#define RUNTIME_INFO(/;"	d
+SAFE	main.h	/^#define SAFE /;"	d
+SEED	main.h	/^#define SEED /;"	d
+SHOW_RUNTIME_INFO	main.h	/^#define SHOW_RUNTIME_INFO /;"	d
+SHOW_TIMING_INFO	main.h	/^#define SHOW_TIMING_INFO /;"	d
+SMALLEST_SCALING	main.h	/^#define SMALLEST_SCALING /;"	d
+SPATIAL_LOWER_BOUND_X	main.h	/^#define SPATIAL_LOWER_BOUND_X /;"	d
+SPATIAL_LOWER_BOUND_Y	main.h	/^#define SPATIAL_LOWER_BOUND_Y /;"	d
+SPATIAL_LOWER_BOUND_Z	main.h	/^#define SPATIAL_LOWER_BOUND_Z /;"	d
+SPATIAL_UPPER_BOUND_X	main.h	/^#define SPATIAL_UPPER_BOUND_X /;"	d
+SPATIAL_UPPER_BOUND_Y	main.h	/^#define SPATIAL_UPPER_BOUND_Y /;"	d
+SPATIAL_UPPER_BOUND_Z	main.h	/^#define SPATIAL_UPPER_BOUND_Z /;"	d
+TARGET	Makefile	/^TARGET = first_steps$/;"	m
+THREAD_NUMBER	main.h	/^#define THREAD_NUMBER /;"	d
+TIME_STEP_SKIPS	main.h	/^#define TIME_STEP_SKIPS /;"	d
+WRITE_OUT_BUFFER_NUMBER	main.h	/^#define WRITE_OUT_BUFFER_NUMBER /;"	d
+__DOPRI853_STEPPER__	dopri853_stepper.h	/^#define __DOPRI853_STEPPER__$/;"	d
+__EVOLUTION_TOOLKIT__	evolution_toolkit.h	/^#define __EVOLUTION_TOOLKIT__$/;"	d
+__FILEHANDLING__	filehandling.h	/^#define __FILEHANDLING__$/;"	d
+__MAIN__	main.h	/^#define __MAIN__$/;"	d
+__RK4_STEPPER__	RK4_stepper.h	/^#define __RK4_STEPPER__$/;"	d
+__SETUP__	setup.h	/^#define __SETUP__$/;"	d
+__tests__	tests.h	/^#define __tests__$/;"	d
+a	main.h	/^    double a; \/\/ lower bound of interval$/;"	m	struct:__anon5
+a101	dopri853_stepper.h	/^    a101,a104,a105,a106,a107,a108,a109,$/;"	m	struct:__anon1
+a104	dopri853_stepper.h	/^    a101,a104,a105,a106,a107,a108,a109,$/;"	m	struct:__anon1
+a105	dopri853_stepper.h	/^    a101,a104,a105,a106,a107,a108,a109,$/;"	m	struct:__anon1
+a106	dopri853_stepper.h	/^    a101,a104,a105,a106,a107,a108,a109,$/;"	m	struct:__anon1
+a107	dopri853_stepper.h	/^    a101,a104,a105,a106,a107,a108,a109,$/;"	m	struct:__anon1
+a108	dopri853_stepper.h	/^    a101,a104,a105,a106,a107,a108,a109,$/;"	m	struct:__anon1
+a109	dopri853_stepper.h	/^    a101,a104,a105,a106,a107,a108,a109,$/;"	m	struct:__anon1
+a111	dopri853_stepper.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:__anon1
+a1110	dopri853_stepper.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:__anon1
+a114	dopri853_stepper.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:__anon1
+a115	dopri853_stepper.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:__anon1
+a116	dopri853_stepper.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:__anon1
+a117	dopri853_stepper.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:__anon1
+a118	dopri853_stepper.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:__anon1
+a119	dopri853_stepper.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:__anon1
+a121	dopri853_stepper.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:__anon1
+a1210	dopri853_stepper.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:__anon1
+a1211	dopri853_stepper.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:__anon1
+a124	dopri853_stepper.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:__anon1
+a125	dopri853_stepper.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:__anon1
+a126	dopri853_stepper.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:__anon1
+a127	dopri853_stepper.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:__anon1
+a128	dopri853_stepper.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:__anon1
+a129	dopri853_stepper.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:__anon1
+a141	dopri853_stepper.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:__anon1
+a1410	dopri853_stepper.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:__anon1
+a1411	dopri853_stepper.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:__anon1
+a1412	dopri853_stepper.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:__anon1
+a1413	dopri853_stepper.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:__anon1
+a147	dopri853_stepper.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:__anon1
+a148	dopri853_stepper.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:__anon1
+a149	dopri853_stepper.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:__anon1
+a151	dopri853_stepper.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:__anon1
+a1511	dopri853_stepper.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:__anon1
+a1512	dopri853_stepper.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:__anon1
+a1513	dopri853_stepper.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:__anon1
+a1514	dopri853_stepper.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:__anon1
+a156	dopri853_stepper.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:__anon1
+a157	dopri853_stepper.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:__anon1
+a158	dopri853_stepper.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:__anon1
+a161	dopri853_stepper.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:__anon1
+a1613	dopri853_stepper.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:__anon1
+a1614	dopri853_stepper.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:__anon1
+a1615	dopri853_stepper.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:__anon1
+a166	dopri853_stepper.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:__anon1
+a167	dopri853_stepper.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:__anon1
+a168	dopri853_stepper.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:__anon1
+a169	dopri853_stepper.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:__anon1
+a21	dopri853_stepper.h	/^    a21,$/;"	m	struct:__anon1
+a31	dopri853_stepper.h	/^    a31,a32,$/;"	m	struct:__anon1
+a32	dopri853_stepper.h	/^    a31,a32,$/;"	m	struct:__anon1
+a41	dopri853_stepper.h	/^    a41,a43,$/;"	m	struct:__anon1
+a43	dopri853_stepper.h	/^    a41,a43,$/;"	m	struct:__anon1
+a51	dopri853_stepper.h	/^    a51,a53,a54,$/;"	m	struct:__anon1
+a53	dopri853_stepper.h	/^    a51,a53,a54,$/;"	m	struct:__anon1
+a54	dopri853_stepper.h	/^    a51,a53,a54,$/;"	m	struct:__anon1
+a61	dopri853_stepper.h	/^    a61,a64,a65,$/;"	m	struct:__anon1
+a64	dopri853_stepper.h	/^    a61,a64,a65,$/;"	m	struct:__anon1
+a65	dopri853_stepper.h	/^    a61,a64,a65,$/;"	m	struct:__anon1
+a71	dopri853_stepper.h	/^    a71,a74,a75,a76,$/;"	m	struct:__anon1
+a74	dopri853_stepper.h	/^    a71,a74,a75,a76,$/;"	m	struct:__anon1
+a75	dopri853_stepper.h	/^    a71,a74,a75,a76,$/;"	m	struct:__anon1
+a76	dopri853_stepper.h	/^    a71,a74,a75,a76,$/;"	m	struct:__anon1
+a81	dopri853_stepper.h	/^    a81,a84,a85,a86,a87,$/;"	m	struct:__anon1
+a84	dopri853_stepper.h	/^    a81,a84,a85,a86,a87,$/;"	m	struct:__anon1
+a85	dopri853_stepper.h	/^    a81,a84,a85,a86,a87,$/;"	m	struct:__anon1
+a86	dopri853_stepper.h	/^    a81,a84,a85,a86,a87,$/;"	m	struct:__anon1
+a87	dopri853_stepper.h	/^    a81,a84,a85,a86,a87,$/;"	m	struct:__anon1
+a91	dopri853_stepper.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:__anon1
+a94	dopri853_stepper.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:__anon1
+a95	dopri853_stepper.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:__anon1
+a96	dopri853_stepper.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:__anon1
+a97	dopri853_stepper.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:__anon1
+a98	dopri853_stepper.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:__anon1
+a_tol	dopri853_stepper.h	/^    double a_tol, r_tol;$/;"	m	struct:__anon3
+allocate_and_initialize_all	setup.c	/^void allocate_and_initialize_all() {$/;"	f
+allocate_dopri853_values	dopri853_stepper.c	/^void allocate_dopri853_values() {$/;"	f
+allocate_external	setup.c	/^void allocate_external() {$/;"	f
+alpha	dopri853_stepper.h	/^    double beta, alpha;$/;"	m	struct:__anon3
+apply_filter_fourier	evolution_toolkit.c	/^void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout) {$/;"	f
+apply_filter_real	evolution_toolkit.c	/^void apply_filter_real(double *inout) {$/;"	f
+are_fields_equal	tests.c	/^int are_fields_equal(const double *f, const double *g) {$/;"	f
+b	main.h	/^    double b; \/\/ upper bound of interval$/;"	m	struct:__anon5
+b1	dopri853_stepper.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:__anon1
+b10	dopri853_stepper.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:__anon1
+b11	dopri853_stepper.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:__anon1
+b12	dopri853_stepper.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:__anon1
+b6	dopri853_stepper.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:__anon1
+b7	dopri853_stepper.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:__anon1
+b8	dopri853_stepper.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:__anon1
+b9	dopri853_stepper.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:__anon1
+beta	dopri853_stepper.h	/^    double beta, alpha;$/;"	m	struct:__anon3
+bhh1	dopri853_stepper.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:__anon1
+bhh2	dopri853_stepper.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:__anon1
+bhh3	dopri853_stepper.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:__anon1
+bins_powspec	main.h	/^    size_t bins_powspec; \/\/ how many bins are used for the power spectrum$/;"	m	struct:__anon7
+buf_size	main.h	/^    size_t buf_size;     \/\/ size of the buffer$/;"	m	struct:__anon7
+c10	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c11	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c14	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c15	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c16	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c2	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c3	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c4	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c5	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c6	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c7	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c8	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c9	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+cfftw_tmp	main.c	/^complex *cfftw_tmp;$/;"	v
+cfftw_tmp_x	main.c	/^complex *cfftw_tmp_x;$/;"	v
+cfftw_tmp_y	main.c	/^complex *cfftw_tmp_y;$/;"	v
+cfftw_tmp_z	main.c	/^complex *cfftw_tmp_z;$/;"	v
+compute_pow_spec	evolution_toolkit.h	/^    uint8_t compute_pow_spec; \/\/ compute the power spectrum in this step?$/;"	m	struct:__anon4
+d41	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
+d410	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
+d411	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
+d412	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
+d413	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
+d414	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
+d415	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
+d416	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
+d46	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
+d47	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
+d48	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
+d49	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
+d51	dopri853_stepper.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:__anon1
+d510	dopri853_stepper.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:__anon1
+d511	dopri853_stepper.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:__anon1
+d512	dopri853_stepper.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:__anon1
+d513	dopri853_stepper.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:__anon1
+d514	dopri853_stepper.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:__anon1
+d515	dopri853_stepper.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:__anon1
+d516	dopri853_stepper.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:__anon1
+d56	dopri853_stepper.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:__anon1
+d57	dopri853_stepper.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:__anon1
+d58	dopri853_stepper.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:__anon1
+d59	dopri853_stepper.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:__anon1
+d61	dopri853_stepper.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:__anon1
+d610	dopri853_stepper.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:__anon1
+d611	dopri853_stepper.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:__anon1
+d612	dopri853_stepper.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:__anon1
+d613	dopri853_stepper.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:__anon1
+d614	dopri853_stepper.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:__anon1
+d615	dopri853_stepper.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:__anon1
+d616	dopri853_stepper.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:__anon1
+d66	dopri853_stepper.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:__anon1
+d67	dopri853_stepper.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:__anon1
+d68	dopri853_stepper.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:__anon1
+d69	dopri853_stepper.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:__anon1
+d71	dopri853_stepper.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:__anon1
+d710	dopri853_stepper.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:__anon1
+d711	dopri853_stepper.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:__anon1
+d712	dopri853_stepper.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:__anon1
+d713	dopri853_stepper.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:__anon1
+d714	dopri853_stepper.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:__anon1
+d715	dopri853_stepper.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:__anon1
+d716	dopri853_stepper.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:__anon1
+d76	dopri853_stepper.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:__anon1
+d77	dopri853_stepper.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:__anon1
+d78	dopri853_stepper.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:__anon1
+d79	dopri853_stepper.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:__anon1
+dense	dopri853_stepper.h	/^    int dense; \/\/ currently unused$/;"	m	struct:__anon3
+dense_output	dopri853_stepper.c	/^double dense_output(const size_t i, const double t, const double dt) {$/;"	f
+destroy_and_cleanup_fftw	setup.c	/^void destroy_and_cleanup_fftw() {$/;"	f
+dfield	main.c	/^double *dfield, *dfield_new;$/;"	v
+dfield_new	main.c	/^double *dfield, *dfield_new;$/;"	v
+dim	main.h	/^    size_t dim;$/;"	m	struct:__anon8
+dopri853_constants_t	dopri853_stepper.h	/^}dopri853_constants_t;$/;"	t	typeref:struct:__anon1
+dopri853_control_t	dopri853_stepper.h	/^}dopri853_control_t;$/;"	t	typeref:struct:__anon3
+dopri853_values_t	dopri853_stepper.h	/^}dopri853_values_t;$/;"	t	typeref:struct:__anon2
+dp	dopri853_stepper.c	/^dopri853_control_t dp;$/;"	v
+dpc	dopri853_constants.c	/^dopri853_constants_t dpc =$/;"	v
+dphi_init	setup.c	/^double dphi_init(const double x, const double y, const double z) {$/;"	f
+dpv	dopri853_stepper.c	/^dopri853_values_t dpv;$/;"	v
+dset_a	main.h	/^    size_t dset_a;       \/\/ h5 data set id of the scaling parameter a$/;"	m	struct:__anon7
+dset_phi	main.h	/^    size_t dset_phi;     \/\/ h5 data set id of the scalar field$/;"	m	struct:__anon7
+dset_powspec	main.h	/^    size_t dset_powspec; \/\/ h5 data set id of the power spectrum$/;"	m	struct:__anon7
+dset_rho	main.h	/^    size_t dset_rho;     \/\/ h5 data set id of the energy density rho$/;"	m	struct:__anon7
+dset_time	main.h	/^    size_t dset_time;    \/\/ h5 data set id of the time$/;"	m	struct:__anon7
+dt	dopri853_stepper.h	/^    double dt;$/;"	m	struct:__anon3
+dt	main.h	/^    double dt; \/\/ size of (initial) timestep delta t$/;"	m	struct:__anon6
+dt_did	dopri853_stepper.h	/^    double dt_did;$/;"	m	struct:__anon3
+dt_min	dopri853_stepper.h	/^    double dt_min;$/;"	m	struct:__anon3
+dt_next	dopri853_stepper.h	/^    double dt_next;$/;"	m	struct:__anon3
+dtmp_grad2	main.c	/^double *dtmp_grad2;$/;"	v
+dtmp_lap	main.c	/^double *dtmp_lap;$/;"	v
+dtmp_x	main.c	/^double *dtmp_x;$/;"	v
+dtmp_y	main.c	/^double *dtmp_y;$/;"	v
+dtmp_z	main.c	/^double *dtmp_z;$/;"	v
+eps	dopri853_stepper.h	/^    double eps;$/;"	m	struct:__anon3
+equal	tests.c	/^int equal(const double a, const double b) {$/;"	f
+er1	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:__anon1
+er10	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:__anon1
+er11	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:__anon1
+er12	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:__anon1
+er6	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:__anon1
+er7	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:__anon1
+er8	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:__anon1
+er9	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:__anon1
+err_old	dopri853_stepper.h	/^    double err_old;$/;"	m	struct:__anon3
+error	dopri853_stepper.c	/^double error(const double dt) {$/;"	f
+evo_flags	evolution_toolkit.c	/^evolution_flags_t evo_flags = {.filter = 0, .compute_pow_spec = 0};$/;"	v
+evolution_flags_t	evolution_toolkit.h	/^}evolution_flags_t;$/;"	t	typeref:struct:__anon4
+f_a_buf	main.c	/^double *f_a_buf;$/;"	v
+fftw_time_exe	main.c	/^double fftw_time_exe  = 0.0;$/;"	v
+fftw_time_plan	main.c	/^double fftw_time_plan = 0.0;$/;"	v
+field	main.c	/^double *field, *field_new;$/;"	v
+field_buf	main.c	/^double *field_buf;$/;"	v
+field_new	main.c	/^double *field, *field_new;$/;"	v
+file	main.h	/^    file_parameters_t file;$/;"	m	struct:__anon8
+file_parameters_t	main.h	/^}file_parameters_t;$/;"	t	typeref:struct:__anon7
+fill_field	tests.c	/^void fill_field(double *f, double (*func)(const double, const double,$/;"	f
+filter	evolution_toolkit.h	/^    uint8_t filter; \/\/ apply a filter in this step? (currently unused)$/;"	m	struct:__anon4
+filter_time	main.c	/^double filter_time = 0.0;$/;"	v
+filter_window_function	evolution_toolkit.c	/^inline double filter_window_function(const double x) {$/;"	f
+free_and_destroy_all	setup.c	/^void free_and_destroy_all() {$/;"	f
+free_dopri853_values	dopri853_stepper.c	/^void free_dopri853_values() {$/;"	f
+free_external	setup.c	/^void free_external() {$/;"	f
+get_wall_time	main.c	/^double get_wall_time() {$/;"	f
+grid	main.c	/^double *grid;$/;"	v
+grid_dimension_t	main.h	/^}grid_dimension_t;$/;"	t	typeref:struct:__anon5
+h5_close	filehandling.c	/^void h5_close() {$/;"	f
+h5_create_empty_by_path	filehandling.c	/^void h5_create_empty_by_path(const char *name) {$/;"	f
+h5_time_write	main.c	/^double h5_time_write = 0.0;$/;"	v
+h5_write_buffers_to_disk	filehandling.c	/^void h5_write_buffers_to_disk(const hsize_t Nt) {$/;"	f
+id	main.h	/^    size_t id;           \/\/ h5 file id of the output file$/;"	m	struct:__anon7
+index	main.h	/^    size_t index;        \/\/ current index within the buffers$/;"	m	struct:__anon7
+initialize_dopri853	dopri853_stepper.c	/^void initialize_dopri853() {$/;"	f
+initialize_parameters	setup.c	/^void initialize_parameters() {$/;"	f
+initialize_threading	setup.c	/^void initialize_threading() {$/;"	f
+k	main.h	/^    complex k; \/\/ a factor used in computing k vectors: k = 2 pi I \/ L$/;"	m	struct:__anon5
+k10	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
+k2	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
+k2	main.h	/^    double k2; \/\/ k2 = k*k = -4 pi^2 \/ L^2$/;"	m	struct:__anon5
+k3	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
+k4	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
+k5	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
+k6	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
+k7	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
+k8	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
+k9	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
+k_tmp	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
+main	main.c	/^int main(int argc, const char * argv[]) {$/;"	f
+max_steps	dopri853_stepper.h	/^    size_t max_steps;$/;"	m	struct:__anon3
+maxscale	dopri853_stepper.h	/^    double minscale, maxscale;$/;"	m	struct:__anon3
+minscale	dopri853_stepper.h	/^    double minscale, maxscale;$/;"	m	struct:__anon3
+mk_fftw_plans	setup.c	/^void mk_fftw_plans() {$/;"	f
+mk_gradient_squared_and_laplacian	evolution_toolkit.c	/^void mk_gradient_squared_and_laplacian(double *in) {$/;"	f
+mk_grid	setup.c	/^void mk_grid() {$/;"	f
+mk_initial_conditions	setup.c	/^void mk_initial_conditions() {$/;"	f
+mk_power_spectrum	evolution_toolkit.c	/^void mk_power_spectrum(const fftw_complex *in) {$/;"	f
+mk_rho	evolution_toolkit.c	/^double mk_rho(double *f) {$/;"	f
+mk_rhs	evolution_toolkit.c	/^void mk_rhs(const double t, double *f, double *result) {$/;"	f
+n_bad	dopri853_stepper.h	/^    int n_bad;$/;"	m	struct:__anon3
+n_ok	dopri853_stepper.h	/^    int n_ok;$/;"	m	struct:__anon3
+n_stp	dopri853_stepper.h	/^    int n_stp;$/;"	m	struct:__anon3
+p_bw	main.c	/^fftw_plan p_bw;$/;"	v
+p_fw	main.c	/^fftw_plan p_fw;$/;"	v
+parameters_t	main.h	/^}parameters_t;$/;"	t	typeref:struct:__anon8
+pars	main.c	/^parameters_t pars;$/;"	v
+perform_step	dopri853_stepper.c	/^int perform_step(const double dt_try) {$/;"	f
+phi_init	setup.c	/^double phi_init(const double x, const double y, const double z,$/;"	f
+poisson_time	main.c	/^double poisson_time = 0.0;$/;"	v
+potential	evolution_toolkit.c	/^inline double potential(const double f) {$/;"	f
+potential_prime	evolution_toolkit.c	/^inline double potential_prime(const double f) {$/;"	f
+pow_spec	main.c	/^double *pow_spec;$/;"	v
+pow_spec_buf	main.c	/^double *pow_spec_buf;$/;"	v
+prepare_and_save_timeslice	evolution_toolkit.c	/^void prepare_and_save_timeslice() {$/;"	f
+prepare_dense_output	dopri853_stepper.c	/^void prepare_dense_output(const double dt) {$/;"	f
+print_vector	setup.c	/^void print_vector(const double *vector, const size_t N) {$/;"	f
+psi	main.c	/^double *psi;$/;"	v
+r_tol	dopri853_stepper.h	/^    double a_tol, r_tol;$/;"	m	struct:__anon3
+rcont1	dopri853_stepper.h	/^        double *rcont1, *rcont2, *rcont3, *rcont4,$/;"	m	struct:__anon2
+rcont2	dopri853_stepper.h	/^        double *rcont1, *rcont2, *rcont3, *rcont4,$/;"	m	struct:__anon2
+rcont3	dopri853_stepper.h	/^        double *rcont1, *rcont2, *rcont3, *rcont4,$/;"	m	struct:__anon2
+rcont4	dopri853_stepper.h	/^        double *rcont1, *rcont2, *rcont3, *rcont4,$/;"	m	struct:__anon2
+rcont5	dopri853_stepper.h	/^               *rcont5, *rcont6, *rcont7, *rcont8;$/;"	m	struct:__anon2
+rcont6	dopri853_stepper.h	/^               *rcont5, *rcont6, *rcont7, *rcont8;$/;"	m	struct:__anon2
+rcont7	dopri853_stepper.h	/^               *rcont5, *rcont6, *rcont7, *rcont8;$/;"	m	struct:__anon2
+rcont8	dopri853_stepper.h	/^               *rcont5, *rcont6, *rcont7, *rcont8;$/;"	m	struct:__anon2
+reject	dopri853_stepper.h	/^    int reject;$/;"	m	struct:__anon3
+rho	main.c	/^double *rho;$/;"	v
+rho_avg	main.c	/^double rho_avg;$/;"	v
+rho_buf	main.c	/^double *rho_buf;$/;"	v
+run_all_tests	tests.c	/^void run_all_tests() {$/;"	f
+run_dopri853	dopri853_stepper.c	/^void run_dopri853() {$/;"	f
+run_rk4	RK4_stepper.c	/^void run_rk4() {$/;"	f
+safe	dopri853_stepper.h	/^    double safe;$/;"	m	struct:__anon3
+save	filehandling.c	/^void save() {$/;"	f
+skip	main.h	/^    size_t skip;         \/\/ how many timesteps to skip in between write out$/;"	m	struct:__anon7
+solve_poisson_eq	evolution_toolkit.c	/^void solve_poisson_eq() {$/;"	f
+success	dopri853_stepper.c	/^int success(const double err, double *dt) {$/;"	f
+t	dopri853_stepper.h	/^    double t;$/;"	m	struct:__anon3
+t	main.h	/^    double t;  \/\/ current time$/;"	m	struct:__anon6
+t	main.h	/^    timing_t t;$/;"	m	struct:__anon8
+t_old	dopri853_stepper.h	/^    double t_old;$/;"	m	struct:__anon3
+test_fft_apply_filter	tests.c	/^void test_fft_apply_filter() {$/;"	f
+test_func	tests.c	/^double test_func(const double x, const double y, const double z) {$/;"	f
+test_func_D2x	tests.c	/^double test_func_D2x(const double x, const double y, const double z) {$/;"	f
+test_func_D2y	tests.c	/^double test_func_D2y(const double x, const double y, const double z) {$/;"	f
+test_func_D2z	tests.c	/^double test_func_D2z(const double x, const double y, const double z) {$/;"	f
+test_func_Dx	tests.c	/^double test_func_Dx(const double x, const double y, const double z) {$/;"	f
+test_func_Dy	tests.c	/^double test_func_Dy(const double x, const double y, const double z) {$/;"	f
+test_func_Dz	tests.c	/^double test_func_Dz(const double x, const double y, const double z) {$/;"	f
+test_func_gradsq	tests.c	/^double test_func_gradsq(const double x, const double y, const double z) {$/;"	f
+test_func_lap	tests.c	/^double test_func_lap(const double x, const double y, const double z) {$/;"	f
+test_mk_gradient_squared_and_laplacian	tests.c	/^void test_mk_gradient_squared_and_laplacian() {$/;"	f
+test_rhs_poisson	tests.c	/^double test_rhs_poisson(const double x, const double y, const double z) {$/;"	f
+test_sol_poisson	tests.c	/^double test_sol_poisson(const double x, const double y, const double z) {$/;"	f
+test_solve_poisson_eq	tests.c	/^void test_solve_poisson_eq() {$/;"	f
+tf	dopri853_stepper.h	/^    double tf;$/;"	m	struct:__anon3
+tf	main.h	/^    double tf; \/\/ final time$/;"	m	struct:__anon6
+ti	dopri853_stepper.h	/^    double ti;$/;"	m	struct:__anon3
+ti	main.h	/^    double ti; \/\/ initial time$/;"	m	struct:__anon6
+time_buf	main.c	/^double *time_buf;$/;"	v
+timing_t	main.h	/^}timing_t;$/;"	t	typeref:struct:__anon6
+try_step	dopri853_stepper.c	/^void try_step(const double dt) {$/;"	f
+x	main.h	/^    grid_dimension_t x;$/;"	m	struct:__anon8
+y	main.h	/^    grid_dimension_t y;$/;"	m	struct:__anon8
+yerr	dopri853_stepper.h	/^        double *yerr, *yerr2;$/;"	m	struct:__anon2
+yerr2	dopri853_stepper.h	/^        double *yerr, *yerr2;$/;"	m	struct:__anon2
+z	main.h	/^    grid_dimension_t z;$/;"	m	struct:__anon8

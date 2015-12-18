@@ -180,15 +180,15 @@ void mk_gradient_squared_and_laplacian(double *in) {
 // TODO: change that?
 inline double potential(const double f) {
     // higgs metastability potential
-    double l = LAMBDA / 1.0e-10;
-    double a = 0.01 * l, b = 1.0 * l;
-    return f == 0.0 ? LAMBDA :
-        (LAMBDA + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) +
-        b * pow(f, 6));
+    // double l = LAMBDA / 1.0e-10;
+    // double a = 0.01 * l, b = 1.0 * l;
+    // return f == 0.0 ? LAMBDA :
+    //     (LAMBDA + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) +
+    //     b * pow(f, 6));
 
-    // notch or step potential (LAMBDA = 1.876e-4)
-    // double lambda = 100.0;
-    // return LAMBDA / (1.0 + exp(-lambda * f));
+    // notch or step potential (LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d:
+    double lambda = 100.0;
+    return LAMBDA / (1.0 + exp(-lambda * f));
 
     // standard f squared potential
     // return MASS * MASS * f * f / 2.0;
@@ -201,17 +201,17 @@ inline double potential(const double f) {
 
 inline double potential_prime(const double f) {
     // higgs metastability potential
-    double l = LAMBDA / 1.0e-10;
-    double a = 0.01 * l, b = 1.0 * l;
-    return f == 0.0 ? 0 :
-        (4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) -
-        (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0))
-        + 6.0 * b * pow(f, 5));
+    // double l = LAMBDA / 1.0e-10;
+    // double a = 0.01 * l, b = 1.0 * l;
+    // return f == 0.0 ? 0 :
+    //     (4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) -
+    //     (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0))
+    //     + 6.0 * b * pow(f, 5));
 
     // notch or step potential (LAMBDA = 1.876e-4)
-    // double lambda = 100.0;
-    // double tmp = exp(lambda * f);
-    // return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
+    double lambda = 100.0;
+    double tmp = exp(lambda * f);
+    return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
 
     // standard f squared potential
     // return MASS * MASS * f;
@@ -418,9 +418,9 @@ void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout) {
             for (size_t k = 0; k < Mz; ++k)
             {
                 x = filter_window_function(2.0 *
-                    (i > Nx / 2 ? Nx - i : i) / (double) Nx);
+                    (i > Nx / 2 ? (int)Nx - (int)i : i) / (double) Nx);
                 y = filter_window_function(2.0 *
-                    (j > Ny / 2 ? Ny - j : j) / (double) Ny);
+                    (j > Ny / 2 ? (int)Ny - (int)j : j) / (double) Ny);
                 z = filter_window_function(2.0 * k / (double) Nz);
                 inout[osy + k] *= x * y * z / (double) N;
                 dinout[osy + k] *= x * y * z / (double) N;

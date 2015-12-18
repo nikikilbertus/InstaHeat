@@ -42,7 +42,7 @@ during execution
  */
 #define WRITE_OUT_BUFFER_NUMBER (20)
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (1)
+#define TIME_STEP_SKIPS         (10)
 /**
  *  there is a (very crude and biased!) estimation of the power spectrum to
  *  track stability, therefore we sum up fourier coefficients into bins
@@ -68,12 +68,11 @@ during execution
 
 // ------------------computational domain---------------------------------------
 // spatial
-// TODO currently one needs at least 2, better 4 points in each direction,
-// because only the 3d fftw is used. 2d and 1d will be properly implemented
+// TODO 1d not properly working yet
 // soonish
-#define GRIDPOINTS_X            (256)
-#define GRIDPOINTS_Y            (256)
-#define GRIDPOINTS_Z            (1)
+#define GRIDPOINTS_X            (64)
+#define GRIDPOINTS_Y            (64)
+#define GRIDPOINTS_Z            (64)
 #define SPATIAL_LOWER_BOUND_X   (-PI)
 #define SPATIAL_UPPER_BOUND_X   (PI)
 #define SPATIAL_LOWER_BOUND_Y   (-PI)
@@ -82,16 +81,16 @@ during execution
 #define SPATIAL_UPPER_BOUND_Z   (PI)
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
-#define DELTA_T                 (0.001)
+#define DELTA_T                 (0.01)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (1.0)
+#define FINAL_TIME              (250.0)
 #define MAX_STEPS               (1e6)
 #define MINIMAL_DELTA_T         (1.0e-5)
 
 // ----------------parameters used in the potential-----------------------------
 #define MASS                    (1.0)
 #define COUPLING                (1.0) // coupling in a phi4 potential
-#define LAMBDA                  (5.e-4) // "cosmological constant"
+#define LAMBDA                  (4.721e-5) // "cosmological constant"
 
 // -------------------additional parameters for dopri853------------------------
 // maximal/minimal rescaling of dt per step (don't change)

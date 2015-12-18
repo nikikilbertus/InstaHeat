@@ -48,8 +48,8 @@ void run_dopri853() {
     RUNTIME_INFO(printf("initial time step dt: %f\n", dp.dt));
     RUNTIME_INFO(printf("minimal time step dt: %f\n", dp.dt_min));
     RUNTIME_INFO(printf("max number of steps: %zu\n", dp.max_steps));
-    RUNTIME_INFO(printf("relative tolerance: %f, "
-                        "absolute tolerance: %f\n", dp.r_tol, dp.a_tol));
+    RUNTIME_INFO(printf("relative tolerance: %.15f\n", dp.r_tol));
+    RUNTIME_INFO(printf("absolute tolerance: %.15f\n", dp.a_tol));
     RUNTIME_INFO(puts("Using DFT (fftw3) for spatial derivatives."));
 
     #ifdef ENABLE_FFT_FILTER

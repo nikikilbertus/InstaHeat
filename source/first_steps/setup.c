@@ -64,7 +64,7 @@ void initialize_parameters() {
     }
 
     // due to the memory usage of fftw, we need different upper bounds in for
-    // loops for depending on  the dimension, (the N gridpoints from the last
+    // loops depending on  the dimension, (the N gridpoints from the last
     // dimension are transformed to floor(N/2)+1 points in fourier space)
     switch (pars.dim)
     {
@@ -102,7 +102,7 @@ void initialize_parameters() {
     pars.file.buf_size = WRITE_OUT_BUFFER_NUMBER;
     pars.file.skip = TIME_STEP_SKIPS;
     pars.file.bins_powspec = POWER_SPECTRUM_BINS;
-    RUNTIME_INFO(printf("Initialized parameters (%zu dimensions.)\n\n",
+    RUNTIME_INFO(printf("Initialized parameters using %zu dimension(s).\n\n",
             pars.dim));
 }
 
@@ -134,11 +134,12 @@ void allocate_external() {
     pow_spec_buf = calloc(buf_size * bins, sizeof *pow_spec_buf);
 
     // default arrays to save coefficients of real to complex transforms
-    size_t ncz = Nz / 2 + 1; // see fftw3 documentation for this
-    cfftw_tmp   = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp);
-    cfftw_tmp_x = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_x);
-    cfftw_tmp_y = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_y);
-    cfftw_tmp_z = fftw_malloc(ncz * Nx * Ny * sizeof *cfftw_tmp_z);
+    // see fftw3 documentation and Mxyz for this
+    size_t M = pars.x.M * pars.y.M * pars.z.M;
+    cfftw_tmp   = fftw_malloc(M * sizeof *cfftw_tmp);
+    cfftw_tmp_x = fftw_malloc(M * sizeof *cfftw_tmp_x);
+    cfftw_tmp_y = fftw_malloc(M * sizeof *cfftw_tmp_y);
+    cfftw_tmp_z = fftw_malloc(M * sizeof *cfftw_tmp_z);
 
     // general purpose double memory blocks for temporary use
     dtmp_x = fftw_malloc(Ntot * sizeof *dtmp_x); // used in dopri853 (dense)
@@ -183,14 +184,14 @@ void mk_grid() {
         grid[i] = ax + (bx - ax) * i / Nx;
     }
     #pragma omp parallel for
-    for (size_t i = Nx; i < Nx+Ny; ++i)
+    for (size_t j = Nx; j < Nx+Ny; ++j)
     {
-        grid[i] = ay + (by - ay) * (i-Nx) / Ny;
+        grid[j] = ay + (by - ay) * (j - Nx) / Ny;
     }
     #pragma omp parallel for
-    for (size_t i = Nx+Ny; i < Nx+Ny+Nz; ++i)
+    for (size_t k = Nx + Ny; k < Nx + Ny+ Nz; ++k)
     {
-        grid[i] = az + (bz - az) * (i-Nx-Ny) / Nz;
+        grid[k] = az + (bz - az) * (k - Nx - Ny) / Nz;
     }
 
     #ifdef DEBUG
@@ -236,9 +237,6 @@ void mk_fftw_plans() {
                     FFTW_DEFAULT_FLAG);
             p_bw = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, cfftw_tmp, field,
                     FFTW_DEFAULT_FLAG);
-            break;
-        default:
-            fputs("Dimension has to be 1, 2 or 3\n", stderr);
             break;
     }
     #ifdef SHOW_TIMING_INFO
@@ -303,31 +301,45 @@ void mk_initial_conditions() {
 double phi_init(const double x, const double y, const double z,
                                                 const double *phases) {
     // localized for higgs metastability potential
-    double phi0 = 0.04;
-    double lambda = 20.0;
+    // double phi0 = 0.04;
+    // double lambda = 20.0;
+    // if (pars.dim == 1)
+    // {
+    //     return phi0 * 0.5 * (1.0 + cos(x)) * exp(-lambda * x * x);
+    // }
+    // else if (pars.dim == 2)
+    // {
+    //     return phi0 * 0.25 * (1.0 + cos(x)) * (1.0 + cos(y)) *
+    //         exp(-lambda * (x * x + y * y));
+    // }
+    // else
+    // {
+    //     return phi0 * 0.125 * (1.0 + cos(x)) * (1.0 + cos(y)) * (1.0 + cos(z)) *
+    //        exp(-lambda * (x * x + y * y + z * z));
+    // }
+
+    // some simple waves for notch or step potential simulations
+    double frac = 0.4; // vary the ratio between \phi_0 and \delta \phi
+    double phi0 = 0.73 * frac; // only vary if you know exactly why
+    double deltaphi = phi0 / frac;
     if (pars.dim == 1)
     {
-        return phi0 * 0.5 * (1.0 + cos(x)) * exp(-lambda * x * x);
+        return phi0 + deltaphi *
+                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]));
     }
     else if (pars.dim == 2)
     {
-        return phi0 * 0.25 * (1.0 + cos(x)) * (1.0 + cos(y)) *
-            exp(-lambda * (x * x + y * y));
+        return phi0 + deltaphi *
+                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
+                     cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]));
     }
     else
     {
-        return phi0 * 0.125 * (1.0 + cos(x)) * (1.0 + cos(y)) * (1.0 + cos(z)) *
-           exp(-lambda * (x * x + y * y + z * z));
+        return phi0 + deltaphi *
+                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
+                     cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) +
+                     cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5]));
     }
-
-    // some simple waves for notch or step potential simulations
-    // double frac = 0.4; // vary the ratio between \phi_0 and \delta \phi
-    // double phi0 = 0.73 * frac; // only vary if you know exactly why and what for
-    // double deltaphi = phi0 / frac;
-    // return phi0 + deltaphi *
-    //             (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
-    //              cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) +
-    //              cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5]));
 }
 
 // initial values of the time deriv. of the scalar field, make sure its periodic
