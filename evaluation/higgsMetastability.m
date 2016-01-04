@@ -1,4 +1,4 @@
-dim = 1;
+dim = 3;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
@@ -85,7 +85,7 @@ if mod(N,1) == 0 && dim == 2
     end
 end
 
-% 1d movie if data is small enough
+%1d movie if data is small enough
 if dim == 1 
     for i=1:Nt
         plot(phi(:,i))

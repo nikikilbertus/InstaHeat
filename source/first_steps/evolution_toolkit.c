@@ -186,7 +186,8 @@ inline double potential(const double f) {
     //     (LAMBDA + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) +
     //     b * pow(f, 6));
 
-    // notch or step potential (LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d:
+    // notch or step potential
+    // LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
     double lambda = 100.0;
     return LAMBDA / (1.0 + exp(-lambda * f));
 
@@ -208,7 +209,8 @@ inline double potential_prime(const double f) {
     //     (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0))
     //     + 6.0 * b * pow(f, 5));
 
-    // notch or step potential (LAMBDA = 1.876e-4)
+    // notch or step potential
+    // LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
     double lambda = 100.0;
     double tmp = exp(lambda * f);
     return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));

@@ -90,7 +90,7 @@ during execution
 // ----------------parameters used in the potential-----------------------------
 #define MASS                    (1.0)
 #define COUPLING                (1.0) // coupling in a phi4 potential
-#define LAMBDA                  (4.721e-5) // "cosmological constant"
+#define LAMBDA                  (1.876e-4) // "cosmological constant"
 
 // -------------------additional parameters for dopri853------------------------
 // maximal/minimal rescaling of dt per step (don't change)
