@@ -124,7 +124,7 @@ void h5_write_buffers_to_disk(const hsize_t Nt) {
     // static hsize_t counter;
 
     #ifdef SHOW_TIMING_INFO
-    double start = get_wall_time();
+    h5_time_write -= get_wall_time();
     #endif
 
     // --------------------------phi--------------------------------------------
@@ -215,8 +215,7 @@ void h5_write_buffers_to_disk(const hsize_t Nt) {
     H5Sclose(dspace);
 
     #ifdef SHOW_TIMING_INFO
-    double end = get_wall_time();
-    h5_time_write += end - start;
+    h5_time_write += get_wall_time();
     #endif
 }
 
