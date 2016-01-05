@@ -67,11 +67,11 @@ void mk_gradient_squared_and_laplacian(double *in) {
     size_t Mz = pars.z.M;
 
     #ifdef SHOW_TIMING_INFO
-    double start = get_wall_time();
+    fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_r2c(p_fw, in, cfftw_tmp);
     #ifdef SHOW_TIMING_INFO
-    fftw_time_exe += get_wall_time() - start;
+    fftw_time_exe += get_wall_time();
     #endif
 
     if (evo_flags.compute_pow_spec == 1)
@@ -143,7 +143,7 @@ void mk_gradient_squared_and_laplacian(double *in) {
     }
 
     #ifdef SHOW_TIMING_INFO
-    start = get_wall_time();
+    fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_c2r(p_bw, cfftw_tmp_x, dtmp_x);
     if (pars.dim > 1)
@@ -156,7 +156,7 @@ void mk_gradient_squared_and_laplacian(double *in) {
     }
     fftw_execute_dft_c2r(p_bw, cfftw_tmp, dtmp_lap);
     #ifdef SHOW_TIMING_INFO
-    fftw_time_exe += get_wall_time() - start;
+    fftw_time_exe += get_wall_time();
     #endif
 
     // gradient squared
@@ -180,51 +180,51 @@ void mk_gradient_squared_and_laplacian(double *in) {
 // TODO: change that?
 inline double potential(const double f) {
     // higgs metastability potential
-    // double l = LAMBDA / 1.0e-10;
-    // double a = 0.01 * l, b = 1.0 * l;
-    // return f == 0.0 ? LAMBDA :
-    //     (LAMBDA + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) +
-    //     b * pow(f, 6));
+    double l = LAMBDA / 1.0e-10;
+    double a = 0.01 * l, b = 1.0 * l;
+    return f == 0.0 ? LAMBDA :
+        (LAMBDA + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) +
+        b * pow(f, 6));
 
     // notch or step potential
-    // LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
-    double lambda = 100.0;
-    return LAMBDA / (1.0 + exp(-lambda * f));
+    /* LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5 */
+    /* double lambda = 100.0; */
+    /* return LAMBDA / (1.0 + exp(-lambda * f)); */
 
     // standard f squared potential
-    // return MASS * MASS * f * f / 2.0;
+    /* return MASS * MASS * f * f / 2.0; */
 
     // standard f to the fourth (with f squared) potential
-    // return MASS * MASS * f * f / 2.0 + COUPLING * f * f * f * f / 24.0;
+    /* return MASS * MASS * f * f / 2.0 + COUPLING * f * f * f * f / 24.0; */
 
-    // return 0.0;
+    /* return 0.0; */
 }
 
 inline double potential_prime(const double f) {
     // higgs metastability potential
-    // double l = LAMBDA / 1.0e-10;
-    // double a = 0.01 * l, b = 1.0 * l;
-    // return f == 0.0 ? 0 :
-    //     (4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) -
-    //     (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0))
-    //     + 6.0 * b * pow(f, 5));
+    double l = LAMBDA / 1.0e-10;
+    double a = 0.01 * l, b = 1.0 * l;
+    return f == 0.0 ? 0 :
+        (4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) -
+        (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0))
+        + 6.0 * b * pow(f, 5));
 
     // notch or step potential
-    // LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
-    double lambda = 100.0;
-    double tmp = exp(lambda * f);
-    return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
+    /* LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5 */
+    /* double lambda = 100.0; */
+    /* double tmp = exp(lambda * f); */
+    /* return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp)); */
 
     // standard f squared potential
-    // return MASS * MASS * f;
+    /* return MASS * MASS * f; */
 
     // standard f to the fourth (with f squared) potential
-    // return MASS * MASS * f + COUPLING * f * f * f / 6.0;
+    /* return MASS * MASS * f + COUPLING * f * f * f / 6.0; */
 
-    // return 0.0;
+    /* return 0.0; */
 }
 
-// solve the poisson equation Laplace(psi) = rho / 2 for scalar perturbations
+// solve the poisson equation Laplace(psi) = rhs for scalar perturbations
 void solve_poisson_eq() {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -234,12 +234,17 @@ void solve_poisson_eq() {
     size_t Mz = pars.z.M;
 
     #ifdef SHOW_TIMING_INFO
-    double start_poisson = get_wall_time();
-    double start = start_poisson;
+    poisson_time -= get_wall_time();
     #endif
-    fftw_execute_dft_r2c(p_fw, rho, cfftw_tmp);
+    double *rhs = dtmp_z; // reuse already allocated memory block
+    make_poisson_rhs(rhs);
+
     #ifdef SHOW_TIMING_INFO
-    fftw_time_exe += get_wall_time() - start;
+    fftw_time_exe -= get_wall_time();
+    #endif
+    fftw_execute_dft_r2c(p_fw, rhs, cfftw_tmp);
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe += get_wall_time();
     #endif
 
     double k_sq;
@@ -272,9 +277,7 @@ void solve_poisson_eq() {
                 }
                 if (k_sq < -1.0e-16)
                 {
-                    // factor two comes from equation: grad^2 psi = rho / 2
-                    // using 8 pi G = 1
-                    cfftw_tmp[osy + k] /= 2.0 * k_sq * N;
+                    cfftw_tmp[osy + k] /= k_sq * N;
                 }
                 else
                 {
@@ -285,13 +288,101 @@ void solve_poisson_eq() {
     }
 
     #ifdef SHOW_TIMING_INFO
-    start = get_wall_time();
+    fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_c2r(p_bw, cfftw_tmp, psi);
     #ifdef SHOW_TIMING_INFO
-    fftw_time_exe += get_wall_time() - start;
+    fftw_time_exe += get_wall_time();
     poisson_time += get_wall_time();
     #endif
+}
+
+// construct the right hand side for the poisson equation
+void make_poisson_rhs(double *rhs) {
+    size_t Nx = pars.x.N;
+    size_t N = pars.N;
+    size_t Mx = pars.x.M;
+    size_t My = pars.y.M;
+    size_t Mz = pars.z.M;
+    double a = field[2 * N];
+    double hubble = sqrt(rho_avg / 3.0);
+
+    double *u_x = dtmp_y; // reuse an already allocated memory block
+
+    // compute \bar{p}, i.e. the average pressure, the velocity in one
+    // direction u_1 and its average \bar{u}_1
+    double p_avg = 0.0, u_avg = 0.0, df, grad2;
+    #pragma omp parallel for default(shared) private(df, grad2) \
+        reduction(+:p_avg, u_avg)
+    for (size_t i = 0; i < N; ++i)
+    {
+        df = field[N + i];
+        grad2 = dtmp_grad2[i] / (a * a);
+        u_x[i] = - dtmp_x[i] / sqrt(df * df - grad2);
+        p_avg += 0.5 * (df * df - grad2) - potential(field[i]);
+        u_avg += u_x[i];
+    }
+    p_avg /= N;
+    u_avg /= N;
+
+    // construct \delta u_1 (overwrite to save memory)
+    #pragma omp parallel for
+    for (size_t i = 0; i < N; ++i)
+    {
+        u_x[i] -= u_avg;
+    }
+
+    // construct the velocity potential from \partial_1 \delta u = \delta u_1
+    // by inverting in fourier space
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe -= get_wall_time();
+    #endif
+    fftw_execute_dft_r2c(p_fw, u_x, cfftw_tmp);
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe += get_wall_time();
+    #endif
+
+    size_t osx, osy;
+    #pragma omp parallel for private(osx, osy)
+    for (size_t i = 0; i < Mx; ++i)
+    {
+        osx = i * My * Mz;
+        for (size_t j = 0; j < My; ++j)
+        {
+            osy = osx + j * Mz;
+            for (size_t k = 0; k < Mz; ++k)
+            {
+                if (i > Nx / 2)
+                {
+                    cfftw_tmp[osy + k] /= pars.x.k * ((int)i - (int)Nx) * N;
+                }
+                else if (2 * i == Nx || i == 0)
+                {
+                    cfftw_tmp_x[osy + k] = 0.0;
+                }
+                else
+                {
+                    cfftw_tmp[osy + k] /= pars.x.k * i * N;
+                }
+            }
+        }
+    }
+
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe -= get_wall_time();
+    #endif
+    fftw_execute_dft_c2r(p_bw, cfftw_tmp, u_x);
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe += get_wall_time();
+    #endif
+
+    // put together the right hand side of the poisson equation for psi
+    #pragma omp parallel for
+    for (size_t i = 0; i < N; ++i)
+    {
+        rhs[i] = 0.5 * a * a *
+            (rho[i] - rho_avg - 3.0 * hubble * (rho_avg + p_avg) * u_x[i]);
+    }
 }
 
 // computes a crude estimation of the power spectrum, more info in main.h
@@ -370,31 +461,25 @@ void apply_filter_real(double *inout) {
     size_t N = pars.N;
 
     #ifdef SHOW_TIMING_INFO
-    double start_filter = get_wall_time();
-    #endif
-
-    #ifdef SHOW_TIMING_INFO
-    double start_fft = get_wall_time();
+    filter_time -= get_wall_time();
+    fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_r2c(p_fw, inout, cfftw_tmp);
     fftw_execute_dft_r2c(p_fw, inout + N, cfftw_tmp_x);
     #ifdef SHOW_TIMING_INFO
-    fftw_time_exe += get_wall_time() - start_fft;
+    fftw_time_exe += get_wall_time();
     #endif
 
     apply_filter_fourier(cfftw_tmp, cfftw_tmp_x);
 
     #ifdef SHOW_TIMING_INFO
-    start_fft = get_wall_time();
+    fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_c2r(p_bw, cfftw_tmp, inout);
     fftw_execute_dft_c2r(p_bw, cfftw_tmp_x, inout + N);
     #ifdef SHOW_TIMING_INFO
-    fftw_time_exe += get_wall_time() - start_fft;
-    #endif
-
-    #ifdef SHOW_TIMING_INFO
-    filter_time += get_wall_time() - start_filter;
+    fftw_time_exe += get_wall_time();
+    filter_time += get_wall_time();
     #endif
 }
 

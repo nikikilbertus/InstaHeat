@@ -216,7 +216,7 @@ void mk_fftw_plans() {
     size_t Nz = pars.z.N;
 
     #ifdef SHOW_TIMING_INFO
-    double start =  get_wall_time();
+    fftw_time_plan -= get_wall_time();
     #endif
     switch (pars.dim)
     {
@@ -240,7 +240,7 @@ void mk_fftw_plans() {
             break;
     }
     #ifdef SHOW_TIMING_INFO
-    fftw_time_plan += get_wall_time() - start;
+    fftw_time_plan += get_wall_time();
     #endif
     RUNTIME_INFO(puts("Created fftw plans.\n"));
 }
@@ -301,45 +301,45 @@ void mk_initial_conditions() {
 double phi_init(const double x, const double y, const double z,
                                                 const double *phases) {
     // localized for higgs metastability potential
-    // double phi0 = 0.04;
-    // double lambda = 20.0;
-    // if (pars.dim == 1)
-    // {
-    //     return phi0 * 0.5 * (1.0 + cos(x)) * exp(-lambda * x * x);
-    // }
-    // else if (pars.dim == 2)
-    // {
-    //     return phi0 * 0.25 * (1.0 + cos(x)) * (1.0 + cos(y)) *
-    //         exp(-lambda * (x * x + y * y));
-    // }
-    // else
-    // {
-    //     return phi0 * 0.125 * (1.0 + cos(x)) * (1.0 + cos(y)) * (1.0 + cos(z)) *
-    //        exp(-lambda * (x * x + y * y + z * z));
-    // }
-
-    // some simple waves for notch or step potential simulations
-    double frac = 0.4; // vary the ratio between \phi_0 and \delta \phi
-    double phi0 = 0.73 * frac; // only vary if you know exactly why
-    double deltaphi = phi0 / frac;
+    double phi0 = 0.04;
+    double lambda = 20.0;
     if (pars.dim == 1)
     {
-        return phi0 + deltaphi *
-                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]));
+        return phi0 * 0.5 * (1.0 + cos(x)) * exp(-lambda * x * x);
     }
     else if (pars.dim == 2)
     {
-        return phi0 + deltaphi *
-                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
-                     cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]));
+        return phi0 * 0.25 * (1.0 + cos(x)) * (1.0 + cos(y)) *
+            exp(-lambda * (x * x + y * y));
     }
     else
     {
-        return phi0 + deltaphi *
-                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
-                     cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) +
-                     cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5]));
+        return phi0 * 0.125 * (1.0 + cos(x)) * (1.0 + cos(y)) * (1.0 + cos(z)) *
+           exp(-lambda * (x * x + y * y + z * z));
     }
+
+    // some simple waves for notch or step potential simulations
+    /* double frac = 0.4; // vary the ratio between \phi_0 and \delta \phi */
+    /* double phi0 = 0.73 * frac; // only vary if you know exactly why */
+    /* double deltaphi = phi0 / frac; */
+    /* if (pars.dim == 1) */
+    /* { */
+    /*     return phi0 + deltaphi * */
+    /*                 (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1])); */
+    /* } */
+    /* else if (pars.dim == 2) */
+    /* { */
+    /*     return phi0 + deltaphi * */
+    /*                 (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) + */
+    /*                  cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3])); */
+    /* } */
+    /* else */
+    /* { */
+    /*     return phi0 + deltaphi * */
+    /*                 (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) + */
+    /*                  cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) + */
+    /*                  cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5])); */
+    /* } */
 }
 
 // initial values of the time deriv. of the scalar field, make sure its periodic

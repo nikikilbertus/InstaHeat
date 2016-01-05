@@ -65,7 +65,7 @@ void run_dopri853() {
     save();
 
     #ifdef SHOW_TIMING_INFO
-    double start = get_wall_time();
+    double secs = -get_wall_time();
     #endif
 
     for (dp.n_stp = 0; dp.n_stp < dp.max_steps; ++dp.n_stp)
@@ -112,7 +112,7 @@ void run_dopri853() {
     }
 
     #ifdef SHOW_TIMING_INFO
-    double secs = get_wall_time() - start;
+    secs += get_wall_time();
     #endif
 
     free_dopri853_values();

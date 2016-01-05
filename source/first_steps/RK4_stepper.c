@@ -41,7 +41,7 @@ void run_rk4() {
     #endif
 
     #ifdef SHOW_TIMING_INFO
-    double start = get_wall_time();
+    double secs = -get_wall_time();
     #endif
 
     for (size_t nt = 0; t < pars.t.tf; ++nt)
@@ -119,7 +119,7 @@ void run_rk4() {
 
     RUNTIME_INFO(puts("Finished rk4"));
     #ifdef SHOW_TIMING_INFO
-    double secs = get_wall_time() - start;
+    secs += get_wall_time();
     RUNTIME_INFO(printf("time: %f seconds\n\n", secs));
     #endif
 
