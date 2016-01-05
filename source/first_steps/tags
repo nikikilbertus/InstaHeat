@@ -305,6 +305,7 @@ k8	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *
 k9	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
 k_tmp	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
 main	main.c	/^int main(int argc, const char * argv[]) {$/;"	f
+make_poisson_rhs	evolution_toolkit.c	/^void make_poisson_rhs(double *rhs) {$/;"	f
 max_steps	dopri853_stepper.h	/^    size_t max_steps;$/;"	m	struct:__anon3
 maxscale	dopri853_stepper.h	/^    double minscale, maxscale;$/;"	m	struct:__anon3
 minscale	dopri853_stepper.h	/^    double minscale, maxscale;$/;"	m	struct:__anon3
