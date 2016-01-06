@@ -180,16 +180,16 @@ void mk_gradient_squared_and_laplacian(double *in) {
 // TODO: change that?
 inline double potential(const double f) {
     // higgs metastability potential
-    double l = LAMBDA / 1.0e-10;
-    double a = 0.01 * l, b = 1.0 * l;
-    return f == 0.0 ? LAMBDA :
-        (LAMBDA + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) +
-        b * pow(f, 6));
+    /* double l = LAMBDA / 1.0e-10; */
+    /* double a = 0.01 * l, b = 1.0 * l; */
+    /* return f == 0.0 ? LAMBDA : */
+    /*     (LAMBDA + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) + */
+    /*     b * pow(f, 6)); */
 
     // notch or step potential
-    /* LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5 */
-    /* double lambda = 100.0; */
-    /* return LAMBDA / (1.0 + exp(-lambda * f)); */
+    // LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
+    double lambda = 100.0;
+    return LAMBDA / (1.0 + exp(-lambda * f));
 
     // standard f squared potential
     /* return MASS * MASS * f * f / 2.0; */
@@ -202,18 +202,18 @@ inline double potential(const double f) {
 
 inline double potential_prime(const double f) {
     // higgs metastability potential
-    double l = LAMBDA / 1.0e-10;
-    double a = 0.01 * l, b = 1.0 * l;
-    return f == 0.0 ? 0 :
-        (4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) -
-        (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0))
-        + 6.0 * b * pow(f, 5));
+    /* double l = LAMBDA / 1.0e-10; */
+    /* double a = 0.01 * l, b = 1.0 * l; */
+    /* return f == 0.0 ? 0 : */
+    /*     (4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) - */
+    /*     (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0)) */
+    /*     + 6.0 * b * pow(f, 5)); */
 
     // notch or step potential
-    /* LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5 */
-    /* double lambda = 100.0; */
-    /* double tmp = exp(lambda * f); */
-    /* return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp)); */
+    // LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
+    double lambda = 100.0;
+    double tmp = exp(lambda * f);
+    return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
 
     // standard f squared potential
     /* return MASS * MASS * f; */
@@ -307,6 +307,8 @@ void make_poisson_rhs(double *rhs) {
     double a = field[2 * N];
     double hubble = sqrt(rho_avg / 3.0);
 
+    RUNTIME_INFO(printf("hubble: %.15f\n", hubble));
+    RUNTIME_INFO(printf("a: %.15f\n", a));
     double *u_x = dtmp_y; // reuse an already allocated memory block
 
     // compute \bar{p}, i.e. the average pressure, the velocity in one
@@ -318,12 +320,19 @@ void make_poisson_rhs(double *rhs) {
     {
         df = field[N + i];
         grad2 = dtmp_grad2[i] / (a * a);
+        // TODO: fix this
+        if (df*df-grad2 < 0)
+        {
+            RUNTIME_INFO(printf("found neg sqrt in: %zu\n", i));
+        }
         u_x[i] = - dtmp_x[i] / sqrt(df * df - grad2);
         p_avg += 0.5 * (df * df - grad2) - potential(field[i]);
         u_avg += u_x[i];
     }
     p_avg /= N;
     u_avg /= N;
+    RUNTIME_INFO(printf("p: %.15f\n", p_avg));
+    RUNTIME_INFO(printf("u: %.15f\n", u_avg));
 
     // construct \delta u_1 (overwrite to save memory)
     #pragma omp parallel for

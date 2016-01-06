@@ -9,6 +9,7 @@ t = h5read(name, '/time');
 a = h5read(name, '/a');
 rho = h5read(name, '/rho');
 phi = h5read(name, '/phi');
+psi = h5read(name, '/psi');
 powspec = h5read(name, '/power_spectrum');
 % compute some further properties
 H = sqrt(rho / 3);

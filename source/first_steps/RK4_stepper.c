@@ -63,12 +63,14 @@ void run_rk4() {
         {
             evo_flags.compute_pow_spec = 1;
             mk_rhs(t, field, k1);
+            solve_poisson_eq();
             evo_flags.compute_pow_spec = 0;
             save();
         }
         else
         {
             mk_rhs(t, field, k1);
+            solve_poisson_eq();
         }
 
         // step 2
@@ -101,7 +103,6 @@ void run_rk4() {
         {
             field[i] += dt * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]) / 6.0;
         }
-        // solve_poisson_eq();
 
         t += dt;
         pars.t.t = t;
