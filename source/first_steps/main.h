@@ -63,8 +63,10 @@ during execution
  *  filter_window_function in evolution_toolkit.c, this should not be necessary
  *  for smaller grids, and simple (not too nonlinear) scenarios rather try to
  *  adjust tolerances and see what happens to the power spectrum
-*/
+ */
 // #define ENABLE_FFT_FILTER
+// include scalar metric perturbation Psi
+// #define INCLUDE_PSI
 
 // ------------------computational domain---------------------------------------
 // spatial

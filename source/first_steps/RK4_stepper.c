@@ -63,14 +63,18 @@ void run_rk4() {
         {
             evo_flags.compute_pow_spec = 1;
             mk_rhs(t, field, k1);
+            #ifdef INCLUDE_PSI
             solve_poisson_eq();
+            #endif
             evo_flags.compute_pow_spec = 0;
             save();
         }
         else
         {
             mk_rhs(t, field, k1);
+            #ifdef INCLUDE_PSI
             solve_poisson_eq();
+            #endif
         }
 
         // step 2
