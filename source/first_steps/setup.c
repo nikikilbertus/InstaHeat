@@ -126,6 +126,7 @@ void allocate_external() {
     // this buffer only holds the scalar field (not the deriv. or a)
     field_buf    = calloc(buf_size * N, sizeof *field_buf);
     psi          = fftw_malloc(N * sizeof *psi);
+    psi_buf      = fftw_malloc(buf_size * N * sizeof *psi_buf);
     time_buf     = calloc(buf_size, sizeof *time_buf);
     f_a_buf      = calloc(buf_size, sizeof *f_a_buf);
     rho          = fftw_malloc(N * sizeof *rho);
@@ -369,6 +370,7 @@ void free_external() {
     fftw_free(dfield_new);
     free(field_buf);
     free(psi);
+    free(psi_buf);
     free(time_buf);
     free(f_a_buf);
     free(rho);

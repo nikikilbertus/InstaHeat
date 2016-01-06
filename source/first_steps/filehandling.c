@@ -17,18 +17,18 @@ void h5_create_empty_by_path(const char *name) {
     pars.file.id = file;
 
     // --------------------------phi--------------------------------------------
-    // create dataspace for the phi
+    // create dataspace for phi
     hsize_t dims[2] = {0, N};
     hsize_t max_dims[2] = {H5S_UNLIMITED, N};
     hid_t dspace_phi = H5Screate_simple(rank, dims, max_dims);
 
-    // create property list for the phi
+    // create property list for phi
     hid_t plist_phi = H5Pcreate(H5P_DATASET_CREATE);
     H5Pset_layout(plist_phi, H5D_CHUNKED);
     hsize_t chunk_dims[2] = {Nt, N};
     H5Pset_chunk(plist_phi, rank, chunk_dims);
 
-    // create dataset for the phi
+    // create dataset for phi
     hid_t dset_phi = H5Dcreate(file, "phi", H5T_NATIVE_DOUBLE,
                             dspace_phi, H5P_DEFAULT, plist_phi, H5P_DEFAULT);
     pars.file.dset_phi = dset_phi;
@@ -36,6 +36,24 @@ void h5_create_empty_by_path(const char *name) {
     // close property list and dataspace
     H5Pclose(plist_phi);
     H5Sclose(dspace_phi);
+
+    // --------------------------psi--------------------------------------------
+    // create dataspace for psi
+    hid_t dspace_psi = H5Screate_simple(rank, dims, max_dims);
+
+    // create property list for phi
+    hid_t plist_psi = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_layout(plist_psi, H5D_CHUNKED);
+    H5Pset_chunk(plist_psi, rank, chunk_dims);
+
+    // create dataset for psi
+    hid_t dset_psi = H5Dcreate(file, "psi", H5T_NATIVE_DOUBLE,
+                            dspace_psi, H5P_DEFAULT, plist_psi, H5P_DEFAULT);
+    pars.file.dset_psi = dset_psi;
+
+    // close property list and dataspace
+    H5Pclose(plist_psi);
+    H5Sclose(dspace_psi);
 
     // --------------------------power spectrum---------------------------------
     // create dataspace for the power_spectrum
@@ -150,6 +168,22 @@ void h5_write_buffers_to_disk(const hsize_t Nt) {
     H5Sclose(mem_space);
     H5Sclose(dspace);
 
+    // --------------------------psi--------------------------------------------
+    dset = pars.file.dset_psi;
+
+    mem_space = H5Screate_simple(rank, add_dims, NULL);
+    dspace = H5Dget_space(dset);
+    H5Dset_extent(dset, new_dims);
+    dspace = H5Dget_space(dset);
+
+    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
+                            add_dims, NULL);
+    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT,
+                    psi_buf);
+
+    H5Sclose(mem_space);
+    H5Sclose(dspace);
+
     // --------------------------power spectrum---------------------------------
     dset = pars.file.dset_powspec;
 
@@ -230,8 +264,9 @@ void save() {
     for (size_t i = 0; i < N; ++i)
     {
         field_buf[os + i] = field[i];
+        psi_buf[os + i] = psi[i];
         #ifdef CHECK_FOR_NAN
-        if (isnan(field[i]))
+        if (isnan(field[i]) || isnan(psi[i]))
         {
             fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
             exit(EXIT_FAILURE);

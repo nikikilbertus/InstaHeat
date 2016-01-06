@@ -129,6 +129,7 @@ typedef struct {
 typedef struct {
     size_t id;           // h5 file id of the output file
     size_t dset_phi;     // h5 data set id of the scalar field
+    size_t dset_psi;     // h5 data set id of the scalar perturbation
     size_t dset_powspec; // h5 data set id of the power spectrum
     size_t dset_time;    // h5 data set id of the time
     size_t dset_a;       // h5 data set id of the scaling parameter a
@@ -182,6 +183,7 @@ extern double *field_buf;
 
 // the scalar perturbation psi
 extern double *psi;
+extern double *psi_buf;
 
 // buffer for scaling parameter a
 extern double *f_a_buf;
