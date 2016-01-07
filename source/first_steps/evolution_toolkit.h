@@ -15,7 +15,7 @@ typedef struct {
 extern evolution_flags_t evo_flags;
 
 void mk_rhs(const double t, double *f, double *result);
-double mk_rho(double *f);
+void mk_rho(double *f);
 void mk_gradient_squared_and_laplacian(double *in);
 extern double potential(const double f);
 extern double potential_prime(const double f);

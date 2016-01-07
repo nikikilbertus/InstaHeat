@@ -18,7 +18,7 @@ void mk_rhs(const double t, double *f, double *result) {
     size_t N2 = 2 * N;
     double a = f[N2];
 
-    rho_avg = mk_rho(f);
+    mk_rho(f);
     double hubble = sqrt(rho_avg / 3.0);
 
     #pragma omp parallel for
@@ -37,23 +37,24 @@ void mk_rhs(const double t, double *f, double *result) {
 }
 
 // compute energy density rho, i.e. 00 of stress energy, return average value
-double mk_rho(double *f) {
+void mk_rho(double *f) {
     size_t N = pars.N;
     double a = f[2 * N];
-    double T00 = 0.0;
+    rho_avg = 0.0;
 
     mk_gradient_squared_and_laplacian(f);
 
     double df, grad2;
-    #pragma omp parallel for default(shared) private(df, grad2) reduction(+:T00)
+    #pragma omp parallel for default(shared) private(df, grad2) \
+        reduction(+:rho_avg)
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
         grad2 = dtmp_grad2[i] / (a * a);
         rho[i] = (df * df + grad2) / 2. + potential(f[i]);
-        T00 += rho[i];
+        rho_avg += rho[i];
     }
-    return T00 / N;
+    rho_avg /= N;
 }
 
 // compute the laplacian and the squared gradient of the input and store them in
@@ -464,7 +465,7 @@ inline double filter_window_function(const double x) {
 // point where everything is available anyway
 void prepare_and_save_timeslice() {
     evo_flags.compute_pow_spec = 1;
-    rho_avg = mk_rho(field);
+    mk_rho(field);
     evo_flags.compute_pow_spec = 0;
     save();
 }
