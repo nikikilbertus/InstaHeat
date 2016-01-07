@@ -93,6 +93,9 @@ void run_dopri853() {
 
         if ((dp.n_stp + 1) % pars.file.skip == 0)
         {
+            #ifdef INCLUDE_PSI
+            solve_poisson_eq();
+            #endif
             save();
         }
         if (dp.t >= dp.tf)
@@ -154,9 +157,6 @@ int perform_step(const double dt_try) {
     }
     mk_rhs(dp.t + dt, field_new, dfield_new);
     evo_flags.compute_pow_spec = 0;
-    #ifdef INCLUDE_PSI
-    solve_poisson_eq();
-    #endif
 
     #pragma omp parallel for
     for (size_t i = 0; i < Ntot; ++i)

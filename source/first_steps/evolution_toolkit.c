@@ -36,7 +36,7 @@ void mk_rhs(const double t, double *f, double *result) {
     result[N2] = a * hubble;
 }
 
-// compute energy density rho, i.e. 00 of stress energy, return average value
+// compute energy density rho, i.e. 00 of stress energy & save average value
 void mk_rho(double *f) {
     size_t N = pars.N;
     double a = f[2 * N];

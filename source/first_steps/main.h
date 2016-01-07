@@ -17,10 +17,10 @@ during execution
 */
 #define SHOW_RUNTIME_INFO // recommended
 #define SHOW_TIMING_INFO // recommended
-// #define CHECK_FOR_NAN // not recommended (performance)
-// #define ENABLE_PROFILER // only recommended for debugging
-// #define DEBUG // only recommended for debugging (huge output!)
-// #define RUN_TESTS_ONLY // testing only (tests.c)
+/* #define CHECK_FOR_NAN // not recommended (performance) */
+/* #define ENABLE_PROFILER // only recommended for debugging */
+/* #define DEBUG // only recommended for debugging (huge output!) */
+/* #define RUN_TESTS_ONLY // testing only (tests.c) */
 
 // always leave this here uncommented
 #ifdef SHOW_RUNTIME_INFO
@@ -64,17 +64,15 @@ during execution
  *  for smaller grids, and simple (not too nonlinear) scenarios rather try to
  *  adjust tolerances and see what happens to the power spectrum
  */
-// #define ENABLE_FFT_FILTER
+/* #define ENABLE_FFT_FILTER */
 // include scalar metric perturbation Psi
-// #define INCLUDE_PSI
+#define INCLUDE_PSI
 
 // ------------------computational domain---------------------------------------
 // spatial
-// TODO 1d not properly working yet
-// soonish
-#define GRIDPOINTS_X            (32)
-#define GRIDPOINTS_Y            (32)
-#define GRIDPOINTS_Z            (32)
+#define GRIDPOINTS_X            (64)
+#define GRIDPOINTS_Y            (64)
+#define GRIDPOINTS_Z            (1)
 #define SPATIAL_LOWER_BOUND_X   (-PI)
 #define SPATIAL_UPPER_BOUND_X   (PI)
 #define SPATIAL_LOWER_BOUND_Y   (-PI)
@@ -83,16 +81,16 @@ during execution
 #define SPATIAL_UPPER_BOUND_Z   (PI)
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
-#define DELTA_T                 (0.1)
+#define DELTA_T                 (0.02)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (0.1)
+#define FINAL_TIME              (250.0)
 #define MAX_STEPS               (1e6)
 #define MINIMAL_DELTA_T         (1.0e-5)
 
 // ----------------parameters used in the potential-----------------------------
 #define MASS                    (1.0)
 #define COUPLING                (1.0) // coupling in a phi4 potential
-#define LAMBDA                  (1.876e-4) // "cosmological constant"
+#define LAMBDA                  (4.721e-5) // "cosmological constant"
 
 // -------------------additional parameters for dopri853------------------------
 // maximal/minimal rescaling of dt per step (don't change)

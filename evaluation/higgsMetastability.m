@@ -1,4 +1,5 @@
-dim = 3;
+close all
+dim = 2;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
@@ -14,6 +15,7 @@ powspec = h5read(name, '/power_spectrum');
 % compute some further properties
 H = sqrt(rho / 3);
 phiAvg = mean(phi);
+psiAvg = mean(psi);
 Nt = length(t);
 
 % start with some simple plots (rho over a with a^-4 for reference)
@@ -39,12 +41,20 @@ legend('data', 'reference: a^{-2}');
 shg;
 pause;
 
-% average field value (with max and min) over time
+% average field value and perturbation (with max and min) over time
+subplot(1,2,1)
 plot(t, phiAvg, t, max(phi), t, min(phi));
+title('phi')
 xlabel('t')
 legend('<phi>', 'max', 'min')
+subplot(1,2,2)
+plot(t, psiAvg, t, max(psi), t, min(psi));
+title('psi')
+xlabel('t')
+legend('<psi>', 'max', 'min')
 shg;
 pause;
+close all;
 
 % the power spectrum with a reference plane at 10^-10 (everything below
 % that might as well be roundoff errors and not truncation errors
@@ -78,11 +88,18 @@ pause;
 N = sqrt(length(phi(:,1)));
 if mod(N,1) == 0 && dim == 2
     for i=1:Nt
+        subplot(1,2,1)
         surf(reshape(phi(:,i),N,N))
+        title('phi')
+        shading interp
+        lighting phong
+        subplot(1,2,2)
+        surf(reshape(psi(:,i),N,N))
+        title('psi')
         shading interp
         lighting phong
         shg;
-        pause()
+        pause(0.2)
     end
 end
 
