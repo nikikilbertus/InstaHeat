@@ -136,32 +136,34 @@ void allocate_external() {
 
     // default arrays to save coefficients of real to complex transforms
     // see fftw3 documentation and Mxyz for this
+    // TODO: maybe wrap this allocation in extra method (slight differences!)
     size_t M = pars.x.M * pars.y.M * pars.z.M;
-    cfftw_tmp   = fftw_malloc(M * sizeof *cfftw_tmp);
-    cfftw_tmp_x = fftw_malloc(M * sizeof *cfftw_tmp_x);
-    cfftw_tmp_y = fftw_malloc(M * sizeof *cfftw_tmp_y);
-    cfftw_tmp_z = fftw_malloc(M * sizeof *cfftw_tmp_z);
-    cfftw_tmp2   = fftw_malloc(M * sizeof *cfftw_tmp2);
-    cfftw_tmp2_x = fftw_malloc(M * sizeof *cfftw_tmp2_x);
-    cfftw_tmp2_y = fftw_malloc(M * sizeof *cfftw_tmp2_y);
-    cfftw_tmp2_z = fftw_malloc(M * sizeof *cfftw_tmp2_z);
+    tmp_phi.c   = fftw_malloc(M * sizeof *tmp_phi.c);
+    tmp_phi.cx  = fftw_malloc(M * sizeof *tmp_phi.cx);
+    tmp_phi.cy  = fftw_malloc(M * sizeof *tmp_phi.cy);
+    tmp_phi.cz  = fftw_malloc(M * sizeof *tmp_phi.cz);
+    tmp_psi.c   = fftw_malloc(M * sizeof *tmp_psi.c);
+    tmp_psi.cx  = fftw_malloc(M * sizeof *tmp_psi.cx);
+    tmp_psi.cy  = fftw_malloc(M * sizeof *tmp_psi.cy);
+    tmp_psi.cz  = fftw_malloc(M * sizeof *tmp_psi.cz);
 
     // general purpose double memory blocks for temporary use
-    dtmp_x = fftw_malloc(Ntot * sizeof *dtmp_x); // used in dopri853 (dense)
-    dtmp_y = fftw_malloc(N * sizeof *dtmp_y);
-    dtmp_z = fftw_malloc(N * sizeof *dtmp_z);
-    dtmp2_x = fftw_malloc(N * sizeof *dtmp2_x);
-    dtmp2_y = fftw_malloc(N * sizeof *dtmp2_y);
-    dtmp2_z = fftw_malloc(N * sizeof *dtmp2_z);
-    dtmp_grad2 = fftw_malloc(N * sizeof *dtmp_grad2);
-    dtmp_lap = fftw_malloc(N * sizeof *dtmp_lap);
+    tmp_phi.dx = fftw_malloc(Ntot * sizeof *tmp_phi.dx); // used in dopri853 (dense)
+    tmp_phi.dy = fftw_malloc(N * sizeof *tmp_phi.dy);
+    tmp_phi.dz = fftw_malloc(N * sizeof *tmp_phi.dz);
+    tmp_phi.grad = fftw_malloc(N * sizeof *tmp_phi.grad);
+    tmp_phi.lap  = fftw_malloc(N * sizeof *tmp_phi.lap);
+    tmp_psi.dx = fftw_malloc(N * sizeof *tmp_psi.dx);
+    tmp_psi.dy = fftw_malloc(N * sizeof *tmp_psi.dy);
+    tmp_psi.dz = fftw_malloc(N * sizeof *tmp_psi.dz);
+    tmp_psi.grad = fftw_malloc(N * sizeof *tmp_psi.grad);
 
     if (!(grid && field && field_new && dfield && dfield_new && field_buf &&
         psi && time_buf && rho && rho_buf && pow_spec && pow_spec_buf &&
-        cfftw_tmp && cfftw_tmp_x && cfftw_tmp_y && cfftw_tmp_z &&
-        dtmp_x && dtmp_y && dtmp_z && dtmp_grad2 && dtmp_lap &&
-        dtmp2_x && dtmp2_y && dtmp2_z &&
-        cfftw_tmp2 && cfftw_tmp2_x && cfftw_tmp2_y && cfftw_tmp2_z))
+        tmp_phi.c  && tmp_phi.cx && tmp_phi.cy && tmp_phi.cz &&
+        tmp_phi.dx && tmp_phi.dy && tmp_phi.dz && tmp_phi.grad && tmp_phi.lap &&
+        tmp_psi.c  && tmp_psi.cx && tmp_psi.cy && tmp_psi.cz &&
+        tmp_psi.dx && tmp_psi.dy && tmp_psi.dz && tmp_psi.grad))
     {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
@@ -231,21 +233,21 @@ void mk_fftw_plans() {
     switch (pars.dim)
     {
         case 1:
-            p_fw = fftw_plan_dft_r2c_1d(Nx, field, cfftw_tmp,
+            p_fw = fftw_plan_dft_r2c_1d(Nx, field, tmp_phi.c,
                     FFTW_DEFAULT_FLAG);
-            p_bw = fftw_plan_dft_c2r_1d(Nx, cfftw_tmp, field,
+            p_bw = fftw_plan_dft_c2r_1d(Nx, tmp_phi.c, field,
                     FFTW_DEFAULT_FLAG);
             break;
         case 2:
-            p_fw = fftw_plan_dft_r2c_2d(Nx, Ny, field, cfftw_tmp,
+            p_fw = fftw_plan_dft_r2c_2d(Nx, Ny, field, tmp_phi.c,
                     FFTW_DEFAULT_FLAG);
-            p_bw = fftw_plan_dft_c2r_2d(Nx, Ny, cfftw_tmp, field,
+            p_bw = fftw_plan_dft_c2r_2d(Nx, Ny, tmp_phi.c, field,
                     FFTW_DEFAULT_FLAG);
             break;
         case 3:
-            p_fw = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, field, cfftw_tmp,
+            p_fw = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, field, tmp_phi.c,
                     FFTW_DEFAULT_FLAG);
-            p_bw = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, cfftw_tmp, field,
+            p_bw = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, tmp_phi.c, field,
                     FFTW_DEFAULT_FLAG);
             break;
     }
@@ -402,22 +404,23 @@ void free_external() {
     free(rho_buf);
     free(pow_spec);
     free(pow_spec_buf);
-    fftw_free(cfftw_tmp);
-    fftw_free(cfftw_tmp_x);
-    fftw_free(cfftw_tmp_y);
-    fftw_free(cfftw_tmp_z);
-    fftw_free(cfftw_tmp2);
-    fftw_free(cfftw_tmp2_x);
-    fftw_free(cfftw_tmp2_y);
-    fftw_free(cfftw_tmp2_z);
-    fftw_free(dtmp_x);
-    fftw_free(dtmp_y);
-    fftw_free(dtmp_z);
-    fftw_free(dtmp2_x);
-    fftw_free(dtmp2_y);
-    fftw_free(dtmp2_z);
-    fftw_free(dtmp_grad2);
-    fftw_free(dtmp_lap);
+    fftw_free(tmp_phi.c);
+    fftw_free(tmp_phi.cx);
+    fftw_free(tmp_phi.cy);
+    fftw_free(tmp_phi.cz);
+    fftw_free(tmp_phi.dx);
+    fftw_free(tmp_phi.dy);
+    fftw_free(tmp_phi.dz);
+    fftw_free(tmp_phi.grad);
+    fftw_free(tmp_phi.lap);
+    fftw_free(tmp_psi.c);
+    fftw_free(tmp_psi.cx);
+    fftw_free(tmp_psi.cy);
+    fftw_free(tmp_psi.cz);
+    fftw_free(tmp_psi.dx);
+    fftw_free(tmp_psi.dy);
+    fftw_free(tmp_psi.dz);
+    fftw_free(tmp_psi.grad);
     RUNTIME_INFO(puts("Freed external variables.\n"));
 }
 

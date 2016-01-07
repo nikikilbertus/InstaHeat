@@ -381,7 +381,7 @@ void prepare_dense_output(const double dt) {
     size_t Ntot = 2 * pars.N + 1;
     double t = dp.t;
     double fdiff, bspl;
-    double *ftmp = dtmp_x;
+    double *ftmp = tmp_phi.dx;
 
     #pragma omp parallel for private(fdiff, bspl)
     for (size_t i = 0; i < Ntot; ++i)

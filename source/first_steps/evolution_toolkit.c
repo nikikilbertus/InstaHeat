@@ -31,33 +31,8 @@ void mk_rhs(const double t, double *f, double *result) {
     #pragma omp parallel for
     for (size_t i = N; i < N2; ++i)
     {
-        result[i] = dtmp_lap[i - N] / (a * a);
-        result[i] -= ( 3.0 * hubble * f[i] + potential_prime(f[i - N]) );
-    }
-    result[N2] = a * hubble;
-}
-
-// compute the right hand side of the pde, i.e. the first temporal derivatives
-// of all fields (scalar field, its first temporal derivative and a)
-void mk_rhs(const double t, double *f, double *result) {
-    size_t N = pars.N;
-    size_t N2 = 2 * N;
-    double a = f[N2];
-
-    mk_rho(f);
-    double hubble = sqrt(rho_avg / 3.0);
-
-    #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i)
-    {
-        result[i] = f[N + i];
-    }
-
-    #pragma omp parallel for
-    for (size_t i = N; i < N2; ++i)
-    {
-        result[i] = dtmp_lap[i - N] / (a * a);
-        result[i] -= ( 3.0 * hubble * f[i] + potential_prime(f[i - N]) );
+        result[i] = tmp_phi.lap[i - N] / (a * a);
+        result[i] -= (3.0 * hubble * f[i] + potential_prime(f[i - N]));
     }
     result[N2] = a * hubble;
 }
@@ -76,15 +51,14 @@ void mk_rho(double *f) {
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
-        grad2 = dtmp_grad2[i] / (a * a);
+        grad2 = tmp_phi.grad[i] / (a * a);
         rho[i] = (df * df + grad2) / 2. + potential(f[i]);
         rho_avg += rho[i];
     }
     rho_avg /= N;
 }
 
-// compute the laplacian and the squared gradient of the input and store them in
-// dtmp_lap and dtmp_grad2
+// compute the laplacian and the squared gradient of the input and store them
 void mk_gradient_squared_and_laplacian(double *in) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -96,14 +70,14 @@ void mk_gradient_squared_and_laplacian(double *in) {
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
-    fftw_execute_dft_r2c(p_fw, in, cfftw_tmp);
+    fftw_execute_dft_r2c(p_fw, in, tmp_phi.c);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
 
     if (evo_flags.compute_pow_spec == 1)
     {
-        mk_power_spectrum(cfftw_tmp);
+        mk_power_spectrum(tmp_phi.c);
     }
 
     double k_sq;
@@ -123,48 +97,48 @@ void mk_gradient_squared_and_laplacian(double *in) {
                 // x derivative
                 if (i > Nx / 2)
                 {
-                    cfftw_tmp_x[id] = cfftw_tmp[id] * pars.x.k
+                    tmp_phi.cx[id] = tmp_phi.c[id] * pars.x.k
                         * ((int)i - (int)Nx) / N;
                     k_sq += pars.x.k2 * (Nx - i) * (Nx - i);
                 }
                 else if (2 * i == Nx)
                 {
-                    cfftw_tmp_x[id] = 0.0;
+                    tmp_phi.cx[id] = 0.0;
                     k_sq += pars.x.k2 * i * i;
                 }
                 else
                 {
-                    cfftw_tmp_x[id] = cfftw_tmp[id] * pars.x.k * i / N;
+                    tmp_phi.cx[id] = tmp_phi.c[id] * pars.x.k * i / N;
                     k_sq += pars.x.k2 * i * i;
                 }
                 // y derivative
                 if (j > Ny / 2)
                 {
-                    cfftw_tmp_y[id] = cfftw_tmp[id] * pars.y.k
+                    tmp_phi.cy[id] = tmp_phi.c[id] * pars.y.k
                         * ((int)j - (int)Ny) / N;
                     k_sq += pars.y.k2 * (Ny - j) * (Ny - j);
                 }
                 else if (2 * j == Ny)
                 {
-                    cfftw_tmp_y[id] = 0.0;
+                    tmp_phi.cy[id] = 0.0;
                     k_sq += pars.y.k2 * j * j;
                 }
                 else
                 {
-                    cfftw_tmp_y[id] = cfftw_tmp[id] * pars.y.k * j / N;
+                    tmp_phi.cy[id] = tmp_phi.c[id] * pars.y.k * j / N;
                     k_sq += pars.y.k2 * j * j;
                 }
                 // z derivative
                 if (k == Mz - 1)
                 {
-                    cfftw_tmp_z[id] = 0.0;
+                    tmp_phi.cz[id] = 0.0;
                 }
                 else
                 {
-                    cfftw_tmp_z[id] = cfftw_tmp[id] * pars.z.k * k / N;
+                    tmp_phi.cz[id] = tmp_phi.c[id] * pars.z.k * k / N;
                 }
                 // laplacian
-                cfftw_tmp[id] *= k_sq / N;
+                tmp_phi.c[id] *= k_sq / N;
             }
         }
     }
@@ -172,16 +146,16 @@ void mk_gradient_squared_and_laplacian(double *in) {
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
-    fftw_execute_dft_c2r(p_bw, cfftw_tmp_x, dtmp_x);
+    fftw_execute_dft_c2r(p_bw, tmp_phi.cx, tmp_phi.dx);
     if (pars.dim > 1)
     {
-        fftw_execute_dft_c2r(p_bw, cfftw_tmp_y, dtmp_y);
+        fftw_execute_dft_c2r(p_bw, tmp_phi.cy, tmp_phi.dy);
     }
     if (pars.dim > 2)
     {
-        fftw_execute_dft_c2r(p_bw, cfftw_tmp_z, dtmp_z);
+        fftw_execute_dft_c2r(p_bw, tmp_phi.cz, tmp_phi.dz);
     }
-    fftw_execute_dft_c2r(p_bw, cfftw_tmp, dtmp_lap);
+    fftw_execute_dft_c2r(p_bw, tmp_phi.c, tmp_phi.lap);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
@@ -190,14 +164,14 @@ void mk_gradient_squared_and_laplacian(double *in) {
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
     {
-        dtmp_grad2[i] = dtmp_x[i] * dtmp_x[i];
+        tmp_phi.grad[i] = tmp_phi.dx[i] * tmp_phi.dx[i];
         if (pars.dim > 1)
         {
-            dtmp_grad2[i] += dtmp_y[i] * dtmp_y[i];
+            tmp_phi.grad[i] += tmp_phi.dy[i] * tmp_phi.dy[i];
         }
         if (pars.dim > 2)
         {
-            dtmp_grad2[i] += dtmp_z[i] * dtmp_z[i];
+            tmp_phi.grad[i] += tmp_phi.dz[i] * tmp_phi.dz[i];
         }
     }
 }
@@ -265,13 +239,13 @@ void solve_poisson_eq() {
     #ifdef SHOW_TIMING_INFO
     poisson_time -= get_wall_time();
     #endif
-    double *rhs = dtmp_z; // reuse already allocated memory block
+    double *rhs = tmp_phi.dz; // reuse already allocated memory block
     mk_poisson_rhs(rhs);
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
-    fftw_execute_dft_r2c(p_fw, rhs, cfftw_tmp);
+    fftw_execute_dft_r2c(p_fw, rhs, tmp_phi.c);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
@@ -306,11 +280,11 @@ void solve_poisson_eq() {
                 }
                 if (k_sq < -1.0e-16)
                 {
-                    cfftw_tmp[osy + k] /= k_sq * N;
+                    tmp_phi.c[osy + k] /= k_sq * N;
                 }
                 else
                 {
-                    cfftw_tmp[osy + k] = 0.0;
+                    tmp_phi.c[osy + k] = 0.0;
                 }
             }
         }
@@ -319,7 +293,7 @@ void solve_poisson_eq() {
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
-    fftw_execute_dft_c2r(p_bw, cfftw_tmp, psi);
+    fftw_execute_dft_c2r(p_bw, tmp_phi.c, psi);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     poisson_time += get_wall_time();
@@ -422,19 +396,19 @@ void apply_filter_real(double *inout) {
     filter_time -= get_wall_time();
     fftw_time_exe -= get_wall_time();
     #endif
-    fftw_execute_dft_r2c(p_fw, inout, cfftw_tmp);
-    fftw_execute_dft_r2c(p_fw, inout + N, cfftw_tmp_x);
+    fftw_execute_dft_r2c(p_fw, inout, tmp_phi.c);
+    fftw_execute_dft_r2c(p_fw, inout + N, tmp_phi.cx);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
 
-    apply_filter_fourier(cfftw_tmp, cfftw_tmp_x);
+    apply_filter_fourier(tmp_phi.c, tmp_phi.cx);
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
-    fftw_execute_dft_c2r(p_bw, cfftw_tmp, inout);
-    fftw_execute_dft_c2r(p_bw, cfftw_tmp_x, inout + N);
+    fftw_execute_dft_c2r(p_bw, tmp_phi.c, inout);
+    fftw_execute_dft_c2r(p_bw, tmp_phi.cx, inout + N);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     filter_time += get_wall_time();

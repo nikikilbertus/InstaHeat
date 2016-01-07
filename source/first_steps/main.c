@@ -29,22 +29,24 @@ double *rho;
 double *rho_buf;
 double *pow_spec;
 double *pow_spec_buf;
-complex *cfftw_tmp;
-complex *cfftw_tmp_x;
-complex *cfftw_tmp_y;
-complex *cfftw_tmp_z;
-complex *cfftw_tmp2;
-complex *cfftw_tmp2_x;
-complex *cfftw_tmp2_y;
-complex *cfftw_tmp2_z;
-double *dtmp_x;
-double *dtmp_y;
-double *dtmp_z;
-double *dtmp2_x;
-double *dtmp2_y;
-double *dtmp2_z;
-double *dtmp_grad2;
-double *dtmp_lap;
+temporary_t tmp_phi;
+temporary_t tmp_psi;
+/* complex *cfftw_tmp; */
+/* complex *cfftw_tmp_x; */
+/* complex *cfftw_tmp_y; */
+/* complex *cfftw_tmp_z; */
+/* complex *cfftw_tmp2; */
+/* complex *cfftw_tmp2_x; */
+/* complex *cfftw_tmp2_y; */
+/* complex *cfftw_tmp2_z; */
+/* double *dtmp_x; */
+/* double *dtmp_y; */
+/* double *dtmp_z; */
+/* double *dtmp2_x; */
+/* double *dtmp2_y; */
+/* double *dtmp2_z; */
+/* double *dtmp_grad2; */
+/* double *dtmp_lap; */
 fftw_plan p_fw;
 fftw_plan p_bw;
 double fftw_time_exe  = 0.0;

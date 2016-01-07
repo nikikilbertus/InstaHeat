@@ -19,8 +19,8 @@ void test_mk_gradient_squared_and_laplacian() {
     mk_gradient_squared_and_laplacian(field);
 
     puts("test mk gradient squared and laplacian:");
-    fill_field(dtmp_x + N, test_func_Dx);
-    if (are_fields_equal(dtmp_x, dtmp_x + N) == 0)
+    fill_field(tmp_phi.dx + N, test_func_Dx);
+    if (are_fields_equal(tmp_phi.dx, tmp_phi.dx + N) == 0)
     {
         puts("Dx passed\n");
     }
@@ -28,8 +28,8 @@ void test_mk_gradient_squared_and_laplacian() {
     {
         puts("Dx failed\n");
     }
-    fill_field(dtmp_x + N, test_func_Dy);
-    if (are_fields_equal(dtmp_y, dtmp_x + N) == 0)
+    fill_field(tmp_phi.dx + N, test_func_Dy);
+    if (are_fields_equal(tmp_phi.dy, tmp_phi.dx + N) == 0)
     {
         puts("Dy passed\n");
     }
@@ -37,8 +37,8 @@ void test_mk_gradient_squared_and_laplacian() {
     {
         puts("Dy failed\n");
     }
-    fill_field(dtmp_x + N, test_func_Dz);
-    if (are_fields_equal(dtmp_z, dtmp_x + N) == 0)
+    fill_field(tmp_phi.dx + N, test_func_Dz);
+    if (are_fields_equal(tmp_phi.dz, tmp_phi.dx + N) == 0)
     {
         puts("Dz passed\n");
     }
@@ -47,9 +47,9 @@ void test_mk_gradient_squared_and_laplacian() {
         puts("Dz failed\n");
     }
 
-    fill_field(dtmp_x, test_func_gradsq);
-    fill_field(dtmp_y, test_func_lap);
-    if (are_fields_equal(dtmp_x, dtmp_grad2) == 0)
+    fill_field(tmp_phi.dx, test_func_gradsq);
+    fill_field(tmp_phi.dy, test_func_lap);
+    if (are_fields_equal(tmp_phi.dx, tmp_phi.grad) == 0)
     {
         puts("gradient squared passed\n");
     }
@@ -57,7 +57,7 @@ void test_mk_gradient_squared_and_laplacian() {
     {
         puts("gradient squared failed\n");
     }
-    if (are_fields_equal(dtmp_y, dtmp_lap) == 0)
+    if (are_fields_equal(tmp_phi.dy, tmp_phi.lap) == 0)
     {
         puts("laplace passed\n");
     }
@@ -67,14 +67,14 @@ void test_mk_gradient_squared_and_laplacian() {
     }
     #ifdef DEBUG
     puts("testgradsq");
-    print_vector(dtmp_grad2, N);
+    print_vector(tmp_phi.grad, N);
     puts("exact");
-    print_vector(dtmp_x, N);
+    print_vector(tmp_phi.dx, N);
     puts("\n");
     puts("testlap");
-    print_vector(dtmp_lap, N);
+    print_vector(tmp_phi.lap, N);
     puts("exact");
-    print_vector(dtmp_y, N);
+    print_vector(tmp_phi.dy, N);
     puts("\n");
     #endif
 }

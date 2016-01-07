@@ -162,6 +162,19 @@ typedef struct {
     file_parameters_t file;
 }parameters_t;
 
+// temporal veriables used for computations of gradients and so on
+typedef struct {
+    double *dx;
+    double *dy;
+    double *dz;
+    complex *c;
+    complex *cx;
+    complex *cy;
+    complex *cz;
+    double *grad;
+    double *lap;
+}temporary_t;
+
 // --------------------------global variables-----------------------------------
 // we are using rather many global variables; that has the advantage of central
 // one time allocation/initialization and deallocation;
@@ -199,24 +212,26 @@ extern double *pow_spec;
 extern double *pow_spec_buf;
 
 // default arrays for real to complex dfts
-extern complex *cfftw_tmp;
-extern complex *cfftw_tmp_x;
-extern complex *cfftw_tmp_y;
-extern complex *cfftw_tmp_z;
-extern complex *cfftw_tmp2;
-extern complex *cfftw_tmp2_x;
-extern complex *cfftw_tmp2_y;
-extern complex *cfftw_tmp2_z;
+extern temporary_t tmp_phi;
+extern temporary_t tmp_psi;
+/* extern complex *cfftw_tmp; */
+/* extern complex *cfftw_tmp_x; */
+/* extern complex *cfftw_tmp_y; */
+/* extern complex *cfftw_tmp_z; */
+/* extern complex *cfftw_tmp2; */
+/* extern complex *cfftw_tmp2_x; */
+/* extern complex *cfftw_tmp2_y; */
+/* extern complex *cfftw_tmp2_z; */
 
 // general purpose memory blocks for temporary use (e.g. for gradient)
-extern double *dtmp_x;
-extern double *dtmp_y;
-extern double *dtmp_z;
-extern double *dtmp2_x;
-extern double *dtmp2_y;
-extern double *dtmp2_z;
-extern double *dtmp_grad2;
-extern double *dtmp_lap;
+/* extern double *dtmp_x; */
+/* extern double *dtmp_y; */
+/* extern double *dtmp_z; */
+/* extern double *dtmp2_x; */
+/* extern double *dtmp2_y; */
+/* extern double *dtmp2_z; */
+/* extern double *dtmp_grad2; */
+/* extern double *dtmp_lap; */
 
 // fftw plans
 extern fftw_plan p_fw;
