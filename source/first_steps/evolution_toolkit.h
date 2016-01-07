@@ -20,11 +20,12 @@ void mk_gradient_squared_and_laplacian(double *in);
 extern double potential(const double f);
 extern double potential_prime(const double f);
 void solve_poisson_eq();
-void make_poisson_rhs(double *rhs);
+void mk_poisson_rhs(double *rhs);
 void mk_power_spectrum(const fftw_complex *in);
 void apply_filter_real(double *inout);
 void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout);
 extern double filter_window_function(const double x);
 void prepare_and_save_timeslice();
+double mean(const double *in, size_t N);
 
 #endif

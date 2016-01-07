@@ -224,7 +224,7 @@ inline double potential_prime(const double f) {
     /* return 0.0; */
 }
 
-// solve the poisson equation Laplace(psi) = rhs for scalar perturbations
+// solve the poisson like equation Laplace(psi) = rhs for scalar perturbations
 void solve_poisson_eq() {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -237,7 +237,7 @@ void solve_poisson_eq() {
     poisson_time -= get_wall_time();
     #endif
     double *rhs = dtmp_z; // reuse already allocated memory block
-    make_poisson_rhs(rhs);
+    mk_poisson_rhs(rhs);
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
@@ -298,99 +298,18 @@ void solve_poisson_eq() {
 }
 
 // construct the right hand side for the poisson equation
-void make_poisson_rhs(double *rhs) {
-    size_t Nx = pars.x.N;
+void mk_poisson_rhs(double *rhs) {
     size_t N = pars.N;
-    size_t Mx = pars.x.M;
-    size_t My = pars.y.M;
-    size_t Mz = pars.z.M;
     double a = field[2 * N];
     double hubble = sqrt(rho_avg / 3.0);
-
-    RUNTIME_INFO(printf("hubble: %.15f\n", hubble));
-    RUNTIME_INFO(printf("a: %.15f\n", a));
-    double *u_x = dtmp_y; // reuse an already allocated memory block
-
-    // compute \bar{p}, i.e. the average pressure, the velocity in one
-    // direction u_1 and its average \bar{u}_1
-    double p_avg = 0.0, u_avg = 0.0, df, grad2;
-    #pragma omp parallel for default(shared) private(df, grad2) \
-        reduction(+:p_avg, u_avg)
-    for (size_t i = 0; i < N; ++i)
-    {
-        df = field[N + i];
-        grad2 = dtmp_grad2[i] / (a * a);
-        // TODO: fix this
-        if (df*df-grad2 < 0)
-        {
-            RUNTIME_INFO(printf("found neg sqrt in: %zu\n", i));
-        }
-        u_x[i] = - dtmp_x[i] / sqrt(df * df - grad2);
-        p_avg += 0.5 * (df * df - grad2) - potential(field[i]);
-        u_avg += u_x[i];
-    }
-    p_avg /= N;
-    u_avg /= N;
-    RUNTIME_INFO(printf("p: %.15f\n", p_avg));
-    RUNTIME_INFO(printf("u: %.15f\n", u_avg));
-
-    // construct \delta u_1 (overwrite to save memory)
-    #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i)
-    {
-        u_x[i] -= u_avg;
-    }
-
-    // construct the velocity potential from \partial_1 \delta u = \delta u_1
-    // by inverting in fourier space
-    #ifdef SHOW_TIMING_INFO
-    fftw_time_exe -= get_wall_time();
-    #endif
-    fftw_execute_dft_r2c(p_fw, u_x, cfftw_tmp);
-    #ifdef SHOW_TIMING_INFO
-    fftw_time_exe += get_wall_time();
-    #endif
-
-    size_t osx, osy;
-    #pragma omp parallel for private(osx, osy)
-    for (size_t i = 0; i < Mx; ++i)
-    {
-        osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j)
-        {
-            osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k)
-            {
-                if (i > Nx / 2)
-                {
-                    cfftw_tmp[osy + k] /= pars.x.k * ((int)i - (int)Nx) * N;
-                }
-                else if (2 * i == Nx || i == 0)
-                {
-                    cfftw_tmp_x[osy + k] = 0.0;
-                }
-                else
-                {
-                    cfftw_tmp[osy + k] /= pars.x.k * i * N;
-                }
-            }
-        }
-    }
-
-    #ifdef SHOW_TIMING_INFO
-    fftw_time_exe -= get_wall_time();
-    #endif
-    fftw_execute_dft_c2r(p_bw, cfftw_tmp, u_x);
-    #ifdef SHOW_TIMING_INFO
-    fftw_time_exe += get_wall_time();
-    #endif
+    double phi_avg = mean(field, N);
 
     // put together the right hand side of the poisson equation for psi
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
     {
-        rhs[i] = 0.5 * a * a *
-            (rho[i] - rho_avg - 3.0 * hubble * (rho_avg + p_avg) * u_x[i]);
+        rhs[i] = 0.5 * (3.0 * hubble * a * a * field[N + i] * (field[i] -
+                    phi_avg) - rho[i] + rho_avg);
     }
 }
 
@@ -548,4 +467,14 @@ void prepare_and_save_timeslice() {
     rho_avg = mk_rho(field);
     evo_flags.compute_pow_spec = 0;
     save();
+}
+
+double mean(const double *in, size_t N) {
+    double mean = 0.0;
+    #pragma omp parallel for reduction(+: mean)
+    for (size_t i = 0; i < N; ++i)
+    {
+        mean += in[i];
+    }
+    return mean / N;
 }
