@@ -70,9 +70,9 @@ during execution
 
 // ------------------computational domain---------------------------------------
 // spatial
-#define GRIDPOINTS_X            (32)
-#define GRIDPOINTS_Y            (32)
-#define GRIDPOINTS_Z            (32)
+#define GRIDPOINTS_X            (64)
+#define GRIDPOINTS_Y            (64)
+#define GRIDPOINTS_Z            (1)
 #define SPATIAL_LOWER_BOUND_X   (-PI)
 #define SPATIAL_UPPER_BOUND_X   (PI)
 #define SPATIAL_LOWER_BOUND_Y   (-PI)
@@ -83,7 +83,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (0.01)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (0.01)
+#define FINAL_TIME              (250.0)
 #define MAX_STEPS               (1e6)
 #define MINIMAL_DELTA_T         (1.0e-5)
 
@@ -91,6 +91,7 @@ during execution
 #define MASS                    (1.0)
 #define COUPLING                (1.0) // coupling in a phi4 potential
 #define LAMBDA                  (4.721e-5) // "cosmological constant"
+// for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
 
 // -------------------additional parameters for dopri853------------------------
 // maximal/minimal rescaling of dt per step (don't change)
@@ -202,11 +203,18 @@ extern complex *cfftw_tmp;
 extern complex *cfftw_tmp_x;
 extern complex *cfftw_tmp_y;
 extern complex *cfftw_tmp_z;
+extern complex *cfftw_tmp2;
+extern complex *cfftw_tmp2_x;
+extern complex *cfftw_tmp2_y;
+extern complex *cfftw_tmp2_z;
 
 // general purpose memory blocks for temporary use (e.g. for gradient)
 extern double *dtmp_x;
 extern double *dtmp_y;
 extern double *dtmp_z;
+extern double *dtmp2_x;
+extern double *dtmp2_y;
+extern double *dtmp2_z;
 extern double *dtmp_grad2;
 extern double *dtmp_lap;
 

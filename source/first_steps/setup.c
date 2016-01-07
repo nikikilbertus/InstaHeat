@@ -141,18 +141,27 @@ void allocate_external() {
     cfftw_tmp_x = fftw_malloc(M * sizeof *cfftw_tmp_x);
     cfftw_tmp_y = fftw_malloc(M * sizeof *cfftw_tmp_y);
     cfftw_tmp_z = fftw_malloc(M * sizeof *cfftw_tmp_z);
+    cfftw_tmp2   = fftw_malloc(M * sizeof *cfftw_tmp2);
+    cfftw_tmp2_x = fftw_malloc(M * sizeof *cfftw_tmp2_x);
+    cfftw_tmp2_y = fftw_malloc(M * sizeof *cfftw_tmp2_y);
+    cfftw_tmp2_z = fftw_malloc(M * sizeof *cfftw_tmp2_z);
 
     // general purpose double memory blocks for temporary use
     dtmp_x = fftw_malloc(Ntot * sizeof *dtmp_x); // used in dopri853 (dense)
     dtmp_y = fftw_malloc(N * sizeof *dtmp_y);
     dtmp_z = fftw_malloc(N * sizeof *dtmp_z);
+    dtmp2_x = fftw_malloc(N * sizeof *dtmp2_x);
+    dtmp2_y = fftw_malloc(N * sizeof *dtmp2_y);
+    dtmp2_z = fftw_malloc(N * sizeof *dtmp2_z);
     dtmp_grad2 = fftw_malloc(N * sizeof *dtmp_grad2);
     dtmp_lap = fftw_malloc(N * sizeof *dtmp_lap);
 
     if (!(grid && field && field_new && dfield && dfield_new && field_buf &&
         psi && time_buf && rho && rho_buf && pow_spec && pow_spec_buf &&
         cfftw_tmp && cfftw_tmp_x && cfftw_tmp_y && cfftw_tmp_z &&
-        dtmp_x && dtmp_y && dtmp_z && dtmp_grad2 && dtmp_lap))
+        dtmp_x && dtmp_y && dtmp_z && dtmp_grad2 && dtmp_lap &&
+        dtmp2_x && dtmp2_y && dtmp2_z &&
+        cfftw_tmp2 && cfftw_tmp2_x && cfftw_tmp2_y && cfftw_tmp2_z))
     {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
@@ -320,43 +329,43 @@ double phi_init(const double x, const double y, const double z,
     /* } */
 
     // some simple waves for notch or step potential simulations
-    /* double frac = 0.4; // vary the ratio between \phi_0 and \delta \phi */
-    /* double phi0 = 0.73 * frac; // only vary if you know exactly why */
-    /* double deltaphi = phi0 / frac; */
-    /* if (pars.dim == 1) */
-    /* { */
-    /*     return phi0 + deltaphi * */
-    /*                 (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1])); */
-    /* } */
-    /* else if (pars.dim == 2) */
-    /* { */
-    /*     return phi0 + deltaphi * */
-    /*                 (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) + */
-    /*                  cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3])); */
-    /* } */
-    /* else */
-    /* { */
-    /*     return phi0 + deltaphi * */
-    /*                 (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) + */
-    /*                  cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) + */
-    /*                  cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5])); */
-    /* } */
-
-    // very simple one for testing
-    double mean = 0.5;
-    double amplitude = 0.1;
+    double frac = 0.4; // vary the ratio between \phi_0 and \delta \phi
+    double phi0 = 0.73 * frac; // only vary if you know exactly why
+    double deltaphi = phi0 / frac;
     if (pars.dim == 1)
     {
-        return mean + amplitude * cos(x);
+        return phi0 + deltaphi *
+                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]));
     }
     else if (pars.dim == 2)
     {
-        return mean + amplitude * cos(x) * cos(y);
+        return phi0 + deltaphi *
+                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
+                     cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]));
     }
     else
     {
-        return mean + amplitude * cos(x) * cos(y) * cos(z);
+        return phi0 + deltaphi *
+                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
+                     cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) +
+                     cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5]));
     }
+
+    // very simple one for testing
+    /* double mean = 0.5; */
+    /* double amplitude = 0.1; */
+    /* if (pars.dim == 1) */
+    /* { */
+    /*     return mean + amplitude * cos(x); */
+    /* } */
+    /* else if (pars.dim == 2) */
+    /* { */
+    /*     return mean + amplitude * cos(x) * cos(y); */
+    /* } */
+    /* else */
+    /* { */
+    /*     return mean + amplitude * cos(x) * cos(y) * cos(z); */
+    /* } */
 }
 
 // initial values of the time deriv. of the scalar field, make sure its periodic
@@ -397,9 +406,16 @@ void free_external() {
     fftw_free(cfftw_tmp_x);
     fftw_free(cfftw_tmp_y);
     fftw_free(cfftw_tmp_z);
+    fftw_free(cfftw_tmp2);
+    fftw_free(cfftw_tmp2_x);
+    fftw_free(cfftw_tmp2_y);
+    fftw_free(cfftw_tmp2_z);
     fftw_free(dtmp_x);
     fftw_free(dtmp_y);
     fftw_free(dtmp_z);
+    fftw_free(dtmp2_x);
+    fftw_free(dtmp2_y);
+    fftw_free(dtmp2_z);
     fftw_free(dtmp_grad2);
     fftw_free(dtmp_lap);
     RUNTIME_INFO(puts("Freed external variables.\n"));

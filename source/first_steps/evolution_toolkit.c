@@ -37,6 +37,31 @@ void mk_rhs(const double t, double *f, double *result) {
     result[N2] = a * hubble;
 }
 
+// compute the right hand side of the pde, i.e. the first temporal derivatives
+// of all fields (scalar field, its first temporal derivative and a)
+void mk_rhs(const double t, double *f, double *result) {
+    size_t N = pars.N;
+    size_t N2 = 2 * N;
+    double a = f[N2];
+
+    mk_rho(f);
+    double hubble = sqrt(rho_avg / 3.0);
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < N; ++i)
+    {
+        result[i] = f[N + i];
+    }
+
+    #pragma omp parallel for
+    for (size_t i = N; i < N2; ++i)
+    {
+        result[i] = dtmp_lap[i - N] / (a * a);
+        result[i] -= ( 3.0 * hubble * f[i] + potential_prime(f[i - N]) );
+    }
+    result[N2] = a * hubble;
+}
+
 // compute energy density rho, i.e. 00 of stress energy & save average value
 void mk_rho(double *f) {
     size_t N = pars.N;
@@ -190,8 +215,8 @@ inline double potential(const double f) {
 
     // notch or step potential
     // LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
-    /* double lambda = 100.0; */
-    /* return LAMBDA / (1.0 + exp(-lambda * f)); */
+    double lambda = 100.0;
+    return LAMBDA / (1.0 + exp(-lambda * f));
 
     // standard f squared potential
     /* return MASS * MASS * f * f / 2.0; */
@@ -201,7 +226,7 @@ inline double potential(const double f) {
 
     /* return LAMBDA; */
 
-    return 0.0;
+    /* return 0.0; */
 }
 
 inline double potential_prime(const double f) {
@@ -215,9 +240,9 @@ inline double potential_prime(const double f) {
 
     // notch or step potential
     // LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
-    /* double lambda = 100.0; */
-    /* double tmp = exp(lambda * f); */
-    /* return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp)); */
+    double lambda = 100.0;
+    double tmp = exp(lambda * f);
+    return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
 
     // standard f squared potential
     /* return MASS * MASS * f; */
