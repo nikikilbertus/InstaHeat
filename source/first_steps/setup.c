@@ -320,26 +320,42 @@ double phi_init(const double x, const double y, const double z,
     /* } */
 
     // some simple waves for notch or step potential simulations
-    double frac = 0.4; // vary the ratio between \phi_0 and \delta \phi
-    double phi0 = 0.73 * frac; // only vary if you know exactly why
-    double deltaphi = phi0 / frac;
+    /* double frac = 0.4; // vary the ratio between \phi_0 and \delta \phi */
+    /* double phi0 = 0.73 * frac; // only vary if you know exactly why */
+    /* double deltaphi = phi0 / frac; */
+    /* if (pars.dim == 1) */
+    /* { */
+    /*     return phi0 + deltaphi * */
+    /*                 (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1])); */
+    /* } */
+    /* else if (pars.dim == 2) */
+    /* { */
+    /*     return phi0 + deltaphi * */
+    /*                 (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) + */
+    /*                  cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3])); */
+    /* } */
+    /* else */
+    /* { */
+    /*     return phi0 + deltaphi * */
+    /*                 (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) + */
+    /*                  cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) + */
+    /*                  cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5])); */
+    /* } */
+
+    // very simple one for testing
+    double mean = 0.5;
+    double amplitude = 0.1;
     if (pars.dim == 1)
     {
-        return phi0 + deltaphi *
-                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]));
+        return mean + amplitude * cos(x);
     }
     else if (pars.dim == 2)
     {
-        return phi0 + deltaphi *
-                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
-                     cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]));
+        return mean + amplitude * cos(x) * cos(y);
     }
     else
     {
-        return phi0 + deltaphi *
-                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
-                     cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) +
-                     cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5]));
+        return mean + amplitude * cos(x) * cos(y) * cos(z);
     }
 }
 
