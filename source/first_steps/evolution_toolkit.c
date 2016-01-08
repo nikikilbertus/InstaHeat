@@ -38,7 +38,7 @@ void mk_rhs(const double t, double *f, double *result) {
     {
         df = f[N + i];
         p = psi[i];
-        result[N + i] += ( (3.0 - 2.0 * p) * hubble * df +
+        result[N + i] = ( (3.0 - 2.0 * p) * hubble * df +
             2.0 * (p - 1.0) * (f[i] - phi_avg) * df * df +
             potential_prime(f[i]) +
             (4.0 * p * tmp_psi.grad[i] - (1.0 + 2.0 * p) * tmp_phi.lap[i]) /
