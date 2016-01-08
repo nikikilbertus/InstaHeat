@@ -75,6 +75,7 @@ int main(int argc, const char * argv[]) {
     #ifdef SHOW_TIMING_INFO
     double secs = get_wall_time() - start;
     RUNTIME_INFO(printf("main took %f seconds.\n", secs));
+    RUNTIME_INFO(puts("as percentage of total, not mutually disjoint:"));
     RUNTIME_INFO(printf("fftw execution took %f seconds (%.2f %%).\n",
                         fftw_time_exe, 100. * (fftw_time_exe / secs)));
     RUNTIME_INFO(printf("fftw planning took %f seconds (%.2f %%).\n",
