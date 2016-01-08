@@ -28,12 +28,30 @@ void mk_rhs(const double t, double *f, double *result) {
         result[i] = f[N + i];
     }
 
+    #ifdef INCLUDE_PSI
+    solve_poisson_eq(f);
+    mk_grad_phi_times_grad_psi();
+
+    double df, p;
+    #pragma omp parallel for private(df, p)
+    for (size_t i = 0; i < N; ++i)
+    {
+        df = f[N + i];
+        p = psi[i];
+        result[N + i] += ( (3.0 - 2.0 * p) * hubble * df +
+            2.0 * (p - 1.0) * (f[i] - phi_avg) * df * df +
+            potential_prime(f[i]) +
+            (4.0 * p * tmp_psi.grad[i] - (1.0 + 2.0 * p) * tmp_phi.lap[i]) /
+            (a * a) ) / (2.0 * p - 1.0);
+    }
+    #else
     #pragma omp parallel for
     for (size_t i = N; i < N2; ++i)
     {
         result[i] = tmp_phi.lap[i - N] / (a * a);
         result[i] -= (3.0 * hubble * f[i] + potential_prime(f[i - N]));
     }
+    #endif
     result[N2] = a * hubble;
 }
 
@@ -176,6 +194,107 @@ void mk_gradient_squared_and_laplacian(double *in) {
     }
 }
 
+// compute grad phi \dot grad psi
+void mk_grad_phi_times_grad_psi() {
+    size_t Nx = pars.x.N;
+    size_t Ny = pars.y.N;
+    size_t N  = pars.N;
+    size_t Mx = pars.x.M;
+    size_t My = pars.y.M;
+    size_t Mz = pars.z.M;
+
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe -= get_wall_time();
+    #endif
+    fftw_execute_dft_r2c(p_fw, psi, tmp_psi.c);
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe += get_wall_time();
+    #endif
+
+    size_t osx, osy, id;
+    #pragma omp parallel for private(osx, osy, id)
+    for (size_t i = 0; i < Mx; ++i)
+    {
+        osx = i * My * Mz;
+        for (size_t j = 0; j < My; ++j)
+        {
+            osy = osx + j * Mz;
+            for (size_t k = 0; k < Mz; ++k)
+            {
+                id = osy + k;
+                // x derivative
+                if (i > Nx / 2)
+                {
+                    tmp_psi.cx[id] = tmp_psi.c[id] * pars.x.k
+                        * ((int)i - (int)Nx) / N;
+                }
+                else if (2 * i == Nx)
+                {
+                    tmp_psi.cx[id] = 0.0;
+                }
+                else
+                {
+                    tmp_psi.cx[id] = tmp_psi.c[id] * pars.x.k * i / N;
+                }
+                // y derivative
+                if (j > Ny / 2)
+                {
+                    tmp_psi.cy[id] = tmp_psi.c[id] * pars.y.k
+                        * ((int)j - (int)Ny) / N;
+                }
+                else if (2 * j == Ny)
+                {
+                    tmp_psi.cy[id] = 0.0;
+                }
+                else
+                {
+                    tmp_psi.cy[id] = tmp_psi.c[id] * pars.y.k * j / N;
+                }
+                // z derivative
+                if (k == Mz - 1)
+                {
+                    tmp_psi.cz[id] = 0.0;
+                }
+                else
+                {
+                    tmp_psi.cz[id] = tmp_psi.c[id] * pars.z.k * k / N;
+                }
+            }
+        }
+    }
+
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe -= get_wall_time();
+    #endif
+    fftw_execute_dft_c2r(p_bw, tmp_psi.cx, tmp_psi.dx);
+    if (pars.dim > 1)
+    {
+        fftw_execute_dft_c2r(p_bw, tmp_psi.cy, tmp_psi.dy);
+    }
+    if (pars.dim > 2)
+    {
+        fftw_execute_dft_c2r(p_bw, tmp_psi.cz, tmp_psi.dz);
+    }
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe += get_wall_time();
+    #endif
+
+    // gradient squared
+    #pragma omp parallel for
+    for (size_t i = 0; i < N; ++i)
+    {
+        tmp_psi.grad[i] = tmp_phi.dx[i] * tmp_psi.dx[i];
+        if (pars.dim > 1)
+        {
+            tmp_psi.grad[i] += tmp_phi.dy[i] * tmp_psi.dy[i];
+        }
+        if (pars.dim > 2)
+        {
+            tmp_psi.grad[i] += tmp_phi.dz[i] * tmp_psi.dz[i];
+        }
+    }
+}
+
 // A selection of potentials one can try, make sure to set the corresponding
 // potential_prime, the derivative is not computed automatically
 // TODO: change that?
@@ -228,7 +347,7 @@ inline double potential_prime(const double f) {
 }
 
 // solve the poisson like equation Laplace(psi) = rhs for scalar perturbations
-void solve_poisson_eq() {
+void solve_poisson_eq(double *f) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t N = pars.N;
@@ -239,8 +358,8 @@ void solve_poisson_eq() {
     #ifdef SHOW_TIMING_INFO
     poisson_time -= get_wall_time();
     #endif
-    double *rhs = tmp_phi.dz; // reuse already allocated memory block
-    mk_poisson_rhs(rhs);
+    double *rhs = tmp_phi.dx + N; // reuse already allocated memory block
+    mk_poisson_rhs(f, rhs);
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
@@ -301,18 +420,17 @@ void solve_poisson_eq() {
 }
 
 // construct the right hand side for the poisson equation
-void mk_poisson_rhs(double *rhs) {
+void mk_poisson_rhs(double *f, double *rhs) {
     size_t N = pars.N;
-    double a = field[2 * N];
+    double a = f[2 * N];
     double hubble = sqrt(rho_avg / 3.0);
-    double phi_avg = mean(field, N);
+    phi_avg = mean(f, N);
 
     // put together the right hand side of the poisson equation for psi
-    //TODO: do i use dfield or field[N+i]
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
     {
-        rhs[i] = 0.5 * (3.0 * hubble * a * a * field[N + i] * (field[i] -
+        rhs[i] = 0.5 * (3.0 * hubble * a * a * f[N + i] * (f[i] -
                     phi_avg) - rho[i] + rho_avg);
     }
 }

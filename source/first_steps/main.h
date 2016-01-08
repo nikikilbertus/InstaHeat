@@ -194,6 +194,7 @@ extern double *time_buf;
 extern double *field, *dfield;
 extern double *field_new, *dfield_new;
 extern double *field_buf;
+extern double phi_avg;
 
 // the scalar perturbation psi
 extern double *psi;
@@ -214,24 +215,6 @@ extern double *pow_spec_buf;
 // default arrays for real to complex dfts
 extern temporary_t tmp_phi;
 extern temporary_t tmp_psi;
-/* extern complex *cfftw_tmp; */
-/* extern complex *cfftw_tmp_x; */
-/* extern complex *cfftw_tmp_y; */
-/* extern complex *cfftw_tmp_z; */
-/* extern complex *cfftw_tmp2; */
-/* extern complex *cfftw_tmp2_x; */
-/* extern complex *cfftw_tmp2_y; */
-/* extern complex *cfftw_tmp2_z; */
-
-// general purpose memory blocks for temporary use (e.g. for gradient)
-/* extern double *dtmp_x; */
-/* extern double *dtmp_y; */
-/* extern double *dtmp_z; */
-/* extern double *dtmp2_x; */
-/* extern double *dtmp2_y; */
-/* extern double *dtmp2_z; */
-/* extern double *dtmp_grad2; */
-/* extern double *dtmp_lap; */
 
 // fftw plans
 extern fftw_plan p_fw;
