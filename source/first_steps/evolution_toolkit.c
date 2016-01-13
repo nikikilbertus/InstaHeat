@@ -423,15 +423,19 @@ void solve_poisson_eq(double *f) {
 void mk_poisson_rhs(double *f, double *rhs) {
     size_t N = pars.N;
     double a = f[2 * N];
+    double a2 = a * a;
     double hubble = sqrt(rho_avg / 3.0);
     phi_avg = mean(f, N);
 
+    double df;
     // put together the right hand side of the poisson equation for psi
-    #pragma omp parallel for
+    #pragma omp parallel for private(df)
     for (size_t i = 0; i < N; ++i)
     {
-        rhs[i] = 0.5 * (3.0 * hubble * a * a * f[N + i] * (f[i] -
-                    phi_avg) - rho[i] + rho_avg);
+        df = f[N + i];
+        rhs[i] = ( tmp_phi.grad[i] +
+            6.0 * a2 * a2 * hubble * (f[i] - phi_avg) * df +
+            a2 * (df * df + 2.0 * (rho_avg + potential(f[i]))) ) / (4.0 * a2);
     }
 }
 
