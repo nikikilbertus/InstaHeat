@@ -38,11 +38,11 @@ void mk_rhs(const double t, double *f, double *result) {
     {
         df = f[N + i];
         p = psi[i];
-        result[N + i] = ( (3.0 - 2.0 * p) * hubble * df +
-            2.0 * (p - 1.0) * (f[i] - phi_avg) * df * df +
-            potential_prime(f[i]) +
-            (4.0 * p * tmp_psi.grad[i] - (1.0 + 2.0 * p) * tmp_phi.lap[i]) /
-            (a * a) ) / (2.0 * p - 1.0);
+        result[N + i] = ( (1.0 + 4.0 * p) * tmp_phi.lap[i] / (a * a) -
+            (3.0 + 4.0 * p) * hubble * df +
+            2.0 * (1.0 + p) * (f[i] - phi_avg) * df * df -
+            (1.0 + 2.0 * p) * potential_prime(f[i]) -
+            4.0 * p * tmp_psi.grad[i] / (a * a);
     }
     #else
     #pragma omp parallel for
@@ -347,6 +347,8 @@ inline double potential_prime(const double f) {
 }
 
 // solve the poisson like equation Laplace(psi) = rhs for scalar perturbations
+//TODO: since we have linear term, it's not a poisson equation anymore, change
+//the use of "poisson" everywhere
 void solve_poisson_eq(double *f) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -354,12 +356,16 @@ void solve_poisson_eq(double *f) {
     size_t Mx = pars.x.M;
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
+    double a = f[2 * N];
 
     #ifdef SHOW_TIMING_INFO
     poisson_time -= get_wall_time();
     #endif
     double *rhs = tmp_phi.dx + N; // reuse already allocated memory block
+    double df, gf;
     mk_poisson_rhs(f, rhs);
+    df = mean(f + N, N);
+    gf = mean(tmp_phi.grad, N) / (a * a);
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
@@ -369,9 +375,9 @@ void solve_poisson_eq(double *f) {
     fftw_time_exe += get_wall_time();
     #endif
 
-    double k_sq;
+    double k_sq, scaling;
     size_t osx, osy;
-    #pragma omp parallel for private(osx, osy, k_sq)
+    #pragma omp parallel for private(osx, osy, k_sq, scaling)
     for (size_t i = 0; i < Mx; ++i)
     {
         osx = i * My * Mz;
@@ -397,9 +403,12 @@ void solve_poisson_eq(double *f) {
                 {
                     k_sq += pars.y.k2 * j * j;
                 }
-                if (k_sq < -1.0e-16)
+                // k_sq for laplace, rest for linear term w/ constant coeff
+                // TODO: when do i set zero? when k_sq==0 or scaling==0?
+                scaling = k_sq + 0.5 * (df * df - gf);
+                if (fabs(scaling) < 1.0e-15)
                 {
-                    tmp_phi.c[osy + k] /= k_sq * N;
+                    tmp_phi.c[osy + k] /= scaling * N;
                 }
                 else
                 {
@@ -417,6 +426,19 @@ void solve_poisson_eq(double *f) {
     fftw_time_exe += get_wall_time();
     poisson_time += get_wall_time();
     #endif
+
+    // set average of psi to zero (does not seem to be necessary)
+    /* double psi_avg = 0.0; */
+    /* #pragma omp parallel for reduction(+: psi_avg) */
+    /* for (size_t i = 0; i < N; ++i) */
+    /* { */
+    /*     psi_avg += psi[i]; */
+    /* } */
+    /* psi_avg /= N; */
+    /* if (fabs(psi_avg) > 1.0e-4) */
+    /* { */
+    /*     printf("psi_avg = %f", psi_avg); */
+    /* } */
 }
 
 // construct the right hand side for the poisson equation
@@ -427,16 +449,25 @@ void mk_poisson_rhs(double *f, double *rhs) {
     double hubble = sqrt(rho_avg / 3.0);
     phi_avg = mean(f, N);
 
-    double df;
+    double df, rhs_avg = 0.0;
     // put together the right hand side of the poisson equation for psi
-    #pragma omp parallel for private(df)
+    #pragma omp parallel for private(df) reduction(+: rhs_avg)
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
         rhs[i] = ( tmp_phi.grad[i] +
             6.0 * a2 * a2 * hubble * (f[i] - phi_avg) * df +
             a2 * (df * df + 2.0 * (rho_avg + potential(f[i]))) ) / (4.0 * a2);
+        rhs_avg += rhs[i];
     }
+    rhs_avg /= (double) N;
+
+    // TODO: should i average rhs to zero? (if not: delete rhs_avg)
+    /* #pragma omp parallel for */
+    /* for (size_t i = 0; i < N; ++i) */
+    /* { */
+    /*     rhs[i] -= rhs_avg; */
+    /* } */
 }
 
 // computes a crude estimation of the power spectrum, more info in main.h

@@ -33,7 +33,7 @@ during execution
 
 // ------------file handling parameters for writing to disk---------------------
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/run.h5")
+#define DATAPATH                ("../../../data/dp_3.h5")
 /**
  *  write out data is buffered to not access hard drive too frequently (actually
  *  there are several levels of buffering, since hdf5 does it's own buffering
@@ -70,8 +70,8 @@ during execution
 
 // ------------------computational domain---------------------------------------
 // spatial
-#define GRIDPOINTS_X            (32)
-#define GRIDPOINTS_Y            (32)
+#define GRIDPOINTS_X            (64)
+#define GRIDPOINTS_Y            (64)
 #define GRIDPOINTS_Z            (1)
 #define SPATIAL_LOWER_BOUND_X   (-PI)
 #define SPATIAL_UPPER_BOUND_X   (PI)
@@ -101,8 +101,8 @@ during execution
 #define BETA                    (0.0) // ALPHA = 1.0/8.0 - BETA * 0.2
 #define SAFE                    (0.9)
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-9)
-#define ABSOLUTE_TOLERANCE      (1.0e-9)
+#define RELATIVE_TOLERANCE      (1.0e-3)
+#define ABSOLUTE_TOLERANCE      (1.0e-3)
 
 // ------------------------typedefs---------------------------------------------
 // representing one spatial dimension of a multi dimensional grid

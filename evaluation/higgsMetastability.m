@@ -1,9 +1,10 @@
 close all
 dim = 2;
+name = 'dp_12';
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
-name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/run.h5';
+name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/' name '.h5'];
 
 % built in functions for reading makes it easy
 t = h5read(name, '/time');
@@ -73,16 +74,16 @@ pause;
 
 % a quick check of parsevals equation (indicates whether power spectrum
 % computation makes sense)
-parseval = zeros(1, Nt);
-for i = 1:Nt
-parseval(i) = (abs(sqrt(sum(powspec(:,i))) - norm(phi(:, i))) );
-end
-plot(parseval);
-title(['parseval, max error = ' num2str(max(parseval))]);
-xlabel('t');
-ylabel('||phi(k)|| - ||phi(x)||');
-shg;
-pause;
+% parseval = zeros(1, Nt);
+% for i = 1:Nt
+% parseval(i) = (abs(sqrt(sum(powspec(:,i))) - norm(phi(:, i))) );
+% end
+% plot(parseval);
+% title(['parseval, max error = ' num2str(max(parseval))]);
+% xlabel('t');
+% ylabel('||phi(k)|| - ||phi(x)||');
+% shg;
+% pause;
 
 % a little movie of the 2d wavefunction
 N = sqrt(length(phi(:,1)));
