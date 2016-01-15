@@ -38,6 +38,7 @@ void mk_rhs(const double t, double *f, double *result) {
     {
         df = f[N + i];
         p = psi[i];
+        //TODO: make sure this is correct now after comparison with karsten!
         result[N + i] = ( (1.0 + 4.0 * p) * tmp_phi.lap[i] / (a * a) -
             (3.0 + 4.0 * p) * hubble * df +
             2.0 * (1.0 + p) * (f[i] - phi_avg) * df * df -
@@ -347,8 +348,9 @@ inline double potential_prime(const double f) {
 }
 
 // solve the poisson like equation Laplace(psi) = rhs for scalar perturbations
-//TODO: since we have linear term, it's not a poisson equation anymore, change
-//the use of "poisson" everywhere
+//TODO: since we have linear term now, it's not a poisson equation anymore, change
+//the use of "poisson" everywhere, also make sure I actually have the correct
+//equations here
 void solve_poisson_eq(double *f) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -442,6 +444,7 @@ void solve_poisson_eq(double *f) {
 }
 
 // construct the right hand side for the poisson equation
+//TODO: i think this is not correct anymore? check!
 void mk_poisson_rhs(double *f, double *rhs) {
     size_t N = pars.N;
     double a = f[2 * N];
