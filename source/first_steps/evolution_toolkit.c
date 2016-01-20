@@ -66,7 +66,7 @@ void mk_rho(double *f) {
 
     double df, grad2;
     #pragma omp parallel for default(shared) private(df, grad2) \
-        reduction(+:rho_avg)
+        reduction(+: rho_avg)
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
@@ -195,7 +195,7 @@ void mk_gradient_squared_and_laplacian(double *in) {
     }
 }
 
-// compute grad phi \dot grad psi
+// compute grad phi times grad psi
 void mk_grad_phi_times_grad_psi() {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -612,11 +612,11 @@ inline double filter_window_function(const double x) {
     // two thirds rule
     // return x < 2.0/3.0 ? x : 0.0;
 
-    // miscellaneous
-    // return 1. - tanh( 1. / ( 1. - pow(x, 8) ) - 1. );
-    // return exp(1. + 1. / ( pow(x, 8) - 1. ));
-    // return 0.5 * ( 1. + cos( pow(x, 8) * PI ) );
-    // return 0.0;
+    // miscellaneous, have been used in testing
+    /* return 1. - tanh( 1. / ( 1. - pow(x, 8) ) - 1. ); */
+    /* return exp(1. + 1. / ( pow(x, 8) - 1. )); */
+    /* return 0.5 * ( 1. + cos( pow(x, 8) * PI ) ); */
+    /* return 0.0; */
 }
 
 // recompute current power spectrum and rho and save current timeslice to buffer
