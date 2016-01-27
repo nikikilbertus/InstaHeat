@@ -6,8 +6,9 @@
 
 // -------------------mathematical constants and macros-------------------------
 #define PI                      (3.141592653589793238462643383279)
-#define MAX(x, y)               ((x) > (y) ? (x) : (y))
-#define MIN(x, y)               ((x) > (y) ? (y) : (x))
+#define MAX(x, y)               (((x) > (y)) ? (x) : (y))
+#define MIN(x, y)               (((x) > (y)) ? (y) : (x))
+
 // seed for random number generator in creation of initial conditions
 #define SEED                    (1113)
 
@@ -33,7 +34,8 @@ during execution
 
 // ------------file handling parameters for writing to disk---------------------
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/dp_3.h5")
+#define DATAPATH                ("../../../data/run.h5")
+
 /**
  *  write out data is buffered to not access hard drive too frequently (actually
  *  there are several levels of buffering, since hdf5 does it's own buffering
@@ -41,8 +43,10 @@ during execution
  *  writing them to disk, beware of the memory consumption of large buffers!
  */
 #define WRITE_OUT_BUFFER_NUMBER (20)
+
 // how many timeslices to skip in between writing to file (1: write out all)
 #define TIME_STEP_SKIPS         (10)
+
 /**
  *  there is a (very crude and biased!) estimation of the power spectrum to
  *  track stability, therefore we sum up fourier coefficients into bins
@@ -54,8 +58,10 @@ during execution
 // how many threads to use for openmp parallelization (also used by fftw)
 // if <= 0, the return value of omp_get_max_threads() is used
 #define THREAD_NUMBER           (0)
+
 // the plan flag used for fftw plans
 #define FFTW_DEFAULT_FLAG       (FFTW_ESTIMATE)
+
 /**
  *  apply a frequency cutoff filter at each time step during the time evolution
  *  (compiler switch) the specific cutoff (e.g. step function with certain
@@ -65,6 +71,7 @@ during execution
  *  adjust tolerances and see what happens to the power spectrum
  */
 /* #define ENABLE_FFT_FILTER */
+
 // include scalar metric perturbation Psi
 #define INCLUDE_PSI
 
@@ -79,6 +86,7 @@ during execution
 #define SPATIAL_UPPER_BOUND_Y   (PI)
 #define SPATIAL_LOWER_BOUND_Z   (-PI)
 #define SPATIAL_UPPER_BOUND_Z   (PI)
+
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (0.01)
@@ -97,12 +105,14 @@ during execution
 // maximal/minimal rescaling of dt per step (don't change)
 #define SMALLEST_SCALING        (0.333)
 #define LARGEST_SCALING         (6.0)
+
 // internal parameters for determining the rescaling of dt (don't change)
 #define BETA                    (0.0) // ALPHA = 1.0/8.0 - BETA * 0.2
 #define SAFE                    (0.9)
+
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-3)
-#define ABSOLUTE_TOLERANCE      (1.0e-3)
+#define RELATIVE_TOLERANCE      (1.0e-6)
+#define ABSOLUTE_TOLERANCE      (1.0e-6)
 
 // ------------------------typedefs---------------------------------------------
 // representing one spatial dimension of a multi dimensional grid

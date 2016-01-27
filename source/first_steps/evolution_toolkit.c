@@ -39,7 +39,7 @@ void mk_rhs(const double t, double *f, double *result) {
         df = f[N + i];
         p = psi[i];
         //TODO: make sure this is correct now after comparison with karsten!
-        result[N + i] = ( (1.0 + 4.0 * p) * tmp_phi.lap[i] / (a * a) -
+        result[N + i] = (1.0 + 4.0 * p) * tmp_phi.lap[i] / (a * a) -
             (3.0 + 4.0 * p) * hubble * df +
             2.0 * (1.0 + p) * (f[i] - phi_avg) * df * df -
             (1.0 + 2.0 * p) * potential_prime(f[i]) -
@@ -358,16 +358,12 @@ void solve_poisson_eq(double *f) {
     size_t Mx = pars.x.M;
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
-    double a = f[2 * N];
 
     #ifdef SHOW_TIMING_INFO
     poisson_time -= get_wall_time();
     #endif
     double *rhs = tmp_phi.dx + N; // reuse already allocated memory block
-    double df, gf;
     mk_poisson_rhs(f, rhs);
-    df = mean(f + N, N);
-    gf = mean(tmp_phi.grad, N) / (a * a);
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
@@ -377,9 +373,9 @@ void solve_poisson_eq(double *f) {
     fftw_time_exe += get_wall_time();
     #endif
 
-    double k_sq, scaling;
+    double k_sq;
     size_t osx, osy;
-    #pragma omp parallel for private(osx, osy, k_sq, scaling)
+    #pragma omp parallel for private(osx, osy, k_sq)
     for (size_t i = 0; i < Mx; ++i)
     {
         osx = i * My * Mz;
@@ -405,12 +401,11 @@ void solve_poisson_eq(double *f) {
                 {
                     k_sq += pars.y.k2 * j * j;
                 }
-                // k_sq for laplace, rest for linear term w/ constant coeff
+                // TODO: what happens if linear term comes into the game?
                 // TODO: when do i set zero? when k_sq==0 or scaling==0?
-                scaling = k_sq + 0.5 * (df * df - gf);
-                if (fabs(scaling) < 1.0e-15)
+                if (fabs(k_sq) > 1.0e-12)
                 {
-                    tmp_phi.c[osy + k] /= scaling * N;
+                    tmp_phi.c[osy + k] /= k_sq * N;
                 }
                 else
                 {
@@ -450,20 +445,29 @@ void mk_poisson_rhs(double *f, double *rhs) {
     double a = f[2 * N];
     double a2 = a * a;
     double hubble = sqrt(rho_avg / 3.0);
-    phi_avg = mean(f, N);
+    /* phi_avg = mean(f, N); */
 
-    double df, rhs_avg = 0.0;
+    double df;
+    double max_c2 = 0.0;
+    /* double rhs_avg = 0.0; */
     // put together the right hand side of the poisson equation for psi
-    #pragma omp parallel for private(df) reduction(+: rhs_avg)
+    #pragma omp parallel for private(df) // reduction(+: rhs_avg)
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
-        rhs[i] = ( tmp_phi.grad[i] +
-            6.0 * a2 * a2 * hubble * (f[i] - phi_avg) * df +
-            a2 * (df * df + 2.0 * (rho_avg + potential(f[i]))) ) / (4.0 * a2);
-        rhs_avg += rhs[i];
+        rhs[i] = 0.5 * a2 * (rho[i] - rho_avg);
+
+        max_c2 = MAX(max_c2, fabs(-0.5 * ( tmp_phi.grad[i] +
+            3.0 * a2 * df * df + 4.0 * a2 * potential(f[i]) ) +
+            9.0 * a2 * hubble * hubble) );
+
+        /* if (max_c2 / fabs(rhs[i]) > 0.1) */
+        /* { */
+        /*     puts("c_1 / c_0 > 0.001"); */
+        /* } */
+        /* rhs_avg += rhs[i]; */
     }
-    rhs_avg /= (double) N;
+    /* rhs_avg /= (double) N; */
 
     // TODO: should i average rhs to zero? (if not: delete rhs_avg)
     /* #pragma omp parallel for */
