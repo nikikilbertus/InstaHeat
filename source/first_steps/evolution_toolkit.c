@@ -352,6 +352,8 @@ void mk_psi_and_dpsi(double *f) {
     size_t Mx = pars.x.M;
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
+    double a = f[2 * N];
+    double hubble = sqrt(rho_avg / 3.0);
 
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
