@@ -149,14 +149,14 @@ void allocate_external() {
     tmp_psi.cz  = fftw_malloc(M * sizeof *tmp_psi.cz);
 
     // general purpose double memory blocks for temporary use
-    tmp_phi.dx = fftw_malloc(Ntot * sizeof *tmp_phi.dx); // used in dopri853 (dense)
-    tmp_phi.dy = fftw_malloc(N * sizeof *tmp_phi.dy);
-    tmp_phi.dz = fftw_malloc(N * sizeof *tmp_phi.dz);
+    tmp_phi.dx   = fftw_malloc(Ntot * sizeof *tmp_phi.dx); // used in dopri853 (dense)
+    tmp_phi.dy   = fftw_malloc(N * sizeof *tmp_phi.dy);
+    tmp_phi.dz   = fftw_malloc(N * sizeof *tmp_phi.dz);
     tmp_phi.grad = fftw_malloc(N * sizeof *tmp_phi.grad);
     tmp_phi.lap  = fftw_malloc(N * sizeof *tmp_phi.lap);
-    tmp_psi.dx = fftw_malloc(N * sizeof *tmp_psi.dx);
-    tmp_psi.dy = fftw_malloc(N * sizeof *tmp_psi.dy);
-    tmp_psi.dz = fftw_malloc(N * sizeof *tmp_psi.dz);
+    tmp_psi.dx   = fftw_malloc(N * sizeof *tmp_psi.dx);
+    tmp_psi.dy   = fftw_malloc(N * sizeof *tmp_psi.dy);
+    tmp_psi.dz   = fftw_malloc(N * sizeof *tmp_psi.dz);
     tmp_psi.grad = fftw_malloc(N * sizeof *tmp_psi.grad);
 
     if (!(grid && field && field_new && dfield && dfield_new && field_buf &&

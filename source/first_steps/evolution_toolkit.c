@@ -69,7 +69,7 @@ void mk_rho(double *f) {
     {
         df = f[N + i];
         grad2 = tmp_phi.grad[i] / (a * a);
-        rho[i] = (df * df + grad2) / 2. + potential(f[i]);
+        rho[i] = (df * df + grad2) / 2.0 + potential(f[i]);
         rho_avg += rho[i];
     }
     rho_avg /= N;
@@ -194,6 +194,7 @@ void mk_gradient_squared_and_laplacian(double *in) {
 }
 
 // compute grad phi times grad psi
+// //TODO: delete that?
 void mk_grad_phi_times_grad_psi() {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -345,10 +346,8 @@ inline double potential_prime(const double f) {
     return 0.0;
 }
 
-// solve the poisson like equation Laplace(psi) = rhs for scalar perturbations
-//TODO: since we have linear term now, it's not a poisson equation anymore, change
-//the use of "poisson" everywhere, also make sure I actually have the correct
-//equations here
+// solve the poisson like equation for scalar perturbations
+//TODO: triple check that I am doing the right thing here
 void solve_poisson_eq(double *f) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -356,20 +355,6 @@ void solve_poisson_eq(double *f) {
     size_t Mx = pars.x.M;
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
-
-    #ifdef SHOW_TIMING_INFO
-    poisson_time -= get_wall_time();
-    #endif
-    double *rhs = tmp_phi.dx + N; // reuse already allocated memory block
-    mk_poisson_rhs(f, rhs);
-
-    #ifdef SHOW_TIMING_INFO
-    fftw_time_exe -= get_wall_time();
-    #endif
-    fftw_execute_dft_r2c(p_fw, rhs, tmp_phi.c);
-    #ifdef SHOW_TIMING_INFO
-    fftw_time_exe += get_wall_time();
-    #endif
 
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
@@ -381,15 +366,15 @@ void solve_poisson_eq(double *f) {
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
-    fftw_execute_dft_r2c(p_fw, tmp_psi.dx, tmp_phi.cx);
-    fftw_execute_dft_r2c(p_fw, tmp_psi.dy, tmp_phi.cy);
+    fftw_execute_dft_r2c(p_fw, tmp_psi.dx, tmp_psi.cx);
+    fftw_execute_dft_r2c(p_fw, tmp_psi.dy, tmp_psi.cy);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
 
     double k_sq;
-    size_t osx, osy;
-    #pragma omp parallel for private(osx, osy, k_sq)
+    size_t osx, osy, id;
+    #pragma omp parallel for private(osx, osy, k_sq, id)
     for (size_t i = 0; i < Mx; ++i)
     {
         osx = i * My * Mz;
@@ -398,14 +383,22 @@ void solve_poisson_eq(double *f) {
             osy = osx + j * Mz;
             for (size_t k = 0; k < Mz; ++k)
             {
+                id = osy + k;
                 k_sq = pars.z.k2 * k * k;
                 if (i > Nx / 2)
                 {
                     k_sq += pars.x.k2 * (Nx - i) * (Nx - i);
+                    tmp_psi.cx[id] /= pars.x.k * ((int)i - (int)Nx);
+                }
+                else if (2 * i == Nx)
+                {
+                    k_sq += pars.x.k2 * i * i;
+                    tmp_psi.cx[id] = 0.0;
                 }
                 else
                 {
                     k_sq += pars.x.k2 * i * i;
+                    tmp_psi.cx[id] /= pars.x.k * i;
                 }
                 if (j > Ny / 2)
                 {
@@ -415,15 +408,15 @@ void solve_poisson_eq(double *f) {
                 {
                     k_sq += pars.y.k2 * j * j;
                 }
-                // TODO: what happens if linear term comes into the game?
                 // TODO: when do i set zero? when k_sq==0 or scaling==0?
                 if (fabs(k_sq) > 1.0e-14)
                 {
-                    tmp_phi.c[osy + k] /= k_sq * N;
+                    tmp_psi.c[id] = a2 *
+                        (tmp_psi.cy[id] + tmp_psi.cx) / (k_sq * N);
                 }
                 else
                 {
-                    tmp_phi.c[osy + k] = 0.0;
+                    tmp_psi.c[id] = 0.0;
                 }
             }
         }
@@ -432,7 +425,7 @@ void solve_poisson_eq(double *f) {
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
-    fftw_execute_dft_c2r(p_bw, tmp_phi.c, psi);
+    fftw_execute_dft_c2r(p_bw, tmp_psi.c, psi);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     poisson_time += get_wall_time();
@@ -453,7 +446,7 @@ void solve_poisson_eq(double *f) {
 }
 
 // construct the right hand side for the poisson equation
-//TODO: i think this is not correct anymore? check!
+//TODO: delete that?
 void mk_poisson_rhs(double *f, double *rhs) {
     size_t N = pars.N;
     double a = f[2 * N];
@@ -667,6 +660,7 @@ void prepare_and_save_timeslice() {
     save();
 }
 
+//TODO: do i need that function? delete?
 double mean(const double *in, size_t N) {
     double mean = 0.0;
     #pragma omp parallel for reduction(+: mean)
