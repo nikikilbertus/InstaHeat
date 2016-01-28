@@ -371,7 +371,7 @@ void mk_psi_and_dpsi(double *f) {
 
     double k_sq;
     size_t osx, osy, id;
-    #pragma omp parallel for private(osx, osy, k_sq, id)
+    #pragma omp parallel for private(k_sq, osx, osy, id)
     for (size_t i = 0; i < Mx; ++i)
     {
         osx = i * My * Mz;
@@ -405,7 +405,7 @@ void mk_psi_and_dpsi(double *f) {
                 {
                     k_sq += pars.y.k2 * j * j;
                 }
-                if (fabs(k_sq) > 1.0e-14)
+                if (fabs(k_sq) > 1.0e-12)
                 {
                     tmp_psi.c[id] = 0.5 * a2 *
                         (tmp_psi.cy[id] + 3.0 * hubble * tmp_psi.cx[id]) /
@@ -430,7 +430,7 @@ void mk_psi_and_dpsi(double *f) {
     poisson_time += get_wall_time();
     #endif
 
-    // set average of psi to zero (does not seem to be necessary)
+    // set average of psi to zero? (does not seem to be necessary)
     double psi_avg = 0.0;
     double dpsi_avg = 0.0;
     #pragma omp parallel for reduction(+: psi_avg, dpsi_avg)
