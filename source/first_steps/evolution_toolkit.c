@@ -359,8 +359,8 @@ void solve_poisson_eq(double *f) {
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
     {
-        tmp_psi.dx[i] = 1.5 * hubble * f[N + i] * tmp_phi.dx[i];
-        tmp_psi.dy[i] = 0.5 * (rho[i] - rho_avg);
+        tmp_psi.dx[i] = 3.0 * hubble * f[N + i] * tmp_phi.dx[i];
+        tmp_psi.dy[i] = (rho[i] - rho_avg);
     }
 
     #ifdef SHOW_TIMING_INFO
@@ -408,11 +408,10 @@ void solve_poisson_eq(double *f) {
                 {
                     k_sq += pars.y.k2 * j * j;
                 }
-                // TODO: when do i set zero? when k_sq==0 or scaling==0?
                 if (fabs(k_sq) > 1.0e-14)
                 {
-                    tmp_psi.c[id] = a2 *
-                        (tmp_psi.cy[id] + tmp_psi.cx) / (k_sq * N);
+                    tmp_psi.c[id] = 0.5 * a2 *
+                        (tmp_psi.cy[id] + tmp_psi.cx[id]) / (k_sq * N);
                 }
                 else
                 {
@@ -432,17 +431,17 @@ void solve_poisson_eq(double *f) {
     #endif
 
     // set average of psi to zero (does not seem to be necessary)
-    /* double psi_avg = 0.0; */
-    /* #pragma omp parallel for reduction(+: psi_avg) */
-    /* for (size_t i = 0; i < N; ++i) */
-    /* { */
-    /*     psi_avg += psi[i]; */
-    /* } */
-    /* psi_avg /= N; */
-    /* if (fabs(psi_avg) > 1.0e-4) */
-    /* { */
-    /*     printf("psi_avg = %f", psi_avg); */
-    /* } */
+    double psi_avg = 0.0;
+    #pragma omp parallel for reduction(+: psi_avg)
+    for (size_t i = 0; i < N; ++i)
+    {
+        psi_avg += psi[i];
+    }
+    psi_avg /= N;
+    if (fabs(psi_avg) > 1.0e-9)
+    {
+        printf("psi_avg = %f", psi_avg);
+    }
 }
 
 // construct the right hand side for the poisson equation
