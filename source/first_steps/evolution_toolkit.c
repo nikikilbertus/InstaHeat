@@ -30,7 +30,8 @@ void mk_rhs(const double t, double *f, double *result) {
 
     #ifdef INCLUDE_PSI
     solve_poisson_eq(f);
-    mk_grad_phi_times_grad_psi();
+    //TODO: do i still need that? if not -> delete
+    /* mk_grad_phi_times_grad_psi(); */
 
     double df, p;
     #pragma omp parallel for private(df, p)
@@ -38,9 +39,8 @@ void mk_rhs(const double t, double *f, double *result) {
     {
         df = f[N + i];
         p = psi[i];
-        //TODO: make sure this is correct now after comparison with karsten!
         result[N + i] = (1.0 + 4.0 * p) * tmp_phi.lap[i] / (a * a) -
-            (3.0 * hubble - 4.0 * dpsi[i]) * df +
+            (3.0 * hubble - 4.0 * dpsi[i]) * df -
             (1.0 + 2.0 * p) * potential_prime(f[i]);
     }
     #else
@@ -371,6 +371,22 @@ void solve_poisson_eq(double *f) {
     fftw_time_exe += get_wall_time();
     #endif
 
+    #pragma omp parallel for
+    for (size_t i = 0; i < N; ++i)
+    {
+        tmp_psi.dx[i] = 1.5 * hubble * f[N + i] * tmp_phi.dx[i];
+        tmp_psi.dy[i] = 0.5 * (rho[i] - rho_avg);
+    }
+
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe -= get_wall_time();
+    #endif
+    fftw_execute_dft_r2c(p_fw, tmp_psi.dx, tmp_phi.cx);
+    fftw_execute_dft_r2c(p_fw, tmp_psi.dy, tmp_phi.cy);
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe += get_wall_time();
+    #endif
+
     double k_sq;
     size_t osx, osy;
     #pragma omp parallel for private(osx, osy, k_sq)
@@ -447,6 +463,22 @@ void mk_poisson_rhs(double *f, double *rhs) {
     double df;
     double c1 = 0.0;
     double count = 0.0;
+    #pragma omp parallel for
+    for (size_t i = 0; i < N; ++i)
+    {
+        tmp_psi.dx[i] = 1.5 * hubble * f[N + i] * tmp_phi.dx[i];
+        tmp_psi.dy[i] = 0.5 * (rho[i] - rho_avg);
+    }
+
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe -= get_wall_time();
+    #endif
+    fftw_execute_dft_r2c(p_fw, tmp_psi.dx, tmp_phi.cx);
+    fftw_execute_dft_r2c(p_fw, tmp_psi.dy, tmp_phi.cy);
+    #ifdef SHOW_TIMING_INFO
+    fftw_time_exe += get_wall_time();
+    #endif
+
     /* double rhs_avg = 0.0; */
     // put together the right hand side of the poisson equation for psi
     #pragma omp parallel for private(df) reduction(+: count) // reduction(+: rhs_avg)

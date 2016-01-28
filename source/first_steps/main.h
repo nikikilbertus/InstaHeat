@@ -208,6 +208,7 @@ extern double phi_avg;
 
 // the scalar perturbation psi
 extern double *psi;
+extern double *dpsi;
 extern double *psi_buf;
 
 // buffer for scaling parameter a

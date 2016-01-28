@@ -23,6 +23,7 @@ double *dfield, *dfield_new;
 double *field_buf;
 double phi_avg;
 double *psi;
+double *dpsi;
 double *psi_buf;
 double *f_a_buf;
 double rho_avg;
