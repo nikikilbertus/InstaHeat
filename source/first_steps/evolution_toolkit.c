@@ -356,7 +356,7 @@ void mk_psi_and_dpsi(double *f) {
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
     {
-        tmp_psi.dx[i] = 3.0 * hubble * f[N + i] * tmp_phi.dx[i];
+        tmp_psi.dx[i] = f[N + i] * tmp_phi.dx[i];
         tmp_psi.dy[i] = (rho[i] - rho_avg);
     }
 
@@ -408,12 +408,14 @@ void mk_psi_and_dpsi(double *f) {
                 if (fabs(k_sq) > 1.0e-14)
                 {
                     tmp_psi.c[id] = 0.5 * a2 *
-                        (tmp_psi.cy[id] + tmp_psi.cx[id]) / (k_sq * N);
+                        (tmp_psi.cy[id] + 3.0 * hubble * tmp_psi.cx[id]) /
+                        (k_sq * N);
                 }
                 else
                 {
                     tmp_psi.c[id] = 0.0;
                 }
+                tmp_psi.cz[id] = 0.5 * tmp_psi.cx[id] - hubble * tmp_psi.c[id];
             }
         }
     }
@@ -422,6 +424,7 @@ void mk_psi_and_dpsi(double *f) {
     fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_c2r(p_bw, tmp_psi.c, psi);
+    fftw_execute_dft_c2r(p_bw, tmp_psi.cz, dpsi);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     poisson_time += get_wall_time();
@@ -429,15 +432,19 @@ void mk_psi_and_dpsi(double *f) {
 
     // set average of psi to zero (does not seem to be necessary)
     double psi_avg = 0.0;
-    #pragma omp parallel for reduction(+: psi_avg)
+    double dpsi_avg = 0.0;
+    #pragma omp parallel for reduction(+: psi_avg, dpsi_avg)
     for (size_t i = 0; i < N; ++i)
     {
         psi_avg += psi[i];
+        dpsi_avg += dpsi[i];
     }
     psi_avg /= N;
-    if (fabs(psi_avg) > 1.0e-9)
+    dpsi_avg /= N;
+    if (fabs(psi_avg) + fabs(dpsi_avg) > 1.0e-4)
     {
-        printf("psi_avg = %f", psi_avg);
+        printf("psi_avg = %f\n", psi_avg);
+        printf("dpsi_avg = %f\n", dpsi_avg);
     }
 }
 
