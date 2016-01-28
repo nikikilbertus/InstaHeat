@@ -29,7 +29,6 @@ void mk_rhs(const double t, double *f, double *result) {
     }
 
     #ifdef INCLUDE_PSI
-    phi_avg = mean(f, N);
     solve_poisson_eq(f);
     mk_grad_phi_times_grad_psi();
 
@@ -41,10 +40,8 @@ void mk_rhs(const double t, double *f, double *result) {
         p = psi[i];
         //TODO: make sure this is correct now after comparison with karsten!
         result[N + i] = (1.0 + 4.0 * p) * tmp_phi.lap[i] / (a * a) -
-            (3.0 + 4.0 * p) * hubble * df +
-            2.0 * (1.0 + p) * (f[i] - phi_avg) * df * df -
-            (1.0 + 2.0 * p) * potential_prime(f[i]) -
-            4.0 * p * tmp_psi.grad[i] / (a * a);
+            (3.0 * hubble - 4.0 * dpsi[i]) * df +
+            (1.0 + 2.0 * p) * potential_prime(f[i]);
     }
     #else
     #pragma omp parallel for
