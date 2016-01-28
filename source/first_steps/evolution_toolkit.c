@@ -29,10 +29,7 @@ void mk_rhs(const double t, double *f, double *result) {
     }
 
     #ifdef INCLUDE_PSI
-    solve_poisson_eq(f);
-    //TODO: do i still need that? if not -> delete
-    /* mk_grad_phi_times_grad_psi(); */
-
+    mk_psi_and_dpsi(f);
     double df, p;
     #pragma omp parallel for private(df, p)
     for (size_t i = 0; i < N; ++i)
@@ -348,7 +345,7 @@ inline double potential_prime(const double f) {
 
 // solve the poisson like equation for scalar perturbations
 //TODO: triple check that I am doing the right thing here
-void solve_poisson_eq(double *f) {
+void mk_psi_and_dpsi(double *f) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t N = pars.N;
