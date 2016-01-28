@@ -21,7 +21,6 @@ void mk_grad_phi_times_grad_psi();
 extern double potential(const double f);
 extern double potential_prime(const double f);
 void mk_psi_and_dpsi(double *f);
-void mk_poisson_rhs(double *f, double *rhs);
 void mk_power_spectrum(const fftw_complex *in);
 void apply_filter_real(double *inout);
 void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout);
