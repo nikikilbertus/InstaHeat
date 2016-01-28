@@ -29,6 +29,7 @@ void mk_rhs(const double t, double *f, double *result) {
     }
 
     #ifdef INCLUDE_PSI
+    phi_avg = mean(f, N);
     solve_poisson_eq(f);
     mk_grad_phi_times_grad_psi();
 
@@ -403,7 +404,7 @@ void solve_poisson_eq(double *f) {
                 }
                 // TODO: what happens if linear term comes into the game?
                 // TODO: when do i set zero? when k_sq==0 or scaling==0?
-                if (fabs(k_sq) > 1.0e-12)
+                if (fabs(k_sq) > 1.0e-14)
                 {
                     tmp_phi.c[osy + k] /= k_sq * N;
                 }
@@ -445,30 +446,34 @@ void mk_poisson_rhs(double *f, double *rhs) {
     double a = f[2 * N];
     double a2 = a * a;
     double hubble = sqrt(rho_avg / 3.0);
-    /* phi_avg = mean(f, N); */
 
     double df;
-    double max_c2 = 0.0;
+    double c1 = 0.0;
+    double count = 0.0;
     /* double rhs_avg = 0.0; */
     // put together the right hand side of the poisson equation for psi
-    #pragma omp parallel for private(df) // reduction(+: rhs_avg)
+    #pragma omp parallel for private(df) reduction(+: count) // reduction(+: rhs_avg)
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
         rhs[i] = 0.5 * a2 * (rho[i] - rho_avg);
+        rhs[i] += 1.5 * a2 * hubble * df * (f[i] - phi_avg);
 
-        max_c2 = MAX(max_c2, fabs(-0.5 * ( tmp_phi.grad[i] +
+        c1 = -0.5 * ( tmp_phi.grad[i] +
             3.0 * a2 * df * df + 4.0 * a2 * potential(f[i]) ) +
-            9.0 * a2 * hubble * hubble) );
+            9.0 * a2 * hubble * hubble;
 
-        /* if (max_c2 / fabs(rhs[i]) > 0.1) */
+        count += fabs(c1 / rhs[i]);
+        /* if (fabs(c1 / rhs[i]) > 1.0) */
         /* { */
-        /*     puts("c_1 / c_0 > 0.001"); */
+        /*     count++; */
         /* } */
         /* rhs_avg += rhs[i]; */
     }
     /* rhs_avg /= (double) N; */
+    count /= (double) N;
 
+    /* printf("average c1 / c0 is %f\n", count); */
     // TODO: should i average rhs to zero? (if not: delete rhs_avg)
     /* #pragma omp parallel for */
     /* for (size_t i = 0; i < N; ++i) */
