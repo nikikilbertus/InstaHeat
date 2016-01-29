@@ -27,5 +27,7 @@ void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout);
 extern double filter_window_function(const double x);
 void prepare_and_save_timeslice();
 double mean(const double *in, size_t N);
+void contains_nan(double *f, size_t N);
+void contains_nanc(complex *f, size_t N);
 
 #endif

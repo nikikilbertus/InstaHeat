@@ -28,6 +28,7 @@ void mk_rhs(const double t, double *f, double *result) {
         result[i] = f[N + i];
     }
 
+    mk_psi_and_dpsi(f);
     #ifdef INCLUDE_PSI
     mk_psi_and_dpsi(f);
     double df, p;
@@ -356,11 +357,15 @@ void mk_psi_and_dpsi(double *f) {
     double a2 = a * a;
     double hubble = sqrt(rho_avg / 3.0);
 
+    #ifdef SHOW_TIMING_INFO
+    poisson_time -= get_wall_time();
+    #endif
+
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
     {
         tmp_psi.dx[i] = f[N + i] * tmp_phi.dx[i];
-        tmp_psi.dy[i] = (rho[i] - rho_avg);
+        tmp_psi.dy[i] = rho[i] - rho_avg;
     }
 
     #ifdef SHOW_TIMING_INFO
@@ -372,6 +377,8 @@ void mk_psi_and_dpsi(double *f) {
     fftw_time_exe += get_wall_time();
     #endif
 
+    contains_nan(tmp_psi.dy, N);
+    contains_nanc(tmp_psi.cy, N);
     double k_sq;
     size_t osx, osy, id;
     #pragma omp parallel for private(k_sq, osx, osy, id)
@@ -410,19 +417,22 @@ void mk_psi_and_dpsi(double *f) {
                 }
                 if (fabs(k_sq) > 1.0e-12)
                 {
-                    tmp_psi.c[id] = 0.5 * a2 *
-                        (tmp_psi.cy[id] + 3.0 * hubble * tmp_psi.cx[id]) /
-                        (k_sq * N);
+                    tmp_psi.c[id] = 0.5 * a2 * tmp_psi.cy[id] / (k_sq * N);
+                    /* tmp_psi.c[id] = 0.5 * a2 * */
+                    /*     (tmp_psi.cy[id] + 3.0 * hubble * tmp_psi.cx[id]) / */
+                    /*     (k_sq * N); */
                 }
                 else
                 {
                     tmp_psi.c[id] = 0.0;
                 }
-                tmp_psi.cz[id] = 0.5 * tmp_psi.cx[id] - hubble * tmp_psi.c[id];
+                tmp_psi.cz[id] = 0.5 * tmp_psi.cx[id] / N -
+                        hubble * tmp_psi.c[id];
             }
         }
     }
 
+    /* contains_nanc(tmp_psi.c, N); */
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
@@ -432,6 +442,7 @@ void mk_psi_and_dpsi(double *f) {
     fftw_time_exe += get_wall_time();
     poisson_time += get_wall_time();
     #endif
+
 
     // set average of psi to zero? (does not seem to be necessary)
     double psi_avg = 0.0;
@@ -616,4 +627,28 @@ double mean(const double *in, size_t N) {
         mean += in[i];
     }
     return mean / N;
+}
+
+void contains_nan(double *f, size_t N) {
+    size_t count = 0;
+    for (size_t i = 0; i < N; ++i)
+    {
+        if (isnan(f[i]))
+        {
+            ++count;
+        }
+    }
+    printf("found %zu nans\n", count);
+}
+
+void contains_nanc(complex *f, size_t N) {
+    size_t count = 0;
+    for (size_t i = 0; i < N; ++i)
+    {
+        if (isnan(creal(f[i])) || isnan(cimag(f[i])))
+        {
+            ++count;
+        }
+    }
+    printf("found %zu nans\n", count);
 }

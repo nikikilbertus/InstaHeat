@@ -130,7 +130,7 @@ void h5_create_empty_by_path(const char *name) {
     // close property list and dspace_rho
     H5Pclose(plist_rho);
     H5Sclose(dspace_rho);
-    RUNTIME_INFO(puts("Created hdf5 file with datasets for"
+    RUNTIME_INFO(puts("Created hdf5 file with datasets for "
                 "phi, psi, t, a, rho.\n"));
 }
 
