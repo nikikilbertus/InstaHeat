@@ -73,7 +73,7 @@ during execution
 /* #define ENABLE_FFT_FILTER */
 
 // include scalar metric perturbation Psi
-/* #define INCLUDE_PSI */
+#define INCLUDE_PSI
 
 // ------------------computational domain---------------------------------------
 // spatial
@@ -91,7 +91,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (0.01)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (0.01)
+#define FINAL_TIME              (250.0)
 #define MAX_STEPS               (1e6)
 #define MINIMAL_DELTA_T         (1.0e-5)
 

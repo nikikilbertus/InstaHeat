@@ -28,7 +28,6 @@ void mk_rhs(const double t, double *f, double *result) {
         result[i] = f[N + i];
     }
 
-    mk_psi_and_dpsi(f);
     #ifdef INCLUDE_PSI
     mk_psi_and_dpsi(f);
     double df, p;
@@ -353,6 +352,7 @@ void mk_psi_and_dpsi(double *f) {
     size_t Mx = pars.x.M;
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
+    size_t M = Mx * My * Mz;
     double a = f[2 * N];
     double a2 = a * a;
     double hubble = sqrt(rho_avg / 3.0);
@@ -377,8 +377,10 @@ void mk_psi_and_dpsi(double *f) {
     fftw_time_exe += get_wall_time();
     #endif
 
-    contains_nan(tmp_psi.dy, N);
-    contains_nanc(tmp_psi.cy, N);
+    /* contains_nan(tmp_psi.dx, N); */
+    /* contains_nanc(tmp_psi.cx, M); */
+    /* contains_nan(tmp_psi.dy, N); */
+    /* contains_nanc(tmp_psi.cy, M); */
     double k_sq;
     size_t osx, osy, id;
     #pragma omp parallel for private(k_sq, osx, osy, id)
@@ -397,7 +399,7 @@ void mk_psi_and_dpsi(double *f) {
                     k_sq += pars.x.k2 * (Nx - i) * (Nx - i);
                     tmp_psi.cx[id] /= pars.x.k * ((int)i - (int)Nx);
                 }
-                else if (2 * i == Nx)
+                else if (2 * i == Nx || i == 0)
                 {
                     k_sq += pars.x.k2 * i * i;
                     tmp_psi.cx[id] = 0.0;
@@ -417,10 +419,9 @@ void mk_psi_and_dpsi(double *f) {
                 }
                 if (fabs(k_sq) > 1.0e-12)
                 {
-                    tmp_psi.c[id] = 0.5 * a2 * tmp_psi.cy[id] / (k_sq * N);
-                    /* tmp_psi.c[id] = 0.5 * a2 * */
-                    /*     (tmp_psi.cy[id] + 3.0 * hubble * tmp_psi.cx[id]) / */
-                    /*     (k_sq * N); */
+                    tmp_psi.c[id] = 0.5 * a2 *
+                        (tmp_psi.cy[id] + 3.0 * hubble * tmp_psi.cx[id]) /
+                        (k_sq * N);
                 }
                 else
                 {
@@ -432,7 +433,9 @@ void mk_psi_and_dpsi(double *f) {
         }
     }
 
-    /* contains_nanc(tmp_psi.c, N); */
+    /* contains_nanc(tmp_psi.c, M); */
+    /* contains_nanc(tmp_psi.cz, M); */
+
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
@@ -443,6 +446,7 @@ void mk_psi_and_dpsi(double *f) {
     poisson_time += get_wall_time();
     #endif
 
+    /* contains_nan(psi, N); */
 
     // set average of psi to zero? (does not seem to be necessary)
     double psi_avg = 0.0;
