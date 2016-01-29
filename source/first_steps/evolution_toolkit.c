@@ -242,7 +242,6 @@ inline double potential_prime(const double f) {
 }
 
 // solve the poisson like equation for scalar perturbations
-//TODO: triple check that I am doing the right thing here
 void mk_psi_and_dpsi(double *f) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -275,10 +274,6 @@ void mk_psi_and_dpsi(double *f) {
     fftw_time_exe += get_wall_time();
     #endif
 
-    /* contains_nan(tmp_psi.dx, N); */
-    /* contains_nanc(tmp_psi.cx, M); */
-    /* contains_nan(tmp_psi.dy, N); */
-    /* contains_nanc(tmp_psi.cy, M); */
     double k_sq;
     size_t osx, osy, id;
     #pragma omp parallel for private(k_sq, osx, osy, id)
@@ -331,9 +326,6 @@ void mk_psi_and_dpsi(double *f) {
         }
     }
 
-    /* contains_nanc(tmp_psi.c, M); */
-    /* contains_nanc(tmp_psi.cz, M); */
-
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
@@ -343,25 +335,6 @@ void mk_psi_and_dpsi(double *f) {
     fftw_time_exe += get_wall_time();
     poisson_time += get_wall_time();
     #endif
-
-    /* contains_nan(psi, N); */
-
-    // set average of psi to zero? (does not seem to be necessary)
-    double psi_avg = 0.0;
-    double dpsi_avg = 0.0;
-    #pragma omp parallel for reduction(+: psi_avg, dpsi_avg)
-    for (size_t i = 0; i < N; ++i)
-    {
-        psi_avg += psi[i];
-        dpsi_avg += dpsi[i];
-    }
-    psi_avg /= N;
-    dpsi_avg /= N;
-    if (fabs(psi_avg) + fabs(dpsi_avg) > 1.0e-4)
-    {
-        printf("psi_avg = %f\n", psi_avg);
-        printf("dpsi_avg = %f\n", dpsi_avg);
-    }
 }
 
 // computes a crude estimation of the power spectrum, more info in main.h
