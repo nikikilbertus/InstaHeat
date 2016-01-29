@@ -241,7 +241,8 @@ inline double potential_prime(const double f) {
     return 0.0;
 }
 
-// solve the poisson like equation for scalar perturbations
+// solve the poisson like equation for scalar perturbations and simultaneously
+// solving for its derivative
 void mk_psi_and_dpsi(double *f) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
