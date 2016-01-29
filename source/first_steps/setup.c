@@ -312,7 +312,7 @@ void mk_initial_conditions() {
 
 // initial values of the scalar field, make sure its periodic
 double phi_init(const double x, const double y, const double z,
-                                                const double *phases) {
+                                                const double *ph) {
     // localized for higgs metastability potential
     /* double phi0 = 0.04; */
     /* double lambda = 20.0; */
@@ -332,43 +332,44 @@ double phi_init(const double x, const double y, const double z,
     /* } */
 
     // some simple waves for notch or step potential simulations
-    double frac = 0.4; // vary the ratio between \phi_0 and \delta \phi
-    double phi0 = 0.73 * frac; // only vary if you know exactly why
-    double deltaphi = phi0 / frac;
-    if (pars.dim == 1)
-    {
-        return phi0 + deltaphi *
-                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]));
-    }
-    else if (pars.dim == 2)
-    {
-        return phi0 + deltaphi *
-                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
-                     cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]));
-    }
-    else
-    {
-        return phi0 + deltaphi *
-                    (cos(1.0 * x + phases[0]) + cos(-1.0 * x + phases[1]) +
-                     cos(1.0 * y + phases[2]) + cos(-1.0 * y + phases[3]) +
-                     cos(1.0 * z + phases[4]) + cos(-1.0 * z + phases[5]));
-    }
-
-    // very simple one for testing
-    /* double mean = 0.5; */
-    /* double amplitude = 0.1; */
+    /* double frac = 0.4; // vary the ratio between \phi_0 and \delta \phi */
+    /* double phi0 = 0.73 * frac; // only vary if you know exactly why */
+    /* double deltaphi = phi0 / frac; */
     /* if (pars.dim == 1) */
     /* { */
-    /*     return mean + amplitude * cos(x); */
+    /*     return phi0 + deltaphi * */
+    /*                 (cos(1.0 * x + ph[0]) + cos(-1.0 * x + ph[1])); */
     /* } */
     /* else if (pars.dim == 2) */
     /* { */
-    /*     return mean + amplitude * cos(x) * cos(y); */
+    /*     return phi0 + deltaphi * */
+    /*                 (cos(1.0 * x + ph[0]) + cos(-1.0 * x + ph[1]) + */
+    /*                  cos(1.0 * y + ph[2]) + cos(-1.0 * y + ph[3])); */
     /* } */
     /* else */
     /* { */
-    /*     return mean + amplitude * cos(x) * cos(y) * cos(z); */
+    /*     return phi0 + deltaphi * */
+    /*                 (cos(1.0 * x + ph[0]) + cos(-1.0 * x + ph[1]) + */
+    /*                  cos(1.0 * y + ph[2]) + cos(-1.0 * y + ph[3]) + */
+    /*                  cos(1.0 * z + ph[4]) + cos(-1.0 * z + ph[5])); */
     /* } */
+
+    // very simple one for testing
+    double mean = 0.1;
+    double amplitude = 1.0e-2 * mean;
+    if (pars.dim == 1)
+    {
+        return mean + amplitude * cos(x + ph[0]);
+    }
+    else if (pars.dim == 2)
+    {
+        return mean + amplitude * cos(x + ph[0]) * cos(y + ph[1]);
+    }
+    else
+    {
+        return mean + amplitude *
+            cos(x + ph[0]) * cos(y + ph[1]) * cos(z + ph[2]);
+    }
 }
 
 // initial values of the time deriv. of the scalar field, make sure its periodic

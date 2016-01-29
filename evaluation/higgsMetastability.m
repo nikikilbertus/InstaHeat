@@ -59,18 +59,18 @@ close all;
 
 % the power spectrum with a reference plane at 10^-10 (everything below
 % that might as well be roundoff errors and not truncation errors
-h = surf(log(1e-10 * ones(size(powspec))));
-hold on;
-g = surf(log(powspec));
-hold off;
-shading interp; lighting phong;
-set(h,'FaceColor',[1 0 0],'FaceAlpha',0.7,'EdgeAlpha', 0);
-zlabel('log')
-ylabel('|k|');
-xlabel('nt');
-title('power spectrum estimation');
-shg;
-pause;
+% h = surf(log(1e-10 * ones(size(powspec))));
+% hold on;
+% g = surf(log(powspec));
+% hold off;
+% shading interp; lighting phong;
+% set(h,'FaceColor',[1 0 0],'FaceAlpha',0.7,'EdgeAlpha', 0);
+% zlabel('log')
+% ylabel('|k|');
+% xlabel('nt');
+% title('power spectrum estimation');
+% shg;
+% pause;
 
 % a quick check of parsevals equation (indicates whether power spectrum
 % computation makes sense)

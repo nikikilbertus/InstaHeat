@@ -192,7 +192,6 @@ void mk_gradient_squared_and_laplacian(double *in) {
 
 // A selection of potentials one can try, make sure to set the corresponding
 // potential_prime, the derivative is not computed automatically
-// TODO: change that?
 inline double potential(const double f) {
     // higgs metastability potential
     /* double l = LAMBDA / 1.0e-10; */
@@ -203,11 +202,11 @@ inline double potential(const double f) {
 
     // notch or step potential
     // LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
-    double lambda = 100.0;
-    return LAMBDA / (1.0 + exp(-lambda * f));
+    /* double lambda = 100.0; */
+    /* return LAMBDA / (1.0 + exp(-lambda * f)); */
 
     // standard f squared potential
-    /* return MASS * MASS * f * f / 2.0; */
+    return MASS * MASS * f * f / 2.0;
 
     // standard f to the fourth (with f squared) potential
     /* return MASS * MASS * f * f / 2.0 + COUPLING * f * f * f * f / 24.0; */
@@ -228,12 +227,12 @@ inline double potential_prime(const double f) {
 
     // notch or step potential
     // LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
-    double lambda = 100.0;
-    double tmp = exp(lambda * f);
-    return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp));
+    /* double lambda = 100.0; */
+    /* double tmp = exp(lambda * f); */
+    /* return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp)); */
 
     // standard f squared potential
-    /* return MASS * MASS * f; */
+    return MASS * MASS * f;
 
     // standard f to the fourth (with f squared) potential
     /* return MASS * MASS * f + COUPLING * f * f * f / 6.0; */
@@ -250,7 +249,6 @@ void mk_psi_and_dpsi(double *f) {
     size_t Mx = pars.x.M;
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
-    size_t M = Mx * My * Mz;
     double a = f[2 * N];
     double a2 = a * a;
     double hubble = sqrt(rho_avg / 3.0);
