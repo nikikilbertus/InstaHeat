@@ -354,16 +354,17 @@ double phi_init(const double x, const double y, const double z,
     /*                  cos(1.0 * z + ph[4]) + cos(-1.0 * z + ph[5])); */
     /* } */
 
-    // very simple one for testing
-    double mean = 0.1;
-    double amplitude = 1.0e-2 * mean;
+    // very simple one for testing with phi squared potential
+    /* double mean = 14.1421356; // for 50 e-fold inflation */
+    double mean = 6.319569842; // somewhere at the end of 50 e-fold inflation
+    double amplitude = 1.0e-4 * mean;
     if (pars.dim == 1)
     {
         return mean + amplitude * cos(x + ph[0]);
     }
     else if (pars.dim == 2)
     {
-        return mean + amplitude * cos(x + ph[0]) * cos(y + ph[1]);
+        return mean + amplitude * cos(3.0 * x + ph[0]) * cos(2.0 * y + ph[1]);
     }
     else
     {
@@ -374,7 +375,9 @@ double phi_init(const double x, const double y, const double z,
 
 // initial values of the time deriv. of the scalar field, make sure its periodic
 double dphi_init(const double x, const double y, const double z) {
-    return 0.0;
+    /* return 0.0; */
+
+    return -0.089318193; // somewhere at end of 50 e-fold inflation
 }
 
 void free_and_destroy_all() {

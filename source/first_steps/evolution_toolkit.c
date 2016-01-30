@@ -237,7 +237,7 @@ inline double potential_prime(const double f) {
     // standard f to the fourth (with f squared) potential
     /* return MASS * MASS * f + COUPLING * f * f * f / 6.0; */
 
-    return 0.0;
+    /* return 0.0; */
 }
 
 // solve the poisson like equation for scalar perturbations and simultaneously

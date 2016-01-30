@@ -10,7 +10,7 @@
 #define MIN(x, y)               (((x) > (y)) ? (y) : (x))
 
 // seed for random number generator in creation of initial conditions
-#define SEED                    (1113)
+#define SEED                    (113)
 
 /*
 compiler switches for debugging, testing, profiling and additional information
@@ -45,7 +45,7 @@ during execution
 #define WRITE_OUT_BUFFER_NUMBER (20)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (10)
+#define TIME_STEP_SKIPS         (20)
 
 /**
  *  there is a (very crude and biased!) estimation of the power spectrum to
@@ -89,14 +89,15 @@ during execution
 
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
-#define DELTA_T                 (0.01)
+#define DELTA_T                 (0.0001)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (250.0)
+#define FINAL_TIME              (37.5)
 #define MAX_STEPS               (1e6)
 #define MINIMAL_DELTA_T         (1.0e-5)
 
 // ----------------parameters used in the potential-----------------------------
-#define MASS                    (1.0)
+/* #define MASS                    (0.11026) // for 50 e-fold inflation */
+#define MASS                    (0.11026)
 #define COUPLING                (1.0) // coupling in a phi4 potential
 #define LAMBDA                  (4.721e-5) // "cosmological constant"
 // for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5

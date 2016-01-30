@@ -59,18 +59,18 @@ close all;
 
 % the power spectrum with a reference plane at 10^-10 (everything below
 % that might as well be roundoff errors and not truncation errors
-% h = surf(log(1e-10 * ones(size(powspec))));
-% hold on;
-% g = surf(log(powspec));
-% hold off;
-% shading interp; lighting phong;
-% set(h,'FaceColor',[1 0 0],'FaceAlpha',0.7,'EdgeAlpha', 0);
-% zlabel('log')
-% ylabel('|k|');
-% xlabel('nt');
-% title('power spectrum estimation');
-% shg;
-% pause;
+h = surf(log(1e-10 * ones(size(powspec))));
+hold on;
+g = surf(log(powspec));
+hold off;
+shading interp; lighting phong;
+set(h,'FaceColor',[1 0 0],'FaceAlpha',0.7,'EdgeAlpha', 0);
+zlabel('log')
+ylabel('|k|');
+xlabel('nt');
+title('power spectrum estimation');
+shg;
+pause;
 
 % a quick check of parsevals equation (indicates whether power spectrum
 % computation makes sense)
@@ -89,18 +89,22 @@ close all;
 N = sqrt(length(phi(:,1)));
 if mod(N,1) == 0 && dim == 2
     for i=1:Nt
-        subplot(1,2,1)
+        subplot(2,2,1)
         surf(reshape(phi(:,i),N,N))
         title('phi')
-        shading interp
+%         shading interp
         lighting phong
-        subplot(1,2,2)
+        subplot(2,2,3)
+        contourf(reshape(phi(:,i),N,N))
+        subplot(2,2,2)
         surf(reshape(psi(:,i),N,N))
         title('psi')
-        shading interp
+%         shading interp
         lighting phong
+        subplot(2,2,4)
+        contourf(reshape(psi(:,i),N,N))
         shg;
-        pause(0.2)
+        pause(0.05)
     end
 end
 
