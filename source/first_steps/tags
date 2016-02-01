@@ -19,6 +19,7 @@ GRIDPOINTS_Z	main.h	/^#define GRIDPOINTS_Z /;"	d
 HDF5_CC	Makefile	/^export HDF5_CC = gcc-5$/;"	m
 HDF5_CLINKER	Makefile	/^export HDF5_CLINKER = gcc-5$/;"	m
 HEADERS	Makefile	/^HEADERS = $(wildcard *.h)$/;"	m
+INCLUDE_PSI	main.h	/^#define INCLUDE_PSI$/;"	d
 INITIAL_TIME	main.h	/^#define INITIAL_TIME /;"	d
 LAMBDA	main.h	/^#define LAMBDA /;"	d
 LARGEST_SCALING	main.h	/^#define LARGEST_SCALING /;"	d
@@ -157,6 +158,7 @@ bhh2	dopri853_stepper.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:__anon1
 bhh3	dopri853_stepper.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:__anon1
 bins_powspec	main.h	/^    size_t bins_powspec; \/\/ how many bins are used for the power spectrum$/;"	m	struct:__anon7
 buf_size	main.h	/^    size_t buf_size;     \/\/ size of the buffer$/;"	m	struct:__anon7
+c	main.h	/^    complex *c;$/;"	m	struct:__anon9
 c10	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
 c11	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
 c14	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
@@ -170,11 +172,12 @@ c6	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$
 c7	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
 c8	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
 c9	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
-cfftw_tmp	main.c	/^complex *cfftw_tmp;$/;"	v
-cfftw_tmp_x	main.c	/^complex *cfftw_tmp_x;$/;"	v
-cfftw_tmp_y	main.c	/^complex *cfftw_tmp_y;$/;"	v
-cfftw_tmp_z	main.c	/^complex *cfftw_tmp_z;$/;"	v
 compute_pow_spec	evolution_toolkit.h	/^    uint8_t compute_pow_spec; \/\/ compute the power spectrum in this step?$/;"	m	struct:__anon4
+contains_nan	evolution_toolkit.c	/^void contains_nan(double *f, size_t N) {$/;"	f
+contains_nanc	evolution_toolkit.c	/^void contains_nanc(complex *f, size_t N) {$/;"	f
+cx	main.h	/^    complex *cx;$/;"	m	struct:__anon9
+cy	main.h	/^    complex *cy;$/;"	m	struct:__anon9
+cz	main.h	/^    complex *cz;$/;"	m	struct:__anon9
 d41	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
 d410	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
 d411	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
@@ -235,10 +238,12 @@ dopri853_values_t	dopri853_stepper.h	/^}dopri853_values_t;$/;"	t	typeref:struct:
 dp	dopri853_stepper.c	/^dopri853_control_t dp;$/;"	v
 dpc	dopri853_constants.c	/^dopri853_constants_t dpc =$/;"	v
 dphi_init	setup.c	/^double dphi_init(const double x, const double y, const double z) {$/;"	f
+dpsi	main.c	/^double *dpsi;$/;"	v
 dpv	dopri853_stepper.c	/^dopri853_values_t dpv;$/;"	v
 dset_a	main.h	/^    size_t dset_a;       \/\/ h5 data set id of the scaling parameter a$/;"	m	struct:__anon7
 dset_phi	main.h	/^    size_t dset_phi;     \/\/ h5 data set id of the scalar field$/;"	m	struct:__anon7
 dset_powspec	main.h	/^    size_t dset_powspec; \/\/ h5 data set id of the power spectrum$/;"	m	struct:__anon7
+dset_psi	main.h	/^    size_t dset_psi;     \/\/ h5 data set id of the scalar perturbation$/;"	m	struct:__anon7
 dset_rho	main.h	/^    size_t dset_rho;     \/\/ h5 data set id of the energy density rho$/;"	m	struct:__anon7
 dset_time	main.h	/^    size_t dset_time;    \/\/ h5 data set id of the time$/;"	m	struct:__anon7
 dt	dopri853_stepper.h	/^    double dt;$/;"	m	struct:__anon3
@@ -246,11 +251,9 @@ dt	main.h	/^    double dt; \/\/ size of (initial) timestep delta t$/;"	m	struct:
 dt_did	dopri853_stepper.h	/^    double dt_did;$/;"	m	struct:__anon3
 dt_min	dopri853_stepper.h	/^    double dt_min;$/;"	m	struct:__anon3
 dt_next	dopri853_stepper.h	/^    double dt_next;$/;"	m	struct:__anon3
-dtmp_grad2	main.c	/^double *dtmp_grad2;$/;"	v
-dtmp_lap	main.c	/^double *dtmp_lap;$/;"	v
-dtmp_x	main.c	/^double *dtmp_x;$/;"	v
-dtmp_y	main.c	/^double *dtmp_y;$/;"	v
-dtmp_z	main.c	/^double *dtmp_z;$/;"	v
+dx	main.h	/^    double *dx;$/;"	m	struct:__anon9
+dy	main.h	/^    double *dy;$/;"	m	struct:__anon9
+dz	main.h	/^    double *dz;$/;"	m	struct:__anon9
 eps	dopri853_stepper.h	/^    double eps;$/;"	m	struct:__anon3
 equal	tests.c	/^int equal(const double a, const double b) {$/;"	f
 er1	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:__anon1
@@ -281,6 +284,7 @@ free_and_destroy_all	setup.c	/^void free_and_destroy_all() {$/;"	f
 free_dopri853_values	dopri853_stepper.c	/^void free_dopri853_values() {$/;"	f
 free_external	setup.c	/^void free_external() {$/;"	f
 get_wall_time	main.c	/^double get_wall_time() {$/;"	f
+grad	main.h	/^    double *grad;$/;"	m	struct:__anon9
 grid	main.c	/^double *grid;$/;"	v
 grid_dimension_t	main.h	/^}grid_dimension_t;$/;"	t	typeref:struct:__anon5
 h5_close	filehandling.c	/^void h5_close() {$/;"	f
@@ -304,17 +308,19 @@ k7	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *
 k8	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
 k9	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
 k_tmp	dopri853_stepper.h	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:__anon2
+lap	main.h	/^    double *lap;$/;"	m	struct:__anon9
 main	main.c	/^int main(int argc, const char * argv[]) {$/;"	f
-make_poisson_rhs	evolution_toolkit.c	/^void make_poisson_rhs(double *rhs) {$/;"	f
 max_steps	dopri853_stepper.h	/^    size_t max_steps;$/;"	m	struct:__anon3
 maxscale	dopri853_stepper.h	/^    double minscale, maxscale;$/;"	m	struct:__anon3
+mean	evolution_toolkit.c	/^double mean(const double *in, size_t N) {$/;"	f
 minscale	dopri853_stepper.h	/^    double minscale, maxscale;$/;"	m	struct:__anon3
 mk_fftw_plans	setup.c	/^void mk_fftw_plans() {$/;"	f
 mk_gradient_squared_and_laplacian	evolution_toolkit.c	/^void mk_gradient_squared_and_laplacian(double *in) {$/;"	f
 mk_grid	setup.c	/^void mk_grid() {$/;"	f
 mk_initial_conditions	setup.c	/^void mk_initial_conditions() {$/;"	f
 mk_power_spectrum	evolution_toolkit.c	/^void mk_power_spectrum(const fftw_complex *in) {$/;"	f
-mk_rho	evolution_toolkit.c	/^double mk_rho(double *f) {$/;"	f
+mk_psi_and_dpsi	evolution_toolkit.c	/^void mk_psi_and_dpsi(double *f) {$/;"	f
+mk_rho	evolution_toolkit.c	/^void mk_rho(double *f) {$/;"	f
 mk_rhs	evolution_toolkit.c	/^void mk_rhs(const double t, double *f, double *result) {$/;"	f
 n_bad	dopri853_stepper.h	/^    int n_bad;$/;"	m	struct:__anon3
 n_ok	dopri853_stepper.h	/^    int n_ok;$/;"	m	struct:__anon3
@@ -324,6 +330,7 @@ p_fw	main.c	/^fftw_plan p_fw;$/;"	v
 parameters_t	main.h	/^}parameters_t;$/;"	t	typeref:struct:__anon8
 pars	main.c	/^parameters_t pars;$/;"	v
 perform_step	dopri853_stepper.c	/^int perform_step(const double dt_try) {$/;"	f
+phi_avg	main.c	/^double phi_avg;$/;"	v
 phi_init	setup.c	/^double phi_init(const double x, const double y, const double z,$/;"	f
 poisson_time	main.c	/^double poisson_time = 0.0;$/;"	v
 potential	evolution_toolkit.c	/^inline double potential(const double f) {$/;"	f
@@ -334,6 +341,7 @@ prepare_and_save_timeslice	evolution_toolkit.c	/^void prepare_and_save_timeslice
 prepare_dense_output	dopri853_stepper.c	/^void prepare_dense_output(const double dt) {$/;"	f
 print_vector	setup.c	/^void print_vector(const double *vector, const size_t N) {$/;"	f
 psi	main.c	/^double *psi;$/;"	v
+psi_buf	main.c	/^double *psi_buf;$/;"	v
 r_tol	dopri853_stepper.h	/^    double a_tol, r_tol;$/;"	m	struct:__anon3
 rcont1	dopri853_stepper.h	/^        double *rcont1, *rcont2, *rcont3, *rcont4,$/;"	m	struct:__anon2
 rcont2	dopri853_stepper.h	/^        double *rcont1, *rcont2, *rcont3, *rcont4,$/;"	m	struct:__anon2
@@ -353,13 +361,12 @@ run_rk4	RK4_stepper.c	/^void run_rk4() {$/;"	f
 safe	dopri853_stepper.h	/^    double safe;$/;"	m	struct:__anon3
 save	filehandling.c	/^void save() {$/;"	f
 skip	main.h	/^    size_t skip;         \/\/ how many timesteps to skip in between write out$/;"	m	struct:__anon7
-solve_poisson_eq	evolution_toolkit.c	/^void solve_poisson_eq() {$/;"	f
 success	dopri853_stepper.c	/^int success(const double err, double *dt) {$/;"	f
 t	dopri853_stepper.h	/^    double t;$/;"	m	struct:__anon3
 t	main.h	/^    double t;  \/\/ current time$/;"	m	struct:__anon6
 t	main.h	/^    timing_t t;$/;"	m	struct:__anon8
 t_old	dopri853_stepper.h	/^    double t_old;$/;"	m	struct:__anon3
-test_fft_apply_filter	tests.c	/^void test_fft_apply_filter() {$/;"	f
+temporary_t	main.h	/^}temporary_t;$/;"	t	typeref:struct:__anon9
 test_func	tests.c	/^double test_func(const double x, const double y, const double z) {$/;"	f
 test_func_D2x	tests.c	/^double test_func_D2x(const double x, const double y, const double z) {$/;"	f
 test_func_D2y	tests.c	/^double test_func_D2y(const double x, const double y, const double z) {$/;"	f
@@ -370,15 +377,14 @@ test_func_Dz	tests.c	/^double test_func_Dz(const double x, const double y, const
 test_func_gradsq	tests.c	/^double test_func_gradsq(const double x, const double y, const double z) {$/;"	f
 test_func_lap	tests.c	/^double test_func_lap(const double x, const double y, const double z) {$/;"	f
 test_mk_gradient_squared_and_laplacian	tests.c	/^void test_mk_gradient_squared_and_laplacian() {$/;"	f
-test_rhs_poisson	tests.c	/^double test_rhs_poisson(const double x, const double y, const double z) {$/;"	f
-test_sol_poisson	tests.c	/^double test_sol_poisson(const double x, const double y, const double z) {$/;"	f
-test_solve_poisson_eq	tests.c	/^void test_solve_poisson_eq() {$/;"	f
 tf	dopri853_stepper.h	/^    double tf;$/;"	m	struct:__anon3
 tf	main.h	/^    double tf; \/\/ final time$/;"	m	struct:__anon6
 ti	dopri853_stepper.h	/^    double ti;$/;"	m	struct:__anon3
 ti	main.h	/^    double ti; \/\/ initial time$/;"	m	struct:__anon6
 time_buf	main.c	/^double *time_buf;$/;"	v
 timing_t	main.h	/^}timing_t;$/;"	t	typeref:struct:__anon6
+tmp_phi	main.c	/^temporary_t tmp_phi;$/;"	v
+tmp_psi	main.c	/^temporary_t tmp_psi;$/;"	v
 try_step	dopri853_stepper.c	/^void try_step(const double dt) {$/;"	f
 x	main.h	/^    grid_dimension_t x;$/;"	m	struct:__anon8
 y	main.h	/^    grid_dimension_t y;$/;"	m	struct:__anon8
