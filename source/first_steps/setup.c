@@ -364,7 +364,7 @@ double phi_init(const double x, const double y, const double z,
     }
     else if (pars.dim == 2)
     {
-        return mean + amplitude * cos(2.0 * x + ph[0]) * cos(y + ph[1]);
+        return mean + amplitude * cos(x + ph[0]) * cos(y + ph[1]);
     }
     else
     {

@@ -41,7 +41,7 @@ void h5_create_empty_by_path(const char *name) {
     // create dataspace for psi
     hid_t dspace_psi = H5Screate_simple(rank, dims, max_dims);
 
-    // create property list for phi
+    // create property list for psi
     hid_t plist_psi = H5Pcreate(H5P_DATASET_CREATE);
     H5Pset_layout(plist_psi, H5D_CHUNKED);
     H5Pset_chunk(plist_psi, rank, chunk_dims);
@@ -54,6 +54,24 @@ void h5_create_empty_by_path(const char *name) {
     // close property list and dataspace
     H5Pclose(plist_psi);
     H5Sclose(dspace_psi);
+
+    // --------------------------rho--------------------------------------------
+    // create dataspace for rho
+    hid_t dspace_rho = H5Screate_simple(rank, dims, max_dims);
+
+    // create property list for rho
+    hid_t plist_rho = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_layout(plist_rho, H5D_CHUNKED);
+    H5Pset_chunk(plist_rho, rank, chunk_dims);
+
+    // create dataset for rho
+    hid_t dset_rho = H5Dcreate(file, "rho", H5T_NATIVE_DOUBLE,
+                            dspace_rho, H5P_DEFAULT, plist_rho, H5P_DEFAULT);
+    pars.file.dset_rho = dset_rho;
+
+    // close property list and dataspace
+    H5Pclose(plist_rho);
+    H5Sclose(dspace_rho);
 
     // --------------------------power spectrum---------------------------------
     // create dataspace for the power_spectrum
@@ -113,23 +131,6 @@ void h5_create_empty_by_path(const char *name) {
     H5Pclose(plist_a);
     H5Sclose(dspace_a);
 
-    // ---------------------------rho-------------------------------------------
-    // create dataspace for the rho
-    hid_t dspace_rho = H5Screate_simple(rank, dims, max_dims);
-
-    // create property list for the rho
-    hid_t plist_rho = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_layout(plist_rho, H5D_CHUNKED);
-    H5Pset_chunk(plist_rho, rank, chunk_dims);
-
-    // create dataset for the rho
-    hid_t dset_rho = H5Dcreate(file, "rho", H5T_NATIVE_DOUBLE,
-                            dspace_rho, H5P_DEFAULT, plist_rho, H5P_DEFAULT);
-    pars.file.dset_rho = dset_rho;
-
-    // close property list and dspace_rho
-    H5Pclose(plist_rho);
-    H5Sclose(dspace_rho);
     RUNTIME_INFO(puts("Created hdf5 file with datasets for "
                 "phi, psi, t, a, rho.\n"));
 }
@@ -250,25 +251,25 @@ void h5_write_buffers_to_disk(const hsize_t Nt) {
     H5Sclose(mem_space);
     H5Sclose(dspace);
 
-    // --------------------------rho--------------------------------------------
-    // TODO: delete that
-    /* dset = pars.file.dset_rho; */
-
-    /* mem_space = H5Screate_simple(rank, add_dims, NULL); */
-    /* dspace = H5Dget_space(dset); */
-    /* H5Dset_extent(dset, new_dims); */
-    /* dspace = H5Dget_space(dset); */
-
-    /* H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL, */
-    /*                         add_dims, NULL); */
-    /* H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, rho_buf); */
-
-    /* H5Sclose(mem_space); */
-    /* H5Sclose(dspace); */
-
     #ifdef SHOW_TIMING_INFO
     h5_time_write += get_wall_time();
     #endif
+}
+
+void h5_close() {
+    hid_t file = pars.file.id;
+    if (pars.file.index != 0)
+    {
+        h5_write_buffers_to_disk(pars.file.index);
+    }
+    H5Fflush(file, H5F_SCOPE_GLOBAL);
+    hid_t obj_ids[10];
+    hsize_t obj_count = H5Fget_obj_ids(file, H5F_OBJ_DATASET, -1, obj_ids);
+    for (size_t i = 0; i < obj_count; ++i)
+    {
+        H5Dclose(obj_ids[i]);
+    }
+    H5Fclose(file);
 }
 
 void save() {
@@ -328,20 +329,4 @@ void save() {
         pars.file.index += 1;
     }
     RUNTIME_INFO(printf("Writing to file at t = %f\n", pars.t.t));
-}
-
-void h5_close() {
-    hid_t file = pars.file.id;
-    if (pars.file.index != 0)
-    {
-        h5_write_buffers_to_disk(pars.file.index);
-    }
-    H5Fflush(file, H5F_SCOPE_GLOBAL);
-    hid_t obj_ids[10];
-    hsize_t obj_count = H5Fget_obj_ids(file, H5F_OBJ_DATASET, -1, obj_ids);
-    for (size_t i = 0; i < obj_count; ++i)
-    {
-        H5Dclose(obj_ids[i]);
-    }
-    H5Fclose(file);
 }
