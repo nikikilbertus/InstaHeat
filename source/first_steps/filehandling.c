@@ -185,6 +185,22 @@ void h5_write_buffers_to_disk(const hsize_t Nt) {
     H5Sclose(mem_space);
     H5Sclose(dspace);
 
+    // --------------------------rho--------------------------------------------
+    dset = pars.file.dset_rho;
+
+    mem_space = H5Screate_simple(rank, add_dims, NULL);
+    dspace = H5Dget_space(dset);
+    H5Dset_extent(dset, new_dims);
+    dspace = H5Dget_space(dset);
+
+    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
+                            add_dims, NULL);
+    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT,
+                    rho_buf);
+
+    H5Sclose(mem_space);
+    H5Sclose(dspace);
+
     // --------------------------power spectrum---------------------------------
     dset = pars.file.dset_powspec;
 
@@ -235,19 +251,20 @@ void h5_write_buffers_to_disk(const hsize_t Nt) {
     H5Sclose(dspace);
 
     // --------------------------rho--------------------------------------------
-    dset = pars.file.dset_rho;
+    // TODO: delete that
+    /* dset = pars.file.dset_rho; */
 
-    mem_space = H5Screate_simple(rank, add_dims, NULL);
-    dspace = H5Dget_space(dset);
-    H5Dset_extent(dset, new_dims);
-    dspace = H5Dget_space(dset);
+    /* mem_space = H5Screate_simple(rank, add_dims, NULL); */
+    /* dspace = H5Dget_space(dset); */
+    /* H5Dset_extent(dset, new_dims); */
+    /* dspace = H5Dget_space(dset); */
 
-    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
-                            add_dims, NULL);
-    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, rho_buf);
+    /* H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL, */
+    /*                         add_dims, NULL); */
+    /* H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, rho_buf); */
 
-    H5Sclose(mem_space);
-    H5Sclose(dspace);
+    /* H5Sclose(mem_space); */
+    /* H5Sclose(dspace); */
 
     #ifdef SHOW_TIMING_INFO
     h5_time_write += get_wall_time();
@@ -266,8 +283,9 @@ void save() {
     {
         field_buf[os + i] = field[i];
         psi_buf[os + i] = psi[i];
+        rho_buf[os + i] = rho[i];
         #ifdef CHECK_FOR_NAN
-        if (isnan(field[i]) || isnan(psi[i]))
+        if (isnan(field[i]) || isnan(psi[i]) || isnan(rho[i]))
         {
             fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
             exit(EXIT_FAILURE);
@@ -291,10 +309,9 @@ void save() {
 
     time_buf[index] = pars.t.t;
     f_a_buf[index] = field[2 * N];
-    rho_buf[index] = rho_avg;
 
     #ifdef CHECK_FOR_NAN
-    if (isnan(pars.t.t) || isnan(field[2 * N]) || isnan(rho_avg))
+    if (isnan(pars.t.t) || isnan(field[2 * N]))
     {
         fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
             exit(EXIT_FAILURE);

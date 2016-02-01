@@ -131,7 +131,7 @@ void allocate_external() {
     time_buf     = calloc(buf_size, sizeof *time_buf);
     f_a_buf      = calloc(buf_size, sizeof *f_a_buf);
     rho          = fftw_malloc(N * sizeof *rho);
-    rho_buf      = calloc(buf_size, sizeof *rho_buf);
+    rho_buf      = fftw_malloc(buf_size * N * sizeof *rho_buf);
     pow_spec     = calloc(bins, sizeof *pow_spec);
     pow_spec_buf = calloc(buf_size * bins, sizeof *pow_spec_buf);
 
@@ -364,7 +364,7 @@ double phi_init(const double x, const double y, const double z,
     }
     else if (pars.dim == 2)
     {
-        return mean + amplitude * cos(x + ph[0]) * cos(y + ph[1]);
+        return mean + amplitude * cos(2.0 * x + ph[0]) * cos(y + ph[1]);
     }
     else
     {

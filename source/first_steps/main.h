@@ -34,7 +34,7 @@ during execution
 
 // ------------file handling parameters for writing to disk---------------------
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/run.h5")
+#define DATAPATH                ("../../../data/runnew.h5")
 
 /**
  *  write out data is buffered to not access hard drive too frequently (actually
@@ -45,7 +45,7 @@ during execution
 #define WRITE_OUT_BUFFER_NUMBER (20)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (20)
+#define TIME_STEP_SKIPS         (1)
 
 /**
  *  there is a (very crude and biased!) estimation of the power spectrum to
@@ -91,7 +91,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (0.0001)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (37.5)
+#define FINAL_TIME              (35.0)
 #define MAX_STEPS               (1e6)
 #define MINIMAL_DELTA_T         (1.0e-5)
 
@@ -208,17 +208,16 @@ extern double *field_buf;
 extern double phi_avg;
 
 // the scalar perturbation psi
-extern double *psi;
-extern double *dpsi;
+extern double *psi, *dpsi;
 extern double *psi_buf;
 
 // buffer for scaling parameter a
 extern double *f_a_buf;
 
 // energy density rho  = T^{00}_{\phi} and the buffer
-extern double rho_avg;
 extern double *rho;
 extern double *rho_buf;
+extern double rho_avg;
 
 // power spectrum and the buffer
 extern double *pow_spec;
