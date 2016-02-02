@@ -287,19 +287,19 @@ void save() {
     hsize_t os = index * outN;
     size_t osx, osy, id;
     size_t osxb, osyb, idb;
-    //#pragma omp parallel for private(osx, osxb, osy, osyb, id, idb)
-    for (size_t i = 0, ib = 0; i < Nx; i += pars.x.stride, ++ib)
+    #pragma omp parallel for private(osx, osxb, osy, osyb, id, idb)
+    for (size_t i = 0; i < Nx; i += pars.x.stride)
     {
         osx = i * Ny * Nz;
-        osxb = ib * outy * outz;
-        for (size_t j = 0, jb = 0; j < Ny; j += pars.y.stride, ++jb)
+        osxb = i * outy * outz / pars.x.stride;
+        for (size_t j = 0; j < Ny; j += pars.y.stride)
         {
             osy = osx + j * Nz;
-            osyb = osxb + jb * outz;
-            for (size_t k = 0, kb = 0; k < Nz; k += pars.z.stride, ++kb)
+            osyb = osxb + j * outz / pars.y.stride;
+            for (size_t k = 0; k < Nz; k += pars.z.stride)
             {
                 id = osy + k;
-                idb = osyb + kb;
+                idb = osyb + k / pars.z.stride;
                 field_buf[os + idb] = field[id];
                 psi_buf[os + idb] = psi[id];
                 rho_buf[os + idb] = rho[id];
