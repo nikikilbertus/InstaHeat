@@ -55,10 +55,10 @@ void initialize_parameters() {
     pars.z.k2 = -4. * PI * PI / ((pars.z.b - pars.z.a) * (pars.z.b - pars.z.a));
     pars.z.stride = STRIDE_Z;
 
-    size_t outx = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
-    size_t outy = (pars.y.N + pars.y.stride - 1) / pars.y.stride;
-    size_t outz = (pars.z.N + pars.z.stride - 1) / pars.z.stride;
-    pars.outN = outx * outy * outz;
+    pars.x.outN = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
+    pars.y.outN = (pars.y.N + pars.y.stride - 1) / pars.y.stride;
+    pars.z.outN = (pars.z.N + pars.z.stride - 1) / pars.z.stride;
+    pars.outN = pars.x.outN * pars.y.outN * pars.z.outN;
 
     // set the number of dimensions according to gridpoints in each direction
     pars.dim = 3;

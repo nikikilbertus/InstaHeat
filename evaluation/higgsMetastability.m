@@ -1,6 +1,6 @@
 close all
 dim = 2;
-name = 'run';
+name = 'strides2';
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation

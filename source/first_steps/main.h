@@ -34,7 +34,7 @@ during execution
 
 // ------------file handling parameters for writing to disk---------------------
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/run.h5")
+#define DATAPATH                ("../../../data/strides2.h5")
 
 /**
  *  write out data is buffered to not access hard drive too frequently (actually
@@ -52,7 +52,7 @@ during execution
 #define POWER_SPECTRUM_BINS     (50)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (5)
+#define TIME_STEP_SKIPS         (1)
 
 // spatial output strides
 #define STRIDE_X                (1)
@@ -94,9 +94,9 @@ during execution
 
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
-#define DELTA_T                 (0.0001)
+#define DELTA_T                 (0.001)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (40.0)
+#define FINAL_TIME              (200.0)
 #define MAX_STEPS               (1e6)
 #define MINIMAL_DELTA_T         (1.0e-5)
 
@@ -132,6 +132,7 @@ typedef struct {
     complex k; // a factor used in computing k vectors: k = 2 pi I / L
     double k2; // k2 = k*k = -4 pi^2 / L^2
     size_t stride; // strides for output
+    size_t outN; // number of output points in this dimension
 }grid_dimension_t;
 
 // encapsulate timing related parameters

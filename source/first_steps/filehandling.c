@@ -274,29 +274,35 @@ void h5_close() {
 
 void save() {
     hsize_t index = pars.file.index;
-    hsize_t Nt = pars.file.buf_size;
-    hsize_t Nx = pars.x.N;
-    hsize_t Ny = pars.y.N;
-    hsize_t Nz = pars.z.N;
-    hsize_t N = pars.N;
-    hsize_t outN = pars.outN;
-    hsize_t bins = pars.file.bins_powspec;
+    hsize_t Nt    = pars.file.buf_size;
+    hsize_t Nx    = pars.x.N;
+    hsize_t Ny    = pars.y.N;
+    hsize_t Nz    = pars.z.N;
+    hsize_t outy  = pars.y.outN;
+    hsize_t outz  = pars.z.outN;
+    hsize_t N     = pars.N;
+    hsize_t outN  = pars.outN;
+    hsize_t bins  = pars.file.bins_powspec;
 
     hsize_t os = index * outN;
-    size_t osx, osy, id, idbuf = 0;
-    #pragma omp parallel for private(osx, osy, id)
-    for (size_t i = 0; i < Nx; i += pars.x.stride)
+    size_t osx, osy, id;
+    size_t osxb, osyb, idb;
+    //#pragma omp parallel for private(osx, osxb, osy, osyb, id, idb)
+    for (size_t i = 0, ib = 0; i < Nx; i += pars.x.stride, ++ib)
     {
         osx = i * Ny * Nz;
-        for (size_t j = 0; j < Ny; j += pars.y.stride)
+        osxb = ib * outy * outz;
+        for (size_t j = 0, jb = 0; j < Ny; j += pars.y.stride, ++jb)
         {
             osy = osx + j * Nz;
-            for (size_t k = 0; k < Nz; k += pars.z.stride, ++idbuf)
+            osyb = osxb + jb * outz;
+            for (size_t k = 0, kb = 0; k < Nz; k += pars.z.stride, ++kb)
             {
                 id = osy + k;
-                field_buf[os + idbuf] = field[id];
-                psi_buf[os + idbuf] = psi[id];
-                rho_buf[os + idbuf] = rho[id];
+                idb = osyb + kb;
+                field_buf[os + idb] = field[id];
+                psi_buf[os + idb] = psi[id];
+                rho_buf[os + idb] = rho[id];
                 #ifdef CHECK_FOR_NAN
                 if (isnan(field[id]) || isnan(psi[id]) || isnan(rho[id]))
                 {
