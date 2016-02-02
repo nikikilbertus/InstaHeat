@@ -119,15 +119,9 @@ void allocate_external() {
     size_t Ntot = N2 + 1;
     size_t buf_size = pars.file.buf_size;
     size_t bins = pars.file.bins_powspec;
-    #ifdef USE_SPACE_STRIDES
     size_t outx = (Nx + pars.x.stride - 1) / pars.x.stride;
     size_t outy = (Ny + pars.y.stride - 1) / pars.y.stride;
     size_t outz = (Nz + pars.z.stride - 1) / pars.z.stride;
-    #else
-    size_t outx = Nx;
-    size_t outy = Ny;
-    size_t outz = Nz;
-    #endif
     size_t outN = outx * outy * outz;
 
     grid         = malloc((Nx + Ny + Nz) * sizeof *grid);

@@ -55,7 +55,6 @@ during execution
 #define TIME_STEP_SKIPS         (5)
 
 // spatial output strides
-#define USE_SPACE_STRIDES
 #define STRIDE_X                (1)
 #define STRIDE_Y                (1)
 #define STRIDE_Z                (1)
