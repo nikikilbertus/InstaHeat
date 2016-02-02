@@ -119,6 +119,16 @@ void allocate_external() {
     size_t Ntot = N2 + 1;
     size_t buf_size = pars.file.buf_size;
     size_t bins = pars.file.bins_powspec;
+    #ifdef USE_SPACE_STRIDES
+    size_t outx = (Nx + pars.x.stride - 1) / pars.x.stride;
+    size_t outy = (Ny + pars.y.stride - 1) / pars.y.stride;
+    size_t outz = (Nz + pars.z.stride - 1) / pars.z.stride;
+    #else
+    size_t outx = Nx;
+    size_t outy = Ny;
+    size_t outz = Nz;
+    #endif
+    size_t outN = outx * outy * outz;
 
     grid         = malloc((Nx + Ny + Nz) * sizeof *grid);
     // note that the field contains the scalar field, its time deriv. and a
@@ -127,14 +137,14 @@ void allocate_external() {
     dfield       = fftw_malloc(Ntot * sizeof *dfield);
     dfield_new   = fftw_malloc(Ntot * sizeof *dfield_new);
     // this buffer only holds the scalar field (not the deriv. or a)
-    field_buf    = calloc(buf_size * N, sizeof *field_buf);
+    field_buf    = calloc(buf_size * outN, sizeof *field_buf);
     psi          = fftw_malloc(N * sizeof *psi);
     dpsi         = fftw_malloc(N * sizeof *dpsi);
-    psi_buf      = fftw_malloc(buf_size * N * sizeof *psi_buf);
+    psi_buf      = fftw_malloc(buf_size * outN * sizeof *psi_buf);
     time_buf     = calloc(buf_size, sizeof *time_buf);
     f_a_buf      = calloc(buf_size, sizeof *f_a_buf);
     rho          = fftw_malloc(N * sizeof *rho);
-    rho_buf      = fftw_malloc(buf_size * N * sizeof *rho_buf);
+    rho_buf      = fftw_malloc(buf_size * outN * sizeof *rho_buf);
     pow_spec     = calloc(bins, sizeof *pow_spec);
     pow_spec_buf = calloc(buf_size * bins, sizeof *pow_spec_buf);
 
