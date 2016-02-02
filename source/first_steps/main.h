@@ -45,7 +45,7 @@ during execution
 #define WRITE_OUT_BUFFER_NUMBER (20)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (20)
+#define TIME_STEP_SKIPS         (5)
 
 /**
  *  there is a (very crude and biased!) estimation of the power spectrum to
@@ -91,7 +91,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (0.0001)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (45.0)
+#define FINAL_TIME              (40.0)
 #define MAX_STEPS               (1e6)
 #define MINIMAL_DELTA_T         (1.0e-5)
 

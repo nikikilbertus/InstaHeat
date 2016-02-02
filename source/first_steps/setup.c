@@ -357,7 +357,7 @@ double phi_init(const double x, const double y, const double z,
     // very simple one for testing with phi squared potential
     /* double mean = 14.1421356; // for 50 e-fold inflation */
     double mean = 6.319569842; // somewhere at the end of 50 e-fold inflation
-    double amplitude = 1.0e-4 * mean;
+    double amplitude = 1.0e-2 * mean;
     if (pars.dim == 1)
     {
         return mean + amplitude * cos(x + ph[0]);
