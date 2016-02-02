@@ -41,16 +41,19 @@ void initialize_parameters() {
     pars.x.b  = SPATIAL_UPPER_BOUND_X;
     pars.x.k  = 2. * PI * I / (pars.x.b - pars.x.a);
     pars.x.k2 = -4. * PI * PI / ((pars.x.b - pars.x.a) * (pars.x.b - pars.x.a));
+    pars.x.stride = STRIDE_X;
     pars.y.N  = GRIDPOINTS_Y;
     pars.y.a  = SPATIAL_LOWER_BOUND_Y;
     pars.y.b  = SPATIAL_UPPER_BOUND_Y;
     pars.y.k  = 2. * PI * I / (pars.y.b - pars.y.a);
     pars.y.k2 = -4. * PI * PI / ((pars.y.b - pars.y.a) * (pars.y.b - pars.y.a));
+    pars.y.stride = STRIDE_Y;
     pars.z.N  = GRIDPOINTS_Z;
     pars.z.a  = SPATIAL_LOWER_BOUND_Z;
     pars.z.b  = SPATIAL_UPPER_BOUND_Z;
     pars.z.k  = 2. * PI * I / (pars.z.b - pars.z.a);
     pars.z.k2 = -4. * PI * PI / ((pars.z.b - pars.z.a) * (pars.z.b - pars.z.a));
+    pars.z.stride = STRIDE_Z;
 
     // set the number of dimensions according to gridpoints in each direction
     pars.dim = 3;

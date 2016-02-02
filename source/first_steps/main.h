@@ -44,15 +44,20 @@ during execution
  */
 #define WRITE_OUT_BUFFER_NUMBER (20)
 
-// how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (5)
-
 /**
  *  there is a (very crude and biased!) estimation of the power spectrum to
  *  track stability, therefore we sum up fourier coefficients into bins
  *  depending on the norm of their k vector, this gives the number of bins used
  */
 #define POWER_SPECTRUM_BINS     (50)
+
+// how many timeslices to skip in between writing to file (1: write out all)
+#define TIME_STEP_SKIPS         (5)
+
+// spatial output strides
+#define STRIDE_X                (1)
+#define STRIDE_Y                (1)
+#define STRIDE_Z                (1)
 
 // -----------------------simulation preferences--------------------------------
 // how many threads to use for openmp parallelization (also used by fftw)
@@ -126,6 +131,7 @@ typedef struct {
     double b; // upper bound of interval
     complex k; // a factor used in computing k vectors: k = 2 pi I / L
     double k2; // k2 = k*k = -4 pi^2 / L^2
+    size_t stride; // strides for output
 }grid_dimension_t;
 
 // encapsulate timing related parameters
