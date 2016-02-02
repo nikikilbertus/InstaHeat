@@ -90,47 +90,47 @@ double test_func_lap(const double x, const double y, const double z) {
 }
 
 double test_func(const double x, const double y, const double z) {
-    // return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
-        // cos(2.0 * x) * cos(y) * cos(4.0 * z);
+    /* return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) * */
+    /*     cos(2.0 * x) * cos(y) * cos(4.0 * z); */
     return sin(x) * sin(y) * sin(z);
 }
 
 double test_func_Dx(const double x, const double y, const double z) {
-    // return -2.0 * exp(-2. * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
-        // cos(y) * cos(4.0 * z) * (2.0 * x * cos(2.0 * x) + sin(2.0 * x));
+    /* return -2.0 * exp(-2. * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) * */
+    /*     cos(y) * cos(4.0 * z) * (2.0 * x * cos(2.0 * x) + sin(2.0 * x)); */
     return cos(x) * sin(y) * sin(z);
 }
 
 double test_func_Dy(const double x, const double y, const double z) {
-    // return -exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
-        // cos(2.0 * x) * cos(4.0 * z) * (8.0 * y * cos(y) + sin(y));
+    /* return -exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) * */
+    /*     cos(2.0 * x) * cos(4.0 * z) * (8.0 * y * cos(y) + sin(y)); */
     return sin(x) * cos(y) * sin(z);
 }
 
 double test_func_Dz(const double x, const double y, const double z) {
-    // return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
-        // cos(2.0 * x) * cos(y) * (-3.0 * z * cos(4.0 * z) - 4.0 * sin(4.0 * z));
+    /* return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) * */
+    /*     cos(2.0 * x) * cos(y) * (-3.0 * z * cos(4.0 * z) - 4.0 * sin(4.0 * z)); */
     return sin(x) * sin(y) * cos(z);
 }
 
 double test_func_D2x(const double x, const double y, const double z) {
-    // return 8.0 * exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
-        // cos(y) * cos(4.0 * z) * ((-1.0 + 2.0 * pow(x, 2)) * cos(2.0 * x) +
-                // 2.0 * x * sin(2.0 * x));
+    /* return 8.0 * exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) * */
+    /*     cos(y) * cos(4.0 * z) * ((-1.0 + 2.0 * pow(x, 2)) * cos(2.0 * x) + */
+    /*     2.0 * x * sin(2.0 * x)); */
     return -sin(x) * sin(y) * sin(z);
 }
 
 double test_func_D2y(const double x, const double y, const double z) {
-    // return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
-        // cos(2.0 * x) * cos(4.0 * z) * ((-9.0 + 64.0 * pow(y, 2)) * cos(y) +
-                // 16.0 * y * sin(y));
+    /* return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) * */
+    /*     cos(2.0 * x) * cos(4.0 * z) * ((-9.0 + 64.0 * pow(y, 2)) * cos(y) + */
+    /*     16.0 * y * sin(y)); */
     return -sin(x) * sin(y) * sin(z);
 }
 
 double test_func_D2z(const double x, const double y, const double z) {
-    // return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
-        // cos(2.0 * x) * cos(y) * ((-19.0 + 9.0 * pow(z, 2)) * cos(4.0 * z) +
-                // 24.0 * z * sin(4.0 * z));
+    /* return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) * */
+    /*     cos(2.0 * x) * cos(y) * ((-19.0 + 9.0 * pow(z, 2)) * cos(4.0 * z) + */
+    /*     24.0 * z * sin(4.0 * z)); */
     return -sin(x) * sin(y) * sin(z);
 }
 
@@ -171,5 +171,5 @@ int are_fields_equal(const double *f, const double *g) {
 }
 
 int equal(const double a, const double b) {
-    return fabs(a - b) < 1e-10 ? 0 : -1;
+    return fabs(a - b) < 1e-8 ? 0 : -1;
 }

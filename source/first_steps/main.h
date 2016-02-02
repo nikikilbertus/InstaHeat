@@ -34,7 +34,7 @@ during execution
 
 // ------------file handling parameters for writing to disk---------------------
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/runnew.h5")
+#define DATAPATH                ("../../../data/run.h5")
 
 /**
  *  write out data is buffered to not access hard drive too frequently (actually
@@ -45,7 +45,7 @@ during execution
 #define WRITE_OUT_BUFFER_NUMBER (20)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (1)
+#define TIME_STEP_SKIPS         (20)
 
 /**
  *  there is a (very crude and biased!) estimation of the power spectrum to
@@ -91,7 +91,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (0.0001)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (35.0)
+#define FINAL_TIME              (45.0)
 #define MAX_STEPS               (1e6)
 #define MINIMAL_DELTA_T         (1.0e-5)
 
@@ -112,8 +112,8 @@ during execution
 #define SAFE                    (0.9)
 
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-6)
-#define ABSOLUTE_TOLERANCE      (1.0e-6)
+#define RELATIVE_TOLERANCE      (1.0e-12)
+#define ABSOLUTE_TOLERANCE      (1.0e-12)
 
 // ------------------------typedefs---------------------------------------------
 // representing one spatial dimension of a multi dimensional grid

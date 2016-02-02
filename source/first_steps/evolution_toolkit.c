@@ -19,6 +19,7 @@ void mk_rhs(const double t, double *f, double *result) {
     size_t N2 = 2 * N;
     double a = f[N2];
 
+    mk_gradient_squared_and_laplacian(f);
     mk_rho(f);
     double hubble = sqrt(rho_avg / 3.0);
 
@@ -56,8 +57,6 @@ void mk_rho(double *f) {
     size_t N = pars.N;
     double a = f[2 * N];
     rho_avg = 0.0;
-
-    mk_gradient_squared_and_laplacian(f);
 
     double df, grad2;
     #pragma omp parallel for default(shared) private(df, grad2) \
@@ -309,7 +308,7 @@ void mk_psi_and_dpsi(double *f) {
                 {
                     k_sq += pars.y.k2 * j * j;
                 }
-                if (fabs(k_sq) > 1.0e-12)
+                if (fabs(k_sq) > 1.0e-10)
                 {
                     tmp_psi.c[id] = 0.5 * a2 *
                         (tmp_psi.cy[id] + 3.0 * hubble * tmp_psi.cx[id]) /
@@ -488,6 +487,7 @@ inline double filter_window_function(const double x) {
 void prepare_and_save_timeslice() {
     evo_flags.compute_pow_spec = 1;
     mk_rho(field);
+    mk_psi_and_dpsi(field);
     evo_flags.compute_pow_spec = 0;
     save();
 }
