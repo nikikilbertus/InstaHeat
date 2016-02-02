@@ -275,23 +275,37 @@ void h5_close() {
 void save() {
     hsize_t index = pars.file.index;
     hsize_t Nt = pars.file.buf_size;
+    hsize_t Nx = pars.x.N;
+    hsize_t Ny = pars.y.N;
+    hsize_t Nz = pars.z.N;
     hsize_t N = pars.N;
+    hsize_t outN = pars.outN;
     hsize_t bins = pars.file.bins_powspec;
 
-    hsize_t os = index * N;
-    #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i)
+    hsize_t os = index * outN;
+    size_t osx, osy, id, idbuf = 0;
+    #pragma omp parallel for private(osx, osy, id)
+    for (size_t i = 0; i < Nx; i += pars.x.stride)
     {
-        field_buf[os + i] = field[i];
-        psi_buf[os + i] = psi[i];
-        rho_buf[os + i] = rho[i];
-        #ifdef CHECK_FOR_NAN
-        if (isnan(field[i]) || isnan(psi[i]) || isnan(rho[i]))
+        osx = i * Ny * Nz;
+        for (size_t j = 0; j < Ny; j += pars.y.stride)
         {
-            fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
-            exit(EXIT_FAILURE);
+            osy = osx + j * Nz;
+            for (size_t k = 0; k < Nz; k += pars.z.stride, ++idbuf)
+            {
+                id = osy + k;
+                field_buf[os + idbuf] = field[id];
+                psi_buf[os + idbuf] = psi[id];
+                rho_buf[os + idbuf] = rho[id];
+                #ifdef CHECK_FOR_NAN
+                if (isnan(field[id]) || isnan(psi[id]) || isnan(rho[id]))
+                {
+                    fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
+                    exit(EXIT_FAILURE);
+                }
+                #endif
+            }
         }
-        #endif
     }
 
     os = index * bins;
