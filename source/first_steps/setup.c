@@ -55,6 +55,11 @@ void initialize_parameters() {
     pars.z.k2 = -4. * PI * PI / ((pars.z.b - pars.z.a) * (pars.z.b - pars.z.a));
     pars.z.stride = STRIDE_Z;
 
+    size_t outx = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
+    size_t outy = (pars.y.N + pars.y.stride - 1) / pars.y.stride;
+    size_t outz = (pars.z.N + pars.z.stride - 1) / pars.z.stride;
+    pars.outN = outx * outy * outz;
+
     // set the number of dimensions according to gridpoints in each direction
     pars.dim = 3;
     if (pars.z.N == 1)
@@ -119,10 +124,7 @@ void allocate_external() {
     size_t Ntot = N2 + 1;
     size_t buf_size = pars.file.buf_size;
     size_t bins = pars.file.bins_powspec;
-    size_t outx = (Nx + pars.x.stride - 1) / pars.x.stride;
-    size_t outy = (Ny + pars.y.stride - 1) / pars.y.stride;
-    size_t outz = (Nz + pars.z.stride - 1) / pars.z.stride;
-    size_t outN = outx * outy * outz;
+    size_t outN = pars.outN;
 
     grid         = malloc((Nx + Ny + Nz) * sizeof *grid);
     // note that the field contains the scalar field, its time deriv. and a
