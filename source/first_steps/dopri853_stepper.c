@@ -86,7 +86,9 @@ void run_dopri853() {
         {
             ++dp.n_bad;
         }
+        #ifdef DEBUG
         RUNTIME_INFO(printf("did step: %d with dt: %f\n", dp.n_stp, dp.dt_did));
+        #endif
 
         if ((dp.n_stp + 1) % pars.file.skip == 0)
         {

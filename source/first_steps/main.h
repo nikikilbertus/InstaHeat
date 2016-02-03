@@ -34,7 +34,7 @@ during execution
 
 // ------------file handling parameters for writing to disk---------------------
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/strides2.h5")
+#define DATAPATH                ("../../../data/compare.h5")
 
 /**
  *  write out data is buffered to not access hard drive too frequently (actually
@@ -78,15 +78,15 @@ during execution
 /* #define ENABLE_FFT_FILTER */
 
 // include scalar metric perturbation Psi
-/* #define INCLUDE_PSI */
+#define INCLUDE_PSI
 
 // ------------------computational domain---------------------------------------
 // spatial
-#define GRIDPOINTS_X            (64)
-#define GRIDPOINTS_Y            (64)
+#define GRIDPOINTS_X            (16)
+#define GRIDPOINTS_Y            (1)
 #define GRIDPOINTS_Z            (1)
-#define SPATIAL_LOWER_BOUND_X   (-PI)
-#define SPATIAL_UPPER_BOUND_X   (PI)
+#define SPATIAL_LOWER_BOUND_X   (-PI * 6.0 * 1.0e3)
+#define SPATIAL_UPPER_BOUND_X   (PI * 6.0 * 1.0e3)
 #define SPATIAL_LOWER_BOUND_Y   (-PI)
 #define SPATIAL_UPPER_BOUND_Y   (PI)
 #define SPATIAL_LOWER_BOUND_Z   (-PI)
@@ -94,15 +94,15 @@ during execution
 
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
-#define DELTA_T                 (0.001)
+#define DELTA_T                 (0.01)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (200.0)
-#define MAX_STEPS               (1e6)
+#define FINAL_TIME              (1300000.0)
+#define MAX_STEPS               (1e9)
 #define MINIMAL_DELTA_T         (1.0e-5)
 
 // ----------------parameters used in the potential-----------------------------
-/* #define MASS                    (0.11026) // for 50 e-fold inflation */
-#define MASS                    (0.11026)
+/* #define MASS                    (0.11026) // for 50 e-fold hom inflation */
+#define MASS                    (1.0e-3)
 #define COUPLING                (1.0) // coupling in a phi4 potential
 #define LAMBDA                  (4.721e-5) // "cosmological constant"
 // for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
@@ -117,8 +117,8 @@ during execution
 #define SAFE                    (0.9)
 
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-12)
-#define ABSOLUTE_TOLERANCE      (1.0e-12)
+#define RELATIVE_TOLERANCE      (1.0e-10)
+#define ABSOLUTE_TOLERANCE      (1.0e-10)
 
 // ------------------------typedefs---------------------------------------------
 // representing one spatial dimension of a multi dimensional grid

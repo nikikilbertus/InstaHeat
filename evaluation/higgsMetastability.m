@@ -1,6 +1,6 @@
 close all
-dim = 2;
-name = 'strides2';
+dim = 1;
+name = 'compare';
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
@@ -19,6 +19,16 @@ psiAvg = mean(psi);
 rhoAvg = mean(rho);
 H = sqrt(rhoAvg / 3);
 Nt = length(t);
+
+plot(t, phiAvg'.*a.^(3/2), tk, phi0k.*ak.^(3/2))
+shg
+pause
+
+phiAvgsp = spline(t,phiAvg,tk);
+asp = spline(t,a,tk);
+plot(tk, phiAvgsp.*asp.^(3/2) - phi0k.*ak.^(3/2))
+shg
+pause
 
 % start with some simple plots (rho over a with a^-4 for reference)
 % loglog(a, rhoAvg);
@@ -63,31 +73,20 @@ shg;
 pause;
 close all;
 
-subplot(1,2,1)
-plot(t, (max(phi) - min(phi)) ./ phiAvg);
-ylabel('delta phi / phi0')
-xlabel('t')
-subplot(1,2,2)
-plot(t, (max(rho) - min(rho)) ./ rhoAvg);
-ylabel('delta rho / rho0')
-xlabel('t')
-shg;
-pause;
-
 % the power spectrum with a reference plane at 10^-10 (everything below
 % that might as well be roundoff errors and not truncation errors
-h = surf(log(1e-10 * ones(size(powspec))));
-hold on;
-g = surf(log(powspec));
-hold off;
-shading interp; lighting phong;
-set(h,'FaceColor',[1 0 0],'FaceAlpha',0.7,'EdgeAlpha', 0);
-zlabel('log')
-ylabel('|k|');
-xlabel('nt');
-title('power spectrum estimation');
-shg;
-pause;
+% h = surf(log(1e-10 * ones(size(powspec))));
+% hold on;
+% g = surf(log(powspec));
+% hold off;
+% shading interp; lighting phong;
+% set(h,'FaceColor',[1 0 0],'FaceAlpha',0.7,'EdgeAlpha', 0);
+% zlabel('log')
+% ylabel('|k|');
+% xlabel('nt');
+% title('power spectrum estimation');
+% shg;
+% pause;
 
 % a quick check of parsevals equation (indicates whether power spectrum
 % computation makes sense)
@@ -139,10 +138,22 @@ if mod(N,1) == 0 && dim == 2
 end
 
 %1d movie if data is small enough
+close all
+Nk = length(phi(:,i));
+x = linspace(-pi,pi,Nk+1)';
+x = x(1:end-1);
 if dim == 1 
     for i=1:Nt
-        plot(phi(:,i))
+        subplot(1,3,1)
+        plot(x,phi(:,i))
+        title('phi')
+        subplot(1,3,2)
+        plot(x,rho(:,i))
+        title('rho')
+        subplot(1,3,3)
+        plot(x,psi(:,i))
+        title('psi')
         shg;
-        pause()
+        pause(0.1);
     end
 end
