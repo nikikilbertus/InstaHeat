@@ -24,9 +24,27 @@ plot(t, phiAvg'.*a.^(3/2), tk, phi0k.*ak.^(3/2))
 shg
 pause
 
+% interpolate to t
+% phi0ksp = spline(tk,phi0k,t);
+% aksp = spline(tk,ak,t);
+% plot(t, phiAvg'.*a.^(3/2) - phi0ksp.*aksp.^(3/2))
+% shg
+% pause
+
+% interpolate to tk
 phiAvgsp = spline(t,phiAvg,tk);
 asp = spline(t,a,tk);
 plot(tk, phiAvgsp.*asp.^(3/2) - phi0k.*ak.^(3/2))
+shg
+pause
+
+phifft = fft(phi);
+phi1 = phifft(2,:);
+
+plot(t, phi1'.*a.^(3/2))
+shg
+pause
+plot(t, phi1'.*a.^(3/2), tk, phi1k.*ak.^(3/1))
 shg
 pause
 
@@ -139,7 +157,7 @@ end
 
 %1d movie if data is small enough
 close all
-Nk = length(phi(:,i));
+Nk = length(phi(:,1));
 x = linspace(-pi,pi,Nk+1)';
 x = x(1:end-1);
 if dim == 1 

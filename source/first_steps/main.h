@@ -75,14 +75,14 @@ during execution
  *  for smaller grids, and simple (not too nonlinear) scenarios rather try to
  *  adjust tolerances and see what happens to the power spectrum
  */
-/* #define ENABLE_FFT_FILTER */
+#define ENABLE_FFT_FILTER
 
 // include scalar metric perturbation Psi
 #define INCLUDE_PSI
 
 // ------------------computational domain---------------------------------------
 // spatial
-#define GRIDPOINTS_X            (16)
+#define GRIDPOINTS_X            (1024)
 #define GRIDPOINTS_Y            (1)
 #define GRIDPOINTS_Z            (1)
 #define SPATIAL_LOWER_BOUND_X   (-PI * 6.0 * 1.0e3)
@@ -94,10 +94,10 @@ during execution
 
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
-#define DELTA_T                 (0.01)
+#define DELTA_T                 (0.001)
 #define INITIAL_TIME            (0.0)
 #define FINAL_TIME              (1300000.0)
-#define MAX_STEPS               (1e9)
+#define MAX_STEPS               (1e12)
 #define MINIMAL_DELTA_T         (1.0e-5)
 
 // ----------------parameters used in the potential-----------------------------
@@ -117,8 +117,8 @@ during execution
 #define SAFE                    (0.9)
 
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-10)
-#define ABSOLUTE_TOLERANCE      (1.0e-10)
+#define RELATIVE_TOLERANCE      (1.0e-12)
+#define ABSOLUTE_TOLERANCE      (1.0e-12)
 
 // ------------------------typedefs---------------------------------------------
 // representing one spatial dimension of a multi dimensional grid
