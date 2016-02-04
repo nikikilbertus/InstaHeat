@@ -146,6 +146,7 @@ void h5_create_empty_by_path(const char *name) {
     H5Pclose(plist_par);
     H5Dclose(dset_par);
     H5Sclose(dspace_par);
+    //TODO: include all other possible parameters in output
 
     RUNTIME_INFO(puts("Created hdf5 file with datasets for "
                 "phi, psi, t, a, rho.\n"));
