@@ -131,6 +131,22 @@ void h5_create_empty_by_path(const char *name) {
     H5Pclose(plist_a);
     H5Sclose(dspace_a);
 
+    // ---------------------------parameters------------------------------------
+    dims[0] = 1;
+    max_dims[0] = 1;
+
+    // write mass parameter
+    double mass[1] = {MASS};
+    hid_t dspace_par = H5Screate_simple(rank, dims, max_dims);
+    hid_t plist_par = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_layout(plist_par, H5D_COMPACT);
+    hid_t dset_par = H5Dcreate(file, "mass", H5T_NATIVE_DOUBLE,
+                            dspace_par, H5P_DEFAULT, plist_par, H5P_DEFAULT);
+    H5Dwrite(dset_par, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, mass);
+    H5Pclose(plist_par);
+    H5Dclose(dset_par);
+    H5Sclose(dspace_par);
+
     RUNTIME_INFO(puts("Created hdf5 file with datasets for "
                 "phi, psi, t, a, rho.\n"));
 }

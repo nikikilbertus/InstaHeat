@@ -27,14 +27,20 @@ end
 
 plot(tk, phi0k.*ak.^(3/2))
 xlabel('t');
-ylabel('a^(3/2) * phi0');
+ylabel('a^{3/2} * phi_0');
 shg;
 pause;
 
-plot(tk, dphi0k.*ak.^(3/2))
+plot(tk, phi1k.*ak.^(3/2))
 xlabel('t');
-ylabel('a^(3/2) * phi0');
+ylabel('a^{3/2} * phi_1');
 shg;
 pause;
+
+% plot(tk, delrhok)
+% xlabel('t');
+% ylabel('delta rho');
+% shg;
+% pause;
 
 clear raw

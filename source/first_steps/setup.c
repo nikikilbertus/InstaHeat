@@ -368,7 +368,8 @@ double phi_init(const double x, const double y, const double z,
     /* double mean = 6.319569842; // somewhere at the end of 50 e-fold inflation */
     double mean = 1.0;
     double amplitude = 1.0e-5 * mean;
-    double k = MASS / 6.0;
+    /* double k = MASS / 6.0; */
+    double k = 1.0;
     if (pars.dim == 1)
     {
         return mean + amplitude * cos(k * x);

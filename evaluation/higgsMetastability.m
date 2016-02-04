@@ -21,6 +21,8 @@ H = sqrt(rhoAvg / 3);
 Nt = length(t);
 
 plot(t, phiAvg'.*a.^(3/2), tk, phi0k.*ak.^(3/2))
+xlabel('t');
+ylabel('a^{3/2} * phi_0');
 shg
 pause
 
@@ -35,6 +37,8 @@ pause
 phiAvgsp = spline(t,phiAvg,tk);
 asp = spline(t,a,tk);
 plot(tk, phiAvgsp.*asp.^(3/2) - phi0k.*ak.^(3/2))
+xlabel('t');
+ylabel('error in: a^{3/2} * phi_0');
 shg
 pause
 
@@ -42,9 +46,13 @@ phifft = fft(phi);
 phi1 = phifft(2,:);
 
 plot(t, phi1'.*a.^(3/2))
+xlabel('t');
+ylabel('a^{3/2} * phi_1');
 shg
 pause
 plot(t, phi1'.*a.^(3/2), tk, phi1k.*ak.^(3/1))
+xlabel('t');
+ylabel('comparison of a^{3/2} * phi_1');
 shg
 pause
 
@@ -55,41 +63,41 @@ pause
 % (just put the logfit.m file in the same folder as this one)
 % logfit(a, rhoAvg, 'loglog')
 
-loglog(a, rhoAvg);
-xlabel('a')
-ylabel('rho');
-shg;
-pause;
+% loglog(a, rhoAvg);
+% xlabel('a')
+% ylabel('rho');
+% shg;
+% pause;
 
 % H over a with a^-2 for reference
 % loglog(a, H);
 % logfit(a, H, 'loglog')
 
-loglog(a, H);
-xlabel('a')
-ylabel('H');
-shg;
-pause;
+% loglog(a, H);
+% xlabel('a')
+% ylabel('H');
+% shg;
+% pause;
 
 % average field value and perturbation (with max and min) over time
-subplot(1,3,1)
-plot(t, phiAvg, t, max(phi), t, min(phi));
-title('phi')
-xlabel('t')
-legend('<phi>', 'max', 'min')
-subplot(1,3,2)
-plot(t, rhoAvg, t, max(rho), t, min(rho));
-title('rho')
-xlabel('t')
-legend('<rho>', 'max', 'min')
-subplot(1,3,3)
-plot(t, psiAvg, t, max(psi), t, min(psi));
-title('psi')
-xlabel('t')
-legend('<psi>', 'max', 'min')
-shg;
-pause;
-close all;
+% subplot(1,3,1)
+% plot(t, phiAvg, t, max(phi), t, min(phi));
+% title('phi')
+% xlabel('t')
+% legend('<phi>', 'max', 'min')
+% subplot(1,3,2)
+% plot(t, rhoAvg, t, max(rho), t, min(rho));
+% title('rho')
+% xlabel('t')
+% legend('<rho>', 'max', 'min')
+% subplot(1,3,3)
+% plot(t, psiAvg, t, max(psi), t, min(psi));
+% title('psi')
+% xlabel('t')
+% legend('<psi>', 'max', 'min')
+% shg;
+% pause;
+% close all;
 
 % the power spectrum with a reference plane at 10^-10 (everything below
 % that might as well be roundoff errors and not truncation errors
