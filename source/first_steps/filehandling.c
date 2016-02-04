@@ -148,6 +148,29 @@ void h5_create_empty_by_path(const char *name) {
     H5Sclose(dspace_par);
     //TODO: include all other possible parameters in output
 
+    // ---------------------------commit hash-----------------------------------
+    char *cmd = "hg id -i";
+    char hash[16];
+    FILE *output;
+
+    if ((output = popen(cmd, "r")) == NULL)
+    {
+        fputs("Could not get hg commit hash.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+
+    if (fgets(hash, 16, output) != NULL)
+    {
+        //TODO: save hash as string to hdf5 file
+        RUNTIME_INFO(printf("current hash: %s \n", hash));
+    }
+
+    if (pclose(output))
+    {
+        fputs("Could not close file of hg commit hash command.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+
     RUNTIME_INFO(puts("Created hdf5 file with datasets for "
                 "phi, psi, t, a, rho.\n"));
 }
