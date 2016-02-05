@@ -1,4 +1,3 @@
-dim = 2;
 name = 'compare';
 
 % loading the data, replace 'name' with the path where you stored the .h5
@@ -6,6 +5,7 @@ name = 'compare';
 name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/' name '.h5'];
 
 % built in functions for reading makes it easy
+dim = h5read(name, '/dimension');
 t = h5read(name, '/time');
 a = h5read(name, '/a');
 rho = h5read(name, '/rho');

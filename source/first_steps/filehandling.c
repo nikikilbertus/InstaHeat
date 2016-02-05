@@ -133,21 +133,31 @@ void h5_create_empty_by_path(const char *name) {
     H5Sclose(dspace_a);
 
     // ---------------------------parameters------------------------------------
-    dims[0] = 1;
-    max_dims[0] = 1;
+    double val[3] = {MASS, 0.0, 0.0};
+    h5_write_parameter(file, "mass", val, 1);
 
-    // write mass parameter
-    double mass[1] = {MASS};
-    hid_t dspace_par = H5Screate_simple(rank, dims, max_dims);
-    hid_t plist_par = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_layout(plist_par, H5D_COMPACT);
-    hid_t dset_par = H5Dcreate(file, "mass", H5T_NATIVE_DOUBLE,
-                            dspace_par, H5P_DEFAULT, plist_par, H5P_DEFAULT);
-    H5Dwrite(dset_par, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, mass);
-    H5Pclose(plist_par);
-    H5Dclose(dset_par);
-    H5Sclose(dspace_par);
-    //TODO: include all other possible parameters in output
+    val[0] = pars.dim;
+    h5_write_parameter(file, "dimension", val, 1);
+
+    val[0] = SEED;
+    h5_write_parameter(file, "seed", val, 1);
+
+    val[0] = TIME_STEP_SKIPS;
+    h5_write_parameter(file, "strides_time", val, 1);
+
+    val[0] = RELATIVE_TOLERANCE;
+    val[1] = ABSOLUTE_TOLERANCE;
+    h5_write_parameter(file, "strides_time", val, 2);
+
+    val[0] = GRIDPOINTS_X;
+    val[1] = GRIDPOINTS_Y;
+    val[2] = GRIDPOINTS_Z;
+    h5_write_parameter(file, "gridpoints", val, 3);
+
+    val[0] = STRIDE_X;
+    val[1] = STRIDE_Y;
+    val[2] = STRIDE_Z;
+    h5_write_parameter(file, "strides_space", val, 3);
 
     // ---------------------------commit hash-----------------------------------
     // TODO: include compiler switch for whether hg, git or neither is used
@@ -194,6 +204,23 @@ void h5_create_empty_by_path(const char *name) {
 
     RUNTIME_INFO(puts("Created hdf5 file with datasets for "
                 "phi, psi, t, a, rho.\n"));
+}
+
+void h5_write_parameter(const hid_t file, const char *name, const double *val,
+        size_t N) {
+    hsize_t rank = 1;
+    hsize_t dims[1] = {N};
+    hsize_t max_dims[1] = {N};
+
+    hid_t dspace_par = H5Screate_simple(rank, dims, max_dims);
+    hid_t plist_par = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_layout(plist_par, H5D_COMPACT);
+    hid_t dset_par = H5Dcreate(file, name, H5T_NATIVE_DOUBLE,
+                            dspace_par, H5P_DEFAULT, plist_par, H5P_DEFAULT);
+    H5Dwrite(dset_par, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, val);
+    H5Pclose(plist_par);
+    H5Dclose(dset_par);
+    H5Sclose(dspace_par);
 }
 
 void h5_write_buffers_to_disk(const hsize_t Nt) {
