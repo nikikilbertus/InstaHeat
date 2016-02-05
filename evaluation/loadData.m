@@ -1,7 +1,7 @@
 close all
 dim = 1;
 name = 'compare';
-mass = 0.1;
+mass = 3;
 scaling = 10^3 * mass;
 
 % loading the data, replace 'name' with the path where you stored the .h5

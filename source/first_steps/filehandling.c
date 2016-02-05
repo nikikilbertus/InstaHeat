@@ -6,6 +6,7 @@
 #include "filehandling.h"
 #include "main.h"
 
+//TODO: modularize the initialization
 void h5_create_empty_by_path(const char *name) {
     hsize_t rank = 2;
     hsize_t N = pars.outN;
@@ -149,20 +150,40 @@ void h5_create_empty_by_path(const char *name) {
     //TODO: include all other possible parameters in output
 
     // ---------------------------commit hash-----------------------------------
+    // TODO: include compiler switch for whether hg, git or neither is used
     char *cmd = "hg id -i";
-    char hash[16];
+    size_t len = 16;
+    char hash[len];
     FILE *output;
 
     if ((output = popen(cmd, "r")) == NULL)
     {
-        fputs("Could not get hg commit hash.\n", stderr);
+        fputs("Could not get hash of current commit.\n", stderr);
         exit(EXIT_FAILURE);
     }
 
-    if (fgets(hash, 16, output) != NULL)
+    if (fgets(hash, len, output) != NULL)
     {
         //TODO: save hash as string to hdf5 file
-        RUNTIME_INFO(printf("current hash: %s \n", hash));
+        hid_t filetype = H5Tcopy(H5T_FORTRAN_S1);
+        H5Tset_size(filetype, len - 1);
+        hid_t memtype = H5Tcopy(H5T_C_S1);
+        H5Tset_size(memtype, len);
+        hid_t dspace_str = H5Screate_simple (1, dims, NULL);
+
+        hid_t dset_str = H5Dcreate(file, "commit-hash", filetype, dspace_str,
+                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        H5Dwrite(dset_str, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, hash);
+        H5Dclose(dset_str);
+        H5Sclose(dspace_str);
+        H5Tclose(filetype);
+        H5Tclose(memtype);
+        /* RUNTIME_INFO(printf("current hash: %s \n", hash)); */
+    }
+    else
+    {
+        fputs("Could not parse hash of current commit.\n", stderr);
+        exit(EXIT_FAILURE);
     }
 
     if (pclose(output))
