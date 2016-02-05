@@ -1,60 +1,39 @@
-close all
-dim = 1;
-name = 'compare';
-
-% loading the data, replace 'name' with the path where you stored the .h5
-% file from the simulation
-name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/' name '.h5'];
-
-% built in functions for reading makes it easy
-t = h5read(name, '/time');
-a = h5read(name, '/a');
-rho = h5read(name, '/rho');
-phi = h5read(name, '/phi');
-psi = h5read(name, '/psi');
-powspec = h5read(name, '/power_spectrum');
-% compute some further properties
-phiAvg = mean(phi);
-psiAvg = mean(psi);
-rhoAvg = mean(rho);
-H = sqrt(rhoAvg / 3);
-Nt = length(t);
-
 plot(t, phiAvg'.*a.^(3/2), tk, phi0k.*ak.^(3/2))
 xlabel('t');
 ylabel('a^{3/2} * phi_0');
 shg
 pause
-
-% interpolate to t
-% phi0ksp = spline(tk,phi0k,t);
-% aksp = spline(tk,ak,t);
-% plot(t, phiAvg'.*a.^(3/2) - phi0ksp.*aksp.^(3/2))
-% shg
-% pause
-
-% interpolate to tk
-phiAvgsp = spline(t,phiAvg,tk);
-asp = spline(t,a,tk);
-plot(tk, phiAvgsp.*asp.^(3/2) - phi0k.*ak.^(3/2))
-xlabel('t');
-ylabel('error in: a^{3/2} * phi_0');
-shg
-pause
-
-phifft = fft(phi);
-phi1 = phifft(2,:);
-
-plot(t, phi1'.*a.^(3/2))
+plot(t, phi1'.*a.^(3/2), tk, phi1k.*ak.^(3/2))
 xlabel('t');
 ylabel('a^{3/2} * phi_1');
 shg
 pause
-plot(t, phi1'.*a.^(3/2), tk, phi1k.*ak.^(3/1))
+
+
+% interpolate to t
+phi0ksp = spline(tk,phi0k,t);
+phi1ksp = spline(tk,phi1k,t);
+aksp = spline(tk,ak,t);
+subplot(1,2,1)
+plot(t, phiAvg'.*a.^(3/2) - phi0ksp.*aksp.^(3/2))
 xlabel('t');
-ylabel('comparison of a^{3/2} * phi_1');
+ylabel('error in: a^{3/2} * phi_0')
+subplot(1,2,2)
+plot(t, phi1'.*a.^(3/2) - phi1ksp.*aksp.^(3/2))
+xlabel('t');
+ylabel('error in: a^{3/2} * phi_1');
 shg
 pause
+
+
+% interpolate to tk
+% phiAvgsp = spline(t,phiAvg,tk);
+% asp = spline(t,a,tk);
+% plot(tk, phiAvgsp.*asp.^(3/2) - phi0k.*ak.^(3/2))
+% xlabel('t');
+% ylabel('error in: a^{3/2} * phi_0');
+% shg
+% pause
 
 % start with some simple plots (rho over a with a^-4 for reference)
 % loglog(a, rhoAvg);

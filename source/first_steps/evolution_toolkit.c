@@ -37,16 +37,46 @@ void mk_rhs(const double t, double *f, double *result) {
     {
         df = f[N + i];
         p = psi[i];
+        // all
         result[N + i] = (1.0 + 4.0 * p) * tmp_phi.lap[i] / (a * a) -
             (3.0 * hubble - 4.0 * dpsi[i]) * df -
             (1.0 + 2.0 * p) * potential_prime(f[i]);
+
+        // only potential
+        /* result[N + i] = tmp_phi.lap[i] / (a * a) - */
+        /*     3.0 * hubble * df - */
+        /*     (1.0 + 2.0 * p) * potential_prime(f[i]); */
+
+        // only laplacian
+        /* result[N + i] = (1.0 + 4.0 * p) * tmp_phi.lap[i] / (a * a) - */
+        /*     3.0 * hubble * df - */
+        /*     potential_prime(f[i]); */
+
+        // only dpsi
+        /* result[N + i] = tmp_phi.lap[i] / (a * a) - */
+        /*     (3.0 * hubble - 4.0 * dpsi[i]) * df - */
+        /*     potential_prime(f[i]); */
+
+        // without dpsi
+        /* result[N + i] = (1.0 + 4.0 * p) * tmp_phi.lap[i] / (a * a) - */
+        /*     3.0 * hubble * df - */
+        /*     (1.0 + 2.0 * p) * potential_prime(f[i]); */
+
+        // without dpsi modified
+        /* result[N + i] = (1.0 + 4.0 * p) * tmp_phi.lap[i] / (a * a) - */
+        /*     (3.0 + 4.0 * p) * hubble * df - */
+        /*     (1.0 + 2.0 * p) * potential_prime(f[i]); */
+
+        // without psi
+        /* result[N + i] = tmp_phi.lap[i] / (a * a) - 3.0 * hubble * f[N + i] - */
+        /*     potential_prime(f[i]); */
     }
     #else
     #pragma omp parallel for
-    for (size_t i = N; i < N2; ++i)
+    for (size_t i = 0; i < N; ++i)
     {
-        result[i] = tmp_phi.lap[i - N] / (a * a);
-        result[i] -= (3.0 * hubble * f[i] + potential_prime(f[i - N]));
+        result[N + i] = tmp_phi.lap[i] / (a * a) - 3.0 * hubble * f[N + i] -
+            potential_prime(f[i]);
     }
     #endif
     result[N2] = a * hubble;
@@ -313,6 +343,7 @@ void mk_psi_and_dpsi(double *f) {
                     tmp_psi.c[id] = 0.5 * a2 *
                         (tmp_psi.cy[id] + 3.0 * hubble * tmp_psi.cx[id]) /
                         (k_sq * N);
+                    /* tmp_psi.c[id] = 0.5 * a2 * tmp_psi.cy[id] / (k_sq * N); */
                 }
                 else
                 {
