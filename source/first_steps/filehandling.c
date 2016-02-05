@@ -6,7 +6,6 @@
 #include "filehandling.h"
 #include "main.h"
 
-//TODO: modularize the initialization
 void h5_create_empty_by_path(const char *name) {
     hsize_t rank = 2;
     hsize_t N = pars.outN;
@@ -17,6 +16,7 @@ void h5_create_empty_by_path(const char *name) {
     hid_t file = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     pars.file.id = file;
 
+    // TODO: modularize these initializations by function
     // --------------------------phi--------------------------------------------
     // create dataspace for phi
     hsize_t dims[2] = {0, N};
@@ -174,7 +174,6 @@ void h5_create_empty_by_path(const char *name) {
 
     if (fgets(hash, len, output) != NULL)
     {
-        //TODO: save hash as string to hdf5 file
         hid_t filetype = H5Tcopy(H5T_FORTRAN_S1);
         H5Tset_size(filetype, len - 1);
         hid_t memtype = H5Tcopy(H5T_C_S1);
@@ -188,7 +187,6 @@ void h5_create_empty_by_path(const char *name) {
         H5Sclose(dspace_str);
         H5Tclose(filetype);
         H5Tclose(memtype);
-        /* RUNTIME_INFO(printf("current hash: %s \n", hash)); */
     }
     else
     {
