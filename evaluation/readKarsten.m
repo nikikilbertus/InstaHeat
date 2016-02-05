@@ -1,7 +1,6 @@
-close all
 dim = 1;
 name = 'compare';
-scaleamp = 1/2;
+scaleamp = 1;
 
 name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten_compare/' name '.dat'];
 

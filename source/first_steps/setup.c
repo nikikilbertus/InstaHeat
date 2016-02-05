@@ -372,11 +372,13 @@ double phi_init(const double x, const double y, const double z,
     double k = 1.0;
     if (pars.dim == 1)
     {
-        return mean + amplitude * cos(k * x);
+        return mean + amplitude * cos(k * x + ph[0]);
+        /* return mean + amplitude * (cos(k * x + ph[0]) + cos(2.0 * k * x + ph[1])); */
     }
     else if (pars.dim == 2)
     {
-        return mean + amplitude * cos(x + ph[0]) * cos(y + ph[1]);
+        return mean + amplitude * (cos(k * x + ph[1]) * cos(k * y + ph[0])
+                 * cos(2.0 * k * y + ph[2]) * cos(3.0 * k * x + ph[3]));
     }
     else
     {

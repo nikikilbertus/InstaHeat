@@ -1,4 +1,4 @@
-lt = 1000000;
+lt = max(t);
 st = 800;
 
 figure
