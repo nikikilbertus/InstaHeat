@@ -160,8 +160,12 @@ void h5_create_empty_by_path(const char *name) {
     h5_write_parameter(file, "strides_space", val, 3);
 
     // ---------------------------commit hash-----------------------------------
-    // TODO: include compiler switch for whether hg, git or neither is used
+    #if VERSION_CONTROL != VERSION_CONTROL_NONE
+    #if VERSION_CONTROL == VERSION_CONTROL_HG
     char *cmd = "hg id -i";
+    #elif VERSION_CONTROL == VERSION_CONTROL_GIT
+    char *cmd = "git rev-parse --short HEAD";
+    #endif
     size_t len = 16;
     char hash[len];
     FILE *output;
@@ -196,11 +200,12 @@ void h5_create_empty_by_path(const char *name) {
 
     if (pclose(output))
     {
-        fputs("Could not close file of hg commit hash command.\n", stderr);
+        fputs("Could not close file of commit hash.\n", stderr);
         exit(EXIT_FAILURE);
     }
+    #endif
 
-    RUNTIME_INFO(puts("Created hdf5 file with datasets for "
+    RUNTIME_INFO(puts("Created hdf5 file with parameters and datasets for "
                 "phi, psi, t, a, rho.\n"));
 }
 

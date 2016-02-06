@@ -32,6 +32,13 @@ during execution
 #define RUNTIME_INFO(f)
 #endif
 
+// ------------writing current commit hash to disk (hg, git, none)--------------
+#define VERSION_CONTROL_NONE    (0)
+#define VERSION_CONTROL_HG      (1)
+#define VERSION_CONTROL_GIT     (2)
+
+#define VERSION_CONTROL         VERSION_CONTROL_HG
+
 // ------------file handling parameters for writing to disk---------------------
 // the output is bundled in one .h5 file, enter path here
 #define DATAPATH                ("../../../data/compare.h5")
