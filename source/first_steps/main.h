@@ -190,15 +190,15 @@ typedef struct {
 
 // temporal veriables used for computations of gradients and so on
 typedef struct {
-    double *dx;
-    double *dy;
-    double *dz;
-    complex *c;
-    complex *cx;
-    complex *cy;
-    complex *cz;
-    double *grad;
-    double *lap;
+    double  *xphi;
+    double  *yphi;
+    double  *zphi;
+    complex *phic;
+    complex *xphic;
+    complex *yphic;
+    complex *zphic;
+    double  *grad;
+    double  *lap;
 }temporary_t;
 
 // --------------------------global variables-----------------------------------
@@ -239,8 +239,7 @@ extern double *pow_spec;
 extern double *pow_spec_buf;
 
 // default arrays for real to complex dfts
-extern temporary_t tmp_phi;
-extern temporary_t tmp_psi;
+extern temporary_t tmp;
 
 // fftw plans
 extern fftw_plan p_fw;

@@ -148,21 +148,22 @@ void allocate_external() {
     // see fftw3 documentation and Mxyz for this
     // TODO: maybe wrap this allocation in extra method (slight differences!)
     size_t M = pars.x.M * pars.y.M * pars.z.M;
-    tmp_phi.c   = fftw_malloc(M * sizeof *tmp_phi.c);
-    tmp_phi.cx  = fftw_malloc(M * sizeof *tmp_phi.cx);
-    tmp_phi.cy  = fftw_malloc(M * sizeof *tmp_phi.cy);
-    tmp_phi.cz  = fftw_malloc(M * sizeof *tmp_phi.cz);
+    tmp.phic   = fftw_malloc(M * sizeof *tmp.phic);
+    tmp.xphic  = fftw_malloc(M * sizeof *tmp.xphic);
+    tmp.yphic  = fftw_malloc(M * sizeof *tmp.yphic);
+    tmp.zphic  = fftw_malloc(M * sizeof *tmp.zphic);
     tmp_psi.c   = fftw_malloc(M * sizeof *tmp_psi.c);
     tmp_psi.cx  = fftw_malloc(M * sizeof *tmp_psi.cx);
     tmp_psi.cy  = fftw_malloc(M * sizeof *tmp_psi.cy);
     tmp_psi.cz  = fftw_malloc(M * sizeof *tmp_psi.cz);
 
     // general purpose double memory blocks for temporary use
-    tmp_phi.dx   = fftw_malloc(Ntot * sizeof *tmp_phi.dx); // used in dopri853 (dense)
-    tmp_phi.dy   = fftw_malloc(N * sizeof *tmp_phi.dy);
-    tmp_phi.dz   = fftw_malloc(N * sizeof *tmp_phi.dz);
-    tmp_phi.grad = fftw_malloc(N * sizeof *tmp_phi.grad);
-    tmp_phi.lap  = fftw_malloc(N * sizeof *tmp_phi.lap);
+    // TODO: don't use dx in dense output
+    tmp.xdphi = fftw_malloc(Ntot * sizeof *tmp.xphi); // used in dopri853 (dense)
+    tmp.ydphi = fftw_malloc(N * sizeof *tmp.ydphi);
+    tmp.zdphi = fftw_malloc(N * sizeof *tmp.zdphi);
+    tmp.grad  = fftw_malloc(N * sizeof *tmp.grad);
+    tmp.lap   = fftw_malloc(N * sizeof *tmp.lap);
     tmp_psi.dx   = fftw_malloc(N * sizeof *tmp_psi.dx);
     tmp_psi.dy   = fftw_malloc(N * sizeof *tmp_psi.dy);
     tmp_psi.dz   = fftw_malloc(N * sizeof *tmp_psi.dz);
@@ -170,8 +171,8 @@ void allocate_external() {
 
     if (!(grid && field && field_new && dfield && dfield_new && field_buf &&
         psi && dpsi && time_buf && rho && rho_buf && pow_spec && pow_spec_buf &&
-        tmp_phi.c  && tmp_phi.cx && tmp_phi.cy && tmp_phi.cz &&
-        tmp_phi.dx && tmp_phi.dy && tmp_phi.dz && tmp_phi.grad && tmp_phi.lap &&
+        tmp.phic  && tmp.xphic && tmp.yphic && tmp.zphic &&
+        tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap &&
         tmp_psi.c  && tmp_psi.cx && tmp_psi.cy && tmp_psi.cz &&
         tmp_psi.dx && tmp_psi.dy && tmp_psi.dz && tmp_psi.grad))
     {
@@ -243,21 +244,21 @@ void mk_fftw_plans() {
     switch (pars.dim)
     {
         case 1:
-            p_fw = fftw_plan_dft_r2c_1d(Nx, field, tmp_phi.c,
+            p_fw = fftw_plan_dft_r2c_1d(Nx, field, tmp.phic,
                     FFTW_DEFAULT_FLAG);
-            p_bw = fftw_plan_dft_c2r_1d(Nx, tmp_phi.c, field,
+            p_bw = fftw_plan_dft_c2r_1d(Nx, tmp.phic, field,
                     FFTW_DEFAULT_FLAG);
             break;
         case 2:
-            p_fw = fftw_plan_dft_r2c_2d(Nx, Ny, field, tmp_phi.c,
+            p_fw = fftw_plan_dft_r2c_2d(Nx, Ny, field, tmp.phic,
                     FFTW_DEFAULT_FLAG);
-            p_bw = fftw_plan_dft_c2r_2d(Nx, Ny, tmp_phi.c, field,
+            p_bw = fftw_plan_dft_c2r_2d(Nx, Ny, tmp.phic, field,
                     FFTW_DEFAULT_FLAG);
             break;
         case 3:
-            p_fw = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, field, tmp_phi.c,
+            p_fw = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, field, tmp.phic,
                     FFTW_DEFAULT_FLAG);
-            p_bw = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, tmp_phi.c, field,
+            p_bw = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, tmp.phic, field,
                     FFTW_DEFAULT_FLAG);
             break;
     }
@@ -424,15 +425,15 @@ void free_external() {
     free(rho_buf);
     free(pow_spec);
     free(pow_spec_buf);
-    fftw_free(tmp_phi.c);
-    fftw_free(tmp_phi.cx);
-    fftw_free(tmp_phi.cy);
-    fftw_free(tmp_phi.cz);
-    fftw_free(tmp_phi.dx);
-    fftw_free(tmp_phi.dy);
-    fftw_free(tmp_phi.dz);
-    fftw_free(tmp_phi.grad);
-    fftw_free(tmp_phi.lap);
+    fftw_free(tmp.phic);
+    fftw_free(tmp.xphic);
+    fftw_free(tmp.yphic);
+    fftw_free(tmp.zphic);
+    fftw_free(tmp.xphi);
+    fftw_free(tmp.yphi);
+    fftw_free(tmp.zphi);
+    fftw_free(tmp.grad);
+    fftw_free(tmp.lap);
     fftw_free(tmp_psi.c);
     fftw_free(tmp_psi.cx);
     fftw_free(tmp_psi.cy);
