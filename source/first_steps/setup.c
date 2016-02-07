@@ -36,6 +36,7 @@ void initialize_threading() {
  *  throughout the code
  */
 void initialize_parameters() {
+    // TODO: make function to initialize different directions
     pars.x.N  = GRIDPOINTS_X;
     pars.x.a  = SPATIAL_LOWER_BOUND_X;
     pars.x.b  = SPATIAL_UPPER_BOUND_X;
@@ -148,33 +149,31 @@ void allocate_external() {
     // see fftw3 documentation and Mxyz for this
     // TODO: maybe wrap this allocation in extra method (slight differences!)
     size_t M = pars.x.M * pars.y.M * pars.z.M;
-    tmp.phic   = fftw_malloc(M * sizeof *tmp.phic);
-    tmp.xphic  = fftw_malloc(M * sizeof *tmp.xphic);
-    tmp.yphic  = fftw_malloc(M * sizeof *tmp.yphic);
-    tmp.zphic  = fftw_malloc(M * sizeof *tmp.zphic);
-    tmp_psi.c   = fftw_malloc(M * sizeof *tmp_psi.c);
-    tmp_psi.cx  = fftw_malloc(M * sizeof *tmp_psi.cx);
-    tmp_psi.cy  = fftw_malloc(M * sizeof *tmp_psi.cy);
-    tmp_psi.cz  = fftw_malloc(M * sizeof *tmp_psi.cz);
+    tmp.phic  = fftw_malloc(M * sizeof *tmp.phic);
+    tmp.xphic = fftw_malloc(M * sizeof *tmp.xphic);
+    tmp.yphic = fftw_malloc(M * sizeof *tmp.yphic);
+    tmp.zphic = fftw_malloc(M * sizeof *tmp.zphic);
+    tmp.psic  = fftw_malloc(M * sizeof *tmp.psic);
+    tmp.fc    = fftw_malloc(M * sizeof *tmp.fc);
+    tmp.deltarhoc  = fftw_malloc(M * sizeof *tmp.deltarhoc);
+    tmp.dpsic = fftw_malloc(M * sizeof *tmp.dpsic);
 
     // general purpose double memory blocks for temporary use
     // TODO: don't use dx in dense output
-    tmp.xdphi = fftw_malloc(Ntot * sizeof *tmp.xphi); // used in dopri853 (dense)
-    tmp.ydphi = fftw_malloc(N * sizeof *tmp.ydphi);
-    tmp.zdphi = fftw_malloc(N * sizeof *tmp.zdphi);
-    tmp.grad  = fftw_malloc(N * sizeof *tmp.grad);
-    tmp.lap   = fftw_malloc(N * sizeof *tmp.lap);
-    tmp_psi.dx   = fftw_malloc(N * sizeof *tmp_psi.dx);
-    tmp_psi.dy   = fftw_malloc(N * sizeof *tmp_psi.dy);
-    tmp_psi.dz   = fftw_malloc(N * sizeof *tmp_psi.dz);
-    tmp_psi.grad = fftw_malloc(N * sizeof *tmp_psi.grad);
+    tmp.xphi = fftw_malloc(Ntot * sizeof *tmp.xphi); // used in dopri853 (dense)
+    tmp.yphi = fftw_malloc(N * sizeof *tmp.yphi);
+    tmp.zphi = fftw_malloc(N * sizeof *tmp.zphi);
+    tmp.grad = fftw_malloc(N * sizeof *tmp.grad);
+    tmp.lap  = fftw_malloc(N * sizeof *tmp.lap);
+    tmp.f    = fftw_malloc(N * sizeof *tmp.f);
+    tmp.deltarho = fftw_malloc(N * sizeof *tmp.deltarho);
 
     if (!(grid && field && field_new && dfield && dfield_new && field_buf &&
         psi && dpsi && time_buf && rho && rho_buf && pow_spec && pow_spec_buf &&
         tmp.phic  && tmp.xphic && tmp.yphic && tmp.zphic &&
         tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap &&
-        tmp_psi.c  && tmp_psi.cx && tmp_psi.cy && tmp_psi.cz &&
-        tmp_psi.dx && tmp_psi.dy && tmp_psi.dz && tmp_psi.grad))
+        tmp.psic  && tmp.fc && tmp.deltarhoc && tmp.dpsic &&
+        tmp.f && tmp.deltarho))
     {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
@@ -434,14 +433,12 @@ void free_external() {
     fftw_free(tmp.zphi);
     fftw_free(tmp.grad);
     fftw_free(tmp.lap);
-    fftw_free(tmp_psi.c);
-    fftw_free(tmp_psi.cx);
-    fftw_free(tmp_psi.cy);
-    fftw_free(tmp_psi.cz);
-    fftw_free(tmp_psi.dx);
-    fftw_free(tmp_psi.dy);
-    fftw_free(tmp_psi.dz);
-    fftw_free(tmp_psi.grad);
+    fftw_free(tmp.psic);
+    fftw_free(tmp.fc);
+    fftw_free(tmp.deltarhoc);
+    fftw_free(tmp.dpsic);
+    fftw_free(tmp.f);
+    fftw_free(tmp.deltarho);
     RUNTIME_INFO(puts("Freed external variables.\n"));
 }
 

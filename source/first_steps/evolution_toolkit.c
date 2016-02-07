@@ -289,15 +289,15 @@ void mk_psi_and_dpsi(double *f) {
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
     {
-        tmp_psi.dx[i] = f[N + i] * tmp.xphi[i];
-        tmp_psi.dy[i] = rho[i] - rho_avg;
+        tmp.f[i] = f[N + i] * tmp.xphi[i];
+        tmp.deltarho[i] = rho[i] - rho_avg;
     }
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
-    fftw_execute_dft_r2c(p_fw, tmp_psi.dx, tmp_psi.cx);
-    fftw_execute_dft_r2c(p_fw, tmp_psi.dy, tmp_psi.cy);
+    fftw_execute_dft_r2c(p_fw, tmp.f, tmp.fc);
+    fftw_execute_dft_r2c(p_fw, tmp.deltarho, tmp.deltarhoc);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
@@ -318,17 +318,17 @@ void mk_psi_and_dpsi(double *f) {
                 if (i > Nx / 2)
                 {
                     k_sq += pars.x.k2 * (Nx - i) * (Nx - i);
-                    tmp_psi.cx[id] /= pars.x.k * ((int)i - (int)Nx);
+                    tmp.fc[id] /= pars.x.k * ((int)i - (int)Nx);
                 }
                 else if (2 * i == Nx || i == 0)
                 {
                     k_sq += pars.x.k2 * i * i;
-                    tmp_psi.cx[id] = 0.0;
+                    tmp.fc[id] = 0.0;
                 }
                 else
                 {
                     k_sq += pars.x.k2 * i * i;
-                    tmp_psi.cx[id] /= pars.x.k * i;
+                    tmp.fc[id] /= pars.x.k * i;
                 }
                 if (j > Ny / 2)
                 {
@@ -340,17 +340,17 @@ void mk_psi_and_dpsi(double *f) {
                 }
                 if (fabs(k_sq) > 1.0e-10)
                 {
-                    tmp_psi.c[id] = 0.5 * a2 *
-                        (tmp_psi.cy[id] + 3.0 * hubble * tmp_psi.cx[id]) /
+                    tmp.psic[id] = 0.5 * a2 *
+                        (tmp.deltarhoc[id] + 3.0 * hubble * tmp.fc[id]) /
                         (k_sq * N);
-                    /* tmp_psi.c[id] = 0.5 * a2 * tmp_psi.cy[id] / (k_sq * N); */
+                    /* tmp.psic[id] = 0.5 * a2 * tmp.deltarhoc[id] / (k_sq * N); */
                 }
                 else
                 {
-                    tmp_psi.c[id] = 0.0;
+                    tmp.psic[id] = 0.0;
                 }
-                tmp_psi.cz[id] = 0.5 * tmp_psi.cx[id] / N -
-                        hubble * tmp_psi.c[id];
+                tmp.dpsic[id] = 0.5 * tmp.fc[id] / N -
+                        hubble * tmp.psic[id];
             }
         }
     }
@@ -358,8 +358,8 @@ void mk_psi_and_dpsi(double *f) {
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
-    fftw_execute_dft_c2r(p_bw, tmp_psi.c, psi);
-    fftw_execute_dft_c2r(p_bw, tmp_psi.cz, dpsi);
+    fftw_execute_dft_c2r(p_bw, tmp.psic, psi);
+    fftw_execute_dft_c2r(p_bw, tmp.dpsic, dpsi);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     poisson_time += get_wall_time();

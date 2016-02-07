@@ -199,6 +199,12 @@ typedef struct {
     complex *zphic;
     double  *grad;
     double  *lap;
+    double  *deltarho;
+    double  *f;
+    complex *deltarhoc;
+    complex *fc;
+    complex *psic;
+    complex *dpsic;
 }temporary_t;
 
 // --------------------------global variables-----------------------------------
