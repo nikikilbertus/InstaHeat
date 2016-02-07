@@ -188,7 +188,7 @@ typedef struct {
     file_parameters_t file;
 }parameters_t;
 
-// temporal veriables used for computations of gradients and so on
+// temporal veriables used for computations of gradients, ffts and the like
 typedef struct {
     double  *xphi;
     double  *yphi;
@@ -244,7 +244,7 @@ extern double rho_avg;
 extern double *pow_spec;
 extern double *pow_spec_buf;
 
-// default arrays for real to complex dfts
+// default arrays with temporary memory for real to complex dfts
 extern temporary_t tmp;
 
 // fftw plans

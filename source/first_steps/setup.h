@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include "main.h"
 
+// everything here is only called once in the beginning or the end, thus there
+// is no need for any optimization
 void allocate_and_initialize_all();
 void initialize_threading();
 void initialize_parameters();

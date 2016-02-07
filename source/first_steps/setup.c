@@ -36,7 +36,6 @@ void initialize_threading() {
  *  throughout the code
  */
 void initialize_parameters() {
-    // TODO: make function to initialize different directions
     pars.x.N  = GRIDPOINTS_X;
     pars.x.a  = SPATIAL_LOWER_BOUND_X;
     pars.x.b  = SPATIAL_UPPER_BOUND_X;
