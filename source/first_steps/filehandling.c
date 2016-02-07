@@ -16,7 +16,6 @@ void h5_create_empty_by_path(const char *name) {
     hid_t file = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     pars.file.id = file;
 
-    // TODO: modularize these initializations by function
     // --------------------------phi--------------------------------------------
     // create dataspace for phi
     hsize_t dims[2] = {0, N};

@@ -49,9 +49,16 @@ SPATIAL_LOWER_BOUND_Z	main.h	/^#define SPATIAL_LOWER_BOUND_Z /;"	d
 SPATIAL_UPPER_BOUND_X	main.h	/^#define SPATIAL_UPPER_BOUND_X /;"	d
 SPATIAL_UPPER_BOUND_Y	main.h	/^#define SPATIAL_UPPER_BOUND_Y /;"	d
 SPATIAL_UPPER_BOUND_Z	main.h	/^#define SPATIAL_UPPER_BOUND_Z /;"	d
+STRIDE_X	main.h	/^#define STRIDE_X /;"	d
+STRIDE_Y	main.h	/^#define STRIDE_Y /;"	d
+STRIDE_Z	main.h	/^#define STRIDE_Z /;"	d
 TARGET	Makefile	/^TARGET = first_steps$/;"	m
 THREAD_NUMBER	main.h	/^#define THREAD_NUMBER /;"	d
 TIME_STEP_SKIPS	main.h	/^#define TIME_STEP_SKIPS /;"	d
+VERSION_CONTROL	main.h	/^#define VERSION_CONTROL /;"	d
+VERSION_CONTROL_GIT	main.h	/^#define VERSION_CONTROL_GIT /;"	d
+VERSION_CONTROL_HG	main.h	/^#define VERSION_CONTROL_HG /;"	d
+VERSION_CONTROL_NONE	main.h	/^#define VERSION_CONTROL_NONE /;"	d
 WRITE_OUT_BUFFER_NUMBER	main.h	/^#define WRITE_OUT_BUFFER_NUMBER /;"	d
 __DOPRI853_STEPPER__	dopri853_stepper.h	/^#define __DOPRI853_STEPPER__$/;"	d
 __EVOLUTION_TOOLKIT__	evolution_toolkit.h	/^#define __EVOLUTION_TOOLKIT__$/;"	d
@@ -291,6 +298,7 @@ h5_close	filehandling.c	/^void h5_close() {$/;"	f
 h5_create_empty_by_path	filehandling.c	/^void h5_create_empty_by_path(const char *name) {$/;"	f
 h5_time_write	main.c	/^double h5_time_write = 0.0;$/;"	v
 h5_write_buffers_to_disk	filehandling.c	/^void h5_write_buffers_to_disk(const hsize_t Nt) {$/;"	f
+h5_write_parameter	filehandling.c	/^void h5_write_parameter(const hid_t file, const char *name, const double *val,$/;"	f
 id	main.h	/^    size_t id;           \/\/ h5 file id of the output file$/;"	m	struct:__anon7
 index	main.h	/^    size_t index;        \/\/ current index within the buffers$/;"	m	struct:__anon7
 initialize_dopri853	dopri853_stepper.c	/^void initialize_dopri853() {$/;"	f
@@ -325,6 +333,8 @@ mk_rhs	evolution_toolkit.c	/^void mk_rhs(const double t, double *f, double *resu
 n_bad	dopri853_stepper.h	/^    int n_bad;$/;"	m	struct:__anon3
 n_ok	dopri853_stepper.h	/^    int n_ok;$/;"	m	struct:__anon3
 n_stp	dopri853_stepper.h	/^    int n_stp;$/;"	m	struct:__anon3
+outN	main.h	/^    size_t outN; \/\/ number of output points in this dimension$/;"	m	struct:__anon5
+outN	main.h	/^    size_t outN; \/\/ total number of spatial gridpoints for output (with strides)$/;"	m	struct:__anon8
 p_bw	main.c	/^fftw_plan p_bw;$/;"	v
 p_fw	main.c	/^fftw_plan p_fw;$/;"	v
 parameters_t	main.h	/^}parameters_t;$/;"	t	typeref:struct:__anon8
@@ -361,6 +371,7 @@ run_rk4	RK4_stepper.c	/^void run_rk4() {$/;"	f
 safe	dopri853_stepper.h	/^    double safe;$/;"	m	struct:__anon3
 save	filehandling.c	/^void save() {$/;"	f
 skip	main.h	/^    size_t skip;         \/\/ how many timesteps to skip in between write out$/;"	m	struct:__anon7
+stride	main.h	/^    size_t stride; \/\/ strides for output$/;"	m	struct:__anon5
 success	dopri853_stepper.c	/^int success(const double err, double *dt) {$/;"	f
 t	dopri853_stepper.h	/^    double t;$/;"	m	struct:__anon3
 t	main.h	/^    double t;  \/\/ current time$/;"	m	struct:__anon6
