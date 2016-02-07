@@ -82,7 +82,7 @@ void mk_rhs(const double t, double *f, double *result) {
     result[N2] = a * hubble;
 }
 
-// compute energy density rho, i.e. 00 of stress energy & save average value
+// compute energy density rho & save average value
 void mk_rho(double *f) {
     size_t N = pars.N;
     double a = f[2 * N];
@@ -269,8 +269,7 @@ inline double potential_prime(const double f) {
     /* return 0.0; */
 }
 
-// solve the poisson like equation for scalar perturbations and simultaneously
-// solving for its derivative
+// solve poisson like equation for scalar perturbation and its derivative
 void mk_psi_and_dpsi(double *f) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -366,7 +365,6 @@ void mk_psi_and_dpsi(double *f) {
 }
 
 // computes a crude estimation of the power spectrum, more info in main.h
-// and stores it in global pow_spec
 void mk_power_spectrum(const fftw_complex *in) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -512,8 +510,6 @@ inline double filter_window_function(const double x) {
 }
 
 // recompute current power spectrum and rho and save current timeslice to buffer
-// we might want to save this extra call to to mk_rho and write out data at a
-// point where everything is available anyway
 void prepare_and_save_timeslice() {
     evo_flags.compute_pow_spec = 1;
     mk_rho(field);
