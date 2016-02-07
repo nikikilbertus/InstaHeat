@@ -523,17 +523,6 @@ void prepare_and_save_timeslice() {
     save();
 }
 
-//TODO: do i need that function? delete?
-double mean(const double *in, size_t N) {
-    double mean = 0.0;
-    #pragma omp parallel for reduction(+: mean)
-    for (size_t i = 0; i < N; ++i)
-    {
-        mean += in[i];
-    }
-    return mean / N;
-}
-
 void contains_nan(double *f, size_t N) {
     size_t count = 0;
     for (size_t i = 0; i < N; ++i)
