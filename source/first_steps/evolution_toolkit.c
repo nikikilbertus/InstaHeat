@@ -343,7 +343,6 @@ void mk_psi_and_dpsi(double *f) {
                     tmp.psic[id] = 0.5 * a2 *
                         (tmp.deltarhoc[id] + 3.0 * hubble * tmp.fc[id]) /
                         (k_sq * N);
-                    /* tmp.psic[id] = 0.5 * a2 * tmp.deltarhoc[id] / (k_sq * N); */
                 }
                 else
                 {

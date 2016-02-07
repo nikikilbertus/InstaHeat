@@ -147,7 +147,6 @@ void allocate_external() {
 
     // default arrays to save coefficients of real to complex transforms
     // see fftw3 documentation and Mxyz for this
-    // TODO: maybe wrap this allocation in extra method (slight differences!)
     size_t M = pars.x.M * pars.y.M * pars.z.M;
     tmp.phic  = fftw_malloc(M * sizeof *tmp.phic);
     tmp.xphic = fftw_malloc(M * sizeof *tmp.xphic);
