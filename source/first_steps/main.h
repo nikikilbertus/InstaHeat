@@ -109,9 +109,10 @@ during execution
 
 // ----------------parameters used in the potential-----------------------------
 /* #define MASS                    (0.11026) // for 50 e-fold hom inflation */
-#define MASS                    (6.0)
+#define MASS                    (0.002025828275523)
 #define COUPLING                (1.0) // coupling in a phi4 potential
 #define LAMBDA                  (4.721e-5) // "cosmological constant"
+#define A_INITIAL               (1.04977e4)
 // for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
 
 // -------------------additional parameters for dopri853------------------------

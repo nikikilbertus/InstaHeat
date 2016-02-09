@@ -1,33 +1,41 @@
 dim = 1;
-name = 'compare';
+name = 'compare_2';
 scaleamp = 1;
 
 name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten_compare/' name '.dat'];
 
 raw = importdata(name);
 
-tk = raw(:,1);
-ak = raw(:,2);
-phi0k = raw(:,3) .* ak.^(-3/2);
-dphi0k = raw(:,4) .* ak.^(-3/2);
-phi1k = raw(:,5) .* ak.^(-3/2) * scaleamp;
-dphi1k = raw(:,6) .* ak.^(-3/2) * scaleamp;
-delrhok = raw(:,8);
+% tk = raw(:,1);
+% ak = raw(:,2);
+% phi0k = raw(:,3) .* ak.^(-3/2);
+% dphi0k = raw(:,4) .* ak.^(-3/2);
+% phi1k = raw(:,5) .* ak.^(-3/2) * scaleamp;
+% dphi1k = raw(:,6) .* ak.^(-3/2) * scaleamp;
+% delrhok = raw(:,8);
 
-plot(tk, phi0k.*ak.^(3/2))
-xlabel('t');
+ak = raw(:,1);
+phi0k = raw(:,2);
+dphi0k = raw(:,3);
+phi1k = raw(:,4);
+dphi1k = raw(:,5);
+koveraH = raw(:,6);
+rhorms = raw(:,7);
+
+plot(ak, phi0k.*ak.^(3/2))
+xlabel('a');
 ylabel('a^{3/2} * phi_0');
 shg;
 pause;
 
-plot(tk, phi1k.*ak.^(3/2))
-xlabel('t');
+plot(ak, phi1k.*ak.^(3/2))
+xlabel('a');
 ylabel('a^{3/2} * phi_1');
 shg;
 pause;
 
-% plot(tk, delrhok)
-% xlabel('t');
+% plot(ak, delrhok)
+% xlabel('a');
 % ylabel('delta rho');
 % shg;
 % pause;

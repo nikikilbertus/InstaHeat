@@ -98,6 +98,19 @@ void mk_rho(double *f) {
         rho[i] = (df * df + grad2) / 2.0 + potential(f[i]);
         rho_avg += rho[i];
     }
+
+    // Karstens implementation of rho
+    /* double dphiAvg = mean(field + N, N); */
+    /* double phiAvg = mean(field, N); */
+    /* #pragma omp parallel for private(df)  reduction(+: rho_avg) */
+    /* for (size_t i = 0; i < N; ++i) */
+    /* { */
+    /*     df = f[N + i]; */
+    /*     rho[i] = (dphiAvg * (df - dphiAvg)) / 2.0 + */
+    /*         potential_prime(phiAvg) * (f[i] - phiAvg); */
+    /*     rho_avg += rho[i]; */
+    /* } */
+
     rho_avg /= N;
 }
 
@@ -516,6 +529,16 @@ void prepare_and_save_timeslice() {
     mk_psi_and_dpsi(field);
     evo_flags.compute_pow_spec = 0;
     save();
+}
+
+inline double mean(const double *f, size_t N) {
+    double res = 0.0;
+    #pragma omp parallel for reduction(+: res)
+    for (size_t i = 0; i < N; ++i)
+    {
+        res += f[i];
+    }
+    return res / N;
 }
 
 void contains_nan(double *f, size_t N) {

@@ -301,7 +301,7 @@ void mk_initial_conditions() {
     }
 
     // initialize a
-    field[2 * N] = 1.0;
+    field[2 * N] = A_INITIAL;
 
     // console output for debugging
     #ifdef DEBUG
@@ -364,13 +364,38 @@ double phi_init(const double x, const double y, const double z,
     // very simple one for testing with phi squared potential
     /* double mean = 14.1421356; // for 50 e-fold inflation */
     /* double mean = 6.319569842; // somewhere at the end of 50 e-fold inflation */
-    double mean = 1.0;
-    double amplitude = 1.0e-5 * mean;
-    /* double k = MASS / 6.0; */
+
+    /* double mean = 1.0; */
+    /* double amplitude = 1.0e-5 * mean; */
+
+    // 25063
+    /* double mean = 0.001543576559919; */
+    /* double amplitude = 2.194936266463790e-6; */
+
+    //10138
+    /* double mean = 0.003801532800616; */
+    /* double amplitude = 2.200533462675648e-7; */
+
+    //1833
+    /* double mean = 0.021019511647747; */
+    /* double amplitude = 1.890808635066822e-6; */
+
+    //30
+    /* double mean = 0.999993224388493; */
+    /* double amplitude = 1.000511520852772e-05; */
+
+    //499
+    /* double mean = 0.077381458703679; */
+    /* double amplitude = -2.306228596956429e-07; */
+
+    // compare_2, pos= 1671
+    double mean = 0.0150052;
+    double amplitude = 4.048590000000000e-07;
+
     double k = 1.0;
     if (pars.dim == 1)
     {
-        return mean + amplitude * cos(k * x + ph[0]);
+        return mean + amplitude * cos(k * x);
         /* return mean + amplitude * (cos(k * x + ph[0]) + cos(2.0 * k * x + ph[1])); */
     }
     else if (pars.dim == 2)
@@ -388,6 +413,27 @@ double phi_init(const double x, const double y, const double z,
 // initial values of the time deriv. of the scalar field, make sure its periodic
 double dphi_init(const double x, const double y, const double z) {
     return 0.0;
+
+    /* double mean = -1.447595527218249e-8; */
+    /* double amplitude = 1.794195724493731e-7; */
+
+    /* double mean = 9.996023030535600e-9; */
+    /* double amplitude = 1.794182821708652e-7; */
+
+    /* double mean = -7.814852944111800e-8; */
+    /* double amplitude = 1.791222773169365e-7; */
+
+    /* double mean = -5.351102009251914e-06; */
+    /* double amplitude = 1.865069892229237e-09; */
+
+    /* double mean = 9.369552970351966e-07; */
+    /* double amplitude = 1.768837536606555e-07; */
+
+    double mean = -4.397960000000000e-06;
+    double amplitude = 1.816140000000000e-08;
+
+    double k = 1.0;
+    return (mean + amplitude * cos(k * x)) * MASS / 1.0e-2;
 
     /* return -0.089318193; // somewhere at end of 50 e-fold inflation */
 }

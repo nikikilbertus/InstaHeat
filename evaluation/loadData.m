@@ -14,9 +14,9 @@ psi = h5read(name, '/psi');
 powspec = h5read(name, '/power_spectrum');
 mass = h5read(name, '/mass');
 % compute some further properties
-scaling = 10^3 * mass;
-%t = t * 6 * 10^3; % adjust to compare to karstens time
+scaling = mass / 0.01;
 t = t * scaling; % adjust to compare to karstens time
+% t = t + tk(pos); %shifting t
 phiAvg = mean(phi);
 psiAvg = mean(psi);
 rhoAvg = mean(rho);
@@ -31,7 +31,7 @@ if dim == 1
     phifft = fft(phi);
     phi1 = -(phifft(2,:) + phifft(end,:)) / N;
 
-    phi0ksp = spline(tk,phi0k,t);
-    phi1ksp = spline(tk,phi1k,t);
-    aksp = spline(tk,ak,t);
+%     phi0ksp = spline(ak,phi0k,a);
+%     phi1ksp = spline(ak,phi1k,a);
+%     aksp = spline(ak,ak,a);
 end
