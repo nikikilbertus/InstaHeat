@@ -388,9 +388,17 @@ double phi_init(const double x, const double y, const double z,
     /* double mean = 0.077381458703679; */
     /* double amplitude = -2.306228596956429e-07; */
 
-    // compare_2, pos= 1671
-    double mean = 0.0150052;
-    double amplitude = 4.048590000000000e-07;
+    // compare_2, pos= 7671
+    /* double mean = 0.0150052; */
+    /* double amplitude = 4.048590000000000e-07; */
+
+    // compare_2, pos= 6000
+    /* double mean = 0.0510864; */
+    /* double amplitude = -3.743790000000000e-07; */
+
+    // compare_2, pos= 1
+    double mean = 5.0;
+    double amplitude = 0.01;
 
     double k = 1.0;
     if (pars.dim == 1)
@@ -412,7 +420,7 @@ double phi_init(const double x, const double y, const double z,
 
 // initial values of the time deriv. of the scalar field, make sure its periodic
 double dphi_init(const double x, const double y, const double z) {
-    return 0.0;
+    /* return 0.0; */
 
     /* double mean = -1.447595527218249e-8; */
     /* double amplitude = 1.794195724493731e-7; */
@@ -429,11 +437,17 @@ double dphi_init(const double x, const double y, const double z) {
     /* double mean = 9.369552970351966e-07; */
     /* double amplitude = 1.768837536606555e-07; */
 
-    double mean = -4.397960000000000e-06;
-    double amplitude = 1.816140000000000e-08;
+    /* double mean = -4.397960000000000e-06; */
+    /* double amplitude = 1.816140000000000e-08; */
+
+    /* double mean = 3.255190000000000e-04; */
+    /* double amplitude = 1.742130000000000e-08; */
+
+    double mean = -0.00806088;
+    double amplitude = -1.134420000000000e-20;
 
     double k = 1.0;
-    return (mean + amplitude * cos(k * x)) * MASS / 1.0e-2;
+    return (mean + amplitude * cos(k * x)) * MASS / 1.0e-2 ;
 
     /* return -0.089318193; // somewhere at end of 50 e-fold inflation */
 }

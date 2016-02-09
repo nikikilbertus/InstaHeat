@@ -59,7 +59,7 @@ during execution
 #define POWER_SPECTRUM_BINS     (50)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (1)
+#define TIME_STEP_SKIPS         (100)
 
 // spatial output strides
 #define STRIDE_X                (1)
@@ -89,7 +89,7 @@ during execution
 
 // ------------------computational domain---------------------------------------
 // spatial
-#define GRIDPOINTS_X            (512)
+#define GRIDPOINTS_X            (1024)
 #define GRIDPOINTS_Y            (1)
 #define GRIDPOINTS_Z            (1)
 #define SPATIAL_LOWER_BOUND_X   (-PI)
@@ -101,9 +101,9 @@ during execution
 
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
-#define DELTA_T                 (0.001)
+#define DELTA_T                 (0.00001)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (100.0)
+#define FINAL_TIME              (30)
 #define MAX_STEPS               (1e12)
 #define MINIMAL_DELTA_T         (1.0e-5)
 
@@ -112,7 +112,8 @@ during execution
 #define MASS                    (0.002025828275523)
 #define COUPLING                (1.0) // coupling in a phi4 potential
 #define LAMBDA                  (4.721e-5) // "cosmological constant"
-#define A_INITIAL               (1.04977e4)
+/* #define A_INITIAL               (4.09376e3) */
+#define A_INITIAL               (1.0)
 // for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
 
 // -------------------additional parameters for dopri853------------------------
