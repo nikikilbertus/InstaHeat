@@ -37,6 +37,24 @@ void h5_create_empty_by_path(const char *name) {
     H5Pclose(plist_phi);
     H5Sclose(dspace_phi);
 
+    // -------------------------dphi--------------------------------------------
+    // create dataspace for dphi
+    hid_t dspace_dphi = H5Screate_simple(rank, dims, max_dims);
+
+    // create property list for phi
+    hid_t plist_dphi = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_layout(plist_dphi, H5D_CHUNKED);
+    H5Pset_chunk(plist_dphi, rank, chunk_dims);
+
+    // create dataset for dphi
+    hid_t dset_dphi = H5Dcreate(file, "dphi", H5T_NATIVE_DOUBLE,
+                            dspace_dphi, H5P_DEFAULT, plist_dphi, H5P_DEFAULT);
+    pars.file.dset_dphi = dset_dphi;
+
+    // close property list and dataspace
+    H5Pclose(plist_dphi);
+    H5Sclose(dspace_dphi);
+
     // --------------------------psi--------------------------------------------
     // create dataspace for psi
     hid_t dspace_psi = H5Screate_simple(rank, dims, max_dims);
@@ -54,6 +72,24 @@ void h5_create_empty_by_path(const char *name) {
     // close property list and dataspace
     H5Pclose(plist_psi);
     H5Sclose(dspace_psi);
+
+    // -------------------------dpsi--------------------------------------------
+    // create dataspace for dphi
+    hid_t dspace_dpsi = H5Screate_simple(rank, dims, max_dims);
+
+    // create property list for phi
+    hid_t plist_dpsi = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_layout(plist_dpsi, H5D_CHUNKED);
+    H5Pset_chunk(plist_dpsi, rank, chunk_dims);
+
+    // create dataset for dpsi
+    hid_t dset_dpsi = H5Dcreate(file, "dpsi", H5T_NATIVE_DOUBLE,
+                            dspace_dpsi, H5P_DEFAULT, plist_dpsi, H5P_DEFAULT);
+    pars.file.dset_dpsi = dset_dpsi;
+
+    // close property list and dataspace
+    H5Pclose(plist_dpsi);
+    H5Sclose(dspace_dpsi);
 
     // --------------------------rho--------------------------------------------
     // create dataspace for rho
@@ -255,7 +291,23 @@ void h5_write_buffers_to_disk(const hsize_t Nt) {
     H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
                             add_dims, NULL);
     H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT,
-                    field_buf);
+                    phi_buf);
+
+    H5Sclose(mem_space);
+    H5Sclose(dspace);
+
+    // --------------------------dphi-------------------------------------------
+    dset = pars.file.dset_dphi;
+
+    mem_space = H5Screate_simple(rank, add_dims, NULL);
+    dspace = H5Dget_space(dset);
+    H5Dset_extent(dset, new_dims);
+    dspace = H5Dget_space(dset);
+
+    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
+                            add_dims, NULL);
+    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT,
+                    dphi_buf);
 
     H5Sclose(mem_space);
     H5Sclose(dspace);
@@ -272,6 +324,22 @@ void h5_write_buffers_to_disk(const hsize_t Nt) {
                             add_dims, NULL);
     H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT,
                     psi_buf);
+
+    H5Sclose(mem_space);
+    H5Sclose(dspace);
+
+    // --------------------------dpsi-------------------------------------------
+    dset = pars.file.dset_dpsi;
+
+    mem_space = H5Screate_simple(rank, add_dims, NULL);
+    dspace = H5Dget_space(dset);
+    H5Dset_extent(dset, new_dims);
+    dspace = H5Dget_space(dset);
+
+    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dims, NULL,
+                            add_dims, NULL);
+    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT,
+                    dpsi_buf);
 
     H5Sclose(mem_space);
     H5Sclose(dspace);
@@ -353,7 +421,7 @@ void h5_close() {
         h5_write_buffers_to_disk(pars.file.index);
     }
     H5Fflush(file, H5F_SCOPE_GLOBAL);
-    hid_t obj_ids[10];
+    hid_t obj_ids[20];
     hsize_t obj_count = H5Fget_obj_ids(file, H5F_OBJ_DATASET, -1, obj_ids);
     for (size_t i = 0; i < obj_count; ++i)
     {
@@ -390,9 +458,11 @@ void save() {
             {
                 id = osy + k;
                 idb = osyb + k / pars.z.stride;
-                field_buf[os + idb] = field[id];
-                psi_buf[os + idb] = psi[id];
-                rho_buf[os + idb] = rho[id];
+                phi_buf[os + idb]  = field[id];
+                dphi_buf[os + idb] = field[N + id];
+                psi_buf[os + idb]  = psi[id];
+                dpsi_buf[os + idb] = dpsi[id];
+                rho_buf[os + idb]  = rho[id];
                 #ifdef CHECK_FOR_NAN
                 if (isnan(field[id]) || isnan(psi[id]) || isnan(rho[id]))
                 {

@@ -133,10 +133,12 @@ void allocate_external() {
     dfield       = fftw_malloc(Ntot * sizeof *dfield);
     dfield_new   = fftw_malloc(Ntot * sizeof *dfield_new);
     // this buffer only holds the scalar field (not the deriv. or a)
-    field_buf    = calloc(buf_size * outN, sizeof *field_buf);
+    phi_buf      = calloc(buf_size * outN, sizeof *phi_buf);
+    dphi_buf     = calloc(buf_size * outN, sizeof *dphi_buf);
     psi          = fftw_malloc(N * sizeof *psi);
     dpsi         = fftw_malloc(N * sizeof *dpsi);
     psi_buf      = fftw_malloc(buf_size * outN * sizeof *psi_buf);
+    dpsi_buf     = fftw_malloc(buf_size * outN * sizeof *dpsi_buf);
     time_buf     = calloc(buf_size, sizeof *time_buf);
     f_a_buf      = calloc(buf_size, sizeof *f_a_buf);
     rho          = fftw_malloc(N * sizeof *rho);
@@ -166,12 +168,12 @@ void allocate_external() {
     tmp.f    = fftw_malloc(N * sizeof *tmp.f);
     tmp.deltarho = fftw_malloc(N * sizeof *tmp.deltarho);
 
-    if (!(grid && field && field_new && dfield && dfield_new && field_buf &&
-        psi && dpsi && time_buf && rho && rho_buf && pow_spec && pow_spec_buf &&
-        tmp.phic  && tmp.xphic && tmp.yphic && tmp.zphic &&
-        tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap &&
-        tmp.psic  && tmp.fc && tmp.deltarhoc && tmp.dpsic &&
-        tmp.f && tmp.deltarho))
+    if (!(grid && field && field_new && dfield && dfield_new && phi_buf &&
+        dphi_buf && psi && dpsi && psi_buf && dpsi_buf && time_buf && f_a_buf &&
+        rho && rho_buf && pow_spec && pow_spec_buf && tmp.phic  && tmp.xphic &&
+        tmp.yphic && tmp.zphic && tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad
+        && tmp.lap && tmp.psic  && tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f
+        && tmp.deltarho))
     {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
@@ -472,7 +474,7 @@ void free_external() {
     fftw_free(field_new);
     fftw_free(dfield);
     fftw_free(dfield_new);
-    free(field_buf);
+    free(phi_buf);
     free(psi);
     free(dpsi);
     free(psi_buf);
