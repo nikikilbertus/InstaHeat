@@ -1,6 +1,36 @@
 lt = max(t);
 st = 800;
-pos = 6000;
+s = 1;
+
+subplot(4,1,1)
+plot(ak(s:end), phi0k(s:end).*ak(s:end).^(3/2), a, phiAvg'.*a.^(3/2));
+ylabel('phi0 a^{3/2}')
+xlabel('a')
+
+subplot(4,1,2)
+plot(ak(s:end), dphi0k(s:end).*ak(s:end).^(3/2), a, dphiAvg'.*a.^(3/2));
+ylabel('dphi0 a^{3/2}')
+xlabel('a')
+
+subplot(4,1,3)
+plot(ak(s:end), phi1k(s:end).*ak(s:end).^(3/2), a, phi1'.*a.^(3/2));
+ylabel('phi1 a^{3/2}')
+xlabel('a')
+
+subplot(4,1,4)
+plot(ak(s:end), dphi1k(s:end).*ak(s:end).^(3/2), a, dphi1'.*a.^(3/2));
+ylabel('dphi1 a^{3/2}')
+xlabel('a')
+
+shg
+pause
+figure
+
+plot(ak(pos:end), rhormsk(pos:end), a, rhorms, a, rhormsalg, ak(pos:end), rhormsalgk(pos:end))
+ylabel('rhorms')
+legend('karsten','niki, num','niki, adapted','karsten, alg')
+shg
+return
 
 figure
 subplot(1,2,1)

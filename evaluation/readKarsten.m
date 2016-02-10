@@ -20,7 +20,7 @@ dphi0k = raw(:,3);
 phi1k = raw(:,4);
 dphi1k = raw(:,5);
 koveraH = raw(:,6);
-rhormsk = raw(:,7);
+rhormsk = raw(:,7) / sqrt(2 * pi);
 
 plot(ak, phi0k.*ak.^(3/2))
 xlabel('a');
