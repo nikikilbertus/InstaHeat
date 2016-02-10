@@ -82,26 +82,24 @@ void mk_rhs(const double t, double *f, double *result) {
     result[N2] = a * hubble;
 }
 
-// compute energy density rho & save average value
+// compute energy density rho & average value
 void mk_rho(double *f) {
     size_t N = pars.N;
     double a = f[2 * N];
     rho_avg = 0.0;
 
-    double df, grad2;
-    #pragma omp parallel for default(shared) private(df, grad2) \
-        reduction(+: rho_avg)
+    double df;
+    #pragma omp parallel for default(shared) private(df)  reduction(+: rho_avg)
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
-        grad2 = tmp.grad[i] / (a * a);
-        rho[i] = (df * df + grad2) / 2.0 + potential(f[i]);
+        rho[i] = (df * df + tmp.grad[i] / (a * a)) / 2.0 + potential(f[i]);
         rho_avg += rho[i];
     }
 
     // Karstens implementation of rho
-    /* double dphiAvg = mean(field + N, N); */
-    /* double phiAvg = mean(field, N); */
+    /* double dphiAvg = mean(f + N, N); */
+    /* double phiAvg = mean(f, N); */
     /* #pragma omp parallel for private(df)  reduction(+: rho_avg) */
     /* for (size_t i = 0; i < N; ++i) */
     /* { */

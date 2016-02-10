@@ -1,5 +1,6 @@
 lt = max(t);
 st = 800;
+pos = 6000;
 
 figure
 subplot(1,2,1)
