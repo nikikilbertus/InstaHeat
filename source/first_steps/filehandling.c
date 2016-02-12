@@ -41,7 +41,7 @@ void h5_create_empty_by_path(const char *name) {
     // create dataspace for dphi
     hid_t dspace_dphi = H5Screate_simple(rank, dims, max_dims);
 
-    // create property list for phi
+    // create property list for dphi
     hid_t plist_dphi = H5Pcreate(H5P_DATASET_CREATE);
     H5Pset_layout(plist_dphi, H5D_CHUNKED);
     H5Pset_chunk(plist_dphi, rank, chunk_dims);
@@ -74,10 +74,10 @@ void h5_create_empty_by_path(const char *name) {
     H5Sclose(dspace_psi);
 
     // -------------------------dpsi--------------------------------------------
-    // create dataspace for dphi
+    // create dataspace for dpsi
     hid_t dspace_dpsi = H5Screate_simple(rank, dims, max_dims);
 
-    // create property list for phi
+    // create property list for dpsi
     hid_t plist_dpsi = H5Pcreate(H5P_DATASET_CREATE);
     H5Pset_layout(plist_dpsi, H5D_CHUNKED);
     H5Pset_chunk(plist_dpsi, rank, chunk_dims);
@@ -241,7 +241,7 @@ void h5_create_empty_by_path(const char *name) {
     #endif
 
     RUNTIME_INFO(puts("Created hdf5 file with parameters and datasets for "
-                "phi, psi, t, a, rho.\n"));
+                "phi, dphi, psi, dpsi, t, a, rho, powerspec.\n"));
 }
 
 void h5_write_parameter(const hid_t file, const char *name, const double *val,

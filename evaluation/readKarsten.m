@@ -1,5 +1,5 @@
 dim = 1;
-name = 'compare_2';
+name = 'compare_psi';
 scaleamp = 1;
 
 name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten_compare/' name '.dat'];
@@ -21,6 +21,8 @@ phi1k = raw(:,4);
 dphi1k = raw(:,5);
 koveraH = raw(:,6);
 rhormsk = raw(:,7) / sqrt(2 * pi);
+psi1k = raw(:,8);
+dpsi1k = raw(:,9);
 
 plot(ak, phi0k.*ak.^(3/2))
 xlabel('a');
@@ -31,6 +33,18 @@ pause;
 plot(ak, phi1k.*ak.^(3/2))
 xlabel('a');
 ylabel('a^{3/2} * phi_1');
+shg;
+pause;
+
+plot(ak, psi1k.*ak.^(3/2))
+xlabel('a');
+ylabel('a^{3/2} * psi');
+shg;
+pause;
+
+plot(ak, dpsi1k.*ak.^(3/2))
+xlabel('a');
+ylabel('a^{3/2} * dpsi');
 shg;
 pause;
 

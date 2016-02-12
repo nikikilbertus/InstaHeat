@@ -395,8 +395,9 @@ double phi_init(const double x, const double y, const double z,
     /* double amplitude = 4.048590000000000e-07; */
 
     // compare_2, pos= 6000
+    double scaledown = 1.0e1;
     double mean = 0.0510864;
-    double amplitude = -3.743790000000000e-07;
+    double amplitude = -3.743790000000000e-07 * scaledown;
 
     // compare_2, pos= 1
     /* double mean = 5.0; */
@@ -442,8 +443,9 @@ double dphi_init(const double x, const double y, const double z) {
     /* double mean = -4.397960000000000e-06; */
     /* double amplitude = 1.816140000000000e-08; */
 
+    double scaledown = 1.0e1;
     double mean = 3.255190000000000e-04;
-    double amplitude = 1.742130000000000e-08;
+    double amplitude = 1.742130000000000e-08 * scaledown;
 
     /* double mean = -0.00806088; */
     /* double amplitude = -1.134420000000000e-20; */

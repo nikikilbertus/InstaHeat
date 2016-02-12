@@ -2,24 +2,29 @@ lt = max(t);
 st = 800;
 s = 1;
 
-subplot(4,1,1)
+subplot(5,1,1)
 plot(ak(s:end), phi0k(s:end).*ak(s:end).^(3/2), a, phiAvg'.*a.^(3/2));
 ylabel('phi0 a^{3/2}')
 xlabel('a')
 
-subplot(4,1,2)
+subplot(5,1,2)
 plot(ak(s:end), dphi0k(s:end).*ak(s:end).^(3/2), a, dphiAvg'.*a.^(3/2));
 ylabel('dphi0 a^{3/2}')
 xlabel('a')
 
-subplot(4,1,3)
+subplot(5,1,3)
 plot(ak(s:end), phi1k(s:end).*ak(s:end).^(3/2), a, phi1'.*a.^(3/2));
 ylabel('phi1 a^{3/2}')
 xlabel('a')
 
-subplot(4,1,4)
+subplot(5,1,4)
 plot(ak(s:end), dphi1k(s:end).*ak(s:end).^(3/2), a, dphi1'.*a.^(3/2));
 ylabel('dphi1 a^{3/2}')
+xlabel('a')
+
+subplot(5,1,5)
+plot(ak(s:end), koveraH(s:end).*ak(s:end), a, 1./H);
+ylabel('k/H')
 xlabel('a')
 
 shg
@@ -30,6 +35,19 @@ plot(ak(pos:end), rhormsk(pos:end), a, rhorms, a, rhormsalg, ak(pos:end), rhorms
 ylabel('rhorms')
 legend('karsten','niki, num','niki, adapted','karsten, alg')
 shg
+pause
+figure
+
+subplot(2,1,1)
+plot(ak(s:end), psi1k(s:end).*ak(s:end).^(3/2), a, psi1'.*a.^(3/2));
+ylabel('psi1 a^{3/2}')
+xlabel('a')
+
+subplot(2,1,2)
+plot(ak(s:end), dpsi1k(s:end).*ak(s:end).^(3/2), a, dpsi1'.*a.^(3/2));
+ylabel('dpsi1 a^{3/2}')
+xlabel('a')
+
 return
 
 figure
