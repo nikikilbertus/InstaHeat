@@ -103,7 +103,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (0.001)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (1.0e5)
+#define FINAL_TIME              (2.0e5)
 #define MAX_STEPS               (1e12)
 #define MINIMAL_DELTA_T         (1.0e-5)
 

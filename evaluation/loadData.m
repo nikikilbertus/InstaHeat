@@ -23,6 +23,10 @@ if (comp)
 else
     scaling = 1;
 end
+[~, pos] = min((ak - min(a)).^2);
+[~, posmax] = min((ak - max(a)).^2);
+posmax = posmax + 100;
+
 tscal = t * scaling; % adjust to compare to karstens time
 % t = t + tk(pos); %shifting t
 phiAvg = mean(phi);
@@ -36,8 +40,9 @@ H = sqrt(rhoAvg / 3);
 Nt = length(t);
 N = length(phi(:,1));
 
-rhorms = sqrt( (mean(rho.^2) - rhoAvg.^2) ./ rhoAvg.^2 );
-rhormsn = sqrt( mean((rho - repmat(rhoAvg,N,1)).^2) ./ rhoAvg.^2 );
+rhorms   = sqrt( (mean(rho.^2) - rhoAvg.^2) ./ rhoAvg.^2 );
+rhormsnn = sqrt( mean(rho.^2) - rhoAvg.^2 ) ./ rhoAvg;
+rhormsn  = sqrt( mean((rho - repmat(rhoAvg,N,1)).^2) ./ rhoAvg.^2 );
 
 rhoalg = (dphi.^2 + (1e-2)^2 * phi.^2) / 2;
 rhoAvgalg = mean(rhoalg);
@@ -122,7 +127,14 @@ if dim == 1
     econfd = dphipad.*(amat.^2.*(4.*dphipad.*dpsipad - 3.*dphipad.*Hmat.*(1 - 4.*psi) + ...
     ddphipad.*(-1 + 4.*psi) - (1 - 2.*psi).*Vprime) + xxphi) ./ amat.^2;
     
-%     phi0ksp = spline(ak,phi0k,a);
-%     phi1ksp = spline(ak,phi1k,a);
-%     aksp = spline(ak,ak,a);
+    I = (ak > 0.8*ak(pos));
+    phi0ksp = spline(ak(I),phi0k(I),a);
+    phi1ksp = spline(ak(I),phi1k(I),a);
+    dphi0ksp = spline(ak(I),dphi0k(I),a);
+    dphi1ksp = spline(ak(I),dphi1k(I),a);
+    psi1ksp = spline(ak(I),psi1k(I),a);
+    dpsi1ksp = spline(ak(I),dpsi1k(I),a);
+    koveraHsp = spline(ak(I),koveraH(I),a);
+    rhormsksp = spline(ak(I),rhormsk(I),a);
+    aksp = spline(ak(I),ak(I),a);
 end

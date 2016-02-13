@@ -31,6 +31,7 @@ void mk_rhs(const double t, double *f, double *result) {
 
     #ifdef INCLUDE_PSI
     mk_psi_and_dpsi(f);
+    /* update_rho(f); */
     double df, p;
     #pragma omp parallel for private(df, p)
     for (size_t i = 0; i < N; ++i)
@@ -98,18 +99,29 @@ void mk_rho(double *f) {
     }
 
     // Karstens implementation of rho
-    /* double dphiAvg = mean(f + N, N); */
     /* double phiAvg = mean(f, N); */
+    /* double dphiAvg = mean(f + N, N); */
     /* #pragma omp parallel for private(df)  reduction(+: rho_avg) */
     /* for (size_t i = 0; i < N; ++i) */
     /* { */
     /*     df = f[N + i]; */
-    /*     rho[i] = (dphiAvg * (df - dphiAvg)) / 2.0 + */
-    /*         potential_prime(phiAvg) * (f[i] - phiAvg); */
+    /*     rho[i] = ( dphiAvg  * ( dphiAvg + 2.0 * (df - dphiAvg)) + */
+    /*         MASS * MASS * phiAvg  * ( phiAvg + 2.0 * (f[i] - phiAvg))) / 2.0; */
     /*     rho_avg += rho[i]; */
     /* } */
-
     rho_avg /= N;
+}
+
+// update rho now that psi is known
+void update_rho(double *f) {
+    size_t N = pars.N;
+    double df;
+    #pragma omp parallel for private(df)
+    for (size_t i = 0; i < N; ++i)
+    {
+        df = f[N + i];
+        rho[i] -= psi[i] * df * df;
+    }
 }
 
 // compute the laplacian and the squared gradient of the input and store them
@@ -312,6 +324,9 @@ void mk_psi_and_dpsi(double *f) {
     fftw_time_exe += get_wall_time();
     #endif
 
+    double dphiAvg = mean(f + N, N);
+    double dphiextra = 0.5 * a2 * dphiAvg * dphiAvg;
+
     double k_sq;
     size_t osx, osy, id;
     #pragma omp parallel for private(k_sq, osx, osy, id)
@@ -348,11 +363,12 @@ void mk_psi_and_dpsi(double *f) {
                 {
                     k_sq += pars.y.k2 * j * j;
                 }
-                if (fabs(k_sq) > 1.0e-10)
+                /* if (fabs(k_sq) > 1.0e-10) */
+                if (-k_sq > dphiextra)
                 {
                     tmp.psic[id] = 0.5 * a2 *
                         (tmp.deltarhoc[id] + 3.0 * hubble * tmp.fc[id]) /
-                        (k_sq * N);
+                        ((k_sq + dphiextra) * N);
                 }
                 else
                 {
@@ -531,12 +547,12 @@ void prepare_and_save_timeslice() {
 
 inline double mean(const double *f, size_t N) {
     double res = 0.0;
-    #pragma omp parallel for reduction(+: res)
+    /* #pragma omp parallel for reduction(+: res) */
     for (size_t i = 0; i < N; ++i)
     {
         res += f[i];
     }
-    return res / N;
+    return res / (double)N;
 }
 
 void contains_nan(double *f, size_t N) {

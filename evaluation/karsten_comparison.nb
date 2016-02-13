@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[    169837,       4968]
-NotebookOptionsPosition[    161249,       4690]
-NotebookOutlinePosition[    161626,       4707]
-CellTagsIndexPosition[    161583,       4704]
+NotebookDataLength[    173159,       5079]
+NotebookOptionsPosition[    164214,       4789]
+NotebookOutlinePosition[    164591,       4806]
+CellTagsIndexPosition[    164548,       4803]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -4685,6 +4685,105 @@ Cell[BoxData[
 Cell[BoxData["True"], "Output",
  CellChangeTimes->{3.664214469445671*^9}]
 }, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["scaling to box of size 2 \[Pi]", "Subsection",
+ CellChangeTimes->{{3.6643004659308577`*^9, 3.664300479432438*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"scaleq", " ", "=", " ", 
+  RowBox[{
+   FractionBox["6", 
+    SuperscriptBox["koverHk", "2"]], " ", "\[Equal]", " ", 
+   RowBox[{
+    RowBox[{
+     SuperscriptBox["dphi0k", "2"], " ", 
+     FractionBox[
+      SuperscriptBox["m", "2"], 
+      SuperscriptBox["mk", "2"]]}], " ", "+", " ", 
+    RowBox[{
+     SuperscriptBox["m", "2"], " ", 
+     SuperscriptBox["phi0k", "2"]}]}]}]}]], "Input",
+ CellChangeTimes->{{3.664300482737749*^9, 3.6643005867287292`*^9}, {
+  3.664300877373713*^9, 3.664300880565317*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  FractionBox["6", 
+   SuperscriptBox["koverHk", "2"]], "\[Equal]", 
+  RowBox[{
+   FractionBox[
+    RowBox[{
+     SuperscriptBox["dphi0k", "2"], " ", 
+     SuperscriptBox["m", "2"]}], 
+    SuperscriptBox["mk", "2"]], "+", 
+   RowBox[{
+    SuperscriptBox["m", "2"], " ", 
+    SuperscriptBox["phi0k", "2"]}]}]}]], "Output",
+ CellChangeTimes->{3.6643005873497047`*^9, 3.6643006253188257`*^9, 
+  3.6643008810700827`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"Solve", "[", 
+   RowBox[{"scaleq", ",", " ", "m"}], "]"}], " ", "//", " ", 
+  "Simplify"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"m", " ", "/.", " ", 
+   RowBox[{"%", "[", 
+    RowBox[{"[", "2", "]"}], "]"}]}], " ", "//", " ", "InputForm"}]}], "Input",\
+
+ CellChangeTimes->{{3.664300588383728*^9, 3.6643006077756023`*^9}, {
+  3.664300649562148*^9, 3.664300735679275*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"m", "\[Rule]", 
+     RowBox[{"-", 
+      FractionBox[
+       SqrtBox["6"], 
+       SqrtBox[
+        FractionBox[
+         RowBox[{
+          SuperscriptBox["koverHk", "2"], " ", 
+          RowBox[{"(", 
+           RowBox[{
+            SuperscriptBox["dphi0k", "2"], "+", 
+            RowBox[{
+             SuperscriptBox["mk", "2"], " ", 
+             SuperscriptBox["phi0k", "2"]}]}], ")"}]}], 
+         SuperscriptBox["mk", "2"]]]]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"m", "\[Rule]", 
+     FractionBox[
+      SqrtBox["6"], 
+      SqrtBox[
+       FractionBox[
+        RowBox[{
+         SuperscriptBox["koverHk", "2"], " ", 
+         RowBox[{"(", 
+          RowBox[{
+           SuperscriptBox["dphi0k", "2"], "+", 
+           RowBox[{
+            SuperscriptBox["mk", "2"], " ", 
+            SuperscriptBox["phi0k", "2"]}]}], ")"}]}], 
+        SuperscriptBox["mk", "2"]]]]}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{{3.664300601775733*^9, 3.664300667328856*^9}, {
+   3.6643007031123257`*^9, 3.664300736050488*^9}, 3.6643008821033697`*^9}],
+
+Cell["Sqrt[6]/Sqrt[(koverHk^2*(dphi0k^2 + mk^2*phi0k^2))/mk^2]", "Output",
+ CellChangeTimes->{{3.664300601775733*^9, 3.664300667328856*^9}, {
+   3.6643007031123257`*^9, 3.664300736050488*^9}, 3.6643008821065397`*^9}]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]]
 },
@@ -4731,7 +4830,7 @@ Cell[27754, 727, 183, 2, 67, "Section"],
 Cell[27940, 731, 289, 6, 27, "Input"],
 Cell[CellGroupData[{
 Cell[28254, 741, 2228, 57, 49, "Input"],
-Cell[30485, 800, 1761, 54, 97, "Output"]
+Cell[30485, 800, 1761, 54, 85, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[32283, 859, 395, 10, 27, "Input"],
@@ -4740,7 +4839,7 @@ Cell[32681, 871, 3834, 104, 53, "Output"]
 Cell[CellGroupData[{
 Cell[36552, 980, 550, 9, 27, "Input"],
 Cell[CellGroupData[{
-Cell[37127, 993, 5412, 140, 103, "Print"],
+Cell[37127, 993, 5412, 140, 82, "Print"],
 Cell[42542, 1135, 3426, 84, 26, "Print"],
 Cell[45971, 1221, 6868, 178, 124, "Print"],
 Cell[52842, 1401, 325, 6, 20, "Print"],
@@ -4791,7 +4890,7 @@ Cell[69621, 1866, 95, 1, 27, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[69753, 1872, 402, 11, 58, "Input"],
-Cell[70158, 1885, 7640, 229, 161, "Output"],
+Cell[70158, 1885, 7640, 229, 149, "Output"],
 Cell[77801, 2116, 4228, 124, 133, "Output"],
 Cell[82032, 2242, 8054, 248, 161, "Output"]
 }, Open  ]]
@@ -4927,13 +5026,13 @@ Cell[146311, 4237, 800, 22, 52, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[147148, 4264, 1354, 37, 49, "Input"],
-Cell[148505, 4303, 192, 4, 39, "Output"]
+Cell[148505, 4303, 192, 4, 27, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[148734, 4312, 1316, 29, 63, "Input"],
 Cell[150053, 4343, 975, 25, 52, "Output"],
 Cell[151031, 4370, 420, 6, 27, "Output"],
-Cell[151454, 4378, 413, 6, 39, "Output"]
+Cell[151454, 4378, 413, 6, 27, "Output"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
@@ -4967,6 +5066,18 @@ Cell[160673, 4666, 73, 1, 27, "Output"]
 Cell[CellGroupData[{
 Cell[160783, 4672, 350, 10, 27, "Input"],
 Cell[161136, 4684, 73, 1, 27, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[161258, 4691, 120, 1, 35, "Subsection"],
+Cell[CellGroupData[{
+Cell[161403, 4696, 530, 15, 50, "Input"],
+Cell[161936, 4713, 440, 14, 51, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[162413, 4732, 414, 11, 43, "Input"],
+Cell[162830, 4745, 1125, 35, 76, "Output"],
+Cell[163958, 4782, 216, 2, 39, "Output"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]

@@ -77,11 +77,11 @@ shg
 % ts{int16(kk/2-1)} = t;
 % end
 
-figure
-hold on
-for i = 8:-1:1
-plot(ts{i},mean(econs{i}))
-end
-hold off
-shg
+% figure
+% hold on
+% for i = 8:-1:1
+% plot(ts{i},mean(econs{i}))
+% end
+% hold off
+% shg
 
