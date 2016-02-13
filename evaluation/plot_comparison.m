@@ -1,4 +1,3 @@
-lt = max(t);
 st = 800;
 s = 1;
 
@@ -46,8 +45,8 @@ shg
 pause
 figure
 
-
 %--------------------------errors phi--------------------------------------
+if max(ak) > max(a) %------------------------------------------------------
 subplot(4,1,1)
 plot(a, (phiAvg' - phi0ksp).*a.^(3/2));
 ylabel('diff: phi0 a^{3/2}')
@@ -67,6 +66,29 @@ subplot(4,1,4)
 plot(a, (dphi1' - dphi1ksp).*a.^(3/2));
 ylabel('diff: dphi1 a^{3/2}')
 xlabel('a')
+
+else %---------------------------------------------------------------------
+subplot(4,1,1)
+plot(ak(I), (phi0sp - phi0k(I)).*ak(I).^(3/2));
+ylabel('diff: phi0 a^{3/2}')
+xlabel('a')
+
+subplot(4,1,2)
+plot(ak(I), (dphi0sp - dphi0k(I)).*ak(I).^(3/2));
+ylabel('diff: dphi0 a^{3/2}')
+xlabel('a')
+
+subplot(4,1,3)
+plot(ak(I), (phi1sp - phi1k(I)).*ak(I).^(3/2));
+ylabel('diff: phi1 a^{3/2}')
+xlabel('a')
+
+subplot(4,1,4)
+plot(ak(I), (dphi1sp - dphi1k(I)).*ak(I).^(3/2));
+ylabel('diff: dphi1 a^{3/2}')
+xlabel('a')
+end
+
 
 shg
 pause
@@ -98,6 +120,7 @@ pause
 figure
 
 %---------------------errors for k/h, rho, psi-----------------------------
+if max(ak) > max(a) %------------------------------------------------------
 subplot(4,1,1)
 plot(a, koveraHsp.*a - 1./H');
 ylabel('diff: k/H')
@@ -118,8 +141,40 @@ plot(a, (dpsi1' - dpsi1ksp).*a.^(3/2));
 ylabel('diff: dpsi1 a^{3/2}')
 xlabel('a')
 
+else %---------------------------------------------------------------------
+
+subplot(4,1,1)
+plot(ak(I), koverHsp - koveraH(I).*ak(I));
+ylabel('diff: k/H')
+xlabel('a')
+
+subplot(4,1,2)
+plot(ak(I), rhormssp - rhormsk(I))
+ylabel('diff: rhorms')
+xlabel('a')
+
+subplot(4,1,3)
+plot(ak(I), (psi1sp - psi1k(I)).*ak(I).^(3/2));
+ylabel('diff: psi1 a^{3/2}')
+xlabel('a')
+
+subplot(4,1,4)
+plot(ak(I), (dpsi1sp - dpsi1k(I)).*ak(I).^(3/2));
+ylabel('diff: dpsi1 a^{3/2}')
+xlabel('a')
+
+end
+
 shg
 pause
+figure
+
+rhofit = polyfit(ak(pos:posmax),rhormsk(pos:posmax),1);
+plot(a, rhorms, ak(pos:posmax), rhormsk(pos:posmax),a, rhofit(1) * a + rhofit(2));
+xlabel('a')
+ylabel('rhorms')
+legend('linear','non-lin','fit linear')
+shg
 
 return
 

@@ -1,6 +1,6 @@
 dim = 1;
 name = 'compare_psi';
-scaleamp = 1;
+scaleamp = 1e4;
 
 name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten_compare/' name '.dat'];
 
@@ -17,12 +17,12 @@ raw = importdata(name);
 ak = raw(:,1);
 phi0k = raw(:,2);
 dphi0k = raw(:,3);
-phi1k = raw(:,4);
-dphi1k = raw(:,5);
+phi1k = raw(:,4) * scaleamp;
+dphi1k = raw(:,5) * scaleamp;
 koveraH = raw(:,6);
-rhormsk = raw(:,7) / sqrt(2 * pi);
-psi1k = raw(:,8);
-dpsi1k = raw(:,9);
+rhormsk = raw(:,7) / sqrt(2 * pi) * scaleamp;
+psi1k = raw(:,8) * scaleamp;
+dpsi1k = raw(:,9) * scaleamp;
 
 plot(ak, phi0k.*ak.^(3/2))
 xlabel('a');
