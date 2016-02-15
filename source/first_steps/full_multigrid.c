@@ -88,3 +88,68 @@ void mglin(double **u, size_t n, size_t ncycle) {
     free(irhs[1]);
     free(iu[1]);
 }
+
+void rstrct(double **uc, double **uf, size_t nc) {
+    size_t ic, iif, jc, jf, ncc = 2 * nc - 1;
+
+    for (jf = 3, jc = 2; jc < nc; ++jc, jf += 2)
+    {
+        for (iif = 3, ic = 2; ic < nc; ++ic, iif += 2)
+        {
+            uc[ic][jc] = 0.5 * uf[iif][jf] + 0.125 * (uf[iif + 1][jf] +
+                    uf[iif - 1][jf] + uf[iif][jf + 1] + uf[iif][jf - 1]);
+        }
+    }
+
+    for (jc = 1, ic = 1; ic <= nc; ++ic, jc += 2)
+    {
+        uc[ic][1] = uf[jc][1];
+        uc[ic][nc] = uf[jc][ncc];
+    }
+
+    for (jc = 1, ic = 1; ic <= nc; ++ic, jc += 2)
+    {
+        uc[1][ic] = uf[1][jc];
+        uc[nc][ic] = uf[ncc][ic];
+    }
+}
+
+void interp(double **uf, double **uc, size_t nf) {
+    size_t ic, iif, jc, jf, nc;
+    nc = nf / 2 + 1;
+    for (jc = 1, jf = 1; jc <= nc; ++jc, jf += 2)
+    {
+        for (ic = 1; ic <= nc; ++ic)
+        {
+            uf[2 * ic - 1][jf] = uc[ic][jc];
+        }
+    }
+
+    for (jf = 1; jf <= nf; jf += 2)
+    {
+        for (iif = 2; iif < nf; iif += 2)
+        {
+            uf[iif][jf] = 0.5 * (uf[iif][jf+1] + uf[iif][jf-1]);
+        }
+    }
+
+    for (jf = 2; jf < nf; jf += 2)
+    {
+        for (iif = 1; iif <= nf; ++iif)
+        {
+            uf[iif][jf] = 0.5 * (uf[iif][jf+1] + uf[iif][jf-1]);
+        }
+    }
+}
+
+void addint(double **uf, double **uc, double **res, size_t nf) {
+    size_t i, j;
+    interp(res, uc, nf);
+    for (j = 1; j <= nf; ++j)
+    {
+        for (i = 1; i <= nf; ++i)
+        {
+            uf[i][j] += res[i][j];
+        }
+    }
+}
