@@ -31,6 +31,7 @@ void mk_rhs(const double t, double *f, double *result) {
 
     #ifdef INCLUDE_PSI
     mk_psi_and_dpsi(f);
+    // TODO: discuss this
     /* update_rho(f); */
     double df, p;
     #pragma omp parallel for private(df, p)
@@ -90,7 +91,7 @@ void mk_rho(double *f) {
     rho_avg = 0.0;
 
     double df;
-    #pragma omp parallel for default(shared) private(df)  reduction(+: rho_avg)
+    #pragma omp parallel for default(shared) private(df) reduction(+: rho_avg)
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
