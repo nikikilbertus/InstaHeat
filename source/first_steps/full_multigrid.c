@@ -153,3 +153,79 @@ void addint(double **uf, double **uc, double **res, size_t nf) {
         }
     }
 }
+
+//TODO: modify for our problem after testing
+void slvsml(double **u, double **rhs) {
+    //TODO: change!
+    double h = 0.5;
+
+    fill0(u,3);
+    u[2][2] = - h * h * rhos[2][2] / 4.0;
+}
+
+void relax(double **u, double **rhs, size_t n) {
+    size_t i, ipass, isw, j, jsw = 1;
+    double h, h2;
+
+    //TODO change
+    h = 1.0 / (n-1);
+    h2 = h * h;
+
+    for (ipass = 1; ipass <= 2; ++ipass, jsw = 3 - jsw)
+    {
+        isw = jsw;
+        for (j = 2; j < n; ++j, isw = 3 - isw)
+        {
+            for (i = isw + 1; i < n; i += 2)
+            {
+                u[i][j] = 0.25 * (u[i + 1][j] + u[i - 1][j] + u[i][j + 1] +
+                        u[i][j - 1] - h2 * rhs[i][j]);
+            }
+        }
+    }
+}
+
+void resid(double **res, double **u, double **rhs, size_t n) {
+    size_t i, j;
+    double h, h2i;
+
+    //TODO: change
+    h = 1.0 / (n - 1);
+    h2i = 1.0 / (h * h);
+
+    for (j = 2; j < n; ++j)
+    {
+        for (i = 2; i < n; ++i)
+        {
+            res[i][j] = -h2i * (u[i + 1][j] + u[i - 1][j] + u[i][j + 1] +
+                    u[i][j - 1] - 4.0 * u[i][j]) + rhs[i][j];
+        }
+    }
+
+    for (i = 1; i <= n; ++i)
+    {
+        res[i][1] = res[i][n] = res[1][i] = res[n][i] = 0.0;
+    }
+}
+
+void copy(double **aout, double **ain, size_t n) {
+    size_t i, j;
+    for (i = 1; i <= n; ++i)
+    {
+        for (j = 1; j <= n; ++j)
+        {
+            aout[j][i] = ain[j][i];
+        }
+    }
+}
+
+void fill0(double **u, size_t n) {
+    size_t i, j;
+    for (j = 1; j <= n; ++j)
+    {
+        for (i = 1; i <= n; ++i)
+        {
+            u[i][j] = 0.0;
+        }
+    }
+}
