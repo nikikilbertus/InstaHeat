@@ -1,9 +1,10 @@
+#include <stdlib.h>
 #include "full_multigrid.h"
 #include "main.h"
 
 void mglin(double **u, size_t n, size_t ncycle) {
     size_t j, jcycle, jj, jpost, jpre, nf, ng = 0, ngrid, nn;
-    double **ired[NGMAX + 1], **irho[NGMAX + 1], **iu[NGMAX + 1];
+    double **ires[NGMAX + 1], **irho[NGMAX + 1], **irhs[NGMAX + 1], **iu[NGMAX + 1];
 
     nn = n;
 
@@ -161,7 +162,7 @@ void slvsml(double **u, double **rhs) {
     double h = 0.5;
 
     fill0(u,3);
-    u[2][2] = - h * h * rhos[2][2] / 4.0;
+    u[2][2] = - h * h * rhs[2][2] / 4.0;
 }
 
 void relax(double **u, double **rhs, size_t n) {

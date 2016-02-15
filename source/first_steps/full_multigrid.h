@@ -8,7 +8,8 @@
 #define NGMAX           (15)
 
 void mglin(double **u, size_t n, size_t ncycle);
-void addint(double **aout, double **ain, size_t n);
+void addint(double **uf, double **uc, double **res, size_t nf);
+void copy(double **aout, double **ain, size_t n);
 void fill0(double **u, size_t n);
 void interp(double **uf, double **uc, size_t nf);
 void relax(double **u, double **rhs, size_t n);
