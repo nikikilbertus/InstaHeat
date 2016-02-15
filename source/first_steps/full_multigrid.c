@@ -1,3 +1,4 @@
+#include "full_multigrid.h"
 #include "main.h"
 
 void mglin(double **u, size_t n, size_t ncycle) {

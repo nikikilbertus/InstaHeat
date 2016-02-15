@@ -1,6 +1,12 @@
 #ifndef __FULL_MULTIGRID__
 #define __FULL_MULTIGRID__
 
+#include <stddef.h>
+
+#define NPRE            (1)
+#define NPOST           (1)
+#define NGMAX           (15)
+
 void mglin(double **u, size_t n, size_t ncycle);
 void addint(double **aout, double **ain, size_t n);
 void fill0(double **u, size_t n);
