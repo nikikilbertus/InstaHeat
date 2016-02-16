@@ -5,9 +5,11 @@
 #include "main.h"
 #include "setup.h"
 #include "evolution_toolkit.h"
+#include "full_multigrid.h"
 
 void run_all_tests() {
     test_mk_gradient_squared_and_laplacian();
+    test_full_multigrid();
 }
 
 void test_mk_gradient_squared_and_laplacian() {
@@ -75,6 +77,32 @@ void test_mk_gradient_squared_and_laplacian() {
     print_vector(tmp.yphi, N);
     puts("\n");
     #endif
+}
+
+void test_full_multigrid() {
+    size_t N = 33;
+    double **u;
+    malloc_dmat(&u, N, N);
+    for (size_t i = 0; i < N; ++i)
+    {
+        for (size_t j = 0; j < N; ++j)
+        {
+            u[i][j] = sin(2.0 * PI * i / (N-1)) * sin(2.0 * PI * j / (N-1));
+        }
+    }
+
+    puts("initialized u");
+    mglin(u, N, 1);
+
+    puts("finished full multigrid");
+    for (size_t i = 0; i < N; ++i)
+    {
+        for (size_t j = 0; j < N; ++j)
+        {
+            printf("%f\n", u[i][j]);
+        }
+    }
+    free_dmat(&u, N);
 }
 
 double test_func_gradsq(const double x, const double y, const double z) {

@@ -7,7 +7,6 @@ void mglin(double **u, size_t n, size_t ncycle) {
     double **ires[NGMAX + 1], **irho[NGMAX + 1], **irhs[NGMAX + 1], **iu[NGMAX + 1];
 
     nn = n;
-
     while (nn >>= 1)
     {
         ng += 1;
@@ -15,37 +14,39 @@ void mglin(double **u, size_t n, size_t ncycle) {
 
     if (n != 1 + (1L << ng))
     {
-        //TODO: exit with error
+        fputs("n-1 must be a power of 2 in full multigrid", stderr);
+        exit(EXIT_FAILURE);
     }
 
     if (ng > NGMAX)
     {
-        //TODO: exit with error
+        fputs("increase NGMAX for full multigrid", stderr);
+        exit(EXIT_FAILURE);
     }
 
-    nn = n/2 + 1;
+    nn = n / 2 + 1;
     ngrid = ng - 1;
-    irho[ngrid] = malloc(nn * nn * sizeof *irho[ngrid]);
+    malloc_dmat(&(irho[ngrid]), nn, nn);
     rstrct(irho[ngrid], u, nn);
     while (nn > 3)
     {
-        nn = nn/2 + 1;
-        irho[--ngrid] = malloc(nn * nn * sizeof *irho[ngrid]);
+        nn = nn / 2 + 1;
+        malloc_dmat(&(irho[--ngrid]), nn, nn);
         rstrct(irho[ngrid], irho[ngrid + 1], nn);
     }
 
     nn = 3;
-    iu[1]   = malloc(nn * nn * sizeof *iu[1]);
-    irhs[1] = malloc(nn * nn * sizeof *irhs[1]);
+    malloc_dmat(&(iu[1]), nn, nn);
+    malloc_dmat(&(irhs[1]), nn, nn);
     slvsml(iu[1], irho[1]);
-    free(irho[1]);
+    free_dmat(&(irho[1]), nn);
     ngrid = ng;
     for (j = 2; j <= ngrid; ++j)
     {
         nn = 2 * nn - 1;
-        iu[j]   = malloc(nn * nn * sizeof *iu[j]);
-        irhs[j] = malloc(nn * nn * sizeof *irhs[j]);
-        ires[j] = malloc(nn * nn * sizeof *ires[j]);
+        malloc_dmat(&(iu[j]), nn, nn);
+        malloc_dmat(&(irhs[j]), nn, nn);
+        malloc_dmat(&(ires[j]), nn, nn);
         interp(iu[j], iu[j - 1], nn);
         copy(irhs[j], (j != ngrid ? irho[j] : u), nn);
 
@@ -79,16 +80,16 @@ void mglin(double **u, size_t n, size_t ncycle) {
     copy(u, iu[ngrid], n);
     for (nn = n, j = ng; j >= 2; --j, nn = nn / 2 + 1)
     {
-        free(ires[j]);
-        free(irhs[j]);
-        free(iu[j]);
+        free_dmat(&(ires[j]), nn);
+        free_dmat(&(irhs[j]), nn);
+        free_dmat(&(iu[j]), nn);
         if (j != ng)
         {
-            free(irho[j]);
+            free_dmat(&(irho[j]), nn);
         }
     }
-    free(irhs[1]);
-    free(iu[1]);
+    free_dmat(&(irhs[1]), 3);
+    free_dmat(&(iu[1]), 3);
 }
 
 void rstrct(double **uc, double **uf, size_t nc) {
@@ -105,13 +106,13 @@ void rstrct(double **uc, double **uf, size_t nc) {
 
     for (jc = 1, ic = 1; ic <= nc; ++ic, jc += 2)
     {
-        uc[ic][1] = uf[jc][1];
+        uc[ic][1]  = uf[jc][1];
         uc[ic][nc] = uf[jc][ncc];
     }
 
     for (jc = 1, ic = 1; ic <= nc; ++ic, jc += 2)
     {
-        uc[1][ic] = uf[1][jc];
+        uc[1][ic]  = uf[1][jc];
         uc[nc][ic] = uf[ncc][ic];
     }
 }
@@ -230,4 +231,20 @@ void fill0(double **u, size_t n) {
             u[i][j] = 0.0;
         }
     }
+}
+
+void malloc_dmat(double*** mat, size_t n, size_t m) {
+    *mat = (double**) malloc(n * sizeof(double*));
+    for (size_t i = 0; i < n; ++i)
+    {
+        (*mat)[i] = (double*) malloc(m * sizeof(double));
+    }
+}
+
+void free_dmat(double*** mat, size_t n) {
+    for (size_t i = 0; i < n; ++i)
+    {
+        free((*mat)[i]);
+    }
+    free(*mat);
 }

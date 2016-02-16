@@ -101,18 +101,20 @@ during execution
 
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
-#define DELTA_T                 (0.001)
+#define DELTA_T                 (0.0001)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (5.0e6)
+#define FINAL_TIME              (4.0e6)
 #define MAX_STEPS               (1e12)
 #define MINIMAL_DELTA_T         (1.0e-5)
 
 // ----------------parameters used in the potential-----------------------------
 /* #define MASS                    (0.11026) // for 50 e-fold hom inflation */
-#define MASS                    (0.002000003836216)
+#define MASS                    (0.002000003836216) // for compare_2
+/* #define MASS                    (3.0) */
 #define COUPLING                (1.0) // coupling in a phi4 potential
 #define LAMBDA                  (4.721e-5) // "cosmological constant"
-#define A_INITIAL               (4.09376e3)
+#define A_INITIAL               (4.09376e3) // compare_2 and compare_psi, 6000
+/* #define A_INITIAL               (1.0) */
 // for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
 
 // -------------------additional parameters for dopri853------------------------

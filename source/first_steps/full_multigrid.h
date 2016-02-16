@@ -16,4 +16,6 @@ void relax(double **u, double **rhs, size_t n);
 void resid(double **res, double **u, double **rhs, size_t n);
 void rstrct(double **uc, double **uf, size_t nc);
 void slvsml(double **u, double **rhs);
+void malloc_dmat(double*** mat, size_t n, size_t m);
+void free_dmat(double*** mat, size_t n);
 #endif
