@@ -297,7 +297,7 @@ void mk_initial_conditions() {
             {
                 z = grid[Nx + Ny + k];
                 field[osy + k] = phi_init(x, y, z, theta);
-                field[N + osy + k] = dphi_init(x, y, z);
+                field[N + osy + k] = dphi_init(x, y, z, theta);
             }
         }
     }
@@ -368,7 +368,7 @@ double phi_init(const double x, const double y, const double z,
     /* double mean = 6.319569842; // somewhere at the end of 50 e-fold inflation */
 
     /* double mean = 1.0; */
-    /* double amplitude = 1.0e-5 * mean; */
+    /* double amplitude = 1.0e-5; */
 
     // 25063
     /* double mean = 0.001543576559919; */
@@ -395,7 +395,7 @@ double phi_init(const double x, const double y, const double z,
     /* double amplitude = 4.048590000000000e-07; */
 
     // compare_2, pos= 6000
-    double scale= 1.0e4;
+    double scale= 1.0e0;
     double mean = 0.0510864;
     double amplitude = -3.743790000000000e-07 * scale;
 
@@ -403,26 +403,23 @@ double phi_init(const double x, const double y, const double z,
     /* double mean = 5.0; */
     /* double amplitude = 0.01; */
 
-    double k = 1.0;
     if (pars.dim == 1)
     {
-        return mean + amplitude * cos(k * x);
-        /* return mean + amplitude * (cos(k * x + ph[0]) + cos(2.0 * k * x + ph[1])); */
+        return mean + amplitude * cos(x);
     }
     else if (pars.dim == 2)
     {
-        return mean + amplitude * (cos(k * x + ph[1]) * cos(k * y + ph[0])
-                 * cos(2.0 * k * y + ph[2]) * cos(3.0 * k * x + ph[3]));
+        return mean + amplitude * cos(x + y + ph[0]);
     }
     else
     {
-        return mean + amplitude *
-            cos(x + ph[0]) * cos(y + ph[1]) * cos(z + ph[2]);
+        return mean + amplitude * cos(x + y + z + ph[0]);
     }
 }
 
 // initial values of the time deriv. of the scalar field, make sure its periodic
-double dphi_init(const double x, const double y, const double z) {
+double dphi_init(const double x, const double y, const double z,
+                                                const double *ph) {
     /* return 0.0; */
 
     /* double mean = -1.447595527218249e-8; */
@@ -443,15 +440,26 @@ double dphi_init(const double x, const double y, const double z) {
     /* double mean = -4.397960000000000e-06; */
     /* double amplitude = 1.816140000000000e-08; */
 
-    double scale = 1.0e4;
+    double scale = 1.0e0;
     double mean = 3.255190000000000e-04;
     double amplitude = 1.742130000000000e-08 * scale;
 
     /* double mean = -0.00806088; */
     /* double amplitude = -1.134420000000000e-20; */
 
-    double k = 1.0;
-    return (mean + amplitude * cos(k * x)) * MASS / 1.0e-2 ;
+    if (pars.dim == 1)
+    {
+        return (mean + amplitude * cos(x)) * MASS / 1.0e-2;
+    }
+    else if (pars.dim == 2)
+    {
+        return (mean + amplitude * cos(x + y + ph[0])) *
+            MASS / 1.0e-2;
+    }
+    else
+    {
+        return (mean + amplitude * cos(x + y + z + ph[0])) * MASS / 1.0e-2;
+    }
 
     /* return -0.089318193; // somewhere at end of 50 e-fold inflation */
 }

@@ -177,21 +177,26 @@ void h5_create_empty_by_path(const char *name) {
     val[0] = SEED;
     h5_write_parameter(file, "seed", val, 1);
 
-    val[0] = TIME_STEP_SKIPS;
+    val[0] = pars.file.skip;
     h5_write_parameter(file, "strides_time", val, 1);
 
     val[0] = RELATIVE_TOLERANCE;
     val[1] = ABSOLUTE_TOLERANCE;
-    h5_write_parameter(file, "strides_time", val, 2);
+    h5_write_parameter(file, "tolerances", val, 2);
 
-    val[0] = GRIDPOINTS_X;
-    val[1] = GRIDPOINTS_Y;
-    val[2] = GRIDPOINTS_Z;
-    h5_write_parameter(file, "gridpoints", val, 3);
+    val[0] = pars.x.N;
+    val[1] = pars.y.N;
+    val[2] = pars.z.N;
+    h5_write_parameter(file, "gridpoints_internal", val, 3);
 
-    val[0] = STRIDE_X;
-    val[1] = STRIDE_Y;
-    val[2] = STRIDE_Z;
+    val[0] = pars.x.outN;
+    val[1] = pars.y.outN;
+    val[2] = pars.z.outN;
+    h5_write_parameter(file, "gridpoints_output", val, 3);
+
+    val[0] = pars.x.stride;
+    val[1] = pars.y.stride;
+    val[2] = pars.z.stride;
     h5_write_parameter(file, "strides_space", val, 3);
 
     // ---------------------------commit hash-----------------------------------

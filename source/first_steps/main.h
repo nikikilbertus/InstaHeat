@@ -19,6 +19,7 @@ during execution
 #define SHOW_RUNTIME_INFO // recommended
 #define SHOW_TIMING_INFO // recommended
 /* #define CHECK_FOR_NAN // not recommended (performance) */
+/* #define CHECK_FOR_CANCELLATION // not recommended (performance) */
 /* #define ENABLE_PROFILER // only recommended for debugging */
 /* #define DEBUG // only recommended for debugging (huge output!) */
 /* #define RUN_TESTS_ONLY // testing only (tests.c) */
@@ -39,6 +40,7 @@ during execution
 
 #define VERSION_CONTROL         VERSION_CONTROL_HG
 
+//-------------which files to write to disk-------------------------------------
 // ------------file handling parameters for writing to disk---------------------
 // the output is bundled in one .h5 file, enter path here
 #define DATAPATH                ("../../../data/compare.h5")
@@ -49,7 +51,7 @@ during execution
  *  too), this parameter determines how many time slices are buffered before
  *  writing them to disk, beware of the memory consumption of large buffers!
  */
-#define WRITE_OUT_BUFFER_NUMBER (20)
+#define WRITE_OUT_BUFFER_NUMBER (10)
 
 /**
  *  there is a (very crude and biased!) estimation of the power spectrum to
@@ -89,7 +91,7 @@ during execution
 
 // ------------------computational domain---------------------------------------
 // spatial
-#define GRIDPOINTS_X            (256)
+#define GRIDPOINTS_X            (128)
 #define GRIDPOINTS_Y            (1)
 #define GRIDPOINTS_Z            (1)
 #define SPATIAL_LOWER_BOUND_X   (-PI)
@@ -103,14 +105,14 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (0.0001)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (4.0e6)
+#define FINAL_TIME              (1.0e6)
 #define MAX_STEPS               (1e12)
-#define MINIMAL_DELTA_T         (1.0e-5)
+#define MINIMAL_DELTA_T         (1.0e-6)
 
 // ----------------parameters used in the potential-----------------------------
 /* #define MASS                    (0.11026) // for 50 e-fold hom inflation */
 #define MASS                    (0.002000003836216) // for compare_2
-/* #define MASS                    (3.0) */
+/* #define MASS                    (6.0) // for compare.dat */
 #define COUPLING                (1.0) // coupling in a phi4 potential
 #define LAMBDA                  (4.721e-5) // "cosmological constant"
 #define A_INITIAL               (4.09376e3) // compare_2 and compare_psi, 6000

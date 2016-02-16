@@ -173,7 +173,7 @@ rhofit = polyfit(ak(pos:posmax),rhormsk(pos:posmax),1);
 plot(a, rhorms, ak(pos:posmax), rhormsk(pos:posmax),a, rhofit(1) * a + rhofit(2));
 xlabel('a')
 ylabel('rhorms')
-legend('linear','non-lin','fit linear')
+legend('non-lin','linear','fit linear')
 shg
 
 return

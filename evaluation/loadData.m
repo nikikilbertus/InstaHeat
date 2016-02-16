@@ -33,7 +33,8 @@ else
     posmax = length(ak);
 end
 
-tscal = t * scaling; % adjust to compare to karstens time
+tunscaled = t;
+t = tunscaled * scaling; % adjust to compare to karstens time
 % t = t + tk(pos); %shifting t
 phiAvg = mean(phi);
 dphi = dphi / scaling;
@@ -72,40 +73,40 @@ if dim == 1
     rhoAvgalgk = mean(rhoalgk);
     rhormsalgk = sqrt( (mean(rhoalgk.^2) - rhoAvgalgk.^2) ./ rhoAvgalgk.^2 );
     
-    dpsi1 = zeros(N, Nt-2);
-    dpsi2 = zeros(N, Nt-2);
-    dphi2 = zeros(N, Nt-2);
-    ddphi2 = zeros(N, Nt-2);
+    dpsifd1 = zeros(N, Nt-2);
+    dpsifd2 = zeros(N, Nt-2);
+    dphifd2 = zeros(N, Nt-2);
+    ddphifd2 = zeros(N, Nt-2);
     for i = 1 : length(t)-2
-        dpsi1(:,i) = (psi(:,i+2) - psi(:,i)) / (t(i+2) - t(i));
+        dpsifd1(:,i) = (psi(:,i+2) - psi(:,i)) / (t(i+2) - t(i));
         
         d1 = t(i+1) - t(i);
         d2 = t(i+2) - t(i+1);
-        dpsi2(:,i) = -d2 / (d1 * (d1 + d2)) * psi(:,i) + ...
+        dpsifd2(:,i) = -d2 / (d1 * (d1 + d2)) * psi(:,i) + ...
             (d2 - d1) / (d2 * d1) * psi(:,i+1) + ...
             d1 / (d2 * (d1 + d2)) * psi(:,i+2);
-        dphi2(:,i) = -d2 / (d1 * (d1 + d2)) * phi(:,i) + ...
+        dphifd2(:,i) = -d2 / (d1 * (d1 + d2)) * phi(:,i) + ...
             (d2 - d1) / (d2 * d1) * phi(:,i+1) + ...
             d1 / (d2 * (d1 + d2)) * phi(:,i+2);
-        
+                
         del = (t(i+1) - t(i+2)) * t(i)^2 + ...
               (t(i+2) - t(i)) * t(i+1)^2 + ... 
               (t(i) - t(i+1)) * t(i+2)^2;
           
-        ddphi2(:,i) = 2 * ( (t(i+1) - t(i+2)) * phi(:,i) + ...
+        ddphifd2(:,i) = 2 * ( (t(i+1) - t(i+2)) * phi(:,i) + ...
             (t(i+2) - t(i)) * phi(:,i+1) + ...
             (t(i) - t(i+1)) * phi(:,i+2) ) / del;
     end
     
     dphipad = zeros(N,Nt);
-    dphipad(:,2:end-1) = dphi2;
+    dphipad(:,2:end-1) = dphifd2;
     
     ddphipad = zeros(N,Nt);
-    ddphipad(:,2:end-1) = ddphi2;
+    ddphipad(:,2:end-1) = ddphifd2;
     
     dpsialg = 0.5 * dphi .* (phi - repmat(phiAvg,N,1)) - psi .* repmat(H,N,1);
     dpsipad = zeros(N,Nt);
-    dpsipad(:,2:end-1) = dpsi2;
+    dpsipad(:,2:end-1) = dpsifd2;
     
     k = [0:N/2-1 0 -N/2+1:-1]';
     xphi = ifft(repmat(1i*k,1,Nt).*fft(phi));

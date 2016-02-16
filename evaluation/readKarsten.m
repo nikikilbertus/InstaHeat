@@ -1,5 +1,5 @@
 dim = 1;
-name = 'compare';
+name = 'compare_psi';
 scaleamp = 1e4;
 
 name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten_compare/' name '.dat'];
@@ -24,6 +24,7 @@ rhormsk = raw(:,7) / sqrt(2 * pi) * scaleamp;
 psi1k = raw(:,8) * scaleamp;
 dpsi1k = raw(:,9) * scaleamp;
 
+figure
 plot(ak, phi0k.*ak.^(3/2))
 xlabel('a');
 ylabel('a^{3/2} * phi_0');

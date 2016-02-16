@@ -14,8 +14,9 @@ void mk_grid();
 void mk_fftw_plans();
 void mk_initial_conditions();
 double phi_init(const double x, const double y, const double z,
-        const double *phases);
-double dphi_init(const double x, const double y, const double z);
+        const double *ph);
+double dphi_init(const double x, const double y, const double z,
+        const double *ph);
 void free_and_destroy_all();
 void destroy_and_cleanup_fftw();
 void free_external();

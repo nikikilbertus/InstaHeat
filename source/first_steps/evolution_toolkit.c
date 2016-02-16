@@ -217,10 +217,10 @@ void mk_gradient_squared_and_laplacian(double *in) {
     if (pars.dim > 1)
     {
         fftw_execute_dft_c2r(p_bw, tmp.yphic, tmp.yphi);
-    }
-    if (pars.dim > 2)
-    {
-        fftw_execute_dft_c2r(p_bw, tmp.zphic, tmp.zphi);
+        if (pars.dim > 2)
+        {
+            fftw_execute_dft_c2r(p_bw, tmp.zphic, tmp.zphi);
+        }
     }
     fftw_execute_dft_c2r(p_bw, tmp.phic, tmp.lap);
     #ifdef SHOW_TIMING_INFO
@@ -235,10 +235,10 @@ void mk_gradient_squared_and_laplacian(double *in) {
         if (pars.dim > 1)
         {
             tmp.grad[i] += tmp.yphi[i] * tmp.yphi[i];
-        }
-        if (pars.dim > 2)
-        {
-            tmp.grad[i] += tmp.zphi[i] * tmp.zphi[i];
+            if (pars.dim > 2)
+            {
+                tmp.grad[i] += tmp.zphi[i] * tmp.zphi[i];
+            }
         }
     }
 }
@@ -328,6 +328,9 @@ void mk_psi_and_dpsi(double *f) {
     double dphiAvg = mean(f + N, N);
     double dphiextra = 0.5 * a2 * dphiAvg * dphiAvg;
 
+    #ifdef CHECK_FOR_CANCELLATION
+    int zerocount = 0;
+    #endif
     double k_sq;
     size_t osx, osy, id;
     #pragma omp parallel for private(k_sq, osx, osy, id)
@@ -365,15 +368,22 @@ void mk_psi_and_dpsi(double *f) {
                     k_sq += pars.y.k2 * j * j;
                 }
                 /* if (fabs(k_sq) > 1.0e-10) */
-                if (-k_sq > dphiextra)
+                if (-k_sq < 1.0e-12 || fabs(k_sq + dphiextra) < 1.0e-12)
+                {
+                    tmp.psic[id] = 0.0;
+                    #ifdef CHECK_FOR_CANCELLATION
+                    if (zerocount++ > 1)
+                    {
+                        RUNTIME_INFO(printf("cancellation in psi at time: "
+                                    "%f\n", pars.t.t));
+                    }
+                    #endif
+                }
+                else
                 {
                     tmp.psic[id] = 0.5 * a2 *
                         (tmp.deltarhoc[id] + 3.0 * hubble * tmp.fc[id]) /
                         ((k_sq + dphiextra) * N);
-                }
-                else
-                {
-                    tmp.psic[id] = 0.0;
                 }
                 tmp.dpsic[id] = 0.5 * tmp.fc[id] / N -
                         hubble * tmp.psic[id];
@@ -499,7 +509,7 @@ void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout) {
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
 
-    double x, y, z;
+    double filter;
     size_t osx, osy;
     #pragma omp parallel for private(osx, osy)
     for (size_t i = 0; i < Mx; ++i)
@@ -510,13 +520,26 @@ void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout) {
             osy = osx + j * Mz;
             for (size_t k = 0; k < Mz; ++k)
             {
-                x = filter_window_function(2.0 *
-                    (i > Nx / 2 ? (int)Nx - (int)i : i) / (double) Nx);
-                y = filter_window_function(2.0 *
-                    (j > Ny / 2 ? (int)Ny - (int)j : j) / (double) Ny);
-                z = filter_window_function(2.0 * k / (double) Nz);
-                inout[osy + k] *= x * y * z / (double) N;
-                dinout[osy + k] *= x * y * z / (double) N;
+                filter = 1.0;
+                if (i != 0 && 2 * i != Nx)
+                {
+                    filter = filter_window_function(2.0 *
+                        (i > Nx / 2 ? (int)Nx - (int)i : i) / (double) Nx);
+                }
+                if (pars.dim > 1)
+                {
+                    if (j != 0 && 2 * j != Ny)
+                    {
+                        filter *= filter_window_function(2.0 *
+                            (j > Ny / 2 ? (int)Ny - (int)j : j) / (double) Ny);
+                    }
+                    if (pars.dim >2 && k != 0 && 2 * k != Nz)
+                    {
+                        filter *= filter_window_function(2.0 * k / (double) Nz);
+                    }
+                }
+                inout[osy + k] *= filter / (double) N;
+                dinout[osy + k] *= filter / (double) N;
             }
         }
     }
