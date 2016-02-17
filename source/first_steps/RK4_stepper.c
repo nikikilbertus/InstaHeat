@@ -64,6 +64,7 @@ void run_rk4() {
             evo_flags.compute_pow_spec = 1;
             mk_rhs(t, field, k1);
             evo_flags.compute_pow_spec = 0;
+            mk_means_and_variances();
             save();
         }
         else
