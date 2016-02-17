@@ -3,6 +3,7 @@
 
 #include <complex.h>
 #include <fftw3.h>
+#include "hdf5.h"
 
 // -------------------mathematical constants and macros-------------------------
 #define PI                      (3.141592653589793238462643383279)
@@ -178,23 +179,23 @@ typedef struct {
 
 // bundle data set identifiers for hdf5 output
 typedef struct {
-    size_t field;
-    size_t mean;
-    size_t variance;
-    size_t dfield;
-    size_t dmean;
-    size_t dvariance;
+    hsize_t field;
+    hsize_t mean;
+    hsize_t var;
+    hsize_t dfield;
+    hsize_t dmean;
+    hsize_t dvar;
 }datasets_t;
 
 //file handling parameters
 typedef struct {
-    size_t id;           // h5 file id of the output file
+    hsize_t id;           // h5 file id of the output file
     datasets_t dset_phi; // h5 data set ids for the scalar field phi
     datasets_t dset_psi; // h5 data set ids for the perturbation psi
     datasets_t dset_rho; // h5 data set ids for the energy density rho
-    size_t dset_powspec; // h5 data set id of the power spectrum
-    size_t dset_time;    // h5 data set id of the time
-    size_t dset_a;       // h5 data set id of the scaling parameter a
+    hsize_t dset_powspec; // h5 data set id of the power spectrum
+    hsize_t dset_time;    // h5 data set id of the time
+    hsize_t dset_a;       // h5 data set id of the scaling parameter a
     size_t index;        // current index within the buffers
     size_t buf_size;     // size of the buffer
     size_t skip;         // how many timesteps to skip in between write out

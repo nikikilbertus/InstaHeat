@@ -21,28 +21,24 @@ void h5_create_empty_by_path(const char *name) {
     hsize_t max[2] = {H5S_UNLIMITED, N};
     hsize_t chunk[2] = {Nt, N};
 
-    // full fields: phi, psi, rho
-    create_dataset(rank, dim, max, chunk, &(pars.file.dset_phi.field), "phi");
-    create_dataset(rank, dim, max, chunk, &(pars.file.dset_phi.dfield), "dphi");
+    // ---------------------------full fields: phi, psi, rho--------------------
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.field), "phi");
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.dfield), "dphi");
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.field), "psi");
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.dfield), "dpsi");
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_rho.field), "rho");
 
-    create_dataset(rank, dim, max, chunk, &(pars.file.dset_psi.field), "psi");
-    create_dataset(rank, dim, max, chunk, &(pars.file.dset_psi.dfield), "dpsi");
-
-    create_dataset(rank, dim, max, chunk, &(pars.file.dset_rho.field), "rho");
-
-    // power spectrum
+    // ---------------------------power spectrum--------------------------------
     dim[1] = bins;
     max[1] = bins;
     chunk[1] = bins;
-
-    create_dataset(rank, dim, max, chunk, &(pars.file.dset_powspec),
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_powspec),
             "power_spectrum");
 
-    // time, a, means, variances
+    // ---------------------------time, a, means, variances---------------------
     rank = 1;
-
-    create_dataset(rank, dim, max, chunk, &(pars.file.dset_time), "time");
-    create_dataset(rank, dim, max, chunk, &(pars.file.dset_a), "a");
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_time), "time");
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_a), "a");
 
     // ---------------------------parameters------------------------------------
     double val[3] = {MASS, 0.0, 0.0};
@@ -126,8 +122,8 @@ void h5_create_empty_by_path(const char *name) {
                 "phi, dphi, psi, dpsi, t, a, rho, powerspec.\n"));
 }
 
-void create_dataset(const hsize_t rank, const hsize_t *dim,
-        const hsize_t *max, const hsize_t *chunk, size_t *dset_id,
+void h5_create_dset(const hsize_t rank, const hsize_t *dim,
+        const hsize_t *max, const hsize_t *chunk, hsize_t *dset,
         const char *name) {
     // create dataspace
     hid_t dspace = H5Screate_simple(rank, dim, max);
@@ -138,9 +134,9 @@ void create_dataset(const hsize_t rank, const hsize_t *dim,
     H5Pset_chunk(plist, rank, chunk);
 
     // create and save dataset
-    hid_t dset = H5Dcreate(pars.file.id, name, H5T_NATIVE_DOUBLE,
+    hid_t dset_id = H5Dcreate(pars.file.id, name, H5T_NATIVE_DOUBLE,
                             dspace, H5P_DEFAULT, plist, H5P_DEFAULT);
-    (*dset_id) = dset;
+    (*dset) = dset_id;
 
     // close property list and dataspace
     H5Pclose(plist);
@@ -164,10 +160,30 @@ void h5_write_parameter(const hid_t file, const char *name, const double *val,
     H5Sclose(dspace_par);
 }
 
-void h5_write_buffers_to_disk(const hsize_t Nt) {
+void h5_get_extent(const hid_t dset, hsize_t *max, hsize_t *cur) {
+    hid_t dspace = H5Dget_space(dset);
+    H5Sget_simple_extent_dims(dspace, cur, max);
+}
+
+void h5_write_buffer(const hsize_t rank, const hsize_t *start,
+        const hsize_t *add, const hsize_t *new_dim, hsize_t dset,
+        const double *buf) {
+    hid_t mem_space = H5Screate_simple(rank, add, NULL);
+    hid_t dspace = H5Dget_space(dset);
+    H5Dset_extent(dset, new_dim);
+    //TODO: necessary to call this again?
+    dspace = H5Dget_space(dset);
+    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start, NULL, add, NULL);
+    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, buf);
+    H5Sclose(mem_space);
+    H5Sclose(dspace);
+}
+
+void h5_write_all_buffers(const hsize_t Nt) {
     hsize_t N = pars.outN;
     hsize_t bins = pars.file.bins_powspec;
     hsize_t rank;
+    file_parameters_t f = pars.file;
     // TODO[performance] maybe use static variable to count dataset size instead
     // of reading it from the file each time
     // static hsize_t counter;
@@ -176,141 +192,35 @@ void h5_write_buffers_to_disk(const hsize_t Nt) {
     h5_time_write -= get_wall_time();
     #endif
 
-    // --------------------------phi--------------------------------------------
     rank = 2;
-    hid_t dset = pars.file.dset_phi.field;
-
-    hsize_t add_dim[2] = {Nt, N};
-    hid_t mem_space = H5Screate_simple(rank, add_dim, NULL);
-    hid_t dspace = H5Dget_space(dset);
+    hsize_t add[2] = {Nt, N};
     hsize_t curr_dim[rank];
     hsize_t max[rank];
-    H5Sget_simple_extent_dims(dspace, curr_dim, max);
-    hsize_t new_dim[2] = {curr_dim[0] + Nt, N};
-    H5Dset_extent(dset, new_dim);
-    dspace = H5Dget_space(dset);
+    hsize_t new_dim[rank];
+    hsize_t start[rank];
 
-    hsize_t start_dim[2] = {curr_dim[0], 0};
-    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dim, NULL,
-                            add_dim, NULL);
-    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT,
-                    phi_buf);
+    h5_get_extent(pars.file.dset_phi.field, max, curr_dim);
+    new_dim[0] = curr_dim[0] + Nt;
+    new_dim[1] = N;
+    start[0] = curr_dim[0];
+    start[1] = 0;
 
-    H5Sclose(mem_space);
-    H5Sclose(dspace);
-
-    // --------------------------dphi-------------------------------------------
-    dset = pars.file.dset_phi.dfield;
-
-    mem_space = H5Screate_simple(rank, add_dim, NULL);
-    dspace = H5Dget_space(dset);
-    H5Dset_extent(dset, new_dim);
-    dspace = H5Dget_space(dset);
-
-    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dim, NULL,
-                            add_dim, NULL);
-    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT,
-                    dphi_buf);
-
-    H5Sclose(mem_space);
-    H5Sclose(dspace);
-
-    // --------------------------psi--------------------------------------------
-    dset = pars.file.dset_psi.field;
-
-    mem_space = H5Screate_simple(rank, add_dim, NULL);
-    dspace = H5Dget_space(dset);
-    H5Dset_extent(dset, new_dim);
-    dspace = H5Dget_space(dset);
-
-    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dim, NULL,
-                            add_dim, NULL);
-    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT,
-                    psi_buf);
-
-    H5Sclose(mem_space);
-    H5Sclose(dspace);
-
-    // --------------------------dpsi-------------------------------------------
-    dset = pars.file.dset_psi.dfield;
-
-    mem_space = H5Screate_simple(rank, add_dim, NULL);
-    dspace = H5Dget_space(dset);
-    H5Dset_extent(dset, new_dim);
-    dspace = H5Dget_space(dset);
-
-    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dim, NULL,
-                            add_dim, NULL);
-    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT,
-                    dpsi_buf);
-
-    H5Sclose(mem_space);
-    H5Sclose(dspace);
-
-    // --------------------------rho--------------------------------------------
-    dset = pars.file.dset_rho.field;
-
-    mem_space = H5Screate_simple(rank, add_dim, NULL);
-    dspace = H5Dget_space(dset);
-    H5Dset_extent(dset, new_dim);
-    dspace = H5Dget_space(dset);
-
-    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dim, NULL,
-                            add_dim, NULL);
-    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT,
-                    rho_buf);
-
-    H5Sclose(mem_space);
-    H5Sclose(dspace);
+    // ---------------------------full fields: phi, psi, rho--------------------
+    h5_write_buffer(rank, start, add, new_dim, f.dset_phi.field, phi_buf);
+    h5_write_buffer(rank, start, add, new_dim, f.dset_phi.dfield, dphi_buf);
+    h5_write_buffer(rank, start, add, new_dim, f.dset_psi.field, psi_buf);
+    h5_write_buffer(rank, start, add, new_dim, f.dset_psi.dfield, dpsi_buf);
+    h5_write_buffer(rank, start, add, new_dim, f.dset_rho.field, rho_buf);
 
     // --------------------------power spectrum---------------------------------
-    dset = pars.file.dset_powspec;
-
-    add_dim[1] = bins;
-    mem_space = H5Screate_simple(rank, add_dim, NULL);
-    dspace = H5Dget_space(dset);
+    add[1] = bins;
     new_dim[1] = bins;
-    H5Dset_extent(dset, new_dim);
-    dspace = H5Dget_space(dset);
+    h5_write_buffer(rank, start, add, new_dim, f.dset_powspec, pow_spec_buf);
 
-    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dim, NULL,
-                            add_dim, NULL);
-    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT,
-                    pow_spec_buf);
-
-    H5Sclose(mem_space);
-    H5Sclose(dspace);
-
-    // --------------------------time-------------------------------------------
+    // ---------------------------time, a, means, variances---------------------
     rank = 1;
-    dset = pars.file.dset_time;
-
-    mem_space = H5Screate_simple(rank, add_dim, NULL);
-    dspace = H5Dget_space(dset);
-    H5Dset_extent(dset, new_dim);
-    dspace = H5Dget_space(dset);
-
-    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dim, NULL,
-                            add_dim, NULL);
-    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, time_buf);
-
-    H5Sclose(mem_space);
-    H5Sclose(dspace);
-
-    // --------------------------a----------------------------------------------
-    dset = pars.file.dset_a;
-
-    mem_space = H5Screate_simple(rank, add_dim, NULL);
-    dspace = H5Dget_space(dset);
-    H5Dset_extent(dset, new_dim);
-    dspace = H5Dget_space(dset);
-
-    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start_dim, NULL,
-                            add_dim, NULL);
-    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, f_a_buf);
-
-    H5Sclose(mem_space);
-    H5Sclose(dspace);
+    h5_write_buffer(rank, start, add, new_dim, f.dset_time, time_buf);
+    h5_write_buffer(rank, start, add, new_dim, f.dset_a, f_a_buf);
 
     #ifdef SHOW_TIMING_INFO
     h5_time_write += get_wall_time();
@@ -321,7 +231,7 @@ void h5_close() {
     hid_t file = pars.file.id;
     if (pars.file.index != 0)
     {
-        h5_write_buffers_to_disk(pars.file.index);
+        h5_write_all_buffers(pars.file.index);
     }
     H5Fflush(file, H5F_SCOPE_GLOBAL);
     hid_t obj_ids[30];
@@ -404,7 +314,7 @@ void save() {
 
     if (index == Nt - 1)
     {
-        h5_write_buffers_to_disk(Nt);
+        h5_write_all_buffers(Nt);
         pars.file.index = 0;
     }
     else
