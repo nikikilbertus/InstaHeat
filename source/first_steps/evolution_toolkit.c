@@ -21,7 +21,7 @@ void mk_rhs(const double t, double *f, double *result) {
 
     mk_gradient_squared_and_laplacian(f);
     mk_rho(f);
-    double hubble = sqrt(rho_avg / 3.0);
+    double hubble = sqrt(rho_mean / 3.0);
 
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
@@ -88,29 +88,29 @@ void mk_rhs(const double t, double *f, double *result) {
 void mk_rho(double *f) {
     size_t N = pars.N;
     double a = f[2 * N];
-    rho_avg = 0.0;
+    rho_mean = 0.0;
 
     double df;
-    #pragma omp parallel for default(shared) private(df) reduction(+: rho_avg)
+    #pragma omp parallel for default(shared) private(df) reduction(+: rho_mean)
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
         rho[i] = (df * df + tmp.grad[i] / (a * a)) / 2.0 + potential(f[i]);
-        rho_avg += rho[i];
+        rho_mean += rho[i];
     }
 
     // Karstens implementation of rho
-    /* double phiAvg = mean(f, N); */
-    /* double dphiAvg = mean(f + N, N); */
-    /* #pragma omp parallel for private(df)  reduction(+: rho_avg) */
+    /* double phimean = mean(f, N); */
+    /* double dphimean = mean(f + N, N); */
+    /* #pragma omp parallel for private(df)  reduction(+: rho_mean) */
     /* for (size_t i = 0; i < N; ++i) */
     /* { */
     /*     df = f[N + i]; */
-    /*     rho[i] = ( dphiAvg  * ( dphiAvg + 2.0 * (df - dphiAvg)) + */
-    /*         MASS * MASS * phiAvg  * ( phiAvg + 2.0 * (f[i] - phiAvg))) / 2.0; */
-    /*     rho_avg += rho[i]; */
+    /*     rho[i] = ( dphimean  * ( dphimean + 2.0 * (df - dphimean)) + */
+    /*         MASS * MASS * phimean  * ( phimean + 2.0 * (f[i] - phimean))) / 2.0; */
+    /*     rho_mean += rho[i]; */
     /* } */
-    rho_avg /= N;
+    rho_mean /= N;
 }
 
 // update rho now that psi is known
@@ -303,7 +303,7 @@ void mk_psi_and_dpsi(double *f) {
     size_t Mz = pars.z.M;
     double a = f[2 * N];
     double a2 = a * a;
-    double hubble = sqrt(rho_avg / 3.0);
+    double hubble = sqrt(rho_mean / 3.0);
 
     #ifdef SHOW_TIMING_INFO
     poisson_time -= get_wall_time();
@@ -313,7 +313,7 @@ void mk_psi_and_dpsi(double *f) {
     for (size_t i = 0; i < N; ++i)
     {
         tmp.f[i] = f[N + i] * tmp.xphi[i];
-        tmp.deltarho[i] = rho[i] - rho_avg;
+        tmp.deltarho[i] = rho[i] - rho_mean;
     }
 
     #ifdef SHOW_TIMING_INFO
@@ -325,8 +325,8 @@ void mk_psi_and_dpsi(double *f) {
     fftw_time_exe += get_wall_time();
     #endif
 
-    double dphiAvg = mean(f + N, N);
-    double dphiextra = 0.5 * a2 * dphiAvg * dphiAvg;
+    double dphimean = mean(f + N, N);
+    double dphiextra = 0.5 * a2 * dphimean * dphimean;
 
     #ifdef CHECK_FOR_CANCELLATION
     int zerocount = 0;

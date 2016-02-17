@@ -259,16 +259,38 @@ extern double *time_buf;
 
 // the scalar field plus scaling parameter a we evolve, the temporal derivatives
 // and the buffer for the scalar field
-extern double *field, *dfield;
-extern double *field_new, *dfield_new;
+extern double *field;
+extern double *dfield;
+extern double *field_new;
+extern double *dfield_new;
 extern double *phi_buf;
 extern double *dphi_buf;
-extern double phi_avg;
+
+extern double phi_mean;
+extern double phi_var;
+extern double *phi_mean_buf;
+extern double *phi_var_buf;
+
+extern double dphi_mean;
+extern double dphi_var;
+extern double *dphi_mean_buf;
+extern double *dphi_var_buf;
 
 // the scalar perturbation psi
-extern double *psi, *dpsi;
+extern double *psi;
+extern double *dpsi;
 extern double *psi_buf;
 extern double *dpsi_buf;
+
+extern double psi_mean;
+extern double psi_var;
+extern double *psi_mean_buf;
+extern double *psi_var_buf;
+
+extern double dpsi_mean;
+extern double dpsi_var;
+extern double *dpsi_mean_buf;
+extern double *dpsi_var_buf;
 
 // buffer for scaling parameter a
 extern double *f_a_buf;
@@ -276,7 +298,10 @@ extern double *f_a_buf;
 // energy density rho  = T^{00}_{\phi} and the buffer
 extern double *rho;
 extern double *rho_buf;
-extern double rho_avg;
+extern double rho_mean;
+extern double rho_var;
+extern double *rho_mean_buf;
+extern double *rho_var_buf;
 
 // power spectrum and the buffer
 extern double *pow_spec;

@@ -133,18 +133,28 @@ void allocate_external() {
     dfield       = fftw_malloc(Ntot * sizeof *dfield);
     dfield_new   = fftw_malloc(Ntot * sizeof *dfield_new);
     // this buffer only holds the scalar field (not the deriv. or a)
-    phi_buf      = calloc(buf_size * outN, sizeof *phi_buf);
-    dphi_buf     = calloc(buf_size * outN, sizeof *dphi_buf);
-    psi          = fftw_malloc(N * sizeof *psi);
-    dpsi         = fftw_malloc(N * sizeof *dpsi);
-    psi_buf      = fftw_malloc(buf_size * outN * sizeof *psi_buf);
-    dpsi_buf     = fftw_malloc(buf_size * outN * sizeof *dpsi_buf);
-    time_buf     = calloc(buf_size, sizeof *time_buf);
-    f_a_buf      = calloc(buf_size, sizeof *f_a_buf);
-    rho          = fftw_malloc(N * sizeof *rho);
-    rho_buf      = fftw_malloc(buf_size * outN * sizeof *rho_buf);
-    pow_spec     = calloc(bins, sizeof *pow_spec);
-    pow_spec_buf = calloc(buf_size * bins, sizeof *pow_spec_buf);
+    phi_buf       = calloc(buf_size * outN, sizeof *phi_buf);
+    dphi_buf      = calloc(buf_size * outN, sizeof *dphi_buf);
+    phi_mean_buf  = calloc(buf_size, sizeof *phi_mean_buf);
+    phi_var_buf   = calloc(buf_size, sizeof *phi_var_buf);
+    dphi_mean_buf = calloc(buf_size, sizeof *dphi_mean_buf);
+    dphi_var_buf  = calloc(buf_size, sizeof *dphi_var_buf);
+    psi           = fftw_malloc(N * sizeof *psi);
+    dpsi          = fftw_malloc(N * sizeof *dpsi);
+    psi_buf       = fftw_malloc(buf_size * outN * sizeof *psi_buf);
+    dpsi_buf      = fftw_malloc(buf_size * outN * sizeof *dpsi_buf);
+    psi_mean_buf  = calloc(buf_size, sizeof *psi_mean_buf);
+    psi_var_buf   = calloc(buf_size, sizeof *psi_var_buf);
+    dpsi_mean_buf = calloc(buf_size, sizeof *dpsi_mean_buf);
+    dpsi_var_buf  = calloc(buf_size, sizeof *dpsi_var_buf);
+    time_buf      = calloc(buf_size, sizeof *time_buf);
+    f_a_buf       = calloc(buf_size, sizeof *f_a_buf);
+    rho           = fftw_malloc(N * sizeof *rho);
+    rho_buf       = fftw_malloc(buf_size * outN * sizeof *rho_buf);
+    rho_mean_buf  = calloc(buf_size, sizeof *rho_mean_buf);
+    rho_var_buf   = calloc(buf_size, sizeof *rho_var_buf);
+    pow_spec      = calloc(bins, sizeof *pow_spec);
+    pow_spec_buf  = calloc(buf_size * bins, sizeof *pow_spec_buf);
 
     // default arrays to save coefficients of real to complex transforms
     // see fftw3 documentation and Mxyz for this
@@ -173,7 +183,9 @@ void allocate_external() {
         rho && rho_buf && pow_spec && pow_spec_buf && tmp.phic  && tmp.xphic &&
         tmp.yphic && tmp.zphic && tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad
         && tmp.lap && tmp.psic  && tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f
-        && tmp.deltarho))
+        && tmp.deltarho && phi_mean_buf && phi_var_buf && dphi_mean_buf &&
+        dphi_var_buf && psi_mean_buf && psi_var_buf && dpsi_mean_buf &&
+        dpsi_var_buf && rho_mean_buf && rho_var_buf))
     {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
@@ -485,13 +497,25 @@ void free_external() {
     fftw_free(dfield);
     fftw_free(dfield_new);
     free(phi_buf);
+    free(dphi_buf);
+    free(phi_mean_buf);
+    free(phi_var_buf);
+    free(dphi_mean_buf);
+    free(dphi_var_buf);
     free(psi);
     free(dpsi);
     free(psi_buf);
+    free(dpsi_buf);
+    free(psi_mean_buf);
+    free(psi_var_buf);
+    free(dpsi_mean_buf);
+    free(dpsi_var_buf);
     free(time_buf);
     free(f_a_buf);
     free(rho);
     free(rho_buf);
+    free(rho_mean_buf);
+    free(rho_var_buf);
     free(pow_spec);
     free(pow_spec_buf);
     fftw_free(tmp.phic);
