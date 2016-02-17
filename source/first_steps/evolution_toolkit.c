@@ -313,6 +313,7 @@ void mk_psi_and_dpsi(double *f) {
     fftw_time_exe += get_wall_time();
     #endif
 
+    //TODO: if dphi_mean is not computed here anymore, include in mk_means...
     dphi_mean = mean(f + N, N);
     double dphiextra = 0.5 * a2 * dphi_mean * dphi_mean;
 
@@ -551,15 +552,52 @@ inline double filter_window_function(const double x) {
 // recompute current power spectrum and rho and save current timeslice to buffer
 void prepare_and_save_timeslice() {
     evo_flags.compute_pow_spec = 1;
+    mk_gradient_squared_and_laplacian(field);
+    evo_flags.compute_pow_spec = 0;
     mk_rho(field);
     mk_psi_and_dpsi(field);
-    evo_flags.compute_pow_spec = 0;
+    mk_means_and_variances();
     save();
+}
+
+void mk_means_and_variances() {
+    size_t N = pars.N;
+
+    #if defined(OUTPUT_PHI_MEAN) || defined(OUTPUT_PHI_VARIANCE)
+    phi_mean = mean(field, N);
+    #endif
+    #ifdef OUTPUT_PHI_VARIANCE
+    phi_var  = variance(phi_mean, field, N);
+    #endif
+
+    // dphi_mean is always computed
+    // TODO: change that if dphi_mean is not computed in mk_psi_and_dpsi anymore
+    #ifdef OUTPUT_DPHI_VARIANCE
+    dphi_var  = variance(dphi_mean, field + N, N);
+    #endif
+
+    #if defined(OUTPUT_PSI_MEAN) || defined(OUTPUT_PSI_VARIANCE)
+    psi_mean = mean(psi, N);
+    #endif
+    #ifdef OUTPUT_PSI_VARIANCE
+    psi_var  = variance(psi_mean, psi, N);
+    #endif
+
+    #if defined(OUTPUT_DPSI_MEAN) || defined(OUTPUT_DPSI_VARIANCE)
+    dpsi_mean = mean(dpsi, N);
+    #endif
+    #ifdef OUTPUT_DPSI_VARIANCE
+    dpsi_var  = variance(dpsi_mean, dpsi, N);
+    #endif
+
+    #ifdef OUTPUT_RHO_VARIANCE
+    rho_var  = variance(rho_mean, rho, N);
+    #endif
 }
 
 inline double mean(const double *f, size_t N) {
     double mean = 0.0;
-    #pragma omp parallel for reduction(+: res)
+    #pragma omp parallel for reduction(+: mean)
     for (size_t i = 0; i < N; ++i)
     {
         mean += f[i];
@@ -567,7 +605,7 @@ inline double mean(const double *f, size_t N) {
     return mean / (double)N;
 }
 
-inline double variance_given_mean(double mean, const double *f, size_t N) {
+inline double variance(double mean, const double *f, size_t N) {
     double sum1 = 0.0;
     double sum2 = 0.0;
     double tmp;

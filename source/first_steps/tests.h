@@ -5,7 +5,6 @@
 
 void run_all_tests();
 void test_mk_gradient_squared_and_laplacian();
-void test_full_multigrid();
 double test_func_gradsq(const double x, const double y, const double z);
 double test_func_lap(const double x, const double y, const double z);
 double test_func(const double x, const double y, const double z);

@@ -61,6 +61,7 @@ void run_dopri853() {
     evo_flags.compute_pow_spec = 1;
     mk_rhs(dp.t, field, dfield);
     evo_flags.compute_pow_spec = 0;
+    mk_means_and_variances();
     save();
 
     #ifdef SHOW_TIMING_INFO
@@ -92,6 +93,7 @@ void run_dopri853() {
 
         if ((dp.n_stp + 1) % pars.file.skip == 0)
         {
+            mk_means_and_variances();
             save();
         }
         if (dp.t >= dp.tf)

@@ -26,8 +26,9 @@ void apply_filter_real(double *inout);
 void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout);
 extern double filter_window_function(const double x);
 void prepare_and_save_timeslice();
+void mk_means_and_variances();
 extern double mean(const double *f, size_t N);
-inline double variance_given_mean(double mean, const double *f, size_t N);
+extern double variance(double mean, const double *f, size_t N);
 void contains_nan(double *f, size_t N);
 void contains_nanc(complex *f, size_t N);
 
