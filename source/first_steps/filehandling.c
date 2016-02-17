@@ -6,33 +6,11 @@
 #include "filehandling.h"
 #include "main.h"
 
-void create_dataset(const hsize_t rank, const hsize_t *dim,
-        const hsize_t *max_dim, const hsize_t *chunk, size_t *dset_id,
-        const char *name) {
-    // create dataspace
-    hid_t dspace = H5Screate_simple(rank, dim, max_dim);
-
-    // create property list
-    hid_t plist = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_layout(plist, H5D_CHUNKED);
-    H5Pset_chunk(plist, rank, chunk);
-
-    // create dataset
-    hid_t dset = H5Dcreate(pars.file.id, name, H5T_NATIVE_DOUBLE,
-                            dspace, H5P_DEFAULT, plist, H5P_DEFAULT);
-    (*dset_id) = dset;
-
-    // close property list and dataspace
-    H5Pclose(plist);
-    H5Sclose(dspace);
-}
-
 void h5_create_empty_by_path(const char *name) {
     hsize_t rank = 2;
     hsize_t N = pars.outN;
     hsize_t Nt = pars.file.buf_size;
     hsize_t bins = pars.file.bins_powspec;
-    file_parameters_t f = pars.file;
 
     // create file
     hid_t file = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -40,158 +18,31 @@ void h5_create_empty_by_path(const char *name) {
 
     // initial setup of dimensions
     hsize_t dim[2] = {0, N};
-    hsize_t max_dim[2] = {H5S_UNLIMITED, N};
+    hsize_t max[2] = {H5S_UNLIMITED, N};
     hsize_t chunk[2] = {Nt, N};
 
-    // --------------------------phi--------------------------------------------
-    /* create_dataset(rank, dim, max_dim, chunk, &(pars.file.dset_phi.field), "phi"); */
+    // full fields: phi, psi, rho
+    create_dataset(rank, dim, max, chunk, &(pars.file.dset_phi.field), "phi");
+    create_dataset(rank, dim, max, chunk, &(pars.file.dset_phi.dfield), "dphi");
 
-    // create dataspace for phi
-    hid_t dspace_phi = H5Screate_simple(rank, dim, max_dim);
+    create_dataset(rank, dim, max, chunk, &(pars.file.dset_psi.field), "psi");
+    create_dataset(rank, dim, max, chunk, &(pars.file.dset_psi.dfield), "dpsi");
 
-    // create property list for phi
-    hid_t plist_phi = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_layout(plist_phi, H5D_CHUNKED);
-    H5Pset_chunk(plist_phi, rank, chunk);
+    create_dataset(rank, dim, max, chunk, &(pars.file.dset_rho.field), "rho");
 
-    // create dataset for phi
-    hid_t dset_phi = H5Dcreate(file, "phi", H5T_NATIVE_DOUBLE,
-                            dspace_phi, H5P_DEFAULT, plist_phi, H5P_DEFAULT);
-    pars.file.dset_phi.field = dset_phi;
-
-    // close property list and dataspace
-    H5Pclose(plist_phi);
-    H5Sclose(dspace_phi);
-
-    // -------------------------dphi--------------------------------------------
-    // create dataspace for dphi
-    hid_t dspace_dphi = H5Screate_simple(rank, dim, max_dim);
-
-    // create property list for dphi
-    hid_t plist_dphi = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_layout(plist_dphi, H5D_CHUNKED);
-    H5Pset_chunk(plist_dphi, rank, chunk);
-
-    // create dataset for dphi
-    hid_t dset_dphi = H5Dcreate(file, "dphi", H5T_NATIVE_DOUBLE,
-                            dspace_dphi, H5P_DEFAULT, plist_dphi, H5P_DEFAULT);
-    pars.file.dset_phi.dfield = dset_dphi;
-
-    // close property list and dataspace
-    H5Pclose(plist_dphi);
-    H5Sclose(dspace_dphi);
-
-    // --------------------------psi--------------------------------------------
-    // create dataspace for psi
-    hid_t dspace_psi = H5Screate_simple(rank, dim, max_dim);
-
-    // create property list for psi
-    hid_t plist_psi = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_layout(plist_psi, H5D_CHUNKED);
-    H5Pset_chunk(plist_psi, rank, chunk);
-
-    // create dataset for psi
-    hid_t dset_psi = H5Dcreate(file, "psi", H5T_NATIVE_DOUBLE,
-                            dspace_psi, H5P_DEFAULT, plist_psi, H5P_DEFAULT);
-    pars.file.dset_psi.field = dset_psi;
-
-    // close property list and dataspace
-    H5Pclose(plist_psi);
-    H5Sclose(dspace_psi);
-
-    // -------------------------dpsi--------------------------------------------
-    // create dataspace for dpsi
-    hid_t dspace_dpsi = H5Screate_simple(rank, dim, max_dim);
-
-    // create property list for dpsi
-    hid_t plist_dpsi = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_layout(plist_dpsi, H5D_CHUNKED);
-    H5Pset_chunk(plist_dpsi, rank, chunk);
-
-    // create dataset for dpsi
-    hid_t dset_dpsi = H5Dcreate(file, "dpsi", H5T_NATIVE_DOUBLE,
-                            dspace_dpsi, H5P_DEFAULT, plist_dpsi, H5P_DEFAULT);
-    pars.file.dset_psi.dfield = dset_dpsi;
-
-    // close property list and dataspace
-    H5Pclose(plist_dpsi);
-    H5Sclose(dspace_dpsi);
-
-    // --------------------------rho--------------------------------------------
-    // create dataspace for rho
-    hid_t dspace_rho = H5Screate_simple(rank, dim, max_dim);
-
-    // create property list for rho
-    hid_t plist_rho = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_layout(plist_rho, H5D_CHUNKED);
-    H5Pset_chunk(plist_rho, rank, chunk);
-
-    // create dataset for rho
-    hid_t dset_rho = H5Dcreate(file, "rho", H5T_NATIVE_DOUBLE,
-                            dspace_rho, H5P_DEFAULT, plist_rho, H5P_DEFAULT);
-    pars.file.dset_rho.field = dset_rho;
-
-    // close property list and dataspace
-    H5Pclose(plist_rho);
-    H5Sclose(dspace_rho);
-
-    // --------------------------power spectrum---------------------------------
-    // create dataspace for the power_spectrum
+    // power spectrum
     dim[1] = bins;
-    max_dim[1] = bins;
-    hid_t dspace_powspec = H5Screate_simple(rank, dim, max_dim);
-
-    // create property list for the power_spectrum
-    hid_t plist_powspec = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_layout(plist_powspec, H5D_CHUNKED);
+    max[1] = bins;
     chunk[1] = bins;
-    H5Pset_chunk(plist_powspec, rank, chunk);
 
-    // create dataset for the power_spectrum
-    hid_t dset_powspec = H5Dcreate(file, "power_spectrum", H5T_NATIVE_DOUBLE,
-                    dspace_powspec, H5P_DEFAULT, plist_powspec, H5P_DEFAULT);
-    pars.file.dset_powspec = dset_powspec;
+    create_dataset(rank, dim, max, chunk, &(pars.file.dset_powspec),
+            "power_spectrum");
 
-    // close property list and dataspace
-    H5Pclose(plist_powspec);
-    H5Sclose(dspace_powspec);
-
-    // --------------------------time-------------------------------------------
-    // create dataspace for the time
+    // time, a, means, variances
     rank = 1;
-    hid_t dspace_time = H5Screate_simple(rank, dim, max_dim);
 
-    // create property list for the time
-    hid_t plist_time = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_layout(plist_time, H5D_CHUNKED);
-    H5Pset_chunk(plist_time, rank, chunk);
-
-    // create dataset for the time
-    hid_t dset_time = H5Dcreate(file, "time", H5T_NATIVE_DOUBLE,
-                            dspace_time, H5P_DEFAULT, plist_time, H5P_DEFAULT);
-    pars.file.dset_time = dset_time;
-
-    // close property list and dspace_time
-    H5Pclose(plist_time);
-    H5Sclose(dspace_time);
-
-    // ---------------------------a---------------------------------------------
-    // create dataspace for the a
-    hid_t dspace_a = H5Screate_simple(rank, dim, max_dim);
-
-    // create property list for the a
-    hid_t plist_a = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_layout(plist_a, H5D_CHUNKED);
-    H5Pset_chunk(plist_a, rank, chunk);
-
-    // create dataset for the a
-    hid_t dset_a = H5Dcreate(file, "a", H5T_NATIVE_DOUBLE,
-                            dspace_a, H5P_DEFAULT, plist_a, H5P_DEFAULT);
-    pars.file.dset_a = dset_a;
-
-    // close property list and dspace_a
-    H5Pclose(plist_a);
-    H5Sclose(dspace_a);
+    create_dataset(rank, dim, max, chunk, &(pars.file.dset_time), "time");
+    create_dataset(rank, dim, max, chunk, &(pars.file.dset_a), "a");
 
     // ---------------------------parameters------------------------------------
     double val[3] = {MASS, 0.0, 0.0};
@@ -275,13 +126,34 @@ void h5_create_empty_by_path(const char *name) {
                 "phi, dphi, psi, dpsi, t, a, rho, powerspec.\n"));
 }
 
+void create_dataset(const hsize_t rank, const hsize_t *dim,
+        const hsize_t *max, const hsize_t *chunk, size_t *dset_id,
+        const char *name) {
+    // create dataspace
+    hid_t dspace = H5Screate_simple(rank, dim, max);
+
+    // create property list
+    hid_t plist = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_layout(plist, H5D_CHUNKED);
+    H5Pset_chunk(plist, rank, chunk);
+
+    // create and save dataset
+    hid_t dset = H5Dcreate(pars.file.id, name, H5T_NATIVE_DOUBLE,
+                            dspace, H5P_DEFAULT, plist, H5P_DEFAULT);
+    (*dset_id) = dset;
+
+    // close property list and dataspace
+    H5Pclose(plist);
+    H5Sclose(dspace);
+}
+
 void h5_write_parameter(const hid_t file, const char *name, const double *val,
         size_t N) {
     hsize_t rank = 1;
     hsize_t dim[1] = {N};
-    hsize_t max_dim[1] = {N};
+    hsize_t max[1] = {N};
 
-    hid_t dspace_par = H5Screate_simple(rank, dim, max_dim);
+    hid_t dspace_par = H5Screate_simple(rank, dim, max);
     hid_t plist_par = H5Pcreate(H5P_DATASET_CREATE);
     H5Pset_layout(plist_par, H5D_COMPACT);
     hid_t dset_par = H5Dcreate(file, name, H5T_NATIVE_DOUBLE,
@@ -312,8 +184,8 @@ void h5_write_buffers_to_disk(const hsize_t Nt) {
     hid_t mem_space = H5Screate_simple(rank, add_dim, NULL);
     hid_t dspace = H5Dget_space(dset);
     hsize_t curr_dim[rank];
-    hsize_t max_dim[rank];
-    H5Sget_simple_extent_dims(dspace, curr_dim, max_dim);
+    hsize_t max[rank];
+    H5Sget_simple_extent_dims(dspace, curr_dim, max);
     hsize_t new_dim[2] = {curr_dim[0] + Nt, N};
     H5Dset_extent(dset, new_dim);
     dspace = H5Dget_space(dset);
@@ -452,7 +324,7 @@ void h5_close() {
         h5_write_buffers_to_disk(pars.file.index);
     }
     H5Fflush(file, H5F_SCOPE_GLOBAL);
-    hid_t obj_ids[20];
+    hid_t obj_ids[30];
     hsize_t obj_count = H5Fget_obj_ids(file, H5F_OBJ_DATASET, -1, obj_ids);
     for (size_t i = 0; i < obj_count; ++i)
     {
