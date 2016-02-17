@@ -10,7 +10,7 @@ void h5_create_dset(const hsize_t rank, const hsize_t *dim,
 void h5_write_parameter(const hid_t file, const char *name, const double *val,
         size_t N);
 void h5_write_all_buffers(const hsize_t Nt);
-void h5_get_extent(const hid_t dset, hsize_t *max, hsize_t *cur);
+void h5_get_extent(hsize_t *max, hsize_t *cur);
 void h5_close();
 void save();
 

@@ -22,18 +22,30 @@ void h5_create_empty_by_path(const char *name) {
     hsize_t chunk[2] = {Nt, N};
 
     // ---------------------------full fields: phi, psi, rho--------------------
+    #ifdef OUTPUT_PHI
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.field), "phi");
+    #endif
+    #ifdef OUTPUT_DPHI
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.dfield), "dphi");
+    #endif
+    #ifdef OUTPUT_PSI
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.field), "psi");
+    #endif
+    #ifdef OUTPUT_DPSI
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.dfield), "dpsi");
+    #endif
+    #ifdef OUTPUT_RHO
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_rho.field), "rho");
+    #endif
 
     // ---------------------------power spectrum--------------------------------
+    #ifdef OUTPUT_POWER_SPECTRUM
     dim[1] = bins;
     max[1] = bins;
     chunk[1] = bins;
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_powspec),
             "power_spectrum");
+    #endif
 
     // ---------------------------time, a, means, variances---------------------
     rank = 1;
@@ -160,8 +172,8 @@ void h5_write_parameter(const hid_t file, const char *name, const double *val,
     H5Sclose(dspace_par);
 }
 
-void h5_get_extent(const hid_t dset, hsize_t *max, hsize_t *cur) {
-    hid_t dspace = H5Dget_space(dset);
+void h5_get_extent(hsize_t *max, hsize_t *cur) {
+    hid_t dspace = H5Dget_space(pars.file.dset_time);
     H5Sget_simple_extent_dims(dspace, cur, max);
 }
 
@@ -193,29 +205,38 @@ void h5_write_all_buffers(const hsize_t Nt) {
     #endif
 
     rank = 2;
-    hsize_t add[2] = {Nt, N};
-    hsize_t curr_dim[rank];
-    hsize_t max[rank];
-    hsize_t new_dim[rank];
-    hsize_t start[rank];
+    hsize_t curr_dim[1];
+    hsize_t max[2];
+    h5_get_extent(max, curr_dim);
 
-    h5_get_extent(pars.file.dset_phi.field, max, curr_dim);
-    new_dim[0] = curr_dim[0] + Nt;
-    new_dim[1] = N;
-    start[0] = curr_dim[0];
-    start[1] = 0;
+    hsize_t add[2] = {Nt, N};
+    hsize_t new_dim[2] = {curr_dim[0] + Nt, N};
+    hsize_t start[2] = {curr_dim[0], 0};
+    max[1] = N;
 
     // ---------------------------full fields: phi, psi, rho--------------------
+    #ifdef OUTPUT_PHI
     h5_write_buffer(rank, start, add, new_dim, f.dset_phi.field, phi_buf);
+    #endif
+    #ifdef OUTPUT_DPHI
     h5_write_buffer(rank, start, add, new_dim, f.dset_phi.dfield, dphi_buf);
+    #endif
+    #ifdef OUTPUT_PSI
     h5_write_buffer(rank, start, add, new_dim, f.dset_psi.field, psi_buf);
+    #endif
+    #ifdef OUTPUT_DPSI
     h5_write_buffer(rank, start, add, new_dim, f.dset_psi.dfield, dpsi_buf);
+    #endif
+    #ifdef OUTPUT_RHO
     h5_write_buffer(rank, start, add, new_dim, f.dset_rho.field, rho_buf);
+    #endif
 
     // --------------------------power spectrum---------------------------------
+    #ifdef OUTPUT_POWER_SPECTRUM
     add[1] = bins;
     new_dim[1] = bins;
     h5_write_buffer(rank, start, add, new_dim, f.dset_powspec, pow_spec_buf);
+    #endif
 
     // ---------------------------time, a, means, variances---------------------
     rank = 1;
@@ -255,6 +276,17 @@ void save() {
     hsize_t outN  = pars.outN;
     hsize_t bins  = pars.file.bins_powspec;
 
+    time_buf[index] = pars.t.t;
+    f_a_buf[index] = field[2 * N];
+
+    #ifdef CHECK_FOR_NAN
+    if (isnan(pars.t.t) || isnan(field[2 * N]))
+    {
+        fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
+            exit(EXIT_FAILURE);
+    }
+    #endif
+
     hsize_t os = index * outN;
     size_t osx, osy, id;
     size_t osxb, osyb, idb;
@@ -287,6 +319,7 @@ void save() {
         }
     }
 
+    #ifdef OUTPUT_POWER_SPECTRUM
     os = index * bins;
     #pragma omp parallel for
     for (size_t i = 0; i < bins; ++i)
@@ -299,16 +332,6 @@ void save() {
             exit(EXIT_FAILURE);
         }
         #endif
-    }
-
-    time_buf[index] = pars.t.t;
-    f_a_buf[index] = field[2 * N];
-
-    #ifdef CHECK_FOR_NAN
-    if (isnan(pars.t.t) || isnan(field[2 * N]))
-    {
-        fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
-            exit(EXIT_FAILURE);
     }
     #endif
 
