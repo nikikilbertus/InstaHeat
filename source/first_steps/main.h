@@ -61,7 +61,6 @@ during execution
 #define OUTPUT_DPSI_VARIANCE
 #define OUTPUT_RHO_VARIANCE
 
-
 // ------------file handling parameters for writing to disk---------------------
 // the output is bundled in one .h5 file, enter path here
 #define DATAPATH                ("../../../data/compare.h5")

@@ -126,35 +126,65 @@ void allocate_external() {
     size_t bins = pars.file.bins_powspec;
     size_t outN = pars.outN;
 
-    grid         = malloc((Nx + Ny + Nz) * sizeof *grid);
-    // note that the field contains the scalar field, its time deriv. and a
-    field        = fftw_malloc(Ntot * sizeof *field);
-    field_new    = fftw_malloc(Ntot * sizeof *field_new);
-    dfield       = fftw_malloc(Ntot * sizeof *dfield);
-    dfield_new   = fftw_malloc(Ntot * sizeof *dfield_new);
-    // this buffer only holds the scalar field (not the deriv. or a)
+    grid       = malloc((Nx + Ny + Nz) * sizeof *grid);
+    field      = fftw_malloc(Ntot * sizeof *field);
+    field_new  = fftw_malloc(Ntot * sizeof *field_new);
+    dfield     = fftw_malloc(Ntot * sizeof *dfield);
+    dfield_new = fftw_malloc(Ntot * sizeof *dfield_new);
+    psi        = fftw_malloc(N * sizeof *psi);
+    dpsi       = fftw_malloc(N * sizeof *dpsi);
+    time_buf   = calloc(buf_size, sizeof *time_buf);
+    f_a_buf    = calloc(buf_size, sizeof *f_a_buf);
+    rho        = fftw_malloc(N * sizeof *rho);
+    pow_spec   = calloc(bins, sizeof *pow_spec);
+    #ifdef OUTPUT_PHI
     phi_buf       = calloc(buf_size * outN, sizeof *phi_buf);
+    #endif
+    #ifdef OUTPUT_DPHI
     dphi_buf      = calloc(buf_size * outN, sizeof *dphi_buf);
+    #endif
+    #ifdef OUTPUT_PHI_MEAN
     phi_mean_buf  = calloc(buf_size, sizeof *phi_mean_buf);
+    #endif
+    #ifdef OUTPUT_PHI_VARIANCE
     phi_var_buf   = calloc(buf_size, sizeof *phi_var_buf);
+    #endif
+    #ifdef OUTPUT_DPHI_MEAN
     dphi_mean_buf = calloc(buf_size, sizeof *dphi_mean_buf);
+    #endif
+    #ifdef OUTPUT_DPHI_VARIANCE
     dphi_var_buf  = calloc(buf_size, sizeof *dphi_var_buf);
-    psi           = fftw_malloc(N * sizeof *psi);
-    dpsi          = fftw_malloc(N * sizeof *dpsi);
+    #endif
+    #ifdef OUTPUT_PSI
     psi_buf       = fftw_malloc(buf_size * outN * sizeof *psi_buf);
+    #endif
+    #ifdef OUTPUT_DPSI
     dpsi_buf      = fftw_malloc(buf_size * outN * sizeof *dpsi_buf);
+    #endif
+    #ifdef OUTPUT_PSI_MEAN
     psi_mean_buf  = calloc(buf_size, sizeof *psi_mean_buf);
+    #endif
+    #ifdef OUTPUT_PSI_VARIANCE
     psi_var_buf   = calloc(buf_size, sizeof *psi_var_buf);
+    #endif
+    #ifdef OUTPUT_DPSI_MEAN
     dpsi_mean_buf = calloc(buf_size, sizeof *dpsi_mean_buf);
+    #endif
+    #ifdef OUTPUT_DPSI_VARIANCE
     dpsi_var_buf  = calloc(buf_size, sizeof *dpsi_var_buf);
-    time_buf      = calloc(buf_size, sizeof *time_buf);
-    f_a_buf       = calloc(buf_size, sizeof *f_a_buf);
-    rho           = fftw_malloc(N * sizeof *rho);
+    #endif
+    #ifdef OUTPUT_RHO
     rho_buf       = fftw_malloc(buf_size * outN * sizeof *rho_buf);
+    #endif
+    #ifdef OUTPUT_RHO_MEAN
     rho_mean_buf  = calloc(buf_size, sizeof *rho_mean_buf);
+    #endif
+    #ifdef OUTPUT_RHO_VARIANCE
     rho_var_buf   = calloc(buf_size, sizeof *rho_var_buf);
-    pow_spec      = calloc(bins, sizeof *pow_spec);
+    #endif
+    #ifdef OUTPUT_POWER_SPECTRUM
     pow_spec_buf  = calloc(buf_size * bins, sizeof *pow_spec_buf);
+    #endif
 
     // default arrays to save coefficients of real to complex transforms
     // see fftw3 documentation and Mxyz for this
@@ -169,7 +199,7 @@ void allocate_external() {
     tmp.dpsic = fftw_malloc(M * sizeof *tmp.dpsic);
 
     // general purpose double memory blocks for temporary use
-    // TODO: don't use dx in dense output
+    // TODO: don't use xphi in dense output
     tmp.xphi = fftw_malloc(Ntot * sizeof *tmp.xphi); // used in dopri853 (dense)
     tmp.yphi = fftw_malloc(N * sizeof *tmp.yphi);
     tmp.zphi = fftw_malloc(N * sizeof *tmp.zphi);
@@ -178,14 +208,10 @@ void allocate_external() {
     tmp.f    = fftw_malloc(N * sizeof *tmp.f);
     tmp.deltarho = fftw_malloc(N * sizeof *tmp.deltarho);
 
-    if (!(grid && field && field_new && dfield && dfield_new && phi_buf &&
-        dphi_buf && psi && dpsi && psi_buf && dpsi_buf && time_buf && f_a_buf &&
-        rho && rho_buf && pow_spec && pow_spec_buf && tmp.phic  && tmp.xphic &&
-        tmp.yphic && tmp.zphic && tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad
-        && tmp.lap && tmp.psic  && tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f
-        && tmp.deltarho && phi_mean_buf && phi_var_buf && dphi_mean_buf &&
-        dphi_var_buf && psi_mean_buf && psi_var_buf && dpsi_mean_buf &&
-        dpsi_var_buf && rho_mean_buf && rho_var_buf))
+    if (!(grid && field && field_new && dfield && dfield_new && psi && dpsi &&
+        rho && pow_spec && tmp.phic  && tmp.xphic && tmp.yphic && tmp.zphic &&
+        tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap && tmp.psic  &&
+        tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f && tmp.deltarho))
     {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
@@ -496,28 +522,60 @@ void free_external() {
     fftw_free(field_new);
     fftw_free(dfield);
     fftw_free(dfield_new);
-    free(phi_buf);
-    free(dphi_buf);
-    free(phi_mean_buf);
-    free(phi_var_buf);
-    free(dphi_mean_buf);
-    free(dphi_var_buf);
+    free(rho);
     free(psi);
     free(dpsi);
-    free(psi_buf);
-    free(dpsi_buf);
-    free(psi_mean_buf);
-    free(psi_var_buf);
-    free(dpsi_mean_buf);
-    free(dpsi_var_buf);
+    free(pow_spec);
     free(time_buf);
     free(f_a_buf);
-    free(rho);
+    #ifdef OUTPUT_PHI
+    free(phi_buf);
+    #endif
+    #ifdef OUTPUT_DPHI
+    free(dphi_buf);
+    #endif
+    #ifdef OUTPUT_PHI_MEAN
+    free(phi_mean_buf);
+    #endif
+    #ifdef OUTPUT_PHI_VARIANCE
+    free(phi_var_buf);
+    #endif
+    #ifdef OUTPUT_DPHI_MEAN
+    free(dphi_mean_buf);
+    #endif
+    #ifdef OUTPUT_DPHI_VARIANCE
+    free(dphi_var_buf);
+    #endif
+    #ifdef OUTPUT_PSI
+    free(psi_buf);
+    #endif
+    #ifdef OUTPUT_DPSI
+    free(dpsi_buf);
+    #endif
+    #ifdef OUTPUT_PSI_MEAN
+    free(psi_mean_buf);
+    #endif
+    #ifdef OUTPUT_PSI_VARIANCE
+    free(psi_var_buf);
+    #endif
+    #ifdef OUTPUT_DPSI_MEAN
+    free(dpsi_mean_buf);
+    #endif
+    #ifdef OUTPUT_DPSI_VARIANCE
+    free(dpsi_var_buf);
+    #endif
+    #ifdef OUTPUT_RHO
     free(rho_buf);
+    #endif
+    #ifdef OUTPUT_RHO_MEAN
     free(rho_mean_buf);
+    #endif
+    #ifdef OUTPUT_RHO_VARIANCE
     free(rho_var_buf);
-    free(pow_spec);
+    #endif
+    #ifdef OUTPUT_POWER_SPECTRUM
     free(pow_spec_buf);
+    #endif
     fftw_free(tmp.phic);
     fftw_free(tmp.xphic);
     fftw_free(tmp.yphic);
