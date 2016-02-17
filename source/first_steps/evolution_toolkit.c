@@ -563,6 +563,7 @@ void prepare_and_save_timeslice() {
 void mk_means_and_variances() {
     size_t N = pars.N;
 
+    //TODO[performance]: parallel sections instead of parallel loops here?
     #if defined(OUTPUT_PHI_MEAN) || defined(OUTPUT_PHI_VARIANCE)
     phi_mean = mean(field, N);
     #endif
