@@ -358,8 +358,7 @@ void mk_initial_conditions() {
 }
 
 // initial values of the scalar field, make sure its periodic
-double phi_init(const double x, const double y, const double z,
-                                                const double *ph) {
+double phi_init(double x, double y, double z, double *ph) {
     // localized for higgs metastability potential
     /* double phi0 = 0.04; */
     /* double lambda = 20.0; */
@@ -456,8 +455,7 @@ double phi_init(const double x, const double y, const double z,
 }
 
 // initial values of the time deriv. of the scalar field, make sure its periodic
-double dphi_init(const double x, const double y, const double z,
-                                                const double *ph) {
+double dphi_init(double x, double y, double z, double *ph) {
     /* return 0.0; */
 
     /* double mean = -1.447595527218249e-8; */
