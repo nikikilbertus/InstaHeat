@@ -41,6 +41,26 @@ during execution
 #define VERSION_CONTROL         VERSION_CONTROL_HG
 
 //-------------which files to write to disk-------------------------------------
+#define OUTPUT_PHI
+#define OUTPUT_DPHI
+#define OUTPUT_PSI
+#define OUTPUT_DPSI
+#define OUTPUT_RHO
+#define OUTPUT_POWER_SPECTRUM
+
+#define OUTPUT_PHI_MEAN
+#define OUTPUT_DPHI_MEAN
+#define OUTPUT_PSI_MEAN
+#define OUTPUT_DPSI_MEAN
+#define OUTPUT_RHO_MEAN
+
+#define OUTPUT_PHI_VARIANCE
+#define OUTPUT_DPHI_VARIANCE
+#define OUTPUT_PSI_VARIANCE
+#define OUTPUT_DPSI_VARIANCE
+#define OUTPUT_RHO_VARIANCE
+
+
 // ------------file handling parameters for writing to disk---------------------
 // the output is bundled in one .h5 file, enter path here
 #define DATAPATH                ("../../../data/compare.h5")
@@ -156,17 +176,25 @@ typedef struct {
     double t;  // current time
 }timing_t;
 
+// bundle data set identifiers for hdf5 output
+typedef struct {
+    size_t field;
+    size_t mean;
+    size_t variance;
+    size_t dfield;
+    size_t dmean;
+    size_t dvariance;
+}datasets_t;
+
 //file handling parameters
 typedef struct {
     size_t id;           // h5 file id of the output file
-    size_t dset_phi;     // h5 data set id of the scalar field
-    size_t dset_dphi;    // h5 data set id of the scalar field dot
-    size_t dset_psi;     // h5 data set id of the scalar perturbation
-    size_t dset_dpsi;    // h5 data set id of the scalar perturbation dot
+    datasets_t dset_phi; // h5 data set ids for the scalar field phi
+    datasets_t dset_psi; // h5 data set ids for the perturbation psi
+    datasets_t dset_rho; // h5 data set ids for the energy density rho
     size_t dset_powspec; // h5 data set id of the power spectrum
     size_t dset_time;    // h5 data set id of the time
     size_t dset_a;       // h5 data set id of the scaling parameter a
-    size_t dset_rho;     // h5 data set id of the energy density rho
     size_t index;        // current index within the buffers
     size_t buf_size;     // size of the buffer
     size_t skip;         // how many timesteps to skip in between write out
