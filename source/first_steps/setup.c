@@ -307,6 +307,9 @@ void mk_fftw_plans() {
 
 // setup initial conditions for the field
 void mk_initial_conditions() {
+    #ifdef READ_INITIAL_CONDITIONS
+    read_initial_data();
+    #else
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
@@ -342,6 +345,8 @@ void mk_initial_conditions() {
 
     // initialize a
     field[2 * N] = A_INITIAL;
+    free(theta);
+    #endif
 
     // console output for debugging
     #ifdef DEBUG
@@ -353,8 +358,25 @@ void mk_initial_conditions() {
     print_vector(field + 2 * N, 1);
     puts("\n");
     #endif
-    free(theta);
     RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
+}
+
+void read_initial_data() {
+    size_t N = pars.N;
+
+    FILE *file = fopen(INITIAL_DATAPATH, "r");
+    if (!file)
+    {
+        fputs("Could not read initial data file.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+
+    //TODO: adjust to actual file format, this is just a dummy
+    for (size_t i = 0; i < N; ++i)
+    {
+        fscanf(file, "%lf", &field[i]);
+    }
+    fclose(file);
 }
 
 // initial values of the scalar field, make sure its periodic

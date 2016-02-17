@@ -13,6 +13,7 @@ void allocate_external();
 void mk_grid();
 void mk_fftw_plans();
 void mk_initial_conditions();
+void read_initial_data();
 double phi_init(double x, double y, double z, double *ph);
 double dphi_init(double x, double y, double z, double *ph);
 void free_and_destroy_all();

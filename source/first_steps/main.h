@@ -64,6 +64,10 @@ during execution
 // ------------file handling parameters for writing to disk---------------------
 // the output is bundled in one .h5 file, enter path here
 #define DATAPATH                ("../../../data/compare.h5")
+#define INITIAL_DATAPATH        ("../../../data/initial/init.dat")
+
+// read initial conditions from file instead of internal construction
+/* #define READ_INITIAL_CONDITIONS */
 
 /**
  *  write out data is buffered to not access hard drive too frequently (actually
