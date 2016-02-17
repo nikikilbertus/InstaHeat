@@ -98,18 +98,6 @@ void mk_rho(double *f) {
         rho[i] = (df * df + tmp.grad[i] / (a * a)) / 2.0 + potential(f[i]);
         rho_mean += rho[i];
     }
-
-    // Karstens implementation of rho
-    /* double phimean = mean(f, N); */
-    /* double dphimean = mean(f + N, N); */
-    /* #pragma omp parallel for private(df)  reduction(+: rho_mean) */
-    /* for (size_t i = 0; i < N; ++i) */
-    /* { */
-    /*     df = f[N + i]; */
-    /*     rho[i] = ( dphimean  * ( dphimean + 2.0 * (df - dphimean)) + */
-    /*         MASS * MASS * phimean  * ( phimean + 2.0 * (f[i] - phimean))) / 2.0; */
-    /*     rho_mean += rho[i]; */
-    /* } */
     rho_mean /= N;
 }
 
@@ -325,8 +313,8 @@ void mk_psi_and_dpsi(double *f) {
     fftw_time_exe += get_wall_time();
     #endif
 
-    double dphimean = mean(f + N, N);
-    double dphiextra = 0.5 * a2 * dphimean * dphimean;
+    dphi_mean = mean(f + N, N);
+    double dphiextra = 0.5 * a2 * dphi_mean * dphi_mean;
 
     #ifdef CHECK_FOR_CANCELLATION
     int zerocount = 0;
@@ -570,13 +558,27 @@ void prepare_and_save_timeslice() {
 }
 
 inline double mean(const double *f, size_t N) {
-    double res = 0.0;
-    /* #pragma omp parallel for reduction(+: res) */
+    double mean = 0.0;
+    #pragma omp parallel for reduction(+: res)
     for (size_t i = 0; i < N; ++i)
     {
-        res += f[i];
+        mean += f[i];
     }
-    return res / (double)N;
+    return mean / (double)N;
+}
+
+inline double variance_given_mean(double mean, const double *f, size_t N) {
+    double sum1 = 0.0;
+    double sum2 = 0.0;
+    double tmp;
+    #pragma omp parallel for private(tmp) reduction(+: sum1, sum2)
+    for (size_t i = 0; i < N; ++i)
+    {
+        tmp = f[i] - mean;
+        sum1 += tmp * tmp;
+        sum2 += tmp;
+    }
+    return (sum1 - sum2 * sum2 / (double)N) / (double)N;
 }
 
 void contains_nan(double *f, size_t N) {

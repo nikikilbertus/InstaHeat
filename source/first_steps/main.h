@@ -81,10 +81,10 @@ during execution
 #define POWER_SPECTRUM_BINS     (50)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (3)
+#define TIME_STEP_SKIPS         (1)
 
 // spatial output strides
-#define STRIDE_X                (2)
+#define STRIDE_X                (1)
 #define STRIDE_Y                (1)
 #define STRIDE_Z                (1)
 
@@ -125,7 +125,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (0.0001)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (1.0e3)
+#define FINAL_TIME              (1.0e5)
 #define MAX_STEPS               (1e12)
 #define MINIMAL_DELTA_T         (1.0e-6)
 
