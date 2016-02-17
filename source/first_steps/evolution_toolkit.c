@@ -617,7 +617,7 @@ inline double variance(double mean, const double *f, size_t N) {
         sum1 += tmp * tmp;
         sum2 += tmp;
     }
-    return (sum1 - sum2 * sum2 / (double)N) / (double)N;
+    return (sum1 - sum2 * sum2 / (double)N) / (double)(N - 1);
 }
 
 void contains_nan(double *f, size_t N) {

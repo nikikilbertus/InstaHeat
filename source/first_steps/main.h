@@ -51,8 +51,8 @@ during execution
 
 #define OUTPUT_PHI_MEAN
 #define OUTPUT_DPHI_MEAN
-#define OUTPUT_PSI_MEAN
-#define OUTPUT_DPSI_MEAN
+/* #define OUTPUT_PSI_MEAN */
+/* #define OUTPUT_DPSI_MEAN */
 #define OUTPUT_RHO_MEAN
 
 #define OUTPUT_PHI_VARIANCE
