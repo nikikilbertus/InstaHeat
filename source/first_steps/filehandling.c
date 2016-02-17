@@ -51,6 +51,46 @@ void h5_create_empty_by_path(const char *name) {
     rank = 1;
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_time), "time");
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_a), "a");
+    #ifdef OUTPUT_PHI_MEAN
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.mean),
+            "phi_mean");
+    #endif
+    #ifdef OUTPUT_PHI_VARIANCE
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.var),
+            "phi_variance");
+    #endif
+    #ifdef OUTPUT_DPHI_MEAN
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.dmean),
+            "dphi_mean");
+    #endif
+    #ifdef OUTPUT_DPHI_VARIANCE
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.dvar),
+            "dphi_variance");
+    #endif
+    #ifdef OUTPUT_PSI_MEAN
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.mean),
+            "psi_mean");
+    #endif
+    #ifdef OUTPUT_PSI_VARIANCE
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.var),
+            "psi_variance");
+    #endif
+    #ifdef OUTPUT_DPSI_MEAN
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.dmean),
+            "dpsi_mean");
+    #endif
+    #ifdef OUTPUT_DPSI_VARIANCE
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.dvar),
+            "dpsi_variance");
+    #endif
+    #ifdef OUTPUT_RHO_MEAN
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_rho.mean),
+            "rho_mean");
+    #endif
+    #ifdef OUTPUT_RHO_VARIANCE
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_rho.var),
+            "rho_variance");
+    #endif
 
     // ---------------------------parameters------------------------------------
     double val[3] = {MASS, 0.0, 0.0};
@@ -242,6 +282,36 @@ void h5_write_all_buffers(const hsize_t Nt) {
     rank = 1;
     h5_write_buffer(rank, start, add, new_dim, f.dset_time, time_buf);
     h5_write_buffer(rank, start, add, new_dim, f.dset_a, f_a_buf);
+    #ifdef OUTPUT_PHI_MEAN
+    h5_write_buffer(rank, start, add, new_dim, f.dset_phi.mean, phi_mean_buf);
+    #endif
+    #ifdef OUTPUT_PHI_VARIANCE
+    h5_write_buffer(rank, start, add, new_dim, f.dset_phi.var, phi_var_buf);
+    #endif
+    #ifdef OUTPUT_DPHI_MEAN
+    h5_write_buffer(rank, start, add, new_dim, f.dset_phi.dmean, dphi_mean_buf);
+    #endif
+    #ifdef OUTPUT_DPHI_VARIANCE
+    h5_write_buffer(rank, start, add, new_dim, f.dset_phi.dvar, dphi_var_buf);
+    #endif
+    #ifdef OUTPUT_PSI_MEAN
+    h5_write_buffer(rank, start, add, new_dim, f.dset_psi.mean, psi_mean_buf);
+    #endif
+    #ifdef OUTPUT_PSI_VARIANCE
+    h5_write_buffer(rank, start, add, new_dim, f.dset_psi.var, psi_var_buf);
+    #endif
+    #ifdef OUTPUT_DPSI_MEAN
+    h5_write_buffer(rank, start, add, new_dim, f.dset_psi.dmean, dpsi_mean_buf);
+    #endif
+    #ifdef OUTPUT_DPSI_VARIANCE
+    h5_write_buffer(rank, start, add, new_dim, f.dset_psi.dvar, dpsi_var_buf);
+    #endif
+    #ifdef OUTPUT_RHO_MEAN
+    h5_write_buffer(rank, start, add, new_dim, f.dset_rho.mean, rho_mean_buf);
+    #endif
+    #ifdef OUTPUT_RHO_VARIANCE
+    h5_write_buffer(rank, start, add, new_dim, f.dset_rho.var, rho_var_buf);
+    #endif
 
     #ifdef SHOW_TIMING_INFO
     h5_time_write += get_wall_time();
@@ -287,6 +357,37 @@ void save() {
     }
     #endif
 
+    #ifdef OUTPUT_PHI_MEAN
+    phi_mean_buf[index] = phi_mean;
+    #endif
+    #ifdef OUTPUT_PHI_VARIANCE
+    phi_var_buf[index] = phi_var;
+    #endif
+    #ifdef OUTPUT_DPHI_MEAN
+    dphi_mean_buf[index] = dphi_mean;
+    #endif
+    #ifdef OUTPUT_DPHI_VARIANCE
+    dphi_var_buf[index] = dphi_var;
+    #endif
+    #ifdef OUTPUT_PSI_MEAN
+    psi_mean_buf[index] = psi_mean;
+    #endif
+    #ifdef OUTPUT_PSI_VARIANCE
+    psi_var_buf[index] = psi_var;
+    #endif
+    #ifdef OUTPUT_DPSI_MEAN
+    dpsi_mean_buf[index] = dpsi_mean;
+    #endif
+    #ifdef OUTPUT_DPSI_VARIANCE
+    dpsi_var_buf[index] = dpsi_var;
+    #endif
+    #ifdef OUTPUT_RHO_MEAN
+    rho_mean_buf[index] = rho_mean;
+    #endif
+    #ifdef OUTPUT_RHO_VARIANCE
+    rho_var_buf[index] = rho_var;
+    #endif
+
     hsize_t os = index * outN;
     size_t osx, osy, id;
     size_t osxb, osyb, idb;
@@ -303,11 +404,21 @@ void save() {
             {
                 id = osy + k;
                 idb = osyb + k / pars.z.stride;
+                #ifdef OUTPUT_PHI
                 phi_buf[os + idb]  = field[id];
+                #endif
+                #ifdef OUTPUT_DPHI
                 dphi_buf[os + idb] = field[N + id];
+                #endif
+                #ifdef OUTPUT_PSI
                 psi_buf[os + idb]  = psi[id];
+                #endif
+                #ifdef OUTPUT_DPSI
                 dpsi_buf[os + idb] = dpsi[id];
+                #endif
+                #ifdef OUTPUT_RHO
                 rho_buf[os + idb]  = rho[id];
+                #endif
                 #ifdef CHECK_FOR_NAN
                 if (isnan(field[id]) || isnan(psi[id]) || isnan(rho[id]))
                 {
