@@ -184,7 +184,7 @@ void mk_gradient_squared_and_laplacian(double *in) {
                     k_sq += pars.y.k2 * j * j;
                 }
                 // z derivative
-                if (k == Mz - 1)
+                if (2 * k == Nz)
                 {
                     tmp.zphic[id] = 0.0;
                 }

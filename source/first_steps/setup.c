@@ -454,7 +454,7 @@ double phi_init(double x, double y, double z, double *ph) {
     /* double amplitude = 4.048590000000000e-07; */
 
     // compare_2, pos= 6000
-    double scale= 1.0e0;
+    double scale= 1.0e3;
     double mean = 0.0510864;
     double amplitude = -3.743790000000000e-07 * scale;
 
@@ -472,7 +472,10 @@ double phi_init(double x, double y, double z, double *ph) {
     }
     else
     {
-        return mean + amplitude * cos(x + y + z + ph[0]);
+        return mean + amplitude *
+            (cos(x + y + z + ph[0]) + cos(-x + y + z + ph[1]) +
+             cos(x - y + z + ph[2]) + cos(x + y - z + ph[3]) +
+             cos(2.0 * x + y + z + ph[4]) + cos(x + 2.0 * y + z + ph[5]));
     }
 }
 
@@ -498,7 +501,7 @@ double dphi_init(double x, double y, double z, double *ph) {
     /* double mean = -4.397960000000000e-06; */
     /* double amplitude = 1.816140000000000e-08; */
 
-    double scale = 1.0e0;
+    double scale = 1.0e3;
     double mean = 3.255190000000000e-04;
     double amplitude = 1.742130000000000e-08 * scale;
 
@@ -516,7 +519,12 @@ double dphi_init(double x, double y, double z, double *ph) {
     }
     else
     {
-        return (mean + amplitude * cos(x + y + z + ph[0])) * MASS / 1.0e-2;
+        return (mean + amplitude *
+            (cos(x + y + z + ph[0]) + cos(-x + y + z + ph[1]) +
+             cos(x - y + z + ph[2]) + cos(x + y - z + ph[3]) +
+             cos(2.0 * x + y + z + ph[4]) + cos(x + 2.0 * y + z + ph[5]))) *
+             MASS / 1.0e-2;
+        /* return (mean + amplitude * cos(x + y + z + ph[0])) * MASS / 1.0e-2; */
     }
 
     /* return -0.089318193; // somewhere at end of 50 e-fold inflation */

@@ -337,13 +337,7 @@ void h5_close() {
 void save() {
     hsize_t index = pars.file.index;
     hsize_t Nt    = pars.file.buf_size;
-    hsize_t Nx    = pars.x.N;
-    hsize_t Ny    = pars.y.N;
-    hsize_t Nz    = pars.z.N;
-    hsize_t outy  = pars.y.outN;
-    hsize_t outz  = pars.z.outN;
     hsize_t N     = pars.N;
-    hsize_t outN  = pars.outN;
     hsize_t bins  = pars.file.bins_powspec;
 
     time_buf[index] = pars.t.t;
@@ -388,6 +382,14 @@ void save() {
     rho_var_buf[index] = rho_var;
     #endif
 
+    #if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || defined(OUTPUT_PSI) || \
+        defined(OUTPUT_DPSI) || defined(OUTPUT_RHO)
+    hsize_t Nx    = pars.x.N;
+    hsize_t Ny    = pars.y.N;
+    hsize_t Nz    = pars.z.N;
+    hsize_t outy  = pars.y.outN;
+    hsize_t outz  = pars.z.outN;
+    hsize_t outN  = pars.outN;
     hsize_t os = index * outN;
     size_t osx, osy, id;
     size_t osxb, osyb, idb;
@@ -429,13 +431,14 @@ void save() {
             }
         }
     }
+    #endif
 
     #ifdef OUTPUT_POWER_SPECTRUM
-    os = index * bins;
+    hsize_t os1 = index * bins;
     #pragma omp parallel for
     for (size_t i = 0; i < bins; ++i)
     {
-        pow_spec_buf[os + i] = pow_spec[i];
+        pow_spec_buf[os1 + i] = pow_spec[i];
         #ifdef CHECK_FOR_NAN
         if (isnan(pow_spec[i]))
         {
