@@ -5,7 +5,7 @@
 #include <fftw3.h>
 #include <time.h>
 #include <sys/time.h>
-#include <gperftools/profiler.h>
+/* #include <gperftools/profiler.h> */
 #include "main.h"
 #include "setup.h"
 #include "RK4_stepper.h"

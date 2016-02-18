@@ -11,12 +11,19 @@ a = h5read(name, '/a');
 
 rhomean = h5read(name, '/rho_mean');
 rhovar = h5read(name, '/rho_variance');
+rhorms = sqrt(rhovar ./ rhomean.^2);
 
 phimean = h5read(name, '/phi_mean');
 phivar = h5read(name, '/phi_variance');
+[phipks, phipkpos] = findpeaks(phimean);
+phienv = spline(a(phipkpos), phipks, a);
+phirms = sqrt(phivar ./ phienv.^2);
 
 dphimean = h5read(name, '/dphi_mean');
 dphivar = h5read(name, '/dphi_variance');
+[dphipks, dphipkpos] = findpeaks(dphimean);
+dphienv = spline(a(dphipkpos), dphipks, a);
+dphirms = sqrt(dphivar ./ dphienv.^2);
 
 psivar = h5read(name, '/psi_variance');
 dpsivar = h5read(name, '/dpsi_variance');

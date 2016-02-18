@@ -453,8 +453,12 @@ double phi_init(double x, double y, double z, double *ph) {
     /* double mean = 0.0150052; */
     /* double amplitude = 4.048590000000000e-07; */
 
+    // compare_2, pos= 5500
+    /* double mean = 0.0202977; */
+    /* double amplitude = -2.26961e-06; */
+
     // compare_2, pos= 6000
-    double scale= 1.0e3;
+    double scale= 1.0e4;
     double mean = 0.0510864;
     double amplitude = -3.743790000000000e-07 * scale;
 
@@ -481,7 +485,7 @@ double phi_init(double x, double y, double z, double *ph) {
 
 // initial values of the time deriv. of the scalar field, make sure its periodic
 double dphi_init(double x, double y, double z, double *ph) {
-    /* return 0.0; */
+    return 0.0;
 
     /* double mean = -1.447595527218249e-8; */
     /* double amplitude = 1.794195724493731e-7; */
@@ -501,7 +505,10 @@ double dphi_init(double x, double y, double z, double *ph) {
     /* double mean = -4.397960000000000e-06; */
     /* double amplitude = 1.816140000000000e-08; */
 
-    double scale = 1.0e3;
+    /* double mean = -0.00475989; */
+    /* double amplitude = -2.91473e-09; */
+
+    double scale = 1.0e4;
     double mean = 3.255190000000000e-04;
     double amplitude = 1.742130000000000e-08 * scale;
 
@@ -510,12 +517,12 @@ double dphi_init(double x, double y, double z, double *ph) {
 
     if (pars.dim == 1)
     {
-        return (mean + amplitude * cos(x)) * MASS / 1.0e-2;
+        return (mean + amplitude * cos(x)) * MASS / MASS_KARSTEN;
     }
     else if (pars.dim == 2)
     {
         return (mean + amplitude * cos(x + y + ph[0])) *
-            MASS / 1.0e-2;
+            MASS / MASS_KARSTEN;
     }
     else
     {
@@ -523,7 +530,7 @@ double dphi_init(double x, double y, double z, double *ph) {
             (cos(x + y + z + ph[0]) + cos(-x + y + z + ph[1]) +
              cos(x - y + z + ph[2]) + cos(x + y - z + ph[3]) +
              cos(2.0 * x + y + z + ph[4]) + cos(x + 2.0 * y + z + ph[5]))) *
-             MASS / 1.0e-2;
+             MASS / MASS_KARSTEN;
         /* return (mean + amplitude * cos(x + y + z + ph[0])) * MASS / 1.0e-2; */
     }
 

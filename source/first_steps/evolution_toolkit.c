@@ -117,6 +117,7 @@ void update_rho(double *f) {
 void mk_gradient_squared_and_laplacian(double *in) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
+    size_t Nz = pars.z.N;
     size_t N  = pars.N;
     size_t Mx = pars.x.M;
     size_t My = pars.y.M;
@@ -338,8 +339,9 @@ void mk_psi_and_dpsi(double *f) {
                     k_sq += pars.x.k2 * (Nx - i) * (Nx - i);
                     tmp.fc[id] /= pars.x.k * ((int)i - (int)Nx);
                 }
-                else if (2 * i == Nx || i == 0)
+                else if (/*2 * i == Nx ||*/ i == 0)
                 {
+                    //TODO: what happens if i don't zero for 2*i=Nx ?
                     k_sq += pars.x.k2 * i * i;
                     tmp.fc[id] = 0.0;
                 }
@@ -510,6 +512,7 @@ void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout) {
             for (size_t k = 0; k < Mz; ++k)
             {
                 filter = 1.0;
+                //TODO: i think i should filter 2*i=Nx modes!?
                 if (i != 0 && 2 * i != Nx)
                 {
                     filter = filter_window_function(2.0 *

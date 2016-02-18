@@ -1,4 +1,4 @@
-name = 'compare_longrun';
+name = 'compare';
 comp = true;
 
 % loading the data, replace 'name' with the path where you stored the .h5
@@ -19,7 +19,7 @@ mass = h5read(name, '/mass');
 
 % compute some further properties
 if (comp)
-    scaling = mass / 0.01;
+    scaling = mass / massk;
 else
     scaling = 1;
 end
@@ -27,7 +27,7 @@ end
 if max(ak) > max(a)
     [~, pos] = min((ak - min(a)).^2);
     [~, posmax] = min((ak - max(a)).^2);
-    posmax = posmax + min(100, length(ak) - pos);
+    posmax = posmax + min(20, length(ak) - pos);
 else
     [~, pos] = min((ak - min(a)).^2);
     posmax = length(ak);
@@ -136,6 +136,7 @@ if dim == 1
     
     if max(ak) > max(a)
         I = (ak > 0.8*ak(pos));
+%         I = (ak > 1);
         phi0ksp = spline(ak(I),phi0k(I),a);
         phi1ksp = spline(ak(I),phi1k(I),a);
         dphi0ksp = spline(ak(I),dphi0k(I),a);
