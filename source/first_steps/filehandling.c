@@ -316,6 +316,7 @@ void h5_write_all_buffers(const hsize_t Nt) {
     #ifdef SHOW_TIMING_INFO
     h5_time_write += get_wall_time();
     #endif
+    RUNTIME_INFO(printf("Dumping to disk at t = %f\n", pars.t.t));
 }
 
 void h5_close() {
@@ -458,5 +459,7 @@ void save() {
     {
         pars.file.index += 1;
     }
-    RUNTIME_INFO(printf("Writing to file at t = %f\n", pars.t.t));
+    #ifdef DEBUG
+    printf("Writing to file at t = %f\n", pars.t.t);
+    #endif
 }

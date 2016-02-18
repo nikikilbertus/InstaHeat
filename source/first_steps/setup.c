@@ -317,10 +317,21 @@ void mk_initial_conditions() {
     size_t osx, osy;
     double x, y, z;
 
-    // random phases used for analysis of notch and step potential
+    size_t Nmodes = 16;
+    /* double *ks = calloc(pars.dim * Nmodes, sizeof *ks); */
+    /* for (size_t i = 0; i < pars.dim * Nmodes; ++i) */
+    /* { */
+    /*     ks[i] = 1.0; */
+    /* } */
+    /* for (size_t i = 3; i < Nmodes; i += 3) */
+    /* { */
+    /*     ks[i] *= -1.0; */
+    /* } */
+
+    // random phases
     srand(SEED);
-    double *theta = calloc(6, sizeof *theta);
-    for (size_t i = 0; i < 6; ++i)
+    double *theta = calloc(Nmodes, sizeof *theta);
+    for (size_t i = 0; i < Nmodes; ++i)
     {
         theta[i] = 2.0 * PI * (double)rand() / (double)RAND_MAX;
     }
@@ -458,7 +469,7 @@ double phi_init(double x, double y, double z, double *ph) {
     /* double amplitude = -2.26961e-06; */
 
     // compare_2, pos= 6000
-    double scale= 1.0e4;
+    double scale= 1.0e3;
     double mean = 0.0510864;
     double amplitude = -3.743790000000000e-07 * scale;
 
@@ -479,7 +490,13 @@ double phi_init(double x, double y, double z, double *ph) {
         return mean + amplitude *
             (cos(x + y + z + ph[0]) + cos(-x + y + z + ph[1]) +
              cos(x - y + z + ph[2]) + cos(x + y - z + ph[3]) +
-             cos(2.0 * x + y + z + ph[4]) + cos(x + 2.0 * y + z + ph[5]));
+             cos(2.0 * x + y + z + ph[4]) + cos(x + 2.0 * y + z + ph[5]) +
+             cos(x + y + 2.0 * z + ph[6]) + cos(-2.0 * x + y + z + ph[7]) +
+             cos(x - 2.0 * y + z + ph[8]) + cos(x + y - 2.0 * z + ph[9]) +
+             cos(3.0 * x + y + z + ph[10]) + cos(x + 3.0 * y + z + ph[11]) +
+             cos(x + y + 3.0 * z + ph[12]) + cos(-3.0 * x + y + z + ph[13]) +
+             cos(x - 3.0 * y + z + ph[14]) + cos(x + y - 3.0 * z + ph[15])
+             );
     }
 }
 
@@ -508,7 +525,7 @@ double dphi_init(double x, double y, double z, double *ph) {
     /* double mean = -0.00475989; */
     /* double amplitude = -2.91473e-09; */
 
-    double scale = 1.0e4;
+    double scale = 1.0e3;
     double mean = 3.255190000000000e-04;
     double amplitude = 1.742130000000000e-08 * scale;
 
