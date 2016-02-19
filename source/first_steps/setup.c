@@ -437,8 +437,13 @@ double phi_init(double x, double y, double z, double *ph) {
     /* double mean = 14.1421356; // for 50 e-fold inflation */
     /* double mean = 6.319569842; // somewhere at the end of 50 e-fold inflation */
 
-    /* double mean = 1.0; */
-    /* double amplitude = 1.0e-5; */
+    // karstens first set original
+    double mean = 1.0;
+    double amplitude = 1.0e-5;
+
+    // karstens first set rescaling field instead of mass
+    /* double mean = 6.0e3; */
+    /* double amplitude = 6.0e-2; */
 
     // 25063
     /* double mean = 0.001543576559919; */
@@ -469,17 +474,19 @@ double phi_init(double x, double y, double z, double *ph) {
     /* double amplitude = -2.26961e-06; */
 
     // compare_2, pos= 6000
-    double scale= 1.0e3;
-    double mean = 0.0510864;
-    double amplitude = -3.743790000000000e-07 * scale;
+    /* double scale= 1.0e3; */
+    /* double mean = 0.0510864; */
+    /* double amplitude = -3.743790000000000e-07 * scale; */
 
     // compare_2, pos= 1
     /* double mean = 5.0; */
     /* double amplitude = 0.01; */
 
+    /* double k = 1.0/6.0e3; */
+    double k = 1.0;
     if (pars.dim == 1)
     {
-        return mean + amplitude * cos(x);
+        return mean + amplitude * cos(k * x);
     }
     else if (pars.dim == 2)
     {
@@ -522,12 +529,12 @@ double dphi_init(double x, double y, double z, double *ph) {
     /* double mean = -4.397960000000000e-06; */
     /* double amplitude = 1.816140000000000e-08; */
 
-    /* double mean = -0.00475989; */
-    /* double amplitude = -2.91473e-09; */
+    double mean = -0.00475989;
+    double amplitude = -2.91473e-09;
 
-    double scale = 1.0e3;
-    double mean = 3.255190000000000e-04;
-    double amplitude = 1.742130000000000e-08 * scale;
+    /* double scale = 1.0e3; */
+    /* double mean = 3.255190000000000e-04; */
+    /* double amplitude = 1.742130000000000e-08 * scale; */
 
     /* double mean = -0.00806088; */
     /* double amplitude = -1.134420000000000e-20; */

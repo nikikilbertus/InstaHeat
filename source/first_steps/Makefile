@@ -1,5 +1,5 @@
 TARGET = first_steps
-LIBS = -L /usr/local/lib -lfftw3_omp -lfftw3 -lm -fopenmp -lprofiler
+LIBS = -L /usr/local/lib -lfftw3_omp -lfftw3 -lm -fopenmp
 CC = h5cc
 CFLAGS = -std=c99 -fopenmp -O3 -g -Wall -I /usr/local/include
 export HDF5_CC = gcc-5

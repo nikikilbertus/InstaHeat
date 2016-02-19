@@ -321,6 +321,8 @@ void mk_psi_and_dpsi(double *f) {
     #ifdef CHECK_FOR_CANCELLATION
     int zerocount = 0;
     #endif
+    int sign = 1;
+    int signcount = 0;
     double k_sq;
     size_t osx, osy, id;
     #pragma omp parallel for private(k_sq, osx, osy, id)
@@ -339,7 +341,7 @@ void mk_psi_and_dpsi(double *f) {
                     k_sq += pars.x.k2 * (Nx - i) * (Nx - i);
                     tmp.fc[id] /= pars.x.k * ((int)i - (int)Nx);
                 }
-                else if (/*2 * i == Nx ||*/ i == 0)
+                else if (2 * i == Nx || i == 0)
                 {
                     //TODO: what happens if i don't zero for 2*i=Nx ?
                     k_sq += pars.x.k2 * i * i;
@@ -358,12 +360,17 @@ void mk_psi_and_dpsi(double *f) {
                 {
                     k_sq += pars.y.k2 * j * j;
                 }
-                /* if (fabs(k_sq) > 1.0e-10) */
-                if (-k_sq < 1.0e-12 || fabs(k_sq + dphiextra) < 1.0e-12)
+                if (((k_sq + dphiextra) > 0 ? 1 : -1) != sign)
+                {
+                    /* RUNTIME_INFO(printf("sign change at i=%zu, j=%zu, k=%zu\n",i,j,k)); */
+                    signcount++;
+                    sign *= -1;
+                }
+                if (-k_sq < 1.0e-10 || fabs(k_sq + dphiextra) < 1.0e-10)
                 {
                     tmp.psic[id] = 0.0;
                     #ifdef CHECK_FOR_CANCELLATION
-                    if (zerocount++ > 1)
+                    if (++zerocount > 1)
                     {
                         RUNTIME_INFO(printf("cancellation in psi at time: "
                                     "%f\n", pars.t.t));
@@ -380,6 +387,11 @@ void mk_psi_and_dpsi(double *f) {
                         hubble * tmp.psic[id];
             }
         }
+    }
+
+    if (signcount > 1)
+    {
+        RUNTIME_INFO(printf("sign changes: %i\n", signcount));
     }
 
     #ifdef SHOW_TIMING_INFO
