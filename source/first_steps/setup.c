@@ -438,8 +438,8 @@ double phi_init(double x, double y, double z, double *ph) {
     /* double mean = 6.319569842; // somewhere at the end of 50 e-fold inflation */
 
     // karstens first set original
-    double mean = 1.0;
-    double amplitude = 1.0e-5;
+    /* double mean = 1.0; */
+    /* double amplitude = 1.0e-5; */
 
     // karstens first set rescaling field instead of mass
     /* double mean = 6.0e3; */
@@ -474,9 +474,9 @@ double phi_init(double x, double y, double z, double *ph) {
     /* double amplitude = -2.26961e-06; */
 
     // compare_2, pos= 6000
-    /* double scale= 1.0e3; */
-    /* double mean = 0.0510864; */
-    /* double amplitude = -3.743790000000000e-07 * scale; */
+    double scale= 1.0e3;
+    double mean = 0.0510864;
+    double amplitude = -3.743790000000000e-07 * scale;
 
     // compare_2, pos= 1
     /* double mean = 5.0; */
@@ -509,7 +509,7 @@ double phi_init(double x, double y, double z, double *ph) {
 
 // initial values of the time deriv. of the scalar field, make sure its periodic
 double dphi_init(double x, double y, double z, double *ph) {
-    return 0.0;
+    /* return 0.0; */
 
     /* double mean = -1.447595527218249e-8; */
     /* double amplitude = 1.794195724493731e-7; */
@@ -529,12 +529,12 @@ double dphi_init(double x, double y, double z, double *ph) {
     /* double mean = -4.397960000000000e-06; */
     /* double amplitude = 1.816140000000000e-08; */
 
-    double mean = -0.00475989;
-    double amplitude = -2.91473e-09;
+    /* double mean = -0.00475989; */
+    /* double amplitude = -2.91473e-09; */
 
-    /* double scale = 1.0e3; */
-    /* double mean = 3.255190000000000e-04; */
-    /* double amplitude = 1.742130000000000e-08 * scale; */
+    double scale = 1.0e3;
+    double mean = 3.255190000000000e-04;
+    double amplitude = 1.742130000000000e-08 * scale;
 
     /* double mean = -0.00806088; */
     /* double amplitude = -1.134420000000000e-20; */

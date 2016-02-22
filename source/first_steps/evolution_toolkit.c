@@ -318,11 +318,9 @@ void mk_psi_and_dpsi(double *f) {
     dphi_mean = mean(f + N, N);
     double dphiextra = 0.5 * a2 * dphi_mean * dphi_mean;
 
-    #ifdef CHECK_FOR_CANCELLATION
-    int zerocount = 0;
-    #endif
-    int sign = 1;
-    int signcount = 0;
+    /* int zerocount = 0; */
+    /* int sign = 1; */
+    /* int signcount = 0; */
     double k_sq;
     size_t osx, osy, id;
     #pragma omp parallel for private(k_sq, osx, osy, id)
@@ -360,22 +358,20 @@ void mk_psi_and_dpsi(double *f) {
                 {
                     k_sq += pars.y.k2 * j * j;
                 }
-                if (((k_sq + dphiextra) > 0 ? 1 : -1) != sign)
-                {
-                    /* RUNTIME_INFO(printf("sign change at i=%zu, j=%zu, k=%zu\n",i,j,k)); */
-                    signcount++;
-                    sign *= -1;
-                }
+                /* if (((k_sq + dphiextra) > 0 ? 1 : -1) != sign) */
+                /* { */
+                /*     /1* RUNTIME_INFO(printf("sign change at i=%zu, j=%zu, k=%zu\n",i,j,k)); *1/ */
+                /*     signcount++; */
+                /*     sign *= -1; */
+                /* } */
                 if (-k_sq < 1.0e-10 || fabs(k_sq + dphiextra) < 1.0e-10)
                 {
                     tmp.psic[id] = 0.0;
-                    #ifdef CHECK_FOR_CANCELLATION
-                    if (++zerocount > 1)
-                    {
-                        RUNTIME_INFO(printf("cancellation in psi at time: "
-                                    "%f\n", pars.t.t));
-                    }
-                    #endif
+                    /* if (++zerocount > 1) */
+                    /* { */
+                    /*     RUNTIME_INFO(printf("cancellation in psi at time: " */
+                    /*                 "%f\n", pars.t.t)); */
+                    /* } */
                 }
                 else
                 {
@@ -383,16 +379,15 @@ void mk_psi_and_dpsi(double *f) {
                         (tmp.deltarhoc[id] + 3.0 * hubble * tmp.fc[id]) /
                         ((k_sq + dphiextra) * N);
                 }
-                tmp.dpsic[id] = 0.5 * tmp.fc[id] / N -
-                        hubble * tmp.psic[id];
+                tmp.dpsic[id] = 0.5 * tmp.fc[id] / N - hubble * tmp.psic[id];
             }
         }
     }
 
-    if (signcount > 1)
-    {
-        RUNTIME_INFO(printf("sign changes: %i\n", signcount));
-    }
+    /* if (signcount > 1) */
+    /* { */
+    /*     RUNTIME_INFO(printf("sign changes: %i\n", signcount)); */
+    /* } */
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();

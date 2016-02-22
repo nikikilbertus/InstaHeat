@@ -20,7 +20,6 @@ during execution
 #define SHOW_RUNTIME_INFO // recommended
 #define SHOW_TIMING_INFO // recommended
 /* #define CHECK_FOR_NAN // not recommended (performance) */
-#define CHECK_FOR_CANCELLATION // not recommended (performance)
 /* #define ENABLE_PROFILER // only recommended for debugging */
 /* #define DEBUG // only recommended for debugging (huge output!) */
 /* #define RUN_TESTS_ONLY // testing only (tests.c) */
@@ -76,7 +75,7 @@ during execution
  *  too), this parameter determines how many time slices are buffered before
  *  writing them to disk, beware of the memory consumption of large buffers!
  */
-#define WRITE_OUT_BUFFER_NUMBER (10)
+#define WRITE_OUT_BUFFER_NUMBER (30)
 
 /**
  *  there is a (very crude and biased!) estimation of the power spectrum to
@@ -89,17 +88,17 @@ during execution
 #define TIME_STEP_SKIPS         (1)
 
 // spatial output strides
-#define STRIDE_X                (4)
+#define STRIDE_X                (8)
 #define STRIDE_Y                (1)
 #define STRIDE_Z                (1)
 
 // -----------------------simulation preferences--------------------------------
 // how many threads to use for openmp parallelization (also used by fftw)
 // if <= 0, the return value of omp_get_max_threads() is used
-#define THREAD_NUMBER           (1)
+#define THREAD_NUMBER           (0)
 
 // the plan flag used for fftw plans (ESTIMATE, MEASURE, PATIENT, EXHAUSTIVE)
-#define FFTW_DEFAULT_FLAG       (FFTW_ESTIMATE)
+#define FFTW_DEFAULT_FLAG       (FFTW_PATIENT)
 
 /**
  *  apply a frequency cutoff filter at each time step during the time evolution
@@ -128,22 +127,22 @@ during execution
 
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
-#define DELTA_T                 (0.000001)
+#define DELTA_T                 (0.0001)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (5.0e1)
+#define FINAL_TIME              (2.0e7)
 #define MAX_STEPS               (1e12)
 #define MINIMAL_DELTA_T         (1.0e-10)
 
 // ----------------parameters used in the potential-----------------------------
 /* #define MASS                    (0.11026) // for 50 e-fold hom inflation */
-/* #define MASS                    (0.002000003836216) // compare_2 compare_psi */
-#define MASS                    (6.0) // for compare.dat
-#define MASS_KARSTEN            (1.0e-3)
+#define MASS                    (0.002000003836216) // compare_2 compare_psi
+/* #define MASS                    (6.0) // for compare.dat */
+#define MASS_KARSTEN            (1.0e-2)
 #define COUPLING                (1.0) // coupling in a phi4 potential
 #define LAMBDA                  (4.721e-5) // "cosmological constant"
 /* #define A_INITIAL               (1.05249e3) // compare_2, compare_psi, 5500 */
-/* #define A_INITIAL               (4.09376e3) // compare_2, compare_psi, 6000 */
-#define A_INITIAL               (1.0)
+#define A_INITIAL               (4.09376e3) // compare_2, compare_psi, 6000
+/* #define A_INITIAL               (1.0) */
 // for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
 
 // -------------------additional parameters for dopri853------------------------

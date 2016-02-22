@@ -1,4 +1,4 @@
-name = 'compare';
+name = 'compare_3dnonlin4e5';
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
@@ -14,15 +14,19 @@ rhovar = h5read(name, '/rho_variance');
 rhorms = sqrt(rhovar ./ rhomean.^2);
 
 phimean = h5read(name, '/phi_mean');
-phivar = h5read(name, '/phi_variance');
 [phipks, phipkpos] = findpeaks(phimean);
 phienv = spline(a(phipkpos), phipks, a);
-phirms = sqrt(phivar ./ phienv.^2);
+phivar = h5read(name, '/phi_variance');
+[phipks, phipkpos] = findpeaks(phivar);
+phivarenv = spline(a(phipkpos), phipks, a);
+phirms = sqrt(phivarenv ./ phienv.^2);
 
 dphimean = h5read(name, '/dphi_mean');
-dphivar = h5read(name, '/dphi_variance');
 [dphipks, dphipkpos] = findpeaks(dphimean);
 dphienv = spline(a(dphipkpos), dphipks, a);
+dphivar = h5read(name, '/dphi_variance');
+[dphipks, dphipkpos] = findpeaks(dphivar);
+dphivarenv = spline(a(dphipkpos), dphipks, a);
 dphirms = sqrt(dphivar ./ dphienv.^2);
 
 psivar = h5read(name, '/psi_variance');
