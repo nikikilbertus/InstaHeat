@@ -509,7 +509,7 @@ void prepare_and_save_timeslice() {
     mk_gradient_squared_and_laplacian(field);
     evo_flags.compute_pow_spec = 0;
     mk_rho(field);
-    mk_psi_and_dpsi(field);
+    mk_psi(field);
     mk_means_and_variances();
     save();
 }
