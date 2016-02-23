@@ -61,8 +61,8 @@ void mk_rho(double *f) {
     double a = f[3 * N];
     rho_mean = 0.0;
 
-    double df;
-    #pragma omp parallel for default(shared) private(df) reduction(+: rho_mean)
+    double df, p;
+    #pragma omp parallel for private(df, p) reduction(+: rho_mean)
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
@@ -74,32 +74,22 @@ void mk_rho(double *f) {
     rho_mean /= N;
 }
 
-// update rho now that psi is known
-void update_rho(double *f) {
-    size_t N = pars.N;
-    double df;
-    #pragma omp parallel for private(df)
-    for (size_t i = 0; i < N; ++i)
-    {
-        df = f[N + i];
-        rho[i] -= psi[i] * df * df;
-    }
-}
-
 // compute the laplacian and the squared gradient of the input and store them
 void mk_gradient_squared_and_laplacian(double *in) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
-    size_t N  = pars.N;
     size_t Mx = pars.x.M;
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
+    size_t N  = pars.N;
+    size_t N2 = 2 * N;
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_r2c(p_fw, in, tmp.phic);
+    fftw_execute_dft_r2c(p_fw, in + N2, tmp.psic);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
@@ -168,6 +158,7 @@ void mk_gradient_squared_and_laplacian(double *in) {
                 }
                 // laplacian
                 tmp.phic[id] *= k_sq / N;
+                tmp.psic[id] *= k_sq / N;
             }
         }
     }
@@ -185,6 +176,7 @@ void mk_gradient_squared_and_laplacian(double *in) {
         }
     }
     fftw_execute_dft_c2r(p_bw, tmp.phic, tmp.lap);
+    fftw_execute_dft_c2r(p_bw, tmp.psic, tmp.f);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
