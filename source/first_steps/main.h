@@ -58,7 +58,7 @@ during execution
 #define OUTPUT_PHI_VARIANCE
 #define OUTPUT_DPHI_VARIANCE
 #define OUTPUT_PSI_VARIANCE
-#define OUTPUT_DPSI_VARIANCE
+/* #define OUTPUT_DPSI_VARIANCE */
 #define OUTPUT_RHO_VARIANCE
 
 // ------------file handling parameters for writing to disk---------------------
@@ -85,7 +85,7 @@ during execution
 #define POWER_SPECTRUM_BINS     (50)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (1)
+#define TIME_STEP_SKIPS         (5)
 
 // spatial output strides
 #define STRIDE_X                (8)
@@ -126,7 +126,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (1.0e-5)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (2.0e7)
+#define FINAL_TIME              (1.0e4)
 #define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-10)
 
@@ -152,8 +152,8 @@ during execution
 #define SAFE                    (0.9)
 
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-12)
-#define ABSOLUTE_TOLERANCE      (1.0e-12)
+#define RELATIVE_TOLERANCE      (1.0e-7)
+#define ABSOLUTE_TOLERANCE      (1.0e-7)
 
 // ------------------------typedefs---------------------------------------------
 // representing one spatial dimension of a multi dimensional grid

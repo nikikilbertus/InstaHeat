@@ -1,5 +1,5 @@
 st = 800;
-s = 1;
+s = 5900;
 
 disp('a:');
 disp(ak(pos) - a(1));

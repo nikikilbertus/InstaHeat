@@ -135,8 +135,8 @@ if dim == 1
     ddphipad.*(-1 + 4.*psi) - (1 - 2.*psi).*Vprime) + xxphi) ./ amat.^2;
     
     if max(ak) > max(a)
-%         I = (ak > 0.8*ak(pos));
-        I = (ak > 1);
+        I = (ak > 0.8*ak(pos));
+%         I = (ak > 1);
         phi0ksp = spline(ak(I),phi0k(I),a);
         phi1ksp = spline(ak(I),phi1k(I),a);
         dphi0ksp = spline(ak(I),dphi0k(I),a);
