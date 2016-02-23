@@ -253,17 +253,6 @@ void mk_grid() {
         grid[k] = az + (bz - az) * (k - Nx - Ny) / Nz;
     }
 
-    #ifdef DEBUG
-    puts("x");
-    print_vector(grid, Nx);
-    puts("\n");
-    puts("y");
-    print_vector(grid + Nx, Ny);
-    puts("\n");
-    puts("z");
-    print_vector(grid + Nx + Ny, Nz);
-    puts("\n");
-    #endif
     RUNTIME_INFO(puts("Constructed gridpoints.\n"));
 }
 
@@ -354,20 +343,14 @@ void mk_initial_conditions() {
     }
 
     // initialize a
-    field[2 * N] = A_INITIAL;
+    field[3 * N] = A_INITIAL;
+
+    // initialize psi
+    mk_initial_psi();
+
     free(theta);
     #endif
 
-    // console output for debugging
-    #ifdef DEBUG
-    puts("phi");
-    print_vector(field, N);
-    puts("\ndphi");
-    print_vector(field + N, N);
-    puts("\na");
-    print_vector(field + 2 * N, 1);
-    puts("\n");
-    #endif
     RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
 }
 
@@ -560,6 +543,10 @@ double dphi_init(double x, double y, double z, double *ph) {
     /* return -0.089318193; // somewhere at end of 50 e-fold inflation */
 }
 
+void mk_initial_psi() {
+    //TODO
+}
+
 void free_and_destroy_all() {
     destroy_and_cleanup_fftw();
     free_external();
@@ -581,8 +568,6 @@ void free_external() {
     fftw_free(dfield);
     fftw_free(dfield_new);
     free(rho);
-    free(psi);
-    free(dpsi);
     free(pow_spec);
     free(time_buf);
     free(f_a_buf);
