@@ -35,7 +35,6 @@ void initialize_dopri853() {
     dp.err_old = 1.0e-4;
     dp.reject = 0;
     dp.eps = DBL_EPSILON;
-    dp.dense = 0; // currently unused
     RUNTIME_INFO(puts("Initialized dopri853 parameters.\n"));
 }
 
@@ -130,7 +129,7 @@ void run_dopri853() {
 }
 
 int perform_step(const double dt_try) {
-    size_t Ntot = 2 * pars.N + 1;
+    size_t Ntot = 3 * pars.N + 1;
     double dt = dt_try;
     for ( ; ; )
     {
@@ -171,7 +170,7 @@ int perform_step(const double dt_try) {
 void try_step(const double dt) {
     size_t i;
     double t = dp.t;
-    size_t Ntot = 2 * pars.N + 1;
+    size_t Ntot = 3 * pars.N + 1;
     // ------------ 1 ------------
     // is already done in perform_step
 
@@ -310,10 +309,10 @@ void try_step(const double dt) {
 }
 
 double error(const double dt) {
-    size_t Ntot = 2 * pars.N + 1;
+    size_t Ntot = 3 * pars.N + 1;
     double err = 0.0, err2 = 0.0, sk, deno;
 
-    #pragma omp parallel for default(shared) private(sk) reduction(+:err,err2)
+    #pragma omp parallel for private(sk) reduction(+:err,err2)
     for (size_t i = 0; i < Ntot; ++i)
     {
         sk = dp.a_tol + dp.r_tol * MAX(fabs(field[i]), fabs(field_new[i]));
@@ -375,110 +374,8 @@ int success(const double err, double *dt) {
     }
 }
 
-void prepare_dense_output(const double dt) {
-    size_t Ntot = 2 * pars.N + 1;
-    double t = dp.t;
-    double fdiff, bspl;
-    double *ftmp = tmp.xphi;
-
-    #pragma omp parallel for private(fdiff, bspl)
-    for (size_t i = 0; i < Ntot; ++i)
-    {
-        dpv.rcont1[i] = field[i];
-
-        fdiff = field_new[i] - field[i];
-        dpv.rcont2[i] = fdiff;
-        bspl = dt * dfield[i] - fdiff;
-
-        dpv.rcont3[i] = bspl;
-
-        dpv.rcont4[i] = fdiff - dt * dfield_new[i] - bspl;
-
-        dpv.rcont5[i] = dpc.d41 * dfield[i]  + dpc.d46 * dpv.k6[i]   +
-                        dpc.d47 * dpv.k7[i]  + dpc.d48 * dpv.k8[i]   +
-                        dpc.d49 * dpv.k9[i]  + dpc.d410 * dpv.k10[i] +
-                        dpc.d411 * dpv.k2[i] + dpc.d412 * dpv.k3[i];
-
-        dpv.rcont6[i] = dpc.d51 * dfield[i]  + dpc.d56 * dpv.k6[i]   +
-                        dpc.d57 * dpv.k7[i]  + dpc.d58 * dpv.k8[i]   +
-                        dpc.d59 * dpv.k9[i]  + dpc.d510 * dpv.k10[i] +
-                        dpc.d511 * dpv.k2[i] + dpc.d512 * dpv.k3[i];
-
-        dpv.rcont7[i] = dpc.d61 * dfield[i]  + dpc.d66 * dpv.k6[i]   +
-                        dpc.d67 * dpv.k7[i]  + dpc.d68 * dpv.k8[i]   +
-                        dpc.d69 * dpv.k9[i]  + dpc.d610 * dpv.k10[i] +
-                        dpc.d611 * dpv.k2[i] + dpc.d612 * dpv.k3[i];
-
-        dpv.rcont8[i] = dpc.d71 * dfield[i]  + dpc.d76 * dpv.k6[i]   +
-                        dpc.d77 * dpv.k7[i]  + dpc.d78 * dpv.k8[i]   +
-                        dpc.d79 * dpv.k9[i]  + dpc.d710 * dpv.k10[i] +
-                        dpc.d711 * dpv.k2[i] + dpc.d712 * dpv.k3[i];
-    }
-
-    // first of three extra function evaluations
-    #pragma omp parallel for
-    for (size_t i = 0; i < Ntot; ++i)
-    {
-        ftmp[i] = field[i] + dt *
-            (dpc.a141 * dfield[i] + dpc.a147 * dpv.k7[i] +
-             dpc.a148 * dpv.k8[i] + dpc.a149 * dpv.k9[i] +
-             dpc.a1410 * dpv.k10[i] + dpc.a1411 * dpv.k2[i] +
-             dpc.a1412 * dpv.k3[i]  + dpc.a1413 * dfield_new[i]);
-    }
-    mk_rhs(t + dpc.c14 * dt, ftmp, dpv.k10);
-
-    // second of three extra function evaluations
-    #pragma omp parallel for
-    for (size_t i = 0; i < Ntot; ++i)
-    {
-        ftmp[i] = field[i] + dt *
-            (dpc.a151 * dfield[i] + dpc.a156 * dpv.k6[i] +
-             dpc.a157 * dpv.k7[i] + dpc.a158 * dpv.k8[i] +
-             dpc.a1511 * dpv.k2[i] + dpc.a1512 * dpv.k3[i] +
-             dpc.a1513 * dfield_new[i] + dpc.a1514 * dpv.k10[i]);
-    }
-    mk_rhs(t + dpc.c15 * dt, ftmp, dpv.k2);
-
-    // third of three extra function evaluations
-    #pragma omp parallel for
-    for (size_t i = 0; i < Ntot; ++i)
-    {
-        ftmp[i] = field[i] + dt *
-            (dpc.a161 * dfield[i] + dpc.a166 * dpv.k6[i] +
-             dpc.a167 * dpv.k7[i] + dpc.a168 * dpv.k8[i] +
-             dpc.a169 * dpv.k9[i] + dpc.a1613 * dfield_new[i] +
-             dpc.a1614 * dpv.k10[i] + dpc.a1615 * dpv.k2[i]);
-    }
-    mk_rhs(t + dpc.c16 * dt, ftmp, dpv.k3);
-
-    #pragma omp parallel for
-    for (size_t i = 0; i < Ntot; ++i)
-    {
-        dpv.rcont5[i] = dt *
-            (dpv.rcont5[i] + dpc.d413 * dfield_new[i] + dpc.d414 * dpv.k10[i] +
-             dpc.d415 * dpv.k2[i] + dpc.d416 * dpv.k3[i]);
-        dpv.rcont6[i] = dt *
-           (dpv.rcont6[i] + dpc.d513 * dfield_new[i] + dpc.d514 * dpv.k10[i] +
-            dpc.d515 * dpv.k2[i] + dpc.d516 * dpv.k3[i]);
-        dpv.rcont7[i] = dt *
-           (dpv.rcont7[i] + dpc.d613 * dfield_new[i] + dpc.d614 * dpv.k10[i] +
-            dpc.d615 * dpv.k2[i] + dpc.d616 * dpv.k3[i]);
-        dpv.rcont8[i] = dt *
-           (dpv.rcont8[i] + dpc.d713 * dfield_new[i] + dpc.d714 * dpv.k10[i] +
-            dpc.d715 * dpv.k2[i] + dpc.d716 * dpv.k3[i]);
-    }
-}
-
-double dense_output(const size_t i, const double t, const double dt) {
-    double s = (t - dp.t_old) / dt;
-    double s1 = 1.0 - s;
-    return dpv.rcont1[i] + s * (dpv.rcont2[i] + s1 * (dpv.rcont3[i] +
-           s * (dpv.rcont4[i] + s1 * (dpv.rcont5[i] + s * (dpv.rcont6[i] +
-           s1 * (dpv.rcont7[i] + s * dpv.rcont8[i]))))));
-}
-
 void allocate_dopri853_values() {
-    size_t Ntot = 2 * pars.N + 1;
+    size_t Ntot = 3 * pars.N + 1;
 
     dpv.k2    = fftw_malloc(Ntot * sizeof *dpv.k2);
     dpv.k3    = fftw_malloc(Ntot * sizeof *dpv.k3);
@@ -494,19 +391,8 @@ void allocate_dopri853_values() {
     dpv.yerr  = fftw_malloc(Ntot * sizeof *dpv.yerr);
     dpv.yerr2 = fftw_malloc(Ntot * sizeof *dpv.yerr2);
 
-    dpv.rcont1 = fftw_malloc(Ntot * sizeof *dpv.rcont1);
-    dpv.rcont2 = fftw_malloc(Ntot * sizeof *dpv.rcont2);
-    dpv.rcont3 = fftw_malloc(Ntot * sizeof *dpv.rcont3);
-    dpv.rcont4 = fftw_malloc(Ntot * sizeof *dpv.rcont4);
-    dpv.rcont5 = fftw_malloc(Ntot * sizeof *dpv.rcont5);
-    dpv.rcont6 = fftw_malloc(Ntot * sizeof *dpv.rcont6);
-    dpv.rcont7 = fftw_malloc(Ntot * sizeof *dpv.rcont7);
-    dpv.rcont8 = fftw_malloc(Ntot * sizeof *dpv.rcont8);
-
     if (!(dpv.k2 && dpv.k3 && dpv.k4 && dpv.k5 && dpv.k6 && dpv.k7 && dpv.k8 &&
-          dpv.k9 && dpv.k10 && dpv.k_tmp && dpv.yerr && dpv.yerr2 &&
-          dpv.rcont1 && dpv.rcont2 && dpv.rcont3 && dpv.rcont4 && dpv.rcont5 &&
-          dpv.rcont6 && dpv.rcont7 && dpv.rcont8))
+          dpv.k9 && dpv.k10 && dpv.k_tmp && dpv.yerr && dpv.yerr2))
     {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
@@ -528,14 +414,5 @@ void free_dopri853_values() {
 
     free(dpv.yerr);
     free(dpv.yerr2);
-
-    free(dpv.rcont1);
-    free(dpv.rcont2);
-    free(dpv.rcont3);
-    free(dpv.rcont4);
-    free(dpv.rcont5);
-    free(dpv.rcont6);
-    free(dpv.rcont7);
-    free(dpv.rcont8);
     RUNTIME_INFO(puts("Freed memory of dopri853 variables.\n"));
 }
