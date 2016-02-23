@@ -17,11 +17,15 @@ evolution_flags_t evo_flags = {.filter = 0, .compute_pow_spec = 0};
 void mk_rhs(const double t, double *f, double *result) {
     size_t N = pars.N;
     size_t N2 = 2 * N;
-    double a = f[N2];
+    size_t N3 = 3 * N;
+    double a = f[N3];
+    double a2 = a * a;
+    double h3;
 
     mk_gradient_squared_and_laplacian(f);
     mk_rho(f);
     double hubble = sqrt(rho_mean / 3.0);
+    h3 = 3.0 * hubble;
 
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
@@ -29,65 +33,32 @@ void mk_rhs(const double t, double *f, double *result) {
         result[i] = f[N + i];
     }
 
-    #ifdef INCLUDE_PSI
-    mk_psi_and_dpsi(f);
-    // TODO: discuss this
-    /* update_rho(f); */
+    #pragma omp parallel for
+    for (size_t i = N2; i < N3; ++i)
+    {
+        result[i] = -f[i] - 0.5 * (rho[i - N2] - rho_mean) / h3 -
+            tmp.f[i - N2] / (h3 * a2);
+    }
+
     double df, p;
     #pragma omp parallel for private(df, p)
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
-        p = psi[i];
-        // all
-        result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / (a * a) -
-            (3.0 * hubble - 4.0 * dpsi[i]) * df -
+        p = f[N2 + i];
+        result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / a2 -
+            (3.0 * hubble - 4.0 * result[N2 + i]) * df -
             (1.0 + 2.0 * p) * potential_prime(f[i]);
-
-        // only potential
-        /* result[N + i] = tmp.lap[i] / (a * a) - */
-        /*     3.0 * hubble * df - */
-        /*     (1.0 + 2.0 * p) * potential_prime(f[i]); */
-
-        // only laplacian
-        /* result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / (a * a) - */
-        /*     3.0 * hubble * df - */
-        /*     potential_prime(f[i]); */
-
-        // only dpsi
-        /* result[N + i] = tmp.lap[i] / (a * a) - */
-        /*     (3.0 * hubble - 4.0 * dpsi[i]) * df - */
-        /*     potential_prime(f[i]); */
-
-        // without dpsi
-        /* result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / (a * a) - */
-        /*     3.0 * hubble * df - */
-        /*     (1.0 + 2.0 * p) * potential_prime(f[i]); */
-
-        // without dpsi modified
-        /* result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / (a * a) - */
-        /*     (3.0 + 4.0 * p) * hubble * df - */
-        /*     (1.0 + 2.0 * p) * potential_prime(f[i]); */
-
-        // without psi
-        /* result[N + i] = tmp.lap[i] / (a * a) - 3.0 * hubble * f[N + i] - */
-        /*     potential_prime(f[i]); */
     }
-    #else
-    #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i)
-    {
-        result[N + i] = tmp.lap[i] / (a * a) - 3.0 * hubble * f[N + i] -
-            potential_prime(f[i]);
-    }
-    #endif
-    result[N2] = a * hubble;
+
+    result[N3] = a * hubble;
 }
 
 // compute energy density rho & average value
 void mk_rho(double *f) {
     size_t N = pars.N;
-    double a = f[2 * N];
+    size_t N2 = 2 * N;
+    double a = f[3 * N];
     rho_mean = 0.0;
 
     double df;
@@ -95,7 +66,9 @@ void mk_rho(double *f) {
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
-        rho[i] = (df * df + tmp.grad[i] / (a * a)) / 2.0 + potential(f[i]);
+        p = f[N2 + i];
+        rho[i] = (0.5 - p) * df * df + (0.5 + p) * tmp.grad[i] / (a * a) +
+            potential(f[i]);
         rho_mean += rho[i];
     }
     rho_mean /= N;

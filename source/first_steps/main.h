@@ -110,9 +110,6 @@ during execution
  */
 /* #define ENABLE_FFT_FILTER */
 
-// include scalar metric perturbation Psi
-#define INCLUDE_PSI
-
 // ------------------computational domain---------------------------------------
 // spatial
 #define GRIDPOINTS_X            (512)

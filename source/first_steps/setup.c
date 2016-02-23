@@ -120,7 +120,6 @@ void allocate_external() {
     size_t Ny   = pars.y.N;
     size_t Nz   = pars.z.N;
     size_t N    = pars.N;
-    size_t N2   = 2 * N;
     size_t N3   = 3 * N;
     size_t Ntot = N3 + 1;
     size_t buf_size = pars.file.buf_size;
