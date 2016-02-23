@@ -121,7 +121,8 @@ void allocate_external() {
     size_t Nz   = pars.z.N;
     size_t N    = pars.N;
     size_t N2   = 2 * N;
-    size_t Ntot = N2 + 1;
+    size_t N3   = 3 * N;
+    size_t Ntot = N3 + 1;
     size_t buf_size = pars.file.buf_size;
     size_t bins = pars.file.bins_powspec;
     size_t outN = pars.outN;
@@ -131,12 +132,11 @@ void allocate_external() {
     field_new  = fftw_malloc(Ntot * sizeof *field_new);
     dfield     = fftw_malloc(Ntot * sizeof *dfield);
     dfield_new = fftw_malloc(Ntot * sizeof *dfield_new);
-    psi        = fftw_malloc(N * sizeof *psi);
-    dpsi       = fftw_malloc(N * sizeof *dpsi);
     time_buf   = calloc(buf_size, sizeof *time_buf);
     f_a_buf    = calloc(buf_size, sizeof *f_a_buf);
     rho        = fftw_malloc(N * sizeof *rho);
     pow_spec   = calloc(bins, sizeof *pow_spec);
+
     #ifdef OUTPUT_PHI
     phi_buf       = calloc(buf_size * outN, sizeof *phi_buf);
     #endif
@@ -199,8 +199,7 @@ void allocate_external() {
     tmp.dpsic = fftw_malloc(M * sizeof *tmp.dpsic);
 
     // general purpose double memory blocks for temporary use
-    // TODO: don't use xphi in dense output
-    tmp.xphi = fftw_malloc(Ntot * sizeof *tmp.xphi); // used in dopri853 (dense)
+    tmp.xphi = fftw_malloc(N * sizeof *tmp.xphi);
     tmp.yphi = fftw_malloc(N * sizeof *tmp.yphi);
     tmp.zphi = fftw_malloc(N * sizeof *tmp.zphi);
     tmp.grad = fftw_malloc(N * sizeof *tmp.grad);
@@ -208,7 +207,7 @@ void allocate_external() {
     tmp.f    = fftw_malloc(N * sizeof *tmp.f);
     tmp.deltarho = fftw_malloc(N * sizeof *tmp.deltarho);
 
-    if (!(grid && field && field_new && dfield && dfield_new && psi && dpsi &&
+    if (!(grid && field && field_new && dfield && dfield_new &&
         rho && pow_spec && tmp.phic  && tmp.xphic && tmp.yphic && tmp.zphic &&
         tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap && tmp.psic  &&
         tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f && tmp.deltarho))

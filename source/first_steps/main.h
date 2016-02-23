@@ -108,7 +108,7 @@ during execution
  *  for smaller grids, and simple (not too nonlinear) scenarios rather try to
  *  adjust tolerances and see what happens to the power spectrum
  */
-#define ENABLE_FFT_FILTER
+/* #define ENABLE_FFT_FILTER */
 
 // include scalar metric perturbation Psi
 #define INCLUDE_PSI
@@ -271,6 +271,8 @@ extern double *field_new;
 extern double *dfield_new;
 extern double *phi_buf;
 extern double *dphi_buf;
+extern double *psi_buf;
+extern double *dpsi_buf;
 
 extern double phi_mean;
 extern double phi_var;
@@ -281,12 +283,6 @@ extern double dphi_mean;
 extern double dphi_var;
 extern double *dphi_mean_buf;
 extern double *dphi_var_buf;
-
-// the scalar perturbation psi
-extern double *psi;
-extern double *dpsi;
-extern double *psi_buf;
-extern double *dpsi_buf;
 
 extern double psi_mean;
 extern double psi_var;
