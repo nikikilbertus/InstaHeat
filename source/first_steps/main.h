@@ -263,6 +263,7 @@ extern double *grid;
 extern double *time_buf;
 
 // the scalar field plus scaling parameter a we evolve, the temporal derivatives
+// the field contains phi, dphi, a, psi
 // and the buffer for the scalar field
 extern double *field;
 extern double *dfield;
