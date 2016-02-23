@@ -36,7 +36,7 @@ void mk_rhs(const double t, double *f, double *result) {
     #pragma omp parallel for
     for (size_t i = N2; i < N3; ++i)
     {
-        result[i] = -f[i] - 0.5 * (rho[i - N2] - rho_mean) / h3 -
+        result[i] = -hubble * f[i] - 0.5 * (rho[i - N2] - rho_mean) / h3 +
             tmp.f[i - N2] / (h3 * a2);
     }
 
@@ -251,11 +251,12 @@ inline double potential_prime(const double f) {
 void mk_psi_and_dpsi(double *f) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
-    size_t N = pars.N;
     size_t Mx = pars.x.M;
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
-    double a = f[2 * N];
+    size_t N  = pars.N;
+    size_t N2 = 2 * N;
+    double a  = f[3 * N];
     double a2 = a * a;
     double hubble = sqrt(rho_mean / 3.0);
 
@@ -279,13 +280,9 @@ void mk_psi_and_dpsi(double *f) {
     fftw_time_exe += get_wall_time();
     #endif
 
-    //TODO: if dphi_mean is not computed here anymore, include in mk_means...
     dphi_mean = mean(f + N, N);
     double dphiextra = 0.5 * a2 * dphi_mean * dphi_mean;
 
-    /* int zerocount = 0; */
-    /* int sign = 1; */
-    /* int signcount = 0; */
     double k_sq;
     size_t osx, osy, id;
     #pragma omp parallel for private(k_sq, osx, osy, id)
@@ -323,20 +320,9 @@ void mk_psi_and_dpsi(double *f) {
                 {
                     k_sq += pars.y.k2 * j * j;
                 }
-                /* if (((k_sq + dphiextra) > 0 ? 1 : -1) != sign) */
-                /* { */
-                /*     /1* RUNTIME_INFO(printf("sign change at i=%zu, j=%zu, k=%zu\n",i,j,k)); *1/ */
-                /*     signcount++; */
-                /*     sign *= -1; */
-                /* } */
                 if (-k_sq < 1.0e-10 || fabs(k_sq + dphiextra) < 1.0e-10)
                 {
                     tmp.psic[id] = 0.0;
-                    /* if (++zerocount > 1) */
-                    /* { */
-                    /*     RUNTIME_INFO(printf("cancellation in psi at time: " */
-                    /*                 "%f\n", pars.t.t)); */
-                    /* } */
                 }
                 else
                 {
@@ -344,21 +330,14 @@ void mk_psi_and_dpsi(double *f) {
                         (tmp.deltarhoc[id] + 3.0 * hubble * tmp.fc[id]) /
                         ((k_sq + dphiextra) * N);
                 }
-                tmp.dpsic[id] = 0.5 * tmp.fc[id] / N - hubble * tmp.psic[id];
             }
         }
     }
 
-    /* if (signcount > 1) */
-    /* { */
-    /*     RUNTIME_INFO(printf("sign changes: %i\n", signcount)); */
-    /* } */
-
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
-    fftw_execute_dft_c2r(p_bw, tmp.psic, psi);
-    fftw_execute_dft_c2r(p_bw, tmp.dpsic, dpsi);
+    fftw_execute_dft_c2r(p_bw, tmp.psic, f + N2);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     poisson_time += get_wall_time();
@@ -537,6 +516,7 @@ void prepare_and_save_timeslice() {
 
 void mk_means_and_variances() {
     size_t N = pars.N;
+    size_t N2 = 2 * N;
 
     //TODO[performance]: parallel sections instead of parallel loops here?
     #if defined(OUTPUT_PHI_MEAN) || defined(OUTPUT_PHI_VARIANCE)
@@ -546,24 +526,18 @@ void mk_means_and_variances() {
     phi_var  = variance(phi_mean, field, N);
     #endif
 
-    // dphi_mean is always computed
-    // TODO: change that if dphi_mean is not computed in mk_psi_and_dpsi anymore
+    #if defined(OUTPUT_DPHI_MEAN) || defined(OUTPUT_DPHI_VARIANCE)
+    dphi_mean = mean(field + N, N);
+    #endif
     #ifdef OUTPUT_DPHI_VARIANCE
     dphi_var  = variance(dphi_mean, field + N, N);
     #endif
 
     #if defined(OUTPUT_PSI_MEAN) || defined(OUTPUT_PSI_VARIANCE)
-    psi_mean = mean(psi, N);
+    psi_mean = mean(field + N2, N);
     #endif
     #ifdef OUTPUT_PSI_VARIANCE
-    psi_var  = variance(psi_mean, psi, N);
-    #endif
-
-    #if defined(OUTPUT_DPSI_MEAN) || defined(OUTPUT_DPSI_VARIANCE)
-    dpsi_mean = mean(dpsi, N);
-    #endif
-    #ifdef OUTPUT_DPSI_VARIANCE
-    dpsi_var  = variance(dpsi_mean, dpsi, N);
+    psi_var  = variance(psi_mean, field + N2, N);
     #endif
 
     #ifdef OUTPUT_RHO_VARIANCE
