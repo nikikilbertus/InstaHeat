@@ -339,13 +339,14 @@ void save() {
     hsize_t index = pars.file.index;
     hsize_t Nt    = pars.file.buf_size;
     hsize_t N     = pars.N;
+    hsize_t N2    = 2 * N;
     hsize_t bins  = pars.file.bins_powspec;
 
     time_buf[index] = pars.t.t;
-    f_a_buf[index] = field[2 * N];
+    f_a_buf[index] = field[3 * N];
 
     #ifdef CHECK_FOR_NAN
-    if (isnan(pars.t.t) || isnan(field[2 * N]))
+    if (isnan(pars.t.t) || isnan(field[3 * N]))
     {
         fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
             exit(EXIT_FAILURE);
@@ -414,16 +415,17 @@ void save() {
                 dphi_buf[os + idb] = field[N + id];
                 #endif
                 #ifdef OUTPUT_PSI
-                psi_buf[os + idb]  = psi[id];
+                psi_buf[os + idb]  = field[N2 + id];
                 #endif
                 #ifdef OUTPUT_DPSI
-                dpsi_buf[os + idb] = dpsi[id];
+                // TODO if i include dpsi again, change here
+                dpsi_buf[os + idb] = 0.0;
                 #endif
                 #ifdef OUTPUT_RHO
                 rho_buf[os + idb]  = rho[id];
                 #endif
                 #ifdef CHECK_FOR_NAN
-                if (isnan(field[id]) || isnan(psi[id]) || isnan(rho[id]))
+                if (isnan(field[id]) || isnan(rho[id]))
                 {
                     fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
                     exit(EXIT_FAILURE);
