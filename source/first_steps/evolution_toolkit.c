@@ -509,7 +509,7 @@ void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout) {
 
     double filter;
     size_t osx, osy;
-    #pragma omp parallel for private(osx, osy)
+    #pragma omp parallel for private(osx, osy, filter)
     for (size_t i = 0; i < Mx; ++i)
     {
         osx = i * My * Mz;

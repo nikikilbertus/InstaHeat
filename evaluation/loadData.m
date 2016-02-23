@@ -1,5 +1,6 @@
 name = 'compare';
 comp = true;
+karstenpsi = true;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
@@ -27,7 +28,7 @@ end
 if max(ak) > max(a)
     [~, pos] = min((ak - min(a)).^2);
     [~, posmax] = min((ak - max(a)).^2);
-    posmax = posmax + min(20, length(ak) - pos);
+    posmax = posmax + min(10, length(ak) - pos);
 else
     [~, pos] = min((ak - min(a)).^2);
     posmax = length(ak);
@@ -51,7 +52,7 @@ rhorms   = sqrt( (mean(rho.^2) - rhoAvg.^2) ./ rhoAvg.^2 );
 rhormsnn = sqrt( mean(rho.^2) - rhoAvg.^2 ) ./ rhoAvg;
 rhormsn  = sqrt( mean((rho - repmat(rhoAvg,N,1)).^2) ./ rhoAvg.^2 );
 
-rhoalg = (dphi.^2 + (1e-2)^2 * phi.^2) / 2;
+rhoalg = (dphi.^2 + (massk)^2 * phi.^2) / 2;
 rhoAvgalg = mean(rhoalg);
 rhormsalg = sqrt( (mean(rhoalg.^2) - rhoAvgalg.^2) ./ rhoAvgalg.^2 );
 
@@ -65,11 +66,10 @@ if dim == 1
     Vprime = mass^2 * phi;
     ddphi = (1 + 4*psi).*phi ./ amat.^2 - (1 + 2*psi).*V + 4*dpsi.*dphi - 3*Hmat.*dphi;
     
-    
     phik = repmat(phi0k',N,1) + repmat(phi1k',N,1) .* repmat(cos(x),1,length(ak));
     dphik = repmat(dphi0k',N,1) + repmat(dphi1k',N,1) .* repmat(cos(x),1,length(ak));
     
-    rhoalgk = (dphik.^2 + (1e-2)^2 * phik.^2) / 2;
+    rhoalgk = (dphik.^2 + (massk)^2 * phik.^2) / 2;
     rhoAvgalgk = mean(rhoalgk);
     rhormsalgk = sqrt( (mean(rhoalgk.^2) - rhoAvgalgk.^2) ./ rhoAvgalgk.^2 );
     
@@ -141,20 +141,24 @@ if dim == 1
         phi1ksp = spline(ak(I),phi1k(I),a);
         dphi0ksp = spline(ak(I),dphi0k(I),a);
         dphi1ksp = spline(ak(I),dphi1k(I),a);
-        psi1ksp = spline(ak(I),psi1k(I),a);
-        dpsi1ksp = spline(ak(I),dpsi1k(I),a);
-        koveraHsp = spline(ak(I),koveraH(I),a);
-        rhormsksp = spline(ak(I),rhormsk(I),a);
+        if (karstenpsi)
+            psi1ksp = spline(ak(I),psi1k(I),a);
+            dpsi1ksp = spline(ak(I),dpsi1k(I),a);
+            koveraHsp = spline(ak(I),koveraH(I),a);
+            rhormsksp = spline(ak(I),rhormsk(I),a);
+        end
     else
         I = (ak >= ak(pos));
         phi0sp = spline(a,phiAvg,ak(I));
         phi1sp = spline(a,phi1,ak(I));
         dphi0sp = spline(a,dphiAvg,ak(I));
         dphi1sp = spline(a,dphi1,ak(I));
-        psi1sp = spline(a,psi1,ak(I));
-        dpsi1sp = spline(a,dpsi1,ak(I));
-        koverHsp = spline(a,1./H,ak(I));
-        rhormssp = spline(a,rhorms,ak(I));
+        if (karstenpsi)
+            psi1sp = spline(a,psi1,ak(I));
+            dpsi1sp = spline(a,dpsi1,ak(I));
+            koverHsp = spline(a,1./H,ak(I));
+            rhormssp = spline(a,rhorms,ak(I));
+        end
     end
         
 end

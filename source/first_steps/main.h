@@ -75,7 +75,7 @@ during execution
  *  too), this parameter determines how many time slices are buffered before
  *  writing them to disk, beware of the memory consumption of large buffers!
  */
-#define WRITE_OUT_BUFFER_NUMBER (30)
+#define WRITE_OUT_BUFFER_NUMBER (20)
 
 /**
  *  there is a (very crude and biased!) estimation of the power spectrum to
@@ -108,7 +108,7 @@ during execution
  *  for smaller grids, and simple (not too nonlinear) scenarios rather try to
  *  adjust tolerances and see what happens to the power spectrum
  */
-/* #define ENABLE_FFT_FILTER */
+#define ENABLE_FFT_FILTER
 
 // include scalar metric perturbation Psi
 #define INCLUDE_PSI
@@ -127,10 +127,10 @@ during execution
 
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
-#define DELTA_T                 (0.0001)
+#define DELTA_T                 (1.0e-5)
 #define INITIAL_TIME            (0.0)
 #define FINAL_TIME              (2.0e7)
-#define MAX_STEPS               (1e12)
+#define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-10)
 
 // ----------------parameters used in the potential-----------------------------
