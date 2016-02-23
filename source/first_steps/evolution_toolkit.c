@@ -54,26 +54,6 @@ void mk_rhs(const double t, double *f, double *result) {
     result[N3] = a * hubble;
 }
 
-// compute energy density rho & average value
-void mk_rho(double *f) {
-    size_t N = pars.N;
-    size_t N2 = 2 * N;
-    double a = f[3 * N];
-    rho_mean = 0.0;
-
-    double df, p;
-    #pragma omp parallel for private(df, p) reduction(+: rho_mean)
-    for (size_t i = 0; i < N; ++i)
-    {
-        df = f[N + i];
-        p = f[N2 + i];
-        rho[i] = (0.5 - p) * df * df + (0.5 + p) * tmp.grad[i] / (a * a) +
-            potential(f[i]);
-        rho_mean += rho[i];
-    }
-    rho_mean /= N;
-}
-
 // compute the laplacian and the squared gradient of the input and store them
 void mk_gradient_squared_and_laplacian(double *in) {
     size_t Nx = pars.x.N;
@@ -197,6 +177,26 @@ void mk_gradient_squared_and_laplacian(double *in) {
     }
 }
 
+// compute energy density rho & average value
+void mk_rho(double *f) {
+    size_t N = pars.N;
+    size_t N2 = 2 * N;
+    double a = f[3 * N];
+    rho_mean = 0.0;
+
+    double df, p;
+    #pragma omp parallel for private(df, p) reduction(+: rho_mean)
+    for (size_t i = 0; i < N; ++i)
+    {
+        df = f[N + i];
+        p = f[N2 + i];
+        rho[i] = (0.5 - p) * df * df + (0.5 + p) * tmp.grad[i] / (a * a) +
+            potential(f[i]);
+        rho_mean += rho[i];
+    }
+    rho_mean /= N;
+}
+
 // A selection of potentials one can try, make sure to set the corresponding
 // potential_prime, the derivative is not computed automatically
 inline double potential(const double f) {
@@ -248,7 +248,7 @@ inline double potential_prime(const double f) {
 }
 
 // solve poisson like equation for scalar perturbation and its derivative
-void mk_psi_and_dpsi(double *f) {
+void mk_psi(double *f) {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t Mx = pars.x.M;

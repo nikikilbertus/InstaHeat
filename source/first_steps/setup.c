@@ -5,6 +5,7 @@
 #include <omp.h>
 #include <fftw3.h>
 #include "setup.h"
+#include "evolution_toolkit.h"
 #include "main.h"
 
 void allocate_and_initialize_all() {
@@ -543,7 +544,19 @@ double dphi_init(double x, double y, double z, double *ph) {
 }
 
 void mk_initial_psi() {
-    //TODO
+    size_t N = pars.N;
+    size_t N2 = 2 * N;
+    size_t N3 = 3 * N;
+
+    #pragma omp parallel for
+    for (size_t i = N2; i < N3; ++i)
+    {
+        field[i] = 0.0;
+    }
+
+    mk_gradient_squared_and_laplacian(field);
+    mk_rho(field);
+    mk_psi(field);
 }
 
 void free_and_destroy_all() {

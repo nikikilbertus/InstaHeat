@@ -15,11 +15,11 @@ typedef struct {
 extern evolution_flags_t evo_flags;
 
 void mk_rhs(const double t, double *f, double *result);
-void mk_rho(double *f);
 void mk_gradient_squared_and_laplacian(double *in);
+void mk_rho(double *f);
 extern double potential(const double f);
 extern double potential_prime(const double f);
-void mk_psi_and_dpsi(double *f);
+void mk_psi(double *f);
 void mk_power_spectrum(const fftw_complex *in);
 void apply_filter_real(double *inout);
 void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout);
