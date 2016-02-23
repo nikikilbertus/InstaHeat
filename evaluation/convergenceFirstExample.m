@@ -49,3 +49,13 @@ hold off
 xlabel('a')
 ylabel('difference dpsi')
 legend('1e-4', '1e-5','1e-6','1e-7','1e-8','1e-9')
+
+for kk = 1:length(nums)
+    dpsitmp = dpsis{kk};
+    dpsitmpfd = dpsifd2s{kk};
+    atmp = as{kk};
+    figure
+    surf(atmp(2:end-60000),x,dpsitmp(:,2:end-60000) - dpsitmpfd(:,1:end-59999))
+    shading interp
+    title(['diff dpsi 1e-' num2str(kk + 3)])
+end

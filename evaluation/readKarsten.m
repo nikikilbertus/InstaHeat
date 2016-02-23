@@ -1,7 +1,7 @@
 dim = 1;
-namepre = 'compare_psi';
+namepre = 'compare';
 scaleamp = 1e0;
-massk = 1e-2;
+massk = 1e-3;
 
 name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten_compare/' namepre '.dat'];
 

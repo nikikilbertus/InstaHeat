@@ -36,11 +36,11 @@ void mk_rhs(const double t, double *f, double *result) {
     #pragma omp parallel for
     for (size_t i = N2; i < N3; ++i)
     {
-        /* result[i] = -hubble * f[i] - 0.5 * (rho[i - N2] - rho_mean) / h3 + */
-        /*     tmp.f[i - N2] / (h3 * a2); */
-        result[i] = -hubble * f[i] - 0.5 * (rho[i - N2] -
-                f[i] * f[i - N] * f[i - N] - rho_mean) / h3 +
-                tmp.f[i - N2] / (h3 * a2);
+        result[i] = -hubble * f[i] - 0.5 * (rho[i - N2] - rho_mean) / h3 +
+            tmp.f[i - N2] / (h3 * a2);
+        /* result[i] = -hubble * f[i] - 0.5 * (rho[i - N2] - */
+        /*         f[i] * f[i - N] * f[i - N] - rho_mean) / h3 + */
+        /*         tmp.f[i - N2] / (h3 * a2); */
     }
 
     double df, p;
@@ -192,8 +192,8 @@ void mk_rho(double *f) {
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
-        /* p = f[N2 + i]; */
-        p = 0.0;
+        p = f[N2 + i];
+        /* p = 0.0; */
         rho[i] = (0.5 - p) * df * df + (0.5 + p) * tmp.grad[i] / (a * a) +
             potential(f[i]);
         rho_mean += rho[i];
@@ -513,7 +513,6 @@ void prepare_and_save_timeslice() {
     mk_gradient_squared_and_laplacian(field);
     evo_flags.compute_pow_spec = 0;
     mk_rho(field);
-    mk_psi(field);
     mk_means_and_variances();
     save();
 }

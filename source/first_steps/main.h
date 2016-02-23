@@ -126,7 +126,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (1.0e-5)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (1.0e4)
+#define FINAL_TIME              (2.0e4)
 #define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-10)
 
@@ -152,8 +152,8 @@ during execution
 #define SAFE                    (0.9)
 
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-7)
-#define ABSOLUTE_TOLERANCE      (1.0e-7)
+#define RELATIVE_TOLERANCE      (1.0e-12)
+#define ABSOLUTE_TOLERANCE      (1.0e-12)
 
 // ------------------------typedefs---------------------------------------------
 // representing one spatial dimension of a multi dimensional grid

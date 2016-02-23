@@ -344,13 +344,11 @@ void mk_initial_conditions() {
 
     // initialize a
     field[3 * N] = A_INITIAL;
-
-    // initialize psi
-    mk_initial_psi();
-
     free(theta);
     #endif
 
+    // initialize psi
+    mk_initial_psi();
     RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
 }
 
