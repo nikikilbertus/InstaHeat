@@ -16,6 +16,8 @@ void mk_initial_conditions();
 void read_initial_data();
 double phi_init(double x, double y, double z, double *ph);
 double dphi_init(double x, double y, double z, double *ph);
+double wrapped_gaussian(double x, double y, double z);
+void mk_initial_psi();
 void free_and_destroy_all();
 void destroy_and_cleanup_fftw();
 void free_external();

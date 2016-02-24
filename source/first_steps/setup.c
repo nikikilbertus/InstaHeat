@@ -474,7 +474,7 @@ double phi_init(double x, double y, double z, double *ph) {
     /* double amplitude = -2.26961e-06; */
 
     // compare_2, pos= 6000
-    double scale= 1.0e3;
+    double scale= 1.0e0;
     double mean = 0.0510864;
     double amplitude = -3.743790000000000e-07 * scale;
 
@@ -486,7 +486,8 @@ double phi_init(double x, double y, double z, double *ph) {
     double k = 1.0;
     if (pars.dim == 1)
     {
-        return mean + amplitude * cos(k * x);
+        /* return mean + amplitude * cos(k * x); */
+        return mean + amplitude * wrapped_gausian(x, y, z);
     }
     else if (pars.dim == 2)
     {
@@ -532,7 +533,7 @@ double dphi_init(double x, double y, double z, double *ph) {
     /* double mean = -0.00475989; */
     /* double amplitude = -2.91473e-09; */
 
-    double scale = 1.0e3;
+    double scale = 1.0e0;
     double mean = 3.255190000000000e-04;
     double amplitude = 1.742130000000000e-08 * scale;
 
@@ -559,6 +560,34 @@ double dphi_init(double x, double y, double z, double *ph) {
     }
 
     /* return -0.089318193; // somewhere at end of 50 e-fold inflation */
+}
+
+double wrapped_gaussian(double x, double y, double z) {
+    size_t max = 32;
+    double s = 0.2;
+    res = 0.0;
+    for (size_t n = 1; n <= max; ++n)
+    {
+        res += exp(-0.5 * n * n * s * s) * (cos(n * x) + pow(-1.0, n + 1)) /
+            (2.0 * PI);
+    }
+    return res;
+}
+
+void mk_initial_psi() {
+    size_t N = pars.N;
+    size_t N2 = 2 * N;
+    size_t N3 = 3 * N;
+
+    #pragma omp parallel for
+    for (size_t i = N2; i < N3; ++i)
+    {
+        field[i] = 0.0;
+    }
+
+    mk_gradient_squared_and_laplacian(field);
+    mk_rho(field);
+    mk_psi(field);
 }
 
 void free_and_destroy_all() {
