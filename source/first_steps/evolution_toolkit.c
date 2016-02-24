@@ -543,6 +543,13 @@ void mk_means_and_variances() {
     psi_var  = variance(psi_mean, field + N2, N);
     #endif
 
+    #if defined(OUTPUT_DPSI_MEAN) || defined(OUTPUT_DPSI_VARIANCE)
+    dpsi_mean = mean(dfield + N2, N);
+    #endif
+    #ifdef OUTPUT_DPSI_VARIANCE
+    dpsi_var  = variance(dpsi_mean, dfield + N2, N);
+    #endif
+
     #ifdef OUTPUT_RHO_VARIANCE
     rho_var  = variance(rho_mean, rho, N);
     #endif

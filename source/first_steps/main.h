@@ -51,14 +51,14 @@ during execution
 
 #define OUTPUT_PHI_MEAN
 #define OUTPUT_DPHI_MEAN
-/* #define OUTPUT_PSI_MEAN */
-/* #define OUTPUT_DPSI_MEAN */
+#define OUTPUT_PSI_MEAN
+#define OUTPUT_DPSI_MEAN
 #define OUTPUT_RHO_MEAN
 
 #define OUTPUT_PHI_VARIANCE
 #define OUTPUT_DPHI_VARIANCE
 #define OUTPUT_PSI_VARIANCE
-/* #define OUTPUT_DPSI_VARIANCE */
+#define OUTPUT_DPSI_VARIANCE
 #define OUTPUT_RHO_VARIANCE
 
 // ------------file handling parameters for writing to disk---------------------
@@ -82,13 +82,13 @@ during execution
  *  track stability, therefore we sum up fourier coefficients into bins
  *  depending on the norm of their k vector, this gives the number of bins used
  */
-#define POWER_SPECTRUM_BINS     (50)
+#define POWER_SPECTRUM_BINS     (20)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (5)
+#define TIME_STEP_SKIPS         (10)
 
 // spatial output strides
-#define STRIDE_X                (8)
+#define STRIDE_X                (1)
 #define STRIDE_Y                (1)
 #define STRIDE_Z                (1)
 
@@ -108,11 +108,11 @@ during execution
  *  for smaller grids, and simple (not too nonlinear) scenarios rather try to
  *  adjust tolerances and see what happens to the power spectrum
  */
-/* #define ENABLE_FFT_FILTER */
+#define ENABLE_FFT_FILTER
 
 // ------------------computational domain---------------------------------------
 // spatial
-#define GRIDPOINTS_X            (256)
+#define GRIDPOINTS_X            (64)
 #define GRIDPOINTS_Y            (1)
 #define GRIDPOINTS_Z            (1)
 #define SPATIAL_LOWER_BOUND_X   (-PI)
@@ -124,22 +124,22 @@ during execution
 
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
-#define DELTA_T                 (1.0e-6)
+#define DELTA_T                 (1.0e-5)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (2.0e4)
+#define FINAL_TIME              (1.0e7)
 #define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-10)
 
 // ----------------parameters used in the potential-----------------------------
 /* #define MASS                    (0.11026) // for 50 e-fold hom inflation */
-/* #define MASS                    (0.002000003836216) // compare_2 compare_psi */
-#define MASS                    (6.0) // for compare.dat
-#define MASS_KARSTEN            (1.0e-3)
+#define MASS                    (0.002000003836216) // compare_2 compare_psi
+/* #define MASS                    (6.0) // for compare.dat */
+#define MASS_KARSTEN            (1.0e-2)
 #define COUPLING                (1.0) // coupling in a phi4 potential
 #define LAMBDA                  (4.721e-5) // "cosmological constant"
 /* #define A_INITIAL               (1.05249e3) // compare_2, compare_psi, 5500 */
-/* #define A_INITIAL               (4.09376e3) // compare_2, compare_psi, 6000 */
-#define A_INITIAL               (1.0)
+#define A_INITIAL               (4.09376e3) // compare_2, compare_psi, 6000
+/* #define A_INITIAL               (1.0) */
 // for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
 
 // -------------------additional parameters for dopri853------------------------
@@ -152,8 +152,8 @@ during execution
 #define SAFE                    (0.9)
 
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-14)
-#define ABSOLUTE_TOLERANCE      (1.0e-14)
+#define RELATIVE_TOLERANCE      (1.0e-7)
+#define ABSOLUTE_TOLERANCE      (1.0e-7)
 
 // ------------------------typedefs---------------------------------------------
 // representing one spatial dimension of a multi dimensional grid

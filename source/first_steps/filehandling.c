@@ -418,8 +418,7 @@ void save() {
                 psi_buf[os + idb]  = field[N2 + id];
                 #endif
                 #ifdef OUTPUT_DPSI
-                // TODO if i include dpsi again, change here
-                dpsi_buf[os + idb] = 0.0;
+                dpsi_buf[os + idb] = dfield[N2 + id];
                 #endif
                 #ifdef OUTPUT_RHO
                 rho_buf[os + idb]  = rho[id];

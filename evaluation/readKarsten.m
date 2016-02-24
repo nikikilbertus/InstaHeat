@@ -1,7 +1,7 @@
 dim = 1;
-namepre = 'compare';
-scaleamp = 1e0;
-massk = 1e-3;
+namepre = 'compare_psi';
+scaleamp = 1e3;
+massk = 1e-2;
 
 name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten_compare/' namepre '.dat'];
 
@@ -26,6 +26,9 @@ else
     psi1k = raw(:,8) * scaleamp;
     dpsi1k = raw(:,9) * scaleamp;
 end
+
+clear raw
+return
 
 figure
 plot(ak, phi0k.*ak.^(3/2))
@@ -57,5 +60,3 @@ pause;
 % ylabel('delta rho');
 % shg;
 % pause;
-
-clear raw

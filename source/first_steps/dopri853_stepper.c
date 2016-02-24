@@ -309,15 +309,20 @@ void try_step(const double dt) {
 }
 
 double error(const double dt) {
+    //TODO: is this ok?!
     size_t Ntot = 3 * pars.N + 1;
+    /* size_t Ntot = 2 * pars.N; */
     double err = 0.0, err2 = 0.0, sk, deno;
 
-    #pragma omp parallel for private(sk) reduction(+:err,err2)
+    double tmp;
+    #pragma omp parallel for private(sk, tmp) reduction(+:err,err2)
     for (size_t i = 0; i < Ntot; ++i)
     {
         sk = dp.a_tol + dp.r_tol * MAX(fabs(field[i]), fabs(field_new[i]));
-        err2 += (dpv.yerr[i] / sk) * (dpv.yerr[i] / sk);
-        err  += (dpv.yerr2[i] / sk) * (dpv.yerr2[i] / sk);
+        tmp = dpv.yerr[i] / sk;
+        err2 += tmp * tmp;
+        tmp = dpv.yerr2[i] / sk;
+        err += tmp * tmp;
     }
     deno = err + 0.01 * err2;
     if (deno <= 0.0)
