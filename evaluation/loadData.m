@@ -1,5 +1,5 @@
-name = 'compare_longnonlin_scale3_fil';
-comp = true;
+name = 'compare';
+comp = false;
 karstenpsi = true;
 
 % loading the data, replace 'name' with the path where you stored the .h5
@@ -22,9 +22,9 @@ phimean = h5read(name, '/phi_mean')';
 phivar = h5read(name, '/phi_variance')';
 dphimean = h5read(name, '/dphi_mean')';
 dphivar = h5read(name, '/dphi_variance')';
-% psimean = h5read(name, '/psi_mean')';
+psimean = h5read(name, '/psi_mean')';
 psivar = h5read(name, '/psi_variance')';
-% dpsimean = h5read(name, '/dpsi_mean')';
+dpsimean = h5read(name, '/dpsi_mean')';
 dpsivar = h5read(name, '/dpsi_variance')';
 rhomean = h5read(name, '/rho_mean')';
 rhovar = h5read(name, '/rho_variance')';
