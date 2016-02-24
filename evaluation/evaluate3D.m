@@ -1,4 +1,4 @@
-name = 'compare_3dnonlin4e5';
+name = 'compare';
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
