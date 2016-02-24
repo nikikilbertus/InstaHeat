@@ -474,7 +474,7 @@ double phi_init(double x, double y, double z, double *ph) {
     /* double amplitude = -2.26961e-06; */
 
     // compare_2, pos= 6000
-    double scale= 1.0e0;
+    double scale= 1.0e5;
     double mean = 0.0510864;
     double amplitude = -3.743790000000000e-07 * scale;
 
@@ -487,7 +487,7 @@ double phi_init(double x, double y, double z, double *ph) {
     if (pars.dim == 1)
     {
         /* return mean + amplitude * cos(k * x); */
-        return mean + amplitude * wrapped_gausian(x, y, z);
+        return mean - amplitude * wrapped_gaussian(x, y, z);
     }
     else if (pars.dim == 2)
     {
@@ -563,13 +563,48 @@ double dphi_init(double x, double y, double z, double *ph) {
 }
 
 double wrapped_gaussian(double x, double y, double z) {
-    size_t max = 32;
-    double s = 0.2;
-    res = 0.0;
-    for (size_t n = 1; n <= max; ++n)
+    double s = 0.5;
+    double res = 0.0;
+    if (pars.dim == 1)
     {
-        res += exp(-0.5 * n * n * s * s) * (cos(n * x) + pow(-1.0, n + 1)) /
-            (2.0 * PI);
+        size_t max = 32;
+        for (size_t i = 1; i <= max; ++i)
+        {
+            res += exp(-0.5 * i * i * s * s) * (cos(i * x) + pow(-1.0, i + 1)) /
+                (2.0 * PI);
+        }
+    }
+    if (pars.dim == 2)
+    {
+        size_t max = 16;
+        for (size_t i = 1; i <= max; ++i)
+        {
+            for (size_t j = 1; j <= max; ++j)
+            {
+                res += exp(-0.5 * (i * i + j * j) * s * s) *
+                    (cos(i * x) + pow(-1.0, i + 1)) *
+                    (cos(j * y) + pow(-1.0, j + 1)) /
+                    (2.0 * PI);
+            }
+        }
+    }
+    if (pars.dim == 3)
+    {
+        size_t max = 16;
+        for (size_t i = 1; i <= max; ++i)
+        {
+            for (size_t j = 1; j <= max; ++j)
+            {
+                for (size_t k = 1; k <= max; ++k)
+                {
+                    res += exp(-0.5 * (i * i + j * j + k * k) * s * s) *
+                        (cos(i * x) + pow(-1.0, i + 1)) *
+                        (cos(j * y) + pow(-1.0, j + 1)) *
+                        (cos(k * z) + pow(-1.0, k + 1)) /
+                        (2.0 * PI);
+                }
+            }
+        }
     }
     return res;
 }

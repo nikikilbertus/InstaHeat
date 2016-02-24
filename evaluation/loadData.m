@@ -18,6 +18,17 @@ dpsi = h5read(name, '/dpsi');
 powspec = h5read(name, '/power_spectrum');
 mass = h5read(name, '/mass');
 
+phimean = h5read(name, '/phi_mean')';
+phivar = h5read(name, '/phi_variance')';
+dphimean = h5read(name, '/dphi_mean')';
+dphivar = h5read(name, '/dphi_variance')';
+psimean = h5read(name, '/psi_mean')';
+psivar = h5read(name, '/psi_variance')';
+dpsimean = h5read(name, '/dpsi_mean')';
+dpsivar = h5read(name, '/dpsi_variance')';
+rhomean = h5read(name, '/rho_mean')';
+rhovar = h5read(name, '/rho_variance')';
+
 % compute some further properties
 if (comp)
     scaling = mass / massk;
