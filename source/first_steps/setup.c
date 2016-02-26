@@ -471,20 +471,22 @@ double phi_init(double x, double y, double z, double *ph) {
     }
     else if (pars.dim == 2)
     {
-        return mean + amplitude * cos(x + y + ph[0]);
+        /* return mean + amplitude * cos(x + y + ph[0]); */
+        return mean - amplitude * wrapped_gaussian(x, y, z);
     }
     else
     {
-        return mean + amplitude *
-            (cos(x + y + z + ph[0]) + cos(-x + y + z + ph[1]) +
-             cos(x - y + z + ph[2]) + cos(x + y - z + ph[3]) +
-             cos(2.0 * x + y + z + ph[4]) + cos(x + 2.0 * y + z + ph[5]) +
-             cos(x + y + 2.0 * z + ph[6]) + cos(-2.0 * x + y + z + ph[7]) +
-             cos(x - 2.0 * y + z + ph[8]) + cos(x + y - 2.0 * z + ph[9]) +
-             cos(3.0 * x + y + z + ph[10]) + cos(x + 3.0 * y + z + ph[11]) +
-             cos(x + y + 3.0 * z + ph[12]) + cos(-3.0 * x + y + z + ph[13]) +
-             cos(x - 3.0 * y + z + ph[14]) + cos(x + y - 3.0 * z + ph[15])
-             );
+        /* return mean + amplitude * */
+        /*     (cos(x + y + z + ph[0]) + cos(-x + y + z + ph[1]) + */
+        /*      cos(x - y + z + ph[2]) + cos(x + y - z + ph[3]) + */
+        /*      cos(2.0 * x + y + z + ph[4]) + cos(x + 2.0 * y + z + ph[5]) + */
+        /*      cos(x + y + 2.0 * z + ph[6]) + cos(-2.0 * x + y + z + ph[7]) + */
+        /*      cos(x - 2.0 * y + z + ph[8]) + cos(x + y - 2.0 * z + ph[9]) + */
+        /*      cos(3.0 * x + y + z + ph[10]) + cos(x + 3.0 * y + z + ph[11]) + */
+        /*      cos(x + y + 3.0 * z + ph[12]) + cos(-3.0 * x + y + z + ph[13]) + */
+        /*      cos(x - 3.0 * y + z + ph[14]) + cos(x + y - 3.0 * z + ph[15]) */
+        /*      ); */
+        return mean - amplitude * wrapped_gaussian(x, y, z);
     }
 }
 
@@ -556,7 +558,7 @@ double wrapped_gaussian(double x, double y, double z) {
     }
     if (pars.dim == 2)
     {
-        size_t max = 16;
+        size_t max = 8;
         for (size_t i = 1; i <= max; ++i)
         {
             for (size_t j = 1; j <= max; ++j)

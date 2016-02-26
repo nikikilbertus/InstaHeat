@@ -1,4 +1,4 @@
-name = 'comp3d';
+name = 'comp2d';
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
@@ -9,9 +9,19 @@ dim = h5read(name, '/dimension');
 t = h5read(name, '/time');
 a = h5read(name, '/a');
 
+try
+    rho = h5read(name, '/rho');
+    phi  = h5read(name, '/phi');
+    dphi = h5read(name, '/dphi');
+    psi  = h5read(name, '/psi');
+    dpsi = h5read(name, '/dpsi');
+catch me
+    disp('could not load fields');
+end
+
 rhomean = h5read(name, '/rho_mean');
-rhovar = h5read(name, '/rho_variance');
-rhorms = sqrt(rhovar ./ rhomean.^2);
+rhovar  = h5read(name, '/rho_variance');
+rhorms  = sqrt(rhovar ./ rhomean.^2);
 
 phimean = h5read(name, '/phi_mean');
 [phipks, phipkpos] = findpeaks(phimean);
@@ -34,6 +44,7 @@ dpsivar = h5read(name, '/dpsi_variance');
 
 powspec = h5read(name, '/power_spectrum');
 
+Nt = length(a);
 N = h5read(name, '/gridpoints_internal');
 Nout = h5read(name, '/gridpoints_output');
 

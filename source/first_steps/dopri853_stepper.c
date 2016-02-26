@@ -309,9 +309,7 @@ void try_step(const double dt) {
 }
 
 double error(const double dt) {
-    //TODO: is this ok?!
     size_t Ntot = 3 * pars.N + 1;
-    /* size_t Ntot = 2 * pars.N; */
     double err = 0.0, err2 = 0.0, sk, deno;
 
     double tmp;

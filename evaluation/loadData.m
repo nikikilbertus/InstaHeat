@@ -1,4 +1,4 @@
-name = 'compare';
+name = 'comp1d';
 comp = false;
 karstenpsi = true;
 
@@ -12,11 +12,14 @@ t = h5read(name, '/time')';
 a = h5read(name, '/a')';
 rho = h5read(name, '/rho');
 phi = h5read(name, '/phi');
-dphi = h5read(name, '/dphi');
+% dphi = h5read(name, '/dphi');
 psi = h5read(name, '/psi');
-dpsi = h5read(name, '/dpsi');
+% dpsi = h5read(name, '/dpsi');
 powspec = h5read(name, '/power_spectrum');
 mass = h5read(name, '/mass');
+
+Nt = length(t);
+N = length(phi(:,1));
 
 phimean = h5read(name, '/phi_mean')';
 phivar = h5read(name, '/phi_variance')';
@@ -28,6 +31,13 @@ dpsimean = h5read(name, '/dpsi_mean')';
 dpsivar = h5read(name, '/dpsi_variance')';
 rhomean = h5read(name, '/rho_mean')';
 rhovar = h5read(name, '/rho_variance')';
+
+H = sqrt(rhomean / 3);
+
+rhorms = sqrt( rhovar ) ./ rhomean;
+rhormsalt1   = sqrt( (mean(rho.^2) - rhomean.^2) ./ rhomean.^2 );
+rhormsalt2 = sqrt( mean(rho.^2) - rhomean.^2 ) ./ rhomean;
+rhormsalt3  = sqrt( mean((rho - repmat(rhomean,N,1)).^2) ./ rhomean.^2 );
 
 % compute some further properties
 if (comp)
@@ -56,15 +66,6 @@ dpsi = dpsi / scaling;
 dpsimean = dpsimean / scaling;
 dpsivar = dpsivar / scaling^2;
 
-H = sqrt(rhomean / 3);
-Nt = length(t);
-N = length(phi(:,1));
-
-rhorms = sqrt( rhovar ) ./ rhomean;
-rhormsalt1   = sqrt( (mean(rho.^2) - rhomean.^2) ./ rhomean.^2 );
-rhormsalt2 = sqrt( mean(rho.^2) - rhomean.^2 ) ./ rhomean;
-rhormsalt3  = sqrt( mean((rho - repmat(rhomean,N,1)).^2) ./ rhomean.^2 );
-
 % rhoalg = (dphi.^2 + (massk)^2 * phi.^2) / 2;
 % rhomeanalg = mean(rhoalg);
 % rhormsalg = sqrt( (mean(rhoalg.^2) - rhomeanalg.^2) ./ rhomeanalg.^2 );
@@ -74,10 +75,12 @@ if dim == 1
     x = x(1:end-1);
     
     k = [0:N/2-1 0 -N/2+1:-1]';
+    klap = k;
+    klap(round(N/2) + 1) = N/2;
     xphi = ifft(repmat(1i*k,1,Nt).*fft(phi));
-    xxphi = ifft(repmat(-k.^2,1,Nt).*fft(phi));
+    xxphi = ifft(repmat(-klap.^2,1,Nt).*fft(phi));
     xpsi = ifft(repmat(1i*k,1,Nt).*fft(psi));
-    xxpsi = ifft(repmat(-k.^2,1,Nt).*fft(psi));
+    xxpsi = ifft(repmat(-klap.^2,1,Nt).*fft(psi));
     
     amat = repmat(a,N,1);
     Hmat = repmat(H,N,1);
@@ -128,7 +131,7 @@ if dim == 1
     dpsipad(:,2:end-1) = dpsifd2;
     
     tmp = fft(xphi.*dphi)./(1i*repmat(k,1,Nt));
-    tmp(abs(repmat(k,1,Nt)) < 1e-10) = 0;
+    tmp(abs(repmat(k,1,Nt)) < 1e-15) = 0;
     dpsin = ifft(0.5 * tmp - fft(psi) .* repmat(H,N,1));
     
     phifft = fft(phi);
