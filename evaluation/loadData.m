@@ -1,4 +1,4 @@
-name = 'comp1d';
+name = 'compare';
 comp = false;
 karstenpsi = true;
 
@@ -12,9 +12,9 @@ t = h5read(name, '/time')';
 a = h5read(name, '/a')';
 rho = h5read(name, '/rho');
 phi = h5read(name, '/phi');
-% dphi = h5read(name, '/dphi');
+dphi = h5read(name, '/dphi');
 psi = h5read(name, '/psi');
-% dpsi = h5read(name, '/dpsi');
+dpsi = h5read(name, '/dpsi');
 powspec = h5read(name, '/power_spectrum');
 mass = h5read(name, '/mass');
 
@@ -131,7 +131,7 @@ if dim == 1
     dpsipad(:,2:end-1) = dpsifd2;
     
     tmp = fft(xphi.*dphi)./(1i*repmat(k,1,Nt));
-    tmp(abs(repmat(k,1,Nt)) < 1e-15) = 0;
+    tmp(abs(repmat(k,1,Nt)) < 1e-18) = 0;
     dpsin = ifft(0.5 * tmp - fft(psi) .* repmat(H,N,1));
     
     phifft = fft(phi);

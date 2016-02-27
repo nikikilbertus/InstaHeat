@@ -454,7 +454,7 @@ double phi_init(double x, double y, double z, double *ph) {
     /* double amplitude = -2.26961e-06; */
 
     // compare_2, pos= 6000
-    double scale= 1.0e5;
+    double scale= 1.0e0;
     double mean = 0.0510864;
     double amplitude = -3.743790000000000e-07 * scale;
 
@@ -466,8 +466,8 @@ double phi_init(double x, double y, double z, double *ph) {
     double k = 1.0;
     if (pars.dim == 1)
     {
-        /* return mean + amplitude * cos(k * x); */
-        return mean - amplitude * wrapped_gaussian(x, y, z);
+        return mean + amplitude * cos(k * x);
+        /* return mean - amplitude * wrapped_gaussian(x, y, z); */
     }
     else if (pars.dim == 2)
     {
