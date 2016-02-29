@@ -106,6 +106,14 @@ int main(int argc, const char * argv[]) {
                         poisson_time, 100. * (poisson_time / secs)));
     RUNTIME_INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
                         h5_time_write, 100. * (h5_time_write / secs)));
+
+    RUNTIME_INFO(puts("Writing runtimes to disk\n"));
+    h5_write_parameter("runtime_total", &secs, 1);
+    h5_write_parameter("runtime_fftw", &fftw_time_exe, 1);
+    h5_write_parameter("runtime_fftwplan", &fftw_time_plan, 1);
+    h5_write_parameter("runtime_filter", &filter_time, 1);
+    h5_write_parameter("runtime_elliptic", &poisson_time, 1);
+    h5_write_parameter("runtime_writeout", &h5_time_write, 1);
     #endif
     return 0;
 }
