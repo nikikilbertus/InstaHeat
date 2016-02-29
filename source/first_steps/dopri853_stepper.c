@@ -121,8 +121,6 @@ void run_dopri853() {
 
     RUNTIME_INFO(puts("Writing simulation meta data to disk\n"));
     double val[1];
-    val[0] = secs;
-    h5_write_parameter("runtime_stepper", val, 1);
     val[0] = (double)dp.n_stp;
     h5_write_parameter("steps_total", val, 1);
     val[0] = (double)dp.n_ok;
@@ -133,6 +131,8 @@ void run_dopri853() {
     RUNTIME_INFO(puts("Finished dopri853"));
     #ifdef SHOW_TIMING_INFO
     RUNTIME_INFO(printf("time: %f seconds\n", secs));
+    val[0] = secs;
+    h5_write_parameter("runtime_stepper", val, 1);
     #endif
     RUNTIME_INFO(printf("steps: %d\n", dp.n_stp + 1));
     RUNTIME_INFO(printf("good steps: %d\n", dp.n_ok));
