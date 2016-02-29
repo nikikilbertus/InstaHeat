@@ -1,4 +1,4 @@
-name = 'comp3d';
+name = 'comp3dshorter';
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
@@ -38,5 +38,7 @@ N = h5read(name, '/gridpoints_internal');
 Nout = h5read(name, '/gridpoints_output');
 
 mass = h5read(name, '/mass');
+
+tols = h5read(name, '/tolerances');
 
 H = sqrt(rhomean / 3);
