@@ -113,9 +113,9 @@ during execution
 
 // ------------------computational domain---------------------------------------
 // spatial
-#define GRIDPOINTS_X            (128)
-#define GRIDPOINTS_Y            (1)
-#define GRIDPOINTS_Z            (1)
+#define GRIDPOINTS_X            (64)
+#define GRIDPOINTS_Y            (64)
+#define GRIDPOINTS_Z            (64)
 #define SPATIAL_LOWER_BOUND_X   (-PI)
 #define SPATIAL_UPPER_BOUND_X   (PI)
 #define SPATIAL_LOWER_BOUND_Y   (-PI)
