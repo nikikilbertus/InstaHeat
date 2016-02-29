@@ -94,35 +94,35 @@ void h5_create_empty_by_path(const char *name) {
 
     // ---------------------------parameters------------------------------------
     double val[3] = {MASS, 0.0, 0.0};
-    h5_write_parameter(file, "mass", val, 1);
+    h5_write_parameter("mass", val, 1);
 
     val[0] = pars.dim;
-    h5_write_parameter(file, "dimension", val, 1);
+    h5_write_parameter("dimension", val, 1);
 
     val[0] = SEED;
-    h5_write_parameter(file, "seed", val, 1);
+    h5_write_parameter("seed", val, 1);
 
     val[0] = pars.file.skip;
-    h5_write_parameter(file, "strides_time", val, 1);
+    h5_write_parameter("strides_time", val, 1);
 
     val[0] = RELATIVE_TOLERANCE;
     val[1] = ABSOLUTE_TOLERANCE;
-    h5_write_parameter(file, "tolerances", val, 2);
+    h5_write_parameter("tolerances", val, 2);
 
     val[0] = pars.x.N;
     val[1] = pars.y.N;
     val[2] = pars.z.N;
-    h5_write_parameter(file, "gridpoints_internal", val, 3);
+    h5_write_parameter("gridpoints_internal", val, 3);
 
     val[0] = pars.x.outN;
     val[1] = pars.y.outN;
     val[2] = pars.z.outN;
-    h5_write_parameter(file, "gridpoints_output", val, 3);
+    h5_write_parameter("gridpoints_output", val, 3);
 
     val[0] = pars.x.stride;
     val[1] = pars.y.stride;
     val[2] = pars.z.stride;
-    h5_write_parameter(file, "strides_space", val, 3);
+    h5_write_parameter("strides_space", val, 3);
 
     // ---------------------------commit hash-----------------------------------
     #if VERSION_CONTROL != VERSION_CONTROL_NONE
@@ -195,11 +195,11 @@ void h5_create_dset(const hsize_t rank, const hsize_t *dim,
     H5Sclose(dspace);
 }
 
-void h5_write_parameter(const hid_t file, const char *name, const double *val,
-        size_t N) {
+void h5_write_parameter(const char *name, const double *val, size_t N) {
     hsize_t rank = 1;
     hsize_t dim[1] = {N};
     hsize_t max[1] = {N};
+    hid_t file = pars.file.id;
 
     hid_t dspace_par = H5Screate_simple(rank, dim, max);
     hid_t plist_par = H5Pcreate(H5P_DATASET_CREATE);
