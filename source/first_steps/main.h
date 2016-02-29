@@ -41,18 +41,18 @@ during execution
 #define VERSION_CONTROL         VERSION_CONTROL_HG
 
 //-------------which files to write to disk-------------------------------------
-#define OUTPUT_PHI
-#define OUTPUT_DPHI
-#define OUTPUT_PSI
-#define OUTPUT_DPSI
+/* #define OUTPUT_PHI */
+/* #define OUTPUT_DPHI */
+/* #define OUTPUT_PSI */
+/* #define OUTPUT_DPSI */
 #define OUTPUT_RHO
 
 #define OUTPUT_POWER_SPECTRUM
 
 #define OUTPUT_PHI_MEAN
 #define OUTPUT_DPHI_MEAN
-/* #define OUTPUT_PSI_MEAN */
-/* #define OUTPUT_DPSI_MEAN */
+#define OUTPUT_PSI_MEAN
+#define OUTPUT_DPSI_MEAN
 #define OUTPUT_RHO_MEAN
 
 #define OUTPUT_PHI_VARIANCE
@@ -64,6 +64,7 @@ during execution
 // ------------file handling parameters for writing to disk---------------------
 // the output is bundled in one .h5 file, enter path here
 #define DATAPATH                ("../../../data/compare.h5")
+#define DATAPATH                ("comp3d_128_1e4_old.h5")
 #define INITIAL_DATAPATH        ("../../../data/initial/init.dat")
 
 // read initial conditions from file instead of internal construction
@@ -85,12 +86,12 @@ during execution
 #define POWER_SPECTRUM_BINS     (50)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (1)
+#define TIME_STEP_SKIPS         (50)
 
 // spatial output strides
-#define STRIDE_X                (8)
-#define STRIDE_Y                (1)
-#define STRIDE_Z                (1)
+#define STRIDE_X                (16)
+#define STRIDE_Y                (16)
+#define STRIDE_Z                (16)
 
 // -----------------------simulation preferences--------------------------------
 // how many threads to use for openmp parallelization (also used by fftw)
@@ -115,9 +116,9 @@ during execution
 
 // ------------------computational domain---------------------------------------
 // spatial
-#define GRIDPOINTS_X            (512)
-#define GRIDPOINTS_Y            (1)
-#define GRIDPOINTS_Z            (1)
+#define GRIDPOINTS_X            (128)
+#define GRIDPOINTS_Y            (128)
+#define GRIDPOINTS_Z            (128)
 #define SPATIAL_LOWER_BOUND_X   (-PI)
 #define SPATIAL_UPPER_BOUND_X   (PI)
 #define SPATIAL_LOWER_BOUND_Y   (-PI)
@@ -129,7 +130,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (1.0e-5)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (2.0e7)
+#define FINAL_TIME              (1.0e4)
 #define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-10)
 
