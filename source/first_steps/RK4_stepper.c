@@ -116,6 +116,11 @@ void run_rk4() {
                           "with the specified final time."));
     }
 
+    RUNTIME_INFO(puts("Writing simulation meta data to disk\n"));
+    double val[1];
+    val[0] = secs;
+    h5_write_parameter("runtime_stepper", val, 1);
+
     RUNTIME_INFO(puts("Finished rk4"));
     #ifdef SHOW_TIMING_INFO
     secs += get_wall_time();
