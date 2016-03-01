@@ -31,7 +31,6 @@
 #define     H5_GRIDPOINTS_OUTPUT_NAME   ("gridpoints_output")
 #define     H5_COMMIT_HASH_NAME         ("commit_hash")
 
-
 void h5_create_empty_by_path(const char *name);
 void h5_create_dset(const hsize_t rank, const hsize_t *dim,
         const hsize_t *max_dim, const hsize_t *chunk, hsize_t *dset_id,
