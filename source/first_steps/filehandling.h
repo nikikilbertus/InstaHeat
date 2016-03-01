@@ -36,6 +36,10 @@
 #define     H5_RUNTIME_FILTER_NAME      ("runtime_filter")
 #define     H5_RUNTIME_ELLIPTIC_NAME    ("runtime_elliptic")
 #define     H5_RUNTIME_WRITEOUT_NAME    ("runtime_writeout")
+#define     H5_RUNTIME_STEPPER_NAME     ("runtime_stepper")
+#define     H5_STEPS_TOTAL_NAME         ("steps_total")
+#define     H5_STEPS_OK_NAME            ("steps_ok")
+#define     H5_STEPS_BAD_NAME           ("steps_bad")
 
 void h5_create_empty_by_path(const char *name);
 void h5_create_dset(const hsize_t rank, const hsize_t *dim,
