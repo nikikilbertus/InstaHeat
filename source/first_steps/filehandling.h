@@ -30,6 +30,12 @@
 #define     H5_GRIDPOINTS_INTERNAL_NAME ("gridpoints_internal")
 #define     H5_GRIDPOINTS_OUTPUT_NAME   ("gridpoints_output")
 #define     H5_COMMIT_HASH_NAME         ("commit_hash")
+#define     H5_RUNTIME_TOTAL_NAME       ("runtime_total")
+#define     H5_RUNTIME_FFTW_NAME        ("runtime_fftw")
+#define     H5_RUNTIME_FFTWPLAN_NAME    ("runtime_fftwplan")
+#define     H5_RUNTIME_FILTER_NAME      ("runtime_filter")
+#define     H5_RUNTIME_ELLIPTIC_NAME    ("runtime_elliptic")
+#define     H5_RUNTIME_WRITEOUT_NAME    ("runtime_writeout")
 
 void h5_create_empty_by_path(const char *name);
 void h5_create_dset(const hsize_t rank, const hsize_t *dim,
