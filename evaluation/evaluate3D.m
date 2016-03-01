@@ -1,4 +1,4 @@
-name = 'comp3d';
+name = 'comp3d_128_5e5_old';
 interp = true;
 
 % loading the data, replace 'name' with the path where you stored the .h5
@@ -48,6 +48,8 @@ Nout = h5read(name, '/gridpoints_output');
 
 mass = h5read(name, '/mass');
 
+strides = h5read(name,'/strides_space');
+timestride = h5read(name,'/strides_time');
 tols = h5read(name, '/tolerances');
 
 H = sqrt(rhomean / 3);
