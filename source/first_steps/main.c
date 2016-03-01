@@ -106,12 +106,12 @@ int main(int argc, const char * argv[]) {
                         h5_time_write, 100. * (h5_time_write / secs)));
 
     RUNTIME_INFO(puts("Writing runtimes to disk\n"));
-    h5_write_parameter("runtime_total", &secs, 1);
-    h5_write_parameter("runtime_fftw", &fftw_time_exe, 1);
-    h5_write_parameter("runtime_fftwplan", &fftw_time_plan, 1);
-    h5_write_parameter("runtime_filter", &filter_time, 1);
-    h5_write_parameter("runtime_elliptic", &poisson_time, 1);
-    h5_write_parameter("runtime_writeout", &h5_time_write, 1);
+    h5_write_parameter(H5_RUNTIME_TOTAL_NAME, &secs, 1);
+    h5_write_parameter(H5_RUNTIME_FFTW_NAME, &fftw_time_exe, 1);
+    h5_write_parameter(H5_RUNTIME_FFTWPLAN_NAME, &fftw_time_plan, 1);
+    h5_write_parameter(H5_RUNTIME_FILTER_NAME, &filter_time, 1);
+    h5_write_parameter(H5_RUNTIME_ELLIPTIC_NAME, &poisson_time, 1);
+    h5_write_parameter(H5_RUNTIME_WRITEOUT_NAME, &h5_time_write, 1);
     #endif
 
     h5_close(pars.file.id);
