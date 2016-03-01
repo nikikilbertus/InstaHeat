@@ -89,8 +89,6 @@ int main(int argc, const char * argv[]) {
     ProfilerStop();
     #endif
 
-    h5_close(pars.file.id);
-    free_and_destroy_all();
 
     #ifdef SHOW_TIMING_INFO
     double secs = get_wall_time() - start;
@@ -115,6 +113,9 @@ int main(int argc, const char * argv[]) {
     h5_write_parameter("runtime_elliptic", &poisson_time, 1);
     h5_write_parameter("runtime_writeout", &h5_time_write, 1);
     #endif
+
+    h5_close(pars.file.id);
+    free_and_destroy_all();
     return 0;
 }
 
