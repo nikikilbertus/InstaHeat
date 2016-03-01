@@ -23,19 +23,24 @@ void h5_create_empty_by_path(const char *name) {
 
     // ---------------------------full fields: phi, psi, rho--------------------
     #ifdef OUTPUT_PHI
-    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.field), H5_PHI_NAME);
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.field),
+            H5_PHI_NAME);
     #endif
     #ifdef OUTPUT_DPHI
-    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.dfield), H5_DPHI_NAME);
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.dfield),
+            H5_DPHI_NAME);
     #endif
     #ifdef OUTPUT_PSI
-    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.field), H5_PSI_NAME);
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.field),
+            H5_PSI_NAME);
     #endif
     #ifdef OUTPUT_DPSI
-    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.dfield), H5_DPSI_NAME);
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.dfield),
+            H5_DPSI_NAME);
     #endif
     #ifdef OUTPUT_RHO
-    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_rho.field), H5_RHO_NAME);
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_rho.field),
+            H5_RHO_NAME);
     #endif
 
     // ---------------------------power spectrum--------------------------------
