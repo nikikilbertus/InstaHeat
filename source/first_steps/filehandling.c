@@ -23,19 +23,19 @@ void h5_create_empty_by_path(const char *name) {
 
     // ---------------------------full fields: phi, psi, rho--------------------
     #ifdef OUTPUT_PHI
-    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.field), "phi");
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.field), H5_PHI_NAME);
     #endif
     #ifdef OUTPUT_DPHI
-    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.dfield), "dphi");
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.dfield), H5_DPHI_NAME);
     #endif
     #ifdef OUTPUT_PSI
-    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.field), "psi");
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.field), H5_PSI_NAME);
     #endif
     #ifdef OUTPUT_DPSI
-    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.dfield), "dpsi");
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.dfield), H5_DPSI_NAME);
     #endif
     #ifdef OUTPUT_RHO
-    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_rho.field), "rho");
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_rho.field), H5_RHO_NAME);
     #endif
 
     // ---------------------------power spectrum--------------------------------
@@ -44,85 +44,85 @@ void h5_create_empty_by_path(const char *name) {
     max[1] = bins;
     chunk[1] = bins;
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_powspec),
-            "power_spectrum");
+            H5_POWER_SPECTRUM_NAME);
     #endif
 
     // ---------------------------time, a, means, variances---------------------
     rank = 1;
-    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_time), "time");
-    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_a), "a");
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_time), H5_TIME_NAME);
+    h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_a), H5_A_NAME);
     #ifdef OUTPUT_PHI_MEAN
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.mean),
-            "phi_mean");
+            H5_PHI_MEAN_NAME);
     #endif
     #ifdef OUTPUT_PHI_VARIANCE
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.var),
-            "phi_variance");
+            H5_PHI_VARIANCE_NAME);
     #endif
     #ifdef OUTPUT_DPHI_MEAN
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.dmean),
-            "dphi_mean");
+            H5_DPHI_MEAN_NAME);
     #endif
     #ifdef OUTPUT_DPHI_VARIANCE
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_phi.dvar),
-            "dphi_variance");
+            H5_DPHI_VARIANCE_NAME);
     #endif
     #ifdef OUTPUT_PSI_MEAN
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.mean),
-            "psi_mean");
+            H5_PSI_MEAN_NAME);
     #endif
     #ifdef OUTPUT_PSI_VARIANCE
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.var),
-            "psi_variance");
+            H5_PSI_VARIANCE_NAME);
     #endif
     #ifdef OUTPUT_DPSI_MEAN
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.dmean),
-            "dpsi_mean");
+            H5_DPSI_MEAN_NAME);
     #endif
     #ifdef OUTPUT_DPSI_VARIANCE
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_psi.dvar),
-            "dpsi_variance");
+            H5_DPSI_VARIANCE_NAME);
     #endif
     #ifdef OUTPUT_RHO_MEAN
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_rho.mean),
-            "rho_mean");
+            H5_RHO_MEAN_NAME);
     #endif
     #ifdef OUTPUT_RHO_VARIANCE
     h5_create_dset(rank, dim, max, chunk, &(pars.file.dset_rho.var),
-            "rho_variance");
+            H5_RHO_VARIANCE_NAME);
     #endif
 
     // ---------------------------parameters------------------------------------
     double val[3] = {MASS, 0.0, 0.0};
-    h5_write_parameter("mass", val, 1);
+    h5_write_parameter(H5_MASS_NAME, val, 1);
 
     val[0] = pars.dim;
-    h5_write_parameter("dimension", val, 1);
+    h5_write_parameter(H5_DIMENSION_NAME, val, 1);
 
     val[0] = SEED;
-    h5_write_parameter("seed", val, 1);
+    h5_write_parameter(H5_SEED_NAME, val, 1);
 
     val[0] = pars.file.skip;
-    h5_write_parameter("strides_time", val, 1);
+    h5_write_parameter(H5_STRIDES_TIME_NAME, val, 1);
 
     val[0] = RELATIVE_TOLERANCE;
     val[1] = ABSOLUTE_TOLERANCE;
-    h5_write_parameter("tolerances", val, 2);
+    h5_write_parameter(H5_TOLERANCES_NAME, val, 2);
 
     val[0] = pars.x.N;
     val[1] = pars.y.N;
     val[2] = pars.z.N;
-    h5_write_parameter("gridpoints_internal", val, 3);
+    h5_write_parameter(H5_GRIDPOINTS_INTERNAL_NAME, val, 3);
 
     val[0] = pars.x.outN;
     val[1] = pars.y.outN;
     val[2] = pars.z.outN;
-    h5_write_parameter("gridpoints_output", val, 3);
+    h5_write_parameter(H5_GRIDPOINTS_OUTPUT_NAME, val, 3);
 
     val[0] = pars.x.stride;
     val[1] = pars.y.stride;
     val[2] = pars.z.stride;
-    h5_write_parameter("strides_space", val, 3);
+    h5_write_parameter(H5_STRIDES_SPACE_NAME, val, 3);
 
     // ---------------------------commit hash-----------------------------------
     #if VERSION_CONTROL != VERSION_CONTROL_NONE
@@ -149,8 +149,8 @@ void h5_create_empty_by_path(const char *name) {
         H5Tset_size(memtype, len);
         hid_t dspace_str = H5Screate_simple (1, dim, NULL);
 
-        hid_t dset_str = H5Dcreate(file, "commit-hash", filetype, dspace_str,
-                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        hid_t dset_str = H5Dcreate(file, H5_COMMIT_HASH_NAME, filetype,
+                dspace_str, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Dwrite(dset_str, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, hash);
         H5Dclose(dset_str);
         H5Sclose(dspace_str);
@@ -171,7 +171,8 @@ void h5_create_empty_by_path(const char *name) {
     #endif
 
     RUNTIME_INFO(puts("Created hdf5 file with parameters and datasets for "
-                "phi, dphi, psi, dpsi, t, a, rho, powerspec.\n"));
+                "phi, dphi, psi, dpsi, rho (+ means & variance), t, a, "
+                "powerspec.\n"));
 }
 
 void h5_create_dset(const hsize_t rank, const hsize_t *dim,
