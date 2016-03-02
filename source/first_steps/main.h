@@ -62,13 +62,17 @@ during execution
 #define OUTPUT_RHO_VARIANCE
 
 // ------------file handling parameters for writing to disk---------------------
+// where to get the initial conditions from
+#define IC_FROM_INTERNAL_FUNCTION   (0)
+#define IC_FROM_H5_FILE             (1)
+#define IC_FROM_DAT_FILE            (2)
+#define INITIAL_CONDITIONS          IC_FROM_INTERNAL_FUNCTION
+
 // the output is bundled in one .h5 file, enter path here
 #define DATAPATH                ("../../../data/compare.h5")
 /* #define DATAPATH                ("$HOME/data/compare.h5") */
 #define INITIAL_DATAPATH        ("../../../data/initial/init.dat")
 
-// read initial conditions from file instead of internal construction
-/* #define READ_INITIAL_CONDITIONS */
 
 /**
  *  write out data is buffered to not access hard drive too frequently (actually

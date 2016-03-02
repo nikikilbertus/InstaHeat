@@ -474,7 +474,6 @@ void save() {
 void h5_read_timeslice(double t, double *f) {
     hid_t file, dset, dspace;
     size_t N = pars.N;
-    hsize_t index = 0;
 
     file = H5Fopen(DATAPATH, H5F_ACC_RDONLY, H5P_DEFAULT);
 
@@ -494,6 +493,7 @@ void h5_read_timeslice(double t, double *f) {
     double *time_tmp = calloc(Nt, sizeof *time_tmp);
     H5Dread(dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, time_tmp);
 
+    hsize_t index = Nt;
     for (size_t i = 0; i < Nt; ++i)
     {
         if (time_tmp[i] >= t)
