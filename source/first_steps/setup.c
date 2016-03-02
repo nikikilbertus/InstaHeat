@@ -295,9 +295,12 @@ void mk_fftw_plans() {
 
 // setup initial conditions for the field
 void mk_initial_conditions() {
-    #ifdef READ_INITIAL_CONDITIONS
+    #if INITIAL_CONDITIONS == IC_FROM_H5_FILE
+    h5_read_and_fill();
+    #elif INITIAL_CONDITIONS == IC_FROM_DAT_FILE
     read_initial_data();
-    #else
+    mk_initial_psi();
+    #elif INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
@@ -348,7 +351,6 @@ void mk_initial_conditions() {
     #endif
 
     // initialize psi
-    mk_initial_psi();
     RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
 }
 
