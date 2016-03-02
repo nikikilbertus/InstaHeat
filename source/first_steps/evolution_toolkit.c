@@ -467,20 +467,19 @@ void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout) {
             for (size_t k = 0; k < Mz; ++k)
             {
                 filter = 1.0;
-                //TODO: i think i should filter 2*i=Nx modes!?
-                if (i != 0/* && 2 * i != Nx*/)
+                if (i != 0)
                 {
                     filter = filter_window_function(2.0 *
                         (i > Nx / 2 ? (int)Nx - (int)i : i) / (double) Nx);
                 }
                 if (pars.dim > 1)
                 {
-                    if (j != 0/* && 2 * j != Ny*/)
+                    if (j != 0)
                     {
                         filter *= filter_window_function(2.0 *
                             (j > Ny / 2 ? (int)Ny - (int)j : j) / (double) Ny);
                     }
-                    if (pars.dim >2 && k != 0/* && 2 * k != Nz*/)
+                    if (pars.dim > 2 && k != 0)
                     {
                         filter *= filter_window_function(2.0 * k / (double) Nz);
                     }
