@@ -511,6 +511,7 @@ void h5_read_timeslice(double t, double *f) {
     h5_read_and_fill(file, index, H5_DPHI_NAME, f + N);
     h5_read_and_fill(file, index, H5_PSI_NAME, f + 2 * N);
 
+    // ---------------------------read a at index-------------------------------
     dset = H5Dopen(file, H5_A_NAME, H5P_DEFAULT);
     dspace = H5Dget_space(dset);
     ndims = H5Sget_simple_extent_ndims(dspace);
