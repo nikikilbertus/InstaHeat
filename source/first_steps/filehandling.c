@@ -499,6 +499,7 @@ void h5_read_timeslice(double t, double *f) {
         if (time_tmp[i] >= t)
         {
             index = i;
+            pars.t.ti = time_tmp[i];
             break;
         }
     }
