@@ -1,5 +1,5 @@
-name = 'comp3d_128_5e5_old';
-interp = true;
+name = 'testcontinue';
+interp = false;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
