@@ -71,7 +71,7 @@ during execution
 // the output is bundled in one .h5 file, enter path here
 #define DATAPATH                ("../../../data/compare.h5")
 /* #define DATAPATH                ("$HOME/data/compare.h5") */
-#define INITIAL_DATAPATH        ("../../../data/initial/init.dat")
+#define INITIAL_DATAPATH        ("../../../data/init.h5")
 
 
 /**
