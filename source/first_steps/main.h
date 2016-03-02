@@ -66,10 +66,10 @@ during execution
 #define IC_FROM_INTERNAL_FUNCTION   (0)
 #define IC_FROM_H5_FILE             (1)
 #define IC_FROM_DAT_FILE            (2)
-#define INITIAL_CONDITIONS          IC_FROM_H5_FILE
+#define INITIAL_CONDITIONS          IC_FROM_INTERNAL_FUNCTION
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/testcontinue.h5")
+#define DATAPATH                ("../../../data/compare.h5")
 /* #define DATAPATH                ("$HOME/data/compare.h5") */
 #define INITIAL_DATAPATH        ("../../../data/init.h5")
 
@@ -90,7 +90,7 @@ during execution
 #define POWER_SPECTRUM_BINS     (30)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (1)
+#define TIME_STEP_SKIPS         (1000)
 
 // spatial output strides
 #define STRIDE_X                (1)
@@ -129,9 +129,9 @@ during execution
 
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
-#define DELTA_T                 (1.0e-5)
-#define INITIAL_TIME            (950.0)
-#define FINAL_TIME              (2.0e3)
+#define DELTA_T                 (1.0e-3)
+#define INITIAL_TIME            (0.0)
+#define FINAL_TIME              (1.0e4)
 #define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-10)
 
@@ -157,7 +157,7 @@ during execution
 #define SAFE                    (0.9)
 
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-10)
+#define RELATIVE_TOLERANCE      (1.0e-4)
 #define ABSOLUTE_TOLERANCE      (1.0e-14)
 
 // ------------------------typedefs---------------------------------------------
