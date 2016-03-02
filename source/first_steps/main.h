@@ -66,10 +66,10 @@ during execution
 #define IC_FROM_INTERNAL_FUNCTION   (0)
 #define IC_FROM_H5_FILE             (1)
 #define IC_FROM_DAT_FILE            (2)
-#define INITIAL_CONDITIONS          IC_FROM_INTERNAL_FUNCTION
+#define INITIAL_CONDITIONS          IC_FROM_H5_FILE
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/compare.h5")
+#define DATAPATH                ("../../../data/testcontinue.h5")
 /* #define DATAPATH                ("$HOME/data/compare.h5") */
 #define INITIAL_DATAPATH        ("../../../data/init.h5")
 
