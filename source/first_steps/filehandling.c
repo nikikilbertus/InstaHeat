@@ -475,7 +475,7 @@ void h5_read_timeslice(double t, double *f) {
     hid_t file, dset, dspace;
     size_t N = pars.N;
 
-    file = H5Fopen(DATAPATH, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(INITIAL_DATAPATH, H5F_ACC_RDONLY, H5P_DEFAULT);
 
     // ---------------------------get time and find index-----------------------
     dset = H5Dopen(file, H5_TIME_NAME, H5P_DEFAULT);
