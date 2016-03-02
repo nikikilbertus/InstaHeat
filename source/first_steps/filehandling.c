@@ -496,14 +496,22 @@ void h5_read_timeslice(double t, double *f) {
     hsize_t index = Nt;
     for (size_t i = 0; i < Nt; ++i)
     {
-        if (time_tmp[i] >= t)
+        //TODO: replace number by actual machine eps?
+        if (time_tmp[i] + 1.0e-14 >= t)
         {
             index = i;
-            pars.t.ti = time_tmp[i];
-            pars.t.t = time_tmp[i];
             break;
         }
     }
+    if (index == Nt)
+    {
+        RUNTIME_INFO(puts("The initial time is larger than the maximal time in"
+                    " the h5 file. Starting at last existing timeslice."));
+        index = Nt - 1;
+    }
+    pars.t.ti = time_tmp[index];
+    pars.t.t = time_tmp[index];
+
     free(time_tmp);
     H5Dclose(dset);
     H5Sclose(dspace);
