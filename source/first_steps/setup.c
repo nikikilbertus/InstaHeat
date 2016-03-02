@@ -6,6 +6,7 @@
 #include <fftw3.h>
 #include "setup.h"
 #include "evolution_toolkit.h"
+#include "filehandling.h"
 #include "main.h"
 
 void allocate_and_initialize_all() {
