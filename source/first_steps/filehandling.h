@@ -50,5 +50,8 @@ void h5_write_all_buffers(const hsize_t Nt);
 void h5_get_extent(hsize_t *max, hsize_t *cur);
 void h5_close();
 void save();
+void h5_read_timeslice(double t, double *f);
+void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
+        double *out);
 
 #endif

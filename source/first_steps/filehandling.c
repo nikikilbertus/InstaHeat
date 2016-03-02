@@ -470,3 +470,84 @@ void save() {
     printf("Writing to file at t = %f\n", pars.t.t);
     #endif
 }
+
+void h5_read_timeslice(double t, double *f) {
+    hid_t file, dset, dspace;
+    size_t N = pars.N;
+    hsize_t index = 0;
+
+    file = H5Fopen(DATAPATH, H5F_ACC_RDONLY, H5P_DEFAULT);
+
+    // ---------------------------get time and find index-----------------------
+    dset = H5Dopen(file, H5_TIME_NAME, H5P_DEFAULT);
+    dspace = H5Dget_space(dset);
+    int ndims = H5Sget_simple_extent_ndims(dspace);
+    if (ndims != 1)
+    {
+        RUNTIME_INFO(fputs("Could not read time properly.", stderr));
+        exit(EXIT_FAILURE);
+    }
+    hsize_t dims[2];
+    H5Sget_simple_extent_dims(dspace, dims, NULL);
+    size_t Nt = dims[0];
+
+    double *time_tmp = calloc(Nt, sizeof *time_tmp);
+    H5Dread(dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, time_tmp);
+
+    for (size_t i = 0; i < Nt; ++i)
+    {
+        if (time_tmp[i] >= t)
+        {
+            index = i;
+            break;
+        }
+    }
+    free(time_tmp);
+    H5Dclose(dset);
+    H5Sclose(dspace);
+
+    // ---------------------------read fields at index--------------------------
+    h5_read_and_fill(file, index, H5_PHI_NAME, f);
+    h5_read_and_fill(file, index, H5_DPHI_NAME, f + N);
+    h5_read_and_fill(file, index, H5_PSI_NAME, f + 2 * N);
+
+    dset = H5Dopen(file, H5_A_NAME, H5P_DEFAULT);
+    dspace = H5Dget_space(dset);
+    ndims = H5Sget_simple_extent_ndims(dspace);
+    H5Sget_simple_extent_dims(dspace, dims, NULL);
+    if (dims[0] != Nt)
+    {
+        RUNTIME_INFO(fputs("Dimensions of dataset does not agree with specified"
+                    " values.", stderr));
+        exit(EXIT_FAILURE);
+    }
+    hsize_t start[1] = {index};
+    hsize_t count[1] = {1};
+    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start, NULL, count, NULL);
+    H5Dread(dset, H5T_NATIVE_DOUBLE, H5S_ALL, dspace, H5P_DEFAULT, f + 3 * N);
+    H5Dclose(dset);
+    H5Sclose(dspace);
+    H5Sclose(file);
+}
+
+void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
+        double *out) {
+    size_t N = pars.N;
+    hid_t dset = H5Dopen(file, name, H5P_DEFAULT);
+    hid_t dspace = H5Dget_space(dset);
+    int ndims = H5Sget_simple_extent_ndims(dspace);
+    hsize_t dims[2];
+    H5Sget_simple_extent_dims(dspace, dims, NULL);
+    if (dims[0] != N || ndims != 2)
+    {
+        RUNTIME_INFO(fputs("Dimensions of dataset does not agree with specified"
+                    " values.", stderr));
+        exit(EXIT_FAILURE);
+    }
+    hsize_t start[2] = {0, index};
+    hsize_t count[2] = {N, 1};
+    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start, NULL, count, NULL);
+    H5Dread(dset, H5T_NATIVE_DOUBLE, H5S_ALL, dspace, H5P_DEFAULT, out);
+    H5Dclose(dset);
+    H5Sclose(dspace);
+}
