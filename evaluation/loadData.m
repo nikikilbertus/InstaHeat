@@ -1,10 +1,11 @@
-name = 'compare';
-comp = false;
-karstenpsi = true;
+% name = 'rk_128';
+comp = true;
+karstenpsi = false;
+loadtimes = true;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
-name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/' name '.h5'];
+name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/check/' name '.h5'];
 
 % built in functions for reading makes it easy
 dim = h5read(name, '/dimension');
@@ -185,4 +186,13 @@ if dim == 1
     dpsicheck = xxpsi ./ (3 * amat.^2 .* Hmat) - ...
                 Hmat .* psi - ...
                 0.5 * (rho - repmat(rhomean, N, 1)) ./ (3 * Hmat);
+end
+
+if loadtimes
+    runtime = h5read(name, '/runtime_stepper');
+    try
+    steps = h5read(name, '/steps_total');
+    catch me
+        %
+    end
 end
