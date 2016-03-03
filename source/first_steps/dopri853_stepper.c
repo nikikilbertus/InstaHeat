@@ -363,7 +363,7 @@ int success(const double err, double *dt) {
             dp.dt_next = (*dt) * scale;
         }
         //TODO: is this correct!?
-        dp.dt_next = MAX(dp.dt_next, 1.0e-2 * sqrt(3.0 / rho_mean));
+        dp.dt_next = MIN(dp.dt_next, 1.0e-2 * sqrt(3.0 / rho_mean));
 
         dp.err_old = MAX(err, 1.0e-4);
         dp.reject = 0;
