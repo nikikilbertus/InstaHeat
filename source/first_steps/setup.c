@@ -5,6 +5,7 @@
 #include <omp.h>
 #include <fftw3.h>
 #include "setup.h"
+#include "evolution_toolkit.h"
 #include "main.h"
 
 void allocate_and_initialize_all() {
@@ -318,15 +319,6 @@ void mk_initial_conditions() {
     double x, y, z;
 
     size_t Nmodes = 16;
-    /* double *ks = calloc(pars.dim * Nmodes, sizeof *ks); */
-    /* for (size_t i = 0; i < pars.dim * Nmodes; ++i) */
-    /* { */
-    /*     ks[i] = 1.0; */
-    /* } */
-    /* for (size_t i = 3; i < Nmodes; i += 3) */
-    /* { */
-    /*     ks[i] *= -1.0; */
-    /* } */
 
     // random phases
     srand(SEED);
