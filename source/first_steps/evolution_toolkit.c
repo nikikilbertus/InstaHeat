@@ -289,9 +289,6 @@ void mk_psi_and_dpsi(double *f) {
     dphi_mean = mean(f + N, N);
     double dphiextra = 0.5 * a2 * dphi_mean * dphi_mean;
 
-    /* int zerocount = 0; */
-    /* int sign = 1; */
-    /* int signcount = 0; */
     double k_sq;
     size_t osx, osy, id;
     #pragma omp parallel for private(k_sq, osx, osy, id)
@@ -329,20 +326,9 @@ void mk_psi_and_dpsi(double *f) {
                 {
                     k_sq += pars.y.k2 * j * j;
                 }
-                /* if (((k_sq + dphiextra) > 0 ? 1 : -1) != sign) */
-                /* { */
-                /*     /1* RUNTIME_INFO(printf("sign change at i=%zu, j=%zu, k=%zu\n",i,j,k)); *1/ */
-                /*     signcount++; */
-                /*     sign *= -1; */
-                /* } */
                 if (-k_sq < 1.0e-10 || fabs(k_sq + dphiextra) < 1.0e-10)
                 {
                     tmp.psic[id] = 0.0;
-                    /* if (++zerocount > 1) */
-                    /* { */
-                    /*     RUNTIME_INFO(printf("cancellation in psi at time: " */
-                    /*                 "%f\n", pars.t.t)); */
-                    /* } */
                 }
                 else
                 {
@@ -354,11 +340,6 @@ void mk_psi_and_dpsi(double *f) {
             }
         }
     }
-
-    /* if (signcount > 1) */
-    /* { */
-    /*     RUNTIME_INFO(printf("sign changes: %i\n", signcount)); */
-    /* } */
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
@@ -490,20 +471,19 @@ void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout) {
             for (size_t k = 0; k < Mz; ++k)
             {
                 filter = 1.0;
-                //TODO: i think i should filter 2*i=Nx modes!?
-                if (i != 0/* && 2 * i != Nx*/)
+                if (i != 0)
                 {
                     filter = filter_window_function(2.0 *
                         (i > Nx / 2 ? (int)Nx - (int)i : i) / (double) Nx);
                 }
                 if (pars.dim > 1)
                 {
-                    if (j != 0/* && 2 * j != Ny*/)
+                    if (j != 0)
                     {
                         filter *= filter_window_function(2.0 *
                             (j > Ny / 2 ? (int)Ny - (int)j : j) / (double) Ny);
                     }
-                    if (pars.dim >2 && k != 0/* && 2 * k != Nz*/)
+                    if (pars.dim > 2 && k != 0)
                     {
                         filter *= filter_window_function(2.0 * k / (double) Nz);
                     }
