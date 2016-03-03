@@ -371,7 +371,7 @@ void mk_power_spectrum(const fftw_complex *in) {
     }
 
     size_t osx, osy, idx;
-    // todo parallelize?
+    //TODO[performance]: parallelize?
     for (size_t i = 0; i < Mx; ++i)
     {
         osx = i * My * Mz;
