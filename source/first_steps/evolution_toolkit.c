@@ -38,9 +38,6 @@ void mk_rhs(const double t, double *f, double *result) {
     {
         result[i] = -hubble * f[i] - 0.5 * (rho[i - N2] - rho_mean) / h3 +
             tmp.f[i - N2] / (h3 * a2);
-        /* result[i] = -hubble * f[i] - 0.5 * (rho[i - N2] - */
-        /*         f[i] * f[i - N] * f[i - N] - rho_mean) / h3 + */
-        /*         tmp.f[i - N2] / (h3 * a2); */
     }
 
     double df, p;
@@ -50,7 +47,7 @@ void mk_rhs(const double t, double *f, double *result) {
         df = f[N + i];
         p = f[N2 + i];
         result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / a2 -
-            (3.0 * hubble - 4.0 * result[N2 + i]) * df -
+            (h3 - 4.0 * result[N2 + i]) * df -
             (1.0 + 2.0 * p) * potential_prime(f[i]);
     }
 
