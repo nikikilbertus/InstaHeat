@@ -90,7 +90,7 @@ during execution
 #define POWER_SPECTRUM_BINS     (30)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (1000)
+#define TIME_STEP_SKIPS         (10000)
 
 // spatial output strides
 #define STRIDE_X                (1)
