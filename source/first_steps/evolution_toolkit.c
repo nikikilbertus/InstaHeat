@@ -182,6 +182,7 @@ void mk_rho(double *f) {
     size_t N = pars.N;
     size_t N2 = 2 * N;
     double a = f[3 * N];
+    double a2 = 2 * a;
     rho_mean = 0.0;
 
     double df, p;
@@ -191,7 +192,7 @@ void mk_rho(double *f) {
         df = f[N + i];
         p = f[N2 + i];
         /* p = 0.0; */
-        rho[i] = (0.5 - p) * df * df + (0.5 + p) * tmp.grad[i] / (a * a) +
+        rho[i] = (0.5 - p) * df * df + (0.5 + p) * tmp.grad[i] / a2 +
             potential(f[i]);
         rho_mean += rho[i];
     }
