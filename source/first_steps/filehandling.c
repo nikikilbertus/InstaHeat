@@ -287,7 +287,7 @@ void h5_write_all_buffers(const hsize_t Nt) {
     // ---------------------------time, a, means, variances---------------------
     rank = 1;
     h5_write_buffer(rank, start, add, new_dim, f.dset_time, time_buf);
-    h5_write_buffer(rank, start, add, new_dim, f.dset_a, f_a_buf);
+    h5_write_buffer(rank, start, add, new_dim, f.dset_a, a_buf);
     #ifdef OUTPUT_PHI_MEAN
     h5_write_buffer(rank, start, add, new_dim, f.dset_phi.mean, phi_mean_buf);
     #endif
@@ -349,7 +349,7 @@ void save() {
     hsize_t bins  = pars.file.bins_powspec;
 
     time_buf[index] = pars.t.t;
-    f_a_buf[index] = field[3 * N];
+    a_buf[index] = field[3 * N];
 
     #ifdef CHECK_FOR_NAN
     if (isnan(pars.t.t) || isnan(field[3 * N]))

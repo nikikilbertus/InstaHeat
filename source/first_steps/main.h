@@ -302,7 +302,7 @@ extern double *dpsi_mean_buf;
 extern double *dpsi_var_buf;
 
 // buffer for scaling parameter a
-extern double *f_a_buf;
+extern double *a_buf;
 
 // energy density rho  = T^{00}_{\phi} and the buffer
 extern double *rho;

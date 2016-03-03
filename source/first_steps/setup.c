@@ -134,7 +134,7 @@ void allocate_external() {
     dfield     = fftw_malloc(Ntot * sizeof *dfield);
     dfield_new = fftw_malloc(Ntot * sizeof *dfield_new);
     time_buf   = calloc(buf_size, sizeof *time_buf);
-    f_a_buf    = calloc(buf_size, sizeof *f_a_buf);
+    a_buf      = calloc(buf_size, sizeof *a_buf);
     rho        = fftw_malloc(N * sizeof *rho);
     pow_spec   = calloc(bins, sizeof *pow_spec);
 
@@ -633,7 +633,7 @@ void free_external() {
     free(rho);
     free(pow_spec);
     free(time_buf);
-    free(f_a_buf);
+    free(a_buf);
     #ifdef OUTPUT_PHI
     free(phi_buf);
     #endif

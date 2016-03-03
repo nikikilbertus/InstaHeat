@@ -42,7 +42,7 @@ double dpsi_mean;
 double dpsi_var;
 double *dpsi_mean_buf;
 double *dpsi_var_buf;
-double *f_a_buf;
+double *a_buf;
 double *rho;
 double *rho_buf;
 double rho_mean;
