@@ -428,6 +428,7 @@ void apply_filter_real(double *inout) {
     #endif
     fftw_execute_dft_r2c(p_fw, inout, tmp.phic);
     fftw_execute_dft_r2c(p_fw, inout + N, tmp.xphic);
+    fftw_execute_dft_r2c(p_fw, inout + 2 * N, tmp.psic);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
@@ -439,6 +440,7 @@ void apply_filter_real(double *inout) {
     #endif
     fftw_execute_dft_c2r(p_bw, tmp.phic, inout);
     fftw_execute_dft_c2r(p_bw, tmp.xphic, inout + N);
+    fftw_execute_dft_c2r(p_bw, tmp.psic, inout + 2 * N);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     filter_time += get_wall_time();
@@ -446,7 +448,8 @@ void apply_filter_real(double *inout) {
 }
 
 // filtering in fourier domain for two fields (phi and dphi) simultaneously
-void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout) {
+void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
+        fftw_complex *psi_io) {
     size_t N = pars.N;
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -484,8 +487,9 @@ void apply_filter_fourier(fftw_complex *inout, fftw_complex *dinout) {
                         filter *= filter_window_function(2.0 * k / (double) Nz);
                     }
                 }
-                inout[osy + k] *= filter / (double) N;
-                dinout[osy + k] *= filter / (double) N;
+                phi_io[osy + k]  *= filter / (double) N;
+                dphi_io[osy + k] *= filter / (double) N;
+                psi_io[osy + k]  *= filter / (double) N;
             }
         }
     }
