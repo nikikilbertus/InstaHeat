@@ -115,6 +115,11 @@ during execution
  */
 #define ENABLE_FFT_FILTER
 
+// choose between the parabolic or the hyperbolic equation to evolve psi
+#define PSI_HYPERBOLIC          (1)
+#define PSI_PARABOLIC           (2)
+#define PSI_METHOD              (PSI_HYPERBOLIC)
+
 // ------------------computational domain---------------------------------------
 // spatial
 #define GRIDPOINTS_X            (192)
@@ -196,17 +201,17 @@ typedef struct {
 
 //file handling parameters
 typedef struct {
-    hsize_t id;           // h5 file id of the output file
-    datasets_t dset_phi; // h5 data set ids for the scalar field phi
-    datasets_t dset_psi; // h5 data set ids for the perturbation psi
-    datasets_t dset_rho; // h5 data set ids for the energy density rho
-    hsize_t dset_powspec; // h5 data set id of the power spectrum
-    hsize_t dset_time;    // h5 data set id of the time
-    hsize_t dset_a;       // h5 data set id of the scaling parameter a
-    size_t index;        // current index within the buffers
-    size_t buf_size;     // size of the buffer
-    size_t skip;         // how many timesteps to skip in between write out
-    size_t bins_powspec; // how many bins are used for the power spectrum
+    hsize_t id;             // h5 file id of the output file
+    datasets_t dset_phi;    // h5 data set ids for the scalar field phi
+    datasets_t dset_psi;    // h5 data set ids for the perturbation psi
+    datasets_t dset_rho;    // h5 data set ids for the energy density rho
+    hsize_t dset_powspec;   // h5 data set id of the power spectrum
+    hsize_t dset_time;      // h5 data set id of the time
+    hsize_t dset_a;         // h5 data set id of the scaling parameter a
+    size_t index;           // current index within the buffers
+    size_t buf_size;        // size of the buffer
+    size_t skip;            // how many timesteps to skip in between write out
+    size_t bins_powspec;    // how many bins are used for the power spectrum
 }file_parameters_t;
 
 /**
