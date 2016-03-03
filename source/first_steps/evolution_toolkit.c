@@ -447,7 +447,7 @@ void apply_filter_real(double *inout) {
     #endif
 }
 
-// filtering in fourier domain for two fields (phi and dphi) simultaneously
+// filtering in fourier domain for phi, dphi, psi simultaneously
 void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
         fftw_complex *psi_io) {
     size_t N = pars.N;
