@@ -69,7 +69,7 @@ during execution
 #define INITIAL_CONDITIONS          IC_FROM_INTERNAL_FUNCTION
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/compare.h5")
+#define DATAPATH                ("../../../data/check/rk_128.h5")
 /* #define DATAPATH                ("$HOME/data/compare.h5") */
 #define INITIAL_DATAPATH        ("../../../data/init.h5")
 

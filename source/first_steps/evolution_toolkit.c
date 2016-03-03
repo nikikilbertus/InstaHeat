@@ -433,7 +433,7 @@ void apply_filter_real(double *inout) {
     fftw_time_exe += get_wall_time();
     #endif
 
-    apply_filter_fourier(tmp.phic, tmp.xphic);
+    apply_filter_fourier(tmp.phic, tmp.xphic, tmp.psic);
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
