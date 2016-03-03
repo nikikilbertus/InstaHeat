@@ -16,6 +16,7 @@ void allocate_and_initialize_all() {
     mk_grid();
     mk_fftw_plans();
     mk_initial_conditions();
+    h5_create_empty_by_path(DATAPATH);
 }
 
 void initialize_threading() {
@@ -611,6 +612,7 @@ void mk_initial_psi() {
 }
 
 void free_and_destroy_all() {
+    h5_close(pars.file.id);
     destroy_and_cleanup_fftw();
     free_external();
 }

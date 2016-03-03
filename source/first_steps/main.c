@@ -75,7 +75,6 @@ int main(int argc, const char * argv[]) {
     #endif
 
     allocate_and_initialize_all();
-    h5_create_empty_by_path(DATAPATH);
 
     #ifdef ENABLE_PROFILER
     ProfilerStart("testprofile.prof");
@@ -114,7 +113,6 @@ int main(int argc, const char * argv[]) {
     h5_write_parameter(H5_RUNTIME_WRITEOUT_NAME, &h5_time_write, 1);
     #endif
 
-    h5_close(pars.file.id);
     free_and_destroy_all();
     return 0;
 }
