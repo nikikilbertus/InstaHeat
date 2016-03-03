@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h>
 #include <math.h>
 #include <omp.h>
 #include "hdf5.h"
@@ -496,8 +497,7 @@ void h5_read_timeslice(double t, double *f) {
     hsize_t index = Nt;
     for (size_t i = 0; i < Nt; ++i)
     {
-        //TODO: replace number by actual machine eps?
-        if (time_tmp[i] + 1.0e-14 >= t)
+        if (time_tmp[i] + DBL_EPSILON >= t)
         {
             index = i;
             break;
