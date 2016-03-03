@@ -43,35 +43,6 @@ void mk_rhs(const double t, double *f, double *result) {
         result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / (a * a) -
             (3.0 * hubble - 4.0 * dpsi[i]) * df -
             (1.0 + 2.0 * p) * potential_prime(f[i]);
-
-        // only potential
-        /* result[N + i] = tmp.lap[i] / (a * a) - */
-        /*     3.0 * hubble * df - */
-        /*     (1.0 + 2.0 * p) * potential_prime(f[i]); */
-
-        // only laplacian
-        /* result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / (a * a) - */
-        /*     3.0 * hubble * df - */
-        /*     potential_prime(f[i]); */
-
-        // only dpsi
-        /* result[N + i] = tmp.lap[i] / (a * a) - */
-        /*     (3.0 * hubble - 4.0 * dpsi[i]) * df - */
-        /*     potential_prime(f[i]); */
-
-        // without dpsi
-        /* result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / (a * a) - */
-        /*     3.0 * hubble * df - */
-        /*     (1.0 + 2.0 * p) * potential_prime(f[i]); */
-
-        // without dpsi modified
-        /* result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / (a * a) - */
-        /*     (3.0 + 4.0 * p) * hubble * df - */
-        /*     (1.0 + 2.0 * p) * potential_prime(f[i]); */
-
-        // without psi
-        /* result[N + i] = tmp.lap[i] / (a * a) - 3.0 * hubble * f[N + i] - */
-        /*     potential_prime(f[i]); */
     }
     #else
     #pragma omp parallel for
