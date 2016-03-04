@@ -221,9 +221,9 @@ typedef struct {
  *  Ny = number of grid points in the y direction
  *  Nz = number of grid points in the z direction
  *  N  = number of gridpoints for the whole spatial grid = Nx * Ny * Nz
- *  N2 = 2 * N
- *  Ntot = number of scalar equations = 2 * N + 1 (N for scalar field, N for its
- *  first temporal derivative, 1 for the FRW scaling parameter a)
+ *  N2 = 2 * N, N3 = 3 * N, ...
+ *  Ntot = number of scalar equations; depends on the used method, elliptic: 2 *
+ *  N + 1, parabolic: 3 * N + 1, hyperbolic: 4 * N + 1
  */
 typedef struct {
     grid_dimension_t x;
