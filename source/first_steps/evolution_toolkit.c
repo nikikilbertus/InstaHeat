@@ -28,48 +28,46 @@ void mk_rhs(const double t, double *f, double *result) {
     double hubble = sqrt(rho_mean / 3.0);
     double h3 = 3.0 * hubble;
 
-    // copy dphi
+    // copy dphi in all cases
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
     {
         result[i] = f[N + i];
     }
 
-    // copy dpsi if evolving via the hyperbolic equation
-    #if PSI_METHOD == PSI_HYPERBOLIC
+    // equation for dpsi when parabolic; copy dpsi and equation for ddpsi when
+    // hyperbolic
+    #if PSI_METHOD != PSI_ELLIPTIC
     #pragma omp parallel for
     for (size_t i = N2; i < N3; ++i)
     {
-        result[i] = f[N + i];
-    }
-    #endif
-
-    // equation for dpsi if evolving via the parabolic equation
-    #if PSI_METHOD == PSI_PARABOLIC
-    #pragma omp parallel for
-    for (size_t i = N2; i < N3; ++i)
-    {
+        #if PSI_METHOD == PSI_PARABOLIC
         result[i] = -hubble * f[i] - 0.5 * (rho[i - N2] - rho_mean) / h3 +
             tmp.f[i - N2] / (h3 * a2);
+        #elif PSI_METHOD == PSI_HYPERBOLIC
+        result[i] = f[N + i];
+        result[N + i] = 0.5 * pressure[i - N2] + (f[i] - 0.5) * pressure_mean -
+            4.0 * hubble * result[i];
+        #endif
     }
     #endif
 
-    // equation for dphi (note that dpsi has to be provided in result first)
-    #if PSI_METHOD != PSI_ELLIPTIC
-    double df, p;
-    #pragma omp parallel for private(df, p)
+    // equation for ddphi in all cases (psi & dpsi have to be provided first)
+    double df, p, dp;
+    #pragma omp parallel for private(df, p, dp)
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
+        #if PSI_METHOD != PSI_ELLIPTIC
         p = f[N2 + i];
+        dp = result[N2 + i];
+        #else
+        p = psi[i];
+        dp = dpsi[i];
+        #endif
         result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / a2 -
-            (h3 - 4.0 * result[N2 + i]) * df -
-            (1.0 + 2.0 * p) * potential_prime(f[i]);
+            (h3 - 4.0 * dp) * df - (1.0 + 2.0 * p) * potential_prime(f[i]);
     }
-    #endif
-    //TODO: PSI_METHOD == PSI_ELLIPTIC case
-
-    //TODO: ddpsi in hyperbolic case
 
     // a is always the same
     result[Ntot - 1] = a * hubble;
