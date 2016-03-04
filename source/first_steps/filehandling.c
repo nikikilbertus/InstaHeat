@@ -142,6 +142,7 @@ void h5_create_empty_by_path(const char *name) {
     char hash[len];
     FILE *output;
 
+    hid_t filetype, memtype, dspace_str, dset_str;
     if ((output = popen(cmd, "r")) == NULL)
     {
         fputs("Could not get hash of current commit.\n", stderr);
@@ -150,13 +151,13 @@ void h5_create_empty_by_path(const char *name) {
 
     if (fgets(hash, len, output) != NULL)
     {
-        hid_t filetype = H5Tcopy(H5T_FORTRAN_S1);
+        filetype = H5Tcopy(H5T_FORTRAN_S1);
         H5Tset_size(filetype, len - 1);
-        hid_t memtype = H5Tcopy(H5T_C_S1);
+        memtype = H5Tcopy(H5T_C_S1);
         H5Tset_size(memtype, len);
-        hid_t dspace_str = H5Screate_simple (1, dim, NULL);
+        dspace_str = H5Screate_simple (1, dim, NULL);
 
-        hid_t dset_str = H5Dcreate(file, H5_COMMIT_HASH_NAME, filetype,
+        dset_str = H5Dcreate(file, H5_COMMIT_HASH_NAME, filetype,
                 dspace_str, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Dwrite(dset_str, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, hash);
         H5Dclose(dset_str);
@@ -176,6 +177,31 @@ void h5_create_empty_by_path(const char *name) {
         exit(EXIT_FAILURE);
     }
     #endif
+
+    //-----------------write out psi method-------------------------------------
+    #if PSI_METHOD == PSI_ELLIPTIC
+    len = 9;
+    char *method = "elliptic";
+    #elif PSI_METHOD == PSI_PARABOLIC
+    len = 10;
+    char *method = "parabolic";
+    #elif PSI_METHOD == PSI_HYPERBOLIC
+    len = 11;
+    char *method = "hyperbolic";
+    #endif
+    filetype = H5Tcopy(H5T_FORTRAN_S1);
+    H5Tset_size(filetype, len - 1);
+    memtype = H5Tcopy(H5T_C_S1);
+    H5Tset_size(memtype, len);
+    dspace_str = H5Screate_simple (1, dim, NULL);
+
+    dset_str = H5Dcreate(file, H5_METHOD_NAME, filetype,
+            dspace_str, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dset_str, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, method);
+    H5Dclose(dset_str);
+    H5Sclose(dspace_str);
+    H5Tclose(filetype);
+    H5Tclose(memtype);
 
     RUNTIME_INFO(puts("Created hdf5 file with datasets for output.\n"));
 }

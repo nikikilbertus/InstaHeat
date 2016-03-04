@@ -30,6 +30,7 @@
 #define     H5_GRIDPOINTS_INTERNAL_NAME ("gridpoints_internal")
 #define     H5_GRIDPOINTS_OUTPUT_NAME   ("gridpoints_output")
 #define     H5_COMMIT_HASH_NAME         ("commit_hash")
+#define     H5_METHOD_NAME              ("method")
 #define     H5_RUNTIME_TOTAL_NAME       ("runtime_total")
 #define     H5_RUNTIME_FFTW_NAME        ("runtime_fftw")
 #define     H5_RUNTIME_FFTWPLAN_NAME    ("runtime_fftwplan")
