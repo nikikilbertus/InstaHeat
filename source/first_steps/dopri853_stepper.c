@@ -140,7 +140,7 @@ void run_dopri853() {
 }
 
 int perform_step(const double dt_try) {
-    size_t Ntot = 3 * pars.N + 1;
+    size_t Ntot = pars.Ntot;
     double dt = dt_try;
     for ( ; ; )
     {
@@ -181,7 +181,7 @@ int perform_step(const double dt_try) {
 void try_step(const double dt) {
     size_t i;
     double t = dp.t;
-    size_t Ntot = 3 * pars.N + 1;
+    size_t Ntot = pars.Ntot;
     // ------------ 1 ------------
     // is already done in perform_step
 
@@ -320,7 +320,7 @@ void try_step(const double dt) {
 }
 
 double error(const double dt) {
-    size_t Ntot = 3 * pars.N + 1;
+    size_t Ntot = pars.Ntot;
     double err = 0.0, err2 = 0.0, sk, deno;
 
     double tmp;
@@ -392,7 +392,7 @@ int success(const double err, double *dt) {
 }
 
 void allocate_dopri853_values() {
-    size_t Ntot = 3 * pars.N + 1;
+    size_t Ntot = pars.Ntot;
 
     dpv.k2    = fftw_malloc(Ntot * sizeof *dpv.k2);
     dpv.k3    = fftw_malloc(Ntot * sizeof *dpv.k3);
