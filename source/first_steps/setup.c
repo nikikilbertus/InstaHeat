@@ -133,15 +133,16 @@ void allocate_external() {
     size_t Nz   = pars.z.N;
     size_t N    = pars.N;
     size_t Ntot = pars.Ntot;
+    size_t Nall = 4 * N + 1;
     size_t outN = pars.outN;
     size_t bins = pars.file.bins_powspec;
     size_t buf_size = pars.file.buf_size;
 
     grid       = malloc((Nx + Ny + Nz) * sizeof *grid);
-    field      = fftw_malloc(Ntot * sizeof *field);
-    field_new  = fftw_malloc(Ntot * sizeof *field_new);
-    dfield     = fftw_malloc(Ntot * sizeof *dfield);
-    dfield_new = fftw_malloc(Ntot * sizeof *dfield_new);
+    field      = fftw_malloc(Nall * sizeof *field);
+    field_new  = fftw_malloc(Nall * sizeof *field_new);
+    dfield     = fftw_malloc(Nall * sizeof *dfield);
+    dfield_new = fftw_malloc(Nall * sizeof *dfield_new);
     time_buf   = calloc(buf_size, sizeof *time_buf);
     a_buf      = calloc(buf_size, sizeof *a_buf);
     rho        = fftw_malloc(N * sizeof *rho);
@@ -368,7 +369,7 @@ void mk_initial_conditions() {
     #endif
 
     // initialize a
-    field[Ntot - 1] = A_INITIAL;
+    field[2 * N] = A_INITIAL;
     free(theta);
     #endif
 
@@ -599,11 +600,11 @@ double wrapped_gaussian(double x, double y, double z) {
 
 void mk_initial_psi() {
     size_t N = pars.N;
-    size_t N2 = 2 * N;
-    size_t Nmax = pars.Ntot - 1;
+    size_t Ni = 2 * N + 1;
+    size_t Nf = pars.Ntot;
 
     #pragma omp parallel for
-    for (size_t i = N2; i < Nmax; ++i)
+    for (size_t i = Ni; i < Nf; ++i)
     {
         field[i] = 0.0;
     }
