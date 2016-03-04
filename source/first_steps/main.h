@@ -273,7 +273,7 @@ extern double *grid;
 // time slices buffer
 extern double *time_buf;
 
-// those contain the Ntot scalar variables we evolve in the integration
+// contain phi, dphi, a, psi, dpsi (only first Ntot entries are integrated)
 extern double *field;
 extern double *dfield;
 extern double *field_new;
