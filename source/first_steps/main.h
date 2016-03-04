@@ -121,7 +121,7 @@ during execution
 #define PSI_METHOD              (PSI_HYPERBOLIC)
 
 // ------------------computational domain---------------------------------------
-// spatial
+// spatial (order is important! use y=z=1 for 1D; use z=1 for 2D)
 #define GRIDPOINTS_X            (192)
 #define GRIDPOINTS_Y            (1)
 #define GRIDPOINTS_Z            (1)
