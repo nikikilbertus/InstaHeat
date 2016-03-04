@@ -96,7 +96,16 @@ void initialize_parameters() {
             break;
     }
 
+    // the total number of scalars evolved in the integration routine depends on
+    // if and how we evolve psi
     pars.N = pars.x.N * pars.y.N * pars.z.N;
+    #if PSI_METHOD == PSI_ELLIPTIC
+    pars.Ntot = 2 * N + 1;
+    #elif PSI_METHOD == PSI_PARABOLIC
+    pars.Ntot = 3 * N + 1;
+    #elif PSI_METHOD == PSI_HYPERBOLIC
+    pars.Ntot = 4 * N + 1;
+    #endif
 
     pars.t.dt = DELTA_T;
     pars.t.t  = INITIAL_TIME;
@@ -123,11 +132,10 @@ void allocate_external() {
     size_t Ny   = pars.y.N;
     size_t Nz   = pars.z.N;
     size_t N    = pars.N;
-    size_t N3   = 3 * N;
-    size_t Ntot = N3 + 1;
-    size_t buf_size = pars.file.buf_size;
-    size_t bins = pars.file.bins_powspec;
+    size_t Ntot = pars.Ntot;
     size_t outN = pars.outN;
+    size_t bins = pars.file.bins_powspec;
+    size_t buf_size = pars.file.buf_size;
 
     grid       = malloc((Nx + Ny + Nz) * sizeof *grid);
     field      = fftw_malloc(Ntot * sizeof *field);

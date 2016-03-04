@@ -272,13 +272,14 @@ extern double *grid;
 // time slices buffer
 extern double *time_buf;
 
-// the scalar field plus scaling parameter a we evolve, the temporal derivatives
-// the field contains phi, dphi, a, psi
-// and the buffer for the scalar field
+// those contain the Ntot scalar variables we evolve in the integration
 extern double *field;
 extern double *dfield;
 extern double *field_new;
 extern double *dfield_new;
+
+//TODO: create structure to bundle buffers (equal for phi and psi)
+// buffers for the scalar inflaton field and the scalar metric perturbation
 extern double *phi_buf;
 extern double *dphi_buf;
 extern double *psi_buf;
