@@ -12,34 +12,50 @@
 // see header file for more info
 evolution_flags_t evo_flags = {.filter = 0, .compute_pow_spec = 0};
 
-// compute the right hand side of the pde, i.e. the first temporal derivatives
-// of all fields (scalar field, its first temporal derivative and a)
+// compute right hand side of the pde, i.e. all first order temporal derivatives
+// which fields are contained depends on PSI_METHOD
 void mk_rhs(const double t, double *f, double *result) {
     size_t N = pars.N;
+    size_t Ntot = pars.Ntot;
     size_t N2 = 2 * N;
     size_t N3 = 3 * N;
-    double a = f[N3];
+    size_t N4 = 4 * N;
+    double a = f[Ntot - 1];
     double a2 = a * a;
-    double h3;
 
     mk_gradient_squared_and_laplacian(f);
     mk_rho(f);
     double hubble = sqrt(rho_mean / 3.0);
-    h3 = 3.0 * hubble;
+    double h3 = 3.0 * hubble;
 
+    // copy dphi
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i)
     {
         result[i] = f[N + i];
     }
 
+    // copy dpsi if evolving via the hyperbolic equation
+    #if PSI_METHOD == PSI_HYPERBOLIC
+    #pragma omp parallel for
+    for (size_t i = N2; i < N3; ++i)
+    {
+        result[i] = f[N + i];
+    }
+    #endif
+
+    // equation for dpsi if evolving via the parabolic equation
+    #if PSI_METHOD == PSI_PARABOLIC
     #pragma omp parallel for
     for (size_t i = N2; i < N3; ++i)
     {
         result[i] = -hubble * f[i] - 0.5 * (rho[i - N2] - rho_mean) / h3 +
             tmp.f[i - N2] / (h3 * a2);
     }
+    #endif
 
+    // equation for dphi (note that dpsi has to be provided in result first)
+    #if PSI_METHOD != PSI_ELLIPTIC
     double df, p;
     #pragma omp parallel for private(df, p)
     for (size_t i = 0; i < N; ++i)
@@ -50,8 +66,13 @@ void mk_rhs(const double t, double *f, double *result) {
             (h3 - 4.0 * result[N2 + i]) * df -
             (1.0 + 2.0 * p) * potential_prime(f[i]);
     }
+    #endif
+    //TODO: PSI_METHOD == PSI_ELLIPTIC case
 
-    result[N3] = a * hubble;
+    //TODO: ddpsi in hyperbolic case
+
+    // a is always the same
+    result[Ntot - 1] = a * hubble;
 }
 
 // compute the laplacian and the squared gradient of the input and store them
