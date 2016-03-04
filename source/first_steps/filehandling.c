@@ -574,3 +574,21 @@ void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
     H5Sclose(dspace);
     H5Sclose(mspace);
 }
+
+void read_initial_data() {
+    size_t N = pars.N;
+
+    FILE *file = fopen(INITIAL_DATAPATH, "r");
+    if (!file)
+    {
+        fputs("Could not read initial data file.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+
+    //TODO: adjust to actual file format, this is just a dummy
+    for (size_t i = 0; i < N; ++i)
+    {
+        fscanf(file, "%lf", &field[i]);
+    }
+    fclose(file);
+}

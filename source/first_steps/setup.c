@@ -365,24 +365,6 @@ void mk_initial_conditions() {
     RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
 }
 
-void read_initial_data() {
-    size_t N = pars.N;
-
-    FILE *file = fopen(INITIAL_DATAPATH, "r");
-    if (!file)
-    {
-        fputs("Could not read initial data file.\n", stderr);
-        exit(EXIT_FAILURE);
-    }
-
-    //TODO: adjust to actual file format, this is just a dummy
-    for (size_t i = 0; i < N; ++i)
-    {
-        fscanf(file, "%lf", &field[i]);
-    }
-    fclose(file);
-}
-
 // initial values of the scalar field, make sure its periodic
 double phi_init(double x, double y, double z, double *ph) {
     // localized for higgs metastability potential
