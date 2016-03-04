@@ -69,7 +69,7 @@ during execution
 #define INITIAL_CONDITIONS          IC_FROM_INTERNAL_FUNCTION
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/test_hyp.h5")
+#define DATAPATH                ("../../../data/bla.h5")
 /* #define DATAPATH                ("$HOME/data/compare.h5") */
 #define INITIAL_DATAPATH        ("../../../data/init.h5")
 
@@ -137,7 +137,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (1.0e-5)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (1.0e6)
+#define FINAL_TIME              (1.0e2)
 #define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-10)
 

@@ -137,6 +137,7 @@ void h5_create_empty_by_path(const char *name) {
     #elif VERSION_CONTROL == VERSION_CONTROL_GIT
     char *cmd = "git rev-parse --short HEAD";
     #endif
+    dim[0] = 1;
     size_t len = 16;
     char hash[len];
     FILE *output;
@@ -176,9 +177,7 @@ void h5_create_empty_by_path(const char *name) {
     }
     #endif
 
-    RUNTIME_INFO(puts("Created hdf5 file with parameters and datasets for "
-                "phi, dphi, psi, dpsi, rho (+ means & variance), t, a, "
-                "powerspec.\n"));
+    RUNTIME_INFO(puts("Created hdf5 file with datasets for output.\n"));
 }
 
 void h5_create_dset(const hsize_t rank, const hsize_t *dim,
