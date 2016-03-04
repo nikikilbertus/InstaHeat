@@ -472,9 +472,10 @@ void save() {
     #endif
 }
 
-void h5_read_timeslice(double t, double *f) {
+void h5_read_timeslice(double *f) {
     hid_t file, dset, dspace;
     size_t N = pars.N;
+    double t = pars.t.ti;
 
     file = H5Fopen(INITIAL_DATAPATH, H5F_ACC_RDONLY, H5P_DEFAULT);
 
@@ -517,9 +518,9 @@ void h5_read_timeslice(double t, double *f) {
     H5Sclose(dspace);
 
     // ---------------------------read fields at index--------------------------
-    h5_read_and_fill(file, index, H5_PHI_NAME, f);
-    h5_read_and_fill(file, index, H5_DPHI_NAME, f + N);
-    h5_read_and_fill(file, index, H5_PSI_NAME, f + 2 * N);
+    h5_read_and_fill(file, index, H5_PHI_NAME, field);
+    h5_read_and_fill(file, index, H5_DPHI_NAME, field + N);
+    h5_read_and_fill(file, index, H5_PSI_NAME, field + 2 * N);
 
     // ---------------------------read a at index-------------------------------
     dset = H5Dopen(file, H5_A_NAME, H5P_DEFAULT);
@@ -540,7 +541,7 @@ void h5_read_timeslice(double t, double *f) {
     hsize_t start[1] = {index};
     hsize_t count[1] = {1};
     H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start, NULL, count, NULL);
-    H5Dread(dset, H5T_NATIVE_DOUBLE, mspace, dspace, H5P_DEFAULT, f + 3 * N);
+    H5Dread(dset, H5T_NATIVE_DOUBLE, mspace, dspace, H5P_DEFAULT, field + 3 * N);
     H5Dclose(dset);
     H5Sclose(dspace);
     H5Fclose(file);

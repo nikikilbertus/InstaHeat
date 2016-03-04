@@ -306,7 +306,7 @@ void mk_fftw_plans() {
 // setup initial conditions for the field
 void mk_initial_conditions() {
     #if INITIAL_CONDITIONS == IC_FROM_H5_FILE
-    h5_read_timeslice(pars.t.ti, field);
+    h5_read_timeslice();
     #elif INITIAL_CONDITIONS == IC_FROM_DAT_FILE
     read_initial_data();
     mk_initial_psi();
