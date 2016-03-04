@@ -16,7 +16,6 @@ evolution_flags_t evo_flags = {.filter = 0, .compute_pow_spec = 0};
 // which fields are contained depends on PSI_METHOD
 void mk_rhs(const double t, double *f, double *result) {
     size_t N = pars.N;
-    size_t Ntot = pars.Ntot;
     size_t N2 = 2 * N;
     size_t N2p = N2 + 1;
     size_t N3p = 3 * N + 1;
@@ -51,7 +50,7 @@ void mk_rhs(const double t, double *f, double *result) {
         #endif
     }
     #else
-    mk_psi();
+    mk_psi(f);
     #endif
 
     // equation for ddphi in all cases (psi & dpsi have to be provided first)
@@ -570,7 +569,7 @@ void prepare_and_save_timeslice() {
     evo_flags.compute_pow_spec = 0;
     mk_rho(field);
     #if PSI_METHOD == PSI_ELLIPTIC
-    mk_psi();
+    mk_psi(field);
     #endif
     mk_means_and_variances();
     save();

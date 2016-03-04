@@ -132,7 +132,6 @@ void allocate_external() {
     size_t Ny   = pars.y.N;
     size_t Nz   = pars.z.N;
     size_t N    = pars.N;
-    size_t Ntot = pars.Ntot;
     size_t Nall = 4 * N + 1;
     size_t outN = pars.outN;
     size_t bins = pars.file.bins_powspec;
@@ -322,7 +321,6 @@ void mk_initial_conditions() {
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
     size_t N = pars.N;
-    size_t Ntot = pars.Ntot;
     size_t osx, osy;
     double x, y, z;
 
@@ -600,11 +598,11 @@ double wrapped_gaussian(double x, double y, double z) {
 
 void mk_initial_psi() {
     size_t N = pars.N;
-    size_t Ni = 2 * N + 1;
-    size_t Nf = pars.Ntot;
+    size_t N2p = 2 * N + 1;
+    size_t Ntot = pars.Ntot;
 
     #pragma omp parallel for
-    for (size_t i = Ni; i < Nf; ++i)
+    for (size_t i = N2p; i < Ntot; ++i)
     {
         field[i] = 0.0;
     }
