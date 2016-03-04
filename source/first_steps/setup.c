@@ -104,7 +104,7 @@ void initialize_parameters() {
     #elif PSI_METHOD == PSI_PARABOLIC
     pars.Ntot = 3 * N + 1;
     #elif PSI_METHOD == PSI_HYPERBOLIC
-    pars.Ntot = 4 * N + 1;
+    pars.Ntot = 4 * pars.N + 1;
     #endif
 
     pars.t.dt = DELTA_T;
