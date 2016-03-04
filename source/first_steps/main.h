@@ -119,7 +119,7 @@ during execution
 #define PSI_ELLIPTIC            (0)
 #define PSI_HYPERBOLIC          (1)
 #define PSI_PARABOLIC           (2)
-#define PSI_METHOD              (PSI_HYPERBOLIC)
+#define PSI_METHOD              (PSI_PARABOLIC)
 
 // ------------------computational domain---------------------------------------
 // spatial (order is important! use y=z=1 for 1D; use z=1 for 2D)
