@@ -315,6 +315,7 @@ void mk_initial_conditions() {
     size_t Ny = pars.y.N;
     size_t Nz = pars.z.N;
     size_t N = pars.N;
+    size_t Ntot = pars.Ntot;
     size_t osx, osy;
     double x, y, z;
 
@@ -356,7 +357,7 @@ void mk_initial_conditions() {
     }
 
     // initialize a
-    field[3 * N] = A_INITIAL;
+    field[Ntot - 1] = A_INITIAL;
     free(theta);
     #endif
 
