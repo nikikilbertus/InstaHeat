@@ -145,6 +145,9 @@ void allocate_external() {
     time_buf   = calloc(buf_size, sizeof *time_buf);
     a_buf      = calloc(buf_size, sizeof *a_buf);
     rho        = fftw_malloc(N * sizeof *rho);
+    #if PSI_METHOD == PSI_HYPERBOLIC
+    pressure   = fftw_malloc(N * sizeof *pressure);
+    #endif
     pow_spec   = calloc(bins, sizeof *pow_spec);
 
     #ifdef OUTPUT_PHI
@@ -218,9 +221,10 @@ void allocate_external() {
     tmp.deltarho = fftw_malloc(N * sizeof *tmp.deltarho);
 
     if (!(grid && field && field_new && dfield && dfield_new &&
-        rho && pow_spec && tmp.phic  && tmp.xphic && tmp.yphic && tmp.zphic &&
-        tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap && tmp.psic  &&
-        tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f && tmp.deltarho))
+        rho && pressure && pow_spec && tmp.phic  && tmp.xphic && tmp.yphic &&
+        tmp.zphic && tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap &&
+        tmp.psic  && tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f &&
+        tmp.deltarho))
     {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
@@ -631,6 +635,9 @@ void free_external() {
     fftw_free(dfield);
     fftw_free(dfield_new);
     free(rho);
+    #if PSI_METHOD == PSI_HYPERBOLIC
+    free(pressure);
+    #endif
     free(pow_spec);
     free(time_buf);
     free(a_buf);
