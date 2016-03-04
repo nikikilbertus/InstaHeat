@@ -222,8 +222,10 @@ typedef struct {
  *  Nz = number of grid points in the z direction
  *  N  = number of gridpoints for the whole spatial grid = Nx * Ny * Nz
  *  N2 = 2 * N, N3 = 3 * N, ...
- *  Ntot = number of scalar equations; depends on the used method, elliptic: 2 *
- *  N + 1, parabolic: 3 * N + 1, hyperbolic: 4 * N + 1
+ *  Ntot = number of scalar equations; depends on the used method
+ *  elliptic: 2 * N + 1 (order: phi, dphi, a)
+ *  parabolic: 3 * N + 1 (oder: phi, dphi, psi, a)
+ *  hyperbolic: 4 * N + 1 (oder: phi, dphi, psi, dpsi, a)
  */
 typedef struct {
     grid_dimension_t x;
