@@ -298,8 +298,9 @@ void mk_psi(double *f) {
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
     size_t N  = pars.N;
+    size_t Ntot  = pars.Ntot;
     size_t N2 = 2 * N;
-    double a  = f[3 * N];
+    double a  = f[Ntot - 1];
     double a2 = a * a;
     double hubble = sqrt(rho_mean / 3.0);
 
@@ -319,6 +320,8 @@ void mk_psi(double *f) {
     #endif
     fftw_execute_dft_r2c(p_fw, tmp.f, tmp.fc);
     fftw_execute_dft_r2c(p_fw, tmp.deltarho, tmp.deltarhoc);
+    //TODO: add dpsi back in here (just always do it, either it's needed or it's
+    //only computed once in the beginning
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
