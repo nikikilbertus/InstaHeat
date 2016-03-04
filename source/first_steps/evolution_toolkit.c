@@ -202,7 +202,6 @@ void mk_gradient_squared_and_laplacian(double *in) {
 // compute energy density rho & average value
 void mk_rho(double *f) {
     size_t N = pars.N;
-    size_t Ntot = pars.Ntot;
     size_t N2 = 2 * N;
     size_t N2p = N2 + 1;
     double a = f[N2];
@@ -227,8 +226,9 @@ void mk_rho(double *f) {
             pressure[i] = t1 - t2 / 3.0 - potential(f[i]);
             pressure_mean += pressure[i];
             #endif
+        #else
+        rho[i] = (df * df + tmp.grad[i] / a2) / 2.0 + potential(f[i]);
         #endif
-        //TODO: PSI_METHOD == PSI_ELLIPTIC case
         rho_mean += rho[i];
     }
     rho_mean /= N;
