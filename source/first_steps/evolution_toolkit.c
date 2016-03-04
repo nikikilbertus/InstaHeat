@@ -475,16 +475,16 @@ void apply_filter_real(double *inout) {
     fftw_execute_dft_r2c(p_fw, inout, tmp.phic);
     fftw_execute_dft_r2c(p_fw, inout + N, tmp.xphic);
     #if PSI_METHOD != PSI_ELLIPTIC
-    fftw_execute_dft_r2c(p_fw, inout + N2p, tmp.psic);
+    fftw_execute_dft_r2c(p_fw, inout + N2p, tmp.yphic);
         #if PSI_METHOD == PSI_HYPERBOLIC
-        fftw_execute_dft_r2c(p_fw, inout + N3p, tmp.dpsic);
+        fftw_execute_dft_r2c(p_fw, inout + N3p, tmp.zphic);
         #endif
     #endif
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
 
-    apply_filter_fourier(tmp.phic, tmp.xphic, tmp.psic, tmp.dpsic);
+    apply_filter_fourier(tmp.phic, tmp.xphic, tmp.yphic, tmp.zphic);
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
@@ -492,9 +492,9 @@ void apply_filter_real(double *inout) {
     fftw_execute_dft_c2r(p_bw, tmp.phic, inout);
     fftw_execute_dft_c2r(p_bw, tmp.xphic, inout + N);
     #if PSI_METHOD != PSI_ELLIPTIC
-    fftw_execute_dft_c2r(p_bw, tmp.psic, inout + N2p);
+    fftw_execute_dft_c2r(p_bw, tmp.yphic, inout + N2p);
         #if PSI_METHOD == PSI_HYPERBOLIC
-        fftw_execute_dft_c2r(p_bw, tmp.dpsic, inout + N3p);
+        fftw_execute_dft_c2r(p_bw, tmp.zphic, inout + N3p);
         #endif
     #endif
     #ifdef SHOW_TIMING_INFO

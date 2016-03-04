@@ -1,4 +1,4 @@
-name = 'test_ell';
+name = 'test_par';
 comp = true;
 karstenpsi = true;
 loadtimes = true;
@@ -18,6 +18,7 @@ psi = h5read(name, '/psi');
 dpsi = h5read(name, '/dpsi');
 powspec = h5read(name, '/power_spectrum');
 mass = h5read(name, '/mass');
+tols = h5read(name, '/tolerances');
 
 Nt = length(t);
 N = length(phi(:,1));

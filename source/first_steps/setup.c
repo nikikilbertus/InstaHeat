@@ -125,10 +125,6 @@ void initialize_parameters() {
     pars.file.bins_powspec = POWER_SPECTRUM_BINS;
     RUNTIME_INFO(printf("Initialized parameters using %zu dimension(s).\n\n",
             pars.dim));
-
-    RUNTIME_INFO(printf("N = %zu,  Nall = %zu, Ntot = %zu, Nx = %zu, Ny = %zu, "
-                "Nz = %zu \n", pars.N, pars.Nall, pars.Ntot, pars.x.N, pars.y.N,
-            pars.z.N));
 }
 
 // allocate memory for all external variables
@@ -365,16 +361,17 @@ void mk_initial_conditions() {
         }
     }
 
-    // initialize psi
-    #if PSI_METHOD != PSI_ELLIPTIC
-    mk_initial_psi();
-    #endif
+    free(theta);
 
     // initialize a
     field[2 * N] = A_INITIAL;
     // empty slot for memory alignment
     field[2 * N + 1] = 0.0;
-    free(theta);
+
+    // initialize psi
+    #if PSI_METHOD != PSI_ELLIPTIC
+    mk_initial_psi();
+    #endif
     #endif
 
     RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
