@@ -100,9 +100,9 @@ void initialize_parameters() {
     // if and how we evolve psi
     pars.N = pars.x.N * pars.y.N * pars.z.N;
     #if PSI_METHOD == PSI_ELLIPTIC
-    pars.Ntot = 2 * N + 1;
+    pars.Ntot = 2 * pars.N + 1;
     #elif PSI_METHOD == PSI_PARABOLIC
-    pars.Ntot = 3 * N + 1;
+    pars.Ntot = 3 * pars.N + 1;
     #elif PSI_METHOD == PSI_HYPERBOLIC
     pars.Ntot = 4 * pars.N + 1;
     #endif

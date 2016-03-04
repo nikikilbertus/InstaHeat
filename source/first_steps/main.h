@@ -116,6 +116,7 @@ during execution
 #define ENABLE_FFT_FILTER
 
 // choose between the parabolic or the hyperbolic equation to evolve psi
+#define PSI_ELLIPTIC            (0)
 #define PSI_HYPERBOLIC          (1)
 #define PSI_PARABOLIC           (2)
 #define PSI_METHOD              (PSI_HYPERBOLIC)
