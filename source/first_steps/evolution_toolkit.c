@@ -18,8 +18,9 @@ void mk_rhs(const double t, double *f, double *result) {
     size_t N = pars.N;
     size_t Ntot = pars.Ntot;
     size_t N2 = 2 * N;
-    size_t N3 = 3 * N;
-    double a = f[Ntot - 1];
+    size_t N2p = N2 + 1;
+    size_t N3p = 3 * N + 1;
+    double a = f[N2];
     double a2 = a * a;
 
     mk_gradient_squared_and_laplacian(f);
@@ -38,15 +39,15 @@ void mk_rhs(const double t, double *f, double *result) {
     // hyperbolic
     #if PSI_METHOD != PSI_ELLIPTIC
     #pragma omp parallel for
-    for (size_t i = N2; i < N3; ++i)
+    for (size_t i = 0; i < N; ++i)
     {
         #if PSI_METHOD == PSI_PARABOLIC
-        result[i] = -hubble * f[i] - 0.5 * (rho[i - N2] - rho_mean) / h3 +
-            tmp.f[i - N2] / (h3 * a2);
+        result[N2p + i] = -hubble * f[N2p + i] - 0.5 * (rho[i] - rho_mean) / h3
+            + tmp.f[i] / (h3 * a2);
         #elif PSI_METHOD == PSI_HYPERBOLIC
-        result[i] = f[N + i];
-        result[N + i] = 0.5 * pressure[i - N2] + (f[i] - 0.5) * pressure_mean -
-            4.0 * hubble * result[i];
+        result[N2p + i] = f[N3p + i];
+        result[N3p + i] = 0.5 * pressure[i] + (f[N2p + i] - 0.5) * pressure_mean
+            - 4.0 * hubble * f[N3p + i];
         #endif
     }
     #endif
@@ -57,19 +58,14 @@ void mk_rhs(const double t, double *f, double *result) {
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
-        #if PSI_METHOD != PSI_ELLIPTIC
-        p = f[N2 + i];
-        dp = result[N2 + i];
-        #else
-        p = psi[i];
-        dp = dpsi[i];
-        #endif
+        p = f[N2p + i];
+        dp = result[N2p + i];
         result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / a2 -
             (h3 - 4.0 * dp) * df - (1.0 + 2.0 * p) * potential_prime(f[i]);
     }
 
     // a is always the same
-    result[Ntot - 1] = a * hubble;
+    result[N2] = a * hubble;
 }
 
 // compute the laplacian and the squared gradient of the input and store them
