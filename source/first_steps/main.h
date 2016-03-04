@@ -90,7 +90,7 @@ during execution
 #define POWER_SPECTRUM_BINS     (30)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (10)
+#define TIME_STEP_SKIPS         (1)
 
 // spatial output strides
 #define STRIDE_X                (1)
@@ -163,8 +163,10 @@ during execution
 #define SAFE                    (0.9)
 
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-7)
-#define ABSOLUTE_TOLERANCE      (1.0e-7)
+#define RELATIVE_TOLERANCE      (1.0e-8)
+#define ABSOLUTE_TOLERANCE      (1.0e-8)
+// the timestep is limited from above by a fraction of the hubble time 1/H
+#define MIN_DT_FRACTION         (1.0e-2)
 
 // ------------------------typedefs---------------------------------------------
 // representing one spatial dimension of a multi dimensional grid

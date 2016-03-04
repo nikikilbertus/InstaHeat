@@ -1,11 +1,11 @@
-% name = 'rk_128';
+name = 'test_ell';
 comp = true;
-karstenpsi = false;
+karstenpsi = true;
 loadtimes = true;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
-name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/check/' name '.h5'];
+name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/' name '.h5'];
 
 % built in functions for reading makes it easy
 dim = h5read(name, '/dimension');
