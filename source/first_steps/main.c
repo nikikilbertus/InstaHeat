@@ -49,6 +49,8 @@ double rho_mean;
 double rho_var;
 double *rho_mean_buf;
 double *rho_var_buf;
+double *pressure;
+double pressure_mean;
 double *pow_spec;
 double *pow_spec_buf;
 temporary_t tmp;

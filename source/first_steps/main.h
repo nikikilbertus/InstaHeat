@@ -316,6 +316,10 @@ extern double rho_var;
 extern double *rho_mean_buf;
 extern double *rho_var_buf;
 
+// pressure (only needed for PSI_METHOD == PSI_HYPERBOLIC, but always defined)
+extern double *pressure;
+extern double pressure_mean;
+
 // power spectrum and the buffer
 extern double *pow_spec;
 extern double *pow_spec_buf;
