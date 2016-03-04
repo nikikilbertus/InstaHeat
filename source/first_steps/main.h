@@ -230,6 +230,7 @@ typedef struct {
     grid_dimension_t y;
     grid_dimension_t z;
     size_t N;
+    size_t Ntot;
     size_t outN; // total number of spatial gridpoints for output (with strides)
     size_t dim;
     timing_t t;
