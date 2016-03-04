@@ -101,7 +101,7 @@ void initialize_parameters() {
     pars.N = pars.x.N * pars.y.N * pars.z.N;
     pars.Nall = 4 * pars.N + 2;
     #if PSI_METHOD == PSI_ELLIPTIC
-    pars.Ntot = 2 * pars.N + 2;
+    pars.Ntot = 2 * pars.N + 1;
     #elif PSI_METHOD == PSI_PARABOLIC
     pars.Ntot = 3 * pars.N + 2;
     #elif PSI_METHOD == PSI_HYPERBOLIC
@@ -125,6 +125,10 @@ void initialize_parameters() {
     pars.file.bins_powspec = POWER_SPECTRUM_BINS;
     RUNTIME_INFO(printf("Initialized parameters using %zu dimension(s).\n\n",
             pars.dim));
+
+    RUNTIME_INFO(printf("N = %zu,  Nall = %zu, Ntot = %zu, Nx = %zu, Ny = %zu, "
+                "Nz = %zu \n", pars.N, pars.Nall, pars.Ntot, pars.x.N, pars.y.N,
+            pars.z.N));
 }
 
 // allocate memory for all external variables
@@ -601,10 +605,10 @@ double wrapped_gaussian(double x, double y, double z) {
 void mk_initial_psi() {
     size_t N = pars.N;
     size_t N2p = 2 * N + 2;
-    size_t Ntot = pars.Ntot;
+    size_t Nall = pars.Nall;
 
     #pragma omp parallel for
-    for (size_t i = N2p; i < Ntot; ++i)
+    for (size_t i = N2p; i < Nall; ++i)
     {
         field[i] = 0.0;
     }

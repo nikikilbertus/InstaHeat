@@ -22,6 +22,7 @@ void mk_rhs(const double t, double *f, double *result) {
     double a = f[N2];
     double a2 = a * a;
 
+    f[N2 + 1] = 0.0;
     mk_gradient_squared_and_laplacian(f);
     mk_rho(f);
     double hubble = sqrt(rho_mean / 3.0);
@@ -71,6 +72,7 @@ void mk_rhs(const double t, double *f, double *result) {
 
     // a is always the same
     result[N2] = a * hubble;
+    result[N2 + 1] = 0.0;
 }
 
 // compute the laplacian and the squared gradient of the input and store them
