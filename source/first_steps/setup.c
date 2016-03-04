@@ -99,12 +99,13 @@ void initialize_parameters() {
     // the total number of scalars evolved in the integration routine depends on
     // if and how we evolve psi
     pars.N = pars.x.N * pars.y.N * pars.z.N;
+    pars.Nall = 4 * pars.N + 1;
     #if PSI_METHOD == PSI_ELLIPTIC
-    pars.Ntot = 2 * pars.N + 1;
+    pars.Ntot = 2 * pars.N + 2;
     #elif PSI_METHOD == PSI_PARABOLIC
-    pars.Ntot = 3 * pars.N + 1;
+    pars.Ntot = 3 * pars.N + 2;
     #elif PSI_METHOD == PSI_HYPERBOLIC
-    pars.Ntot = 4 * pars.N + 1;
+    pars.Ntot = 4 * pars.N + 2;
     #endif
 
     pars.t.dt = DELTA_T;
@@ -132,7 +133,7 @@ void allocate_external() {
     size_t Ny   = pars.y.N;
     size_t Nz   = pars.z.N;
     size_t N    = pars.N;
-    size_t Nall = 4 * N + 1;
+    size_t Nall = pars.Nall;
     size_t outN = pars.outN;
     size_t bins = pars.file.bins_powspec;
     size_t buf_size = pars.file.buf_size;
@@ -207,9 +208,9 @@ void allocate_external() {
     tmp.yphic = fftw_malloc(M * sizeof *tmp.yphic);
     tmp.zphic = fftw_malloc(M * sizeof *tmp.zphic);
     tmp.psic  = fftw_malloc(M * sizeof *tmp.psic);
+    tmp.dpsic = fftw_malloc(M * sizeof *tmp.dpsic);
     tmp.fc    = fftw_malloc(M * sizeof *tmp.fc);
     tmp.deltarhoc  = fftw_malloc(M * sizeof *tmp.deltarhoc);
-    tmp.dpsic = fftw_malloc(M * sizeof *tmp.dpsic);
 
     // general purpose double memory blocks for temporary use
     tmp.xphi = fftw_malloc(N * sizeof *tmp.xphi);
@@ -597,7 +598,7 @@ double wrapped_gaussian(double x, double y, double z) {
 
 void mk_initial_psi() {
     size_t N = pars.N;
-    size_t N2p = 2 * N + 1;
+    size_t N2p = 2 * N + 2;
     size_t Ntot = pars.Ntot;
 
     #pragma omp parallel for

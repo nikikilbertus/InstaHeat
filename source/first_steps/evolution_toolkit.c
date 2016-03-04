@@ -376,8 +376,8 @@ void mk_psi(double *f) {
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
-    fftw_execute_dft_c2r(p_bw, tmp.psic, f + 2 * N + 1);
-    fftw_execute_dft_c2r(p_bw, tmp.dpsic, f + 3 * N + 1);
+    fftw_execute_dft_c2r(p_bw, tmp.psic, f + (2 * N + 1));
+    fftw_execute_dft_c2r(p_bw, tmp.dpsic, f + (3 * N + 1));
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     poisson_time += get_wall_time();
