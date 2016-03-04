@@ -33,11 +33,6 @@ void run_rk4() {
     RUNTIME_INFO(printf("final time: %f\n", pars.t.tf));
     RUNTIME_INFO(printf("time step dt: %f\n", dt));
     RUNTIME_INFO(printf("number of steps: %zu\n", Nt));
-    #ifdef ENABLE_FFT_FILTER
-        RUNTIME_INFO(puts("Frequency cutoff filtering enabled.\n"));
-    #else
-        RUNTIME_INFO(puts("Filtering disabled.\n"));
-    #endif
 
     #ifdef SHOW_TIMING_INFO
     double secs = -get_wall_time();

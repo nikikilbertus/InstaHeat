@@ -17,6 +17,19 @@ void allocate_and_initialize_all() {
     mk_fftw_plans();
     mk_initial_conditions();
     h5_create_empty_by_path(DATAPATH);
+    #ifdef ENABLE_FFT_FILTER
+    RUNTIME_INFO(puts("Frequency cutoff filtering enabled.\n"));
+    #else
+    RUNTIME_INFO(puts("Filtering disabled.\n"));
+    #endif
+
+    #if PSI_METHOD == PSI_ELLIPTIC
+    RUNTIME_INFO(puts("Solving elliptic equation for psi at each timesetp.\n"));
+    #elif PSI_METHOD == PSI_PARABOLIC
+    RUNTIME_INFO(puts("Integrating psi using the parabolic constraint.\n"));
+    #elif PSI_METHOD == PSI_HYPERBOLIC
+    RUNTIME_INFO(puts("Integrating psi using the hyperbolic constraint.\n"));
+    #endif
 }
 
 void initialize_threading() {
