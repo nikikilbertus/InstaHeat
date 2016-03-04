@@ -9,8 +9,7 @@
 #include "filehandling.h"
 
 void run_rk4() {
-    size_t N = pars.N;
-    size_t Ntot = 3 * N + 1;
+    size_t Ntot = pars.Ntot;
     size_t Nt = pars.t.Nt;
     double dt = pars.t.dt;
     double t = pars.t.t;
