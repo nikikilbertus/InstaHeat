@@ -57,6 +57,14 @@ void run_dopri853() {
     RUNTIME_INFO(puts("Filtering disabled.\n"));
     #endif
 
+    #if PSI_METHOD == PSI_ELLIPTIC
+    RUNTIME_INFO(puts("Solving elliptic equation for psi at each timesetp.\n"));
+    #elif PSI_METHOD == PSI_PARABOLIC
+    RUNTIME_INFO(puts("Integrating psi using the parabolic constraint.\n"));
+    #elif PSI_METHOD == PSI_HYPERBOLIC
+    RUNTIME_INFO(puts("Integrating psi using the hyperbolic constraint.\n"));
+    #endif
+
     evo_flags.compute_pow_spec = 1;
     mk_rhs(dp.t, field, dfield);
     evo_flags.compute_pow_spec = 0;
