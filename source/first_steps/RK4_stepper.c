@@ -10,7 +10,7 @@
 
 void run_rk4() {
     size_t Ntot = pars.Ntot;
-    size_t Nall = 4 * pars.N + 1;
+    size_t Nall = pars.Nall;
     size_t Nt = pars.t.Nt;
     double dt = pars.t.dt;
     double t = pars.t.t;

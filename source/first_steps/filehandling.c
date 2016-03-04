@@ -347,8 +347,8 @@ void save() {
     hsize_t Nt    = pars.file.buf_size;
     hsize_t N     = pars.N;
     hsize_t N2    = 2 * N;
-    hsize_t N2p   = N2 + 1;
-    hsize_t N3p   = 3 * N + 1;
+    hsize_t N2p   = N2 + 2;
+    hsize_t N3p   = 3 * N + 2;
     hsize_t bins  = pars.file.bins_powspec;
 
     time_buf[index] = pars.t.t;
@@ -481,6 +481,8 @@ void save() {
 void h5_read_timeslice() {
     hid_t file, dset, dspace;
     size_t N = pars.N;
+    size_t N2p = 2 * N + 2;
+    size_t N3p = 3 * N + 2;
     double t = pars.t.ti;
 
     file = H5Fopen(INITIAL_DATAPATH, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -526,8 +528,8 @@ void h5_read_timeslice() {
     // ---------------------------read fields at index--------------------------
     h5_read_and_fill(file, index, H5_PHI_NAME, field);
     h5_read_and_fill(file, index, H5_DPHI_NAME, field + N);
-    h5_read_and_fill(file, index, H5_PSI_NAME, field + 2 * N + 1);
-    h5_read_and_fill(file, index, H5_DPSI_NAME, field + 3 * N + 1);
+    h5_read_and_fill(file, index, H5_PSI_NAME, field + N2p);
+    h5_read_and_fill(file, index, H5_DPSI_NAME, field + N3p);
 
     // ---------------------------read a at index-------------------------------
     dset = H5Dopen(file, H5_A_NAME, H5P_DEFAULT);

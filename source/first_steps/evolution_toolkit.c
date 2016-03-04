@@ -17,8 +17,8 @@ evolution_flags_t evo_flags = {.filter = 0, .compute_pow_spec = 0};
 void mk_rhs(const double t, double *f, double *result) {
     size_t N = pars.N;
     size_t N2 = 2 * N;
-    size_t N2p = N2 + 1;
-    size_t N3p = 3 * N + 1;
+    size_t N2p = N2 + 2;
+    size_t N3p = 3 * N + 2;
     double a = f[N2];
     double a2 = a * a;
 
@@ -78,7 +78,7 @@ void mk_gradient_squared_and_laplacian(double *in) {
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
     size_t N  = pars.N;
-    size_t N2p = 2 * N + 1;
+    size_t N2p = 2 * N + 2;
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
@@ -202,7 +202,7 @@ void mk_gradient_squared_and_laplacian(double *in) {
 void mk_rho(double *f) {
     size_t N = pars.N;
     size_t N2 = 2 * N;
-    size_t N2p = N2 + 1;
+    size_t N2p = N2 + 2;
     double a = f[N2];
     double a2 = a * a;
     rho_mean = 0.0;
@@ -294,6 +294,8 @@ void mk_psi(double *f) {
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
     size_t N  = pars.N;
+    size_t N2p = 2 * N + 2;
+    size_t N3p = 3 * N + 2;
     double a  = f[2 * N];
     double a2 = a * a;
     double hubble = sqrt(rho_mean / 3.0);
@@ -376,8 +378,8 @@ void mk_psi(double *f) {
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
-    fftw_execute_dft_c2r(p_bw, tmp.psic, f + (2 * N + 1));
-    fftw_execute_dft_c2r(p_bw, tmp.dpsic, f + (3 * N + 1));
+    fftw_execute_dft_c2r(p_bw, tmp.psic, f + N2p);
+    fftw_execute_dft_c2r(p_bw, tmp.dpsic, f + N3p);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     poisson_time += get_wall_time();
@@ -457,6 +459,8 @@ void mk_power_spectrum(const fftw_complex *in) {
 // filter the real input field, input gets overwritten with filtered data
 void apply_filter_real(double *inout) {
     size_t N = pars.N;
+    size_t N2p = 2 * N + 2;
+    size_t N3p = 3 * N + 2;
 
     #ifdef SHOW_TIMING_INFO
     filter_time -= get_wall_time();
@@ -465,9 +469,9 @@ void apply_filter_real(double *inout) {
     fftw_execute_dft_r2c(p_fw, inout, tmp.phic);
     fftw_execute_dft_r2c(p_fw, inout + N, tmp.xphic);
     #if PSI_METHOD != PSI_ELLIPTIC
-    fftw_execute_dft_r2c(p_fw, inout + 2 * N + 1, tmp.psic);
+    fftw_execute_dft_r2c(p_fw, inout + N2p, tmp.psic);
         #if PSI_METHOD == PSI_HYPERBOLIC
-        fftw_execute_dft_r2c(p_fw, inout + 3 * N + 1, tmp.dpsic);
+        fftw_execute_dft_r2c(p_fw, inout + N3p, tmp.dpsic);
         #endif
     #endif
     #ifdef SHOW_TIMING_INFO
@@ -482,9 +486,9 @@ void apply_filter_real(double *inout) {
     fftw_execute_dft_c2r(p_bw, tmp.phic, inout);
     fftw_execute_dft_c2r(p_bw, tmp.xphic, inout + N);
     #if PSI_METHOD != PSI_ELLIPTIC
-    fftw_execute_dft_c2r(p_bw, tmp.psic, inout + 2 * N + 1);
+    fftw_execute_dft_c2r(p_bw, tmp.psic, inout + N2p);
         #if PSI_METHOD == PSI_HYPERBOLIC
-        fftw_execute_dft_c2r(p_bw, tmp.dpsic, inout + 3 * N + 1);
+        fftw_execute_dft_c2r(p_bw, tmp.dpsic, inout + N3p);
         #endif
     #endif
     #ifdef SHOW_TIMING_INFO
@@ -577,8 +581,8 @@ void prepare_and_save_timeslice() {
 
 void mk_means_and_variances() {
     size_t N = pars.N;
-    size_t N2p = 2 * N + 1;
-    size_t N3p = 3 * N + 1;
+    size_t N2p = 2 * N + 2;
+    size_t N3p = 3 * N + 2;
 
     //TODO[performance]: parallel sections instead of parallel loops here?
     #if defined(OUTPUT_PHI_MEAN) || defined(OUTPUT_PHI_VARIANCE)

@@ -58,15 +58,10 @@ void run_dopri853() {
     #endif
 
     evo_flags.compute_pow_spec = 1;
-    RUNTIME_INFO(puts("here.\n"));
     mk_rhs(dp.t, field, dfield);
-    RUNTIME_INFO(puts("here.\n"));
     evo_flags.compute_pow_spec = 0;
-    RUNTIME_INFO(puts("here.\n"));
     mk_means_and_variances();
-    RUNTIME_INFO(puts("here.\n"));
     save();
-    RUNTIME_INFO(puts("here.\n"));
 
     #ifdef SHOW_TIMING_INFO
     double secs = -get_wall_time();
@@ -398,7 +393,7 @@ int success(const double err, double *dt) {
 
 void allocate_dopri853_values() {
     size_t Ntot = pars.Ntot;
-    size_t Nall = 4 * pars.N + 1;
+    size_t Nall = pars.Nall;
 
     dpv.k2    = fftw_malloc(Ntot * sizeof *dpv.k2);
     dpv.k3    = fftw_malloc(Ntot * sizeof *dpv.k3);

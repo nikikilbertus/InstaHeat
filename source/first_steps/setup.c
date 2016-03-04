@@ -99,7 +99,7 @@ void initialize_parameters() {
     // the total number of scalars evolved in the integration routine depends on
     // if and how we evolve psi
     pars.N = pars.x.N * pars.y.N * pars.z.N;
-    pars.Nall = 4 * pars.N + 1;
+    pars.Nall = 4 * pars.N + 2;
     #if PSI_METHOD == PSI_ELLIPTIC
     pars.Ntot = 2 * pars.N + 2;
     #elif PSI_METHOD == PSI_PARABOLIC
@@ -368,6 +368,8 @@ void mk_initial_conditions() {
 
     // initialize a
     field[2 * N] = A_INITIAL;
+    // empty slot for memory alignment
+    field[2 * N + 1] = 0.0;
     free(theta);
     #endif
 
