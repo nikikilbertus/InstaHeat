@@ -19,7 +19,6 @@ void mk_rhs(const double t, double *f, double *result) {
     size_t Ntot = pars.Ntot;
     size_t N2 = 2 * N;
     size_t N3 = 3 * N;
-    size_t N4 = 4 * N;
     double a = f[Ntot - 1];
     double a2 = a * a;
 
@@ -205,6 +204,7 @@ void mk_gradient_squared_and_laplacian(double *in) {
 // compute energy density rho & average value
 void mk_rho(double *f) {
     size_t N = pars.N;
+    size_t Ntot = pars.Ntot;
     size_t N2 = 2 * N;
     double a = f[Ntot - 1];
     double a2 = a * a;
