@@ -347,13 +347,15 @@ void save() {
     hsize_t Nt    = pars.file.buf_size;
     hsize_t N     = pars.N;
     hsize_t N2    = 2 * N;
+    hsize_t N2p   = N2 + 1;
+    hsize_t N3p   = 3 * N + 1;
     hsize_t bins  = pars.file.bins_powspec;
 
     time_buf[index] = pars.t.t;
-    a_buf[index] = field[3 * N];
+    a_buf[index] = field[N2];
 
     #ifdef CHECK_FOR_NAN
-    if (isnan(pars.t.t) || isnan(field[3 * N]))
+    if (isnan(pars.t.t) || isnan(field[N2]))
     {
         fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
             exit(EXIT_FAILURE);
@@ -422,10 +424,14 @@ void save() {
                 dphi_buf[os + idb] = field[N + id];
                 #endif
                 #ifdef OUTPUT_PSI
-                psi_buf[os + idb]  = field[N2 + id];
+                psi_buf[os + idb]  = field[N2p + id];
                 #endif
                 #ifdef OUTPUT_DPSI
-                dpsi_buf[os + idb] = dfield[N2 + id];
+                    #if PSI_METHOD == PSI_PARABOLIC
+                    dpsi_buf[os + idb] = dfield[N2p + id];
+                    #else
+                    dpsi_buf[os + idb] = field[N3p + id];
+                    #endif
                 #endif
                 #ifdef OUTPUT_RHO
                 rho_buf[os + idb]  = rho[id];
@@ -472,7 +478,7 @@ void save() {
     #endif
 }
 
-void h5_read_timeslice(double *f) {
+void h5_read_timeslice() {
     hid_t file, dset, dspace;
     size_t N = pars.N;
     double t = pars.t.ti;
@@ -520,7 +526,8 @@ void h5_read_timeslice(double *f) {
     // ---------------------------read fields at index--------------------------
     h5_read_and_fill(file, index, H5_PHI_NAME, field);
     h5_read_and_fill(file, index, H5_DPHI_NAME, field + N);
-    h5_read_and_fill(file, index, H5_PSI_NAME, field + 2 * N);
+    h5_read_and_fill(file, index, H5_PSI_NAME, field + 2 * N + 1);
+    h5_read_and_fill(file, index, H5_DPSI_NAME, field + 3 * N + 1);
 
     // ---------------------------read a at index-------------------------------
     dset = H5Dopen(file, H5_A_NAME, H5P_DEFAULT);
@@ -541,7 +548,7 @@ void h5_read_timeslice(double *f) {
     hsize_t start[1] = {index};
     hsize_t count[1] = {1};
     H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start, NULL, count, NULL);
-    H5Dread(dset, H5T_NATIVE_DOUBLE, mspace, dspace, H5P_DEFAULT, field + 3 * N);
+    H5Dread(dset, H5T_NATIVE_DOUBLE, mspace, dspace, H5P_DEFAULT, field + 2 * N);
     H5Dclose(dset);
     H5Sclose(dspace);
     H5Fclose(file);
