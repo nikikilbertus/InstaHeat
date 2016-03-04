@@ -596,10 +596,10 @@ double wrapped_gaussian(double x, double y, double z) {
 void mk_initial_psi() {
     size_t N = pars.N;
     size_t N2 = 2 * N;
-    size_t N3 = 3 * N;
+    size_t Nmax = pars.Ntot - 1;
 
     #pragma omp parallel for
-    for (size_t i = N2; i < N3; ++i)
+    for (size_t i = N2; i < Nmax; ++i)
     {
         field[i] = 0.0;
     }
