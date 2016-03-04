@@ -466,9 +466,9 @@ void apply_filter_real(double *inout) {
     fftw_execute_dft_r2c(p_fw, inout, tmp.phic);
     fftw_execute_dft_r2c(p_fw, inout + N, tmp.xphic);
     #if PSI_METHOD != PSI_ELLIPTIC
-    fftw_execute_dft_r2c(p_fw, inout + 2 * N, tmp.psic);
+    fftw_execute_dft_r2c(p_fw, inout + 2 * N + 1, tmp.psic);
         #if PSI_METHOD == PSI_HYPERBOLIC
-        fftw_execute_dft_r2c(p_fw, inout + 3 * N, tmp.dpsic);
+        fftw_execute_dft_r2c(p_fw, inout + 3 * N + 1, tmp.dpsic);
         #endif
     #endif
     #ifdef SHOW_TIMING_INFO
@@ -483,9 +483,9 @@ void apply_filter_real(double *inout) {
     fftw_execute_dft_c2r(p_bw, tmp.phic, inout);
     fftw_execute_dft_c2r(p_bw, tmp.xphic, inout + N);
     #if PSI_METHOD != PSI_ELLIPTIC
-    fftw_execute_dft_c2r(p_bw, tmp.psic, inout + 2 * N);
+    fftw_execute_dft_c2r(p_bw, tmp.psic, inout + 2 * N + 1);
         #if PSI_METHOD == PSI_HYPERBOLIC
-        fftw_execute_dft_c2r(p_bw, tmp.dpsic, inout + 3 * N);
+        fftw_execute_dft_c2r(p_bw, tmp.dpsic, inout + 3 * N + 1);
         #endif
     #endif
     #ifdef SHOW_TIMING_INFO
@@ -569,7 +569,9 @@ void prepare_and_save_timeslice() {
     mk_gradient_squared_and_laplacian(field);
     evo_flags.compute_pow_spec = 0;
     mk_rho(field);
+    #if PSI_METHOD == PSI_ELLIPTIC
     mk_means_and_variances();
+    #endif
     save();
 }
 
