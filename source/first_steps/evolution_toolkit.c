@@ -60,7 +60,11 @@ void mk_rhs(const double t, double *f, double *result) {
     {
         df = f[N + i];
         p = f[N2p + i];
+        #if PSI_METHOD != PSI_PARABOLIC
+        dp = f[N3p + i];
+        #else
         dp = result[N2p + i];
+        #endif
         result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / a2 -
             (h3 - 4.0 * dp) * df - (1.0 + 2.0 * p) * potential_prime(f[i]);
     }

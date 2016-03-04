@@ -163,8 +163,8 @@ during execution
 #define SAFE                    (0.9)
 
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-10)
-#define ABSOLUTE_TOLERANCE      (1.0e-10)
+#define RELATIVE_TOLERANCE      (1.0e-7)
+#define ABSOLUTE_TOLERANCE      (1.0e-7)
 
 // ------------------------typedefs---------------------------------------------
 // representing one spatial dimension of a multi dimensional grid
