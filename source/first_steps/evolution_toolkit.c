@@ -581,38 +581,59 @@ void prepare_and_save_timeslice() {
 void mk_means_and_variances() {
     size_t N = pars.N;
     size_t N2 = 2 * N;
+    size_t N3 = 3 * N;
 
     //TODO[performance]: parallel sections instead of parallel loops here?
     #if defined(OUTPUT_PHI_MEAN) || defined(OUTPUT_PHI_VARIANCE)
     phi_mean = mean(field, N);
     #endif
     #ifdef OUTPUT_PHI_VARIANCE
-    phi_var  = variance(phi_mean, field, N);
+    phi_var = variance(phi_mean, field, N);
     #endif
 
     #if defined(OUTPUT_DPHI_MEAN) || defined(OUTPUT_DPHI_VARIANCE)
     dphi_mean = mean(field + N, N);
     #endif
     #ifdef OUTPUT_DPHI_VARIANCE
-    dphi_var  = variance(dphi_mean, field + N, N);
+    dphi_var = variance(dphi_mean, field + N, N);
     #endif
 
     #if defined(OUTPUT_PSI_MEAN) || defined(OUTPUT_PSI_VARIANCE)
-    psi_mean = mean(field + N2, N);
+        #if PSI_METHOD != PSI_ELLIPTIC
+        psi_mean = mean(field + N2, N);
+        #else
+        //TODO
+        #endif
     #endif
     #ifdef OUTPUT_PSI_VARIANCE
-    psi_var  = variance(psi_mean, field + N2, N);
+        #if PSI_METHOD != PSI_ELLIPTIC
+        psi_var = variance(psi_mean, field + N2, N);
+        #else
+        //TODO
+        #endif
     #endif
 
     #if defined(OUTPUT_DPSI_MEAN) || defined(OUTPUT_DPSI_VARIANCE)
-    dpsi_mean = mean(dfield + N2, N);
+        #if PSI_METHOD == PSI_ELLIPTIC
+        //TODO
+        #elif PSI_METHOD == PSI_PARABOLIC
+        dpsi_mean = mean(dfield + N2, N);
+        #elif PSI_METHOD == PSI_HYPERBOLIC
+        dpsi_mean = mean(field + N3, N);
+        #endif
     #endif
     #ifdef OUTPUT_DPSI_VARIANCE
-    dpsi_var  = variance(dpsi_mean, dfield + N2, N);
+        #if PSI_METHOD == PSI_ELLIPTIC
+        //TODO
+        #elif PSI_METHOD == PSI_PARABOLIC
+        dpsi_var = variance(dpsi_mean, dfield + N2, N);
+        #elif PSI_METHOD == PSI_HYPERBOLIC
+        dpsi_var = variance(dpsi_mean, field + N3, N);
+        #endif
     #endif
 
     #ifdef OUTPUT_RHO_VARIANCE
-    rho_var  = variance(rho_mean, rho, N);
+    rho_var = variance(rho_mean, rho, N);
     #endif
 }
 
