@@ -470,19 +470,29 @@ void apply_filter_real(double *inout) {
     #endif
     fftw_execute_dft_r2c(p_fw, inout, tmp.phic);
     fftw_execute_dft_r2c(p_fw, inout + N, tmp.xphic);
+    #if PSI_METHOD != PSI_ELLIPTIC
     fftw_execute_dft_r2c(p_fw, inout + 2 * N, tmp.psic);
+        #if PSI_METHOD == PSI_HYPERBOLIC
+        fftw_execute_dft_r2c(p_fw, inout + 3 * N, tmp.dpsic);
+        #endif
+    #endif
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
 
-    apply_filter_fourier(tmp.phic, tmp.xphic, tmp.psic);
+    apply_filter_fourier(tmp.phic, tmp.xphic, tmp.psic, tmp.dpsic);
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_c2r(p_bw, tmp.phic, inout);
     fftw_execute_dft_c2r(p_bw, tmp.xphic, inout + N);
+    #if PSI_METHOD != PSI_ELLIPTIC
     fftw_execute_dft_c2r(p_bw, tmp.psic, inout + 2 * N);
+        #if PSI_METHOD == PSI_HYPERBOLIC
+        fftw_execute_dft_c2r(p_bw, tmp.dpsic, inout + 3 * N);
+        #endif
+    #endif
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     filter_time += get_wall_time();
