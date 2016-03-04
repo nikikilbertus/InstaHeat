@@ -10,6 +10,7 @@
 
 void run_rk4() {
     size_t Ntot = pars.Ntot;
+    size_t Nall = 4 * pars.N + 1;
     size_t Nt = pars.t.Nt;
     double dt = pars.t.dt;
     double t = pars.t.t;
@@ -19,7 +20,7 @@ void run_rk4() {
     k2    = fftw_malloc(Ntot * sizeof *k2);
     k3    = fftw_malloc(Ntot * sizeof *k3);
     k4    = fftw_malloc(Ntot * sizeof *k4);
-    tmp_k = fftw_malloc(Ntot * sizeof *tmp_k);
+    tmp_k = fftw_malloc(Nall * sizeof *tmp_k);
 
     if (!(k1 && k2 && k3 && k4 && tmp_k))
     {

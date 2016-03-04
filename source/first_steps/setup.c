@@ -221,10 +221,9 @@ void allocate_external() {
     tmp.deltarho = fftw_malloc(N * sizeof *tmp.deltarho);
 
     if (!(grid && field && field_new && dfield && dfield_new &&
-        rho && pressure && pow_spec && tmp.phic  && tmp.xphic && tmp.yphic &&
-        tmp.zphic && tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap &&
-        tmp.psic  && tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f &&
-        tmp.deltarho))
+        rho && pow_spec && tmp.phic  && tmp.xphic && tmp.yphic && tmp.zphic &&
+        tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap && tmp.psic  &&
+        tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f && tmp.deltarho))
     {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
