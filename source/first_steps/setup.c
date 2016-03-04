@@ -309,7 +309,9 @@ void mk_initial_conditions() {
     h5_read_timeslice();
     #elif INITIAL_CONDITIONS == IC_FROM_DAT_FILE
     read_initial_data();
-    mk_initial_psi();
+        #if PSI_METHOD != PSI_ELLIPTIC
+        mk_initial_psi();
+        #endif
     #elif INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -356,12 +358,16 @@ void mk_initial_conditions() {
         }
     }
 
+    // initialize psi
+    #if PSI_METHOD != PSI_ELLIPTIC
+    mk_initial_psi();
+    #endif
+
     // initialize a
     field[Ntot - 1] = A_INITIAL;
     free(theta);
     #endif
 
-    // initialize psi
     RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
 }
 
@@ -542,9 +548,10 @@ double dphi_init(double x, double y, double z, double *ph) {
 double wrapped_gaussian(double x, double y, double z) {
     double s = 0.5;
     double res = 0.0;
+    size_t max;
     if (pars.dim == 1)
     {
-        size_t max = 32;
+        max = 32;
         for (size_t i = 1; i <= max; ++i)
         {
             res += exp(-0.5 * i * i * s * s) * (cos(i * x) + pow(-1.0, i + 1)) /
@@ -553,7 +560,7 @@ double wrapped_gaussian(double x, double y, double z) {
     }
     if (pars.dim == 2)
     {
-        size_t max = 8;
+        max = 16;
         for (size_t i = 1; i <= max; ++i)
         {
             for (size_t j = 1; j <= max; ++j)
@@ -567,7 +574,7 @@ double wrapped_gaussian(double x, double y, double z) {
     }
     if (pars.dim == 3)
     {
-        size_t max = 16;
+        max = 16;
         for (size_t i = 1; i <= max; ++i)
         {
             for (size_t j = 1; j <= max; ++j)
