@@ -501,7 +501,7 @@ void apply_filter_real(double *inout) {
 
 // filtering in fourier domain for phi, dphi, psi simultaneously
 void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
-        fftw_complex *psi_io) {
+        fftw_complex *psi_io, fftw_complex *dpsi_io) {
     size_t N = pars.N;
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -539,9 +539,15 @@ void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
                         filter *= filter_window_function(2.0 * k / (double) Nz);
                     }
                 }
-                phi_io[osy + k]  *= filter / (double) N;
-                dphi_io[osy + k] *= filter / (double) N;
-                psi_io[osy + k]  *= filter / (double) N;
+                filter /= (double) N;
+                phi_io[osy + k]  *= filter;
+                dphi_io[osy + k] *= filter;
+                #if PSI_METHOD != PSI_ELLIPTIC
+                psi_io[osy + k]  *= filter;
+                    #if PSI_METHOD == PSI_HYPERBOLIC
+                    dpsi_io[osy + k]  *= filter;
+                    #endif
+                #endif
             }
         }
     }
