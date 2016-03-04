@@ -50,6 +50,8 @@ void mk_rhs(const double t, double *f, double *result) {
             - 4.0 * hubble * f[N3p + i];
         #endif
     }
+    #else
+    mk_psi();
     #endif
 
     // equation for ddphi in all cases (psi & dpsi have to be provided first)
@@ -202,7 +204,8 @@ void mk_rho(double *f) {
     size_t N = pars.N;
     size_t Ntot = pars.Ntot;
     size_t N2 = 2 * N;
-    double a = f[Ntot - 1];
+    size_t N2p = N2 + 1;
+    double a = f[N2];
     double a2 = a * a;
     rho_mean = 0.0;
     #if PSI_METHOD == PSI_HYPERBOLIC
@@ -216,7 +219,7 @@ void mk_rho(double *f) {
     {
         df = f[N + i];
         #if PSI_METHOD != PSI_ELLIPTIC
-        p = f[N2 + i];
+        p = f[N2p + i];
         t1 = (0.5 - p) * df * df;
         t2 = (0.5 + p) * tmp.grad[i] / a2;
         rho[i] = t1 + t2 + potential(f[i]);
