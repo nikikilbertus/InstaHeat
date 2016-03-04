@@ -90,7 +90,9 @@ void mk_gradient_squared_and_laplacian(double *in) {
     fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_r2c(p_fw, in, tmp.phic);
-    fftw_execute_dft_r2c(p_fw, in + N2, tmp.psic);
+        #if PSI_METHOD == PSI_PARABOLIC
+        fftw_execute_dft_r2c(p_fw, in + N2, tmp.psic);
+        #endif
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
@@ -159,7 +161,9 @@ void mk_gradient_squared_and_laplacian(double *in) {
                 }
                 // laplacian
                 tmp.phic[id] *= k_sq / N;
+                #if PSI_METHOD == PSI_PARABOLIC
                 tmp.psic[id] *= k_sq / N;
+                #endif
             }
         }
     }
