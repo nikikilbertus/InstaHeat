@@ -77,14 +77,14 @@ void mk_gradient_squared_and_laplacian(double *in) {
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
     size_t N  = pars.N;
-    size_t N2 = 2 * N;
+    size_t N2p = 2 * N + 1;
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_r2c(p_fw, in, tmp.phic);
         #if PSI_METHOD == PSI_PARABOLIC
-        fftw_execute_dft_r2c(p_fw, in + N2, tmp.psic);
+        fftw_execute_dft_r2c(p_fw, in + N2p, tmp.psic);
         #endif
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
