@@ -181,7 +181,9 @@ void mk_gradient_squared_and_laplacian(double *in) {
         }
     }
     fftw_execute_dft_c2r(p_bw, tmp.phic, tmp.lap);
+    #if PSI_METHOD == PSI_PARABOLIC
     fftw_execute_dft_c2r(p_bw, tmp.psic, tmp.f);
+    #endif
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
@@ -206,22 +208,36 @@ void mk_gradient_squared_and_laplacian(double *in) {
 void mk_rho(double *f) {
     size_t N = pars.N;
     size_t N2 = 2 * N;
-    double a = f[3 * N];
-    double a2 = 2 * a;
+    double a = f[Ntot - 1];
+    double a2 = a * a;
     rho_mean = 0.0;
+    #if PSI_METHOD == PSI_HYPERBOLIC
+    pressure_mean = 0.0;
+    #endif
 
-    double df, p;
-    #pragma omp parallel for private(df, p) reduction(+: rho_mean)
+    double df, p, t1, t2;
+    #pragma omp parallel for private(df, p, t1, t2) \
+                                reduction(+: rho_mean, pressure_mean)
     for (size_t i = 0; i < N; ++i)
     {
         df = f[N + i];
+        #if PSI_METHOD != PSI_ELLIPTIC
         p = f[N2 + i];
-        /* p = 0.0; */
-        rho[i] = (0.5 - p) * df * df + (0.5 + p) * tmp.grad[i] / a2 +
-            potential(f[i]);
+        t1 = (0.5 - p) * df * df;
+        t2 = (0.5 + p) * tmp.grad[i] / a2;
+        rho[i] = t1 + t2 + potential(f[i]);
+            #if PSI_METHOD == PSI_HYPERBOLIC
+            pressure[i] = t1 - t2 / 3.0 - potential(f[i]);
+            pressure_mean += pressure[i];
+            #endif
+        #endif
+        //TODO: PSI_METHOD == PSI_ELLIPTIC case
         rho_mean += rho[i];
     }
     rho_mean /= N;
+    #if PSI_METHOD == PSI_HYPERBOLIC
+    pressure_mean /= N;
+    #endif
 }
 
 // A selection of potentials one can try, make sure to set the corresponding
