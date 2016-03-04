@@ -295,9 +295,7 @@ void mk_psi(double *f) {
     size_t My = pars.y.M;
     size_t Mz = pars.z.M;
     size_t N  = pars.N;
-    size_t Ntot  = pars.Ntot;
-    size_t N2 = 2 * N;
-    double a  = f[Ntot - 1];
+    double a  = f[2 * N];
     double a2 = a * a;
     double hubble = sqrt(rho_mean / 3.0);
 
@@ -317,8 +315,6 @@ void mk_psi(double *f) {
     #endif
     fftw_execute_dft_r2c(p_fw, tmp.f, tmp.fc);
     fftw_execute_dft_r2c(p_fw, tmp.deltarho, tmp.deltarhoc);
-    //TODO: add dpsi back in here (just always do it, either it's needed or it's
-    //only computed once in the beginning
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
@@ -363,7 +359,7 @@ void mk_psi(double *f) {
                 {
                     k_sq += pars.y.k2 * j * j;
                 }
-                if (-k_sq < 1.0e-10 || fabs(k_sq + dphiextra) < 1.0e-10)
+                if (-k_sq < 1.0e-14 || fabs(k_sq + dphiextra) < 1.0e-14)
                 {
                     tmp.psic[id] = 0.0;
                 }
@@ -373,6 +369,7 @@ void mk_psi(double *f) {
                         (tmp.deltarhoc[id] + 3.0 * hubble * tmp.fc[id]) /
                         ((k_sq + dphiextra) * N);
                 }
+                tmp.dpsic[id] = 0.5 * tmp.fc[id] / N - hubble * tmp.psic[id];
             }
         }
     }
@@ -380,7 +377,8 @@ void mk_psi(double *f) {
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
-    fftw_execute_dft_c2r(p_bw, tmp.psic, f + N2);
+    fftw_execute_dft_c2r(p_bw, tmp.psic, f + 2 * N + 1);
+    fftw_execute_dft_c2r(p_bw, tmp.dpsic, f + 3 * N + 1);
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     poisson_time += get_wall_time();
