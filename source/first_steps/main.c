@@ -83,8 +83,8 @@ int main(int argc, const char * argv[]) {
     #endif
 
     // main call to integration routine
-    run_rk4();
-    /* run_dopri853(); */
+    /* run_rk4(); */
+    run_dopri853();
 
     #ifdef ENABLE_PROFILER
     ProfilerStop();
