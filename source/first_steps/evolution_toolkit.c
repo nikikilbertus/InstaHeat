@@ -72,7 +72,9 @@ void mk_rhs(const double t, double *f, double *result) {
 
     // a is always the same
     result[N2] = a * hubble;
+    #if PSI_METHOD != PSI_ELLIPTIC
     result[N2 + 1] = 0.0;
+    #endif
 }
 
 // compute the laplacian and the squared gradient of the input and store them

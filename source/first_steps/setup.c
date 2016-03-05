@@ -573,8 +573,7 @@ double wrapped_gaussian(double x, double y, double z) {
         max = 32;
         for (size_t i = 1; i <= max; ++i)
         {
-            res += exp(-0.5 * i * i * s * s) * (cos(i * x) + pow(-1.0, i + 1)) /
-                (2.0 * PI);
+            res += exp(-0.5 * i * i * s * s) * (cos(i * x) + pow(-1.0, i + 1));
         }
     }
     if (pars.dim == 2)
@@ -586,8 +585,7 @@ double wrapped_gaussian(double x, double y, double z) {
             {
                 res += exp(-0.5 * (i * i + j * j) * s * s) *
                     (cos(i * x) + pow(-1.0, i + 1)) *
-                    (cos(j * y) + pow(-1.0, j + 1)) /
-                    (2.0 * PI);
+                    (cos(j * y) + pow(-1.0, j + 1));
             }
         }
     }
@@ -603,13 +601,12 @@ double wrapped_gaussian(double x, double y, double z) {
                     res += exp(-0.5 * (i * i + j * j + k * k) * s * s) *
                         (cos(i * x) + pow(-1.0, i + 1)) *
                         (cos(j * y) + pow(-1.0, j + 1)) *
-                        (cos(k * z) + pow(-1.0, k + 1)) /
-                        (2.0 * PI);
+                        (cos(k * z) + pow(-1.0, k + 1));
                 }
             }
         }
     }
-    return res;
+    return res / (2.0 * PI);
 }
 
 void mk_initial_psi() {

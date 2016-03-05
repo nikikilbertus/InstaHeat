@@ -1,4 +1,4 @@
-name = 'test_par';
+name = 'check/hyp_128_10';
 comp = true;
 karstenpsi = true;
 loadtimes = true;
