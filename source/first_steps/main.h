@@ -69,8 +69,8 @@ during execution
 #define INITIAL_CONDITIONS          IC_FROM_INTERNAL_FUNCTION
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/check/ell_128_10.h5")
-/* #define DATAPATH                ("$HOME/data/compare.h5") */
+#define DATAPATH                ("../../../data/check/hyp_128_11.h5")
+/* #define DATAPATH                ("bla.h5") */
 #define INITIAL_DATAPATH        ("../../../data/init.h5")
 
 
@@ -119,7 +119,7 @@ during execution
 #define PSI_ELLIPTIC            (0)
 #define PSI_HYPERBOLIC          (1)
 #define PSI_PARABOLIC           (2)
-#define PSI_METHOD              (PSI_ELLIPTIC)
+#define PSI_METHOD              (PSI_HYPERBOLIC)
 
 // ------------------computational domain---------------------------------------
 // spatial (order is important! use y=z=1 for 1D; use z=1 for 2D)
@@ -163,7 +163,7 @@ during execution
 #define SAFE                    (0.9)
 
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-10)
+#define RELATIVE_TOLERANCE      (1.0e-11)
 #define ABSOLUTE_TOLERANCE      (1.0e-14)
 // the timestep is limited from above by a fraction of the hubble time 1/H
 #define MIN_DT_FRACTION         (1.0e-3)

@@ -116,8 +116,7 @@ void run_rk4() {
     secs += get_wall_time();
     RUNTIME_INFO(printf("time: %f seconds\n\n", secs));
     RUNTIME_INFO(puts("Writing simulation meta data to disk\n"));
-    double val[1];
-    val[0] = secs;
+    double val[1] = {secs};
     h5_write_parameter(H5_RUNTIME_STEPPER_NAME, val, 1);
     #endif
 
