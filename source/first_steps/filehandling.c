@@ -131,6 +131,7 @@ void h5_create_empty_by_path(const char *name) {
     h5_write_parameter(H5_STRIDES_SPACE_NAME, val, 3);
 
     // ---------------------------commit hash-----------------------------------
+    hid_t filetype, memtype, dspace_str, dset_str;
     #if VERSION_CONTROL != VERSION_CONTROL_NONE
     #if VERSION_CONTROL == VERSION_CONTROL_HG
     char *cmd = "hg id -i";
@@ -142,7 +143,6 @@ void h5_create_empty_by_path(const char *name) {
     char hash[len];
     FILE *output;
 
-    hid_t filetype, memtype, dspace_str, dset_str;
     if ((output = popen(cmd, "r")) == NULL)
     {
         fputs("Could not get hash of current commit.\n", stderr);
