@@ -1,4 +1,4 @@
-% name = 'check/ell_192_ref';
+name = 'check/par_192_ref';
 comp = true;
 karstenpsi = true;
 loadtimes = true;
