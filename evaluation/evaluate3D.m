@@ -1,4 +1,4 @@
-name = 'comp3d_128_5e5_ell';
+name = '3d_128_hyp';
 interp = true;
 
 % loading the data, replace 'name' with the path where you stored the .h5

@@ -1,4 +1,4 @@
-name = 'check/hyp_128_10';
+% name = 'check/ell_192_ref';
 comp = true;
 karstenpsi = true;
 loadtimes = true;
@@ -193,6 +193,8 @@ if loadtimes
     runtime = h5read(name, '/runtime_stepper');
     try
     steps = h5read(name, '/steps_total');
+    stepsok = h5read(name, '/steps_ok');
+    stepsbad = h5read(name, '/steps_bad');
     catch me
         %
     end

@@ -368,8 +368,13 @@ int success(const double err, double *dt) {
         {
             dp.dt_next = (*dt) * scale;
         }
-        //TODO: is this correct?
-        dp.dt_next = MIN(dp.dt_next, MIN_DT_FRACTION * sqrt(3.0 / rho_mean));
+        #ifdef MIN_DT_FRACTION
+        double minstep = MIN_DT_FRACTION * sqrt(3.0 / rho_mean);
+        if (dp.dt_next > minstep)
+        {
+            dp.dt_next = minstep;
+        }
+        #endif
 
         dp.err_old = MAX(err, 1.0e-4);
         dp.reject = 0;
