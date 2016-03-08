@@ -474,7 +474,7 @@ double phi_init(double x, double y, double z, double *ph) {
     /* double amplitude = -2.26961e-06; */
 
     // compare_2, pos= 6000
-    double scale= 1.0e3;
+    double scale= 1.0e4;
     double mean = 0.0510864;
     double amplitude = -3.743790000000000e-07 * scale;
 
@@ -535,7 +535,7 @@ double dphi_init(double x, double y, double z, double *ph) {
     /* double mean = -0.00475989; */
     /* double amplitude = -2.91473e-09; */
 
-    double scale = 1.0e3;
+    double scale = 1.0e4;
     double mean = 3.255190000000000e-04;
     double amplitude = 1.742130000000000e-08 * scale;
 
@@ -717,6 +717,12 @@ void free_external() {
     fftw_free(tmp.f);
     fftw_free(tmp.deltarho);
     RUNTIME_INFO(puts("Freed external variables.\n"));
+}
+
+inline complex box_muller() {
+    double u1 = (double)rand() / (double)RAND_MAX;
+    double u2 = (double)rand() / (double)RAND_MAX;
+    return sqrt(-2 * log(u1)) * cexp(2.0 * PI * u2 * 1i);
 }
 
 // -------------------------printing function-----------------------------------

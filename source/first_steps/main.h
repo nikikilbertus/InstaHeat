@@ -69,7 +69,7 @@ during execution
 #define INITIAL_CONDITIONS          IC_FROM_INTERNAL_FUNCTION
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/check2/ell_=GRIDNUM=_=TOLNUM=.h5")
+#define DATAPATH                ("../../../data/check3/par_=GRIDNUM=_=TOLNUM=.h5")
 /* #define DATAPATH                ("bla.h5") */
 #define INITIAL_DATAPATH        ("../../../data/init.h5")
 
@@ -90,7 +90,7 @@ during execution
 #define POWER_SPECTRUM_BINS     (30)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (20)
+#define TIME_STEP_SKIPS         (5)
 
 // spatial output strides
 #define STRIDE_X                (1)
@@ -119,7 +119,7 @@ during execution
 #define PSI_ELLIPTIC            (0)
 #define PSI_HYPERBOLIC          (1)
 #define PSI_PARABOLIC           (2)
-#define PSI_METHOD              (PSI_ELLIPTIC)
+#define PSI_METHOD              (PSI_HYPERBOLIC)
 
 // ------------------computational domain---------------------------------------
 // spatial (order is important! use y=z=1 for 1D; use z=1 for 2D)
@@ -137,7 +137,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (1.0e-5)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (1.0e5)
+#define FINAL_TIME              (2.0e5)
 #define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-10)
 

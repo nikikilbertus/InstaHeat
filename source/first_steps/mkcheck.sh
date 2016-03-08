@@ -1,6 +1,6 @@
 #!/bin/bash
 cp main.h main.h.keep
-for num in 32 64 96 128 192
+for num in 32 64 96 128 192 256
 do
     cp main.h.keep main.h.tmp
     sed -i -e "s/=GRIDNUM=/${num}/g" main.h.tmp

@@ -1,19 +1,22 @@
-method = 'par';
+method = 'hyp';
 nums = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-gridpoints = [32, 64, 96, 128];
+gridpoints = [32, 64, 96, 128, 192];
+prefix= 'check2/';
 suffix = '';
+
+name = [prefix method '_' num2str(max(gridpoints)) '_ref'];
+loadData
+rkphii = phi(:,1);
+rkphi = phi(:,end);
+rkx = x;
 
 errsall = zeros(length(nums), length(gridpoints));
 stepsall = zeros(size(errsall));
+
 for ll = 1:length(gridpoints)
 
     Ngrid = gridpoints(ll);
-    name = ['check/' method '_' num2str(Ngrid) '_ref'];
-    loadData
-    rkphii = phi(:,1);
-    rkphi = phi(:,end);
-
-    basename = ['check/' method '_' num2str(Ngrid) '_'];
+    basename = [prefix method '_' num2str(Ngrid) '_'];
 
     errs1 = zeros(length(nums), 1);
     % errs2 = zeros(length(nums), 1);
@@ -28,7 +31,9 @@ for ll = 1:length(gridpoints)
         loadData
     %     phisi{kk} = phi(:,1);
     %     phisf{kk} = phi(:,end);
-        errs1(kk) = norm(phi(:,end) - rkphi(:)) / N;
+        phitmp = spline(rkx, rkphi, x);
+        errs1(kk) = norm(phi(:,end) - phitmp) / N;
+%         errs1(kk) = norm(phi(:,end) - rkphi(1:round(max(gridpoints)/N):end)) / N;
 %         runtimes1(kk) = runtime;
         steps1(kk) = steps;
     %     name = [basename num2str(nums(kk)) '_a0'];
@@ -42,16 +47,16 @@ for ll = 1:length(gridpoints)
 end
 
 figure
-semilogy(nums, errsall,'linewidth',2); xlabel('rel. tol. 10^{-x}'); ylabel('err');
-title('error wrt reference');
-legend('32','64','96','128');
+semilogy(nums, errsall, nums, 1e-3 * 10.^(-nums),'linewidth',2); xlabel('rel. tol. 10^{-x}'); ylabel('err');
+title([method ': error wrt reference']);
+legend('32','64','96','128','192');
 
 figure
 plot(nums, stepsall,'linewidth',2); xlabel('rel. tol. 10^{-x}'); ylabel('total steps');
-title('total number of steps');
-legend('32','64','96','128');
+title([method ': total number of steps']);
+legend('32','64','96','128','192');
 
 figure
 semilogy(gridpoints, errsall,'linewidth',2); xlabel('gridpoints'); ylabel('err');
-title('error wrt reference');
+title([method ': error wrt reference']);
 legend('3','4','5','6','7','8','9','10','11','12','13');

@@ -1,4 +1,4 @@
-name = 'check/par_192_ref';
+% name = 'check2/hyp_128_10';
 comp = true;
 karstenpsi = true;
 loadtimes = true;
