@@ -337,6 +337,9 @@ void mk_initial_conditions() {
     double hubble = 1.0;
     mk_bunch_davies(field, hubble, phi0);
     mk_bunch_davies(field + pars.N, hubble, dphi0);
+        #if PSI_METHOD != PSI_ELLIPTIC
+        mk_initial_psi();
+        #endif
     #elif INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
