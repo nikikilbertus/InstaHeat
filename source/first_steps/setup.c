@@ -327,8 +327,16 @@ void mk_initial_conditions() {
     #elif INITIAL_CONDITIONS == IC_FROM_DAT_FILE
     read_initial_data();
         #if PSI_METHOD != PSI_ELLIPTIC
+        //TODO: do I get psi from karsten?
         mk_initial_psi();
         #endif
+    #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
+    //TODO: need correct values at end of inflation here
+    double phi0 = 1.0;
+    double dphi0 = 1.0;
+    double hubble = 1.0;
+    mk_bunch_davies(field, hubble, phi0);
+    mk_bunch_davies(field + pars.N, hubble, dphi0);
     #elif INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -742,7 +750,7 @@ void mk_bunch_davies(double *f, const double H, const double homo) {
             exp(-kk * kk / kcut2);
     }
 
-    fftw_plan pl = fftw_r2r_1d_plan(nos, ker, ker, FFTW_RODFT10, FFTW_ESTIMATE);
+    fftw_plan pl = fftw_plan_r2r_1d(nos, ker, ker, FFTW_RODFT10, FFTW_ESTIMATE);
     fftw_execute(pl);
     fftw_destroy_plan(pl);
 

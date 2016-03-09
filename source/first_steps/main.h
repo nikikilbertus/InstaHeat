@@ -66,10 +66,11 @@ during execution
 #define IC_FROM_INTERNAL_FUNCTION   (0)
 #define IC_FROM_H5_FILE             (1)
 #define IC_FROM_DAT_FILE            (2)
-#define INITIAL_CONDITIONS          IC_FROM_INTERNAL_FUNCTION
+#define IC_FROM_BUNCH_DAVIES        (3)
+#define INITIAL_CONDITIONS          IC_FROM_BUNCH_DAVIES
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/check3/par_=GRIDNUM=_=TOLNUM=.h5")
+#define DATAPATH                ("../../../data/bla.h5")
 /* #define DATAPATH                ("bla.h5") */
 #define INITIAL_DATAPATH        ("../../../data/init.h5")
 
@@ -123,9 +124,9 @@ during execution
 
 // ------------------computational domain---------------------------------------
 // spatial (order is important! use y=z=1 for 1D; use z=1 for 2D)
-#define GRIDPOINTS_X            (=GRIDNUM=)
-#define GRIDPOINTS_Y            (1)
-#define GRIDPOINTS_Z            (1)
+#define GRIDPOINTS_X            (32)
+#define GRIDPOINTS_Y            (32)
+#define GRIDPOINTS_Z            (32)
 #define SPATIAL_LOWER_BOUND_X   (-PI)
 #define SPATIAL_UPPER_BOUND_X   (PI)
 #define SPATIAL_LOWER_BOUND_Y   (-PI)
@@ -137,7 +138,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (1.0e-5)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (2.0e5)
+#define FINAL_TIME              (1.0e4)
 #define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-10)
 
@@ -163,7 +164,7 @@ during execution
 #define SAFE                    (0.9)
 
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-=TOLNUM=)
+#define RELATIVE_TOLERANCE      (1.0e-9)
 #define ABSOLUTE_TOLERANCE      (1.0e-14)
 // the timestep is limited from above by a fraction of the hubble time 1/H
 /* #define MIN_DT_FRACTION         (1.0e-2) */
