@@ -1,4 +1,4 @@
-% name = 'check2/hyp_128_10';
+% name = 'check3/hyp_128_9';
 comp = true;
 karstenpsi = true;
 loadtimes = true;

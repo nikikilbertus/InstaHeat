@@ -21,6 +21,7 @@ void mk_initial_psi();
 void free_and_destroy_all();
 void destroy_and_cleanup_fftw();
 void free_external();
+void mk_bunch_davies(double *f, const double H, const double homo);
 extern complex box_muller();
 void print_vector(const double *vector, const size_t N);
 

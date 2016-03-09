@@ -338,16 +338,6 @@ void mk_initial_conditions() {
     double x, y, z;
 
     size_t Nmodes = 16;
-    /* double *ks = calloc(pars.dim * Nmodes, sizeof *ks); */
-    /* for (size_t i = 0; i < pars.dim * Nmodes; ++i) */
-    /* { */
-    /*     ks[i] = 1.0; */
-    /* } */
-    /* for (size_t i = 3; i < Nmodes; i += 3) */
-    /* { */
-    /*     ks[i] *= -1.0; */
-    /* } */
-
     // random phases
     srand(SEED);
     double *theta = calloc(Nmodes, sizeof *theta);
@@ -717,6 +707,97 @@ void free_external() {
     fftw_free(tmp.f);
     fftw_free(tmp.deltarho);
     RUNTIME_INFO(puts("Freed external variables.\n"));
+}
+
+void mk_bunch_davies(double *f, const double H, const double homo) {
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
+    if (Nx != Ny || Nx != Nz || Ny != Nz)
+    {
+        fputs("Bunch Davies vacuum works only for Nx = Ny = Nz.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    const size_t N  = pars.N;
+    const size_t nn = Nx / 2 + 1;
+    const size_t os = 16;
+    const size_t nos = Nx * os * os;
+    const double dx = (pars.x.b - pars.x.a) / Nx;
+    const double dxos = dx / os;
+    const double dk = 2.0 * PI / (pars.x.b - pars.x.a);
+    const double dkos = 0.5 * dk / os;
+    //TODO: pspectre uses kcutpspectre = 2 * kcutdefrost, we use pspectre
+    const double kcut2 = nn * nn * dk * dk;
+    const double meff2 = MASS * MASS - 2.25 * H * H;
+    const double norm = 0.5 / (N * sqrt(2.0 * PI * pow(dk, 3))) * (dkos / dxos);
+
+    double *ker = fftw_malloc(nos * sizeof *ker);
+
+    double kk;
+    #pragma omp parallel for private(kk)
+    for (size_t i = 0; i < nos; ++i)
+    {
+        kk = (i + 0.5) * dkos;
+        ker[i] = kk * pow(kk * kk + meff2, -0.25) *
+            exp(-kk * kk / kcut2);
+    }
+
+    fftw_plan pl = fftw_r2r_1d_plan(nos, ker, ker, FFTW_RODFT10, FFTW_ESTIMATE);
+    fftw_execute(pl);
+    fftw_destroy_plan(pl);
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < nos; ++i)
+    {
+        ker[i] *= norm / (i + 1);
+    }
+
+    size_t osx, osy, l;
+    #pragma omp parallel for private(osx, osy, kk, l)
+    for (int i = 0; i < Nx; ++i)
+    {
+        osx = i * Ny * Nz;
+        for (int j = 0; j < Ny; ++j)
+        {
+            osy = osx + j * Nz;
+            for (int k = 0; k < Nz; ++k)
+            {
+                kk = sqrt((double)( (i + 1 - nn) * (i + 1 - nn) +
+                                    (j + 1 - nn) * (j + 1 - nn) +
+                                    (k + 1 - nn) * (k + 1 - nn))) * os;
+                l = (size_t) floor(kk);
+
+                if (l > 0)
+                {
+                    f[osy + k] = ker[l - 1] + (kk - l) * (ker[l] - ker[l - 1]);
+                }
+                else
+                {
+                    f[osy + k] = (4.0 * ker[0] - ker[1]) / 3.0;
+                }
+            }
+        }
+    }
+
+    fftw_free(ker);
+    fftw_execute_dft_r2c(p_fw, f, tmp.phic);
+
+    #pragma omp parallel for private(osx, osy)
+    for (size_t i = 0; i < Nx; ++i)
+    {
+        osx = i * Ny * nn;
+        for (size_t j = 0; j < Ny; ++j)
+        {
+            osy = osx + j * nn;
+            for (size_t k = 0; k < nn; ++k)
+            {
+                tmp.phic[osy + k] *= box_muller();
+            }
+        }
+    }
+
+    tmp.phic[0] = homo;
+    fftw_execute_dft_c2r(p_bw, tmp.phic, f);
 }
 
 inline complex box_muller() {
