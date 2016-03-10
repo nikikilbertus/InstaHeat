@@ -145,7 +145,7 @@ int perform_step(const double dt_try) {
         }
         if (fabs(dt) <= fabs(dp.t) * dp.eps)
         {
-            fputs("Stepsize underflow. Still exiting gracefully.\n", stderr);
+            fputs("\n!!! Stepsize underflow.\n", stderr);
             return 1;
         }
     }
