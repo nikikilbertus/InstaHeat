@@ -332,14 +332,16 @@ void mk_initial_conditions() {
         #endif
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
     //TODO: need correct values at end of inflation here
-    double phi0 = 1.0;
-    double dphi0 = 1.0;
-    double hubble = 1.0;
+    double phi0 = 1.01985;
+    double dphi0 = -0.00714754 * MASS / MASS_KARSTEN;
+    double hubble = 0.001016848945526;
     mk_bunch_davies(field, hubble, phi0);
     mk_bunch_davies(field + pars.N, hubble, dphi0);
         #if PSI_METHOD != PSI_ELLIPTIC
         mk_initial_psi();
         #endif
+    field[2 * pars.N] = A_INITIAL;
+    field[2 * pars.N + 1] = 0.0;
     #elif INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -377,9 +379,7 @@ void mk_initial_conditions() {
 
     free(theta);
 
-    // initialize a
     field[2 * N] = A_INITIAL;
-    // empty slot for memory alignment
     field[2 * N + 1] = 0.0;
 
     // initialize psi

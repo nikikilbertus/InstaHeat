@@ -41,11 +41,11 @@ during execution
 #define VERSION_CONTROL         VERSION_CONTROL_HG
 
 //-------------which files to write to disk-------------------------------------
-#define OUTPUT_PHI
-#define OUTPUT_DPHI
-#define OUTPUT_PSI
-#define OUTPUT_DPSI
-#define OUTPUT_RHO
+/* #define OUTPUT_PHI */
+/* #define OUTPUT_DPHI */
+/* #define OUTPUT_PSI */
+/* #define OUTPUT_DPSI */
+/* #define OUTPUT_RHO */
 
 #define OUTPUT_POWER_SPECTRUM
 
@@ -150,7 +150,8 @@ during execution
 #define COUPLING                (1.0) // coupling in a phi4 potential
 #define LAMBDA                  (4.721e-5) // "cosmological constant"
 /* #define A_INITIAL               (1.05249e3) // compare_2, compare_psi, 5500 */
-#define A_INITIAL               (4.09376e3) // compare_2, compare_psi, 6000
+/* #define A_INITIAL               (4.09376e3) // compare_2, compare_psi, 6000 */
+#define A_INITIAL               (6.1625e2) // compare_2, compare_psi, 5450
 /* #define A_INITIAL               (1.0) */
 // for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
 

@@ -1,7 +1,7 @@
-% name = 'check3/hyp_128_9';
-comp = true;
-karstenpsi = true;
-loadtimes = true;
+name = 'runinflation';
+comp = false;
+karstenpsi = false;
+loadtimes = false;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
