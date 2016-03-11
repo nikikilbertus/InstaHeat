@@ -436,6 +436,7 @@ void mk_power_spectrum(const fftw_complex *in) {
                 {
                     pow2_tmp = 2.0 * in[osy + k] * conj(in[osy + k]);
                 }
+                //TODO[performance]: check whether it is faster without this if
                 if (pow2_tmp > 0.0)
                 {
                     k2_tmp = pars.z.k2 * k * k;
@@ -456,7 +457,7 @@ void mk_power_spectrum(const fftw_complex *in) {
                     {
                         k2_tmp += pars.y.k2 * j * j;
                     }
-                    idx = (int)(k2_tmp / dk2 - 1e-10);
+                    idx = (int)floor(k2_tmp / dk2);
                     pow_spec[idx] += pow2_tmp / N;
                 }
             }
