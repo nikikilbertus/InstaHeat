@@ -34,7 +34,7 @@ alpha(.1)
 subplot(2,3,2)
 pl1 = pl;
 plm = mean(pl1(:));
-pl1(abs(pl1 - plm)/plm < 0.95) = nan;
+pl1(abs(pl1 - plm)/abs(plm) < 0.95) = nan;
 hh = slice(X,Y,Z,pl1, x, y, z, 'cubic');
 set(hh, 'EdgeColor','none', 'FaceColor','interp')
 alpha(.3)
@@ -61,3 +61,51 @@ end
 close(writerObj);
 
 system('ffmpeg -i rho3d.avi -vcodec libx264 -filter:v "setpts=15.0*PTS" rho3d2.mp4')
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% initial conditions from karsten
+
+name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64.dat';
+data = importdata(name);
+data = squeeze(data(:,4:5));
+phi = reshape(data(:,1),64,64,64);
+dphi = reshape(data(:,2),64,64,64);
+rho = dphi.^2 / 2 + mass^2 * phi.^2 / 2;
+
+writerObj = VideoWriter('ic3d.avi');
+open(writerObj);
+set(gcf,'Renderer','zbuffer');
+for i = 1:64
+subplot(3,3,1)
+surf(squeeze(phi(i,:,:)))
+title('phi projected to yz')
+subplot(3,3,2)
+surf(squeeze(phi(:,i,:)))
+title('phi projected to xz')
+subplot(3,3,3)
+surf(squeeze(phi(:,:,i)))
+title('phi projected to xy')
+
+subplot(3,3,4)
+surf(squeeze(dphi(i,:,:)))
+title('dphi projected to yz')
+subplot(3,3,5)
+surf(squeeze(dphi(:,i,:)))
+title('dphi projected to xz')
+subplot(3,3,6)
+surf(squeeze(dphi(:,:,i)))
+title('dphi projected to xy')
+
+subplot(3,3,7)
+surf(squeeze(rho(i,:,:)))
+title('rho projected to yz')
+subplot(3,3,8)
+surf(squeeze(rho(:,i,:)))
+title('rho projected to xz')
+subplot(3,3,9)
+surf(squeeze(rho(:,:,i)))
+title('rho projected to xy')
+frame = getframe(gcf);
+writeVideo(writerObj,frame);
+end
+close(writerObj);
