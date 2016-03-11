@@ -65,8 +65,9 @@ double h5_time_write = 0.0;
 // -----------------------------main--------------------------------------------
 int main(int argc, const char * argv[]) {
 
-    #ifdef RUN_TESTS_ONLY
     allocate_and_initialize_all();
+
+    #ifdef RUN_TESTS_ONLY
     run_all_tests();
     free_and_destroy_all();
     return 0;
@@ -75,8 +76,6 @@ int main(int argc, const char * argv[]) {
     #ifdef SHOW_TIMING_INFO
     double start = get_wall_time();
     #endif
-
-    allocate_and_initialize_all();
 
     #ifdef ENABLE_PROFILER
     ProfilerStart("testprofile.prof");
@@ -89,7 +88,6 @@ int main(int argc, const char * argv[]) {
     #ifdef ENABLE_PROFILER
     ProfilerStop();
     #endif
-
 
     #ifdef SHOW_TIMING_INFO
     double secs = get_wall_time() - start;
