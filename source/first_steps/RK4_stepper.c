@@ -9,9 +9,9 @@
 #include "filehandling.h"
 
 void run_rk4() {
-    size_t Ntot = pars.Ntot;
-    size_t Nall = pars.Nall;
-    size_t Nt = pars.t.Nt;
+    const size_t Ntot = pars.Ntot;
+    const size_t Nall = pars.Nall;
+    const size_t Nt = pars.t.Nt;
     double dt = pars.t.dt;
     double t = pars.t.t;
 
