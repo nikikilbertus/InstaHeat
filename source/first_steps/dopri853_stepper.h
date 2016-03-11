@@ -4,7 +4,7 @@
 #include "main.h"
 
 typedef struct {
-    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,
+    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,
     b1,b6,b7,b8,b9,b10,b11,b12,
     bhh1,bhh2,bhh3,
     er1,er6,er7,er8,er9,er10,er11,er12,
