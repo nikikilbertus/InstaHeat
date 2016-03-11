@@ -368,8 +368,8 @@ int success(const double err, double *dt) {
         {
             dp.dt_next = (*dt) * scale;
         }
-        #ifdef MIN_DT_FRACTION
-        const double minstep = MIN_DT_FRACTION * sqrt(3.0 / rho_mean);
+        #ifdef MAX_DT_HUBBLE_FRACTION
+        const double minstep = MAX_DT_HUBBLE_FRACTION * sqrt(3.0 / rho_mean);
         if (dp.dt_next > minstep)
         {
             dp.dt_next = minstep;

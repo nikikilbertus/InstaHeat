@@ -44,7 +44,7 @@ during execution
 //-------------which files to write to disk-------------------------------------
 #define OUTPUT_PHI
 /* #define OUTPUT_DPHI */
-#define OUTPUT_PSI
+/* #define OUTPUT_PSI */
 /* #define OUTPUT_DPSI */
 #define OUTPUT_RHO
 
@@ -71,7 +71,7 @@ during execution
 #define INITIAL_CONDITIONS          IC_FROM_DAT_FILE
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/valtest.h5")
+#define DATAPATH                ("../../../data/bla.h5")
 /* #define DATAPATH                ("bla.h5") */
 #define INITIAL_DATAPATH        ("../../../data/karsten/data_64.dat")
 
@@ -89,7 +89,7 @@ during execution
  *  track stability, therefore we sum up fourier coefficients into bins
  *  depending on the norm of their k vector, this gives the number of bins used
  */
-#define POWER_SPECTRUM_BINS     (30)
+#define POWER_SPECTRUM_BINS     (80)
 
 // how many timeslices to skip in between writing to file (1: write out all)
 #define TIME_STEP_SKIPS         (1)
@@ -139,7 +139,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (1.0e-5)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (1.0e1)
+#define FINAL_TIME              (1.2e3)
 #define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-10)
 
@@ -170,8 +170,8 @@ during execution
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
 #define RELATIVE_TOLERANCE      (1.0e-9)
 #define ABSOLUTE_TOLERANCE      (1.0e-14)
-// the timestep is limited from above by a fraction of the hubble time 1/H
-#define MIN_DT_FRACTION         (1.0e-3)
+// the timestep is limited from above by this fraction of the hubble time 1/H
+#define MAX_DT_HUBBLE_FRACTION  (1.0e-3)
 
 // ------------------------typedefs---------------------------------------------
 // representing one spatial dimension of a multi dimensional grid
