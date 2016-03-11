@@ -142,14 +142,14 @@ void initialize_parameters() {
 
 // allocate memory for all external variables
 void allocate_external() {
-    size_t Nx   = pars.x.N;
-    size_t Ny   = pars.y.N;
-    size_t Nz   = pars.z.N;
-    size_t N    = pars.N;
-    size_t Nall = pars.Nall;
-    size_t outN = pars.outN;
-    size_t bins = pars.file.bins_powspec;
-    size_t buf_size = pars.file.buf_size;
+    const size_t Nx   = pars.x.N;
+    const size_t Ny   = pars.y.N;
+    const size_t Nz   = pars.z.N;
+    const size_t N    = pars.N;
+    const size_t Nall = pars.Nall;
+    const size_t outN = pars.outN;
+    const size_t bins = pars.file.bins_powspec;
+    const size_t buf_size = pars.file.buf_size;
 
     grid       = malloc((Nx + Ny + Nz) * sizeof *grid);
     field      = fftw_malloc(Nall * sizeof *field);
@@ -215,7 +215,7 @@ void allocate_external() {
 
     // default arrays to save coefficients of real to complex transforms
     // see fftw3 documentation and Mxyz for this
-    size_t M = pars.x.M * pars.y.M * pars.z.M;
+    const size_t M = pars.x.M * pars.y.M * pars.z.M;
     tmp.phic  = fftw_malloc(M * sizeof *tmp.phic);
     tmp.xphic = fftw_malloc(M * sizeof *tmp.xphic);
     tmp.yphic = fftw_malloc(M * sizeof *tmp.yphic);
@@ -247,15 +247,15 @@ void allocate_external() {
 
 // make the N fourier spectral gridpoints for the computational domain
 void mk_grid() {
-    size_t Nx = pars.x.N;
-    size_t Ny = pars.y.N;
-    size_t Nz = pars.z.N;
-    double ax = pars.x.a;
-    double bx = pars.x.b;
-    double ay = pars.y.a;
-    double by = pars.y.b;
-    double az = pars.z.a;
-    double bz = pars.z.b;
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
+    const double ax = pars.x.a;
+    const double bx = pars.x.b;
+    const double ay = pars.y.a;
+    const double by = pars.y.b;
+    const double az = pars.z.a;
+    const double bz = pars.z.b;
 
     if (Nx < 1 || Ny < 1 || Nz < 1)
     {
@@ -286,9 +286,9 @@ void mk_grid() {
 // create the fftw plans, IMPORTANT: create BEFORE initializing arrays, because
 // setting up the plans destroys the arrays!
 void mk_fftw_plans() {
-    size_t Nx = pars.x.N;
-    size_t Ny = pars.y.N;
-    size_t Nz = pars.z.N;
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_plan -= get_wall_time();
@@ -333,9 +333,9 @@ void mk_initial_conditions() {
         #endif
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
     //TODO: need correct values at end of inflation here
-    double phi0 = 1.01985;
-    double dphi0 = -0.00714754 * MASS / MASS_KARSTEN;
-    double hubble = 0.5 * (dphi0 * dphi0 + MASS * MASS * phi0 * phi0);
+    const double phi0 = 1.01985;
+    const double dphi0 = -0.00714754 * MASS / MASS_KARSTEN;
+    const double hubble = 0.5 * (dphi0 * dphi0 + MASS * MASS * phi0 * phi0);
     /* double phi0 = 2.339383796213256; */
     /* double dphi0 = -2.736358272992573; */
     /* double hubble = 1.934897490588959; */
@@ -347,14 +347,14 @@ void mk_initial_conditions() {
         mk_initial_psi();
         #endif
     #elif INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
-    size_t Nx = pars.x.N;
-    size_t Ny = pars.y.N;
-    size_t Nz = pars.z.N;
-    size_t N = pars.N;
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
+    const size_t N = pars.N;
     size_t osx, osy;
     double x, y, z;
 
-    size_t Nmodes = 16;
+    const size_t Nmodes = 16;
     // random phases
     srand(SEED);
     double *theta = calloc(Nmodes, sizeof *theta);
@@ -396,7 +396,8 @@ void mk_initial_conditions() {
 }
 
 // initial values of the scalar field, make sure its periodic
-double phi_init(double x, double y, double z, double *ph) {
+double phi_init(const double x, const double y, const double z,
+        const double *ph) {
     // localized for higgs metastability potential
     /* double phi0 = 0.04; */
     /* double lambda = 20.0; */
@@ -479,16 +480,16 @@ double phi_init(double x, double y, double z, double *ph) {
     /* double amplitude = -2.26961e-06; */
 
     // compare_2, pos= 6000
-    double scale= 1.0e4;
-    double mean = 0.0510864;
-    double amplitude = -3.743790000000000e-07 * scale;
+    const double scale= 1.0e4;
+    const double mean = 0.0510864;
+    const double amplitude = -3.743790000000000e-07 * scale;
 
     // compare_2, pos= 1
     /* double mean = 5.0; */
     /* double amplitude = 0.01; */
 
     /* double k = 1.0/6.0e3; */
-    double k = 1.0;
+    const double k = 1.0;
     if (pars.dim == 1)
     {
         return mean + amplitude * cos(k * x);
@@ -516,7 +517,8 @@ double phi_init(double x, double y, double z, double *ph) {
 }
 
 // initial values of the time deriv. of the scalar field, make sure its periodic
-double dphi_init(double x, double y, double z, double *ph) {
+double dphi_init(const double x, const double y, const double z,
+        const double *ph) {
     /* return 0.0; */
 
     /* double mean = -1.447595527218249e-8; */
@@ -540,9 +542,9 @@ double dphi_init(double x, double y, double z, double *ph) {
     /* double mean = -0.00475989; */
     /* double amplitude = -2.91473e-09; */
 
-    double scale = 1.0e4;
-    double mean = 3.255190000000000e-04;
-    double amplitude = 1.742130000000000e-08 * scale;
+    const double scale = 1.0e4;
+    const double mean = 3.255190000000000e-04;
+    const double amplitude = 1.742130000000000e-08 * scale;
 
     /* double mean = -0.00806088; */
     /* double amplitude = -1.134420000000000e-20; */
@@ -569,9 +571,9 @@ double dphi_init(double x, double y, double z, double *ph) {
     /* return -0.089318193; // somewhere at end of 50 e-fold inflation */
 }
 
-double wrapped_gaussian(double x, double y, double z) {
-    double s = 0.5;
-    double res = 0.0;
+double wrapped_gaussian(const double x, const double y, const double z) {
+    const double s = 0.5;
+    const double res = 0.0;
     size_t max;
     if (pars.dim == 1)
     {
@@ -615,9 +617,9 @@ double wrapped_gaussian(double x, double y, double z) {
 }
 
 void mk_initial_psi() {
-    size_t N = pars.N;
-    size_t N2p = 2 * N + 2;
-    size_t Nall = pars.Nall;
+    const size_t N = pars.N;
+    const size_t N2p = 2 * N + 2;
+    const size_t Nall = pars.Nall;
 
     #pragma omp parallel for
     for (size_t i = N2p; i < Nall; ++i)
@@ -822,8 +824,8 @@ void mk_bunch_davies(double *f, const double H, const double homo,
 }
 
 inline complex box_muller() {
-    double u1 = (double)rand() / (double)RAND_MAX;
-    double u2 = (double)rand() / (double)RAND_MAX;
+    const double u1 = (double)rand() / (double)RAND_MAX;
+    const double u2 = (double)rand() / (double)RAND_MAX;
     return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * 1i);
 }
 

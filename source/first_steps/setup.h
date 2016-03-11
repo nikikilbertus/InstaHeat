@@ -14,9 +14,11 @@ void mk_grid();
 void mk_fftw_plans();
 void mk_initial_conditions();
 void read_initial_data();
-double phi_init(double x, double y, double z, double *ph);
-double dphi_init(double x, double y, double z, double *ph);
-double wrapped_gaussian(double x, double y, double z);
+double phi_init(const double x, const double y, const double z,
+        const double *ph);
+double dphi_init(const double x, const double y, const double z,
+        const double *ph);
+double wrapped_gaussian(const double x, const double y, const double z);
 void mk_initial_psi();
 void free_and_destroy_all();
 void destroy_and_cleanup_fftw();

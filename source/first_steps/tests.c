@@ -11,7 +11,7 @@ void run_all_tests() {
 }
 
 void test_mk_gradient_squared_and_laplacian() {
-    size_t N = pars.N;
+    const size_t N = pars.N;
 
     fill_field(field, test_func);
     mk_gradient_squared_and_laplacian(field);
@@ -78,9 +78,9 @@ void test_mk_gradient_squared_and_laplacian() {
 }
 
 double test_func_gradsq(const double x, const double y, const double z) {
-    double grad_x = test_func_Dx(x,y,z);
-    double grad_y = test_func_Dy(x,y,z);
-    double grad_z = test_func_Dz(x,y,z);
+    const double grad_x = test_func_Dx(x,y,z);
+    const double grad_y = test_func_Dy(x,y,z);
+    const double grad_z = test_func_Dz(x,y,z);
     return grad_x * grad_x + grad_y * grad_y + grad_z * grad_z;
 }
 
@@ -136,9 +136,9 @@ double test_func_D2z(const double x, const double y, const double z) {
 
 void fill_field(double *f, double (*func)(const double, const double,
                                                         const double)) {
-    size_t Nx = pars.x.N;
-    size_t Ny = pars.y.N;
-    size_t Nz = pars.z.N;
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
     size_t osx, osy;
     double x, y, z;
 
