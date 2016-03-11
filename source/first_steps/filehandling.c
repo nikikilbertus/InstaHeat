@@ -8,13 +8,13 @@
 #include "main.h"
 
 void h5_create_empty_by_path(const char *name) {
+    const hsize_t N = pars.outN;
+    const hsize_t Nt = pars.file.buf_size;
+    const hsize_t bins = pars.file.bins_powspec;
     hsize_t rank = 2;
-    hsize_t N = pars.outN;
-    hsize_t Nt = pars.file.buf_size;
-    hsize_t bins = pars.file.bins_powspec;
 
     // create file
-    hid_t file = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    const hid_t file = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     pars.file.id = file;
 
     // initial setup of dimensions
@@ -135,9 +135,9 @@ void h5_create_empty_by_path(const char *name) {
     size_t len;
     #if VERSION_CONTROL != VERSION_CONTROL_NONE
     #if VERSION_CONTROL == VERSION_CONTROL_HG
-    char *cmd = "hg id -i";
+    const char *cmd = "hg id -i";
     #elif VERSION_CONTROL == VERSION_CONTROL_GIT
-    char *cmd = "git rev-parse --short HEAD";
+    const char *cmd = "git rev-parse --short HEAD";
     #endif
     dim[0] = 1;
     len = 16;
@@ -182,13 +182,13 @@ void h5_create_empty_by_path(const char *name) {
     //-----------------write out psi method-------------------------------------
     #if PSI_METHOD == PSI_ELLIPTIC
     len = 9;
-    char *method = "elliptic";
+    const char *method = "elliptic";
     #elif PSI_METHOD == PSI_PARABOLIC
     len = 10;
-    char *method = "parabolic";
+    const char *method = "parabolic";
     #elif PSI_METHOD == PSI_HYPERBOLIC
     len = 11;
-    char *method = "hyperbolic";
+    const char *method = "hyperbolic";
     #endif
     filetype = H5Tcopy(H5T_FORTRAN_S1);
     H5Tset_size(filetype, len - 1);
@@ -228,7 +228,7 @@ void h5_create_dset(const hsize_t rank, const hsize_t *dim,
     H5Sclose(dspace);
 }
 
-void h5_write_parameter(const char *name, const double *val, size_t N) {
+void h5_write_parameter(const char *name, const double *val, const size_t N) {
     hsize_t rank = 1;
     hsize_t dim[1] = {N};
     hsize_t max[1] = {N};
@@ -251,7 +251,7 @@ void h5_get_extent(hsize_t *max, hsize_t *cur) {
 }
 
 void h5_write_buffer(const hsize_t rank, const hsize_t *start,
-        const hsize_t *add, const hsize_t *new_dim, hsize_t dset,
+        const hsize_t *add, const hsize_t *new_dim, const hsize_t dset,
         const double *buf) {
     hid_t mem_space = H5Screate_simple(rank, add, NULL);
     hid_t dspace = H5Dget_space(dset);
