@@ -133,7 +133,7 @@ void run_dopri853() {
 }
 
 int perform_step(const double dt_try) {
-    size_t Ntot = pars.Ntot;
+    const size_t Ntot = pars.Ntot;
     double dt = dt_try;
     for ( ; ; )
     {
@@ -172,9 +172,9 @@ int perform_step(const double dt_try) {
 }
 
 void try_step(const double dt) {
-    size_t i;
+    const size_t Ntot = pars.Ntot;
     double t = dp.t;
-    size_t Ntot = pars.Ntot;
+    size_t i;
     // ------------ 1 ------------
     // is already done in perform_step
 
@@ -313,7 +313,7 @@ void try_step(const double dt) {
 }
 
 double error(const double dt) {
-    size_t Ntot = pars.Ntot;
+    const size_t Ntot = pars.Ntot;
     double err = 0.0, err2 = 0.0, sk, deno;
 
     double tmp;
@@ -335,11 +335,11 @@ double error(const double dt) {
 }
 
 int success(const double err, double *dt) {
-    double beta  = dp.beta;
-    double alpha = dp.alpha;
-    double safe  = dp.safe;
-    double minscale = dp.minscale;
-    double maxscale = dp.maxscale;
+    const double beta  = dp.beta;
+    const double alpha = dp.alpha;
+    const double safe  = dp.safe;
+    const double minscale = dp.minscale;
+    const double maxscale = dp.maxscale;
     double scale;
 
     if (err <= 1.0)
@@ -369,7 +369,7 @@ int success(const double err, double *dt) {
             dp.dt_next = (*dt) * scale;
         }
         #ifdef MIN_DT_FRACTION
-        double minstep = MIN_DT_FRACTION * sqrt(3.0 / rho_mean);
+        const double minstep = MIN_DT_FRACTION * sqrt(3.0 / rho_mean);
         if (dp.dt_next > minstep)
         {
             dp.dt_next = minstep;
@@ -390,8 +390,8 @@ int success(const double err, double *dt) {
 }
 
 void allocate_dopri853_values() {
-    size_t Ntot = pars.Ntot;
-    size_t Nall = pars.Nall;
+    const size_t Ntot = pars.Ntot;
+    const size_t Nall = pars.Nall;
 
     dpv.k2    = fftw_malloc(Ntot * sizeof *dpv.k2);
     dpv.k3    = fftw_malloc(Ntot * sizeof *dpv.k3);
