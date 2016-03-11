@@ -16,7 +16,7 @@ extern evolution_flags_t evo_flags;
 
 void mk_rhs(const double t, double *f, double *result);
 void mk_gradient_squared_and_laplacian(double *in);
-void mk_rho(double *f);
+void mk_rho(const double *f);
 extern double potential(const double f);
 extern double potential_prime(const double f);
 void mk_psi(double *f);
@@ -27,9 +27,9 @@ void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
 extern double filter_window_function(const double x);
 void prepare_and_save_timeslice();
 void mk_means_and_variances();
-extern double mean(const double *f, size_t N);
-extern double variance(double mean, const double *f, size_t N);
-void contains_nan(double *f, size_t N);
-void contains_nanc(complex *f, size_t N);
+extern double mean(const double *f, const size_t N);
+extern double variance(const double mean, const double *f, const size_t N);
+void contains_nan(const double *f, const size_t N);
+void contains_nanc(const complex *f, const size_t N);
 
 #endif

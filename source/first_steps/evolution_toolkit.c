@@ -15,18 +15,18 @@ evolution_flags_t evo_flags = {.filter = 0, .compute_pow_spec = 0};
 // compute right hand side of the pde, i.e. all first order temporal derivatives
 // which fields are contained depends on PSI_METHOD
 void mk_rhs(const double t, double *f, double *result) {
-    size_t N = pars.N;
-    size_t N2 = 2 * N;
-    size_t N2p = N2 + 2;
-    size_t N3p = 3 * N + 2;
-    double a = f[N2];
-    double a2 = a * a;
+    const size_t N = pars.N;
+    const size_t N2 = 2 * N;
+    const size_t N2p = N2 + 2;
+    const size_t N3p = 3 * N + 2;
+    const double a = f[N2];
+    const double a2 = a * a;
 
     f[N2 + 1] = 0.0;
     mk_gradient_squared_and_laplacian(f);
     mk_rho(f);
-    double hubble = sqrt(rho_mean / 3.0);
-    double h3 = 3.0 * hubble;
+    const double hubble = sqrt(rho_mean / 3.0);
+    const double h3 = 3.0 * hubble;
 
     // copy dphi in all cases
     #pragma omp parallel for
@@ -79,14 +79,14 @@ void mk_rhs(const double t, double *f, double *result) {
 
 // compute the laplacian and the squared gradient of the input and store them
 void mk_gradient_squared_and_laplacian(double *in) {
-    size_t Nx = pars.x.N;
-    size_t Ny = pars.y.N;
-    size_t Nz = pars.z.N;
-    size_t Mx = pars.x.M;
-    size_t My = pars.y.M;
-    size_t Mz = pars.z.M;
-    size_t N  = pars.N;
-    size_t N2p = 2 * N + 2;
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
+    const size_t Mx = pars.x.M;
+    const size_t My = pars.y.M;
+    const size_t Mz = pars.z.M;
+    const size_t N  = pars.N;
+    const size_t N2p = 2 * N + 2;
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
@@ -207,12 +207,12 @@ void mk_gradient_squared_and_laplacian(double *in) {
 }
 
 // compute energy density rho & average value
-void mk_rho(double *f) {
-    size_t N = pars.N;
-    size_t N2 = 2 * N;
-    size_t N2p = N2 + 2;
-    double a = f[N2];
-    double a2 = a * a;
+void mk_rho(const double *f) {
+    const size_t N = pars.N;
+    const size_t N2 = 2 * N;
+    const size_t N2p = N2 + 2;
+    const double a = f[N2];
+    const double a2 = a * a;
     rho_mean = 0.0;
     #if PSI_METHOD == PSI_HYPERBOLIC
     pressure_mean = 0.0;
@@ -296,17 +296,17 @@ inline double potential_prime(const double f) {
 
 // solve poisson like equation for scalar perturbation and its derivative
 void mk_psi(double *f) {
-    size_t Nx = pars.x.N;
-    size_t Ny = pars.y.N;
-    size_t Mx = pars.x.M;
-    size_t My = pars.y.M;
-    size_t Mz = pars.z.M;
-    size_t N  = pars.N;
-    size_t N2p = 2 * N + 2;
-    size_t N3p = 3 * N + 2;
-    double a  = f[2 * N];
-    double a2 = a * a;
-    double hubble = sqrt(rho_mean / 3.0);
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Mx = pars.x.M;
+    const size_t My = pars.y.M;
+    const size_t Mz = pars.z.M;
+    const size_t N  = pars.N;
+    const size_t N2p = 2 * N + 2;
+    const size_t N3p = 3 * N + 2;
+    const double a  = f[2 * N];
+    const double a2 = a * a;
+    const double hubble = sqrt(rho_mean / 3.0);
 
     #ifdef SHOW_TIMING_INFO
     poisson_time -= get_wall_time();
@@ -329,7 +329,7 @@ void mk_psi(double *f) {
     #endif
 
     dphi_mean = mean(f + N, N);
-    double dphiextra = 0.5 * a2 * dphi_mean * dphi_mean;
+    const double dphiextra = 0.5 * a2 * dphi_mean * dphi_mean;
 
     double k_sq;
     size_t osx, osy, id;
@@ -396,19 +396,19 @@ void mk_psi(double *f) {
 
 // computes a crude estimation of the power spectrum, more info in main.h
 void mk_power_spectrum(const fftw_complex *in) {
-    size_t Nx = pars.x.N;
-    size_t Ny = pars.y.N;
-    size_t Nz = pars.z.N;
-    size_t N = pars.N;
-    size_t bins = pars.file.bins_powspec;
-    size_t Mx = pars.x.M;
-    size_t My = pars.y.M;
-    size_t Mz = pars.z.M;
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
+    const size_t N = pars.N;
+    const size_t bins = pars.file.bins_powspec;
+    const size_t Mx = pars.x.M;
+    const size_t My = pars.y.M;
+    const size_t Mz = pars.z.M;
 
-    double k_max2 = pars.x.k2 * (Nx/2) * (Nx/2) +
+    const double k_max2 = pars.x.k2 * (Nx/2) * (Nx/2) +
                     pars.y.k2 * (Ny/2) * (Ny/2) +
                     pars.z.k2 * (Nz/2) * (Nz/2);
-    double dk2 = k_max2 / bins;
+    const double dk2 = k_max2 / bins;
     double k2_tmp = 0.0;
     double pow2_tmp = 0.0;
 
@@ -466,9 +466,9 @@ void mk_power_spectrum(const fftw_complex *in) {
 
 // filter the real input field, input gets overwritten with filtered data
 void apply_filter_real(double *inout) {
-    size_t N = pars.N;
-    size_t N2p = 2 * N + 2;
-    size_t N3p = 3 * N + 2;
+    const size_t N = pars.N;
+    const size_t N2p = 2 * N + 2;
+    const size_t N3p = 3 * N + 2;
 
     #ifdef SHOW_TIMING_INFO
     filter_time -= get_wall_time();
@@ -508,13 +508,13 @@ void apply_filter_real(double *inout) {
 // filtering in fourier domain for phi, dphi, psi simultaneously
 void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
         fftw_complex *psi_io, fftw_complex *dpsi_io) {
-    size_t N = pars.N;
-    size_t Nx = pars.x.N;
-    size_t Ny = pars.y.N;
-    size_t Nz = pars.z.N;
-    size_t Mx = pars.x.M;
-    size_t My = pars.y.M;
-    size_t Mz = pars.z.M;
+    const size_t N = pars.N;
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
+    const size_t Mx = pars.x.M;
+    const size_t My = pars.y.M;
+    const size_t Mz = pars.z.M;
 
     double filter;
     size_t osx, osy;
@@ -588,9 +588,9 @@ void prepare_and_save_timeslice() {
 }
 
 void mk_means_and_variances() {
-    size_t N = pars.N;
-    size_t N2p = 2 * N + 2;
-    size_t N3p = 3 * N + 2;
+    const size_t N = pars.N;
+    const size_t N2p = 2 * N + 2;
+    const size_t N3p = 3 * N + 2;
 
     //TODO[performance]: parallel sections instead of parallel loops here?
     #if defined(OUTPUT_PHI_MEAN) || defined(OUTPUT_PHI_VARIANCE)
@@ -634,7 +634,7 @@ void mk_means_and_variances() {
     #endif
 }
 
-inline double mean(const double *f, size_t N) {
+inline double mean(const double *f, const size_t N) {
     double mean = 0.0;
     #pragma omp parallel for reduction(+: mean)
     for (size_t i = 0; i < N; ++i)
@@ -644,7 +644,7 @@ inline double mean(const double *f, size_t N) {
     return mean / (double)N;
 }
 
-inline double variance(double mean, const double *f, size_t N) {
+inline double variance(const double mean, const double *f, const size_t N) {
     double sum1 = 0.0;
     double sum2 = 0.0;
     double tmp;
@@ -658,7 +658,7 @@ inline double variance(double mean, const double *f, size_t N) {
     return (sum1 - sum2 * sum2 / (double)N) / (double)(N - 1);
 }
 
-void contains_nan(double *f, size_t N) {
+void contains_nan(const double *f, const size_t N) {
     size_t count = 0;
     for (size_t i = 0; i < N; ++i)
     {
@@ -670,7 +670,7 @@ void contains_nan(double *f, size_t N) {
     printf("found %zu nans\n", count);
 }
 
-void contains_nanc(complex *f, size_t N) {
+void contains_nanc(const complex *f, const size_t N) {
     size_t count = 0;
     for (size_t i = 0; i < N; ++i)
     {

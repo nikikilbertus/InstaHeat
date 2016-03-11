@@ -173,7 +173,7 @@ int perform_step(const double dt_try) {
 
 void try_step(const double dt) {
     const size_t Ntot = pars.Ntot;
-    double t = dp.t;
+    const double t = dp.t;
     size_t i;
     // ------------ 1 ------------
     // is already done in perform_step
@@ -275,7 +275,7 @@ void try_step(const double dt) {
     mk_rhs(t + dpc.c11 * dt, dpv.k_tmp, dpv.k2);
 
     // ------------ new dt ------------
-    double tpdt = t + dt;
+    const double tpdt = t + dt;
 
     // ------------ 12 ------------
     #pragma omp parallel for
