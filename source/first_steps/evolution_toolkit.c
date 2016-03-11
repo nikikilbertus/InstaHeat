@@ -409,7 +409,7 @@ void mk_power_spectrum(const fftw_complex *in) {
                     pars.y.k2 * (Ny/2) * (Ny/2) +
                     pars.z.k2 * (Nz/2) * (Nz/2));
     const double dk = k_max / bins;
-    double k_tmp = 0.0;
+    double k2_tmp = 0.0;
     double pow2_tmp = 0.0;
 
     #pragma omp parallel for
