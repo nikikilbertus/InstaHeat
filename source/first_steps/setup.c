@@ -573,7 +573,7 @@ double dphi_init(const double x, const double y, const double z,
 
 double wrapped_gaussian(const double x, const double y, const double z) {
     const double s = 0.5;
-    const double res = 0.0;
+    double res = 0.0;
     size_t max;
     if (pars.dim == 1)
     {
