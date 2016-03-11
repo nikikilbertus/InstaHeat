@@ -55,20 +55,20 @@ void initialize_parameters() {
     pars.x.N  = GRIDPOINTS_X;
     pars.x.a  = SPATIAL_LOWER_BOUND_X;
     pars.x.b  = SPATIAL_UPPER_BOUND_X;
-    pars.x.k  = 2. * PI * I / (pars.x.b - pars.x.a);
-    pars.x.k2 = -4. * PI * PI / ((pars.x.b - pars.x.a) * (pars.x.b - pars.x.a));
+    pars.x.k  = TWOPI * I / (pars.x.b - pars.x.a);
+    pars.x.k2 = -TWOPI * TWOPI / ((pars.x.b - pars.x.a) * (pars.x.b - pars.x.a));
     pars.x.stride = STRIDE_X;
     pars.y.N  = GRIDPOINTS_Y;
     pars.y.a  = SPATIAL_LOWER_BOUND_Y;
     pars.y.b  = SPATIAL_UPPER_BOUND_Y;
-    pars.y.k  = 2. * PI * I / (pars.y.b - pars.y.a);
-    pars.y.k2 = -4. * PI * PI / ((pars.y.b - pars.y.a) * (pars.y.b - pars.y.a));
+    pars.y.k  = TWOPI * I / (pars.y.b - pars.y.a);
+    pars.y.k2 = -TWOPI * TWOPI / ((pars.y.b - pars.y.a) * (pars.y.b - pars.y.a));
     pars.y.stride = STRIDE_Y;
     pars.z.N  = GRIDPOINTS_Z;
     pars.z.a  = SPATIAL_LOWER_BOUND_Z;
     pars.z.b  = SPATIAL_UPPER_BOUND_Z;
-    pars.z.k  = 2. * PI * I / (pars.z.b - pars.z.a);
-    pars.z.k2 = -4. * PI * PI / ((pars.z.b - pars.z.a) * (pars.z.b - pars.z.a));
+    pars.z.k  = TWOPI * I / (pars.z.b - pars.z.a);
+    pars.z.k2 = -TWOPI * TWOPI / ((pars.z.b - pars.z.a) * (pars.z.b - pars.z.a));
     pars.z.stride = STRIDE_Z;
 
     pars.x.outN = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
@@ -326,22 +326,26 @@ void mk_initial_conditions() {
     h5_read_timeslice();
     #elif INITIAL_CONDITIONS == IC_FROM_DAT_FILE
     read_initial_data();
+    field[2 * pars.N] = A_INITIAL;
+    field[2 * pars.N + 1] = 0.0;
         #if PSI_METHOD != PSI_ELLIPTIC
-        //TODO: do I get psi from karsten?
         mk_initial_psi();
         #endif
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
     //TODO: need correct values at end of inflation here
     double phi0 = 1.01985;
     double dphi0 = -0.00714754 * MASS / MASS_KARSTEN;
-    double hubble = 0.001016848945526;
-    mk_bunch_davies(field, hubble, phi0);
-    mk_bunch_davies(field + pars.N, hubble, dphi0);
+    double hubble = 0.5 * (dphi0 * dphi0 + MASS * MASS * phi0 * phi0);
+    /* double phi0 = 2.339383796213256; */
+    /* double dphi0 = -2.736358272992573; */
+    /* double hubble = 1.934897490588959; */
+    mk_bunch_davies(field, hubble, phi0, -0.25);
+    mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
+    field[2 * pars.N] = A_INITIAL;
+    field[2 * pars.N + 1] = 0.0;
         #if PSI_METHOD != PSI_ELLIPTIC
         mk_initial_psi();
         #endif
-    field[2 * pars.N] = A_INITIAL;
-    field[2 * pars.N + 1] = 0.0;
     #elif INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -356,7 +360,7 @@ void mk_initial_conditions() {
     double *theta = calloc(Nmodes, sizeof *theta);
     for (size_t i = 0; i < Nmodes; ++i)
     {
-        theta[i] = 2.0 * PI * (double)rand() / (double)RAND_MAX;
+        theta[i] = TWOPI * (double)rand() / (double)RAND_MAX;
     }
 
     // initialize the scalar field and its temporal derivative
@@ -388,7 +392,7 @@ void mk_initial_conditions() {
     #endif
     #endif
 
-    RUNTIME_INFO(puts("Initialized the field and its temporal derivative.\n"));
+    RUNTIME_INFO(puts("Initialized fields on first time slice.\n"));
 }
 
 // initial values of the scalar field, make sure its periodic
@@ -607,7 +611,7 @@ double wrapped_gaussian(double x, double y, double z) {
             }
         }
     }
-    return res / (2.0 * PI);
+    return res / TWOPI;
 }
 
 void mk_initial_psi() {
@@ -720,7 +724,8 @@ void free_external() {
     RUNTIME_INFO(puts("Freed external variables.\n"));
 }
 
-void mk_bunch_davies(double *f, const double H, const double homo) {
+void mk_bunch_davies(double *f, const double H, const double homo,
+        const double gamma) {
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
     const size_t Nz = pars.z.N;
@@ -735,13 +740,18 @@ void mk_bunch_davies(double *f, const double H, const double homo) {
     const size_t nos = Nx * os * os;
     const double dx = (pars.x.b - pars.x.a) / Nx;
     const double dxos = dx / os;
-    const double dk = 2.0 * PI / (pars.x.b - pars.x.a);
+    const double dk = TWOPI / (pars.x.b - pars.x.a);
     const double dkos = 0.5 * dk / os;
     //TODO: pspectre uses kcutpspectre = 2 * kcutdefrost, we use pspectre
-    const double kcut2 = nn * nn * dk * dk;
+    const double kcut2 = 0.25 * nn * nn * dk * dk;
     const double meff2 = MASS * MASS - 2.25 * H * H;
-    const double norm = 0.5 / (N * sqrt(2.0 * PI * pow(dk, 3))) * (dkos / dxos);
+    const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3))) * (dkos / dxos);
 
+    if (meff2 <= 0.0)
+    {
+        fputs("The effective mass turned out to be negative.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
     double *ker = fftw_malloc(nos * sizeof *ker);
 
     double kk;
@@ -749,7 +759,7 @@ void mk_bunch_davies(double *f, const double H, const double homo) {
     for (size_t i = 0; i < nos; ++i)
     {
         kk = (i + 0.5) * dkos;
-        ker[i] = kk * pow(kk * kk + meff2, -0.25) *
+        ker[i] = kk * pow(kk * kk + meff2, gamma) *
             exp(-kk * kk / kcut2);
     }
 
@@ -814,7 +824,7 @@ void mk_bunch_davies(double *f, const double H, const double homo) {
 inline complex box_muller() {
     double u1 = (double)rand() / (double)RAND_MAX;
     double u2 = (double)rand() / (double)RAND_MAX;
-    return sqrt(-2 * log(u1)) * cexp(2.0 * PI * u2 * 1i);
+    return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * 1i);
 }
 
 // -------------------------printing function-----------------------------------

@@ -621,9 +621,15 @@ void read_initial_data() {
     }
 
     //TODO: adjust to actual file format, this is just a dummy
+    int ii, jj, kk;
     for (size_t i = 0; i < N; ++i)
     {
-        fscanf(file, "%lf", &field[i]);
+        if(!fscanf(file, " %d %d %d %lf %lf\n",
+                    &ii, &jj, &kk, &field[i], &field[i + N]))
+        {
+            fputs("Could not read initial data file.\n", stderr);
+            exit(EXIT_FAILURE);
+        }
     }
     fclose(file);
 }

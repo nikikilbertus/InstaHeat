@@ -1,5 +1,5 @@
-name = '3d_128_hyp';
-interp = true;
+name = 'bunchdavies';
+interp = false;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
@@ -53,3 +53,5 @@ timestride = h5read(name,'/strides_time');
 tols = h5read(name, '/tolerances');
 
 H = sqrt(rhomean / 3);
+
+return

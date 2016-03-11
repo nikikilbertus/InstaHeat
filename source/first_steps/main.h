@@ -7,6 +7,7 @@
 
 // -------------------mathematical constants and macros-------------------------
 #define PI                      (3.141592653589793238462643383279)
+#define TWOPI                   (6.283185307179586476925286766559)
 #define MAX(x, y)               (((x) > (y)) ? (x) : (y))
 #define MIN(x, y)               (((x) > (y)) ? (y) : (x))
 
@@ -41,11 +42,11 @@ during execution
 #define VERSION_CONTROL         VERSION_CONTROL_HG
 
 //-------------which files to write to disk-------------------------------------
-/* #define OUTPUT_PHI */
+#define OUTPUT_PHI
 /* #define OUTPUT_DPHI */
-/* #define OUTPUT_PSI */
+#define OUTPUT_PSI
 /* #define OUTPUT_DPSI */
-/* #define OUTPUT_RHO */
+#define OUTPUT_RHO
 
 #define OUTPUT_POWER_SPECTRUM
 
@@ -70,9 +71,9 @@ during execution
 #define INITIAL_CONDITIONS          IC_FROM_BUNCH_DAVIES
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/bla.h5")
+#define DATAPATH                ("../../../data/bunchdavies.h5")
 /* #define DATAPATH                ("bla.h5") */
-#define INITIAL_DATAPATH        ("../../../data/init.h5")
+#define INITIAL_DATAPATH        ("../../../data/karsten/data_64.dat")
 
 
 /**
@@ -81,7 +82,7 @@ during execution
  *  too), this parameter determines how many time slices are buffered before
  *  writing them to disk, beware of the memory consumption of large buffers!
  */
-#define WRITE_OUT_BUFFER_NUMBER (20)
+#define WRITE_OUT_BUFFER_NUMBER (5)
 
 /**
  *  there is a (very crude and biased!) estimation of the power spectrum to
@@ -91,7 +92,7 @@ during execution
 #define POWER_SPECTRUM_BINS     (30)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (5)
+#define TIME_STEP_SKIPS         (1)
 
 // spatial output strides
 #define STRIDE_X                (1)
@@ -124,9 +125,9 @@ during execution
 
 // ------------------computational domain---------------------------------------
 // spatial (order is important! use y=z=1 for 1D; use z=1 for 2D)
-#define GRIDPOINTS_X            (32)
-#define GRIDPOINTS_Y            (32)
-#define GRIDPOINTS_Z            (32)
+#define GRIDPOINTS_X            (64)
+#define GRIDPOINTS_Y            (64)
+#define GRIDPOINTS_Z            (64)
 #define SPATIAL_LOWER_BOUND_X   (-PI)
 #define SPATIAL_UPPER_BOUND_X   (PI)
 #define SPATIAL_LOWER_BOUND_Y   (-PI)
@@ -138,12 +139,13 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (1.0e-5)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (1.0e4)
+#define FINAL_TIME              (1.3e3)
 #define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-10)
 
 // ----------------parameters used in the potential-----------------------------
 /* #define MASS                    (0.11026) // for 50 e-fold hom inflation */
+/* #define MASS                    (1.0e-2) // compare_2 compare_psi */
 #define MASS                    (0.002000003836216) // compare_2 compare_psi
 /* #define MASS                    (6.0) // for compare.dat */
 #define MASS_KARSTEN            (1.0e-2)
@@ -152,6 +154,7 @@ during execution
 /* #define A_INITIAL               (1.05249e3) // compare_2, compare_psi, 5500 */
 /* #define A_INITIAL               (4.09376e3) // compare_2, compare_psi, 6000 */
 #define A_INITIAL               (6.1625e2) // compare_2, compare_psi, 5450
+/* #define A_INITIAL               (1.370074629050061e+05) // data_64 */
 /* #define A_INITIAL               (1.0) */
 // for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
 
@@ -168,7 +171,7 @@ during execution
 #define RELATIVE_TOLERANCE      (1.0e-9)
 #define ABSOLUTE_TOLERANCE      (1.0e-14)
 // the timestep is limited from above by a fraction of the hubble time 1/H
-/* #define MIN_DT_FRACTION         (1.0e-2) */
+#define MIN_DT_FRACTION         (1.0e-3)
 
 // ------------------------typedefs---------------------------------------------
 // representing one spatial dimension of a multi dimensional grid
