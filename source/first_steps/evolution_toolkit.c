@@ -405,11 +405,11 @@ void mk_power_spectrum(const fftw_complex *in) {
     const size_t My = pars.y.M;
     const size_t Mz = pars.z.M;
 
-    const double k_max2 = pars.x.k2 * (Nx/2) * (Nx/2) +
+    const double k_max = sqrt(pars.x.k2 * (Nx/2) * (Nx/2) +
                     pars.y.k2 * (Ny/2) * (Ny/2) +
-                    pars.z.k2 * (Nz/2) * (Nz/2);
-    const double dk2 = k_max2 / bins;
-    double k2_tmp = 0.0;
+                    pars.z.k2 * (Nz/2) * (Nz/2));
+    const double dk = k_max / bins;
+    double k_tmp = 0.0;
     double pow2_tmp = 0.0;
 
     #pragma omp parallel for
@@ -457,7 +457,7 @@ void mk_power_spectrum(const fftw_complex *in) {
                     {
                         k2_tmp += pars.y.k2 * j * j;
                     }
-                    idx = (int)floor(k2_tmp / dk2);
+                    idx = (int)floor(sqrt(k2_tmp) / dk);
                     pow_spec[idx] += pow2_tmp / N;
                 }
             }
