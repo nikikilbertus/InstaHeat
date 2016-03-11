@@ -130,6 +130,11 @@ void h5_create_empty_by_path(const char *name) {
     val[2] = pars.z.stride;
     h5_write_parameter(H5_STRIDES_SPACE_NAME, val, 3);
 
+    #ifdef MAX_DT_HUBBLE_FRACTION
+    val[0] = MAX_DT_HUBBLE_FRACTION;
+    h5_write_parameter(H5_MAX_DT_HUBBLE_FRACTION_NAME, val, 1);
+    #endif
+
     // ---------------------------commit hash-----------------------------------
     hid_t filetype, memtype, dspace_str, dset_str;
     size_t len;
