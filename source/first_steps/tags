@@ -59,9 +59,11 @@ H5_TOLERANCES_NAME	filehandling.h	/^#define     H5_TOLERANCES_NAME /;"	d
 HDF5_CC	Makefile	/^export HDF5_CC = gcc-5$/;"	m
 HDF5_CLINKER	Makefile	/^export HDF5_CLINKER = gcc-5$/;"	m
 HEADERS	Makefile	/^HEADERS = $(wildcard *.h)$/;"	m
+IC_FROM_BUNCH_DAVIES	main.h	/^#define IC_FROM_BUNCH_DAVIES /;"	d
 IC_FROM_DAT_FILE	main.h	/^#define IC_FROM_DAT_FILE /;"	d
 IC_FROM_H5_FILE	main.h	/^#define IC_FROM_H5_FILE /;"	d
 IC_FROM_INTERNAL_FUNCTION	main.h	/^#define IC_FROM_INTERNAL_FUNCTION /;"	d
+INFO	main.h	/^#define INFO(/;"	d
 INITIAL_CONDITIONS	main.h	/^#define INITIAL_CONDITIONS /;"	d
 INITIAL_DATAPATH	main.h	/^#define INITIAL_DATAPATH /;"	d
 INITIAL_TIME	main.h	/^#define INITIAL_TIME /;"	d
@@ -82,10 +84,8 @@ Nall	main.h	/^    size_t Nall;$/;"	m	struct:__anon9
 Nt	main.h	/^    size_t Nt; \/\/ number of timesteps (only relevant for fixed step size)$/;"	m	struct:__anon6
 Ntot	main.h	/^    size_t Ntot;$/;"	m	struct:__anon9
 OBJECTS	Makefile	/^OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))$/;"	m
-OUTPUT_DPHI	main.h	/^#define OUTPUT_DPHI$/;"	d
 OUTPUT_DPHI_MEAN	main.h	/^#define OUTPUT_DPHI_MEAN$/;"	d
 OUTPUT_DPHI_VARIANCE	main.h	/^#define OUTPUT_DPHI_VARIANCE$/;"	d
-OUTPUT_DPSI	main.h	/^#define OUTPUT_DPSI$/;"	d
 OUTPUT_DPSI_MEAN	main.h	/^#define OUTPUT_DPSI_MEAN$/;"	d
 OUTPUT_DPSI_VARIANCE	main.h	/^#define OUTPUT_DPSI_VARIANCE$/;"	d
 OUTPUT_PHI	main.h	/^#define OUTPUT_PHI$/;"	d
@@ -105,7 +105,6 @@ PSI_HYPERBOLIC	main.h	/^#define PSI_HYPERBOLIC /;"	d
 PSI_METHOD	main.h	/^#define PSI_METHOD /;"	d
 PSI_PARABOLIC	main.h	/^#define PSI_PARABOLIC /;"	d
 RELATIVE_TOLERANCE	main.h	/^#define RELATIVE_TOLERANCE /;"	d
-RUNTIME_INFO	main.h	/^#define RUNTIME_INFO(/;"	d
 SAFE	main.h	/^#define SAFE /;"	d
 SEED	main.h	/^#define SEED /;"	d
 SHOW_RUNTIME_INFO	main.h	/^#define SHOW_RUNTIME_INFO /;"	d
@@ -123,6 +122,7 @@ STRIDE_Z	main.h	/^#define STRIDE_Z /;"	d
 TARGET	Makefile	/^TARGET = first_steps$/;"	m
 THREAD_NUMBER	main.h	/^#define THREAD_NUMBER /;"	d
 TIME_STEP_SKIPS	main.h	/^#define TIME_STEP_SKIPS /;"	d
+TWOPI	main.h	/^#define TWOPI /;"	d
 VERSION_CONTROL	main.h	/^#define VERSION_CONTROL /;"	d
 VERSION_CONTROL_GIT	main.h	/^#define VERSION_CONTROL_GIT /;"	d
 VERSION_CONTROL_HG	main.h	/^#define VERSION_CONTROL_HG /;"	d
@@ -233,6 +233,7 @@ bhh1	dopri853_stepper.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:__anon1
 bhh2	dopri853_stepper.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:__anon1
 bhh3	dopri853_stepper.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:__anon1
 bins_powspec	main.h	/^    size_t bins_powspec;    \/\/ how many bins are used for the power spectrum$/;"	m	struct:__anon8
+box_muller	setup.c	/^inline complex box_muller() {$/;"	f
 buf_size	main.h	/^    size_t buf_size;        \/\/ size of the buffer$/;"	m	struct:__anon8
 c10	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
 c11	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
@@ -405,6 +406,7 @@ maxscale	dopri853_stepper.h	/^    double minscale, maxscale;$/;"	m	struct:__anon
 mean	evolution_toolkit.c	/^inline double mean(const double *f, size_t N) {$/;"	f
 mean	main.h	/^    hsize_t mean;$/;"	m	struct:__anon7
 minscale	dopri853_stepper.h	/^    double minscale, maxscale;$/;"	m	struct:__anon3
+mk_bunch_davies	setup.c	/^void mk_bunch_davies(double *f, const double H, const double homo,$/;"	f
 mk_fftw_plans	setup.c	/^void mk_fftw_plans() {$/;"	f
 mk_gradient_squared_and_laplacian	evolution_toolkit.c	/^void mk_gradient_squared_and_laplacian(double *in) {$/;"	f
 mk_grid	setup.c	/^void mk_grid() {$/;"	f
