@@ -35,20 +35,20 @@ void initialize_dopri853() {
     dp.err_old = 1.0e-4;
     dp.reject = 0;
     dp.eps = DBL_EPSILON;
-    RUNTIME_INFO(puts("Initialized dopri853 parameters.\n"));
+    INFO(puts("Initialized dopri853 parameters.\n"));
 }
 
 void run_dopri853() {
     initialize_dopri853();
     allocate_dopri853_values();
-    RUNTIME_INFO(puts("Starting dopri853 integration with:"));
-    RUNTIME_INFO(printf("initial time: %f\n", dp.ti));
-    RUNTIME_INFO(printf("final time: %f\n", dp.tf));
-    RUNTIME_INFO(printf("initial time step dt: %f\n", dp.dt));
-    RUNTIME_INFO(printf("minimal time step dt: %f\n", dp.dt_min));
-    RUNTIME_INFO(printf("max number of steps: %zu\n", dp.max_steps));
-    RUNTIME_INFO(printf("relative tolerance: %.15f\n", dp.r_tol));
-    RUNTIME_INFO(printf("absolute tolerance: %.15f\n", dp.a_tol));
+    INFO(puts("Starting dopri853 integration with:"));
+    INFO(printf("initial time: %f\n", dp.ti));
+    INFO(printf("final time: %f\n", dp.tf));
+    INFO(printf("initial time step dt: %f\n", dp.dt));
+    INFO(printf("minimal time step dt: %f\n", dp.dt_min));
+    INFO(printf("max number of steps: %zu\n", dp.max_steps));
+    INFO(printf("relative tolerance: %.15f\n", dp.r_tol));
+    INFO(printf("absolute tolerance: %.15f\n\n", dp.a_tol));
 
     evo_flags.compute_pow_spec = 1;
     mk_rhs(dp.t, field, dfield);
@@ -65,7 +65,7 @@ void run_dopri853() {
         if (dp.t + dp.dt * 1.0001 > dp.tf)
         {
             dp.dt = dp.tf - dp.t;
-            RUNTIME_INFO(printf("overshoot, new dt = %f\n", dp.dt));
+            INFO(printf("overshoot, new dt = %f\n", dp.dt));
         }
         if (perform_step(dp.dt))
         {
@@ -80,7 +80,7 @@ void run_dopri853() {
             ++dp.n_bad;
         }
         #ifdef DEBUG
-        RUNTIME_INFO(printf("did step: %d with dt: %f\n", dp.n_stp, dp.dt_did));
+        INFO(printf("did step: %d with dt: %f\n", dp.n_stp, dp.dt_did));
         #endif
 
         if ((dp.n_stp + 1) % pars.file.skip == 0)
@@ -112,7 +112,7 @@ void run_dopri853() {
 
     free_dopri853_values();
 
-    RUNTIME_INFO(puts("Writing simulation meta data to disk\n"));
+    INFO(puts("Writing simulation meta data to disk\n"));
     double val[1];
     val[0] = (double)dp.n_stp;
     h5_write_parameter(H5_STEPS_TOTAL_NAME, val, 1);
@@ -121,15 +121,15 @@ void run_dopri853() {
     val[0] = (double)dp.n_bad;
     h5_write_parameter(H5_STEPS_BAD_NAME, val, 1);
 
-    RUNTIME_INFO(puts("Finished dopri853"));
+    INFO(puts("Finished dopri853"));
     #ifdef SHOW_TIMING_INFO
-    RUNTIME_INFO(printf("time: %f seconds\n", secs));
+    INFO(printf("time: %f seconds\n", secs));
     val[0] = secs;
     h5_write_parameter(H5_RUNTIME_STEPPER_NAME, val, 1);
     #endif
-    RUNTIME_INFO(printf("steps: %d\n", dp.n_stp + 1));
-    RUNTIME_INFO(printf("good steps: %d\n", dp.n_ok));
-    RUNTIME_INFO(printf("bad steps: %d\n\n", dp.n_bad));
+    INFO(printf("steps: %d\n", dp.n_stp + 1));
+    INFO(printf("good steps: %d\n", dp.n_ok));
+    INFO(printf("bad steps: %d\n\n", dp.n_bad));
 }
 
 int perform_step(const double dt_try) {
@@ -413,7 +413,7 @@ void allocate_dopri853_values() {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    RUNTIME_INFO(puts("Allocated memory for dopri853 variables.\n"));
+    INFO(puts("Allocated memory for dopri853 variables.\n"));
 }
 
 void free_dopri853_values() {
@@ -430,5 +430,5 @@ void free_dopri853_values() {
 
     free(dpv.yerr);
     free(dpv.yerr2);
-    RUNTIME_INFO(puts("Freed memory of dopri853 variables.\n"));
+    INFO(puts("Freed memory of dopri853 variables.\n"));
 }

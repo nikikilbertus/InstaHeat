@@ -93,20 +93,20 @@ int main(int argc, const char * argv[]) {
 
     #ifdef SHOW_TIMING_INFO
     double secs = get_wall_time() - start;
-    RUNTIME_INFO(printf("main took %f seconds.\n", secs));
-    RUNTIME_INFO(puts("as percentage of total, not mutually disjoint:"));
-    RUNTIME_INFO(printf("fftw execution took %f seconds (%.2f %%).\n",
+    INFO(printf("main took %f seconds.\n", secs));
+    INFO(puts("as percentage of total, not mutually disjoint:"));
+    INFO(printf("fftw execution took %f seconds (%.2f %%).\n",
                         fftw_time_exe, 100. * (fftw_time_exe / secs)));
-    RUNTIME_INFO(printf("fftw planning took %f seconds (%.2f %%).\n",
+    INFO(printf("fftw planning took %f seconds (%.2f %%).\n",
                         fftw_time_plan, 100. * (fftw_time_plan / secs)));
-    RUNTIME_INFO(printf("fft filtering took %f seconds (%.2f %%).\n",
+    INFO(printf("fft filtering took %f seconds (%.2f %%).\n",
                         filter_time, 100. * (filter_time / secs)));
-    RUNTIME_INFO(printf("poisson equation took %f seconds (%.2f %%).\n",
+    INFO(printf("poisson equation took %f seconds (%.2f %%).\n",
                         poisson_time, 100. * (poisson_time / secs)));
-    RUNTIME_INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
+    INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
                         h5_time_write, 100. * (h5_time_write / secs)));
 
-    RUNTIME_INFO(puts("Writing runtimes to disk\n"));
+    INFO(puts("Writing runtimes to disk\n"));
     h5_write_parameter(H5_RUNTIME_TOTAL_NAME, &secs, 1);
     h5_write_parameter(H5_RUNTIME_FFTW_NAME, &fftw_time_exe, 1);
     h5_write_parameter(H5_RUNTIME_FFTWPLAN_NAME, &fftw_time_plan, 1);
@@ -125,7 +125,7 @@ double get_wall_time() {
     struct timeval time;
     if (gettimeofday(&time, NULL))
     {
-        RUNTIME_INFO(puts("Could not get wall time, reurning 0.\n"));
+        INFO(puts("Could not get wall time, reurning 0.\n"));
         return 0.0;
     }
     return (double)time.tv_sec + (double)time.tv_usec * 0.000001;

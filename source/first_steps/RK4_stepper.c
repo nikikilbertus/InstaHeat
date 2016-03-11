@@ -28,11 +28,11 @@ void run_rk4() {
         exit(EXIT_FAILURE);
     }
 
-    RUNTIME_INFO(puts("Starting RK4 time evolution with:"));
-    RUNTIME_INFO(printf("initial time: %f\n", pars.t.ti));
-    RUNTIME_INFO(printf("final time: %f\n", pars.t.tf));
-    RUNTIME_INFO(printf("time step dt: %f\n", dt));
-    RUNTIME_INFO(printf("number of steps: %zu\n", Nt));
+    INFO(puts("Starting RK4 time evolution with:"));
+    INFO(printf("initial time: %f\n", pars.t.ti));
+    INFO(printf("final time: %f\n", pars.t.tf));
+    INFO(printf("time step dt: %f\n", dt));
+    INFO(printf("number of steps: %zu\n", Nt));
 
     #ifdef SHOW_TIMING_INFO
     double secs = -get_wall_time();
@@ -49,7 +49,7 @@ void run_rk4() {
         {
             dt = pars.t.tf - t;
             pars.t.dt = dt;
-            RUNTIME_INFO(printf("overshoot, new dt = %f\n", dt));
+            INFO(printf("overshoot, new dt = %f\n", dt));
         }
 
         // step 1 (and write out data if required)
@@ -107,15 +107,15 @@ void run_rk4() {
     // info about last timeslice
     if (fabs(pars.t.tf - pars.t.t) > 1e-10)
     {
-        RUNTIME_INFO(puts("The time of the last step does not coincide "
+        INFO(puts("The time of the last step does not coincide "
                           "with the specified final time."));
     }
 
-    RUNTIME_INFO(puts("Finished rk4"));
+    INFO(puts("Finished rk4"));
     #ifdef SHOW_TIMING_INFO
     secs += get_wall_time();
-    RUNTIME_INFO(printf("time: %f seconds\n\n", secs));
-    RUNTIME_INFO(puts("Writing simulation meta data to disk\n"));
+    INFO(printf("time: %f seconds\n\n", secs));
+    INFO(puts("Writing simulation meta data to disk\n"));
     double val[1] = {secs};
     h5_write_parameter(H5_RUNTIME_STEPPER_NAME, val, 1);
     #endif

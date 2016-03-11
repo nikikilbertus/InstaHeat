@@ -27,11 +27,11 @@ during execution
 
 // always leave this here uncommented
 #ifdef SHOW_RUNTIME_INFO
-#define RUNTIME_INFO(f) do {\
+#define INFO(f) do {\
         (f); \
     } while (0)
 #else
-#define RUNTIME_INFO(f)
+#define INFO(f)
 #endif
 
 // ------------writing current commit hash to disk (hg, git, none)--------------
@@ -68,10 +68,10 @@ during execution
 #define IC_FROM_H5_FILE             (1)
 #define IC_FROM_DAT_FILE            (2)
 #define IC_FROM_BUNCH_DAVIES        (3)
-#define INITIAL_CONDITIONS          IC_FROM_BUNCH_DAVIES
+#define INITIAL_CONDITIONS          IC_FROM_DAT_FILE
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/bunchdavies.h5")
+#define DATAPATH                ("../../../data/valtest.h5")
 /* #define DATAPATH                ("bla.h5") */
 #define INITIAL_DATAPATH        ("../../../data/karsten/data_64.dat")
 
@@ -128,33 +128,33 @@ during execution
 #define GRIDPOINTS_X            (64)
 #define GRIDPOINTS_Y            (64)
 #define GRIDPOINTS_Z            (64)
-#define SPATIAL_LOWER_BOUND_X   (-PI)
-#define SPATIAL_UPPER_BOUND_X   (PI)
-#define SPATIAL_LOWER_BOUND_Y   (-PI)
-#define SPATIAL_UPPER_BOUND_Y   (PI)
-#define SPATIAL_LOWER_BOUND_Z   (-PI)
-#define SPATIAL_UPPER_BOUND_Z   (PI)
+#define SPATIAL_LOWER_BOUND_X   (0.0)
+#define SPATIAL_UPPER_BOUND_X   (1.0)
+#define SPATIAL_LOWER_BOUND_Y   (0.0)
+#define SPATIAL_UPPER_BOUND_Y   (1.0)
+#define SPATIAL_LOWER_BOUND_Z   (0.0)
+#define SPATIAL_UPPER_BOUND_Z   (1.0)
 
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (1.0e-5)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (1.3e3)
+#define FINAL_TIME              (1.0e1)
 #define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-10)
 
 // ----------------parameters used in the potential-----------------------------
 /* #define MASS                    (0.11026) // for 50 e-fold hom inflation */
-/* #define MASS                    (1.0e-2) // compare_2 compare_psi */
-#define MASS                    (0.002000003836216) // compare_2 compare_psi
+#define MASS                    (1.0e-2) // exactly karste
+/* #define MASS                    (0.002000003836216) // compare_2 compare_psi */
 /* #define MASS                    (6.0) // for compare.dat */
 #define MASS_KARSTEN            (1.0e-2)
 #define COUPLING                (1.0) // coupling in a phi4 potential
 #define LAMBDA                  (4.721e-5) // "cosmological constant"
 /* #define A_INITIAL               (1.05249e3) // compare_2, compare_psi, 5500 */
 /* #define A_INITIAL               (4.09376e3) // compare_2, compare_psi, 6000 */
-#define A_INITIAL               (6.1625e2) // compare_2, compare_psi, 5450
-/* #define A_INITIAL               (1.370074629050061e+05) // data_64 */
+/* #define A_INITIAL               (6.1625e2) // compare_2, compare_psi, 5450 */
+#define A_INITIAL               (1.370074629050061e+05) // data_64
 /* #define A_INITIAL               (1.0) */
 // for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
 

@@ -204,7 +204,7 @@ void h5_create_empty_by_path(const char *name) {
     H5Tclose(filetype);
     H5Tclose(memtype);
 
-    RUNTIME_INFO(puts("Created hdf5 file with datasets for output.\n"));
+    INFO(puts("Created hdf5 file with datasets for output.\n"));
 }
 
 void h5_create_dset(const hsize_t rank, const hsize_t *dim,
@@ -349,7 +349,7 @@ void h5_write_all_buffers(const hsize_t Nt) {
     #ifdef SHOW_TIMING_INFO
     h5_time_write += get_wall_time();
     #endif
-    RUNTIME_INFO(printf("Dumping to disk at t = %f\n", pars.t.t));
+    INFO(printf("Dumping to disk at t = %f\n", pars.t.t));
 }
 
 void h5_close() {
@@ -519,7 +519,7 @@ void h5_read_timeslice() {
     int ndims = H5Sget_simple_extent_ndims(dspace);
     if (ndims != 1)
     {
-        RUNTIME_INFO(fputs("Could not read time properly.\n", stderr));
+        INFO(fputs("Could not read time properly.\n", stderr));
         exit(EXIT_FAILURE);
     }
     hsize_t dims[2];
@@ -540,7 +540,7 @@ void h5_read_timeslice() {
     }
     if (index == Nt)
     {
-        RUNTIME_INFO(puts("The initial time is larger than the maximal time in"
+        INFO(puts("The initial time is larger than the maximal time in"
                     " the h5 file. Starting at last existing timeslice."));
         index = Nt - 1;
     }
@@ -564,7 +564,7 @@ void h5_read_timeslice() {
     H5Sget_simple_extent_dims(dspace, dims, NULL);
     if (dims[0] != Nt)
     {
-        RUNTIME_INFO(fputs("Dimensions of dataset does not agree with specified"
+        INFO(fputs("Dimensions of dataset does not agree with specified"
                     " values.\n", stderr));
         exit(EXIT_FAILURE);
     }
@@ -592,7 +592,7 @@ void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
     H5Sget_simple_extent_dims(dspace, dims, NULL);
     if (dims[1] != N || ndims != 2)
     {
-        RUNTIME_INFO(fputs("Dimensions of dataset does not agree with specified"
+        INFO(fputs("Dimensions of dataset does not agree with specified"
                     " values.\n", stderr));
         exit(EXIT_FAILURE);
     }

@@ -18,17 +18,17 @@ void allocate_and_initialize_all() {
     mk_initial_conditions();
     h5_create_empty_by_path(DATAPATH);
     #ifdef ENABLE_FFT_FILTER
-    RUNTIME_INFO(puts("Frequency cutoff filtering enabled.\n"));
+    INFO(puts("Frequency cutoff filtering enabled.\n"));
     #else
-    RUNTIME_INFO(puts("Filtering disabled.\n"));
+    INFO(puts("Filtering disabled.\n"));
     #endif
 
     #if PSI_METHOD == PSI_ELLIPTIC
-    RUNTIME_INFO(puts("Solving elliptic equation for psi at each timesetp.\n"));
+    INFO(puts("Solving elliptic equation for psi at each timesetp.\n"));
     #elif PSI_METHOD == PSI_PARABOLIC
-    RUNTIME_INFO(puts("Integrating psi using the parabolic constraint.\n"));
+    INFO(puts("Integrating psi using the parabolic constraint.\n"));
     #elif PSI_METHOD == PSI_HYPERBOLIC
-    RUNTIME_INFO(puts("Integrating psi using the hyperbolic constraint.\n"));
+    INFO(puts("Integrating psi using the hyperbolic constraint.\n"));
     #endif
 }
 
@@ -37,13 +37,13 @@ void initialize_threading() {
     threadinit = fftw_init_threads();
     if (threadinit == 0)
     {
-        fputs("Could not initialize fftw threads.\n", stderr);
+        fputs("\n\nCould not initialize fftw threads.\n", stderr);
         exit(EXIT_FAILURE);
     }
     threadnum = THREAD_NUMBER <= 0 ? omp_get_max_threads() : THREAD_NUMBER;
     omp_set_num_threads(threadnum);
     fftw_plan_with_nthreads(threadnum);
-    RUNTIME_INFO(printf("Running omp & fftw with %d thread(s)\n\n", threadnum));
+    INFO(printf("\n\nRunning omp & fftw with %d thread(s)\n\n", threadnum));
 }
 
 /**
@@ -136,7 +136,7 @@ void initialize_parameters() {
     pars.file.buf_size = WRITE_OUT_BUFFER_NUMBER;
     pars.file.skip = TIME_STEP_SKIPS;
     pars.file.bins_powspec = POWER_SPECTRUM_BINS;
-    RUNTIME_INFO(printf("Initialized parameters using %zu dimension(s).\n\n",
+    INFO(printf("Initialized parameters using %zu dimension(s).\n\n",
             pars.dim));
 }
 
@@ -242,7 +242,7 @@ void allocate_external() {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    RUNTIME_INFO(puts("Allocated memory for external variables.\n"));
+    INFO(puts("Allocated memory for external variables.\n"));
 }
 
 // make the N fourier spectral gridpoints for the computational domain
@@ -280,7 +280,7 @@ void mk_grid() {
         grid[k] = az + (bz - az) * (k - Nx - Ny) / Nz;
     }
 
-    RUNTIME_INFO(puts("Constructed gridpoints.\n"));
+    INFO(puts("Constructed gridpoints.\n"));
 }
 
 // create the fftw plans, IMPORTANT: create BEFORE initializing arrays, because
@@ -317,7 +317,7 @@ void mk_fftw_plans() {
     #ifdef SHOW_TIMING_INFO
     fftw_time_plan += get_wall_time();
     #endif
-    RUNTIME_INFO(puts("Created fftw plans.\n"));
+    INFO(puts("Created fftw plans.\n"));
 }
 
 // setup initial conditions for the field
@@ -392,7 +392,7 @@ void mk_initial_conditions() {
     #endif
     #endif
 
-    RUNTIME_INFO(puts("Initialized fields on first time slice.\n"));
+    INFO(puts("Initialized fields on first time slice.\n"));
 }
 
 // initial values of the scalar field, make sure its periodic
@@ -641,7 +641,7 @@ void destroy_and_cleanup_fftw() {
     fftw_destroy_plan(p_fw);
     fftw_destroy_plan(p_bw);
     fftw_cleanup_threads();
-    RUNTIME_INFO(puts("Destroyed fftw plans.\n"));
+    INFO(puts("Destroyed fftw plans.\n"));
 }
 
 // free memory of all global variables
@@ -721,7 +721,7 @@ void free_external() {
     fftw_free(tmp.dpsic);
     fftw_free(tmp.f);
     fftw_free(tmp.deltarho);
-    RUNTIME_INFO(puts("Freed external variables.\n"));
+    INFO(puts("Freed external variables.\n"));
 }
 
 void mk_bunch_davies(double *f, const double H, const double homo,
