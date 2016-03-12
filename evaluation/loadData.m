@@ -1,4 +1,4 @@
-name = 'runinflation';
+name = 'bla';
 comp = false;
 karstenpsi = false;
 loadtimes = false;
