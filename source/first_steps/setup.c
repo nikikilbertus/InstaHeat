@@ -333,12 +333,17 @@ void mk_initial_conditions() {
         #endif
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
     //TODO: need correct values at end of inflation here
-    const double phi0 = 1.01985;
-    const double dphi0 = -0.00714754 * MASS / MASS_KARSTEN;
-    const double hubble = 0.5 * (dphi0 * dphi0 + MASS * MASS * phi0 * phi0);
+    /* const double phi0 = -0.008283249078352; */
+    /* const double dphi0 = -5.738421024284034e-05; */
+    /* const double hubble = sqrt(0.5 * (dphi0 * dphi0 + MASS * MASS * phi0 * phi0) / 3.0); */
+    //defrost
     /* double phi0 = 2.339383796213256; */
     /* double dphi0 = -2.736358272992573; */
     /* double hubble = 1.934897490588959; */
+    //pspectre
+    double phi0 = 1.0093430384226378929425913902459;
+    double dphi0 = 0.0;
+    double hubble = 1.934897490588959;
     mk_bunch_davies(field, hubble, phi0, -0.25);
     mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
     field[2 * pars.N] = A_INITIAL;

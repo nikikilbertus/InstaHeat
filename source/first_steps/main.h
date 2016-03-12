@@ -42,11 +42,11 @@ during execution
 #define VERSION_CONTROL         VERSION_CONTROL_HG
 
 //-------------which files to write to disk-------------------------------------
-#define OUTPUT_PHI
+/* #define OUTPUT_PHI */
 /* #define OUTPUT_DPHI */
-/* #define OUTPUT_PSI */
+#define OUTPUT_PSI
 /* #define OUTPUT_DPSI */
-#define OUTPUT_RHO
+/* #define OUTPUT_RHO */
 
 #define OUTPUT_POWER_SPECTRUM
 
@@ -89,7 +89,7 @@ during execution
  *  track stability, therefore we sum up fourier coefficients into bins
  *  depending on the norm of their k vector, this gives the number of bins used
  */
-#define POWER_SPECTRUM_BINS     (80)
+#define POWER_SPECTRUM_BINS     (50)
 
 // how many timeslices to skip in between writing to file (1: write out all)
 #define TIME_STEP_SKIPS         (1)
@@ -139,22 +139,22 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (1.0e-5)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (1.2e3)
+#define FINAL_TIME              (1.0e2)
 #define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-10)
 
 // ----------------parameters used in the potential-----------------------------
 /* #define MASS                    (0.11026) // for 50 e-fold hom inflation */
-#define MASS                    (1.0e-2) // exactly karste
+#define MASS                    (1.0e-2) // data_64
 /* #define MASS                    (0.002000003836216) // compare_2 compare_psi */
-/* #define MASS                    (6.0) // for compare.dat */
+/* #define MASS                    (16.418149637955437) // defrost */
 #define MASS_KARSTEN            (1.0e-2)
 #define COUPLING                (1.0) // coupling in a phi4 potential
 #define LAMBDA                  (4.721e-5) // "cosmological constant"
 /* #define A_INITIAL               (1.05249e3) // compare_2, compare_psi, 5500 */
 /* #define A_INITIAL               (4.09376e3) // compare_2, compare_psi, 6000 */
 /* #define A_INITIAL               (6.1625e2) // compare_2, compare_psi, 5450 */
-#define A_INITIAL               (1.370074629050061e+05) // data_64
+#define A_INITIAL               (1.370074629050061e5) // data_64
 /* #define A_INITIAL               (1.0) */
 // for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
 
