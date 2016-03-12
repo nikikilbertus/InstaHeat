@@ -94,7 +94,7 @@ void run_dopri853() {
         }
         if (fabs(dp.dt_next) <= dp.dt_min)
         {
-            fputs("Step size too small. Still exiting gracefully.\n", stderr);
+            fputs("!!! Stepsize underflow.\n", stderr);
             break;
         }
         dp.dt = dp.dt_next;
