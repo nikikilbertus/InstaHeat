@@ -415,7 +415,14 @@ void allocate_dopri853_values() {
     }
     INFO(puts("Allocated memory for dopri853 variables.\n"));
 }
-
+/**
+ * @file dopri853_stepper.c
+ * @brief Frees memory for the Dormand Prince 853 integrator.
+ *
+ * Free all memory that was allocated for the intermediate evaluations of the
+ * Dormand Prince 853 integration routine as well as temporary memory for the
+ * errors.
+ */
 void free_dopri853_values() {
     free(dpv.k2);
     free(dpv.k3);
