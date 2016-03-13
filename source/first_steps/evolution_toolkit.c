@@ -351,7 +351,6 @@ void mk_psi(double *f) {
                 }
                 else if (2 * i == Nx || i == 0)
                 {
-                    //TODO: what happens if i don't zero for 2*i=Nx ?
                     k_sq += pars.x.k2 * i * i;
                     tmp.fc[id] = 0.0;
                 }
