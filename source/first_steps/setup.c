@@ -762,6 +762,9 @@ void free_external() {
     #ifdef OUTPUT_POWER_SPECTRUM
     free(pow_spec_buf);
     #endif
+    #ifdef ENABLE_FFT_FILTER
+    free(filter);
+    #endif
     fftw_free(tmp.phic);
     fftw_free(tmp.xphic);
     fftw_free(tmp.yphic);
