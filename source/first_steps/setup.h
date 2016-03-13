@@ -13,6 +13,7 @@ void allocate_external();
 void mk_grid();
 void mk_fftw_plans();
 void mk_initial_conditions();
+void mk_filter_mask();
 void read_initial_data();
 double phi_init(const double x, const double y, const double z,
         const double *ph);
