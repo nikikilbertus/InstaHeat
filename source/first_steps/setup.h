@@ -14,7 +14,7 @@ void mk_grid();
 void mk_fftw_plans();
 void mk_initial_conditions();
 void mk_filter_mask();
-extern double filter_window_function(const double x);
+extern double filter_window(const double x);
 void read_initial_data();
 double phi_init(const double x, const double y, const double z,
         const double *ph);

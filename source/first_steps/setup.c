@@ -429,19 +429,19 @@ void mk_filter_mask() {
                 tmp = 1.0;
                 if (i != 0)
                 {
-                    tmp = filter_window_function(2.0 *
+                    tmp = filter_window(2.0 *
                         (i > Nx / 2 ? (int)Nx - (int)i : i) / (double) Nx);
                 }
                 if (pars.dim > 1)
                 {
                     if (j != 0)
                     {
-                        tmp *= filter_window_function(2.0 *
+                        tmp *= filter_window(2.0 *
                             (j > Ny / 2 ? (int)Ny - (int)j : j) / (double) Ny);
                     }
                     if (pars.dim > 2 && k != 0)
                     {
-                        tmp *= filter_window_function(2.0 * k / (double) Nz);
+                        tmp *= filter_window(2.0 * k / (double) Nz);
                     }
                 }
                 filter[osy + k] = tmp / (double) N;
@@ -451,7 +451,7 @@ void mk_filter_mask() {
 }
 
 // the cutoff function for filtering, use either two thirds or fourier smoothing
-inline double filter_window_function(const double x) {
+inline double filter_window(const double x) {
     // fourier smoothing
     return exp(-36.0 * pow(x, 36));
 
