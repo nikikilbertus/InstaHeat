@@ -16,6 +16,7 @@ void allocate_and_initialize_all() {
     mk_grid();
     mk_fftw_plans();
     mk_initial_conditions();
+    mk_filter_mask();
     h5_create_empty_by_path(DATAPATH);
     #ifdef ENABLE_FFT_FILTER
     INFO(puts("Frequency cutoff filtering enabled.\n"));
