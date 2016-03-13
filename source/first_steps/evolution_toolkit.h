@@ -24,7 +24,6 @@ void mk_power_spectrum(const fftw_complex *in);
 void apply_filter_real(double *inout);
 void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
         fftw_complex *psi_io, fftw_complex *dpsi_io);
-extern double filter_window_function(const double x);
 void prepare_and_save_timeslice();
 void mk_means_and_variances();
 extern double mean(const double *f, const size_t N);

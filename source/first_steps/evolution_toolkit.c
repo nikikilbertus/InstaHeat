@@ -557,21 +557,6 @@ void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
     }
 }
 
-// the cutoff function for filtering, use either two thirds or fourier smoothing
-inline double filter_window_function(const double x) {
-    // fourier smoothing
-    return exp(-36.0 * pow(x, 36));
-
-    // two thirds rule
-    // return x < 2.0/3.0 ? x : 0.0;
-
-    // miscellaneous, have been used in testing
-    /* return 1. - tanh( 1. / ( 1. - pow(x, 8) ) - 1. ); */
-    /* return exp(1. + 1. / ( pow(x, 8) - 1. )); */
-    /* return 0.5 * ( 1. + cos( pow(x, 8) * PI ) ); */
-    /* return 0.0; */
-}
-
 // recompute current power spectrum and rho and save current timeslice to buffer
 void prepare_and_save_timeslice() {
     evo_flags.compute_pow_spec = 1;
