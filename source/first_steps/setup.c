@@ -213,9 +213,13 @@ void allocate_external() {
     pow_spec_buf  = calloc(buf_size * bins, sizeof *pow_spec_buf);
     #endif
 
+    const size_t M = pars.x.M * pars.y.M * pars.z.M;
+    #ifdef ENABLE_FFT_FILTER
+    filter = fftw_malloc(M * sizeof *filter);
+    #endif
+
     // default arrays to save coefficients of real to complex transforms
     // see fftw3 documentation and Mxyz for this
-    const size_t M = pars.x.M * pars.y.M * pars.z.M;
     tmp.phic  = fftw_malloc(M * sizeof *tmp.phic);
     tmp.xphic = fftw_malloc(M * sizeof *tmp.xphic);
     tmp.yphic = fftw_malloc(M * sizeof *tmp.yphic);
