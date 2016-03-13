@@ -400,6 +400,51 @@ void mk_initial_conditions() {
     INFO(puts("Initialized fields on first time slice.\n"));
 }
 
+// create mask for the fourier filtering
+void mk_filter_mask() {
+    const size_t N = pars.N;
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
+    const size_t Mx = pars.x.M;
+    const size_t My = pars.y.M;
+    const size_t Mz = pars.z.M;
+
+    double tmp;
+    size_t osx, osy;
+    #pragma omp parallel for private(osx, osy, tmp)
+    for (size_t i = 0; i < Mx; ++i)
+    {
+        osx = i * My * Mz;
+        for (size_t j = 0; j < My; ++j)
+        {
+            osy = osx + j * Mz;
+            for (size_t k = 0; k < Mz; ++k)
+            {
+                tmp = 1.0;
+                if (i != 0)
+                {
+                    tmp = filter_window_function(2.0 *
+                        (i > Nx / 2 ? (int)Nx - (int)i : i) / (double) Nx);
+                }
+                if (pars.dim > 1)
+                {
+                    if (j != 0)
+                    {
+                        tmp *= filter_window_function(2.0 *
+                            (j > Ny / 2 ? (int)Ny - (int)j : j) / (double) Ny);
+                    }
+                    if (pars.dim > 2 && k != 0)
+                    {
+                        tmp *= filter_window_function(2.0 * k / (double) Nz);
+                    }
+                }
+                filter[osy + k] = tmp / (double) N;
+            }
+        }
+    }
+}
+
 // initial values of the scalar field, make sure its periodic
 double phi_init(const double x, const double y, const double z,
         const double *ph) {
