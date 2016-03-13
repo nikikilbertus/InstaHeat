@@ -55,6 +55,7 @@ double *pressure;
 double pressure_mean;
 double *pow_spec;
 double *pow_spec_buf;
+double *filter;
 temporary_t tmp;
 fftw_plan p_fw;
 fftw_plan p_bw;
