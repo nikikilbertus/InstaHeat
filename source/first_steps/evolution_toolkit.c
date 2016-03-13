@@ -506,54 +506,20 @@ void apply_filter_real(double *inout) {
 // filtering in fourier domain for phi, dphi, psi simultaneously
 void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
         fftw_complex *psi_io, fftw_complex *dpsi_io) {
-    const size_t N = pars.N;
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const size_t Mx = pars.x.M;
-    const size_t My = pars.y.M;
-    const size_t Mz = pars.z.M;
-
-    double filter;
-    size_t osx, osy;
-    #pragma omp parallel for private(osx, osy, filter)
-    for (size_t i = 0; i < Mx; ++i)
+    const size_t M = pars.x.M * pars.y.M * pars.z.M;
+    double fil;
+    #pragma omp parallel for private(fil)
+    for (size_t i = 0; i < M; ++i)
     {
-        osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j)
-        {
-            osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k)
-            {
-                filter = 1.0;
-                if (i != 0)
-                {
-                    filter = filter_window_function(2.0 *
-                        (i > Nx / 2 ? (int)Nx - (int)i : i) / (double) Nx);
-                }
-                if (pars.dim > 1)
-                {
-                    if (j != 0)
-                    {
-                        filter *= filter_window_function(2.0 *
-                            (j > Ny / 2 ? (int)Ny - (int)j : j) / (double) Ny);
-                    }
-                    if (pars.dim > 2 && k != 0)
-                    {
-                        filter *= filter_window_function(2.0 * k / (double) Nz);
-                    }
-                }
-                filter /= (double) N;
-                phi_io[osy + k]  *= filter;
-                dphi_io[osy + k] *= filter;
-                #if PSI_METHOD != PSI_ELLIPTIC
-                psi_io[osy + k]  *= filter;
-                    #if PSI_METHOD == PSI_HYPERBOLIC
-                    dpsi_io[osy + k]  *= filter;
-                    #endif
-                #endif
-            }
-        }
+        fil = filter[i];
+        phi_io[i]  *= fil;
+        dphi_io[i] *= fil;
+        #if PSI_METHOD != PSI_ELLIPTIC
+        psi_io[i]  *= fil;
+            #if PSI_METHOD == PSI_HYPERBOLIC
+            dpsi_io[i]  *= fil;
+            #endif
+        #endif
     }
 }
 
