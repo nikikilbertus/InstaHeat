@@ -1,4 +1,4 @@
-function [ps, ps0] = mkPowerSpectrum(f, bins)
+function [ps] = mkPowerSpectrum(f, bins)
 
 N = numel(f);
 fk = fftn(f);
