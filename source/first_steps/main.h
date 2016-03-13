@@ -334,6 +334,11 @@ extern double pressure_mean;
 extern double *pow_spec;
 extern double *pow_spec_buf;
 
+// filter mask for fourier filtering
+#ifdef ENABLE_FFT_FILTER
+extern double *filter;
+#endif
+
 // default arrays with temporary memory for real to complex dfts
 extern temporary_t tmp;
 
