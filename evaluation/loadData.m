@@ -1,7 +1,7 @@
-name = 'bla';
-comp = false;
-karstenpsi = false;
-loadtimes = false;
+name = 'testfil';
+comp = true;
+karstenpsi = true;
+loadtimes = true;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
