@@ -1,7 +1,7 @@
 TARGET = first_steps
 LIBS = -L /usr/local/lib -lfftw3_omp -lfftw3 -lm -fopenmp
 CC = h5cc
-CFLAGS = -std=c99 -fopenmp -O3 -g -Wall -I /usr/local/include
+CFLAGS = -std=c99 -fopenmp -O2 -g -Wall -Wextra -march=native -I /usr/local/include
 export HDF5_CC = gcc-5
 export HDF5_CLINKER = gcc-5
 
