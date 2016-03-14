@@ -15,7 +15,8 @@
  * @note This is just a huge list of constant double values. Do not change
  * anything here.
  */
-typedef struct {
+struct dopri853_constants
+{
     const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,
     b1,b6,b7,b8,b9,b10,b11,b12,
     bhh1,bhh2,bhh3,
@@ -38,7 +39,7 @@ typedef struct {
     d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,
     d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,
     d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;
-}dopri853_constants_t;
+};
 
 /**
  * @brief Holds intermediate evaluations of the right hand side and errors for
@@ -49,10 +50,11 @@ typedef struct {
  * mk_rhs(const double t, double *f, double *result) in evolution_toolkit.c as
  * well as memory blocks for the error estimates (5th and 3rd order).
  */
-typedef struct {
+struct dopri853_values
+{
         double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;
         double *yerr, *yerr2;
-}dopri853_values_t;
+};
 
 /**
  * @brief Holds parameters for the Dormand Prince integrator.
@@ -60,7 +62,8 @@ typedef struct {
  * Most of these parameters should be self explanatory by their names. For more
  * information see <a href="http://numerical.recipes">Numerical Recipes</a>.
  */
-typedef struct {
+struct dopri853_control
+{
     double t;
     double t_old;
     double ti;
@@ -80,7 +83,7 @@ typedef struct {
     double err_old;
     int reject;
     double eps;
-}dopri853_control_t;
+};
 
 extern dopri853_constants_t dpc; //< Dormand Prince Butcher tableaux constants
 extern dopri853_values_t dpv; //< Intermediate fields and errors
