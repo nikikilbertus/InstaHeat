@@ -9,7 +9,8 @@
 #include "filehandling.h"
 #include "main.h"
 
-void allocate_and_initialize_all() {
+void allocate_and_initialize_all()
+{
     initialize_threading();
     initialize_parameters();
     allocate_external();
@@ -33,7 +34,8 @@ void allocate_and_initialize_all() {
     #endif
 }
 
-void initialize_threading() {
+void initialize_threading()
+{
     int threadnum, threadinit;
     threadinit = fftw_init_threads();
     if (threadinit == 0)
@@ -52,7 +54,8 @@ void initialize_threading() {
  *  in main.h; using the struct gives more flexibility than using the defines
  *  throughout the code
  */
-void initialize_parameters() {
+void initialize_parameters()
+{
     pars.x.N  = GRIDPOINTS_X;
     pars.x.a  = SPATIAL_LOWER_BOUND_X;
     pars.x.b  = SPATIAL_UPPER_BOUND_X;
@@ -142,7 +145,8 @@ void initialize_parameters() {
 }
 
 // allocate memory for all external variables
-void allocate_external() {
+void allocate_external()
+{
     const size_t Nx   = pars.x.N;
     const size_t Ny   = pars.y.N;
     const size_t Nz   = pars.z.N;
@@ -251,7 +255,8 @@ void allocate_external() {
 }
 
 // make the N fourier spectral gridpoints for the computational domain
-void mk_grid() {
+void mk_grid()
+{
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
     const size_t Nz = pars.z.N;
@@ -290,7 +295,8 @@ void mk_grid() {
 
 // create the fftw plans, IMPORTANT: create BEFORE initializing arrays, because
 // setting up the plans destroys the arrays!
-void mk_fftw_plans() {
+void mk_fftw_plans()
+{
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
     const size_t Nz = pars.z.N;
@@ -326,7 +332,8 @@ void mk_fftw_plans() {
 }
 
 // setup initial conditions for the field
-void mk_initial_conditions() {
+void mk_initial_conditions()
+{
     #if INITIAL_CONDITIONS == IC_FROM_H5_FILE
     h5_read_timeslice();
     #elif INITIAL_CONDITIONS == IC_FROM_DAT_FILE
@@ -406,7 +413,8 @@ void mk_initial_conditions() {
 }
 
 // create mask for the fourier filtering
-void mk_filter_mask() {
+void mk_filter_mask()
+{
     const size_t N = pars.N;
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
@@ -451,7 +459,8 @@ void mk_filter_mask() {
 }
 
 // the cutoff function for filtering, use either two thirds or fourier smoothing
-inline double filter_window(const double x) {
+inline double filter_window(const double x)
+{
     // fourier smoothing
     return exp(-36.0 * pow(x, 36));
 
@@ -467,7 +476,8 @@ inline double filter_window(const double x) {
 
 // initial values of the scalar field, make sure its periodic
 double phi_init(const double x, const double y, const double z,
-        const double *ph) {
+        const double *ph)
+{
     // localized for higgs metastability potential
     /* double phi0 = 0.04; */
     /* double lambda = 20.0; */
@@ -588,7 +598,8 @@ double phi_init(const double x, const double y, const double z,
 
 // initial values of the time deriv. of the scalar field, make sure its periodic
 double dphi_init(const double x, const double y, const double z,
-        const double *ph) {
+        const double *ph)
+{
     /* return 0.0; */
 
     /* double mean = -1.447595527218249e-8; */
@@ -641,7 +652,8 @@ double dphi_init(const double x, const double y, const double z,
     /* return -0.089318193; // somewhere at end of 50 e-fold inflation */
 }
 
-double wrapped_gaussian(const double x, const double y, const double z) {
+double wrapped_gaussian(const double x, const double y, const double z)
+{
     const double s = 0.5;
     double res = 0.0;
     size_t max;
@@ -686,7 +698,8 @@ double wrapped_gaussian(const double x, const double y, const double z) {
     return res / TWOPI;
 }
 
-void mk_initial_psi() {
+void mk_initial_psi()
+{
     const size_t N = pars.N;
     const size_t N2p = 2 * N + 2;
     const size_t Nall = pars.Nall;
@@ -702,14 +715,16 @@ void mk_initial_psi() {
     mk_psi(field);
 }
 
-void free_and_destroy_all() {
+void free_and_destroy_all()
+{
     h5_close(pars.file.id);
     destroy_and_cleanup_fftw();
     free_external();
 }
 
 // destroy the fftw plans and call cleanup for internal fftw3 cleanup
-void destroy_and_cleanup_fftw() {
+void destroy_and_cleanup_fftw()
+{
     fftw_destroy_plan(p_fw);
     fftw_destroy_plan(p_bw);
     fftw_cleanup_threads();
@@ -717,7 +732,8 @@ void destroy_and_cleanup_fftw() {
 }
 
 // free memory of all global variables
-void free_external() {
+void free_external()
+{
     free(grid);
     fftw_free(field);
     fftw_free(field_new);
@@ -800,7 +816,8 @@ void free_external() {
 }
 
 void mk_bunch_davies(double *f, const double H, const double homo,
-        const double gamma) {
+        const double gamma)
+{
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
     const size_t Nz = pars.z.N;
@@ -899,7 +916,8 @@ void mk_bunch_davies(double *f, const double H, const double homo,
     fftw_execute_dft_c2r(p_bw, tmp.phic, f);
 }
 
-inline complex box_muller() {
+inline complex box_muller()
+{
     const double u1 = (double)rand() / (double)RAND_MAX;
     const double u2 = (double)rand() / (double)RAND_MAX;
     return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * 1i);
@@ -907,7 +925,8 @@ inline complex box_muller() {
 
 // -------------------------printing function-----------------------------------
 // for debugging mostly
-void print_vector(const double *vector, const size_t N) {
+void print_vector(const double *vector, const size_t N)
+{
     for (size_t i = 0; i < N; i++)
     {
         printf("%f\n", vector[i]);
