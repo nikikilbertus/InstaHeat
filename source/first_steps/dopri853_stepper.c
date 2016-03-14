@@ -39,7 +39,8 @@ dopri853_values_t dpv;
  * @note Changes in here are not recommended. All parameters that can/should be
  * chosen by the user are determined somewhere else and only copied here.
  */
-void initialize_dopri853() {
+void initialize_dopri853()
+{
     dp.t = pars.t.ti;
     dp.t_old = pars.t.ti;
     dp.ti = pars.t.ti;
@@ -74,7 +75,8 @@ void initialize_dopri853() {
  * as specified and frees the memory allocated earlier. All steps are reported
  * via the standard output.
  */
-void run_dopri853() {
+void run_dopri853()
+{
     initialize_dopri853();
     allocate_dopri853_values();
     INFO(puts("Starting dopri853 integration with:"));
@@ -186,7 +188,8 @@ void run_dopri853() {
  * If the stepsize is decreased up to the minimal specified stepsize without
  * succeeding, a error message is reported and the exit code 1 is returned.
  */
-int perform_step(const double dt_try) {
+int perform_step(const double dt_try)
+{
     const size_t Ntot = pars.Ntot;
     double dt = dt_try;
     for ( ; ; )
@@ -243,7 +246,8 @@ int perform_step(const double dt_try) {
  * for a step, which is evaluated by the errors it produced. It might get
  * discarded and recomputed with a different dt.
  */
-void try_step(const double dt) {
+void try_step(const double dt)
+{
     const size_t Ntot = pars.Ntot;
     const double t = dp.t;
     size_t i;
@@ -393,7 +397,8 @@ void try_step(const double dt) {
  * Computes the collective error of <b>all</b> the fields in the integration
  * routine normalized such that the threshold value is 1.
  */
-double error(const double dt) {
+double error(const double dt)
+{
     const size_t Ntot = pars.Ntot;
     double err = 0.0, err2 = 0.0, sk, deno;
 
@@ -432,7 +437,8 @@ double error(const double dt) {
  * Various rules enter the scaling of the stepsize and various counters and
  * flags are set.
  */
-int success(const double err, double *dt) {
+int success(const double err, double *dt)
+{
     const double beta  = dp.beta;
     const double alpha = dp.alpha;
     const double safe  = dp.safe;
@@ -493,7 +499,8 @@ int success(const double err, double *dt) {
  * Allocates memory for the intermediate evaluations of the Dormand Prince
  * integration routine as well as temporary memory for the erros.
  */
-void allocate_dopri853_values() {
+void allocate_dopri853_values()
+{
     const size_t Ntot = pars.Ntot;
     const size_t Nall = pars.Nall;
 
@@ -527,7 +534,8 @@ void allocate_dopri853_values() {
  * Dormand Prince integration routine as well as temporary memory for the
  * errors.
  */
-void free_dopri853_values() {
+void free_dopri853_values()
+{
     free(dpv.k2);
     free(dpv.k3);
     free(dpv.k4);
