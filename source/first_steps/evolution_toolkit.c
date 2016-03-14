@@ -457,7 +457,7 @@ void prepare_and_save_timeslice()
 void center(double *f, const size_t N)
 {
     double avg = mean(f, N);
-    #pragma omp parallel for reduction(+: mean)
+    #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
         f[i] -= avg;
     }

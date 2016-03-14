@@ -71,7 +71,7 @@ during execution
 #define INITIAL_CONDITIONS          IC_FROM_DAT_FILE
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/bla2.h5")
+#define DATAPATH                ("../../../data/bla3.h5")
 /* #define DATAPATH                ("bla.h5") */
 #define INITIAL_DATAPATH        ("../../../data/karsten/data_64psi.dat")
 
