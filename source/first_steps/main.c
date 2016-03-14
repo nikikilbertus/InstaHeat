@@ -126,8 +126,7 @@ int main(int argc, const char * argv[])
 double get_wall_time()
 {
     struct timeval time;
-    if (gettimeofday(&time, NULL))
-    {
+    if (gettimeofday(&time, NULL)) {
         INFO(puts("Could not get wall time, reurning 0.\n"));
         return 0.0;
     }
