@@ -174,9 +174,10 @@ during execution
 // the timestep is limited from above by this fraction of the hubble time 1/H
 #define MAX_DT_HUBBLE_FRACTION  (1.0e-2)
 
-// ------------------------typedefs---------------------------------------------
+// ------------------------struct definitions-----------------------------------
 // representing one spatial dimension of a multi dimensional grid
-typedef struct {
+struct grid_dimension
+{
     size_t N; // number of gridpoints
     // depending on dimension, different upper bounds in for loops, see
     // initialization in setup.c for more information
@@ -187,33 +188,36 @@ typedef struct {
     double k2; // k2 = k*k = -4 pi^2 / L^2
     size_t stride; // strides for output
     size_t outN; // number of output points in this dimension
-}grid_dimension_t;
+};
 
 // encapsulate timing related parameters
-typedef struct {
+struct timing
+{
     size_t Nt; // number of timesteps (only relevant for fixed step size)
     double dt; // size of (initial) timestep delta t
     double ti; // initial time
     double tf; // final time
     double t;  // current time
-}timing_t;
+};
 
 // bundle data set identifiers for hdf5 output
-typedef struct {
+struct datasets
+{
     hsize_t field;
     hsize_t mean;
     hsize_t var;
     hsize_t dfield;
     hsize_t dmean;
     hsize_t dvar;
-}datasets_t;
+};
 
 //file handling parameters
-typedef struct {
+struct file_parameters
+{
     hsize_t id;             // h5 file id of the output file
-    datasets_t dset_phi;    // h5 data set ids for the scalar field phi
-    datasets_t dset_psi;    // h5 data set ids for the perturbation psi
-    datasets_t dset_rho;    // h5 data set ids for the energy density rho
+    struct datasets dset_phi;    // h5 data set ids for the scalar field phi
+    struct datasets dset_psi;    // h5 data set ids for the perturbation psi
+    struct datasets dset_rho;    // h5 data set ids for the energy density rho
     hsize_t dset_powspec;   // h5 data set id of the power spectrum
     hsize_t dset_time;      // h5 data set id of the time
     hsize_t dset_a;         // h5 data set id of the scaling parameter a
@@ -221,7 +225,7 @@ typedef struct {
     size_t buf_size;        // size of the buffer
     size_t skip;            // how many timesteps to skip in between write out
     size_t bins_powspec;    // how many bins are used for the power spectrum
-}file_parameters_t;
+};
 
 /**
  *  simulation parameters
@@ -236,21 +240,23 @@ typedef struct {
  *  parabolic: 3 * N + 1 (oder: phi, dphi, psi, a)
  *  hyperbolic: 4 * N + 1 (oder: phi, dphi, psi, dpsi, a)
  */
-typedef struct {
-    grid_dimension_t x;
-    grid_dimension_t y;
-    grid_dimension_t z;
+struct parameters
+{
+    struct grid_dimension x;
+    struct grid_dimension y;
+    struct grid_dimension z;
     size_t N;
     size_t Ntot;
     size_t Nall;
     size_t outN; // total number of spatial gridpoints for output (with strides)
     size_t dim;
-    timing_t t;
-    file_parameters_t file;
-}parameters_t;
+    struct timing t;
+    struct file_parameters file;
+};
 
 // temporal veriables used for computations of gradients, ffts and the like
-typedef struct {
+struct temporary
+{
     double  *xphi;
     double  *yphi;
     double  *zphi;
@@ -266,7 +272,7 @@ typedef struct {
     complex *fc;
     complex *psic;
     complex *dpsic;
-}temporary_t;
+};
 
 // --------------------------global variables-----------------------------------
 // we are using rather many global variables; that has the advantage of central
@@ -274,7 +280,7 @@ typedef struct {
 // it also saves a lot of typing
 
 // simulation parameters
-extern parameters_t pars;
+extern struct parameters pars;
 
 // spatial gridpoints
 extern double *grid;
@@ -338,7 +344,7 @@ extern double *pow_spec_buf;
 extern double *filter;
 
 // default arrays with temporary memory for real to complex dfts
-extern temporary_t tmp;
+extern struct temporary tmp;
 
 // fftw plans
 extern fftw_plan p_fw;

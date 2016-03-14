@@ -276,7 +276,7 @@ void h5_write_all_buffers(const hsize_t Nt)
     hsize_t N = pars.outN;
     hsize_t bins = pars.file.bins_powspec;
     hsize_t rank;
-    file_parameters_t f = pars.file;
+    struct file_parameters f = pars.file;
     // TODO[performance] maybe use static variable to count dataset size instead
     // of reading it from the file each time
     // static hsize_t counter;

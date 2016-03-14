@@ -17,7 +17,7 @@
 
 // -----------------------------global variables--------------------------------
 // explanation in main.h
-parameters_t pars;
+struct parameters pars;
 double *grid;
 double *time_buf;
 double *field;
@@ -56,7 +56,7 @@ double pressure_mean;
 double *pow_spec;
 double *pow_spec_buf;
 double *filter;
-temporary_t tmp;
+struct temporary tmp;
 fftw_plan p_fw;
 fftw_plan p_bw;
 double fftw_time_exe  = 0.0;
