@@ -8,7 +8,8 @@
 #include "evolution_toolkit.h"
 #include "filehandling.h"
 
-void run_rk4() {
+void run_rk4()
+{
     const size_t Ntot = pars.Ntot;
     const size_t Nall = pars.Nall;
     const size_t Nt = pars.t.Nt;
