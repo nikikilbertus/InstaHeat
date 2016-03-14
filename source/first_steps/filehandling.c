@@ -7,7 +7,8 @@
 #include "filehandling.h"
 #include "main.h"
 
-void h5_create_empty_by_path(const char *name) {
+void h5_create_empty_by_path(const char *name)
+{
     const hsize_t N = pars.outN;
     const hsize_t Nt = pars.file.buf_size;
     const hsize_t bins = pars.file.bins_powspec;
@@ -216,7 +217,8 @@ void h5_create_empty_by_path(const char *name) {
 
 void h5_create_dset(const hsize_t rank, const hsize_t *dim,
         const hsize_t *max, const hsize_t *chunk, hsize_t *dset,
-        const char *name) {
+        const char *name)
+{
     // create dataspace
     hid_t dspace = H5Screate_simple(rank, dim, max);
 
@@ -235,7 +237,8 @@ void h5_create_dset(const hsize_t rank, const hsize_t *dim,
     H5Sclose(dspace);
 }
 
-void h5_write_parameter(const char *name, const double *val, const size_t N) {
+void h5_write_parameter(const char *name, const double *val, const size_t N)
+{
     hsize_t rank = 1;
     hsize_t dim[1] = {N};
     hsize_t max[1] = {N};
@@ -252,14 +255,16 @@ void h5_write_parameter(const char *name, const double *val, const size_t N) {
     H5Sclose(dspace_par);
 }
 
-void h5_get_extent(hsize_t *max, hsize_t *cur) {
+void h5_get_extent(hsize_t *max, hsize_t *cur)
+{
     hid_t dspace = H5Dget_space(pars.file.dset_time);
     H5Sget_simple_extent_dims(dspace, cur, max);
 }
 
 void h5_write_buffer(const hsize_t rank, const hsize_t *start,
         const hsize_t *add, const hsize_t *new_dim, const hsize_t dset,
-        const double *buf) {
+        const double *buf)
+{
     hid_t mem_space = H5Screate_simple(rank, add, NULL);
     hid_t dspace = H5Dget_space(dset);
     H5Dset_extent(dset, new_dim);
@@ -271,7 +276,8 @@ void h5_write_buffer(const hsize_t rank, const hsize_t *start,
     H5Sclose(dspace);
 }
 
-void h5_write_all_buffers(const hsize_t Nt) {
+void h5_write_all_buffers(const hsize_t Nt)
+{
     hsize_t N = pars.outN;
     hsize_t bins = pars.file.bins_powspec;
     hsize_t rank;
@@ -359,7 +365,8 @@ void h5_write_all_buffers(const hsize_t Nt) {
     INFO(printf("Dumping to disk at t = %f\n", pars.t.t));
 }
 
-void h5_close() {
+void h5_close()
+{
     hid_t file = pars.file.id;
     if (pars.file.index != 0)
     {
@@ -375,7 +382,8 @@ void h5_close() {
     H5Fclose(file);
 }
 
-void save() {
+void save()
+{
     hsize_t index = pars.file.index;
     hsize_t Nt    = pars.file.buf_size;
     hsize_t N     = pars.N;
@@ -511,7 +519,8 @@ void save() {
     #endif
 }
 
-void h5_read_timeslice() {
+void h5_read_timeslice()
+{
     hid_t file, dset, dspace;
     size_t N = pars.N;
     size_t N2p = 2 * N + 2;
@@ -590,7 +599,8 @@ void h5_read_timeslice() {
 }
 
 void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
-        double *out) {
+        double *out)
+{
     size_t N = pars.N;
     hid_t dset = H5Dopen(file, name, H5P_DEFAULT);
     hid_t dspace = H5Dget_space(dset);
@@ -617,7 +627,8 @@ void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
     H5Sclose(mspace);
 }
 
-void read_initial_data() {
+void read_initial_data()
+{
     size_t N = pars.N;
 
     FILE *file = fopen(INITIAL_DATAPATH, "r");
