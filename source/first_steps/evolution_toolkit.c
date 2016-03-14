@@ -31,8 +31,7 @@ void mk_rhs(const double t, double *f, double *result)
 
     // copy dphi in all cases
     #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i)
-    {
+    for (size_t i = 0; i < N; ++i) {
         result[i] = f[N + i];
     }
 
@@ -40,8 +39,7 @@ void mk_rhs(const double t, double *f, double *result)
     // hyperbolic
     #if PSI_METHOD != PSI_ELLIPTIC
     #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i)
-    {
+    for (size_t i = 0; i < N; ++i) {
         #if PSI_METHOD == PSI_PARABOLIC
         result[N2p + i] = -hubble * f[N2p + i] - 0.5 * (rho[i] - rho_mean) / h3
             + tmp.f[i] / (h3 * a2);
@@ -58,8 +56,7 @@ void mk_rhs(const double t, double *f, double *result)
     // equation for ddphi in all cases (psi & dpsi have to be provided first)
     double df, p, dp;
     #pragma omp parallel for private(df, p, dp)
-    for (size_t i = 0; i < N; ++i)
-    {
+    for (size_t i = 0; i < N; ++i) {
         df = f[N + i];
         p = f[N2p + i];
         #if PSI_METHOD != PSI_PARABOLIC
@@ -101,66 +98,54 @@ void mk_gradient_squared_and_laplacian(double *in)
     fftw_time_exe += get_wall_time();
     #endif
 
-    if (evo_flags.compute_pow_spec == 1)
-    {
+    if (evo_flags.compute_pow_spec == 1) {
         mk_power_spectrum(tmp.phic);
     }
 
     double k_sq;
     size_t osx, osy, id;
     #pragma omp parallel for private(osx, osy, id, k_sq)
-    for (size_t i = 0; i < Mx; ++i)
-    {
+    for (size_t i = 0; i < Mx; ++i) {
         osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j)
-        {
+        for (size_t j = 0; j < My; ++j) {
             osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k)
-            {
+            for (size_t k = 0; k < Mz; ++k) {
                 id = osy + k;
                 // for laplacian
                 k_sq = pars.z.k2 * k * k;
                 // x derivative
-                if (i > Nx / 2)
-                {
+                if (i > Nx / 2) {
                     tmp.xphic[id] = tmp.phic[id] * pars.x.k
                         * ((int)i - (int)Nx) / N;
                     k_sq += pars.x.k2 * (Nx - i) * (Nx - i);
                 }
-                else if (2 * i == Nx)
-                {
+                else if (2 * i == Nx) {
                     tmp.xphic[id] = 0.0;
                     k_sq += pars.x.k2 * i * i;
                 }
-                else
-                {
+                else {
                     tmp.xphic[id] = tmp.phic[id] * pars.x.k * i / N;
                     k_sq += pars.x.k2 * i * i;
                 }
                 // y derivative
-                if (j > Ny / 2)
-                {
+                if (j > Ny / 2) {
                     tmp.yphic[id] = tmp.phic[id] * pars.y.k
                         * ((int)j - (int)Ny) / N;
                     k_sq += pars.y.k2 * (Ny - j) * (Ny - j);
                 }
-                else if (2 * j == Ny)
-                {
+                else if (2 * j == Ny) {
                     tmp.yphic[id] = 0.0;
                     k_sq += pars.y.k2 * j * j;
                 }
-                else
-                {
+                else {
                     tmp.yphic[id] = tmp.phic[id] * pars.y.k * j / N;
                     k_sq += pars.y.k2 * j * j;
                 }
                 // z derivative
-                if (2 * k == Nz)
-                {
+                if (2 * k == Nz) {
                     tmp.zphic[id] = 0.0;
                 }
-                else
-                {
+                else {
                     tmp.zphic[id] = tmp.phic[id] * pars.z.k * k / N;
                 }
                 // laplacian
@@ -176,11 +161,9 @@ void mk_gradient_squared_and_laplacian(double *in)
     fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_c2r(p_bw, tmp.xphic, tmp.xphi);
-    if (pars.dim > 1)
-    {
+    if (pars.dim > 1) {
         fftw_execute_dft_c2r(p_bw, tmp.yphic, tmp.yphi);
-        if (pars.dim > 2)
-        {
+        if (pars.dim > 2) {
             fftw_execute_dft_c2r(p_bw, tmp.zphic, tmp.zphi);
         }
     }
@@ -194,14 +177,11 @@ void mk_gradient_squared_and_laplacian(double *in)
 
     // gradient squared
     #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i)
-    {
+    for (size_t i = 0; i < N; ++i) {
         tmp.grad[i] = tmp.xphi[i] * tmp.xphi[i];
-        if (pars.dim > 1)
-        {
+        if (pars.dim > 1) {
             tmp.grad[i] += tmp.yphi[i] * tmp.yphi[i];
-            if (pars.dim > 2)
-            {
+            if (pars.dim > 2) {
                 tmp.grad[i] += tmp.zphi[i] * tmp.zphi[i];
             }
         }
@@ -224,8 +204,7 @@ void mk_rho(const double *f)
     double df, p, t1, t2;
     #pragma omp parallel for private(df, p, t1, t2) \
                                 reduction(+: rho_mean, pressure_mean)
-    for (size_t i = 0; i < N; ++i)
-    {
+    for (size_t i = 0; i < N; ++i) {
         df = f[N + i];
         #if PSI_METHOD != PSI_ELLIPTIC
         p = f[N2p + i];
@@ -319,8 +298,7 @@ void mk_psi(double *f)
     #endif
 
     #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i)
-    {
+    for (size_t i = 0; i < N; ++i) {
         tmp.f[i] = f[N + i] * tmp.xphi[i];
         tmp.deltarho[i] = rho[i] - rho_mean;
     }
@@ -340,45 +318,35 @@ void mk_psi(double *f)
     double k_sq;
     size_t osx, osy, id;
     #pragma omp parallel for private(k_sq, osx, osy, id)
-    for (size_t i = 0; i < Mx; ++i)
-    {
+    for (size_t i = 0; i < Mx; ++i) {
         osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j)
-        {
+        for (size_t j = 0; j < My; ++j) {
             osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k)
-            {
+            for (size_t k = 0; k < Mz; ++k) {
                 id = osy + k;
                 k_sq = pars.z.k2 * k * k;
-                if (i > Nx / 2)
-                {
+                if (i > Nx / 2) {
                     k_sq += pars.x.k2 * (Nx - i) * (Nx - i);
                     tmp.fc[id] /= pars.x.k * ((int)i - (int)Nx);
                 }
-                else if (2 * i == Nx || i == 0)
-                {
+                else if (2 * i == Nx || i == 0) {
                     k_sq += pars.x.k2 * i * i;
                     tmp.fc[id] = 0.0;
                 }
-                else
-                {
+                else {
                     k_sq += pars.x.k2 * i * i;
                     tmp.fc[id] /= pars.x.k * i;
                 }
-                if (j > Ny / 2)
-                {
+                if (j > Ny / 2) {
                     k_sq += pars.y.k2 * (Ny - j) * (Ny - j);
                 }
-                else
-                {
+                else {
                     k_sq += pars.y.k2 * j * j;
                 }
-                if (-k_sq < 1.0e-14 || fabs(k_sq + dphiextra) < 1.0e-14)
-                {
+                if (-k_sq < 1.0e-14 || fabs(k_sq + dphiextra) < 1.0e-14) {
                     tmp.psic[id] = 0.0;
                 }
-                else
-                {
+                else {
                     tmp.psic[id] = 0.5 * a2 *
                         (tmp.deltarhoc[id] + 3.0 * hubble * tmp.fc[id]) /
                         ((k_sq + dphiextra) * N);
@@ -417,48 +385,37 @@ void mk_power_spectrum(const fftw_complex *in)
     double pow2_tmp = 0.0;
 
     #pragma omp parallel for
-    for (size_t i = 0; i < bins; ++i)
-    {
+    for (size_t i = 0; i < bins; ++i) {
         pow_spec[i] = 0.0;
     }
 
     size_t osx, osy, idx;
     //TODO[performance]: parallelize?
-    for (size_t i = 0; i < Mx; ++i)
-    {
+    for (size_t i = 0; i < Mx; ++i) {
         osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j)
-        {
+        for (size_t j = 0; j < My; ++j) {
             osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k)
-            {
-                if (k == 0 || 2 * k == Nz)
-                {
+            for (size_t k = 0; k < Mz; ++k) {
+                if (k == 0 || 2 * k == Nz) {
                     pow2_tmp = in[osy + k] * conj(in[osy + k]);
                 }
-                else
-                {
+                else {
                     pow2_tmp = 2.0 * in[osy + k] * conj(in[osy + k]);
                 }
                 //TODO[performance]: check whether it is faster without this if
-                if (pow2_tmp > 0.0)
-                {
+                if (pow2_tmp > 0.0) {
                     k2_tmp = pars.z.k2 * k * k;
-                    if (i > Nx / 2)
-                    {
+                    if (i > Nx / 2) {
                         k2_tmp += pars.x.k2 * (Nx - i) * (Nx - i);
                     }
-                    else
-                    {
+                    else {
                         k2_tmp += pars.x.k2 * i * i;
                     }
 
-                    if (j > Ny / 2)
-                    {
+                    if (j > Ny / 2) {
                         k2_tmp += pars.y.k2 * (Ny - j) * (Ny - j);
                     }
-                    else
-                    {
+                    else {
                         k2_tmp += pars.y.k2 * j * j;
                     }
                     idx = (int)trunc(bins * sqrt(k2_tmp / k2_max) - 1.0e-14);
@@ -518,8 +475,7 @@ void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
     const size_t M = pars.x.M * pars.y.M * pars.z.M;
     double fil;
     #pragma omp parallel for private(fil)
-    for (size_t i = 0; i < M; ++i)
-    {
+    for (size_t i = 0; i < M; ++i) {
         fil = filter[i];
         phi_io[i]  *= fil;
         dphi_io[i] *= fil;
@@ -598,8 +554,7 @@ inline double mean(const double *f, const size_t N)
 {
     double mean = 0.0;
     #pragma omp parallel for reduction(+: mean)
-    for (size_t i = 0; i < N; ++i)
-    {
+    for (size_t i = 0; i < N; ++i) {
         mean += f[i];
     }
     return mean / (double)N;
@@ -611,8 +566,7 @@ inline double variance(const double mean, const double *f, const size_t N)
     double sum2 = 0.0;
     double tmp;
     #pragma omp parallel for private(tmp) reduction(+: sum1, sum2)
-    for (size_t i = 0; i < N; ++i)
-    {
+    for (size_t i = 0; i < N; ++i) {
         tmp = f[i] - mean;
         sum1 += tmp * tmp;
         sum2 += tmp;
@@ -623,10 +577,8 @@ inline double variance(const double mean, const double *f, const size_t N)
 void contains_nan(const double *f, const size_t N)
 {
     size_t count = 0;
-    for (size_t i = 0; i < N; ++i)
-    {
-        if (isnan(f[i]))
-        {
+    for (size_t i = 0; i < N; ++i) {
+        if (isnan(f[i])) {
             ++count;
         }
     }
@@ -636,10 +588,8 @@ void contains_nan(const double *f, const size_t N)
 void contains_nanc(const complex *f, const size_t N)
 {
     size_t count = 0;
-    for (size_t i = 0; i < N; ++i)
-    {
-        if (isnan(creal(f[i])) || isnan(cimag(f[i])))
-        {
+    for (size_t i = 0; i < N; ++i) {
+        if (isnan(creal(f[i])) || isnan(cimag(f[i]))) {
             ++count;
         }
     }
