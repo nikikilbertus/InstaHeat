@@ -14,9 +14,10 @@ void allocate_and_initialize_all()
     initialize_threading();
     initialize_parameters();
     allocate_external();
-    mk_grid();
+    mk_x_grid();
     mk_fftw_plans();
     mk_initial_conditions();
+    mk_k_grid()
     mk_filter_mask();
     h5_create_empty_by_path(DATAPATH);
     #ifdef ENABLE_FFT_FILTER
@@ -249,7 +250,7 @@ void allocate_external()
 }
 
 // make the N fourier spectral gridpoints for the computational domain
-void mk_grid()
+void mk_x_grid()
 {
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
@@ -395,6 +396,41 @@ void mk_initial_conditions()
     #endif
 
     INFO(puts("Initialized fields on first time slice.\n"));
+}
+
+// create grid with k squared values
+void mk_k_grid()
+{
+    const size_t N = pars.N;
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Mx = pars.x.M;
+    const size_t My = pars.y.M;
+    const size_t Mz = pars.z.M;
+
+    double k2;
+    size_t osx, osy, idx;
+    #pragma omp parallel for private(osx, osy, k2)
+    for (size_t i = 0; i < Mx; ++i) {
+        osx = i * My * Mz;
+        for (size_t j = 0; j < My; ++j) {
+            osy = osx + j * Mz;
+            for (size_t k = 0; k < Mz; ++k) {
+                k2 = pars.z.k2 * k * k;
+                if (i > Nx / 2) {
+                    k2 += pars.x.k2 * (Nx - i) * (Nx - i);
+                } else {
+                    k2 += pars.x.k2 * i * i;
+                }
+                if (j > Ny / 2) {
+                    k2 += pars.y.k2 * (Ny - j) * (Ny - j);
+                } else {
+                    k2 += pars.y.k2 * j * j;
+                }
+                ksq[osy + k] = k2;
+            }
+        }
+    }
 }
 
 // create mask for the fourier filtering
