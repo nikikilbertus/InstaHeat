@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "dopri853_stepper.h"
 
-const struct dopri853_constants dpc =
+struct dopri853_constants dpc =
 {
 .c2    = 0.526001519587677318785587544488e-01,
 .c3    = 0.789002279381515978178381316732e-01,

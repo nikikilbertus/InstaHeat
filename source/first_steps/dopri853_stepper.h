@@ -85,9 +85,9 @@ struct dopri853_control
     double eps;
 };
 
-extern dopri853_constants_t dpc; //< Dormand Prince Butcher tableaux constants
-extern dopri853_values_t dpv; //< Intermediate fields and errors
-extern dopri853_control_t dp; //< Dormand Prince parameters
+extern struct dopri853_constants dpc; //< Dormand Prince Butcher tableaux constants
+extern struct dopri853_values dpv; //< Intermediate fields and errors
+extern struct dopri853_control dp; //< Dormand Prince parameters
 
 void initialize_dopri853();
 void run_dopri853();
