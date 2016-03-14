@@ -460,42 +460,30 @@ double phi_init(const double x, const double y, const double z,
     /* double phi0 = 0.04; */
     /* double lambda = 20.0; */
     /* if (pars.dim == 1) */
-    /* { */
     /*     return phi0 * 0.5 * (1.0 + cos(x)) * exp(-lambda * x * x); */
-    /* } */
     /* else if (pars.dim == 2) */
-    /* { */
     /*     return phi0 * 0.25 * (1.0 + cos(x)) * (1.0 + cos(y)) * */
     /*         exp(-lambda * (x * x + y * y)); */
-    /* } */
     /* else */
-    /* { */
     /*     return phi0 * 0.125 * (1.0 + cos(x)) * (1.0 + cos(y)) * (1.0 + cos(z)) * */
     /*        exp(-lambda * (x * x + y * y + z * z)); */
-    /* } */
 
     // some simple waves for notch or step potential simulations
     /* double frac = 0.4; // vary the ratio between \phi_0 and \delta \phi */
     /* double phi0 = 0.73 * frac; // only vary if you know exactly why */
     /* double deltaphi = phi0 / frac; */
     /* if (pars.dim == 1) */
-    /* { */
     /*     return phi0 + deltaphi * */
     /*                 (cos(1.0 * x + ph[0]) + cos(-1.0 * x + ph[1])); */
-    /* } */
     /* else if (pars.dim == 2) */
-    /* { */
     /*     return phi0 + deltaphi * */
     /*                 (cos(1.0 * x + ph[0]) + cos(-1.0 * x + ph[1]) + */
     /*                  cos(1.0 * y + ph[2]) + cos(-1.0 * y + ph[3])); */
-    /* } */
     /* else */
-    /* { */
     /*     return phi0 + deltaphi * */
     /*                 (cos(1.0 * x + ph[0]) + cos(-1.0 * x + ph[1]) + */
     /*                  cos(1.0 * y + ph[2]) + cos(-1.0 * y + ph[3]) + */
     /*                  cos(1.0 * z + ph[4]) + cos(-1.0 * z + ph[5])); */
-    /* } */
 
     // very simple one for testing with phi squared potential
     /* double mean = 14.1421356; // for 50 e-fold inflation */
@@ -551,12 +539,10 @@ double phi_init(const double x, const double y, const double z,
     if (pars.dim == 1) {
         return mean + amplitude * cos(k * x);
         /* return mean - amplitude * wrapped_gaussian(x, y, z); */
-    }
-    else if (pars.dim == 2) {
+    } else if (pars.dim == 2) {
         /* return mean + amplitude * cos(x + y + ph[0]); */
         return mean - amplitude * wrapped_gaussian(x, y, z);
-    }
-    else {
+    } else {
         /* return mean + amplitude * */
         /*     (cos(x + y + z + ph[0]) + cos(-x + y + z + ph[1]) + */
         /*      cos(x - y + z + ph[2]) + cos(x + y - z + ph[3]) + */
@@ -607,12 +593,10 @@ double dphi_init(const double x, const double y, const double z,
 
     if (pars.dim == 1) {
         return (mean + amplitude * cos(x)) * MASS / MASS_KARSTEN;
-    }
-    else if (pars.dim == 2) {
+    } else if (pars.dim == 2) {
         return (mean + amplitude * cos(x + y + ph[0])) *
             MASS / MASS_KARSTEN;
-    }
-    else {
+    } else {
         return (mean + amplitude *
             (cos(x + y + z + ph[0]) + cos(-x + y + z + ph[1]) +
              cos(x - y + z + ph[2]) + cos(x + y - z + ph[3]) +
@@ -840,8 +824,7 @@ void mk_bunch_davies(double *f, const double H, const double homo,
 
                 if (l > 0) {
                     f[osy + k] = ker[l - 1] + (kk - l) * (ker[l] - ker[l - 1]);
-                }
-                else {
+                } else {
                     f[osy + k] = (4.0 * ker[0] - ker[1]) / 3.0;
                 }
             }

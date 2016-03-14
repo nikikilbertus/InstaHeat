@@ -108,8 +108,7 @@ void run_dopri853()
         }
         if (dp.dt_did == dp.dt) {
             ++dp.n_ok;
-        }
-        else {
+        } else {
             ++dp.n_bad;
         }
         #ifdef DEBUG
@@ -420,8 +419,7 @@ int success(const double err, double *dt)
     if (err <= 1.0) {
         if (err == 0.0) {
             scale = maxscale;
-        }
-        else {
+        } else {
             scale = safe * pow(err, -alpha) * pow(dp.err_old, beta);
             if (scale < minscale) {
                 scale = minscale;
@@ -432,8 +430,7 @@ int success(const double err, double *dt)
         }
         if (dp.reject) {
             dp.dt_next = (*dt) * MIN(scale, 1.0);
-        }
-        else {
+        } else {
             dp.dt_next = (*dt) * scale;
         }
         #ifdef MAX_DT_HUBBLE_FRACTION
@@ -446,8 +443,7 @@ int success(const double err, double *dt)
         dp.err_old = MAX(err, 1.0e-4);
         dp.reject = 0;
         return 1;
-    }
-    else {
+    } else {
         scale = MAX(safe * pow(err, -alpha), minscale);
         (*dt) *= scale;
         dp.reject = 1;

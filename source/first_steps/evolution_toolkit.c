@@ -118,12 +118,10 @@ void mk_gradient_squared_and_laplacian(double *in)
                     tmp.xphic[id] = tmp.phic[id] * pars.x.k
                         * ((int)i - (int)Nx) / N;
                     k_sq += pars.x.k2 * (Nx - i) * (Nx - i);
-                }
-                else if (2 * i == Nx) {
+                } else if (2 * i == Nx) {
                     tmp.xphic[id] = 0.0;
                     k_sq += pars.x.k2 * i * i;
-                }
-                else {
+                } else {
                     tmp.xphic[id] = tmp.phic[id] * pars.x.k * i / N;
                     k_sq += pars.x.k2 * i * i;
                 }
@@ -132,20 +130,17 @@ void mk_gradient_squared_and_laplacian(double *in)
                     tmp.yphic[id] = tmp.phic[id] * pars.y.k
                         * ((int)j - (int)Ny) / N;
                     k_sq += pars.y.k2 * (Ny - j) * (Ny - j);
-                }
-                else if (2 * j == Ny) {
+                } else if (2 * j == Ny) {
                     tmp.yphic[id] = 0.0;
                     k_sq += pars.y.k2 * j * j;
-                }
-                else {
+                } else {
                     tmp.yphic[id] = tmp.phic[id] * pars.y.k * j / N;
                     k_sq += pars.y.k2 * j * j;
                 }
                 // z derivative
                 if (2 * k == Nz) {
                     tmp.zphic[id] = 0.0;
-                }
-                else {
+                } else {
                     tmp.zphic[id] = tmp.phic[id] * pars.z.k * k / N;
                 }
                 // laplacian
@@ -328,25 +323,21 @@ void mk_psi(double *f)
                 if (i > Nx / 2) {
                     k_sq += pars.x.k2 * (Nx - i) * (Nx - i);
                     tmp.fc[id] /= pars.x.k * ((int)i - (int)Nx);
-                }
-                else if (2 * i == Nx || i == 0) {
+                } else if (2 * i == Nx || i == 0) {
                     k_sq += pars.x.k2 * i * i;
                     tmp.fc[id] = 0.0;
-                }
-                else {
+                } else {
                     k_sq += pars.x.k2 * i * i;
                     tmp.fc[id] /= pars.x.k * i;
                 }
                 if (j > Ny / 2) {
                     k_sq += pars.y.k2 * (Ny - j) * (Ny - j);
-                }
-                else {
+                } else {
                     k_sq += pars.y.k2 * j * j;
                 }
                 if (-k_sq < 1.0e-14 || fabs(k_sq + dphiextra) < 1.0e-14) {
                     tmp.psic[id] = 0.0;
-                }
-                else {
+                } else {
                     tmp.psic[id] = 0.5 * a2 *
                         (tmp.deltarhoc[id] + 3.0 * hubble * tmp.fc[id]) /
                         ((k_sq + dphiextra) * N);
@@ -398,8 +389,7 @@ void mk_power_spectrum(const fftw_complex *in)
             for (size_t k = 0; k < Mz; ++k) {
                 if (k == 0 || 2 * k == Nz) {
                     pow2_tmp = in[osy + k] * conj(in[osy + k]);
-                }
-                else {
+                } else {
                     pow2_tmp = 2.0 * in[osy + k] * conj(in[osy + k]);
                 }
                 //TODO[performance]: check whether it is faster without this if
@@ -407,15 +397,13 @@ void mk_power_spectrum(const fftw_complex *in)
                     k2_tmp = pars.z.k2 * k * k;
                     if (i > Nx / 2) {
                         k2_tmp += pars.x.k2 * (Nx - i) * (Nx - i);
-                    }
-                    else {
+                    } else {
                         k2_tmp += pars.x.k2 * i * i;
                     }
 
                     if (j > Ny / 2) {
                         k2_tmp += pars.y.k2 * (Ny - j) * (Ny - j);
-                    }
-                    else {
+                    } else {
                         k2_tmp += pars.y.k2 * j * j;
                     }
                     idx = (int)trunc(bins * sqrt(k2_tmp / k2_max) - 1.0e-14);

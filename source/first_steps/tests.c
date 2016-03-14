@@ -22,22 +22,19 @@ void test_mk_gradient_squared_and_laplacian()
     fill_field(tmp.xphi + N, test_func_Dx);
     if (are_fields_equal(tmp.xphi, tmp.xphi + N) == 0) {
         puts("Dx passed\n");
-    }
-    else {
+    } else {
         puts("Dx failed\n");
     }
     fill_field(tmp.xphi + N, test_func_Dy);
     if (are_fields_equal(tmp.yphi, tmp.xphi + N) == 0) {
         puts("Dy passed\n");
-    }
-    else {
+    } else {
         puts("Dy failed\n");
     }
     fill_field(tmp.xphi + N, test_func_Dz);
     if (are_fields_equal(tmp.zphi, tmp.xphi + N) == 0) {
         puts("Dz passed\n");
-    }
-    else {
+    } else {
         puts("Dz failed\n");
     }
 
@@ -45,14 +42,12 @@ void test_mk_gradient_squared_and_laplacian()
     fill_field(tmp.yphi, test_func_lap);
     if (are_fields_equal(tmp.xphi, tmp.grad) == 0) {
         puts("gradient squared passed\n");
-    }
-    else {
+    } else {
         puts("gradient squared failed\n");
     }
     if (are_fields_equal(tmp.yphi, tmp.lap) == 0) {
         puts("laplace passed\n");
-    }
-    else {
+    } else {
         puts("laplace failed\n");
     }
     #ifdef DEBUG

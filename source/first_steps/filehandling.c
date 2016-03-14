@@ -171,8 +171,7 @@ void h5_create_empty_by_path(const char *name)
         H5Sclose(dspace_str);
         H5Tclose(filetype);
         H5Tclose(memtype);
-    }
-    else {
+    } else {
         fputs("Could not parse hash of current commit.\n", stderr);
         exit(EXIT_FAILURE);
     }
@@ -495,8 +494,7 @@ void save()
     if (index == Nt - 1) {
         h5_write_all_buffers(Nt);
         pars.file.index = 0;
-    }
-    else {
+    } else {
         pars.file.index += 1;
     }
     #ifdef DEBUG
