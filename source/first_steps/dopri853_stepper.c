@@ -9,9 +9,36 @@
 #include "evolution_toolkit.h"
 #include "filehandling.h"
 
+/**
+ * @file dopri853_stepper.c
+ * @brief A 8th order explicit Dormand Prince integrator with 5th and 3rd order
+ * error estimates for adaptive stepsizes.
+ */
+
+/**
+ * @brief The parameters for the Dormand Prince intergrator.
+ * @see dopri853_stepper.h
+ */
 dopri853_control_t dp;
+
+/**
+ * @brief Holds the intermediate values of the fields needed for the integration
+ * as well as the errors for the adaptive stepsize.
+ * @see dopri853_stepper.h
+ */
 dopri853_values_t dpv;
 
+/**
+ * @brief Initializes parameters in dopri853_control_t dp of the Dormand Prince
+ * integrator.
+ *
+ * All fields of the struct dopri853_control_t dp are set according either as
+ * fixed initial values or according to parameters entered by the user. All
+ * parameters of the integration routine are saved in this struct.
+ *
+ * @note Changes in here are not recommended. All parameters that can/should be
+ * chosen by the user are determined somewhere else and only copied here.
+ */
 void initialize_dopri853() {
     dp.t = pars.t.ti;
     dp.t_old = pars.t.ti;
@@ -38,6 +65,15 @@ void initialize_dopri853() {
     INFO(puts("Initialized dopri853 parameters.\n"));
 }
 
+/**
+ * @brief Run the Dormand Prince integrator to evolve the fields.
+ *
+ * This is the main routine of dopri853_stepper.c. It initializes the
+ * integration parameters, allocates necessary memory, integrates the field
+ * (assuming initial values are already present), writes the evolution to disk
+ * as specified and frees the memory allocated earlier. All steps are reported
+ * via the standard output.
+ */
 void run_dopri853() {
     initialize_dopri853();
     allocate_dopri853_values();
@@ -132,6 +168,24 @@ void run_dopri853() {
     INFO(printf("bad steps: %d\n\n", dp.n_bad));
 }
 
+/**
+ * @brief Evolves field forward in time by one step.
+ *
+ * @param[in] dt_dry The initially proposed stepsize for this step.
+ * @return Returns 0 in case of success and 1 in case of failure, in this case a
+ * underflow of the specified minimal stepsize.
+ *
+ * Starting with the input @p param1 this function repeatedly calls
+ * try_step(const double dt), computes the normalized overall error by calling
+ * error(const double dt), plugs that into success(const double err, double
+ * *dt) to determine, whether the step is accepted or rejected. In the first
+ * case, the fiels are updated and filtered and/or written to disk if required.
+ * In case of failure, the step is retried with the updated stepsize.
+ *
+ * @note Various counters and global values (like the current time) are updated.
+ * If the stepsize is decreased up to the minimal specified stepsize without
+ * succeeding, a error message is reported and the exit code 1 is returned.
+ */
 int perform_step(const double dt_try) {
     const size_t Ntot = pars.Ntot;
     double dt = dt_try;
@@ -171,6 +225,24 @@ int perform_step(const double dt_try) {
     return 0;
 }
 
+/**
+ * @brief Tries one timestep with the specified stepsize.
+ *
+ * @param[in] dt The stepsize to use in the integration step.
+ *
+ * Computes all necessary (12) intermediate evaluations of the right hand side
+ * of the differential equation (specified by mk_rhs(const double t, double *f,
+ * double *result) in evolution_toolkit.c) to perform one step of the Dormand
+ * Prince integrator, evolves the field forward in time by the given stepsize
+ * and computes the error estimates w.r.t.  the previous timeslice (still as
+ * vectors, i.e. not a single value).  Intermediate evaluations and errors are
+ * stored in members of dopri853_values_t dp.
+ *
+ * @note Contrary to perform_step(const double dt_try) this function is not
+ * garuanteed to actually result in a step forward. It only proposes a candidate
+ * for a step, which is evaluated by the errors it produced. It might get
+ * discarded and recomputed with a different dt.
+ */
 void try_step(const double dt) {
     const size_t Ntot = pars.Ntot;
     const double t = dp.t;
@@ -312,6 +384,15 @@ void try_step(const double dt) {
     }
 }
 
+/**
+ * @brief Computes the error of the previously tried step.
+ *
+ * @param[in] dt The previously tried stepsize.
+ * @return The error of the previously tried stepsize.
+ *
+ * Computes the collective error of <b>all</b> the fields in the integration
+ * routine normalized such that the threshold value is 1.
+ */
 double error(const double dt) {
     const size_t Ntot = pars.Ntot;
     double err = 0.0, err2 = 0.0, sk, deno;
@@ -334,6 +415,23 @@ double error(const double dt) {
     return dt * err * sqrt(1.0 / (Ntot * deno));
 }
 
+/**
+ * @brief Reports whether a step was successful and adjusts the stepsize
+ * accordingly.
+ *
+ * @param[in] err The error estimate of the previously tried stepsize as
+ * computed by error().
+ * @param[inout] dt The stepsize that has previously been tried. Serves as input
+ * to compute next stepsize in case of success and is changed for a new trial of
+ * the current step in case of failure.
+ * @return Returns 1 in case of success and 0 in case of failure.
+ *
+ * When the error @p param1 is smaller than 1, the current step is accepted. In
+ * this case the new stepsize is computed and set accordingly. Otherwise the
+ * current stepsize @p param2 is adjusted and the current step is retried.
+ * Various rules enter the scaling of the stepsize and various counters and
+ * flags are set.
+ */
 int success(const double err, double *dt) {
     const double beta  = dp.beta;
     const double alpha = dp.alpha;
@@ -389,6 +487,12 @@ int success(const double err, double *dt) {
     }
 }
 
+/**
+ * @brief Allocates memory for the Dormand Prince integrator.
+ *
+ * Allocates memory for the intermediate evaluations of the Dormand Prince
+ * integration routine as well as temporary memory for the erros.
+ */
 void allocate_dopri853_values() {
     const size_t Ntot = pars.Ntot;
     const size_t Nall = pars.Nall;
@@ -415,12 +519,12 @@ void allocate_dopri853_values() {
     }
     INFO(puts("Allocated memory for dopri853 variables.\n"));
 }
+
 /**
- * @file dopri853_stepper.c
- * @brief Frees memory for the Dormand Prince 853 integrator.
+ * @brief Frees memory for the Dormand Prince integrator.
  *
- * Free all memory that was allocated for the intermediate evaluations of the
- * Dormand Prince 853 integration routine as well as temporary memory for the
+ * Frees all memory that was allocated for the intermediate evaluations of the
+ * Dormand Prince integration routine as well as temporary memory for the
  * errors.
  */
 void free_dopri853_values() {
