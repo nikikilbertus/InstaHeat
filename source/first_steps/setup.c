@@ -17,7 +17,7 @@ void allocate_and_initialize_all()
     mk_x_grid();
     mk_fftw_plans();
     mk_initial_conditions();
-    mk_k_grid()
+    mk_k_grid();
     mk_filter_mask();
     h5_create_empty_by_path(DATAPATH);
     #ifdef ENABLE_FFT_FILTER
@@ -402,7 +402,6 @@ void mk_initial_conditions()
 // create grid with k squared values
 void mk_k_grid()
 {
-    const size_t N = pars.N;
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
     const size_t Mx = pars.x.M;
@@ -410,7 +409,7 @@ void mk_k_grid()
     const size_t Mz = pars.z.M;
 
     double k2;
-    size_t osx, osy, idx;
+    size_t osx, osy;
     #pragma omp parallel for private(osx, osy, k2)
     for (size_t i = 0; i < Mx; ++i) {
         osx = i * My * Mz;

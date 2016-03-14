@@ -268,7 +268,6 @@ inline double potential_prime(const double f)
 void mk_psi(double *f)
 {
     const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
     const size_t Mx = pars.x.M;
     const size_t My = pars.y.M;
     const size_t Mz = pars.z.M;
@@ -353,7 +352,6 @@ void mk_power_spectrum(const fftw_complex *in)
 
     const double k2_max = pars.x.k2 * (Nx/2) * (Nx/2) +
                     pars.y.k2 * (Ny/2) * (Ny/2) + pars.z.k2 * (Nz/2) * (Nz/2);
-    double k2_tmp = 0.0;
     double pow2_tmp = 0.0;
 
     #pragma omp parallel for
