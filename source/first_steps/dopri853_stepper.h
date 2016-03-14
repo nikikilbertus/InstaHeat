@@ -3,6 +3,18 @@
 
 #include "main.h"
 
+/**
+ * @file dopri853_stepper.h
+ * @brief Typedefs and function declarations for dopri853_stepper.c and for
+ * dopri853_constants.c.
+ * @see <a href="http://numerical.recipes">Numerical Recipes</a>
+ */
+
+/**
+ * @brief Holds the Butcher tableaux for the Dormand Prince integration routine.
+ * @note This is just a huge list of constant double values. Do not change
+ * anything here.
+ */
 typedef struct {
     const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,
     b1,b6,b7,b8,b9,b10,b11,b12,
@@ -28,11 +40,26 @@ typedef struct {
     d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;
 }dopri853_constants_t;
 
+/**
+ * @brief Holds intermediate evaluations of the right hand side and errors for
+ * the Dormand Prince integrator.
+ *
+ * Holds pointers to memory blocks for the intermediate evaluations of
+ * the right hand side of the partial differential equation (as determined in
+ * mk_rhs(const double t, double *f, double *result) in evolution_toolkit.c as
+ * well as memory blocks for the error estimates (5th and 3rd order).
+ */
 typedef struct {
         double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;
         double *yerr, *yerr2;
 }dopri853_values_t;
 
+/**
+ * @brief Holds parameters for the Dormand Prince integrator.
+ *
+ * Most of these parameters should be self explanatory by their names. For more
+ * information see <a href="http://numerical.recipes">Numerical Recipes</a>.
+ */
 typedef struct {
     double t;
     double t_old;
@@ -55,9 +82,9 @@ typedef struct {
     double eps;
 }dopri853_control_t;
 
-extern dopri853_constants_t dpc; // Dormand Prince Constants
-extern dopri853_values_t dpv; // Dormand Prince Values
-extern dopri853_control_t dp; // Dormand Prince (controls)
+extern dopri853_constants_t dpc; //< Dormand Prince Butcher tableaux constants
+extern dopri853_values_t dpv; //< Intermediate fields and errors
+extern dopri853_control_t dp; //< Dormand Prince parameters
 
 void initialize_dopri853();
 void run_dopri853();

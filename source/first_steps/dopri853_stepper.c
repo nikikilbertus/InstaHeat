@@ -13,6 +13,7 @@
  * @file dopri853_stepper.c
  * @brief A 8th order explicit Dormand Prince integrator with 5th and 3rd order
  * error estimates for adaptive stepsizes.
+ * @see <a href="http://numerical.recipes">Numerical Recipes</a>
  */
 
 /**
@@ -22,8 +23,7 @@
 dopri853_control_t dp;
 
 /**
- * @brief Holds the intermediate values of the fields needed for the integration
- * as well as the errors for the adaptive stepsize.
+ * @brief Holds intermediate fields as well as the error estimates.
  * @see dopri853_stepper.h
  */
 dopri853_values_t dpv;
