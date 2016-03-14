@@ -56,6 +56,7 @@ double pressure_mean;
 double *pow_spec;
 double *pow_spec_buf;
 double *filter;
+double *ksq;
 struct temporary tmp;
 fftw_plan p_fw;
 fftw_plan p_bw;

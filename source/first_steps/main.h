@@ -344,6 +344,9 @@ extern double *pow_spec_buf;
 // filter mask for fourier filtering
 extern double *filter;
 
+// grid of ksq values
+extern double *ksq;
+
 // default arrays with temporary memory for real to complex dfts
 extern struct temporary tmp;
 
