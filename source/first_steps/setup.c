@@ -38,8 +38,7 @@ void initialize_threading()
 {
     int threadnum, threadinit;
     threadinit = fftw_init_threads();
-    if (threadinit == 0)
-    {
+    if (threadinit == 0) {
         fputs("\n\nCould not initialize fftw threads.\n", stderr);
         exit(EXIT_FAILURE);
     }
@@ -82,11 +81,9 @@ void initialize_parameters()
 
     // set the number of dimensions according to gridpoints in each direction
     pars.dim = 3;
-    if (pars.z.N == 1)
-    {
+    if (pars.z.N == 1) {
         pars.dim = 2;
-        if (pars.y.N == 1)
-        {
+        if (pars.y.N == 1) {
             pars.dim = 1;
         }
     }
@@ -94,8 +91,7 @@ void initialize_parameters()
     // due to the memory usage of fftw, we need different upper bounds in for
     // loops depending on  the dimension, (the N gridpoints from the last
     // dimension are transformed to floor(N/2)+1 points in fourier space)
-    switch (pars.dim)
-    {
+    switch (pars.dim) {
         case 1:
             pars.x.M = pars.x.N / 2 + 1;
             pars.y.M = 1;
@@ -130,8 +126,7 @@ void initialize_parameters()
     pars.t.ti = INITIAL_TIME;
     pars.t.tf = FINAL_TIME;
     pars.t.Nt = ceil((pars.t.tf - pars.t.ti) / pars.t.dt) + 1;
-    if (pars.t.Nt > MAX_STEPS)
-    {
+    if (pars.t.Nt > MAX_STEPS) {
         fputs("Exeeding MAX_STEPS, decrease DELTA_T.\n", stderr);
         exit(EXIT_FAILURE);
     }
@@ -246,8 +241,7 @@ void allocate_external()
     if (!(grid && field && field_new && dfield && dfield_new &&
         rho && pow_spec && tmp.phic  && tmp.xphic && tmp.yphic && tmp.zphic &&
         tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap && tmp.psic  &&
-        tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f && tmp.deltarho))
-    {
+        tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f && tmp.deltarho)) {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
     }
@@ -267,26 +261,22 @@ void mk_grid()
     const double az = pars.z.a;
     const double bz = pars.z.b;
 
-    if (Nx < 1 || Ny < 1 || Nz < 1)
-    {
+    if (Nx < 1 || Ny < 1 || Nz < 1) {
         fputs("Need positive number of gridpoints\n", stderr);
         exit(EXIT_FAILURE);
     }
 
     // set up the grid points
     #pragma omp parallel for
-    for (size_t i = 0; i < Nx; ++i)
-    {
+    for (size_t i = 0; i < Nx; ++i) {
         grid[i] = ax + (bx - ax) * i / Nx;
     }
     #pragma omp parallel for
-    for (size_t j = Nx; j < Nx+Ny; ++j)
-    {
+    for (size_t j = Nx; j < Nx+Ny; ++j) {
         grid[j] = ay + (by - ay) * (j - Nx) / Ny;
     }
     #pragma omp parallel for
-    for (size_t k = Nx + Ny; k < Nx + Ny+ Nz; ++k)
-    {
+    for (size_t k = Nx + Ny; k < Nx + Ny+ Nz; ++k) {
         grid[k] = az + (bz - az) * (k - Nx - Ny) / Nz;
     }
 
@@ -304,8 +294,7 @@ void mk_fftw_plans()
     #ifdef SHOW_TIMING_INFO
     fftw_time_plan -= get_wall_time();
     #endif
-    switch (pars.dim)
-    {
+    switch (pars.dim) {
         case 1:
             p_fw = fftw_plan_dft_r2c_1d(Nx, field, tmp.phic,
                     FFTW_DEFAULT_FLAG);
@@ -375,22 +364,18 @@ void mk_initial_conditions()
     // random phases
     srand(SEED);
     double *theta = calloc(Nmodes, sizeof *theta);
-    for (size_t i = 0; i < Nmodes; ++i)
-    {
+    for (size_t i = 0; i < Nmodes; ++i) {
         theta[i] = TWOPI * (double)rand() / (double)RAND_MAX;
     }
 
     // initialize the scalar field and its temporal derivative
-    for (size_t i = 0; i < Nx; ++i)
-    {
+    for (size_t i = 0; i < Nx; ++i) {
         x = grid[i];
         osx = i * Ny * Nz;
-        for (size_t j = 0; j < Ny; ++j)
-        {
+        for (size_t j = 0; j < Ny; ++j) {
             y = grid[Nx + j];
             osy = osx + j * Nz;
-            for (size_t k = 0; k < Nz; ++k)
-            {
+            for (size_t k = 0; k < Nz; ++k) {
                 z = grid[Nx + Ny + k];
                 field[osy + k] = phi_init(x, y, z, theta);
                 field[N + osy + k] = dphi_init(x, y, z, theta);
@@ -426,29 +411,22 @@ void mk_filter_mask()
     double tmp;
     size_t osx, osy;
     #pragma omp parallel for private(osx, osy, tmp)
-    for (size_t i = 0; i < Mx; ++i)
-    {
+    for (size_t i = 0; i < Mx; ++i) {
         osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j)
-        {
+        for (size_t j = 0; j < My; ++j) {
             osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k)
-            {
+            for (size_t k = 0; k < Mz; ++k) {
                 tmp = 1.0;
-                if (i != 0)
-                {
+                if (i != 0) {
                     tmp = filter_window(2.0 *
                         (i > Nx / 2 ? (int)Nx - (int)i : i) / (double) Nx);
                 }
-                if (pars.dim > 1)
-                {
-                    if (j != 0)
-                    {
+                if (pars.dim > 1) {
+                    if (j != 0) {
                         tmp *= filter_window(2.0 *
                             (j > Ny / 2 ? (int)Ny - (int)j : j) / (double) Ny);
                     }
-                    if (pars.dim > 2 && k != 0)
-                    {
+                    if (pars.dim > 2 && k != 0) {
                         tmp *= filter_window(2.0 * k / (double) Nz);
                     }
                 }
@@ -570,18 +548,15 @@ double phi_init(const double x, const double y, const double z,
 
     /* double k = 1.0/6.0e3; */
     const double k = 1.0;
-    if (pars.dim == 1)
-    {
+    if (pars.dim == 1) {
         return mean + amplitude * cos(k * x);
         /* return mean - amplitude * wrapped_gaussian(x, y, z); */
     }
-    else if (pars.dim == 2)
-    {
+    else if (pars.dim == 2) {
         /* return mean + amplitude * cos(x + y + ph[0]); */
         return mean - amplitude * wrapped_gaussian(x, y, z);
     }
-    else
-    {
+    else {
         /* return mean + amplitude * */
         /*     (cos(x + y + z + ph[0]) + cos(-x + y + z + ph[1]) + */
         /*      cos(x - y + z + ph[2]) + cos(x + y - z + ph[3]) + */
@@ -630,17 +605,14 @@ double dphi_init(const double x, const double y, const double z,
     /* double mean = -0.00806088; */
     /* double amplitude = -1.134420000000000e-20; */
 
-    if (pars.dim == 1)
-    {
+    if (pars.dim == 1) {
         return (mean + amplitude * cos(x)) * MASS / MASS_KARSTEN;
     }
-    else if (pars.dim == 2)
-    {
+    else if (pars.dim == 2) {
         return (mean + amplitude * cos(x + y + ph[0])) *
             MASS / MASS_KARSTEN;
     }
-    else
-    {
+    else {
         return (mean + amplitude *
             (cos(x + y + z + ph[0]) + cos(-x + y + z + ph[1]) +
              cos(x - y + z + ph[2]) + cos(x + y - z + ph[3]) +
@@ -657,36 +629,27 @@ double wrapped_gaussian(const double x, const double y, const double z)
     const double s = 0.5;
     double res = 0.0;
     size_t max;
-    if (pars.dim == 1)
-    {
+    if (pars.dim == 1) {
         max = 32;
-        for (size_t i = 1; i <= max; ++i)
-        {
+        for (size_t i = 1; i <= max; ++i) {
             res += exp(-0.5 * i * i * s * s) * (cos(i * x) + pow(-1.0, i + 1));
         }
     }
-    if (pars.dim == 2)
-    {
+    if (pars.dim == 2) {
         max = 16;
-        for (size_t i = 1; i <= max; ++i)
-        {
-            for (size_t j = 1; j <= max; ++j)
-            {
+        for (size_t i = 1; i <= max; ++i) {
+            for (size_t j = 1; j <= max; ++j) {
                 res += exp(-0.5 * (i * i + j * j) * s * s) *
                     (cos(i * x) + pow(-1.0, i + 1)) *
                     (cos(j * y) + pow(-1.0, j + 1));
             }
         }
     }
-    if (pars.dim == 3)
-    {
+    if (pars.dim == 3) {
         max = 16;
-        for (size_t i = 1; i <= max; ++i)
-        {
-            for (size_t j = 1; j <= max; ++j)
-            {
-                for (size_t k = 1; k <= max; ++k)
-                {
+        for (size_t i = 1; i <= max; ++i) {
+            for (size_t j = 1; j <= max; ++j) {
+                for (size_t k = 1; k <= max; ++k) {
                     res += exp(-0.5 * (i * i + j * j + k * k) * s * s) *
                         (cos(i * x) + pow(-1.0, i + 1)) *
                         (cos(j * y) + pow(-1.0, j + 1)) *
@@ -705,8 +668,7 @@ void mk_initial_psi()
     const size_t Nall = pars.Nall;
 
     #pragma omp parallel for
-    for (size_t i = N2p; i < Nall; ++i)
-    {
+    for (size_t i = N2p; i < Nall; ++i) {
         field[i] = 0.0;
     }
 
@@ -821,8 +783,7 @@ void mk_bunch_davies(double *f, const double H, const double homo,
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
     const size_t Nz = pars.z.N;
-    if (Nx != Ny || Nx != Nz || Ny != Nz)
-    {
+    if (Nx != Ny || Nx != Nz || Ny != Nz) {
         fputs("Bunch Davies vacuum works only for Nx = Ny = Nz.\n", stderr);
         exit(EXIT_FAILURE);
     }
@@ -842,8 +803,7 @@ void mk_bunch_davies(double *f, const double H, const double homo,
     const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3)) *
             (2.e5/sqrt(8*M_PI))) * (dkos / dxos);
 
-    if (meff2 <= 0.0)
-    {
+    if (meff2 <= 0.0) {
         fputs("The effective mass turned out to be negative.\n", stderr);
         exit(EXIT_FAILURE);
     }
@@ -851,8 +811,7 @@ void mk_bunch_davies(double *f, const double H, const double homo,
 
     double kk;
     #pragma omp parallel for private(kk)
-    for (size_t i = 0; i < nos; ++i)
-    {
+    for (size_t i = 0; i < nos; ++i) {
         kk = (i + 0.5) * dkos;
         ker[i] = kk * pow(kk * kk + meff2, gamma) *
             exp(-kk * kk / kcut2);
@@ -863,32 +822,26 @@ void mk_bunch_davies(double *f, const double H, const double homo,
     fftw_destroy_plan(pl);
 
     #pragma omp parallel for
-    for (size_t i = 0; i < nos; ++i)
-    {
+    for (size_t i = 0; i < nos; ++i) {
         ker[i] *= norm / (i + 1);
     }
 
     size_t osx, osy, l;
     #pragma omp parallel for private(osx, osy, kk, l)
-    for (int i = 0; i < Nx; ++i)
-    {
+    for (int i = 0; i < Nx; ++i) {
         osx = i * Ny * Nz;
-        for (int j = 0; j < Ny; ++j)
-        {
+        for (int j = 0; j < Ny; ++j) {
             osy = osx + j * Nz;
-            for (int k = 0; k < Nz; ++k)
-            {
+            for (int k = 0; k < Nz; ++k) {
                 kk = sqrt((double)( (i + 1 - nn) * (i + 1 - nn) +
                                     (j + 1 - nn) * (j + 1 - nn) +
                                     (k + 1 - nn) * (k + 1 - nn))) * os;
                 l = (size_t) floor(kk);
 
-                if (l > 0)
-                {
+                if (l > 0) {
                     f[osy + k] = ker[l - 1] + (kk - l) * (ker[l] - ker[l - 1]);
                 }
-                else
-                {
+                else {
                     f[osy + k] = (4.0 * ker[0] - ker[1]) / 3.0;
                 }
             }
@@ -899,14 +852,11 @@ void mk_bunch_davies(double *f, const double H, const double homo,
     fftw_execute_dft_r2c(p_fw, f, tmp.phic);
 
     #pragma omp parallel for private(osx, osy)
-    for (size_t i = 0; i < Nx; ++i)
-    {
+    for (size_t i = 0; i < Nx; ++i) {
         osx = i * Ny * nn;
-        for (size_t j = 0; j < Ny; ++j)
-        {
+        for (size_t j = 0; j < Ny; ++j) {
             osy = osx + j * nn;
-            for (size_t k = 0; k < nn; ++k)
-            {
+            for (size_t k = 0; k < nn; ++k) {
                 tmp.phic[osy + k] *= box_muller() / (8.0 * PI);
             }
         }
@@ -927,8 +877,7 @@ inline complex box_muller()
 // for debugging mostly
 void print_vector(const double *vector, const size_t N)
 {
-    for (size_t i = 0; i < N; i++)
-    {
+    for (size_t i = 0; i < N; i++) {
         printf("%f\n", vector[i]);
     }
 }
