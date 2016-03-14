@@ -30,6 +30,7 @@ H5_DPSI_VARIANCE_NAME	filehandling.h	/^#define     H5_DPSI_VARIANCE_NAME /;"	d
 H5_GRIDPOINTS_INTERNAL_NAME	filehandling.h	/^#define     H5_GRIDPOINTS_INTERNAL_NAME /;"	d
 H5_GRIDPOINTS_OUTPUT_NAME	filehandling.h	/^#define     H5_GRIDPOINTS_OUTPUT_NAME /;"	d
 H5_MASS_NAME	filehandling.h	/^#define     H5_MASS_NAME /;"	d
+H5_MAX_DT_HUBBLE_FRACTION_NAME	filehandling.h	/^#define     H5_MAX_DT_HUBBLE_FRACTION_NAME /;"	d
 H5_METHOD_NAME	filehandling.h	/^#define     H5_METHOD_NAME /;"	d
 H5_PHI_MEAN_NAME	filehandling.h	/^#define     H5_PHI_MEAN_NAME /;"	d
 H5_PHI_NAME	filehandling.h	/^#define     H5_PHI_NAME /;"	d
@@ -74,18 +75,20 @@ M	main.h	/^    size_t M;$/;"	m	struct:__anon5
 MASS	main.h	/^#define MASS /;"	d
 MASS_KARSTEN	main.h	/^#define MASS_KARSTEN /;"	d
 MAX	main.h	/^#define MAX(/;"	d
+MAX_DT_HUBBLE_FRACTION	main.h	/^#define MAX_DT_HUBBLE_FRACTION /;"	d
 MAX_STEPS	main.h	/^#define MAX_STEPS /;"	d
 MIN	main.h	/^#define MIN(/;"	d
 MINIMAL_DELTA_T	main.h	/^#define MINIMAL_DELTA_T /;"	d
-MIN_DT_FRACTION	main.h	/^#define MIN_DT_FRACTION /;"	d
 N	main.h	/^    size_t N; \/\/ number of gridpoints$/;"	m	struct:__anon5
 N	main.h	/^    size_t N;$/;"	m	struct:__anon9
 Nall	main.h	/^    size_t Nall;$/;"	m	struct:__anon9
 Nt	main.h	/^    size_t Nt; \/\/ number of timesteps (only relevant for fixed step size)$/;"	m	struct:__anon6
 Ntot	main.h	/^    size_t Ntot;$/;"	m	struct:__anon9
 OBJECTS	Makefile	/^OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))$/;"	m
+OUTPUT_DPHI	main.h	/^#define OUTPUT_DPHI$/;"	d
 OUTPUT_DPHI_MEAN	main.h	/^#define OUTPUT_DPHI_MEAN$/;"	d
 OUTPUT_DPHI_VARIANCE	main.h	/^#define OUTPUT_DPHI_VARIANCE$/;"	d
+OUTPUT_DPSI	main.h	/^#define OUTPUT_DPSI$/;"	d
 OUTPUT_DPSI_MEAN	main.h	/^#define OUTPUT_DPSI_MEAN$/;"	d
 OUTPUT_DPSI_VARIANCE	main.h	/^#define OUTPUT_DPSI_VARIANCE$/;"	d
 OUTPUT_PHI	main.h	/^#define OUTPUT_PHI$/;"	d
@@ -235,22 +238,22 @@ bhh3	dopri853_stepper.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:__anon1
 bins_powspec	main.h	/^    size_t bins_powspec;    \/\/ how many bins are used for the power spectrum$/;"	m	struct:__anon8
 box_muller	setup.c	/^inline complex box_muller() {$/;"	f
 buf_size	main.h	/^    size_t buf_size;        \/\/ size of the buffer$/;"	m	struct:__anon8
-c10	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
-c11	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
-c14	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
-c15	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
-c16	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
-c2	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
-c3	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
-c4	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
-c5	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
-c6	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
-c7	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
-c8	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
-c9	dopri853_stepper.h	/^    double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c10	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c11	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c14	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c15	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c16	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c2	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c3	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c4	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c5	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c6	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c7	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c8	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
+c9	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:__anon1
 compute_pow_spec	evolution_toolkit.h	/^    uint8_t compute_pow_spec; \/\/ compute the power spectrum in this step?$/;"	m	struct:__anon4
-contains_nan	evolution_toolkit.c	/^void contains_nan(double *f, size_t N) {$/;"	f
-contains_nanc	evolution_toolkit.c	/^void contains_nanc(complex *f, size_t N) {$/;"	f
+contains_nan	evolution_toolkit.c	/^void contains_nan(const double *f, const size_t N) {$/;"	f
+contains_nanc	evolution_toolkit.c	/^void contains_nanc(const complex *f, const size_t N) {$/;"	f
 d41	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
 d410	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
 d411	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:__anon1
@@ -314,7 +317,7 @@ dopri853_values_t	dopri853_stepper.h	/^}dopri853_values_t;$/;"	t	typeref:struct:
 dp	dopri853_stepper.c	/^dopri853_control_t dp;$/;"	v
 dpc	dopri853_constants.c	/^dopri853_constants_t dpc =$/;"	v
 dphi_buf	main.c	/^double *dphi_buf;$/;"	v
-dphi_init	setup.c	/^double dphi_init(double x, double y, double z, double *ph) {$/;"	f
+dphi_init	setup.c	/^double dphi_init(const double x, const double y, const double z,$/;"	f
 dphi_mean	main.c	/^double dphi_mean;$/;"	v
 dphi_mean_buf	main.c	/^double *dphi_mean_buf;$/;"	v
 dphi_var	main.c	/^double dphi_var;$/;"	v
@@ -363,8 +366,9 @@ file	main.h	/^    file_parameters_t file;$/;"	m	struct:__anon9
 file_parameters_t	main.h	/^}file_parameters_t;$/;"	t	typeref:struct:__anon8
 fill_field	tests.c	/^void fill_field(double *f, double (*func)(const double, const double,$/;"	f
 filter	evolution_toolkit.h	/^    uint8_t filter; \/\/ apply a filter in this step? (currently unused)$/;"	m	struct:__anon4
+filter	main.c	/^double *filter;$/;"	v
 filter_time	main.c	/^double filter_time = 0.0;$/;"	v
-filter_window_function	evolution_toolkit.c	/^inline double filter_window_function(const double x) {$/;"	f
+filter_window	setup.c	/^inline double filter_window(const double x) {$/;"	f
 free_and_destroy_all	setup.c	/^void free_and_destroy_all() {$/;"	f
 free_dopri853_values	dopri853_stepper.c	/^void free_dopri853_values() {$/;"	f
 free_external	setup.c	/^void free_external() {$/;"	f
@@ -381,7 +385,7 @@ h5_read_timeslice	filehandling.c	/^void h5_read_timeslice() {$/;"	f
 h5_time_write	main.c	/^double h5_time_write = 0.0;$/;"	v
 h5_write_all_buffers	filehandling.c	/^void h5_write_all_buffers(const hsize_t Nt) {$/;"	f
 h5_write_buffer	filehandling.c	/^void h5_write_buffer(const hsize_t rank, const hsize_t *start,$/;"	f
-h5_write_parameter	filehandling.c	/^void h5_write_parameter(const char *name, const double *val, size_t N) {$/;"	f
+h5_write_parameter	filehandling.c	/^void h5_write_parameter(const char *name, const double *val, const size_t N) {$/;"	f
 id	main.h	/^    hsize_t id;             \/\/ h5 file id of the output file$/;"	m	struct:__anon8
 index	main.h	/^    size_t index;           \/\/ current index within the buffers$/;"	m	struct:__anon8
 initialize_dopri853	dopri853_stepper.c	/^void initialize_dopri853() {$/;"	f
@@ -403,11 +407,12 @@ lap	main.h	/^    double  *lap;$/;"	m	struct:__anon10
 main	main.c	/^int main(int argc, const char * argv[]) {$/;"	f
 max_steps	dopri853_stepper.h	/^    size_t max_steps;$/;"	m	struct:__anon3
 maxscale	dopri853_stepper.h	/^    double minscale, maxscale;$/;"	m	struct:__anon3
-mean	evolution_toolkit.c	/^inline double mean(const double *f, size_t N) {$/;"	f
+mean	evolution_toolkit.c	/^inline double mean(const double *f, const size_t N) {$/;"	f
 mean	main.h	/^    hsize_t mean;$/;"	m	struct:__anon7
 minscale	dopri853_stepper.h	/^    double minscale, maxscale;$/;"	m	struct:__anon3
 mk_bunch_davies	setup.c	/^void mk_bunch_davies(double *f, const double H, const double homo,$/;"	f
 mk_fftw_plans	setup.c	/^void mk_fftw_plans() {$/;"	f
+mk_filter_mask	setup.c	/^void mk_filter_mask() {$/;"	f
 mk_gradient_squared_and_laplacian	evolution_toolkit.c	/^void mk_gradient_squared_and_laplacian(double *in) {$/;"	f
 mk_grid	setup.c	/^void mk_grid() {$/;"	f
 mk_initial_conditions	setup.c	/^void mk_initial_conditions() {$/;"	f
@@ -415,7 +420,7 @@ mk_initial_psi	setup.c	/^void mk_initial_psi() {$/;"	f
 mk_means_and_variances	evolution_toolkit.c	/^void mk_means_and_variances() {$/;"	f
 mk_power_spectrum	evolution_toolkit.c	/^void mk_power_spectrum(const fftw_complex *in) {$/;"	f
 mk_psi	evolution_toolkit.c	/^void mk_psi(double *f) {$/;"	f
-mk_rho	evolution_toolkit.c	/^void mk_rho(double *f) {$/;"	f
+mk_rho	evolution_toolkit.c	/^void mk_rho(const double *f) {$/;"	f
 mk_rhs	evolution_toolkit.c	/^void mk_rhs(const double t, double *f, double *result) {$/;"	f
 n_bad	dopri853_stepper.h	/^    int n_bad;$/;"	m	struct:__anon3
 n_ok	dopri853_stepper.h	/^    int n_ok;$/;"	m	struct:__anon3
@@ -428,7 +433,7 @@ parameters_t	main.h	/^}parameters_t;$/;"	t	typeref:struct:__anon9
 pars	main.c	/^parameters_t pars;$/;"	v
 perform_step	dopri853_stepper.c	/^int perform_step(const double dt_try) {$/;"	f
 phi_buf	main.c	/^double *phi_buf;$/;"	v
-phi_init	setup.c	/^double phi_init(double x, double y, double z, double *ph) {$/;"	f
+phi_init	setup.c	/^double phi_init(const double x, const double y, const double z,$/;"	f
 phi_mean	main.c	/^double phi_mean;$/;"	v
 phi_mean_buf	main.c	/^double *phi_mean_buf;$/;"	v
 phi_var	main.c	/^double phi_var;$/;"	v
@@ -490,8 +495,8 @@ timing_t	main.h	/^}timing_t;$/;"	t	typeref:struct:__anon6
 tmp	main.c	/^temporary_t tmp;$/;"	v
 try_step	dopri853_stepper.c	/^void try_step(const double dt) {$/;"	f
 var	main.h	/^    hsize_t var;$/;"	m	struct:__anon7
-variance	evolution_toolkit.c	/^inline double variance(double mean, const double *f, size_t N) {$/;"	f
-wrapped_gaussian	setup.c	/^double wrapped_gaussian(double x, double y, double z) {$/;"	f
+variance	evolution_toolkit.c	/^inline double variance(const double mean, const double *f, const size_t N) {$/;"	f
+wrapped_gaussian	setup.c	/^double wrapped_gaussian(const double x, const double y, const double z) {$/;"	f
 x	main.h	/^    grid_dimension_t x;$/;"	m	struct:__anon9
 xphi	main.h	/^    double  *xphi;$/;"	m	struct:__anon10
 xphic	main.h	/^    complex *xphic;$/;"	m	struct:__anon10
