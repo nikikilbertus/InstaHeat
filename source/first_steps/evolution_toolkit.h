@@ -7,12 +7,13 @@
 
 // some flags to pass information about the progress of the stepping to the
 // evolution_toolkit
-typedef struct {
+struct evolution_flags
+{
     uint8_t filter; // apply a filter in this step? (currently unused)
     uint8_t compute_pow_spec; // compute the power spectrum in this step?
-}evolution_flags_t;
+};
 
-extern evolution_flags_t evo_flags;
+extern struct evolution_flags evo_flags;
 
 void mk_rhs(const double t, double *f, double *result);
 void mk_gradient_squared_and_laplacian(double *in);

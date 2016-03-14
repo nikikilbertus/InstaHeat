@@ -10,7 +10,7 @@
 #include "setup.h"
 
 // see header file for more info
-evolution_flags_t evo_flags = {.filter = 0, .compute_pow_spec = 0};
+struct evolution_flags evo_flags = {.filter = 0, .compute_pow_spec = 0};
 
 // compute right hand side of the pde, i.e. all first order temporal derivatives
 // which fields are contained depends on PSI_METHOD
