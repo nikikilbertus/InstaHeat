@@ -14,7 +14,8 @@ evolution_flags_t evo_flags = {.filter = 0, .compute_pow_spec = 0};
 
 // compute right hand side of the pde, i.e. all first order temporal derivatives
 // which fields are contained depends on PSI_METHOD
-void mk_rhs(const double t, double *f, double *result) {
+void mk_rhs(const double t, double *f, double *result)
+{
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
     const size_t N2p = N2 + 2;
@@ -78,7 +79,8 @@ void mk_rhs(const double t, double *f, double *result) {
 }
 
 // compute the laplacian and the squared gradient of the input and store them
-void mk_gradient_squared_and_laplacian(double *in) {
+void mk_gradient_squared_and_laplacian(double *in)
+{
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
     const size_t Nz = pars.z.N;
@@ -207,7 +209,8 @@ void mk_gradient_squared_and_laplacian(double *in) {
 }
 
 // compute energy density rho & average value
-void mk_rho(const double *f) {
+void mk_rho(const double *f)
+{
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
     const size_t N2p = N2 + 2;
@@ -246,7 +249,8 @@ void mk_rho(const double *f) {
 
 // A selection of potentials one can try, make sure to set the corresponding
 // potential_prime, the derivative is not computed automatically
-inline double potential(const double f) {
+inline double potential(const double f)
+{
     // higgs metastability potential
     /* double l = LAMBDA / 1.0e-10; */
     /* double a = 0.01 * l, b = 1.0 * l; */
@@ -270,7 +274,8 @@ inline double potential(const double f) {
     /* return 0.0; */
 }
 
-inline double potential_prime(const double f) {
+inline double potential_prime(const double f)
+{
     // higgs metastability potential
     /* double l = LAMBDA / 1.0e-10; */
     /* double a = 0.01 * l, b = 1.0 * l; */
@@ -295,7 +300,8 @@ inline double potential_prime(const double f) {
 }
 
 // solve poisson like equation for scalar perturbation and its derivative
-void mk_psi(double *f) {
+void mk_psi(double *f)
+{
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
     const size_t Mx = pars.x.M;
@@ -394,7 +400,8 @@ void mk_psi(double *f) {
 }
 
 // computes a crude estimation of the power spectrum, more info in main.h
-void mk_power_spectrum(const fftw_complex *in) {
+void mk_power_spectrum(const fftw_complex *in)
+{
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
     const size_t Nz = pars.z.N;
@@ -463,7 +470,8 @@ void mk_power_spectrum(const fftw_complex *in) {
 }
 
 // filter the real input field, input gets overwritten with filtered data
-void apply_filter_real(double *inout) {
+void apply_filter_real(double *inout)
+{
     const size_t N = pars.N;
     const size_t N2p = 2 * N + 2;
     const size_t N3p = 3 * N + 2;
@@ -505,7 +513,8 @@ void apply_filter_real(double *inout) {
 
 // filtering in fourier domain for phi, dphi, psi simultaneously
 void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
-        fftw_complex *psi_io, fftw_complex *dpsi_io) {
+        fftw_complex *psi_io, fftw_complex *dpsi_io)
+{
     const size_t M = pars.x.M * pars.y.M * pars.z.M;
     double fil;
     #pragma omp parallel for private(fil)
@@ -524,7 +533,8 @@ void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
 }
 
 // recompute current power spectrum and rho and save current timeslice to buffer
-void prepare_and_save_timeslice() {
+void prepare_and_save_timeslice()
+{
     evo_flags.compute_pow_spec = 1;
     mk_gradient_squared_and_laplacian(field);
     evo_flags.compute_pow_spec = 0;
@@ -536,7 +546,8 @@ void prepare_and_save_timeslice() {
     save();
 }
 
-void mk_means_and_variances() {
+void mk_means_and_variances()
+{
     const size_t N = pars.N;
     const size_t N2p = 2 * N + 2;
     const size_t N3p = 3 * N + 2;
@@ -583,7 +594,8 @@ void mk_means_and_variances() {
     #endif
 }
 
-inline double mean(const double *f, const size_t N) {
+inline double mean(const double *f, const size_t N)
+{
     double mean = 0.0;
     #pragma omp parallel for reduction(+: mean)
     for (size_t i = 0; i < N; ++i)
@@ -593,7 +605,8 @@ inline double mean(const double *f, const size_t N) {
     return mean / (double)N;
 }
 
-inline double variance(const double mean, const double *f, const size_t N) {
+inline double variance(const double mean, const double *f, const size_t N)
+{
     double sum1 = 0.0;
     double sum2 = 0.0;
     double tmp;
@@ -607,7 +620,8 @@ inline double variance(const double mean, const double *f, const size_t N) {
     return (sum1 - sum2 * sum2 / (double)N) / (double)(N - 1);
 }
 
-void contains_nan(const double *f, const size_t N) {
+void contains_nan(const double *f, const size_t N)
+{
     size_t count = 0;
     for (size_t i = 0; i < N; ++i)
     {
@@ -619,7 +633,8 @@ void contains_nan(const double *f, const size_t N) {
     printf("found %zu nans\n", count);
 }
 
-void contains_nanc(const complex *f, const size_t N) {
+void contains_nanc(const complex *f, const size_t N)
+{
     size_t count = 0;
     for (size_t i = 0; i < N; ++i)
     {
