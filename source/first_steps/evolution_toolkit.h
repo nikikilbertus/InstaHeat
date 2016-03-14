@@ -26,6 +26,7 @@ void apply_filter_real(double *inout);
 void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
         fftw_complex *psi_io, fftw_complex *dpsi_io);
 void prepare_and_save_timeslice();
+void center(double *f, const size_t N);
 void mk_means_and_variances();
 extern double mean(const double *f, const size_t N);
 extern double variance(const double mean, const double *f, const size_t N);

@@ -454,6 +454,15 @@ void prepare_and_save_timeslice()
     save();
 }
 
+void center(double *f, const size_t N)
+{
+    double avg = mean(f, N);
+    #pragma omp parallel for reduction(+: mean)
+    for (size_t i = 0; i < N; ++i) {
+        f[i] -= avg;
+    }
+}
+
 void mk_means_and_variances()
 {
     const size_t N = pars.N;
