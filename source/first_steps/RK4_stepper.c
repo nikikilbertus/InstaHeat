@@ -23,8 +23,7 @@ void run_rk4()
     k4    = fftw_malloc(Ntot * sizeof *k4);
     tmp_k = fftw_malloc(Nall * sizeof *tmp_k);
 
-    if (!(k1 && k2 && k3 && k4 && tmp_k))
-    {
+    if (!(k1 && k2 && k3 && k4 && tmp_k)) {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
     }
@@ -39,62 +38,54 @@ void run_rk4()
     double secs = -get_wall_time();
     #endif
 
-    for (size_t nt = 0; t < pars.t.tf; ++nt)
-    {
+    for (size_t nt = 0; t < pars.t.tf; ++nt) {
         #ifdef ENABLE_FFT_FILTER
         apply_filter_real(field);
         #endif
 
         // to precisely reach final time in the last step, change dt
-        if (t + dt * 1.0001 > pars.t.tf)
-        {
+        if (t + dt * 1.0001 > pars.t.tf) {
             dt = pars.t.tf - t;
             pars.t.dt = dt;
             INFO(printf("overshoot, new dt = %f\n", dt));
         }
 
         // step 1 (and write out data if required)
-        if (nt % pars.file.skip == 0)
-        {
+        if (nt % pars.file.skip == 0) {
             evo_flags.compute_pow_spec = 1;
             mk_rhs(t, field, k1);
             evo_flags.compute_pow_spec = 0;
             mk_means_and_variances();
             save();
         }
-        else
-        {
+        else {
             mk_rhs(t, field, k1);
         }
 
         // step 2
         #pragma omp parallel for
-        for (size_t i = 0; i < Ntot; ++i)
-        {
+        for (size_t i = 0; i < Ntot; ++i) {
             tmp_k[i] = field[i] + dt * k1[i] / 2.0;
         }
         mk_rhs(t + dt / 2.0, tmp_k, k2);
 
         // step 3
         #pragma omp parallel for
-        for (size_t i = 0; i < Ntot; ++i)
-        {
+        for (size_t i = 0; i < Ntot; ++i) {
             tmp_k[i] = field[i] + dt * k2[i] / 2.0;
         }
         mk_rhs(t + dt / 2.0, tmp_k, k3);
 
         // step 4
         #pragma omp parallel for
-        for (size_t i = 0; i < Ntot; ++i)
-        {
+        for (size_t i = 0; i < Ntot; ++i) {
             tmp_k[i] = field[i] + dt * k3[i];
         }
         mk_rhs(t + dt, tmp_k, k4);
 
         // perform time step
         #pragma omp parallel for
-        for (size_t i = 0; i < Ntot; ++i)
-        {
+        for (size_t i = 0; i < Ntot; ++i) {
             field[i] += dt * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]) / 6.0;
         }
 
@@ -106,8 +97,7 @@ void run_rk4()
     prepare_and_save_timeslice();
 
     // info about last timeslice
-    if (fabs(pars.t.tf - pars.t.t) > 1e-10)
-    {
+    if (fabs(pars.t.tf - pars.t.t) > 1e-14) {
         INFO(puts("The time of the last step does not coincide "
                           "with the specified final time."));
     }
