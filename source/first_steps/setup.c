@@ -330,7 +330,7 @@ void mk_initial_conditions()
     field[2 * pars.N] = A_INITIAL;
     field[2 * pars.N + 1] = 0.0;
         #if PSI_METHOD != PSI_ELLIPTIC
-        /* mk_initial_psi(); */
+        mk_initial_psi();
         #endif
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
     //TODO: need correct values at end of inflation here
@@ -785,7 +785,7 @@ void mk_bunch_davies(double *f, const double H, const double homo,
     const double meff2 = MASS * MASS - 2.25 * H * H;
     /* const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3))) * (dkos / dxos); */
     const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3)) *
-            (2.e5/sqrt(8*M_PI))) * (dkos / dxos);
+            (2.e5/sqrt(8*PI))) * (dkos / dxos);
 
     if (meff2 <= 0.0) {
         fputs("The effective mass turned out to be negative.\n", stderr);
