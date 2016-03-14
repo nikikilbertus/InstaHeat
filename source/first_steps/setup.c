@@ -330,7 +330,7 @@ void mk_initial_conditions()
     field[2 * pars.N] = A_INITIAL;
     field[2 * pars.N + 1] = 0.0;
         #if PSI_METHOD != PSI_ELLIPTIC
-        mk_initial_psi();
+        /* mk_initial_psi(); */
         #endif
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
     //TODO: need correct values at end of inflation here
@@ -780,8 +780,8 @@ void mk_bunch_davies(double *f, const double H, const double homo,
     const double dk = TWOPI / (pars.x.b - pars.x.a);
     const double dkos = 0.5 * dk / os;
     //TODO: pspectre uses kcutpspectre = 2 * kcutdefrost
-    /* const double kcut2 = 0.25 * nn * nn * dk * dk; */
-    const double kcut2 = 0.01 * nn * nn * dk * dk;
+    const double kcut2 = 0.25 * nn * nn * dk * dk;
+    /* const double kcut2 = 0.01 * nn * nn * dk * dk; */
     const double meff2 = MASS * MASS - 2.25 * H * H;
     /* const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3))) * (dkos / dxos); */
     const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3)) *
@@ -840,6 +840,7 @@ void mk_bunch_davies(double *f, const double H, const double homo,
         for (size_t j = 0; j < Ny; ++j) {
             osy = osx + j * nn;
             for (size_t k = 0; k < nn; ++k) {
+                /* tmp.phic[osy + k] *= box_muller(); */
                 tmp.phic[osy + k] *= box_muller() / (8.0 * PI);
             }
         }

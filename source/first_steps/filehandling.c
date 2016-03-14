@@ -607,6 +607,8 @@ void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
 void read_initial_data()
 {
     size_t N = pars.N;
+    size_t N2p = 2 * N + 2;
+    size_t N3p = 3 * N + 2;
 
     FILE *file = fopen(INITIAL_DATAPATH, "r");
     if (!file) {
@@ -614,11 +616,11 @@ void read_initial_data()
         exit(EXIT_FAILURE);
     }
 
-    //TODO: adjust to actual file format, this is just a dummy
     int ii, jj, kk;
     for (size_t i = 0; i < N; ++i) {
-        if(!fscanf(file, " %d %d %d %lf %lf\n",
-                    &ii, &jj, &kk, &field[i], &field[i + N])) {
+        if(!fscanf(file, " %d %d %d %lf %lf %lf %lf\n",
+                    &ii, &jj, &kk, &field[i], &field[i + N], &field[i + N2p],
+                    &field[i + N3p])) {
             fputs("Could not read initial data file.\n", stderr);
             exit(EXIT_FAILURE);
         }

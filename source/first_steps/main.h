@@ -42,11 +42,11 @@ during execution
 #define VERSION_CONTROL         VERSION_CONTROL_HG
 
 //-------------which files to write to disk-------------------------------------
-#define OUTPUT_PHI
-#define OUTPUT_DPHI
-#define OUTPUT_PSI
-#define OUTPUT_DPSI
-#define OUTPUT_RHO
+/* #define OUTPUT_PHI */
+/* #define OUTPUT_DPHI */
+/* #define OUTPUT_PSI */
+/* #define OUTPUT_DPSI */
+/* #define OUTPUT_RHO */
 
 #define OUTPUT_POWER_SPECTRUM
 
@@ -68,12 +68,12 @@ during execution
 #define IC_FROM_H5_FILE             (1)
 #define IC_FROM_DAT_FILE            (2)
 #define IC_FROM_BUNCH_DAVIES        (3)
-#define INITIAL_CONDITIONS          IC_FROM_INTERNAL_FUNCTION
+#define INITIAL_CONDITIONS          IC_FROM_DAT_FILE
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/testfil.h5")
+#define DATAPATH                ("../../../data/bla.h5")
 /* #define DATAPATH                ("bla.h5") */
-#define INITIAL_DATAPATH        ("../../../data/karsten/data_64.dat")
+#define INITIAL_DATAPATH        ("../../../data/karsten/data_64psi.dat")
 
 
 /**
@@ -92,7 +92,7 @@ during execution
 #define POWER_SPECTRUM_BINS     (30)
 
 // how many timeslices to skip in between writing to file (1: write out all)
-#define TIME_STEP_SKIPS         (10)
+#define TIME_STEP_SKIPS         (1)
 
 // spatial output strides
 #define STRIDE_X                (1)
@@ -125,37 +125,38 @@ during execution
 
 // ------------------computational domain---------------------------------------
 // spatial (order is important! use y=z=1 for 1D; use z=1 for 2D)
-#define GRIDPOINTS_X            (128)
-#define GRIDPOINTS_Y            (1)
-#define GRIDPOINTS_Z            (1)
-#define SPATIAL_LOWER_BOUND_X   (-PI)
-#define SPATIAL_UPPER_BOUND_X   (PI)
-#define SPATIAL_LOWER_BOUND_Y   (-PI)
-#define SPATIAL_UPPER_BOUND_Y   (PI)
-#define SPATIAL_LOWER_BOUND_Z   (-PI)
-#define SPATIAL_UPPER_BOUND_Z   (PI)
+#define GRIDPOINTS_X            (64)
+#define GRIDPOINTS_Y            (64)
+#define GRIDPOINTS_Z            (64)
+#define SPATIAL_LOWER_BOUND_X   (0.0)
+#define SPATIAL_UPPER_BOUND_X   (1.0)
+#define SPATIAL_LOWER_BOUND_Y   (0.0)
+#define SPATIAL_UPPER_BOUND_Y   (1.0)
+#define SPATIAL_LOWER_BOUND_Z   (0.0)
+#define SPATIAL_UPPER_BOUND_Z   (1.0)
 
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (1.0e-5)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (1.0e6)
+#define FINAL_TIME              (1.0e5)
 #define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-10)
 
 // ----------------parameters used in the potential-----------------------------
 /* #define MASS                    (0.11026) // for 50 e-fold hom inflation */
-/* #define MASS                    (1.0e-2) // data_64 */
-#define MASS                    (0.002000003836216) // compare_2 compare_psi
+#define MASS                    (1.0e-2) // data_64
+/* #define MASS                    (0.002000003836216) // compare_2 compare_psi */
 /* #define MASS                    (16.418149637955437) // defrost */
 /* #define MASS                    (9.973557010035818e-7) // pspectre defrost */
 #define MASS_KARSTEN            (1.0e-2)
 #define COUPLING                (1.0) // coupling in a phi4 potential
 #define LAMBDA                  (4.721e-5) // "cosmological constant"
 /* #define A_INITIAL               (1.05249e3) // compare_2, compare_psi, 5500 */
-#define A_INITIAL               (4.09376e3) // compare_2, compare_psi, 6000
+/* #define A_INITIAL               (4.09376e3) // compare_2, compare_psi, 6000 */
 /* #define A_INITIAL               (6.1625e2) // compare_2, compare_psi, 5450 */
 /* #define A_INITIAL               (1.370074629050061e5) // data_64 */
+#define A_INITIAL               (6.227758258677358e4) // data_64psi
 /* #define A_INITIAL               (1.0) */
 // for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
 
@@ -169,7 +170,7 @@ during execution
 #define SAFE                    (0.9)
 
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
-#define RELATIVE_TOLERANCE      (1.0e-9)
+#define RELATIVE_TOLERANCE      (1.0e-8)
 #define ABSOLUTE_TOLERANCE      (1.0e-14)
 // the timestep is limited from above by this fraction of the hubble time 1/H
 #define MAX_DT_HUBBLE_FRACTION  (1.0e-2)
