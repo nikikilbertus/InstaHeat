@@ -20,19 +20,19 @@
  * @brief The parameters for the Dormand Prince intergrator.
  * @see dopri853_stepper.h
  */
-dopri853_control_t dp;
+struct dopri853_control dp;
 
 /**
  * @brief Holds intermediate fields as well as the error estimates.
  * @see dopri853_stepper.h
  */
-dopri853_values_t dpv;
+struct dopri853_values dpv;
 
 /**
- * @brief Initializes parameters in dopri853_control_t dp of the Dormand Prince
- * integrator.
+ * @brief Initializes parameters in the struct dopri853_control dp of the
+ * Dormand Prince integrator.
  *
- * All fields of the struct dopri853_control_t dp are set according either as
+ * All fields of the struct dopri853_control dp are set according either as
  * fixed initial values or according to parameters entered by the user. All
  * parameters of the integration routine are saved in this struct.
  *
@@ -224,7 +224,7 @@ int perform_step(const double dt_try)
  * Prince integrator, evolves the field forward in time by the given stepsize
  * and computes the error estimates w.r.t.  the previous timeslice (still as
  * vectors, i.e. not a single value).  Intermediate evaluations and errors are
- * stored in members of dopri853_values_t dp.
+ * stored in members of the struct dopri853_values dp.
  *
  * @note Contrary to perform_step(const double dt_try) this function is not
  * garuanteed to actually result in a step forward. It only proposes a candidate
