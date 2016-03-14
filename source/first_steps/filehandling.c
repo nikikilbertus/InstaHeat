@@ -152,14 +152,12 @@ void h5_create_empty_by_path(const char *name)
     char hash[len];
     FILE *output;
 
-    if ((output = popen(cmd, "r")) == NULL)
-    {
+    if ((output = popen(cmd, "r")) == NULL) {
         fputs("Could not get hash of current commit.\n", stderr);
         exit(EXIT_FAILURE);
     }
 
-    if (fgets(hash, len, output) != NULL)
-    {
+    if (fgets(hash, len, output) != NULL) {
         filetype = H5Tcopy(H5T_FORTRAN_S1);
         H5Tset_size(filetype, len - 1);
         memtype = H5Tcopy(H5T_C_S1);
@@ -174,14 +172,12 @@ void h5_create_empty_by_path(const char *name)
         H5Tclose(filetype);
         H5Tclose(memtype);
     }
-    else
-    {
+    else {
         fputs("Could not parse hash of current commit.\n", stderr);
         exit(EXIT_FAILURE);
     }
 
-    if (pclose(output))
-    {
+    if (pclose(output)) {
         fputs("Could not close file of commit hash.\n", stderr);
         exit(EXIT_FAILURE);
     }
@@ -368,15 +364,13 @@ void h5_write_all_buffers(const hsize_t Nt)
 void h5_close()
 {
     hid_t file = pars.file.id;
-    if (pars.file.index != 0)
-    {
+    if (pars.file.index != 0) {
         h5_write_all_buffers(pars.file.index);
     }
     H5Fflush(file, H5F_SCOPE_GLOBAL);
     hid_t obj_ids[30];
     hsize_t obj_count = H5Fget_obj_ids(file, H5F_OBJ_DATASET, -1, obj_ids);
-    for (size_t i = 0; i < obj_count; ++i)
-    {
+    for (size_t i = 0; i < obj_count; ++i) {
         H5Dclose(obj_ids[i]);
     }
     H5Fclose(file);
@@ -396,8 +390,7 @@ void save()
     a_buf[index] = field[N2];
 
     #ifdef CHECK_FOR_NAN
-    if (isnan(pars.t.t) || isnan(field[N2]))
-    {
+    if (isnan(pars.t.t) || isnan(field[N2])) {
         fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
             exit(EXIT_FAILURE);
     }
@@ -446,16 +439,13 @@ void save()
     size_t osx, osy, id;
     size_t osxb, osyb, idb;
     #pragma omp parallel for private(osx, osxb, osy, osyb, id, idb)
-    for (size_t i = 0; i < Nx; i += pars.x.stride)
-    {
+    for (size_t i = 0; i < Nx; i += pars.x.stride) {
         osx = i * Ny * Nz;
         osxb = i * outy * outz / pars.x.stride;
-        for (size_t j = 0; j < Ny; j += pars.y.stride)
-        {
+        for (size_t j = 0; j < Ny; j += pars.y.stride) {
             osy = osx + j * Nz;
             osyb = osxb + j * outz / pars.y.stride;
-            for (size_t k = 0; k < Nz; k += pars.z.stride)
-            {
+            for (size_t k = 0; k < Nz; k += pars.z.stride) {
                 id = osy + k;
                 idb = osyb + k / pars.z.stride;
                 #ifdef OUTPUT_PHI
@@ -478,8 +468,7 @@ void save()
                 rho_buf[os + idb]  = rho[id];
                 #endif
                 #ifdef CHECK_FOR_NAN
-                if (isnan(field[id]) || isnan(rho[id]))
-                {
+                if (isnan(field[id]) || isnan(rho[id])) {
                     fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
                     exit(EXIT_FAILURE);
                 }
@@ -492,12 +481,10 @@ void save()
     #ifdef OUTPUT_POWER_SPECTRUM
     hsize_t os1 = index * bins;
     #pragma omp parallel for
-    for (size_t i = 0; i < bins; ++i)
-    {
+    for (size_t i = 0; i < bins; ++i) {
         pow_spec_buf[os1 + i] = pow_spec[i];
         #ifdef CHECK_FOR_NAN
-        if (isnan(pow_spec[i]))
-        {
+        if (isnan(pow_spec[i])) {
             fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
             exit(EXIT_FAILURE);
         }
@@ -505,13 +492,11 @@ void save()
     }
     #endif
 
-    if (index == Nt - 1)
-    {
+    if (index == Nt - 1) {
         h5_write_all_buffers(Nt);
         pars.file.index = 0;
     }
-    else
-    {
+    else {
         pars.file.index += 1;
     }
     #ifdef DEBUG
@@ -533,8 +518,7 @@ void h5_read_timeslice()
     dset = H5Dopen(file, H5_TIME_NAME, H5P_DEFAULT);
     dspace = H5Dget_space(dset);
     int ndims = H5Sget_simple_extent_ndims(dspace);
-    if (ndims != 1)
-    {
+    if (ndims != 1) {
         INFO(fputs("Could not read time properly.\n", stderr));
         exit(EXIT_FAILURE);
     }
@@ -546,16 +530,13 @@ void h5_read_timeslice()
     H5Dread(dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, time_tmp);
 
     hsize_t index = Nt;
-    for (size_t i = 0; i < Nt; ++i)
-    {
-        if (time_tmp[i] + DBL_EPSILON >= t)
-        {
+    for (size_t i = 0; i < Nt; ++i) {
+        if (time_tmp[i] + DBL_EPSILON >= t) {
             index = i;
             break;
         }
     }
-    if (index == Nt)
-    {
+    if (index == Nt) {
         INFO(puts("The initial time is larger than the maximal time in"
                     " the h5 file. Starting at last existing timeslice."));
         index = Nt - 1;
@@ -578,8 +559,7 @@ void h5_read_timeslice()
     dspace = H5Dget_space(dset);
     ndims = H5Sget_simple_extent_ndims(dspace);
     H5Sget_simple_extent_dims(dspace, dims, NULL);
-    if (dims[0] != Nt)
-    {
+    if (dims[0] != Nt) {
         INFO(fputs("Dimensions of dataset does not agree with specified"
                     " values.\n", stderr));
         exit(EXIT_FAILURE);
@@ -607,8 +587,7 @@ void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
     int ndims = H5Sget_simple_extent_ndims(dspace);
     hsize_t dims[2];
     H5Sget_simple_extent_dims(dspace, dims, NULL);
-    if (dims[1] != N || ndims != 2)
-    {
+    if (dims[1] != N || ndims != 2) {
         INFO(fputs("Dimensions of dataset does not agree with specified"
                     " values.\n", stderr));
         exit(EXIT_FAILURE);
@@ -632,19 +611,16 @@ void read_initial_data()
     size_t N = pars.N;
 
     FILE *file = fopen(INITIAL_DATAPATH, "r");
-    if (!file)
-    {
+    if (!file) {
         fputs("Could not read initial data file.\n", stderr);
         exit(EXIT_FAILURE);
     }
 
     //TODO: adjust to actual file format, this is just a dummy
     int ii, jj, kk;
-    for (size_t i = 0; i < N; ++i)
-    {
+    for (size_t i = 0; i < N; ++i) {
         if(!fscanf(file, " %d %d %d %lf %lf\n",
-                    &ii, &jj, &kk, &field[i], &field[i + N]))
-        {
+                    &ii, &jj, &kk, &field[i], &field[i + N])) {
             fputs("Could not read initial data file.\n", stderr);
             exit(EXIT_FAILURE);
         }
