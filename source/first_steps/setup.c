@@ -215,6 +215,7 @@ void allocate_external()
     #endif
 
     const size_t M = pars.x.M * pars.y.M * pars.z.M;
+    ksq = fftw_malloc(M * sizeof *ksq);
     #ifdef ENABLE_FFT_FILTER
     filter = fftw_malloc(M * sizeof *filter);
     #endif
@@ -779,6 +780,7 @@ void free_external()
     #ifdef ENABLE_FFT_FILTER
     free(filter);
     #endif
+    fftw_free(ksq);
     fftw_free(tmp.phic);
     fftw_free(tmp.xphic);
     fftw_free(tmp.yphic);
