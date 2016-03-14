@@ -20,49 +20,39 @@ void test_mk_gradient_squared_and_laplacian()
 
     puts("test mk gradient squared and laplacian:");
     fill_field(tmp.xphi + N, test_func_Dx);
-    if (are_fields_equal(tmp.xphi, tmp.xphi + N) == 0)
-    {
+    if (are_fields_equal(tmp.xphi, tmp.xphi + N) == 0) {
         puts("Dx passed\n");
     }
-    else
-    {
+    else {
         puts("Dx failed\n");
     }
     fill_field(tmp.xphi + N, test_func_Dy);
-    if (are_fields_equal(tmp.yphi, tmp.xphi + N) == 0)
-    {
+    if (are_fields_equal(tmp.yphi, tmp.xphi + N) == 0) {
         puts("Dy passed\n");
     }
-    else
-    {
+    else {
         puts("Dy failed\n");
     }
     fill_field(tmp.xphi + N, test_func_Dz);
-    if (are_fields_equal(tmp.zphi, tmp.xphi + N) == 0)
-    {
+    if (are_fields_equal(tmp.zphi, tmp.xphi + N) == 0) {
         puts("Dz passed\n");
     }
-    else
-    {
+    else {
         puts("Dz failed\n");
     }
 
     fill_field(tmp.xphi, test_func_gradsq);
     fill_field(tmp.yphi, test_func_lap);
-    if (are_fields_equal(tmp.xphi, tmp.grad) == 0)
-    {
+    if (are_fields_equal(tmp.xphi, tmp.grad) == 0) {
         puts("gradient squared passed\n");
     }
-    else
-    {
+    else {
         puts("gradient squared failed\n");
     }
-    if (are_fields_equal(tmp.yphi, tmp.lap) == 0)
-    {
+    if (are_fields_equal(tmp.yphi, tmp.lap) == 0) {
         puts("laplace passed\n");
     }
-    else
-    {
+    else {
         puts("laplace failed\n");
     }
     #ifdef DEBUG
@@ -154,16 +144,13 @@ void fill_field(double *f, double (*func)(const double, const double,
     size_t osx, osy;
     double x, y, z;
 
-    for (size_t i = 0; i < Nx; ++i)
-    {
+    for (size_t i = 0; i < Nx; ++i) {
         x = grid[i];
         osx = i * Ny * Nz;
-        for (size_t j = 0; j < Ny; ++j)
-        {
+        for (size_t j = 0; j < Ny; ++j) {
             y = grid[Nx + j];
             osy = osx + j * Nz;
-            for (size_t k = 0; k < Nz; ++k)
-            {
+            for (size_t k = 0; k < Nz; ++k) {
                 z = grid[Nx + Ny + k];
                 f[osy + k] = func(x, y, z);
             }
@@ -173,10 +160,8 @@ void fill_field(double *f, double (*func)(const double, const double,
 
 int are_fields_equal(const double *f, const double *g)
 {
-    for (size_t i = 0; i < pars.N; ++i)
-    {
-        if (equal(f[i], g[i]) != 0)
-        {
+    for (size_t i = 0; i < pars.N; ++i) {
+        if (equal(f[i], g[i]) != 0) {
             return -1;
         }
     }
