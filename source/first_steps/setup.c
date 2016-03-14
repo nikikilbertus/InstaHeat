@@ -453,20 +453,11 @@ void mk_filter_mask()
         for (size_t j = 0; j < My; ++j) {
             osy = osx + j * Mz;
             for (size_t k = 0; k < Mz; ++k) {
-                tmp = 1.0;
-                if (i != 0) {
-                    tmp = filter_window(2.0 *
-                        (i > Nx / 2 ? (int)Nx - (int)i : i) / (double) Nx);
-                }
-                if (pars.dim > 1) {
-                    if (j != 0) {
-                        tmp *= filter_window(2.0 *
-                            (j > Ny / 2 ? (int)Ny - (int)j : j) / (double) Ny);
-                    }
-                    if (pars.dim > 2 && k != 0) {
-                        tmp *= filter_window(2.0 * k / (double) Nz);
-                    }
-                }
+                tmp = filter_window(2.0 *
+                    (i > Nx / 2 ? (int)Nx - (int)i : i) / (double) Nx);
+                tmp *= filter_window(2.0 *
+                    (j > Ny / 2 ? (int)Ny - (int)j : j) / (double) Ny);
+                tmp *= filter_window(2.0 * k / (double) Nz);
                 filter[osy + k] = tmp / (double) N;
             }
         }

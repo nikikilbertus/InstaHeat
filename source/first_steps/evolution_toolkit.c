@@ -102,40 +102,31 @@ void mk_gradient_squared_and_laplacian(double *in)
         mk_power_spectrum(tmp.phic);
     }
 
-    double k_sq;
     size_t osx, osy, id;
-    #pragma omp parallel for private(osx, osy, id, k_sq)
+    #pragma omp parallel for private(osx, osy, id)
     for (size_t i = 0; i < Mx; ++i) {
         osx = i * My * Mz;
         for (size_t j = 0; j < My; ++j) {
             osy = osx + j * Mz;
             for (size_t k = 0; k < Mz; ++k) {
                 id = osy + k;
-                // for laplacian
-                k_sq = pars.z.k2 * k * k;
                 // x derivative
                 if (i > Nx / 2) {
                     tmp.xphic[id] = tmp.phic[id] * pars.x.k
                         * ((int)i - (int)Nx) / N;
-                    k_sq += pars.x.k2 * (Nx - i) * (Nx - i);
                 } else if (2 * i == Nx) {
                     tmp.xphic[id] = 0.0;
-                    k_sq += pars.x.k2 * i * i;
                 } else {
                     tmp.xphic[id] = tmp.phic[id] * pars.x.k * i / N;
-                    k_sq += pars.x.k2 * i * i;
                 }
                 // y derivative
                 if (j > Ny / 2) {
                     tmp.yphic[id] = tmp.phic[id] * pars.y.k
                         * ((int)j - (int)Ny) / N;
-                    k_sq += pars.y.k2 * (Ny - j) * (Ny - j);
                 } else if (2 * j == Ny) {
                     tmp.yphic[id] = 0.0;
-                    k_sq += pars.y.k2 * j * j;
                 } else {
                     tmp.yphic[id] = tmp.phic[id] * pars.y.k * j / N;
-                    k_sq += pars.y.k2 * j * j;
                 }
                 // z derivative
                 if (2 * k == Nz) {
@@ -144,9 +135,9 @@ void mk_gradient_squared_and_laplacian(double *in)
                     tmp.zphic[id] = tmp.phic[id] * pars.z.k * k / N;
                 }
                 // laplacian
-                tmp.phic[id] *= k_sq / N;
+                tmp.phic[id] *= ksq[id] / N;
                 #if PSI_METHOD == PSI_PARABOLIC
-                tmp.psic[id] *= k_sq / N;
+                tmp.psic[id] *= ksq[id] / N;
                 #endif
             }
         }
@@ -310,37 +301,27 @@ void mk_psi(double *f)
     dphi_mean = mean(f + N, N);
     const double dphiextra = 0.5 * a2 * dphi_mean * dphi_mean;
 
-    double k_sq;
     size_t osx, osy, id;
-    #pragma omp parallel for private(k_sq, osx, osy, id)
+    #pragma omp parallel for private(osx, osy, id)
     for (size_t i = 0; i < Mx; ++i) {
         osx = i * My * Mz;
         for (size_t j = 0; j < My; ++j) {
             osy = osx + j * Mz;
             for (size_t k = 0; k < Mz; ++k) {
                 id = osy + k;
-                k_sq = pars.z.k2 * k * k;
                 if (i > Nx / 2) {
-                    k_sq += pars.x.k2 * (Nx - i) * (Nx - i);
                     tmp.fc[id] /= pars.x.k * ((int)i - (int)Nx);
                 } else if (2 * i == Nx || i == 0) {
-                    k_sq += pars.x.k2 * i * i;
                     tmp.fc[id] = 0.0;
                 } else {
-                    k_sq += pars.x.k2 * i * i;
                     tmp.fc[id] /= pars.x.k * i;
                 }
-                if (j > Ny / 2) {
-                    k_sq += pars.y.k2 * (Ny - j) * (Ny - j);
-                } else {
-                    k_sq += pars.y.k2 * j * j;
-                }
-                if (-k_sq < 1.0e-14 || fabs(k_sq + dphiextra) < 1.0e-14) {
+                if (-ksq[id] < 1.0e-14 || fabs(ksq[id] + dphiextra) < 1.0e-14) {
                     tmp.psic[id] = 0.0;
                 } else {
                     tmp.psic[id] = 0.5 * a2 *
                         (tmp.deltarhoc[id] + 3.0 * hubble * tmp.fc[id]) /
-                        ((k_sq + dphiextra) * N);
+                        ((ksq[id] + dphiextra) * N);
                 }
                 tmp.dpsic[id] = 0.5 * tmp.fc[id] / N - hubble * tmp.psic[id];
             }
@@ -380,8 +361,8 @@ void mk_power_spectrum(const fftw_complex *in)
         pow_spec[i] = 0.0;
     }
 
+    //TODO[performance]: parallelize? can I write it as single for loop?
     size_t osx, osy, idx;
-    //TODO[performance]: parallelize?
     for (size_t i = 0; i < Mx; ++i) {
         osx = i * My * Mz;
         for (size_t j = 0; j < My; ++j) {
@@ -392,23 +373,8 @@ void mk_power_spectrum(const fftw_complex *in)
                 } else {
                     pow2_tmp = 2.0 * in[osy + k] * conj(in[osy + k]);
                 }
-                //TODO[performance]: check whether it is faster without this if
-                if (pow2_tmp > 0.0) {
-                    k2_tmp = pars.z.k2 * k * k;
-                    if (i > Nx / 2) {
-                        k2_tmp += pars.x.k2 * (Nx - i) * (Nx - i);
-                    } else {
-                        k2_tmp += pars.x.k2 * i * i;
-                    }
-
-                    if (j > Ny / 2) {
-                        k2_tmp += pars.y.k2 * (Ny - j) * (Ny - j);
-                    } else {
-                        k2_tmp += pars.y.k2 * j * j;
-                    }
-                    idx = (int)trunc(bins * sqrt(k2_tmp / k2_max) - 1.0e-14);
-                    pow_spec[idx] += pow2_tmp / N;
-                }
+                idx = (int)trunc(bins * sqrt(ksq[osy + k] / k2_max) - 1.0e-14);
+                pow_spec[idx] += pow2_tmp / N;
             }
         }
     }
