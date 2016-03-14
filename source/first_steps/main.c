@@ -66,7 +66,8 @@ double poisson_time = 0.0;
 double h5_time_write = 0.0;
 
 // -----------------------------main--------------------------------------------
-int main(int argc, const char * argv[]) {
+int main(int argc, const char * argv[])
+{
 
     #ifdef SHOW_TIMING_INFO
     double start = get_wall_time();
@@ -122,7 +123,8 @@ int main(int argc, const char * argv[]) {
 
 // -----------------------------timing------------------------------------------
 #ifdef SHOW_TIMING_INFO
-double get_wall_time() {
+double get_wall_time()
+{
     struct timeval time;
     if (gettimeofday(&time, NULL))
     {
