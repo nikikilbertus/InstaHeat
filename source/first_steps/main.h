@@ -71,7 +71,7 @@ during execution
 #define INITIAL_CONDITIONS          IC_FROM_DAT_FILE
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/bla3.h5")
+#define DATAPATH                ("../../../data/bla.h5")
 /* #define DATAPATH                ("bla.h5") */
 #define INITIAL_DATAPATH        ("../../../data/karsten/data_64psi.dat")
 
@@ -89,7 +89,7 @@ during execution
  *  track stability, therefore we sum up fourier coefficients into bins
  *  depending on the norm of their k vector, this gives the number of bins used
  */
-#define POWER_SPECTRUM_BINS     (30)
+#define POWER_SPECTRUM_BINS     (50)
 
 // how many timeslices to skip in between writing to file (1: write out all)
 #define TIME_STEP_SKIPS         (1)
@@ -250,6 +250,7 @@ struct parameters
     size_t Ntot;
     size_t Nall;
     size_t outN; // total number of spatial gridpoints for output (with strides)
+    size_t M;
     size_t dim;
     struct timing t;
     struct file_parameters file;
@@ -274,6 +275,15 @@ struct temporary
     complex *psic;
     complex *dpsic;
 };
+
+// grids for ksq and kx, ky, kz
+struct k_grid
+{
+    double *sq;
+    double *x;
+    double *y;
+    double *z;
+}
 
 // --------------------------global variables-----------------------------------
 // we are using rather many global variables; that has the advantage of central
@@ -344,8 +354,8 @@ extern double *pow_spec_buf;
 // filter mask for fourier filtering
 extern double *filter;
 
-// grid of ksq values
-extern double *ksq;
+// default arrays with temporary memory for real to complex dfts
+extern struct k_grid kvec;
 
 // default arrays with temporary memory for real to complex dfts
 extern struct temporary tmp;
