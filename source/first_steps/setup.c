@@ -169,57 +169,60 @@ void allocate_external()
     pow_spec   = calloc(bins, sizeof *pow_spec);
 
     #ifdef OUTPUT_PHI
-    phi_buf       = calloc(buf_size * outN, sizeof *phi_buf);
+    phi_buf = calloc(buf_size * outN, sizeof *phi_buf);
     #endif
     #ifdef OUTPUT_DPHI
-    dphi_buf      = calloc(buf_size * outN, sizeof *dphi_buf);
+    dphi_buf = calloc(buf_size * outN, sizeof *dphi_buf);
     #endif
     #ifdef OUTPUT_PHI_MEAN
-    phi_mean_buf  = calloc(buf_size, sizeof *phi_mean_buf);
+    phi_mean_buf = calloc(buf_size, sizeof *phi_mean_buf);
     #endif
     #ifdef OUTPUT_PHI_VARIANCE
-    phi_var_buf   = calloc(buf_size, sizeof *phi_var_buf);
+    phi_var_buf = calloc(buf_size, sizeof *phi_var_buf);
     #endif
     #ifdef OUTPUT_DPHI_MEAN
     dphi_mean_buf = calloc(buf_size, sizeof *dphi_mean_buf);
     #endif
     #ifdef OUTPUT_DPHI_VARIANCE
-    dphi_var_buf  = calloc(buf_size, sizeof *dphi_var_buf);
+    dphi_var_buf = calloc(buf_size, sizeof *dphi_var_buf);
     #endif
     #ifdef OUTPUT_PSI
-    psi_buf       = fftw_malloc(buf_size * outN * sizeof *psi_buf);
+    psi_buf = fftw_malloc(buf_size * outN * sizeof *psi_buf);
     #endif
     #ifdef OUTPUT_DPSI
-    dpsi_buf      = fftw_malloc(buf_size * outN * sizeof *dpsi_buf);
+    dpsi_buf = fftw_malloc(buf_size * outN * sizeof *dpsi_buf);
     #endif
     #ifdef OUTPUT_PSI_MEAN
-    psi_mean_buf  = calloc(buf_size, sizeof *psi_mean_buf);
+    psi_mean_buf = calloc(buf_size, sizeof *psi_mean_buf);
     #endif
     #ifdef OUTPUT_PSI_VARIANCE
-    psi_var_buf   = calloc(buf_size, sizeof *psi_var_buf);
+    psi_var_buf = calloc(buf_size, sizeof *psi_var_buf);
     #endif
     #ifdef OUTPUT_DPSI_MEAN
     dpsi_mean_buf = calloc(buf_size, sizeof *dpsi_mean_buf);
     #endif
     #ifdef OUTPUT_DPSI_VARIANCE
-    dpsi_var_buf  = calloc(buf_size, sizeof *dpsi_var_buf);
+    dpsi_var_buf = calloc(buf_size, sizeof *dpsi_var_buf);
     #endif
     #ifdef OUTPUT_RHO
-    rho_buf       = fftw_malloc(buf_size * outN * sizeof *rho_buf);
+    rho_buf = fftw_malloc(buf_size * outN * sizeof *rho_buf);
     #endif
     #ifdef OUTPUT_RHO_MEAN
-    rho_mean_buf  = calloc(buf_size, sizeof *rho_mean_buf);
+    rho_mean_buf = calloc(buf_size, sizeof *rho_mean_buf);
     #endif
     #ifdef OUTPUT_RHO_VARIANCE
-    rho_var_buf   = calloc(buf_size, sizeof *rho_var_buf);
+    rho_var_buf = calloc(buf_size, sizeof *rho_var_buf);
     #endif
     #ifdef OUTPUT_POWER_SPECTRUM
-    pow_spec_buf  = calloc(buf_size * bins, sizeof *pow_spec_buf);
+    pow_spec_buf = calloc(buf_size * bins, sizeof *pow_spec_buf);
     #endif
 
-    ksq = fftw_malloc(M * sizeof *ksq);
+    kvec.sq = fftw_malloc(M * sizeof *kvec.sq);
+    kvec.x  = fftw_malloc(M * sizeof *kvec.x);
+    kvec.y  = fftw_malloc(M * sizeof *kvec.y);
+    kvec.z  = fftw_malloc(M * sizeof *kvec.z);
     #ifdef ENABLE_FFT_FILTER
-    filter = fftw_malloc(M * sizeof *filter);
+    filter  = fftw_malloc(M * sizeof *filter);
     #endif
 
     // default arrays to save coefficients of real to complex transforms
@@ -406,6 +409,7 @@ void mk_initial_conditions()
 // create grid with k squared values
 void mk_k_grid()
 {
+    const size_t N  = pars.N;
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
     const size_t Mx = pars.x.M;
@@ -413,23 +417,43 @@ void mk_k_grid()
     const size_t Mz = pars.z.M;
 
     double k2;
-    size_t osx, osy;
-    #pragma omp parallel for private(osx, osy, k2)
+    size_t osx, osy, id;
+    #pragma omp parallel for private(osx, osy, id, k2)
     for (size_t i = 0; i < Mx; ++i) {
         osx = i * My * Mz;
         for (size_t j = 0; j < My; ++j) {
             osy = osx + j * Mz;
             for (size_t k = 0; k < Mz; ++k) {
+                id = osy + k;
+
                 k2 = pars.z.k2 * k * k;
+
                 if (i > Nx / 2) {
+                    kvec.x[id] = pars.x.k * ((int)i - (int)Nx) / N;
                     k2 += pars.x.k2 * (Nx - i) * (Nx - i);
+                } else if (2 * i == Nx) {
+                    kvec.x[id] = 0.0;
+                    k2 += pars.x.k2 * i * i;
                 } else {
+                    kvec.x[id] = pars.x.k * i / N;
                     k2 += pars.x.k2 * i * i;
                 }
-                if (j > Ny / 2) {
+
+                if (i > Ny / 2) {
+                    kvec.y[id] = pars.y.k * ((int)j - (int)Ny) / N;
                     k2 += pars.y.k2 * (Ny - j) * (Ny - j);
-                } else {
+                } else if (2 * j == Ny) {
+                    kvec.y[id] = 0.0;
                     k2 += pars.y.k2 * j * j;
+                } else {
+                    kvec.y[id] = pars.y.k * j / N;
+                    k2 += pars.y.k2 * j * j;
+                }
+
+                if (2 * k == Nz) {
+                    kvec.z[id] = 0.0;
+                } else {
+                    kvec.z[id] = pars.z.k * k / N;
                 }
                 ksq[osy + k] = k2;
             }
@@ -774,7 +798,10 @@ void free_external()
     #ifdef ENABLE_FFT_FILTER
     free(filter);
     #endif
-    fftw_free(ksq);
+    fftw_free(kvec.sq);
+    fftw_free(kvec.x);
+    fftw_free(kvec.y);
+    fftw_free(kvec.z);
     fftw_free(tmp.phic);
     fftw_free(tmp.xphic);
     fftw_free(tmp.yphic);
