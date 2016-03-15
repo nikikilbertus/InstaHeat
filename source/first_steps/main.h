@@ -185,7 +185,7 @@ struct grid_dimension
     size_t M;
     double a; // lower bound of interval
     double b; // upper bound of interval
-    complex k; // a factor used in computing k vectors: k = 2 pi I / L
+    double k; // a factor used in computing k vectors: k = 2 pi I / L
     double k2; // k2 = k*k = -4 pi^2 / L^2
     size_t stride; // strides for output
     size_t outN; // number of output points in this dimension
