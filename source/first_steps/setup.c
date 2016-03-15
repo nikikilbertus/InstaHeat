@@ -75,6 +75,8 @@ void initialize_parameters()
     pars.z.k2 = -TWOPI * TWOPI / ((pars.z.b - pars.z.a) * (pars.z.b - pars.z.a));
     pars.z.stride = STRIDE_Z;
 
+    pars.N = pars.x.N * pars.y.N * pars.z.N;
+
     pars.x.outN = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
     pars.y.outN = (pars.y.N + pars.y.stride - 1) / pars.y.stride;
     pars.z.outN = (pars.z.N + pars.z.stride - 1) / pars.z.stride;
@@ -109,10 +111,10 @@ void initialize_parameters()
             pars.z.M = pars.z.N / 2 + 1;
             break;
     }
+    pars.M = pars.x.M * pars.y.M * pars.z.M;
 
     // the total number of scalars evolved in the integration routine depends on
     // if and how we evolve psi
-    pars.N = pars.x.N * pars.y.N * pars.z.N;
     pars.Nall = 4 * pars.N + 2;
     #if PSI_METHOD == PSI_ELLIPTIC
     pars.Ntot = 2 * pars.N + 1;
@@ -149,6 +151,7 @@ void allocate_external()
     const size_t N    = pars.N;
     const size_t Nall = pars.Nall;
     const size_t outN = pars.outN;
+    const size_t M    = pars.M;
     const size_t bins = pars.file.bins_powspec;
     const size_t buf_size = pars.file.buf_size;
 
@@ -214,7 +217,6 @@ void allocate_external()
     pow_spec_buf  = calloc(buf_size * bins, sizeof *pow_spec_buf);
     #endif
 
-    const size_t M = pars.x.M * pars.y.M * pars.z.M;
     ksq = fftw_malloc(M * sizeof *ksq);
     #ifdef ENABLE_FFT_FILTER
     filter = fftw_malloc(M * sizeof *filter);
@@ -884,7 +886,7 @@ inline complex box_muller()
 {
     const double u1 = (double)rand() / (double)RAND_MAX;
     const double u2 = (double)rand() / (double)RAND_MAX;
-    return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * 1i);
+    return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * I);
 }
 
 // -------------------------printing function-----------------------------------
