@@ -409,9 +409,9 @@ void mk_initial_conditions()
 // create grid with k squared values
 void mk_k_grid()
 {
-    const size_t N  = pars.N;
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
     const size_t Mx = pars.x.M;
     const size_t My = pars.y.M;
     const size_t Mz = pars.z.M;
@@ -429,33 +429,33 @@ void mk_k_grid()
                 k2 = pars.z.k2 * k * k;
 
                 if (i > Nx / 2) {
-                    kvec.x[id] = pars.x.k * ((int)i - (int)Nx) / N;
+                    kvec.x[id] = pars.x.k * ((int)i - (int)Nx);
                     k2 += pars.x.k2 * (Nx - i) * (Nx - i);
                 } else if (2 * i == Nx) {
                     kvec.x[id] = 0.0;
                     k2 += pars.x.k2 * i * i;
                 } else {
-                    kvec.x[id] = pars.x.k * i / N;
+                    kvec.x[id] = pars.x.k * i;
                     k2 += pars.x.k2 * i * i;
                 }
 
                 if (i > Ny / 2) {
-                    kvec.y[id] = pars.y.k * ((int)j - (int)Ny) / N;
+                    kvec.y[id] = pars.y.k * ((int)j - (int)Ny);
                     k2 += pars.y.k2 * (Ny - j) * (Ny - j);
                 } else if (2 * j == Ny) {
                     kvec.y[id] = 0.0;
                     k2 += pars.y.k2 * j * j;
                 } else {
-                    kvec.y[id] = pars.y.k * j / N;
+                    kvec.y[id] = pars.y.k * j;
                     k2 += pars.y.k2 * j * j;
                 }
 
                 if (2 * k == Nz) {
                     kvec.z[id] = 0.0;
                 } else {
-                    kvec.z[id] = pars.z.k * k / N;
+                    kvec.z[id] = pars.z.k * k;
                 }
-                ksq[osy + k] = k2;
+                kvec.sq[osy + k] = k2;
             }
         }
     }

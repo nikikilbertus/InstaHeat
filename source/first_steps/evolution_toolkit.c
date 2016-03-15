@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h>
 #include <math.h>
 #include <complex.h>
 #include <omp.h>
@@ -97,13 +98,13 @@ void mk_gradient_squared_and_laplacian(double *in)
         mk_power_spectrum(tmp.phic);
     }
 
-    complex tmp;
-    #pragma omp parallel for private(tmp)
+    complex pre;
+    #pragma omp parallel for private(pre)
     for (size_t i = 0; i < M; ++i) {
-        tmp = tmp.phic[i] * I;
-        tmp.xphic[i] = tmp * kvec.x[i];
-        tmp.yphic[i] = tmp * kvec.y[i];
-        tmp.zphic[i] = tmp * kvec.z[i];
+        pre = tmp.phic[i] * I / N;
+        tmp.xphic[i] = pre * kvec.x[i];
+        tmp.yphic[i] = pre * kvec.y[i];
+        tmp.zphic[i] = pre * kvec.z[i];
         tmp.phic[i] *= kvec.sq[i] / N;
         #if PSI_METHOD == PSI_PARABOLIC
         tmp.psic[i] *= kvec.sq[i] / N;
@@ -202,13 +203,6 @@ inline double potential(const double f)
 
     // standard f squared potential
     return MASS * MASS * f * f / 2.0;
-
-    // standard f to the fourth (with f squared) potential
-    /* return MASS * MASS * f * f / 2.0 + COUPLING * f * f * f * f / 24.0; */
-
-    /* return LAMBDA; */
-
-    /* return 0.0; */
 }
 
 inline double potential_prime(const double f)
@@ -229,24 +223,16 @@ inline double potential_prime(const double f)
 
     // standard f squared potential
     return MASS * MASS * f;
-
-    // standard f to the fourth (with f squared) potential
-    /* return MASS * MASS * f + COUPLING * f * f * f / 6.0; */
-
-    /* return 0.0; */
 }
 
 // solve poisson like equation for scalar perturbation and its derivative
 void mk_psi(double *f)
 {
-    const size_t Nx = pars.x.N;
-    const size_t Mx = pars.x.M;
-    const size_t My = pars.y.M;
-    const size_t Mz = pars.z.M;
-    const size_t N  = pars.N;
+    const size_t N = pars.N;
+    const size_t M = pars.M;
     const size_t N2p = 2 * N + 2;
     const size_t N3p = 3 * N + 2;
-    const double a  = f[2 * N];
+    const double a = f[2 * N];
     const double a2 = a * a;
     const double hubble = sqrt(rho_mean / 3.0);
 
@@ -272,31 +258,24 @@ void mk_psi(double *f)
     dphi_mean = mean(f + N, N);
     const double dphiextra = 0.5 * a2 * dphi_mean * dphi_mean;
 
-    size_t osx, osy, id;
-    #pragma omp parallel for private(osx, osy, id)
-    for (size_t i = 0; i < Mx; ++i) {
-        osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j) {
-            osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k) {
-                id = osy + k;
-                if (i > Nx / 2) {
-                    tmp.fc[id] /= pars.x.k * ((int)i - (int)Nx);
-                } else if (2 * i == Nx || i == 0) {
-                    tmp.fc[id] = 0.0;
-                } else {
-                    tmp.fc[id] /= pars.x.k * i;
-                }
-                if (-ksq[id] < 1.0e-14 || fabs(ksq[id] + dphiextra) < 1.0e-14) {
-                    tmp.psic[id] = 0.0;
-                } else {
-                    tmp.psic[id] = 0.5 * a2 *
-                        (tmp.deltarhoc[id] + 3.0 * hubble * tmp.fc[id]) /
-                        ((ksq[id] + dphiextra) * N);
-                }
-                tmp.dpsic[id] = 0.5 * tmp.fc[id] / N - hubble * tmp.psic[id];
-            }
+    tmp.fc[0] = 0.0;
+    tmp.psic[0] = 0.0;
+    tmp.dpsic[0] = 0.0;
+    #pragma omp parallel for
+    for (size_t i = 1; i < M; ++i) {
+        if (fabs(kvec.x[i]) < DBL_EPSILON) {
+            tmp.fc[i] = 0.0;
+        } else {
+            tmp.fc[i] /= kvec.x[i] * I;
         }
+        if (fabs(kvec.sq[i] + dphiextra) < 1.0e-14) {
+            tmp.psic[i] = 0.0;
+        } else {
+            tmp.psic[i] = 0.5 * a2 *
+                (tmp.deltarhoc[i] + 3.0 * hubble * tmp.fc[i]) /
+                ((kvec.sq[i] + dphiextra) * N);
+        }
+        tmp.dpsic[i] = 0.5 * tmp.fc[i] / N - hubble * tmp.psic[i];
     }
 
     #ifdef SHOW_TIMING_INFO
@@ -317,36 +296,28 @@ void mk_power_spectrum(const fftw_complex *in)
     const size_t Ny = pars.y.N;
     const size_t Nz = pars.z.N;
     const size_t N = pars.N;
+    const size_t M = pars.M;
     const size_t bins = pars.file.bins_powspec;
-    const size_t Mx = pars.x.M;
-    const size_t My = pars.y.M;
-    const size_t Mz = pars.z.M;
 
     const double k2_max = pars.x.k2 * (Nx/2) * (Nx/2) +
                     pars.y.k2 * (Ny/2) * (Ny/2) + pars.z.k2 * (Nz/2) * (Nz/2);
-    double pow2_tmp = 0.0;
 
     #pragma omp parallel for
     for (size_t i = 0; i < bins; ++i) {
         pow_spec[i] = 0.0;
     }
 
-    //TODO[performance]: parallelize? can I write it as single for loop?
-    size_t osx, osy, idx;
-    for (size_t i = 0; i < Mx; ++i) {
-        osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j) {
-            osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k) {
-                if (k == 0 || 2 * k == Nz) {
-                    pow2_tmp = in[osy + k] * conj(in[osy + k]);
-                } else {
-                    pow2_tmp = 2.0 * in[osy + k] * conj(in[osy + k]);
-                }
-                idx = (int)trunc(bins * sqrt(ksq[osy + k] / k2_max) - 1.0e-14);
-                pow_spec[idx] += pow2_tmp / N;
-            }
+    double pow2_tmp = 0.0;
+    pow_spec[0] += in[0] * conj(in[0]);
+    size_t idx;
+    for (size_t i = 1; i < M; ++i) {
+        if (fabs(kvec.z[i]) < DBL_EPSILON) {
+            pow2_tmp = in[i] * conj(in[i]);
+        } else {
+            pow2_tmp = 2.0 * in[i] * conj(in[i]);
         }
+        idx = (int)trunc(bins * sqrt(kvec.sq[i] / k2_max) - 1.0e-14);
+        pow_spec[idx] += pow2_tmp / N;
     }
 }
 
