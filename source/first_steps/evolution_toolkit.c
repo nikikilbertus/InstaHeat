@@ -424,7 +424,7 @@ void apply_filter_real(double *inout)
 void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
         fftw_complex *psi_io, fftw_complex *dpsi_io)
 {
-    const size_t M = pars.x.M * pars.y.M * pars.z.M;
+    const size_t M = pars.M;
     double fil;
     #pragma omp parallel for private(fil)
     for (size_t i = 0; i < M; ++i) {
