@@ -78,20 +78,15 @@ void mk_rhs(const double t, double *f, double *result)
 // compute the laplacian and the squared gradient of the input and store them
 void mk_gradient_squared_and_laplacian(double *in)
 {
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const size_t Mx = pars.x.M;
-    const size_t My = pars.y.M;
-    const size_t Mz = pars.z.M;
-    const size_t N  = pars.N;
-    const size_t N2p = 2 * N + 2;
+    const size_t N = pars.N;
+    const size_t M = pars.M;
 
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_r2c(p_fw, in, tmp.phic);
         #if PSI_METHOD == PSI_PARABOLIC
+        const size_t N2p = 2 * N + 2;
         fftw_execute_dft_r2c(p_fw, in + N2p, tmp.psic);
         #endif
     #ifdef SHOW_TIMING_INFO
@@ -102,45 +97,17 @@ void mk_gradient_squared_and_laplacian(double *in)
         mk_power_spectrum(tmp.phic);
     }
 
-    size_t osx, osy, id;
-    #pragma omp parallel for private(osx, osy, id)
-    for (size_t i = 0; i < Mx; ++i) {
-        osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j) {
-            osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k) {
-                id = osy + k;
-                // x derivative
-                if (i > Nx / 2) {
-                    tmp.xphic[id] = tmp.phic[id] * pars.x.k
-                        * ((int)i - (int)Nx) / N;
-                } else if (2 * i == Nx) {
-                    tmp.xphic[id] = 0.0;
-                } else {
-                    tmp.xphic[id] = tmp.phic[id] * pars.x.k * i / N;
-                }
-                // y derivative
-                if (j > Ny / 2) {
-                    tmp.yphic[id] = tmp.phic[id] * pars.y.k
-                        * ((int)j - (int)Ny) / N;
-                } else if (2 * j == Ny) {
-                    tmp.yphic[id] = 0.0;
-                } else {
-                    tmp.yphic[id] = tmp.phic[id] * pars.y.k * j / N;
-                }
-                // z derivative
-                if (2 * k == Nz) {
-                    tmp.zphic[id] = 0.0;
-                } else {
-                    tmp.zphic[id] = tmp.phic[id] * pars.z.k * k / N;
-                }
-                // laplacian
-                tmp.phic[id] *= ksq[id] / N;
-                #if PSI_METHOD == PSI_PARABOLIC
-                tmp.psic[id] *= ksq[id] / N;
-                #endif
-            }
-        }
+    complex tmp;
+    #pragma omp parallel for private(tmp)
+    for (size_t i = 0; i < M; ++i) {
+        tmp = tmp.phic[i] * I;
+        tmp.xphic[i] = tmp * kvec.x[i];
+        tmp.yphic[i] = tmp * kvec.y[i];
+        tmp.zphic[i] = tmp * kvec.z[i];
+        tmp.phic[i] *= kvec.sq[i] / N;
+        #if PSI_METHOD == PSI_PARABOLIC
+        tmp.psic[i] *= kvec.sq[i] / N;
+        #endif
     }
 
     #ifdef SHOW_TIMING_INFO
@@ -161,7 +128,12 @@ void mk_gradient_squared_and_laplacian(double *in)
     fftw_time_exe += get_wall_time();
     #endif
 
-    // gradient squared
+    assemble_gradient_squared();
+}
+
+void assemble_gradient_squared()
+{
+    const size_t N = pars.N;
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
         tmp.grad[i] = tmp.xphi[i] * tmp.xphi[i];

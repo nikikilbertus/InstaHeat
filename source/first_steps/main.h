@@ -283,7 +283,7 @@ struct k_grid
     double *x;
     double *y;
     double *z;
-}
+};
 
 // --------------------------global variables-----------------------------------
 // we are using rather many global variables; that has the advantage of central

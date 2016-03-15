@@ -17,6 +17,7 @@ extern struct evolution_flags evo_flags;
 
 void mk_rhs(const double t, double *f, double *result);
 void mk_gradient_squared_and_laplacian(double *in);
+void assemble_gradient_squared();
 void mk_rho(const double *f);
 extern double potential(const double f);
 extern double potential_prime(const double f);
