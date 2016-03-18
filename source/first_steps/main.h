@@ -42,11 +42,11 @@ during execution
 #define VERSION_CONTROL         VERSION_CONTROL_HG
 
 //-------------which files to write to disk-------------------------------------
-#define OUTPUT_PHI
-#define OUTPUT_DPHI
-#define OUTPUT_PSI
-#define OUTPUT_DPSI
-#define OUTPUT_RHO
+/* #define OUTPUT_PHI */
+/* #define OUTPUT_DPHI */
+/* #define OUTPUT_PSI */
+/* #define OUTPUT_DPSI */
+/* #define OUTPUT_RHO */
 
 #define OUTPUT_POWER_SPECTRUM
 
@@ -72,7 +72,7 @@ during execution
 
 // the output is bundled in one .h5 file, enter path here
 #define DATAPATH                ("../../../data/bla.h5")
-/* #define DATAPATH                ("bla.h5") */
+/* #define DATAPATH                ("datanewlong.h5") */
 #define INITIAL_DATAPATH        ("../../../data/karsten/data_64psi.dat")
 
 
@@ -82,7 +82,7 @@ during execution
  *  too), this parameter determines how many time slices are buffered before
  *  writing them to disk, beware of the memory consumption of large buffers!
  */
-#define WRITE_OUT_BUFFER_NUMBER (10)
+#define WRITE_OUT_BUFFER_NUMBER (20)
 
 /**
  *  there is a (very crude and biased!) estimation of the power spectrum to
@@ -171,7 +171,7 @@ during execution
 
 // error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
 #define RELATIVE_TOLERANCE      (1.0e-8)
-#define ABSOLUTE_TOLERANCE      (1.0e-14)
+#define ABSOLUTE_TOLERANCE      (1.0e-12)
 // the timestep is limited from above by this fraction of the hubble time 1/H
 #define MAX_DT_HUBBLE_FRACTION  (1.0e-2)
 
