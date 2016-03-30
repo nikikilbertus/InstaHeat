@@ -16,9 +16,9 @@ void allocate_and_initialize_all()
     allocate_external();
     mk_x_grid();
     mk_fftw_plans();
-    mk_initial_conditions();
     mk_k_grid();
     mk_filter_mask();
+    mk_initial_conditions();
     h5_create_empty_by_path(DATAPATH);
     #ifdef ENABLE_FFT_FILTER
     INFO(puts("Frequency cutoff filtering enabled.\n"));
@@ -91,7 +91,7 @@ void initialize_parameters()
         }
     }
 
-    // due to the memory usage of fftw, we need different upper bounds in for
+    // due to the memory layout of fftw, we need different upper bounds in for
     // loops depending on  the dimension, (the N gridpoints from the last
     // dimension are transformed to floor(N/2)+1 points in fourier space)
     switch (pars.dim) {
@@ -439,7 +439,7 @@ void mk_k_grid()
                     k2 += pars.x.k2 * i * i;
                 }
 
-                if (i > Ny / 2) {
+                if (j > Ny / 2) {
                     kvec.y[id] = pars.y.k * ((int)j - (int)Ny);
                     k2 += pars.y.k2 * (Ny - j) * (Ny - j);
                 } else if (2 * j == Ny) {
@@ -455,7 +455,7 @@ void mk_k_grid()
                 } else {
                     kvec.z[id] = pars.z.k * k;
                 }
-                kvec.sq[osy + k] = k2;
+                kvec.sq[id] = k2;
             }
         }
     }

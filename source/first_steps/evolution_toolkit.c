@@ -308,9 +308,8 @@ void mk_power_spectrum(const fftw_complex *in)
     }
 
     double pow2_tmp = 0.0;
-    pow_spec[0] += in[0] * conj(in[0]);
     size_t idx;
-    for (size_t i = 1; i < M; ++i) {
+    for (size_t i = 0; i < M; ++i) {
         if (fabs(kvec.z[i]) < DBL_EPSILON) {
             pow2_tmp = in[i] * conj(in[i]);
         } else {

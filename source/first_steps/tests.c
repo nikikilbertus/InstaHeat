@@ -13,26 +13,24 @@ void run_all_tests()
 
 void test_mk_gradient_squared_and_laplacian()
 {
-    const size_t N = pars.N;
-
     fill_field(field, test_func);
     mk_gradient_squared_and_laplacian(field);
 
     puts("test mk gradient squared and laplacian:");
-    fill_field(tmp.xphi + N, test_func_Dx);
-    if (are_fields_equal(tmp.xphi, tmp.xphi + N) == 0) {
+    fill_field(tmp.f, test_func_Dx);
+    if (are_fields_equal(tmp.xphi, tmp.f) == 0) {
         puts("Dx passed\n");
     } else {
         puts("Dx failed\n");
     }
-    fill_field(tmp.xphi + N, test_func_Dy);
-    if (are_fields_equal(tmp.yphi, tmp.xphi + N) == 0) {
+    fill_field(tmp.f, test_func_Dy);
+    if (are_fields_equal(tmp.yphi, tmp.f) == 0) {
         puts("Dy passed\n");
     } else {
         puts("Dy failed\n");
     }
-    fill_field(tmp.xphi + N, test_func_Dz);
-    if (are_fields_equal(tmp.zphi, tmp.xphi + N) == 0) {
+    fill_field(tmp.f, test_func_Dz);
+    if (are_fields_equal(tmp.zphi, tmp.f) == 0) {
         puts("Dz passed\n");
     } else {
         puts("Dz failed\n");
@@ -51,6 +49,7 @@ void test_mk_gradient_squared_and_laplacian()
         puts("laplace failed\n");
     }
     #ifdef DEBUG
+    const size_t N = pars.N;
     puts("testgradsq");
     print_vector(tmp.grad, N);
     puts("exact");
@@ -165,5 +164,5 @@ int are_fields_equal(const double *f, const double *g)
 
 int equal(const double a, const double b)
 {
-    return fabs(a - b) < 1e-8 ? 0 : -1;
+    return fabs(a - b) < 1e-10 ? 0 : -1;
 }
