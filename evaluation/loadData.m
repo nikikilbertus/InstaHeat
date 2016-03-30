@@ -1,5 +1,5 @@
-name = 'testfil';
-comp = true;
+name = 'bla';
+comp = false;
 karstenpsi = true;
 loadtimes = true;
 

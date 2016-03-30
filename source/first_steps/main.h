@@ -22,8 +22,8 @@ during execution
 #define SHOW_TIMING_INFO // recommended
 /* #define CHECK_FOR_NAN // not recommended (performance) */
 /* #define ENABLE_PROFILER // only recommended for debugging */
-#define DEBUG // only recommended for debugging (huge output!)
-#define RUN_TESTS_ONLY // testing only (tests.c)
+/* #define DEBUG // only recommended for debugging (huge output!) */
+/* #define RUN_TESTS_ONLY // testing only (tests.c) */
 
 // always leave this here uncommented
 #ifdef SHOW_RUNTIME_INFO
@@ -42,11 +42,11 @@ during execution
 #define VERSION_CONTROL         VERSION_CONTROL_HG
 
 //-------------which files to write to disk-------------------------------------
-/* #define OUTPUT_PHI */
-/* #define OUTPUT_DPHI */
-/* #define OUTPUT_PSI */
-/* #define OUTPUT_DPSI */
-/* #define OUTPUT_RHO */
+#define OUTPUT_PHI
+#define OUTPUT_DPHI
+#define OUTPUT_PSI
+#define OUTPUT_DPSI
+#define OUTPUT_RHO
 
 #define OUTPUT_POWER_SPECTRUM
 
@@ -71,7 +71,7 @@ during execution
 #define INITIAL_CONDITIONS          IC_FROM_DAT_FILE
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/bla.h5")
+#define DATAPATH                ("../../../data/blay.h5")
 /* #define DATAPATH                ("datanewlong.h5") */
 #define INITIAL_DATAPATH        ("../../../data/karsten/data_64psi.dat")
 
@@ -102,7 +102,7 @@ during execution
 // -----------------------simulation preferences--------------------------------
 // how many threads to use for openmp parallelization (also used by fftw)
 // if <= 0, the return value of omp_get_max_threads() is used
-#define THREAD_NUMBER           (1)
+#define THREAD_NUMBER           (0)
 
 // the plan flag used for fftw plans (ESTIMATE, MEASURE, PATIENT, EXHAUSTIVE)
 #define FFTW_DEFAULT_FLAG       (FFTW_PATIENT)
@@ -125,15 +125,15 @@ during execution
 
 // ------------------computational domain---------------------------------------
 // spatial (order is important! use y=z=1 for 1D; use z=1 for 2D)
-#define GRIDPOINTS_X            (4)
-#define GRIDPOINTS_Y            (4)
-#define GRIDPOINTS_Z            (4)
-#define SPATIAL_LOWER_BOUND_X   (-PI)
-#define SPATIAL_UPPER_BOUND_X   (PI)
-#define SPATIAL_LOWER_BOUND_Y   (-PI)
-#define SPATIAL_UPPER_BOUND_Y   (PI)
-#define SPATIAL_LOWER_BOUND_Z   (-PI)
-#define SPATIAL_UPPER_BOUND_Z   (PI)
+#define GRIDPOINTS_X            (64)
+#define GRIDPOINTS_Y            (64)
+#define GRIDPOINTS_Z            (64)
+#define SPATIAL_LOWER_BOUND_X   (0.0)
+#define SPATIAL_UPPER_BOUND_X   (1.0)
+#define SPATIAL_LOWER_BOUND_Y   (0.0)
+#define SPATIAL_UPPER_BOUND_Y   (1.0)
+#define SPATIAL_LOWER_BOUND_Z   (0.0)
+#define SPATIAL_UPPER_BOUND_Z   (1.0)
 
 // temporal
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)

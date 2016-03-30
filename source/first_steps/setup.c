@@ -339,7 +339,7 @@ void mk_initial_conditions()
     center(field + 2 * pars.N + 2, pars.N);
     center(field + 3 * pars.N + 2, pars.N);
         #if PSI_METHOD != PSI_ELLIPTIC
-        /* mk_initial_psi(); */
+        mk_initial_psi();
         #endif
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
     //TODO: need correct values at end of inflation here
@@ -398,9 +398,9 @@ void mk_initial_conditions()
     field[2 * N + 1] = 0.0;
 
     // initialize psi
-    #if PSI_METHOD != PSI_ELLIPTIC
-    mk_initial_psi();
-    #endif
+        #if PSI_METHOD != PSI_ELLIPTIC
+        mk_initial_psi();
+        #endif
     #endif
 
     INFO(puts("Initialized fields on first time slice.\n"));

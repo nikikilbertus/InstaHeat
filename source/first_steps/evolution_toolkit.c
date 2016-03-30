@@ -256,7 +256,7 @@ void mk_psi(double *f)
     #endif
 
     dphi_mean = mean(f + N, N);
-    const double dphiextra = 0.5 * a2 * dphi_mean * dphi_mean;
+    const double dphiextra = 0.5 * dphi_mean * dphi_mean;
 
     tmp.fc[0] = 0.0;
     tmp.psic[0] = 0.0;
@@ -268,12 +268,11 @@ void mk_psi(double *f)
         } else {
             tmp.fc[i] /= kvec.x[i] * I;
         }
-        if (fabs(kvec.sq[i] + dphiextra) < 1.0e-14) {
+        if (fabs(kvec.sq[i] / a2 + dphiextra) < 1.0e-14) {
             tmp.psic[i] = 0.0;
         } else {
-            tmp.psic[i] = 0.5 * a2 *
-                (tmp.deltarhoc[i] + 3.0 * hubble * tmp.fc[i]) /
-                ((kvec.sq[i] + dphiextra) * N);
+            tmp.psic[i] = 0.5 * (tmp.deltarhoc[i] + 3.0 * hubble * tmp.fc[i]) /
+                ((kvec.sq[i] / a2 + dphiextra) * N);
         }
         tmp.dpsic[i] = 0.5 * tmp.fc[i] / N - hubble * tmp.psic[i];
     }
