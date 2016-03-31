@@ -17,7 +17,9 @@ void allocate_and_initialize_all()
     mk_x_grid();
     mk_fftw_plans();
     mk_k_grid();
+    #ifdef ENABLE_FFT_FILTER
     mk_filter_mask();
+    #endif
     mk_initial_conditions();
     h5_create_empty_by_path(DATAPATH);
     #ifdef ENABLE_FFT_FILTER
@@ -287,7 +289,7 @@ void mk_x_grid()
         grid[k] = az + (bz - az) * (k - Nx - Ny) / Nz;
     }
 
-    INFO(puts("Constructed gridpoints.\n"));
+    INFO(puts("Constructed spatial grid.\n"));
 }
 
 // create the fftw plans, IMPORTANT: create BEFORE initializing arrays, because
@@ -339,7 +341,7 @@ void mk_initial_conditions()
     center(field + 2 * pars.N + 2, pars.N);
     center(field + 3 * pars.N + 2, pars.N);
         #if PSI_METHOD != PSI_ELLIPTIC
-        mk_initial_psi();
+        /* mk_initial_psi(); */
         #endif
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
     //TODO: need correct values at end of inflation here
@@ -459,6 +461,7 @@ void mk_k_grid()
             }
         }
     }
+    INFO(puts("Constructed grids for wave vectors.\n"));
 }
 
 // create mask for the fourier filtering
@@ -489,6 +492,7 @@ void mk_filter_mask()
             }
         }
     }
+    INFO(puts("Constructed filter mask grid.\n"));
 }
 
 // the cutoff function for filtering, use either two thirds or fourier smoothing
