@@ -1,8 +1,8 @@
 function [rho] = mkrho(phi, dphi, psi, a, mass)
 N = 64;
 dim = 3;
-aa=-pi;
-bb=pi;
+aa=0;
+bb=1;
 dx = (bb-aa)/N;
 x = aa + (0:N-1)*dx;
 k = [0:N/2-1 0 -N/2+1:-1] * 2*pi/(bb-aa);

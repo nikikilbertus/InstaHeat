@@ -428,12 +428,12 @@ void save()
 
     #if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || defined(OUTPUT_PSI) || \
         defined(OUTPUT_DPSI) || defined(OUTPUT_RHO)
-    hsize_t Nx    = pars.x.N;
-    hsize_t Ny    = pars.y.N;
-    hsize_t Nz    = pars.z.N;
-    hsize_t outy  = pars.y.outN;
-    hsize_t outz  = pars.z.outN;
-    hsize_t outN  = pars.outN;
+    hsize_t Nx = pars.x.N;
+    hsize_t Ny = pars.y.N;
+    hsize_t Nz = pars.z.N;
+    hsize_t outy = pars.y.outN;
+    hsize_t outz = pars.z.outN;
+    hsize_t outN = pars.outN;
     hsize_t os = index * outN;
     size_t osx, osy, id;
     size_t osxb, osyb, idb;

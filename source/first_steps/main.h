@@ -71,7 +71,7 @@ during execution
 #define INITIAL_CONDITIONS          IC_FROM_DAT_FILE
 
 // the output is bundled in one .h5 file, enter path here
-#define DATAPATH                ("../../../data/blay.h5")
+#define DATAPATH                ("../../../data/bla.h5")
 /* #define DATAPATH                ("datanewlong.h5") */
 #define INITIAL_DATAPATH        ("../../../data/karsten/data_64psi.dat")
 
@@ -102,10 +102,10 @@ during execution
 // -----------------------simulation preferences--------------------------------
 // how many threads to use for openmp parallelization (also used by fftw)
 // if <= 0, the return value of omp_get_max_threads() is used
-#define THREAD_NUMBER           (0)
+#define THREAD_NUMBER           (1)
 
 // the plan flag used for fftw plans (ESTIMATE, MEASURE, PATIENT, EXHAUSTIVE)
-#define FFTW_DEFAULT_FLAG       (FFTW_PATIENT)
+#define FFTW_DEFAULT_FLAG       (FFTW_ESTIMATE)
 
 /**
  *  apply a frequency cutoff filter at each time step during the time evolution
@@ -115,7 +115,7 @@ during execution
  *  for smaller grids, and simple (not too nonlinear) scenarios rather try to
  *  adjust tolerances and see what happens to the power spectrum
  */
-#define ENABLE_FFT_FILTER
+/* #define ENABLE_FFT_FILTER */
 
 // choose between the parabolic or the hyperbolic equation to evolve psi
 #define PSI_ELLIPTIC            (0)
@@ -141,7 +141,7 @@ during execution
 #define INITIAL_TIME            (0.0)
 #define FINAL_TIME              (1.0e0)
 #define MAX_STEPS               (1e15)
-#define MINIMAL_DELTA_T         (1.0e-10)
+#define MINIMAL_DELTA_T         (1.0e-6)
 
 // ----------------parameters used in the potential-----------------------------
 /* #define MASS                    (0.11026) // for 50 e-fold hom inflation */

@@ -236,10 +236,35 @@ void mk_psi(double *f)
     const double a2 = a * a;
     const double hubble = sqrt(rho_mean / 3.0);
 
+    // starting with simplest possible
+    phi_mean = mean(f, N);
+    for (size_t i = 0; i < N; ++i) {
+        tmp.deltarho[i] = rho[i] - rho_mean;
+        tmp.f[i] = f[N + i] * (f[i] - phi_mean);
+    }
+
+    fftw_execute_dft_r2c(p_fw, tmp.deltarho, tmp.deltarhoc);
+    fftw_execute_dft_r2c(p_fw, tmp.f, tmp.fc);
+
+    for (size_t i = 1; i < M; ++i) {
+        tmp.phic[i] = 0.5 * a2 * (tmp.deltarhoc[i] +
+                3 * hubble * tmp.fc[i]) / (kvec.sq[i] * N);
+    }
+    tmp.phic[0] = 0.0;
+
+    fftw_execute_dft_c2r(p_bw, tmp.phic, f + N2p);
+
+    for (size_t i = 0; i < N; ++i) {
+        f[N3p + i] = 0.5 * tmp.f[i] - hubble * f[N2p + i];
+    }
+
+    return;
+
     #ifdef SHOW_TIMING_INFO
     poisson_time -= get_wall_time();
     #endif
 
+    // sophisticated original version
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
         tmp.f[i] = f[N + i] * tmp.xphi[i];
