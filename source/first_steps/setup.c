@@ -352,10 +352,15 @@ void mk_initial_conditions()
     /* double phi0 = 2.339383796213256; */
     /* double dphi0 = -2.736358272992573; */
     /* double hubble = 1.934897490588959; */
+
+    const double phi0 = 1.0093430384226378929425913902459;
+    const double dphi0 = -0.713706915863227;
+    const double hubble = sqrt((dphi0 * dphi0 + MASS * MASS * phi0 * phi0) / 6.0);
+
     //pspectre defrost style
-    const double phi0 = 1.0093430384226378929425913902459/sqrt(8.0 * PI);
-    const double dphi0 = 0.0;
-    const double hubble = sqrt(4.0 * PI * (dphi0 * dphi0 + MASS * MASS * phi0 * phi0) / 3.0);
+    /* const double phi0 = 1.0093430384226378929425913902459/sqrt(8.0 * PI); */
+    /* const double dphi0 = 0.0; */
+    /* const double hubble = sqrt(4.0 * PI * (dphi0 * dphi0 + MASS * MASS * phi0 * phi0) / 3.0); */
     mk_bunch_davies(field, hubble, phi0, -0.25);
     mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
     field[2 * pars.N] = A_INITIAL;
@@ -585,7 +590,7 @@ double phi_init(const double x, const double y, const double z,
     /* double amplitude = -2.26961e-06; */
 
     // compare_2, pos= 6000
-    const double scale= 1.0e4;
+    const double scale= 1.0e0;
     const double mean = 0.0510864;
     const double amplitude = -3.743790000000000e-07 * scale;
 
@@ -643,7 +648,7 @@ double dphi_init(const double x, const double y, const double z,
     /* double mean = -0.00475989; */
     /* double amplitude = -2.91473e-09; */
 
-    const double scale = 1.0e4;
+    const double scale = 1.0e0;
     const double mean = 3.255190000000000e-04;
     const double amplitude = 1.742130000000000e-08 * scale;
 
@@ -844,11 +849,9 @@ void mk_bunch_davies(double *f, const double H, const double homo,
     const double dkos = 0.5 * dk / os;
     //TODO: pspectre uses kcutpspectre = 2 * kcutdefrost
     const double kcut2 = 0.25 * nn * nn * dk * dk;
-    /* const double kcut2 = 0.01 * nn * nn * dk * dk; */
     const double meff2 = MASS * MASS - 2.25 * H * H;
     /* const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3))) * (dkos / dxos); */
-    const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3)) *
-            (2.e5/sqrt(8*PI))) * (dkos / dxos);
+    const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3)) * 2.e5) * (dkos / dxos);
 
     if (meff2 <= 0.0) {
         fputs("The effective mass turned out to be negative.\n", stderr);
@@ -903,8 +906,8 @@ void mk_bunch_davies(double *f, const double H, const double homo,
         for (size_t j = 0; j < Ny; ++j) {
             osy = osx + j * nn;
             for (size_t k = 0; k < nn; ++k) {
-                /* tmp.phic[osy + k] *= box_muller(); */
-                tmp.phic[osy + k] *= box_muller() / (8.0 * PI);
+                tmp.phic[osy + k] *= box_muller();
+                /* tmp.phic[osy + k] *= box_muller() / (8.0 * PI); */
             }
         }
     }

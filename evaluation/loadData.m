@@ -1,5 +1,5 @@
-name = 'bla';
-comp = false;
+name = 'comp_ell';
+comp = true;
 karstenpsi = true;
 loadtimes = true;
 

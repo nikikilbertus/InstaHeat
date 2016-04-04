@@ -1,4 +1,4 @@
-name = 'bla';
+name = 'bunchshort';
 interp = false;
 
 % loading the data, replace 'name' with the path where you stored the .h5

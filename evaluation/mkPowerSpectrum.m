@@ -23,7 +23,7 @@ end
 
 kmax = max(ks(:));
 ps = zeros(1, bins);
-for i = 1:N
+for i = 2:N
     idx = int64(fix(bins * (ks(i) / kmax) - 1e-10) + 1);
     if(idx > bins)
         error('wrong index');

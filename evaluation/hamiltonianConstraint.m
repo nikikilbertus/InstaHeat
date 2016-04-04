@@ -1,4 +1,4 @@
-function [check, t1, t2, t3] = hamiltonianConstraint(psi, dpsi, a, H, rho)
+function [check, t1, t2, t3] = hamiltonianConstraint(psi, dpsi, a, rho)
 N = 64;
 dim = 3;
 aa=0;
@@ -6,8 +6,10 @@ bb=1;
 dx = (bb-aa)/N;
 x = aa + (0:N-1)*dx;
 k = [0:N/2 -N/2+1:-1] * 2*pi/(bb-aa);
-[X,Y,Z] = meshgrid(k,k,k);
-kk = X.^2 + Y.^2 + Z.^2;
+[kx,ky,kz] = ndgrid(k,k,k);
+kk = kx.^2 + ky.^2 + kz.^2;
+
+H = sqrt(mean(rho(:)) / 3);
 
 psilap = ifftn(-kk.*fftn(psi));
 % psilap = del2(psi, dx) * 2 * dim;

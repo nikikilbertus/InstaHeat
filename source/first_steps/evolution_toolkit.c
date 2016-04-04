@@ -238,9 +238,10 @@ void mk_psi(double *f)
 
     // starting with simplest possible
     phi_mean = mean(f, N);
+    dphi_mean = mean(f + N, N);
     for (size_t i = 0; i < N; ++i) {
         tmp.deltarho[i] = rho[i] - rho_mean;
-        tmp.f[i] = f[N + i] * (f[i] - phi_mean);
+        tmp.f[i] = dphi_mean * (f[i] - phi_mean);
     }
 
     fftw_execute_dft_r2c(p_fw, tmp.deltarho, tmp.deltarhoc);
