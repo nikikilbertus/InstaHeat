@@ -1,6 +1,6 @@
 function [rho] = mkrho(phi, dphi, psi, a, mass, L)
-N = 64;
-dim = 3;
+N = size(phi,1);
+dim = ndims(phi);
 aa=0;
 bb=L;
 dx = (bb-aa)/N;

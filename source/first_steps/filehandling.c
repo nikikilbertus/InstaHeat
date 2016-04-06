@@ -121,6 +121,18 @@ void h5_create_empty_by_path(const char *name)
     val[2] = pars.z.N;
     h5_write_parameter(H5_GRIDPOINTS_INTERNAL_NAME, val, 3);
 
+    val[0] = SPATIAL_LOWER_BOUND_X;
+    val[1] = SPATIAL_UPPER_BOUND_X;
+    h5_write_parameter(H5_SPATIAL_BOUNDS_X_NAME, val, 2);
+
+    val[0] = SPATIAL_LOWER_BOUND_Y;
+    val[1] = SPATIAL_UPPER_BOUND_Y;
+    h5_write_parameter(H5_SPATIAL_BOUNDS_Y_NAME, val, 2);
+
+    val[0] = SPATIAL_LOWER_BOUND_Z;
+    val[1] = SPATIAL_UPPER_BOUND_Z;
+    h5_write_parameter(H5_SPATIAL_BOUNDS_Z_NAME, val, 2);
+
     val[0] = pars.x.outN;
     val[1] = pars.y.outN;
     val[2] = pars.z.outN;

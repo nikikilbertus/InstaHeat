@@ -850,7 +850,6 @@ void mk_bunch_davies(double *f, const double H, const double homo,
     //TODO: pspectre uses kcutpspectre = 2 * kcutdefrost
     const double kcut2 = 0.25 * nn * nn * dk * dk;
     const double meff2 = MASS * MASS - 2.25 * H * H;
-    /* const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3))) * (dkos / dxos); */
     const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3)) * MASS_PLANCK) *
         (dkos / dxos);
 

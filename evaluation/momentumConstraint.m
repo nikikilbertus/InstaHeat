@@ -1,6 +1,6 @@
 function [check, t1, t2] = momentumConstraint(psi, dpsi, phi, dphi, rho, L)
-N = 64;
-dim = 3;
+N = size(psi,1);
+dim = ndims(psi);
 aa=0;
 bb=L;
 dx = (bb-aa)/N;

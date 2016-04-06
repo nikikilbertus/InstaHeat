@@ -1,6 +1,6 @@
 function [check, t1, t2, t3] = hamiltonianConstraint(psi, dpsi, a, rho, L)
-N = 64;
-dim = 3;
+N = size(psi,1);
+dim = ndims(psi);
 aa=0;
 bb=L;
 dx = (bb-aa)/N;
