@@ -338,8 +338,8 @@ void mk_initial_conditions()
     read_initial_data();
     field[2 * pars.N] = A_INITIAL;
     field[2 * pars.N + 1] = 0.0;
-    center(field + 2 * pars.N + 2, pars.N);
-    center(field + 3 * pars.N + 2, pars.N);
+    /* center(field + 2 * pars.N + 2, pars.N); */
+    /* center(field + 3 * pars.N + 2, pars.N); */
         #if PSI_METHOD != PSI_ELLIPTIC
         mk_initial_psi();
         #endif
@@ -851,7 +851,8 @@ void mk_bunch_davies(double *f, const double H, const double homo,
     const double kcut2 = 0.25 * nn * nn * dk * dk;
     const double meff2 = MASS * MASS - 2.25 * H * H;
     /* const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3))) * (dkos / dxos); */
-    const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3)) * 2.e5) * (dkos / dxos);
+    const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3)) * MASS_PLANCK) *
+        (dkos / dxos);
 
     if (meff2 <= 0.0) {
         fputs("The effective mass turned out to be negative.\n", stderr);
@@ -907,7 +908,6 @@ void mk_bunch_davies(double *f, const double H, const double homo,
             osy = osx + j * nn;
             for (size_t k = 0; k < nn; ++k) {
                 tmp.phic[osy + k] *= box_muller();
-                /* tmp.phic[osy + k] *= box_muller() / (8.0 * PI); */
             }
         }
     }

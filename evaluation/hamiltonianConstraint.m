@@ -1,8 +1,8 @@
-function [check, t1, t2, t3] = hamiltonianConstraint(psi, dpsi, a, rho)
+function [check, t1, t2, t3] = hamiltonianConstraint(psi, dpsi, a, rho, L)
 N = 64;
 dim = 3;
 aa=0;
-bb=1;
+bb=L;
 dx = (bb-aa)/N;
 x = aa + (0:N-1)*dx;
 k = [0:N/2 -N/2+1:-1] * 2*pi/(bb-aa);

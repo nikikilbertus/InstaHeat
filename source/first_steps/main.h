@@ -12,7 +12,7 @@
 #define MIN(x, y)               (((x) > (y)) ? (y) : (x))
 
 // seed for random number generator in creation of initial conditions
-#define SEED                    (1139)
+#define SEED                    (129)
 
 /*
 compiler switches for debugging, testing, profiling and additional information
@@ -125,9 +125,9 @@ during execution
 
 // ------------------computational domain---------------------------------------
 // spatial (order is important! use y=z=1 for 1D; use z=1 for 2D)
-#define GRIDPOINTS_X            (64)
-#define GRIDPOINTS_Y            (64)
-#define GRIDPOINTS_Z            (64)
+#define GRIDPOINTS_X            (128)
+#define GRIDPOINTS_Y            (128)
+#define GRIDPOINTS_Z            (128)
 #define SPATIAL_LOWER_BOUND_X   (0.0)
 #define SPATIAL_UPPER_BOUND_X   (10.0)
 #define SPATIAL_LOWER_BOUND_Y   (0.0)
@@ -139,7 +139,7 @@ during execution
 // initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (1.0e-5)
 #define INITIAL_TIME            (0.0)
-#define FINAL_TIME              (2.0e3)
+#define FINAL_TIME              (1.0e5)
 #define MAX_STEPS               (1e15)
 #define MINIMAL_DELTA_T         (1.0e-9)
 
@@ -150,6 +150,7 @@ during execution
 /* #define MASS                    (16.418149637955437) // defrost */
 /* #define MASS                    (9.973557010035818e-7) // pspectre defrost */
 #define MASS_KARSTEN            (1.0e-2)
+#define MASS_PLANCK             (2.0e5) // for bunch davies
 #define COUPLING                (1.0) // coupling in a phi4 potential
 #define LAMBDA                  (4.721e-5) // "cosmological constant"
 /* #define A_INITIAL               (1.05249e3) // compare_2, compare_psi, 5500 */
@@ -158,6 +159,7 @@ during execution
 /* #define A_INITIAL               (1.370074629050061e5) // data_64_0 */
 /* #define A_INITIAL               (6.227758258677358e4) // data_64psi_1 */
 /* #define A_INITIAL               (1.868327477603207e4) // data_64psi_2 */
+/* #define A_INITIAL               (6.227611966276128e3) // data_64psi_3 */
 #define A_INITIAL               (1.0)
 // for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
 

@@ -242,6 +242,7 @@ void mk_psi(double *f)
     for (size_t i = 0; i < N; ++i) {
         tmp.deltarho[i] = rho[i] - rho_mean;
         tmp.f[i] = dphi_mean * (f[i] - phi_mean);
+        /* tmp.f[i] = dphi_mean * (f[i] - phi_mean); */
     }
 
     fftw_execute_dft_r2c(p_fw, tmp.deltarho, tmp.deltarhoc);
@@ -260,12 +261,13 @@ void mk_psi(double *f)
     }
 
     return;
+    //-------------------------------------------------------------------------
 
+    // sophisticated original version
     #ifdef SHOW_TIMING_INFO
     poisson_time -= get_wall_time();
     #endif
 
-    // sophisticated original version
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
         tmp.f[i] = f[N + i] * tmp.xphi[i];
