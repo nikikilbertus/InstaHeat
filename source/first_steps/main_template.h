@@ -42,25 +42,25 @@ during execution
 #define VERSION_CONTROL         (_VC_)
 
 //-------------which files to write to disk-------------------------------------
-/* #define OUTPUT_PHI */
-/* #define OUTPUT_DPHI */
-/* #define OUTPUT_PSI */
-/* #define OUTPUT_DPSI */
-/* #define OUTPUT_RHO */
+#define _OPHI_
+#define _ODPHI_
+#define _OPSI_
+#define _ODPSI_
+#define _ORHO_
 
-#define OUTPUT_POWER_SPECTRUM
+#define _OPOWSPEC_
 
-#define OUTPUT_PHI_MEAN
-#define OUTPUT_DPHI_MEAN
-#define OUTPUT_PSI_MEAN
-#define OUTPUT_DPSI_MEAN
-#define OUTPUT_RHO_MEAN
+#define _OPHIM_
+#define _ODPHIM_
+#define _OPSIM_
+#define _ODPSIM_
+#define _ORHOM_
 
-#define OUTPUT_PHI_VARIANCE
-#define OUTPUT_DPHI_VARIANCE
-#define OUTPUT_PSI_VARIANCE
-#define OUTPUT_DPSI_VARIANCE
-#define OUTPUT_RHO_VARIANCE
+#define _OPHIV_
+#define _ODPHIV_
+#define _OPSIV_
+#define _ODPSIV_
+#define _ORHOV_
 
 // ------------file handling parameters for writing to disk---------------------
 // where to get the initial conditions from

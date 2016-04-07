@@ -1,5 +1,14 @@
 #!/bin/bash
 
+function setdef {
+    if [ "$1" -eq "1" ]
+    then
+        sed -i -e "s/$2/$3/g" main.h
+    else
+        sed -i -e "s/$2/MISSING_INPUT/g" main.h
+    fi
+}
+
 source parameters.sh
 
 cp main_template.h main.h
@@ -48,12 +57,27 @@ sed -i -e "s/_SEED_/${SEED}/g" main.h
 sed -i -e "s/_COUPLING_/${COUPLING}/g" main.h
 sed -i -e "s/_LAMBDA_/${LAMBDA}/g" main.h
 
-if [ "${ENABLE_FFT_FILTER}" -eq "1" ]
-then
-    sed -i -e "s/_FILTER_/ENABLE_FFT_FILTER/g" main.h
-else
-    sed -i -e "s/_FILTER_/DISABLE_FFT_FILTER/g" main.h
-fi
+setdef ${ENABLE_FFT_FILTER} "_FILTER_" "ENABLE_FFT_FILTER"
+
+setdef ${PHI} "_OPHI_" "OUTPUT_PHI"
+setdef ${DPHI} "_ODPHI_" "OUTPUT_DPHI"
+setdef ${PSI} "_OPSI_" "OUTPUT_PSI"
+setdef ${DPSI} "_ODPSI_" "OUTPUT_DPSI"
+setdef ${RHO} "_ORHO_" "OUTPUT_RHO"
+
+setdef ${PHI_MEAN} "_OPHIM_" "OUTPUT_PHI_MEAN"
+setdef ${DPHI_MEAN} "_ODPHIM_" "OUTPUT_DPHI_MEAN"
+setdef ${PSI_MEAN} "_OPSIM_" "OUTPUT_PSI_MEAN"
+setdef ${DPSI_MEAN} "_ODPSIM_" "OUTPUT_DPSI_MEAN"
+setdef ${RHO_MEAN} "_ORHOM_" "OUTPUT_RHO_MEAN"
+
+setdef ${PHI_VARIANCE} "_OPHIV_" "OUTPUT_PHI_VARIANCE"
+setdef ${DPHI_VARIANCE} "_ODPHIV_" "OUTPUT_DPHI_VARIANCE"
+setdef ${PSI_VARIANCE} "_OPSIV_" "OUTPUT_PSI_VARIANCE"
+setdef ${DPSI_VARIANCE} "_ODPSIV_" "OUTPUT_DPSI_VARIANCE"
+setdef ${RHO_VARIANCE} "_ORHOV_" "OUTPUT_RHO_VARIANCE"
+
+setdef ${POWER_SPECTRUM} "_OPOWSPEC_" "OUTPUT_POWER_SPECTRUM"
 
 rm main.h-e
 #TODO: output stuff
