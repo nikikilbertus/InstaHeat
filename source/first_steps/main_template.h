@@ -24,6 +24,9 @@ during execution
 /* #define ENABLE_PROFILER // only recommended for debugging */
 /* #define DEBUG // only recommended for debugging (huge output!) */
 /* #define RUN_TESTS_ONLY // testing only (tests.c) */
+#define RK4                 (0)
+#define DOPRI853            (1)
+#define INTEGRATION_METHOD  (DOPRI853)
 
 // always leave this here uncommented
 #ifdef SHOW_RUNTIME_INFO
