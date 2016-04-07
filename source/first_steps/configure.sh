@@ -16,7 +16,7 @@ cp main_template.h main.h
 sed -i -e "s;_PATH_;${DATAPATH};g" main.h
 sed -i -e "s;_IPATH_;${INITIAL_DATAPATH};g" main.h
 sed -i -e "s/_IC_/${INITIAL_CONDITIONS}/g" main.h
-sed -i -e "s/_METHOD_/${PSI_METHOD}/g" main.h
+sed -i -e "s/_PM_/${PSI_METHOD}/g" main.h
 sed -i -e "s/_M_/${MASS}/g" main.h
 sed -i -e "s/_A_/${A_INITIAL}/g" main.h
 sed -i -e "s/_TF_/${FINAL_TIME}/g" main.h
@@ -45,6 +45,7 @@ sed -i -e "s/_THREADS_/${THREAD_NUMBER}/g" main.h
 sed -i -e "s/_FFTW_/${FFTW_DEFAULT_FLAG}/g" main.h
 sed -i -e "s/_VC_/${VERSION_CONTROL}/g" main.h
 
+sed -i -e "s/_IM_/${INTEGRATION_METHOD}/g" main.h
 sed -i -e "s/_TI_/${INITIAL_TIME}/g" main.h
 sed -i -e "s/_DELT_/${DELTA_T}/g" main.h
 sed -i -e "s/_MINDELT_/${MINIMAL_DELTA_T}/g" main.h
