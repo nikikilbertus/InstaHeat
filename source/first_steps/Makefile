@@ -1,4 +1,4 @@
-TARGET = first_steps
+TARGET = run
 LIBS = -L /usr/local/lib -lfftw3_omp -lfftw3 -lm -fopenmp
 CC = h5cc
 CFLAGS = -std=c99 -fopenmp -O2 -g -Wall -march=native -I /usr/local/include
@@ -14,6 +14,7 @@ OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
 HEADERS = $(wildcard *.h)
 
 %.o: %.c $(HEADERS)
+	./configure.sh
 	$(CC) $(CFLAGS) -c $< -o $@
 
 .PRECIOUS: $(TARGET) $(OBJECTS)
