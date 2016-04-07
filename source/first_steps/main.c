@@ -87,8 +87,11 @@ int main(int argc, const char * argv[])
     #endif
 
     // main call to integration routine
-    /* run_rk4(); */
+    #if INTEGRATION_METHOD == RK4
+    run_rk4();
+    #elif INTEGRATION_METHOD == DOPRI853
     run_dopri853();
+    #endif
 
     #ifdef ENABLE_PROFILER
     ProfilerStop();
