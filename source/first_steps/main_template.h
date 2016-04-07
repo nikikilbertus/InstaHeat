@@ -26,7 +26,7 @@ during execution
 /* #define RUN_TESTS_ONLY // testing only (tests.c) */
 #define RK4                 (0)
 #define DOPRI853            (1)
-#define INTEGRATION_METHOD  (DOPRI853)
+#define INTEGRATION_METHOD  (_IM_)
 
 // always leave this here uncommented
 #ifdef SHOW_RUNTIME_INFO
@@ -124,7 +124,7 @@ during execution
 #define PSI_ELLIPTIC            (0)
 #define PSI_HYPERBOLIC          (1)
 #define PSI_PARABOLIC           (2)
-#define PSI_METHOD              (_METHOD_)
+#define PSI_METHOD              (_PM_)
 
 // ------------------computational domain---------------------------------------
 // spatial (order is important! use y=z=1 for 1D; use z=1 for 2D)
