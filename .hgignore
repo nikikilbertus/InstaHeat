@@ -7,6 +7,9 @@ syntax: glob
 *.o
 *prog
 
+# actual main header file (is created from main_template.h)
+main.h
+
 # any data and input files (might allow .txt input files later)
 *.txt
 *.h5
