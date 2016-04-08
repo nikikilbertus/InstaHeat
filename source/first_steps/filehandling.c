@@ -436,8 +436,7 @@ void save()
     rho_var_buf[index] = rho_var;
     #endif
 
-    #if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || defined(OUTPUT_PSI) || \
-        defined(OUTPUT_DPSI) || defined(OUTPUT_RHO)
+    #ifdef LARGE_OUTPUT
     hsize_t N2p = N2 + 2;
     hsize_t N3p = 3 * N + 2;
     hsize_t Nx = pars.x.N;
