@@ -388,7 +388,12 @@ void mk_k_grid()
     INFO(puts("Constructed grids for wave vectors.\n"));
 }
 
-// create mask for the fourier filtering
+/**
+ * @brief Construct an arrray for filtering out high modes in Fourier space.
+ *
+ * Fills the global array filter with multiplicative factors that can be applied
+ * pointwise to a field in Fourier space to cut off high frequency modes.
+ */
 void mk_filter_mask()
 {
     const size_t N = pars.N;
