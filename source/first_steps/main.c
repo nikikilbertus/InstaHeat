@@ -15,8 +15,12 @@
 #include "filehandling.h"
 #include "tests.h"
 
-// -----------------------------global variables--------------------------------
-// explanation in main.h
+/**
+ * @file main.c
+ * @brief Declaration of global variables, the main routine and one function for
+ * wall clock time.
+ */
+
 struct parameters pars;
 double *time_buf;
 double *field;
@@ -65,10 +69,11 @@ double filter_time = 0.0;
 double poisson_time = 0.0;
 double h5_time_write = 0.0;
 
-// -----------------------------main--------------------------------------------
+/**
+ * @brief Main routine: Calls setup, integration and cleanup routines.
+ */
 int main(int argc, const char * argv[])
 {
-
     #ifdef SHOW_TIMING_INFO
     double start = get_wall_time();
     #endif
@@ -85,7 +90,6 @@ int main(int argc, const char * argv[])
     ProfilerStart("testprofile.prof");
     #endif
 
-    // main call to integration routine
     #if INTEGRATION_METHOD == RK4
     run_rk4();
     #elif INTEGRATION_METHOD == DOPRI853
@@ -124,8 +128,14 @@ int main(int argc, const char * argv[])
     return 0;
 }
 
-// -----------------------------timing------------------------------------------
 #ifdef SHOW_TIMING_INFO
+/**
+ * @brief Get wall clock time for timing analysis.
+ *
+ * Only differences in wall clock times are used for timing analysis.
+ *
+ * @return The current wall clock time in seconds since a fixed time.
+ */
 double get_wall_time()
 {
     struct timeval time;
