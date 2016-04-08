@@ -424,20 +424,21 @@ void mk_filter_mask()
     INFO(puts("Constructed filter mask.\n"));
 }
 
-// the cutoff function for filtering, use either two thirds or fourier smoothing
+/**
+ * @brief The specific shape of the cutoff for high frequency modes.
+ *
+ * We have found the exponential cutoff function described in TODO[link] to
+ * paper to workd well for our purposes. It keeps more modes than the common two
+ * thrids rule.
+ *
+ * @see mk_filter_mask(), TODO[link]
+ */
 inline double filter_window(const double x)
 {
-    // fourier smoothing
     return exp(-36.0 * pow(x, 36));
 
     // two thirds rule
     // return x < 2.0/3.0 ? x : 0.0;
-
-    // miscellaneous, have been used in testing
-    /* return 1. - tanh( 1. / ( 1. - pow(x, 8) ) - 1. ); */
-    /* return exp(1. + 1. / ( pow(x, 8) - 1. )); */
-    /* return 0.5 * ( 1. + cos( pow(x, 8) * PI ) ); */
-    /* return 0.0; */
 }
 
 // setup initial conditions for the field
