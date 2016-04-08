@@ -526,6 +526,9 @@ void mk_initial_psi()
  */
 void initialize_from_bunch_davies()
 {
+    size_t Nx = pars.x.N;
+    size_t Ny = pars.y.N;
+    size_t Nz = pars.z.N;
     if (pars.dim != 3) {
         fputs("Bunch Davies vacuum works only in three dimensions.\n", stderr);
         exit(EXIT_FAILURE);
