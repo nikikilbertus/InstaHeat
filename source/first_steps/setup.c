@@ -9,6 +9,21 @@
 #include "filehandling.h"
 #include "main.h"
 
+/**
+ * @file setup.c
+ * @brief One time call to setup/initialization destroy/cleanup before and after
+ * the simulation respectively.
+ *
+ * Only the functions allocate_and_initialize_all() and free_and_destroy_all()
+ * are called from outside this file. Each of them is called exactly once per
+ * simulation. Therefore, performance is not an issue in this file.
+ */
+
+/**
+ * @brief Successively calls the subroutines in this file necessary to setup
+ * everything for the simulation.
+ *
+ *  */
 void allocate_and_initialize_all()
 {
     initialize_threading();
@@ -27,7 +42,6 @@ void allocate_and_initialize_all()
     #else
     INFO(puts("Filtering disabled.\n"));
     #endif
-
     #if PSI_METHOD == PSI_ELLIPTIC
     INFO(puts("Solving elliptic equation for psi at each timesetp.\n"));
     #elif PSI_METHOD == PSI_PARABOLIC
@@ -37,6 +51,12 @@ void allocate_and_initialize_all()
     #endif
 }
 
+/**
+ * @brief Initialize fftw3 with the specified numbers of threads.
+ *
+ * If the parameter THREAD_NUMBER is 0, we initialize fftw3 with
+ * omp_set_num_threads() threads.
+ */
 void initialize_threading()
 {
     int threadnum, threadinit;
@@ -52,9 +72,12 @@ void initialize_threading()
 }
 
 /**
- *  initialize the values in the paramters_t pars variable, mostly from defines
- *  in main.h; using the struct gives more flexibility than using the defines
- *  throughout the code
+ * @brief Initialize the values in the struct parameters pars.
+ *
+ * Most of the values come from preprocessor defines, which in turn are filled
+ * from the external parameters.sh file before compilation. However, some
+ * parameters are computed from others in non trivial ways. The struct pars
+ * provides a flexible way to access all parameters in a centeral global scope.
  */
 void initialize_parameters()
 {
@@ -64,12 +87,14 @@ void initialize_parameters()
     pars.x.k  = TWOPI / (pars.x.b - pars.x.a);
     pars.x.k2 = -TWOPI * TWOPI / ((pars.x.b - pars.x.a) * (pars.x.b - pars.x.a));
     pars.x.stride = STRIDE_X;
+
     pars.y.N  = GRIDPOINTS_Y;
     pars.y.a  = SPATIAL_LOWER_BOUND_Y;
     pars.y.b  = SPATIAL_UPPER_BOUND_Y;
     pars.y.k  = TWOPI / (pars.y.b - pars.y.a);
     pars.y.k2 = -TWOPI * TWOPI / ((pars.y.b - pars.y.a) * (pars.y.b - pars.y.a));
     pars.y.stride = STRIDE_Y;
+
     pars.z.N  = GRIDPOINTS_Z;
     pars.z.a  = SPATIAL_LOWER_BOUND_Z;
     pars.z.b  = SPATIAL_UPPER_BOUND_Z;
@@ -78,13 +103,13 @@ void initialize_parameters()
     pars.z.stride = STRIDE_Z;
 
     pars.N = pars.x.N * pars.y.N * pars.z.N;
+    pars.Nall = 4 * pars.N + 2;
 
     pars.x.outN = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
     pars.y.outN = (pars.y.N + pars.y.stride - 1) / pars.y.stride;
     pars.z.outN = (pars.z.N + pars.z.stride - 1) / pars.z.stride;
     pars.outN = pars.x.outN * pars.y.outN * pars.z.outN;
 
-    // set the number of dimensions according to gridpoints in each direction
     pars.dim = 3;
     if (pars.z.N == 1) {
         pars.dim = 2;
@@ -94,7 +119,7 @@ void initialize_parameters()
     }
 
     // due to the memory layout of fftw, we need different upper bounds in for
-    // loops depending on  the dimension, (the N gridpoints from the last
+    // loops depending on the dimension, (the N gridpoints from the last
     // dimension are transformed to floor(N/2)+1 points in fourier space)
     switch (pars.dim) {
         case 1:
@@ -115,9 +140,7 @@ void initialize_parameters()
     }
     pars.M = pars.x.M * pars.y.M * pars.z.M;
 
-    // the total number of scalars evolved in the integration routine depends on
-    // if and how we evolve psi
-    pars.Nall = 4 * pars.N + 2;
+    // the evolution scheme for psi dictates which fields are evolved
     #if PSI_METHOD == PSI_ELLIPTIC
     pars.Ntot = 2 * pars.N + 1;
     #elif PSI_METHOD == PSI_PARABOLIC
@@ -140,8 +163,7 @@ void initialize_parameters()
     pars.file.buf_size = WRITE_OUT_BUFFER_NUMBER;
     pars.file.skip = TIME_STEP_SKIPS;
     pars.file.bins_powspec = POWER_SPECTRUM_BINS;
-    INFO(printf("Initialized parameters using %zu dimension(s).\n\n",
-            pars.dim));
+    INFO(printf("Initialized parameters for %zu dimension(s).\n\n", pars.dim));
 }
 
 // allocate memory for all external variables
