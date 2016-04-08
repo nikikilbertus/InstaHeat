@@ -23,6 +23,8 @@
  * @brief Successively calls the subroutines in this file necessary to setup
  * everything for the simulation.
  *
+ * A single call to this function sets up everything for the simulation. After
+ * this call, on of the available integration routines can be started.
  *  */
 void allocate_and_initialize_all()
 {
@@ -166,8 +168,7 @@ void initialize_parameters()
 }
 
 /**
- * @brief Allocate memory for all external variables
- *
+ * @brief Allocate memory for all external (i.e. global) variables.
  */
 void allocate_external()
 {
@@ -276,8 +277,18 @@ void allocate_external()
     INFO(puts("Allocated memory for external variables.\n"));
 }
 
-// create the fftw plans, IMPORTANT: create BEFORE initializing arrays, because
-// setting up the plans destroys the arrays!
+/**
+ * @brief Setup the fftw plans for discrete fourier transforms.
+ *
+ * The plans have to be created __before__ the arrays involved in the planning
+ * procedure are initialized. In some planning modes, the values of the arrays
+ * are destroyed during planning. We create the plans for fixed global arrays
+ * and reuse them for various different arrays. One has to be careful that later
+ * arrays fulfil the memory alignment.
+ *
+ * @see FFTW3 documentation for more information on memory alignment (for SIMD
+ * operations).
+ */
 void mk_fftw_plans()
 {
     const size_t Nx = pars.x.N;
