@@ -299,9 +299,6 @@ struct k_grid
 // simulation parameters
 extern struct parameters pars;
 
-// spatial gridpoints
-extern double *grid;
-
 // time slices buffer
 extern double *time_buf;
 
