@@ -458,6 +458,19 @@ void mk_initial_conditions()
     #elif INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
     initialize_from_internal_function();
     #endif
+
+    #ifdef EVOLVE_WITHOUT_PSI
+    #if PSI_METHOD == PSI_ELLIPTIC
+    fputs("EVOLVE_WITHOUT_PSI and PSI_ELLIPTIC are not compatible.\n", stderr);
+    exit(EXIT_FAILURE);
+    #endif
+    const size_t N2p = 2 * pars.N + 2;
+    const size_t Nall = pars.Nall;
+    #pragma omp parallel for
+    for (size_t i = N2p; i < Nall; ++i) {
+        field[i] = 0.0;
+    }
+    #endif
     INFO(puts("Initialized fields on first time slice.\n"));
 }
 
