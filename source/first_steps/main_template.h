@@ -109,25 +109,12 @@
 
 #define SEED                    (_SEED_)
 
-// ----------------parameters used in the potential-----------------------------
-/* #define MASS                    (0.11026) // for 50 e-fold hom inflation */
-#define MASS                    (_M_) // data_64
-/* #define MASS                    (0.002000003836216) // compare_2 compare_psi */
-/* #define MASS                    (16.418149637955437) // defrost */
-/* #define MASS                    (9.973557010035818e-7) // pspectre defrost */
+#define MASS                    (_M_)
 #define MASS_KARSTEN            (_MKARSTEN_)
-#define MASS_PLANCK             (_MPLANCK_) // for bunch davies
-#define COUPLING                (_COUPLING_) // coupling in a phi4 potential
-#define LAMBDA                  (_LAMBDA_) // "cosmological constant"
-/* #define A_INITIAL               (1.05249e3) // compare_2, compare_psi, 5500 */
-/* #define A_INITIAL               (4.09376e3) // compare_2, compare_psi, 6000 */
-/* #define A_INITIAL               (6.1625e2) // compare_2, compare_psi, 5450 */
-/* #define A_INITIAL               (1.370074629050061e5) // data_64_0 */
-/* #define A_INITIAL               (6.227758258677358e4) // data_64psi_1 */
-/* #define A_INITIAL               (1.868327477603207e4) // data_64psi_2 */
-/* #define A_INITIAL               (6.227611966276128e3) // data_64psi_3 */
+#define MASS_PLANCK             (_MPLANCK_)
+#define COUPLING                (_COUPLING_)
+#define LAMBDA                  (_LAMBDA_)
 #define A_INITIAL               (_A_)
-// for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
 
 #define SMALLEST_SCALING        (_MINSCAL_)
 #define LARGEST_SCALING         (_MAXSCAL_)
