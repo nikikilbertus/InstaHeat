@@ -138,6 +138,8 @@ void fill_field(double *f, double (*func)(const double, const double,
     size_t osx, osy;
     double x, y, z;
 
+    double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
+    mk_x_grid(grid);
     for (size_t i = 0; i < Nx; ++i) {
         x = grid[i];
         osx = i * Ny * Nz;
@@ -150,6 +152,7 @@ void fill_field(double *f, double (*func)(const double, const double,
             }
         }
     }
+    free(grid);
 }
 
 int are_fields_equal(const double *f, const double *g)
