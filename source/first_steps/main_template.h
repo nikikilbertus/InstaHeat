@@ -5,6 +5,22 @@
 #include <fftw3.h>
 #include "hdf5.h"
 
+/**
+ * @file main.h
+ * @brief Contains most parameters and compiler switches (for program flow and
+ * options) as preprocessor defines, definitions of global structures,
+ * declaration of global variables and function declarations for main.c.
+ *
+ * The main.h file is created from a shell script that is called from the
+ * Makefile __before__ compilation. There is a main_template.h file which
+ * contains placeholder that are filled according to the values in
+ * parameters.sh. To keep this file short, we do not comment and document the
+ * preprocessor directives. An extensive documentation of the parameter.sh file
+ * is found in a separate documentation file.
+ *
+ * @see doc_parameters.md
+ */
+
 // -------------------mathematical constants and macros-------------------------
 #define PI                      (3.141592653589793238462643383279)
 #define TWOPI                   (6.283185307179586476925286766559)
