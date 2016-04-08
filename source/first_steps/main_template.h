@@ -166,15 +166,17 @@ struct timing
     double t;  ///< current time (constantly updated during simulation)
 };
 
-// bundle data set identifiers for hdf5 output
+/**
+ * @brief A collection of dataset IDs for a single field.
+ */
 struct datasets
 {
-    hsize_t field;
-    hsize_t mean;
-    hsize_t var;
-    hsize_t dfield;
-    hsize_t dmean;
-    hsize_t dvar;
+    hsize_t field; ///< id for the field
+    hsize_t mean; ///< id for the mean of the field
+    hsize_t var; ///< id for the variance of the field
+    hsize_t dfield; ///< id for the time derivative of the field
+    hsize_t dmean; ///< id for the mean of the time derivative of the field
+    hsize_t dvar; ///< id for the variance of the time derivative of the field
 };
 
 //file handling parameters
