@@ -26,8 +26,6 @@
 #define MAX(x, y)               (((x) > (y)) ? (x) : (y))
 #define MIN(x, y)               (((x) > (y)) ? (y) : (x))
 
-#define SEED                    (_SEED_)
-
 #define SHOW_RUNTIME_INFO // recommended
 #define SHOW_TIMING_INFO // recommended
 /* #define CHECK_FOR_NAN // not recommended (performance) */
@@ -109,6 +107,8 @@
 #define MAX_STEPS               (_MAXSTEPS_)
 #define MINIMAL_DELTA_T         (_MINDELT_)
 
+#define SEED                    (_SEED_)
+
 // ----------------parameters used in the potential-----------------------------
 /* #define MASS                    (0.11026) // for 50 e-fold hom inflation */
 #define MASS                    (_M_) // data_64
@@ -137,29 +137,33 @@
 #define ABSOLUTE_TOLERANCE      (_ABSTOL_)
 #define MAX_DT_HUBBLE_FRACTION  (_HFRAC_)
 
-// representing one spatial dimension of a multi dimensional grid
+/**
+ * @brief Holds the values necessary to describe one dimension of the grid.
+ *
+ * All values describe a single dimension of the simulation volume only.
+ */
 struct grid_dimension
 {
-    size_t N; // number of gridpoints
-    // depending on dimension, different upper bounds in for loops, see
-    // initialization in setup.c for more information
-    size_t M;
-    double a; // lower bound of interval
-    double b; // upper bound of interval
-    double k; // a factor used in computing k vectors: k = 2 pi I / L
-    double k2; // k2 = k*k = -4 pi^2 / L^2
-    size_t stride; // strides for output
-    size_t outN; // number of output points in this dimension
+    size_t N; ///< number of gridpoints in real space
+    size_t M; ///< number of gridpoints in Fourier space
+    double a; ///< lower bound of the interval
+    double b; ///< upper bound of the interval
+    double k; ///< used to compute k vectors: k = 2 pi I / (b - a)
+    double k2; ///< used to compute k^2: k2 = k*k = -4 pi^2 / L^2
+    size_t stride; ///< strides for output
+    size_t outN; ///< number of output points in this dimension
 };
 
-// encapsulate timing related parameters
+/**
+ * @brief Parameters related to the time evolution.
+ */
 struct timing
 {
-    size_t Nt; // number of timesteps (only relevant for fixed step size)
-    double dt; // size of (initial) timestep delta t
-    double ti; // initial time
-    double tf; // final time
-    double t;  // current time
+    size_t Nt; ///< number of timesteps (only relevant for fixed step size)
+    double dt; ///< size of the (initial) timestep delta t
+    double ti; ///< initial time
+    double tf; ///< final time
+    double t;  ///< current time (constantly updated during simulation)
 };
 
 // bundle data set identifiers for hdf5 output
