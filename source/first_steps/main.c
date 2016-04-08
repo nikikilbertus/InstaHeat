@@ -18,7 +18,6 @@
 // -----------------------------global variables--------------------------------
 // explanation in main.h
 struct parameters pars;
-double *grid;
 double *time_buf;
 double *field;
 double *field_new;
