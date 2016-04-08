@@ -62,6 +62,8 @@
 #define IC_FROM_BUNCH_DAVIES        (3)
 #define INITIAL_CONDITIONS          (_IC_)
 
+#define EVOLVE_WITHOUT_PSI 	(_WOPSI_)
+
 #define _OPHI_
 #define _ODPHI_
 #define _OPSI_
