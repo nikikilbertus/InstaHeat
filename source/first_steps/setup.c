@@ -633,6 +633,9 @@ void mk_bunch_davies(double *f, const double H, const double homo,
  *
  * @return A complex number whose real and imaginary part are the samples from
  * two independent standard normal random variables.
+ *
+ * @note The two independent uniformly distributed random values are computed
+ * via the standard library rand() function.
  */
 inline complex box_muller()
 {
@@ -641,6 +644,17 @@ inline complex box_muller()
     return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * I);
 }
 
+/**
+ * @brief Construct initial conditions for phi from internally defined functions
+ *
+ * First the actual spatial grid values are computed by calling mk_x_grid(double
+ * *grid) and then phi and dphi are computed by
+ * phi_init(const double x, const double y, const double z, const double *ph),
+ * dphi_init(const double x, const double y, const double z, const double *ph)
+ * potentially using some random phases.
+ * The initial scale factor a comes from the parameter file and psi, dpsi are
+ * then computed from phi and dphi.
+ */
 void initialize_from_internal_function()
 {
     const size_t Nx = pars.x.N;
@@ -649,7 +663,6 @@ void initialize_from_internal_function()
     const size_t N = pars.N;
     size_t osx, osy;
     double x, y, z;
-
     double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
     mk_x_grid(grid);
     const size_t Nmodes = 16;
@@ -674,7 +687,6 @@ void initialize_from_internal_function()
             }
         }
     }
-
     free(grid);
     free(theta);
     field[2 * N] = A_INITIAL;
@@ -688,9 +700,9 @@ void initialize_from_internal_function()
  * @brief Construct the spatial grid.
  *
  * @param[in,out] grid A double array of size Nx + Ny + Nz that is filled up
- * with the grid values by the function
+ * with the grid values in each direction.
  *
- * Since the grid is rectangular with constant spacing in each direction, only
+ * Since the grid is rectangular with uniform spacing in each direction, only
  * the x, y and z values are computed.
  */
 void mk_x_grid(double *grid)
@@ -720,7 +732,21 @@ void mk_x_grid(double *grid)
     INFO(puts("Constructed spatial grid.\n"));
 }
 
-// initial values of the scalar field, make sure its periodic
+/**
+ * @brief The initial value of phi.
+ *
+ * @param[in] x The x coordinate where we want to evaluate phi.
+ * @param[in] y The y coordinate where we want to evaluate phi.
+ * @param[in] z The z coordinate where we want to evaluate phi.
+ * @param[in] ph Random phases for various modes.
+ *
+ * @return The value of phi at the specified coordinates @p param1, @p param2,
+ * @p param3.
+ *
+ * @note This function was mostly used for getting started and debugging and
+ * is subject to constant change. If one has an analytic/algorithmic expression
+ * for physically interesting initial conditions, one can implement them here.
+ */
 double phi_init(const double x, const double y, const double z,
         const double *ph)
 {
@@ -825,7 +851,21 @@ double phi_init(const double x, const double y, const double z,
     }
 }
 
-// initial values of the time deriv. of the scalar field, make sure its periodic
+/**
+ * @brief The initial value of dphi.
+ *
+ * @param[in] x The x coordinate where we want to evaluate dphi.
+ * @param[in] y The y coordinate where we want to evaluate dphi.
+ * @param[in] z The z coordinate where we want to evaluate dphi.
+ * @param[in] ph Random phases for various modes.
+ *
+ * @return The value of dphi at the specified coordinates @p param1, @p param2,
+ * @p param3.
+ *
+ * @note This function was mostly used for getting started and debugging and
+ * is subject to constant change. If one has an analytic/algorithmic expression
+ * for physically interesting initial conditions, one can implement them here.
+ */
 double dphi_init(const double x, const double y, const double z,
         const double *ph)
 {
