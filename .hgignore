@@ -11,6 +11,7 @@ syntax: glob
 main.h
 
 # any data and input files (might allow .txt input files later)
+parameters.sh
 *.txt
 *.h5
 
