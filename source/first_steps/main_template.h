@@ -171,59 +171,65 @@ struct timing
  */
 struct datasets
 {
-    hsize_t field; ///< id for the field
-    hsize_t mean; ///< id for the mean of the field
-    hsize_t var; ///< id for the variance of the field
+    hsize_t field;  ///< id for the field
+    hsize_t mean;   ///< id for the mean of the field
+    hsize_t var;    ///< id for the variance of the field
     hsize_t dfield; ///< id for the time derivative of the field
-    hsize_t dmean; ///< id for the mean of the time derivative of the field
-    hsize_t dvar; ///< id for the variance of the time derivative of the field
-};
-
-//file handling parameters
-struct file_parameters
-{
-    hsize_t id;             // h5 file id of the output file
-    struct datasets dset_phi;    // h5 data set ids for the scalar field phi
-    struct datasets dset_psi;    // h5 data set ids for the perturbation psi
-    struct datasets dset_rho;    // h5 data set ids for the energy density rho
-    hsize_t dset_powspec;   // h5 data set id of the power spectrum
-    hsize_t dset_time;      // h5 data set id of the time
-    hsize_t dset_a;         // h5 data set id of the scaling parameter a
-    size_t index;           // current index within the buffers
-    size_t buf_size;        // size of the buffer
-    size_t skip;            // how many timesteps to skip in between write out
-    size_t bins_powspec;    // how many bins are used for the power spectrum
+    hsize_t dmean;  ///< id for the mean of the time derivative of the field
+    hsize_t dvar;   ///< id for the variance of the time derivative of the field
 };
 
 /**
- *  simulation parameters
- *  throughout all files holds:
+ * @brief All parameters related to file IO operations
+ */
+struct file_parameters
+{
+    hsize_t id;               ///< h5 file id of the output file
+    struct datasets dset_phi; ///< h5 dataset ids for the scalar field phi
+    struct datasets dset_psi; ///< h5 dataset ids for the perturbation psi
+    struct datasets dset_rho; ///< h5 dataset ids for the energy density rho
+    hsize_t dset_powspec;     ///< h5 dataset id for the power spectrum
+    hsize_t dset_time;        ///< h5 dataset id for the time parameter
+    hsize_t dset_a;           ///< h5 dataset id for the scaling parameter a
+    size_t index;             ///< current index within the buffers
+    size_t buf_size;          ///< size of the buffer
+    size_t skip;              ///< timesteps to skip in between write outs
+    size_t bins_powspec;      ///< number of bins for the power spectrum
+};
+
+/**
+ *  @brief Collection of all parameters.
+ *
+ *  @note Throughout the source code holds:
  *  Nx = number of grid points in the x direction
  *  Ny = number of grid points in the y direction
  *  Nz = number of grid points in the z direction
  *  N  = number of gridpoints for the whole spatial grid = Nx * Ny * Nz
- *  N2 = 2 * N, N3 = 3 * N, ...
+ *  N2 = 2 * N, N3 = 3 * N, N2p = 2 * N + 2, N3p = 3 * N + 2
+ *  Nall = size of field = 4 * N + 2
  *  Ntot = number of scalar equations; depends on the used method
- *  elliptic: 2 * N + 1 (order: phi, dphi, a)
- *  parabolic: 3 * N + 1 (oder: phi, dphi, psi, a)
- *  hyperbolic: 4 * N + 1 (oder: phi, dphi, psi, dpsi, a)
+ *  elliptic: Ntot = 2 * N + 1 (order: phi, dphi, a)
+ *  parabolic: Ntot = 3 * N + 1 (oder: phi, dphi, psi, a)
+ *  hyperbolic: Ntot = 4 * N + 1 (oder: phi, dphi, psi, dpsi, a)
  */
 struct parameters
 {
-    struct grid_dimension x;
-    struct grid_dimension y;
-    struct grid_dimension z;
-    size_t N;
-    size_t Ntot;
-    size_t Nall;
-    size_t outN; // total number of spatial gridpoints for output (with strides)
-    size_t M;
-    size_t dim;
-    struct timing t;
-    struct file_parameters file;
+    struct grid_dimension x; ///< specification of the x direction
+    struct grid_dimension y; ///< specification of the y direction
+    struct grid_dimension z; ///< specification of the z direction
+    size_t N; ///< number of spatial gridpoints: N=Nx*Ny*Nz
+    size_t Ntot; ///< number of scalar equations evolved depending on PSI_METHOD
+    size_t Nall; ///< size of field: Nall=4*N+2
+    size_t outN; ///< number of spatial gridpoints for output
+    size_t M; ///< number of gridpoints in Fourier space
+    size_t dim; ///< dimensions of the simulation (1, 2 or 3)
+    struct timing t; ///< time evolution parameters
+    struct file_parameters file; ///< file IO parameters
 };
 
-// temporal veriables used for computations of gradients, ffts and the like
+/**
+ * @brief Temporal arrays used for computations of gradients, ffts and the like.
+ */
 struct temporary
 {
     double  *xphi;
@@ -243,7 +249,9 @@ struct temporary
     complex *dpsic;
 };
 
-// grids for ksq and kx, ky, kz
+/**
+ * @brief Grids for ksq and kx, ky, kz, i.e. the k vector and its square.
+ */
 struct k_grid
 {
     double *sq;
