@@ -976,6 +976,9 @@ void free_and_destroy_all()
     free_external();
 }
 
+/**
+ * @brief Destroy fftw plans and clean up threads.
+ */
 void destroy_and_cleanup_fftw()
 {
     fftw_destroy_plan(p_fw);
@@ -984,7 +987,11 @@ void destroy_and_cleanup_fftw()
     INFO(puts("Destroyed fftw plans.\n"));
 }
 
-// free memory of all global variables
+/**
+ * @brief Free memory from all external (i.e. global) variables.
+ *
+ * @note Everything allocated in allocate_external() must be freed here.
+ */
 void free_external()
 {
     fftw_free(field);
@@ -1071,8 +1078,16 @@ void free_external()
     INFO(puts("Freed external variables.\n"));
 }
 
-// -------------------------printing function-----------------------------------
 // for debugging mostly
+/**
+ * @brief Print a vector to standard output.
+ *
+ * @param[in] vector The vector to print.
+ * @param[in] N The length of the vector, i.e. how many etries to print.
+ *
+ * This function was mostly used for debugging, hence is obsolete/for internal
+ * use only.
+ */
 void print_vector(const double *vector, const size_t N)
 {
     for (size_t i = 0; i < N; i++) {
