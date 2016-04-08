@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
 #include <complex.h>
 #include <omp.h>
 #include <fftw3.h>
@@ -441,7 +442,10 @@ inline double filter_window(const double x)
     // return x < 2.0/3.0 ? x : 0.0;
 }
 
-// setup initial conditions for the field
+/**
+ * @brief Decides which initialization routine to call based on preprocessor
+ * defines given in the parameter file.
+ */
 void mk_initial_conditions()
 {
     #if INITIAL_CONDITIONS == IC_FROM_H5_FILE
@@ -456,6 +460,13 @@ void mk_initial_conditions()
     INFO(puts("Initialized fields on first time slice.\n"));
 }
 
+/**
+ * @brief Read initial conditions from a .dat file.
+ *
+ * This is currently for internal use only. TODO[fill]
+ *
+ * @see read_initial_data() in filehandling.c
+ */
 void initialize_from_dat()
 {
     read_initial_data();
@@ -468,6 +479,10 @@ void initialize_from_dat()
     #endif
 }
 
+/**
+ * @brief Given that the initial phi, dphi and a are already provided in field,
+ * construct the corresponding psi and dpsi.
+ */
 void mk_initial_psi()
 {
     const size_t N = pars.N;
@@ -484,8 +499,34 @@ void mk_initial_psi()
     mk_psi(field);
 }
 
+/**
+ * @brief Construct a Bunch Davies vacuum as initial conditions if the
+ * parameters satisfy the conditions and then construct corresponding psi, dpsi.
+ *
+ * We use the exact same values as in DEFROST TODO[link] defrost paper, hence we
+ * need 3 dimension, MASS=1, a box length of 10 in each direction. DEFROST uses
+ * MASS_PLANCK=2e5.
+ *
+ * @see mk_bunch_davies(double *f, const double H, const double homo, const
+ * double gamma)
+ */
 void initialize_from_bunch_davies()
 {
+    if (pars.dim != 3) {
+        fputs("Bunch Davies vacuum works only in three dimensions.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    if (Nx != Ny || Nx != Nz || Ny != Nz) {
+        fputs("Bunch Davies vacuum works only for Nx = Ny = Nz.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    double lx = fabs(pars.x.b - pars.x.a - 10.0);
+    double ly = fabs(pars.y.b - pars.y.a - 10.0);
+    double lz = fabs(pars.z.b - pars.z.a - 10.0);
+    if (lx > DBL_EPSILON || ly > DBL_EPSILON || lz > DBL_EPSILON) {
+        fputs("Bunch Davies vacuum works only for box size 10.0.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
     const double phi0 = 1.0093430384226378929425913902459;
     const double dphi0 = -0.713706915863227;
     const double hubble = sqrt((dphi0 * dphi0 + MASS * MASS * phi0 * phi0) / 6.0);
@@ -498,16 +539,18 @@ void initialize_from_bunch_davies()
     #endif
 }
 
+/**
+ * @brief Construct a Bunch Davies vacuum for phi and dphi as initial conditions
+ * following the description in DEFROST.
+ *
+ * @see TODO[link] to defrost
+ */
 void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma)
 {
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
     const size_t Nz = pars.z.N;
-    if (Nx != Ny || Nx != Nz || Ny != Nz) {
-        fputs("Bunch Davies vacuum works only for Nx = Ny = Nz.\n", stderr);
-        exit(EXIT_FAILURE);
-    }
     const size_t N  = pars.N;
     const size_t nn = Nx / 2 + 1;
     const size_t os = 16;
@@ -584,6 +627,13 @@ void mk_bunch_davies(double *f, const double H, const double homo,
     fftw_execute_dft_c2r(p_bw, tmp.phic, f);
 }
 
+/**
+ * @brief Compute a sample from two independent standard normal distributed
+ * random variables via the Box-Muller-Transform.
+ *
+ * @return A complex number whose real and imaginary part are the samples from
+ * two independent standard normal random variables.
+ */
 inline complex box_muller()
 {
     const double u1 = (double)rand() / (double)RAND_MAX;
