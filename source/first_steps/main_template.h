@@ -81,6 +81,11 @@
 #define _ODPSIV_
 #define _ORHOV_
 
+#if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || defined(OUTPUT_PSI) \
+    || defined(OUTPUT_DPSI)|| defined(OUTPUT_RHO)
+    #define LARGE_OUTPUT
+#endif
+
 #define DATAPATH                ("_PATH_")
 #define INITIAL_DATAPATH        ("_IPATH_")
 #define WRITE_OUT_BUFFER_NUMBER (_BUF_)

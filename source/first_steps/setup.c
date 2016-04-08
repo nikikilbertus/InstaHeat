@@ -176,10 +176,13 @@ void allocate_external()
 {
     const size_t N = pars.N;
     const size_t Nall = pars.Nall;
-    const size_t outN = pars.outN;
     const size_t M = pars.M;
     const size_t bins = pars.file.bins_powspec;
     const size_t buf_size = pars.file.buf_size;
+
+    #ifdef LARGE_OUTPUT
+    const size_t outN = pars.outN;
+    #endif
 
     field = fftw_malloc(Nall * sizeof *field);
     field_new = fftw_malloc(Nall * sizeof *field_new);
