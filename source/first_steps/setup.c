@@ -29,7 +29,6 @@ void allocate_and_initialize_all()
     initialize_threading();
     initialize_parameters();
     allocate_external();
-    mk_x_grid();
     mk_fftw_plans();
     mk_k_grid();
     #ifdef ENABLE_FFT_FILTER
@@ -172,9 +171,6 @@ void initialize_parameters()
  */
 void allocate_external()
 {
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
     const size_t N = pars.N;
     const size_t Nall = pars.Nall;
     const size_t outN = pars.outN;
@@ -182,7 +178,6 @@ void allocate_external()
     const size_t bins = pars.file.bins_powspec;
     const size_t buf_size = pars.file.buf_size;
 
-    grid = malloc((Nx + Ny + Nz) * sizeof *grid);
     field = fftw_malloc(Nall * sizeof *field);
     field_new = fftw_malloc(Nall * sizeof *field_new);
     dfield = fftw_malloc(Nall * sizeof *dfield);
@@ -271,7 +266,7 @@ void allocate_external()
     tmp.f = fftw_malloc(N * sizeof *tmp.f);
     tmp.deltarho = fftw_malloc(N * sizeof *tmp.deltarho);
 
-    if (!(grid && field && field_new && dfield && dfield_new &&
+    if (!(field && field_new && dfield && dfield_new &&
         rho && pow_spec && tmp.phic  && tmp.xphic && tmp.yphic && tmp.zphic &&
         tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap && tmp.psic  &&
         tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f && tmp.deltarho)) {
@@ -284,10 +279,13 @@ void allocate_external()
 /**
  * @brief Construct the spatial grid.
  *
- * Since the grid is rectangular and regular (equal grid spacing), only the x, y
- * and z values are computed.
+ * @param[in,out] grid A double array of size Nx + Ny + Nz that is filled up
+ * with the grid values by the function
+ *
+ * Since the grid is rectangular with constant spacing in each direction, only
+ * the x, y and z values are computed.
  */
-void mk_x_grid()
+void mk_x_grid(double *grid)
 {
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
@@ -299,21 +297,16 @@ void mk_x_grid()
     const double az = pars.z.a;
     const double bz = pars.z.b;
 
-    if (Nx < 1 || Ny < 1 || Nz < 1) {
-        fputs("Need positive number of gridpoints\n", stderr);
-        exit(EXIT_FAILURE);
-    }
-
     #pragma omp parallel for
     for (size_t i = 0; i < Nx; ++i) {
         grid[i] = ax + (bx - ax) * i / Nx;
     }
     #pragma omp parallel for
-    for (size_t j = Nx; j < Nx+Ny; ++j) {
+    for (size_t j = Nx; j < Nx + Ny; ++j) {
         grid[j] = ay + (by - ay) * (j - Nx) / Ny;
     }
     #pragma omp parallel for
-    for (size_t k = Nx + Ny; k < Nx + Ny+ Nz; ++k) {
+    for (size_t k = Nx + Ny; k < Nx + Ny + Nz; ++k) {
         grid[k] = az + (bz - az) * (k - Nx - Ny) / Nz;
     }
     INFO(puts("Constructed spatial grid.\n"));
@@ -363,40 +356,17 @@ void mk_initial_conditions()
     #if INITIAL_CONDITIONS == IC_FROM_H5_FILE
     h5_read_timeslice();
     #elif INITIAL_CONDITIONS == IC_FROM_DAT_FILE
-    read_initial_data();
-    field[2 * pars.N] = A_INITIAL;
-    field[2 * pars.N + 1] = 0.0;
-    /* center(field + 2 * pars.N + 2, pars.N); */
-    /* center(field + 3 * pars.N + 2, pars.N); */
-        #if PSI_METHOD != PSI_ELLIPTIC
-        mk_initial_psi();
-        #endif
+    initialize_from_dat();
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
-    //TODO: need correct values at end of inflation here
-    /* const double phi0 = -0.008283249078352; */
-    /* const double dphi0 = -5.738421024284034e-05; */
-    /* const double hubble = sqrt(0.5 * (dphi0 * dphi0 + MASS * MASS * phi0 * phi0) / 3.0); */
-    //defrost
-    /* double phi0 = 2.339383796213256; */
-    /* double dphi0 = -2.736358272992573; */
-    /* double hubble = 1.934897490588959; */
-
-    const double phi0 = 1.0093430384226378929425913902459;
-    const double dphi0 = -0.713706915863227;
-    const double hubble = sqrt((dphi0 * dphi0 + MASS * MASS * phi0 * phi0) / 6.0);
-
-    //pspectre defrost style
-    /* const double phi0 = 1.0093430384226378929425913902459/sqrt(8.0 * PI); */
-    /* const double dphi0 = 0.0; */
-    /* const double hubble = sqrt(4.0 * PI * (dphi0 * dphi0 + MASS * MASS * phi0 * phi0) / 3.0); */
-    mk_bunch_davies(field, hubble, phi0, -0.25);
-    mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
-    field[2 * pars.N] = A_INITIAL;
-    field[2 * pars.N + 1] = 0.0;
-        #if PSI_METHOD != PSI_ELLIPTIC
-        mk_initial_psi();
-        #endif
+    initialize_from_bunch_davies();
     #elif INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
+    initialize_from_internal_function();
+    #endif
+    INFO(puts("Initialized fields on first time slice.\n"));
+}
+
+void initialize_from_internal_function()
+{
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
     const size_t Nz = pars.z.N;
@@ -404,15 +374,17 @@ void mk_initial_conditions()
     size_t osx, osy;
     double x, y, z;
 
+    double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
+    mk_x_grid(grid);
     const size_t Nmodes = 16;
+    double *theta = calloc(Nmodes, sizeof *theta);
+
     // random phases
     srand(SEED);
-    double *theta = calloc(Nmodes, sizeof *theta);
     for (size_t i = 0; i < Nmodes; ++i) {
         theta[i] = TWOPI * (double)rand() / (double)RAND_MAX;
     }
 
-    // initialize the scalar field and its temporal derivative
     for (size_t i = 0; i < Nx; ++i) {
         x = grid[i];
         osx = i * Ny * Nz;
@@ -427,18 +399,39 @@ void mk_initial_conditions()
         }
     }
 
+    free(grid);
     free(theta);
-
     field[2 * N] = A_INITIAL;
     field[2 * N + 1] = 0.0;
-
-    // initialize psi
-        #if PSI_METHOD != PSI_ELLIPTIC
-        mk_initial_psi();
-        #endif
+    #if PSI_METHOD != PSI_ELLIPTIC
+    mk_initial_psi();
     #endif
+}
 
-    INFO(puts("Initialized fields on first time slice.\n"));
+void initialize_from_bunch_davies()
+{
+    const double phi0 = 1.0093430384226378929425913902459;
+    const double dphi0 = -0.713706915863227;
+    const double hubble = sqrt((dphi0 * dphi0 + MASS * MASS * phi0 * phi0) / 6.0);
+    mk_bunch_davies(field, hubble, phi0, -0.25);
+    mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
+    field[2 * pars.N] = A_INITIAL;
+    field[2 * pars.N + 1] = 0.0;
+    #if PSI_METHOD != PSI_ELLIPTIC
+    mk_initial_psi();
+    #endif
+}
+
+void initialize_from_dat()
+{
+    read_initial_data();
+    field[2 * pars.N] = A_INITIAL;
+    field[2 * pars.N + 1] = 0.0;
+    /* center(field + 2 * pars.N + 2, pars.N); */
+    /* center(field + 3 * pars.N + 2, pars.N); */
+    #if PSI_METHOD != PSI_ELLIPTIC
+    mk_initial_psi();
+    #endif
 }
 
 // create grid with k squared values
@@ -525,7 +518,7 @@ void mk_filter_mask()
             }
         }
     }
-    INFO(puts("Constructed filter mask grid.\n"));
+    INFO(puts("Constructed filter mask.\n"));
 }
 
 // the cutoff function for filtering, use either two thirds or fourier smoothing
@@ -772,7 +765,6 @@ void destroy_and_cleanup_fftw()
 // free memory of all global variables
 void free_external()
 {
-    free(grid);
     fftw_free(field);
     fftw_free(field_new);
     fftw_free(dfield);
