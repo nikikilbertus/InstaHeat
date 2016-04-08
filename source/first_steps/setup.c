@@ -166,31 +166,34 @@ void initialize_parameters()
     INFO(printf("Initialized parameters for %zu dimension(s).\n\n", pars.dim));
 }
 
-// allocate memory for all external variables
+/**
+ * @brief Allocate memory for all external variables
+ *
+ */
 void allocate_external()
 {
-    const size_t Nx   = pars.x.N;
-    const size_t Ny   = pars.y.N;
-    const size_t Nz   = pars.z.N;
-    const size_t N    = pars.N;
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
+    const size_t N = pars.N;
     const size_t Nall = pars.Nall;
     const size_t outN = pars.outN;
-    const size_t M    = pars.M;
+    const size_t M = pars.M;
     const size_t bins = pars.file.bins_powspec;
     const size_t buf_size = pars.file.buf_size;
 
-    grid       = malloc((Nx + Ny + Nz) * sizeof *grid);
-    field      = fftw_malloc(Nall * sizeof *field);
-    field_new  = fftw_malloc(Nall * sizeof *field_new);
-    dfield     = fftw_malloc(Nall * sizeof *dfield);
+    grid = malloc((Nx + Ny + Nz) * sizeof *grid);
+    field = fftw_malloc(Nall * sizeof *field);
+    field_new = fftw_malloc(Nall * sizeof *field_new);
+    dfield = fftw_malloc(Nall * sizeof *dfield);
     dfield_new = fftw_malloc(Nall * sizeof *dfield_new);
-    time_buf   = calloc(buf_size, sizeof *time_buf);
-    a_buf      = calloc(buf_size, sizeof *a_buf);
-    rho        = fftw_malloc(N * sizeof *rho);
+    time_buf = calloc(buf_size, sizeof *time_buf);
+    a_buf = calloc(buf_size, sizeof *a_buf);
+    rho = fftw_malloc(N * sizeof *rho);
     #if PSI_METHOD == PSI_HYPERBOLIC
-    pressure   = fftw_malloc(N * sizeof *pressure);
+    pressure = fftw_malloc(N * sizeof *pressure);
     #endif
-    pow_spec   = calloc(bins, sizeof *pow_spec);
+    pow_spec = calloc(bins, sizeof *pow_spec);
 
     #ifdef OUTPUT_PHI
     phi_buf = calloc(buf_size * outN, sizeof *phi_buf);
@@ -242,31 +245,30 @@ void allocate_external()
     #endif
 
     kvec.sq = fftw_malloc(M * sizeof *kvec.sq);
-    kvec.x  = fftw_malloc(M * sizeof *kvec.x);
-    kvec.y  = fftw_malloc(M * sizeof *kvec.y);
-    kvec.z  = fftw_malloc(M * sizeof *kvec.z);
+    kvec.x = fftw_malloc(M * sizeof *kvec.x);
+    kvec.y = fftw_malloc(M * sizeof *kvec.y);
+    kvec.z = fftw_malloc(M * sizeof *kvec.z);
     #ifdef ENABLE_FFT_FILTER
-    filter  = fftw_malloc(M * sizeof *filter);
+    filter = fftw_malloc(M * sizeof *filter);
     #endif
 
-    // default arrays to save coefficients of real to complex transforms
-    // see fftw3 documentation and Mxyz for this
-    tmp.phic  = fftw_malloc(M * sizeof *tmp.phic);
+    // default arrays for fourier transforms
+    tmp.phic = fftw_malloc(M * sizeof *tmp.phic);
     tmp.xphic = fftw_malloc(M * sizeof *tmp.xphic);
     tmp.yphic = fftw_malloc(M * sizeof *tmp.yphic);
     tmp.zphic = fftw_malloc(M * sizeof *tmp.zphic);
-    tmp.psic  = fftw_malloc(M * sizeof *tmp.psic);
+    tmp.psic = fftw_malloc(M * sizeof *tmp.psic);
     tmp.dpsic = fftw_malloc(M * sizeof *tmp.dpsic);
-    tmp.fc    = fftw_malloc(M * sizeof *tmp.fc);
-    tmp.deltarhoc  = fftw_malloc(M * sizeof *tmp.deltarhoc);
+    tmp.fc = fftw_malloc(M * sizeof *tmp.fc);
+    tmp.deltarhoc = fftw_malloc(M * sizeof *tmp.deltarhoc);
 
-    // general purpose double memory blocks for temporary use
+    // general purpose memory blocks for temporary use
     tmp.xphi = fftw_malloc(N * sizeof *tmp.xphi);
     tmp.yphi = fftw_malloc(N * sizeof *tmp.yphi);
     tmp.zphi = fftw_malloc(N * sizeof *tmp.zphi);
     tmp.grad = fftw_malloc(N * sizeof *tmp.grad);
-    tmp.lap  = fftw_malloc(N * sizeof *tmp.lap);
-    tmp.f    = fftw_malloc(N * sizeof *tmp.f);
+    tmp.lap = fftw_malloc(N * sizeof *tmp.lap);
+    tmp.f = fftw_malloc(N * sizeof *tmp.f);
     tmp.deltarho = fftw_malloc(N * sizeof *tmp.deltarho);
 
     if (!(grid && field && field_new && dfield && dfield_new &&
@@ -279,7 +281,12 @@ void allocate_external()
     INFO(puts("Allocated memory for external variables.\n"));
 }
 
-// make the N fourier spectral gridpoints for the computational domain
+/**
+ * @brief Construct the spatial grid.
+ *
+ * Since the grid is rectangular and regular (equal grid spacing), only the x, y
+ * and z values are computed.
+ */
 void mk_x_grid()
 {
     const size_t Nx = pars.x.N;
@@ -297,7 +304,6 @@ void mk_x_grid()
         exit(EXIT_FAILURE);
     }
 
-    // set up the grid points
     #pragma omp parallel for
     for (size_t i = 0; i < Nx; ++i) {
         grid[i] = ax + (bx - ax) * i / Nx;
@@ -310,10 +316,10 @@ void mk_x_grid()
     for (size_t k = Nx + Ny; k < Nx + Ny+ Nz; ++k) {
         grid[k] = az + (bz - az) * (k - Nx - Ny) / Nz;
     }
-
     INFO(puts("Constructed spatial grid.\n"));
 }
 
+//TODO: continue doxygen doc here
 // create the fftw plans, IMPORTANT: create BEFORE initializing arrays, because
 // setting up the plans destroys the arrays!
 void mk_fftw_plans()
