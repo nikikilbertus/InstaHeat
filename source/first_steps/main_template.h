@@ -21,28 +21,19 @@
  * @see doc_parameters.md
  */
 
-// -------------------mathematical constants and macros-------------------------
 #define PI                      (3.141592653589793238462643383279)
 #define TWOPI                   (6.283185307179586476925286766559)
 #define MAX(x, y)               (((x) > (y)) ? (x) : (y))
 #define MIN(x, y)               (((x) > (y)) ? (y) : (x))
 
-// seed for random number generator in creation of initial conditions
 #define SEED                    (_SEED_)
 
-/*
-compiler switches for debugging, testing, profiling and additional information
-during execution
-*/
 #define SHOW_RUNTIME_INFO // recommended
 #define SHOW_TIMING_INFO // recommended
 /* #define CHECK_FOR_NAN // not recommended (performance) */
 /* #define ENABLE_PROFILER // only recommended for debugging */
 /* #define DEBUG // only recommended for debugging (huge output!) */
 /* #define RUN_TESTS_ONLY // testing only (tests.c) */
-#define RK4                 (0)
-#define DOPRI853            (1)
-#define INTEGRATION_METHOD  (_IM_)
 
 // always leave this here uncommented
 #ifdef SHOW_RUNTIME_INFO
@@ -53,97 +44,55 @@ during execution
 #define INFO(f)
 #endif
 
-// ------------writing current commit hash to disk (hg, git, none)--------------
+#define RK4                 (0)
+#define DOPRI853            (1)
+#define INTEGRATION_METHOD  (_IM_)
+
 #define VERSION_CONTROL_NONE    (0)
 #define VERSION_CONTROL_HG      (1)
 #define VERSION_CONTROL_GIT     (2)
-
 #define VERSION_CONTROL         (_VC_)
 
-//-------------which files to write to disk-------------------------------------
+#define PSI_ELLIPTIC            (0)
+#define PSI_HYPERBOLIC          (1)
+#define PSI_PARABOLIC           (2)
+#define PSI_METHOD              (_PM_)
+
+#define IC_FROM_INTERNAL_FUNCTION   (0)
+#define IC_FROM_H5_FILE             (1)
+#define IC_FROM_DAT_FILE            (2)
+#define IC_FROM_BUNCH_DAVIES        (3)
+#define INITIAL_CONDITIONS          (_IC_)
+
 #define _OPHI_
 #define _ODPHI_
 #define _OPSI_
 #define _ODPSI_
 #define _ORHO_
-
 #define _OPOWSPEC_
-
 #define _OPHIM_
 #define _ODPHIM_
 #define _OPSIM_
 #define _ODPSIM_
 #define _ORHOM_
-
 #define _OPHIV_
 #define _ODPHIV_
 #define _OPSIV_
 #define _ODPSIV_
 #define _ORHOV_
 
-// ------------file handling parameters for writing to disk---------------------
-// where to get the initial conditions from
-#define IC_FROM_INTERNAL_FUNCTION   (0)
-#define IC_FROM_H5_FILE             (1)
-#define IC_FROM_DAT_FILE            (2)
-#define IC_FROM_BUNCH_DAVIES        (3)
-#define INITIAL_CONDITIONS          _IC_
-
-// the output is bundled in one .h5 file, enter path here
 #define DATAPATH                ("_PATH_")
-/* #define DATAPATH                ("datanewlong.h5") */
 #define INITIAL_DATAPATH        ("_IPATH_")
-
-
-/**
- *  write out data is buffered to not access hard drive too frequently (actually
- *  there are several levels of buffering, since hdf5 does it's own buffering
- *  too), this parameter determines how many time slices are buffered before
- *  writing them to disk, beware of the memory consumption of large buffers!
- */
 #define WRITE_OUT_BUFFER_NUMBER (_BUF_)
-
-/**
- *  there is a (very crude and biased!) estimation of the power spectrum to
- *  track stability, therefore we sum up fourier coefficients into bins
- *  depending on the norm of their k vector, this gives the number of bins used
- */
 #define POWER_SPECTRUM_BINS     (_BINS_)
-
-// how many timeslices to skip in between writing to file (1: write out all)
 #define TIME_STEP_SKIPS         (_TSKIP_)
-
-// spatial output strides
 #define STRIDE_X                (_XSKIP_)
 #define STRIDE_Y                (_YSKIP_)
 #define STRIDE_Z                (_ZSKIP_)
-
-// -----------------------simulation preferences--------------------------------
-// how many threads to use for openmp parallelization (also used by fftw)
-// if <= 0, the return value of omp_get_max_threads() is used
 #define THREAD_NUMBER           (_THREADS_)
-
-// the plan flag used for fftw plans (ESTIMATE, MEASURE, PATIENT, EXHAUSTIVE)
 #define FFTW_DEFAULT_FLAG       (_FFTW_)
-
-/**
- *  apply a frequency cutoff filter at each time step during the time evolution
- *  (compiler switch) the specific cutoff (e.g. step function with certain
- *  fraction (2/3 rule), or fourier smoothing) is determined by the function
- *  filter_window_function in evolution_toolkit.c, this should not be necessary
- *  for smaller grids, and simple (not too nonlinear) scenarios rather try to
- *  adjust tolerances and see what happens to the power spectrum
- */
 #define _FILTER_
 
-// choose between the parabolic or the hyperbolic equation to evolve psi
-#define PSI_ELLIPTIC            (0)
-#define PSI_HYPERBOLIC          (1)
-#define PSI_PARABOLIC           (2)
-#define PSI_METHOD              (_PM_)
-
-// ------------------computational domain---------------------------------------
-// spatial (order is important! use y=z=1 for 1D; use z=1 for 2D)
 #define GRIDPOINTS_X            (_GPX_)
 #define GRIDPOINTS_Y            (_GPY_)
 #define GRIDPOINTS_Z            (_GPZ_)
@@ -154,8 +103,6 @@ during execution
 #define SPATIAL_LOWER_BOUND_Z   (_LZ_)
 #define SPATIAL_UPPER_BOUND_Z   (_UZ_)
 
-// temporal
-// initial step size for adaptive stepping (dopri853) or fixed step size (RK4)
 #define DELTA_T                 (_DELT_)
 #define INITIAL_TIME            (_TI_)
 #define FINAL_TIME              (_TF_)
@@ -182,22 +129,14 @@ during execution
 #define A_INITIAL               (_A_)
 // for notch potential test: LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
 
-// -------------------additional parameters for dopri853------------------------
-// maximal/minimal rescaling of dt per step (don't change)
 #define SMALLEST_SCALING        (_MINSCAL_)
 #define LARGEST_SCALING         (_MAXSCAL_)
-
-// internal parameters for determining the rescaling of dt (don't change)
 #define BETA                    (_BETA_) // ALPHA = 1.0/8.0 - BETA * 0.2
 #define SAFE                    (_SAFE_)
-
-// error tolerancees, those can be changed (typical: between 1e-10 and 1e-3)
 #define RELATIVE_TOLERANCE      (_RELTOL_)
 #define ABSOLUTE_TOLERANCE      (_ABSTOL_)
-// the timestep is limited from above by this fraction of the hubble time 1/H
 #define MAX_DT_HUBBLE_FRACTION  (_HFRAC_)
 
-// ------------------------struct definitions-----------------------------------
 // representing one spatial dimension of a multi dimensional grid
 struct grid_dimension
 {
@@ -307,15 +246,7 @@ struct k_grid
     double *z;
 };
 
-// --------------------------global variables-----------------------------------
-// we are using rather many global variables; that has the advantage of central
-// one time allocation/initialization and deallocation;
-// it also saves a lot of typing
-
-// simulation parameters
 extern struct parameters pars;
-
-// time slices buffer
 extern double *time_buf;
 
 // contain phi, dphi, a, psi, dpsi (only first Ntot entries are integrated)
@@ -324,8 +255,6 @@ extern double *dfield;
 extern double *field_new;
 extern double *dfield_new;
 
-//TODO: create structure to bundle buffers (equal for phi and psi)
-// buffers for the scalar inflaton field and the scalar metric perturbation
 extern double *phi_buf;
 extern double *dphi_buf;
 extern double *psi_buf;
@@ -351,10 +280,8 @@ extern double dpsi_var;
 extern double *dpsi_mean_buf;
 extern double *dpsi_var_buf;
 
-// buffer for scaling parameter a
 extern double *a_buf;
 
-// energy density rho  = T^{00}_{\phi} and the buffer
 extern double *rho;
 extern double *rho_buf;
 extern double rho_mean;
@@ -362,35 +289,28 @@ extern double rho_var;
 extern double *rho_mean_buf;
 extern double *rho_var_buf;
 
-// pressure (only needed for PSI_METHOD == PSI_HYPERBOLIC, but always defined)
+// only needed for PSI_METHOD == PSI_HYPERBOLIC, but always defined
 extern double *pressure;
 extern double pressure_mean;
 
-// power spectrum and the buffer
 extern double *pow_spec;
 extern double *pow_spec_buf;
 
-// filter mask for fourier filtering
 extern double *filter;
 
-// default arrays with temporary memory for real to complex dfts
 extern struct k_grid kvec;
 
-// default arrays with temporary memory for real to complex dfts
 extern struct temporary tmp;
 
-// fftw plans
 extern fftw_plan p_fw;
 extern fftw_plan p_bw;
 
-// monitoring the time taken by certain parts
 extern double fftw_time_exe;
 extern double fftw_time_plan;
 extern double filter_time;
 extern double poisson_time;
 extern double h5_time_write;
 
-// for timing information during execution
 #ifdef SHOW_TIMING_INFO
 double get_wall_time();
 #endif
