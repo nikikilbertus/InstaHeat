@@ -324,7 +324,16 @@ void mk_fftw_plans()
     INFO(puts("Created fftw plans.\n"));
 }
 
-// create grid with k squared values
+/**
+ * @brief Construct grids for the k vector and its square.
+ *
+ * Fills the global arrays kvec.x, kvec.y, kvec.z and kvec.sq with the
+ * corresponding components of the k vector and its square respectively.
+ *
+ * @note The Nx/2, Ny/2, Nz/2 entries of k_x, k_y, k_z are set to zero for
+ * differentiation via discrete fourier transforms. However those entries are
+ * used normally for k^2.
+ */
 void mk_k_grid()
 {
     const size_t Nx = pars.x.N;
@@ -343,7 +352,6 @@ void mk_k_grid()
             osy = osx + j * Mz;
             for (size_t k = 0; k < Mz; ++k) {
                 id = osy + k;
-
                 k2 = pars.z.k2 * k * k;
 
                 if (i > Nx / 2) {
