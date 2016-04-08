@@ -13,6 +13,10 @@
  * @file dopri853_stepper.c
  * @brief A 8th order explicit Dormand Prince integrator with 5th and 3rd order
  * error estimates for adaptive stepsizes.
+ *
+ * Only the function run_dopri853() is called from outside this file. It is the
+ * only one that needs to be visible.
+ *
  * @see <a href="http://numerical.recipes">Numerical Recipes</a>
  */
 
