@@ -59,6 +59,7 @@ sed -i -e "s/_COUPLING_/${COUPLING}/g" main.h
 sed -i -e "s/_LAMBDA_/${LAMBDA}/g" main.h
 
 setdef ${ENABLE_FFT_FILTER} "_FILTER_" "ENABLE_FFT_FILTER"
+setdef ${EVOLVE_WITHOUT_PSI} "_WOPSI_" "EVOLVE_WITHOUT_PSI"
 
 setdef ${PHI} "_OPHI_" "OUTPUT_PHI"
 setdef ${DPHI} "_ODPHI_" "OUTPUT_DPHI"
