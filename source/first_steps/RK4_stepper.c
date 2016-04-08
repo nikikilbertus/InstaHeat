@@ -8,6 +8,11 @@
 #include "evolution_toolkit.h"
 #include "filehandling.h"
 
+/**
+ * @file RK4_stepper.c
+ * @brief A simple standard 4th order explicit Runge Kutta integrator with fixed
+ * stepsize.
+ */
 void run_rk4()
 {
     const size_t Ntot = pars.Ntot;
