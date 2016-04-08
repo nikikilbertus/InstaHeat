@@ -25,8 +25,9 @@
  * everything for the simulation.
  *
  * A single call to this function sets up everything for the simulation. After
- * this call, on of the available integration routines can be started.
- *  */
+ * this call, on of the available integration routines can be started. This
+ * should be the first function called, see main.c.
+ */
 void allocate_and_initialize_all()
 {
     initialize_threading();
@@ -745,7 +746,9 @@ void mk_x_grid(double *grid)
  *
  * @note This function was mostly used for getting started and debugging and
  * is subject to constant change. If one has an analytic/algorithmic expression
- * for physically interesting initial conditions, one can implement them here.
+ * for physically interesting initial conditions, one can implement them here,
+ * or call another function (like wrapped_gaussian(const double x, const double
+ * y, const double z)
  */
 double phi_init(const double x, const double y, const double z,
         const double *ph)
@@ -864,7 +867,9 @@ double phi_init(const double x, const double y, const double z,
  *
  * @note This function was mostly used for getting started and debugging and
  * is subject to constant change. If one has an analytic/algorithmic expression
- * for physically interesting initial conditions, one can implement them here.
+ * for physically interesting initial conditions, one can implement them here,
+ * or call another function (like wrapped_gaussian(const double x, const double
+ * y, const double z)
  */
 double dphi_init(const double x, const double y, const double z,
         const double *ph)
@@ -916,6 +921,9 @@ double dphi_init(const double x, const double y, const double z,
     /* return -0.089318193; // somewhere at end of 50 e-fold inflation */
 }
 
+/**
+ * @brief A periodic version of a Gaussian for localized initial conditions.
+ */
 double wrapped_gaussian(const double x, const double y, const double z)
 {
     const double s = 0.5;
@@ -953,6 +961,14 @@ double wrapped_gaussian(const double x, const double y, const double z)
     return res / TWOPI;
 }
 
+/**
+ * @brief Successively calls the subroutines in this file necessary to cleanup
+ * everything after the simulation is done.
+ *
+ * A single call to this function cleans up everything after the simulation.
+ * After this call, the program can exit. It should be the last function called,
+ * see main.c.
+ */
 void free_and_destroy_all()
 {
     h5_close(pars.file.id);
@@ -960,7 +976,6 @@ void free_and_destroy_all()
     free_external();
 }
 
-// destroy the fftw plans and call cleanup for internal fftw3 cleanup
 void destroy_and_cleanup_fftw()
 {
     fftw_destroy_plan(p_fw);
