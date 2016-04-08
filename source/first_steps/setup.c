@@ -276,43 +276,6 @@ void allocate_external()
     INFO(puts("Allocated memory for external variables.\n"));
 }
 
-/**
- * @brief Construct the spatial grid.
- *
- * @param[in,out] grid A double array of size Nx + Ny + Nz that is filled up
- * with the grid values by the function
- *
- * Since the grid is rectangular with constant spacing in each direction, only
- * the x, y and z values are computed.
- */
-void mk_x_grid(double *grid)
-{
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const double ax = pars.x.a;
-    const double bx = pars.x.b;
-    const double ay = pars.y.a;
-    const double by = pars.y.b;
-    const double az = pars.z.a;
-    const double bz = pars.z.b;
-
-    #pragma omp parallel for
-    for (size_t i = 0; i < Nx; ++i) {
-        grid[i] = ax + (bx - ax) * i / Nx;
-    }
-    #pragma omp parallel for
-    for (size_t j = Nx; j < Nx + Ny; ++j) {
-        grid[j] = ay + (by - ay) * (j - Nx) / Ny;
-    }
-    #pragma omp parallel for
-    for (size_t k = Nx + Ny; k < Nx + Ny + Nz; ++k) {
-        grid[k] = az + (bz - az) * (k - Nx - Ny) / Nz;
-    }
-    INFO(puts("Constructed spatial grid.\n"));
-}
-
-//TODO: continue doxygen doc here
 // create the fftw plans, IMPORTANT: create BEFORE initializing arrays, because
 // setting up the plans destroys the arrays!
 void mk_fftw_plans()
@@ -348,90 +311,6 @@ void mk_fftw_plans()
     fftw_time_plan += get_wall_time();
     #endif
     INFO(puts("Created fftw plans.\n"));
-}
-
-// setup initial conditions for the field
-void mk_initial_conditions()
-{
-    #if INITIAL_CONDITIONS == IC_FROM_H5_FILE
-    h5_read_timeslice();
-    #elif INITIAL_CONDITIONS == IC_FROM_DAT_FILE
-    initialize_from_dat();
-    #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
-    initialize_from_bunch_davies();
-    #elif INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
-    initialize_from_internal_function();
-    #endif
-    INFO(puts("Initialized fields on first time slice.\n"));
-}
-
-void initialize_from_internal_function()
-{
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const size_t N = pars.N;
-    size_t osx, osy;
-    double x, y, z;
-
-    double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
-    mk_x_grid(grid);
-    const size_t Nmodes = 16;
-    double *theta = calloc(Nmodes, sizeof *theta);
-
-    // random phases
-    srand(SEED);
-    for (size_t i = 0; i < Nmodes; ++i) {
-        theta[i] = TWOPI * (double)rand() / (double)RAND_MAX;
-    }
-
-    for (size_t i = 0; i < Nx; ++i) {
-        x = grid[i];
-        osx = i * Ny * Nz;
-        for (size_t j = 0; j < Ny; ++j) {
-            y = grid[Nx + j];
-            osy = osx + j * Nz;
-            for (size_t k = 0; k < Nz; ++k) {
-                z = grid[Nx + Ny + k];
-                field[osy + k] = phi_init(x, y, z, theta);
-                field[N + osy + k] = dphi_init(x, y, z, theta);
-            }
-        }
-    }
-
-    free(grid);
-    free(theta);
-    field[2 * N] = A_INITIAL;
-    field[2 * N + 1] = 0.0;
-    #if PSI_METHOD != PSI_ELLIPTIC
-    mk_initial_psi();
-    #endif
-}
-
-void initialize_from_bunch_davies()
-{
-    const double phi0 = 1.0093430384226378929425913902459;
-    const double dphi0 = -0.713706915863227;
-    const double hubble = sqrt((dphi0 * dphi0 + MASS * MASS * phi0 * phi0) / 6.0);
-    mk_bunch_davies(field, hubble, phi0, -0.25);
-    mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
-    field[2 * pars.N] = A_INITIAL;
-    field[2 * pars.N + 1] = 0.0;
-    #if PSI_METHOD != PSI_ELLIPTIC
-    mk_initial_psi();
-    #endif
-}
-
-void initialize_from_dat()
-{
-    read_initial_data();
-    field[2 * pars.N] = A_INITIAL;
-    field[2 * pars.N + 1] = 0.0;
-    /* center(field + 2 * pars.N + 2, pars.N); */
-    /* center(field + 3 * pars.N + 2, pars.N); */
-    #if PSI_METHOD != PSI_ELLIPTIC
-    mk_initial_psi();
-    #endif
 }
 
 // create grid with k squared values
@@ -535,6 +414,235 @@ inline double filter_window(const double x)
     /* return exp(1. + 1. / ( pow(x, 8) - 1. )); */
     /* return 0.5 * ( 1. + cos( pow(x, 8) * PI ) ); */
     /* return 0.0; */
+}
+
+// setup initial conditions for the field
+void mk_initial_conditions()
+{
+    #if INITIAL_CONDITIONS == IC_FROM_H5_FILE
+    h5_read_timeslice();
+    #elif INITIAL_CONDITIONS == IC_FROM_DAT_FILE
+    initialize_from_dat();
+    #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
+    initialize_from_bunch_davies();
+    #elif INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
+    initialize_from_internal_function();
+    #endif
+    INFO(puts("Initialized fields on first time slice.\n"));
+}
+
+void initialize_from_dat()
+{
+    read_initial_data();
+    field[2 * pars.N] = A_INITIAL;
+    field[2 * pars.N + 1] = 0.0;
+    /* center(field + 2 * pars.N + 2, pars.N); */
+    /* center(field + 3 * pars.N + 2, pars.N); */
+    #if PSI_METHOD != PSI_ELLIPTIC
+    mk_initial_psi();
+    #endif
+}
+
+void mk_initial_psi()
+{
+    const size_t N = pars.N;
+    const size_t N2p = 2 * N + 2;
+    const size_t Nall = pars.Nall;
+
+    #pragma omp parallel for
+    for (size_t i = N2p; i < Nall; ++i) {
+        field[i] = 0.0;
+    }
+
+    mk_gradient_squared_and_laplacian(field);
+    mk_rho(field);
+    mk_psi(field);
+}
+
+void initialize_from_bunch_davies()
+{
+    const double phi0 = 1.0093430384226378929425913902459;
+    const double dphi0 = -0.713706915863227;
+    const double hubble = sqrt((dphi0 * dphi0 + MASS * MASS * phi0 * phi0) / 6.0);
+    mk_bunch_davies(field, hubble, phi0, -0.25);
+    mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
+    field[2 * pars.N] = A_INITIAL;
+    field[2 * pars.N + 1] = 0.0;
+    #if PSI_METHOD != PSI_ELLIPTIC
+    mk_initial_psi();
+    #endif
+}
+
+void mk_bunch_davies(double *f, const double H, const double homo,
+        const double gamma)
+{
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
+    if (Nx != Ny || Nx != Nz || Ny != Nz) {
+        fputs("Bunch Davies vacuum works only for Nx = Ny = Nz.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    const size_t N  = pars.N;
+    const size_t nn = Nx / 2 + 1;
+    const size_t os = 16;
+    const size_t nos = Nx * os * os;
+    const double dx = (pars.x.b - pars.x.a) / Nx;
+    const double dxos = dx / os;
+    const double dk = TWOPI / (pars.x.b - pars.x.a);
+    const double dkos = 0.5 * dk / os;
+    //TODO: pspectre uses kcutpspectre = 2 * kcutdefrost
+    const double kcut2 = 0.25 * nn * nn * dk * dk;
+    const double meff2 = MASS * MASS - 2.25 * H * H;
+    const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3)) * MASS_PLANCK) *
+        (dkos / dxos);
+
+    if (meff2 <= 0.0) {
+        fputs("The effective mass turned out to be negative.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    double *ker = fftw_malloc(nos * sizeof *ker);
+
+    double kk;
+    #pragma omp parallel for private(kk)
+    for (size_t i = 0; i < nos; ++i) {
+        kk = (i + 0.5) * dkos;
+        ker[i] = kk * pow(kk * kk + meff2, gamma) *
+            exp(-kk * kk / kcut2);
+    }
+
+    fftw_plan pl = fftw_plan_r2r_1d(nos, ker, ker, FFTW_RODFT10, FFTW_ESTIMATE);
+    fftw_execute(pl);
+    fftw_destroy_plan(pl);
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < nos; ++i) {
+        ker[i] *= norm / (i + 1);
+    }
+
+    size_t osx, osy, l;
+    #pragma omp parallel for private(osx, osy, kk, l)
+    for (int i = 0; i < Nx; ++i) {
+        osx = i * Ny * Nz;
+        for (int j = 0; j < Ny; ++j) {
+            osy = osx + j * Nz;
+            for (int k = 0; k < Nz; ++k) {
+                kk = sqrt((double)( (i + 1 - nn) * (i + 1 - nn) +
+                                    (j + 1 - nn) * (j + 1 - nn) +
+                                    (k + 1 - nn) * (k + 1 - nn))) * os;
+                l = (size_t) floor(kk);
+
+                if (l > 0) {
+                    f[osy + k] = ker[l - 1] + (kk - l) * (ker[l] - ker[l - 1]);
+                } else {
+                    f[osy + k] = (4.0 * ker[0] - ker[1]) / 3.0;
+                }
+            }
+        }
+    }
+
+    fftw_free(ker);
+    fftw_execute_dft_r2c(p_fw, f, tmp.phic);
+
+    #pragma omp parallel for private(osx, osy)
+    for (size_t i = 0; i < Nx; ++i) {
+        osx = i * Ny * nn;
+        for (size_t j = 0; j < Ny; ++j) {
+            osy = osx + j * nn;
+            for (size_t k = 0; k < nn; ++k) {
+                tmp.phic[osy + k] *= box_muller();
+            }
+        }
+    }
+
+    tmp.phic[0] = homo;
+    fftw_execute_dft_c2r(p_bw, tmp.phic, f);
+}
+
+inline complex box_muller()
+{
+    const double u1 = (double)rand() / (double)RAND_MAX;
+    const double u2 = (double)rand() / (double)RAND_MAX;
+    return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * I);
+}
+
+void initialize_from_internal_function()
+{
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
+    const size_t N = pars.N;
+    size_t osx, osy;
+    double x, y, z;
+
+    double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
+    mk_x_grid(grid);
+    const size_t Nmodes = 16;
+    double *theta = calloc(Nmodes, sizeof *theta);
+
+    // random phases
+    srand(SEED);
+    for (size_t i = 0; i < Nmodes; ++i) {
+        theta[i] = TWOPI * (double)rand() / (double)RAND_MAX;
+    }
+
+    for (size_t i = 0; i < Nx; ++i) {
+        x = grid[i];
+        osx = i * Ny * Nz;
+        for (size_t j = 0; j < Ny; ++j) {
+            y = grid[Nx + j];
+            osy = osx + j * Nz;
+            for (size_t k = 0; k < Nz; ++k) {
+                z = grid[Nx + Ny + k];
+                field[osy + k] = phi_init(x, y, z, theta);
+                field[N + osy + k] = dphi_init(x, y, z, theta);
+            }
+        }
+    }
+
+    free(grid);
+    free(theta);
+    field[2 * N] = A_INITIAL;
+    field[2 * N + 1] = 0.0;
+    #if PSI_METHOD != PSI_ELLIPTIC
+    mk_initial_psi();
+    #endif
+}
+
+/**
+ * @brief Construct the spatial grid.
+ *
+ * @param[in,out] grid A double array of size Nx + Ny + Nz that is filled up
+ * with the grid values by the function
+ *
+ * Since the grid is rectangular with constant spacing in each direction, only
+ * the x, y and z values are computed.
+ */
+void mk_x_grid(double *grid)
+{
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
+    const double ax = pars.x.a;
+    const double bx = pars.x.b;
+    const double ay = pars.y.a;
+    const double by = pars.y.b;
+    const double az = pars.z.a;
+    const double bz = pars.z.b;
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < Nx; ++i) {
+        grid[i] = ax + (bx - ax) * i / Nx;
+    }
+    #pragma omp parallel for
+    for (size_t j = Nx; j < Nx + Ny; ++j) {
+        grid[j] = ay + (by - ay) * (j - Nx) / Ny;
+    }
+    #pragma omp parallel for
+    for (size_t k = Nx + Ny; k < Nx + Ny + Nz; ++k) {
+        grid[k] = az + (bz - az) * (k - Nx - Ny) / Nz;
+    }
+    INFO(puts("Constructed spatial grid.\n"));
 }
 
 // initial values of the scalar field, make sure its periodic
@@ -730,22 +838,6 @@ double wrapped_gaussian(const double x, const double y, const double z)
     return res / TWOPI;
 }
 
-void mk_initial_psi()
-{
-    const size_t N = pars.N;
-    const size_t N2p = 2 * N + 2;
-    const size_t Nall = pars.Nall;
-
-    #pragma omp parallel for
-    for (size_t i = N2p; i < Nall; ++i) {
-        field[i] = 0.0;
-    }
-
-    mk_gradient_squared_and_laplacian(field);
-    mk_rho(field);
-    mk_psi(field);
-}
-
 void free_and_destroy_all()
 {
     h5_close(pars.file.id);
@@ -847,99 +939,6 @@ void free_external()
     fftw_free(tmp.f);
     fftw_free(tmp.deltarho);
     INFO(puts("Freed external variables.\n"));
-}
-
-void mk_bunch_davies(double *f, const double H, const double homo,
-        const double gamma)
-{
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    if (Nx != Ny || Nx != Nz || Ny != Nz) {
-        fputs("Bunch Davies vacuum works only for Nx = Ny = Nz.\n", stderr);
-        exit(EXIT_FAILURE);
-    }
-    const size_t N  = pars.N;
-    const size_t nn = Nx / 2 + 1;
-    const size_t os = 16;
-    const size_t nos = Nx * os * os;
-    const double dx = (pars.x.b - pars.x.a) / Nx;
-    const double dxos = dx / os;
-    const double dk = TWOPI / (pars.x.b - pars.x.a);
-    const double dkos = 0.5 * dk / os;
-    //TODO: pspectre uses kcutpspectre = 2 * kcutdefrost
-    const double kcut2 = 0.25 * nn * nn * dk * dk;
-    const double meff2 = MASS * MASS - 2.25 * H * H;
-    const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3)) * MASS_PLANCK) *
-        (dkos / dxos);
-
-    if (meff2 <= 0.0) {
-        fputs("The effective mass turned out to be negative.\n", stderr);
-        exit(EXIT_FAILURE);
-    }
-    double *ker = fftw_malloc(nos * sizeof *ker);
-
-    double kk;
-    #pragma omp parallel for private(kk)
-    for (size_t i = 0; i < nos; ++i) {
-        kk = (i + 0.5) * dkos;
-        ker[i] = kk * pow(kk * kk + meff2, gamma) *
-            exp(-kk * kk / kcut2);
-    }
-
-    fftw_plan pl = fftw_plan_r2r_1d(nos, ker, ker, FFTW_RODFT10, FFTW_ESTIMATE);
-    fftw_execute(pl);
-    fftw_destroy_plan(pl);
-
-    #pragma omp parallel for
-    for (size_t i = 0; i < nos; ++i) {
-        ker[i] *= norm / (i + 1);
-    }
-
-    size_t osx, osy, l;
-    #pragma omp parallel for private(osx, osy, kk, l)
-    for (int i = 0; i < Nx; ++i) {
-        osx = i * Ny * Nz;
-        for (int j = 0; j < Ny; ++j) {
-            osy = osx + j * Nz;
-            for (int k = 0; k < Nz; ++k) {
-                kk = sqrt((double)( (i + 1 - nn) * (i + 1 - nn) +
-                                    (j + 1 - nn) * (j + 1 - nn) +
-                                    (k + 1 - nn) * (k + 1 - nn))) * os;
-                l = (size_t) floor(kk);
-
-                if (l > 0) {
-                    f[osy + k] = ker[l - 1] + (kk - l) * (ker[l] - ker[l - 1]);
-                } else {
-                    f[osy + k] = (4.0 * ker[0] - ker[1]) / 3.0;
-                }
-            }
-        }
-    }
-
-    fftw_free(ker);
-    fftw_execute_dft_r2c(p_fw, f, tmp.phic);
-
-    #pragma omp parallel for private(osx, osy)
-    for (size_t i = 0; i < Nx; ++i) {
-        osx = i * Ny * nn;
-        for (size_t j = 0; j < Ny; ++j) {
-            osy = osx + j * nn;
-            for (size_t k = 0; k < nn; ++k) {
-                tmp.phic[osy + k] *= box_muller();
-            }
-        }
-    }
-
-    tmp.phic[0] = homo;
-    fftw_execute_dft_c2r(p_bw, tmp.phic, f);
-}
-
-inline complex box_muller()
-{
-    const double u1 = (double)rand() / (double)RAND_MAX;
-    const double u2 = (double)rand() / (double)RAND_MAX;
-    return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * I);
 }
 
 // -------------------------printing function-----------------------------------
