@@ -390,12 +390,10 @@ void h5_close()
 void save()
 {
     hsize_t index = pars.file.index;
-    hsize_t Nt    = pars.file.buf_size;
-    hsize_t N     = pars.N;
-    hsize_t N2    = 2 * N;
-    hsize_t N2p   = N2 + 2;
-    hsize_t N3p   = 3 * N + 2;
-    hsize_t bins  = pars.file.bins_powspec;
+    hsize_t Nt = pars.file.buf_size;
+    hsize_t N = pars.N;
+    hsize_t N2 = 2 * N;
+    hsize_t bins = pars.file.bins_powspec;
 
     time_buf[index] = pars.t.t;
     a_buf[index] = field[N2];
@@ -440,6 +438,8 @@ void save()
 
     #if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || defined(OUTPUT_PSI) || \
         defined(OUTPUT_DPSI) || defined(OUTPUT_RHO)
+    hsize_t N2p = N2 + 2;
+    hsize_t N3p = 3 * N + 2;
     hsize_t Nx = pars.x.N;
     hsize_t Ny = pars.y.N;
     hsize_t Nz = pars.z.N;
