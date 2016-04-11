@@ -1,4 +1,4 @@
-name = 'bunchsoph';
+name = 'testbunch6';
 interp = false;
 
 % loading the data, replace 'name' with the path where you stored the .h5
@@ -38,6 +38,8 @@ dphivarenv = spline(a(dphipkpos), dphipks, a);
 dphirms = sqrt(dphivar ./ dphienv.^2);
 end
 
+psimean = h5read(name, '/psi_mean');
+dpsimean = h5read(name, '/dpsi_mean');
 psivar = h5read(name, '/psi_variance');
 dpsivar = h5read(name, '/dpsi_variance');
 

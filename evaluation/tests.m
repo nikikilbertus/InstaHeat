@@ -30,7 +30,7 @@ testl1 = ifftn(-kk.*fftn(test));
 testl2 = del2(test, dx) * 2 * dim;
 
 %% powerspectrum check
-bins = 80;
+bins = 40;
 L=10;
 n = size(phi,1);
 meff2 = mass^2 - 9 * H(1)^2 / 4;
@@ -46,8 +46,8 @@ dk = 2*pi/L;
 kcut = 0.5 * (floor(n/2) + 1) * dk;
 kcut2 = kcut^2;
 normfac = (sqrt(2 * dk^3 * pi))^(-1);
-ps1 = k * dk .* (k2+meff2).^(-.25);
-dps1 = k * dk .* (k2+meff2).^(.25);
+ps1 = k .* (k2+meff2).^(-.25);
+dps1 = k .* (k2+meff2).^(.25);
 % ps1 = ps1 * normfac .* exp(-k2 / kcut2);
 % dps1 = dps1 * normfac .* exp(-k2 / kcut2);
 ps1 = ps1 / ps1(match) * ps(match);
@@ -60,8 +60,8 @@ ky = [0:Ny/2 -Ny/2+1:-1];
 kz = [0:Nz/2 -Nz/2+1:-1];
 [X,Y,Z] = meshgrid(kx,ky,kz);
 ks = sqrt(X.^2 + Y.^2 + Z.^2) * 2*pi/L;
-ps2full = ks.^(-1) .* (ks.^2+meff2).^(-.25) * normfac .* exp(-ks / kcut2);
-dps2full = ks.^(-1) .* (ks.^2+meff2).^(.25) * normfac .* exp(-ks / kcut2);
+ps2full = ks .* (ks.^2+meff2).^(-.25);% .* exp(-ks.^2 / kcut2);
+dps2full = ks .* (ks.^2+meff2).^(.25);% .* exp(-ks.^2 / kcut2);
 ps2 = zeros(1, bins);
 dps2 = zeros(1, bins);
 for i = 2:N
@@ -75,9 +75,9 @@ end
 ps2 = ps2 / ps2(match) * ps(match);
 dps2 = dps2 / dps2(match) * dps(match);
 
-loglog(k,ps,k,ps1)%,k,ps2)
+loglog(k,ps,k,ps1,k,ps2)
 hold on
-loglog(k,dps,k,dps1)%,k,dps2)
+loglog(k,dps,k,dps1,k,dps2)
 hold off
 shg
 

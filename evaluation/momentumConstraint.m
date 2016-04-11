@@ -10,7 +10,7 @@ k = [0:N/2-1 0 -N/2+1:-1] * 2*pi/(bb-aa);
 
 H = sqrt(mean(rho(:)) / 3);
 
-dir = kx;
+dir = kz;
 t1 = ifftn(1i * dir .* fftn(dpsi + H * psi));
 phii = ifftn(1i * dir .* fftn(phi));
 t2 = - 0.5 .* dphi .* phii;
