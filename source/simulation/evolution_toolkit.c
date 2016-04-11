@@ -24,7 +24,6 @@ void mk_rhs(const double t, double *f, double *result)
     const double a = f[N2];
     const double a2 = a * a;
 
-    f[N2 + 1] = 0.0;
     mk_gradient_squared_and_laplacian(f);
     mk_rho(f);
     const double hubble = sqrt(rho_mean / 3.0);
@@ -36,9 +35,8 @@ void mk_rhs(const double t, double *f, double *result)
         result[i] = f[N + i];
     }
 
-    // equation for dpsi when parabolic; copy dpsi and equation for ddpsi when
-    // hyperbolic
     #ifndef EVOLVE_WITHOUT_PSI
+    // parabolic: equation for dpsi; hyperbolic: copy dpsi and equation for ddpsi
     #if PSI_METHOD != PSI_ELLIPTIC
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
@@ -71,11 +69,8 @@ void mk_rhs(const double t, double *f, double *result)
             (h3 - 4.0 * dp) * df - (1.0 + 2.0 * p) * potential_prime(f[i]);
     }
 
-    // a is always the same
+    // update da
     result[N2] = a * hubble;
-    #if PSI_METHOD != PSI_ELLIPTIC
-    result[N2 + 1] = 0.0;
-    #endif
 }
 
 // compute the laplacian and the squared gradient of the input and store them
@@ -246,22 +241,17 @@ void mk_psi(double *f)
         tmp.f[i] = dphi_mean * (f[i] - phi_mean);
         /* tmp.f[i] = dphi_mean * (f[i] - phi_mean); */
     }
-
     fftw_execute_dft_r2c(p_fw, tmp.deltarho, tmp.deltarhoc);
     fftw_execute_dft_r2c(p_fw, tmp.f, tmp.fc);
-
     for (size_t i = 1; i < M; ++i) {
         tmp.phic[i] = 0.5 * a2 * (tmp.deltarhoc[i] +
                 3 * hubble * tmp.fc[i]) / (kvec.sq[i] * N);
     }
     tmp.phic[0] = 0.0;
-
     fftw_execute_dft_c2r(p_bw, tmp.phic, f + N2p);
-
     for (size_t i = 0; i < N; ++i) {
         f[N3p + i] = 0.5 * tmp.f[i] - hubble * f[N2p + i];
     }
-
     return;
     //-------------------------------------------------------------------------
 
@@ -418,7 +408,7 @@ void prepare_and_save_timeslice()
     mk_gradient_squared_and_laplacian(field);
     evo_flags.compute_pow_spec = 0;
     mk_rho(field);
-    #if PSI_METHOD == PSI_ELLIPTIC
+    #if PSI_METHOD == PSI_ELLIPTIC && !defined(EVOLVE_WITHOUT_PSI)
     mk_psi(field);
     #endif
     mk_means_and_variances();
