@@ -66,7 +66,7 @@ __Examples__:
     - If the evolution is performed by the adaptive time step Dormand Prince 853 routine, the time step is adjusted. Thus `DELTA_T` is just the initial try.
 * `MINIMAL_DELTA_T`: (double, >0) This is only relevant if the chosen integration routine is the Dormand Prince 853 stepper (adaptive stepsize) [program flow](#program-flow). It gives a lower bound on the step size. Once the integration routine tries to reduce the step size below this limit, the integration is terminated.
 * `MAX_STEPS`: (integer, >0) The maximal number of steps performed by the integration routine.
-* `MAX_DT_HUBBLE_FRACTION`: (double, >0) This is only relevant if the chosen integration routine is the Dormand Prince 853 stepper (adaptive stepsize) [program flow](#program-flow). To avoid large timesteps in the beginning of the evolution that could lead to instabilities, we limit the time step from above by `MAX_DT_HUBBLE_FRACTION` times the Hubble time $1/H$. A typical values is on the order of $10^{-3}$ to $10^{-2}$.
+* `MAX_DT_HUBBLE_FRACTION`: (double, >0) This is only relevant if the chosen integration routine is the Dormand Prince 853 stepper (adaptive stepsize) [program flow](#program-flow). To avoid large timesteps in the beginning of the evolution that could lead to instabilities, we limit the time step from above by `MAX_DT_HUBBLE_FRACTION` times the Hubble time $$1/H$$. A typical values is on the order of $$10^{-3}$$ to $$10^{-2}$$.
 
 __Remarks__:
 * Even for the fixed time step RK4 method, the time step might be different for the very last step. To ensure that the simulation always ends exactly at the specified `FINAL_TIME`, the time step might be adjusted for the very last step.
@@ -74,24 +74,24 @@ __Remarks__:
 ## Initial conditions
 
 * `A_INITIAL`: (double, >0) The initial value for the scale factor a, see TODO(link equation)
-* `INITIAL_CONDITIONS`: This parameter determines how to obtain the initial conditions for the fields $\phi$, $\dot{\phi}$ and in certain cases also $\psi$ and $\dot{\psi}$. The valid options are:
-    - `"IC_FROM_INTERNAL_FUNCTION"`: The initial $\phi$ and $\dot{\phi}$ are given as functions `phi_init` and `dphi_init` in `setup.c`. These are evaluated on the spatial grid specified by [simulation volume](#simulation-volume). The initial values for $\psi$ are computed via TODO(how to state this?).
+* `INITIAL_CONDITIONS`: This parameter determines how to obtain the initial conditions for the fields $$\phi$$, $$\dot{\phi}$$ and in certain cases also $$\psi$$ and $$\dot{\psi}$$. The valid options are:
+    - `"IC_FROM_INTERNAL_FUNCTION"`: The initial $$\phi$$ and $$\dot{\phi}$$ are given as functions `phi_init` and `dphi_init` in `setup.c`. These are evaluated on the spatial grid specified by [simulation volume](#simulation-volume). The initial values for $$\psi$$ are computed via TODO(how to state this?).
     - `"IC_FROM_H5_FILE"`: One can load initial conditions from a previous simulation. The following conditions have to be satisfied:
           + The `INITIAL_DATAPATH` parameter in section [initial conditions](#initial-conditions) points to the output file of a previous simulation from which a certain timeslice should be used as initial conditions for the current run.
           + The `INITIAL_TIME` parameter in section [initial conditions](#initial-conditions) has to lie in the simulation region of the previous output file, i.e. `INITIAL_TIME` has to be larger than `INITIAL_TIME` of the previous simulation and smaller than `FINAL_TIME` of the previous simulation.
           + The number of gridpoints (`GRIDPOINTS_{X,Y,Z}` parameters in section [simulation volume](#simulation-volume)) have to coincide with the number of gridpoints from the previous simulation.
 
-      Then the program will find the time slice __closest__ to the specified `INITIAL_TIME` in the previous output file and use all necessary values ($a$, $\phi$, $\dot{\phi}$, $\psi$, $\dot{\psi}$) as initial conditions for the new simulation. Note that the simulation might therefore not start exactly at the specified `INITIAL_TIME`.
+      Then the program will find the time slice __closest__ to the specified `INITIAL_TIME` in the previous output file and use all necessary values ($$a$$, $$\phi$$, $$\dot{\phi}$$, $$\psi$$, $$\dot{\psi}$$) as initial conditions for the new simulation. Note that the simulation might therefore not start exactly at the specified `INITIAL_TIME`.
 
-    - `"IC_FROM_DAT_FILE"`: One can load initial conditions from a `.dat` file. This feature was implemented during development of the code when initial conditions were provided from a collaborator in a `.dat` file. It is obsolete now. If you want to read initial conditions from a separately generated file you might change the method `read_initial_data()` in `filehandling.c` accordingly. Also make sure to read and understand the memory layout of the field variables TODO(link, where?).
-    - `"IC_FROM_BUNCH_DAVIES"`: The initial conditions are given by the Bunch Davies vacuum. We followed the implementation of DEFROST TODO(link, ref) to compute initial values for $\phi$ and $\dot{\phi}. For detailed information see TODO(link paper, coderef). Subsequently we compute $\psi$ and $\dot{psi}$ from TODO(how to formulate this?).
+    - `"IC_FROM_DAT_FILE_WITH_PSI"` and `"IC_FROM_DAT_FILE_WITHOUT_PSI"`: One can load initial conditions from a `.dat` file. This feature was implemented during development of the code when initial conditions were provided from a collaborator in a `.dat` file. It is obsolete now. There was the option to also import $$\psi$$ and $$\dot{\psi}$$ from this `.dat` file, or to compute them from the provided $$\phi$$ and $$\dot{\phi}$$. If you want to read initial conditions from a separately generated file you might change the method `read_initial_data()` in `filehandling.c` accordingly. Also make sure to read and understand the memory layout of the field variables TODO(link, where?).
+    - `"IC_FROM_BUNCH_DAVIES"`: The initial conditions are given by the Bunch Davies vacuum. We followed the implementation of DEFROST TODO(link, ref) to compute initial values for $$\phi$$ and $$\dot{\phi}$$. For detailed information see TODO(link paper, coderef). Subsequently we compute $$\psi$$ and $$\dot{psi}$$ from TODO(how to formulate this?).
 * `INITIAL_DATAPATH`: See section [file IO](#file-io).
 * `INITIAL_TIME`: See section [simulation volume](#simulation-volume).
 
 ## Potential parameters
 
 * `MASS`: (double, >0) The mass parameter used in the code. Note that this value can be easily rescaled, hence has little physical relevance.
-* `MASS_PLANCK`: (double, >0) If `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"`, this value is the ratio Planck mass/inflaton mass. This determines the amplitude of the vacuum fluctuations of the Bunch Davies vacuum. Note in the code $8 \pi G = 1$, hence the reduced Planck mass is one. Also the `MASS` is a parameter that does not itself carry physical meaning. This `MASS_PLANCK` is the only value that carries physical meaning.
+* `MASS_PLANCK`: (double, >0) If `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"`, this value is the ratio Planck mass/inflaton mass. This determines the amplitude of the vacuum fluctuations of the Bunch Davies vacuum. Note in the code $$8 \pi G = 1$$, hence the reduced Planck mass is one. Also the `MASS` is a parameter that does not itself carry physical meaning. This `MASS_PLANCK` is the only value that carries physical meaning.
 * `MASS_KARSTEN`: (double, >0) Obsolete. Internal use only.
 
 ## File IO
@@ -105,7 +105,7 @@ __Remarks__:
   - `"VERSION_CONTROL_GIT"`: Try to get the hash of the current git revision and include it in the output.
   - `"VERSION_CONTROL_NONE"`: Do not try to get the hash of the current revision. Nothing is added to the output file.
 * `WRITE_OUT_BUFFER_NUMBER`: (integer, >0) The program uses an internal buffer where outputs are accumulated before they are actually written to disk. Since rare and large writeouts are usually faster than frequent small ones, this should result in a speed up. `WRITE_OUT_BUFFER_NUMBER` specifies how many timeslices of the output should be buffered before disk access. If one uses many gridpoints, memory constraints might not allow for a large buffer.
-* `POWER_SPECTRUM_BINS`: (integer, >0) The number of bins used to compute the power spectrum. This is only relevant if`POWER_SPECTRUM="1"`, i.e. the power spectrum of $\phi$ is included in the output. See TODO(link thesis) for details.
+* `POWER_SPECTRUM_BINS`: (integer, >0) The number of bins used to compute the power spectrum. This is only relevant if`POWER_SPECTRUM="1"`, i.e. the power spectrum of $$\phi$$ is included in the output. See TODO(link thesis) for details.
 * `TIME_STEP_SKIPS`: (integer, >0) The number of time steps skipped between outputs. To avoid large output files, one can skip `TIME_STEP_SKIPS` many time steps, before writing a time slice to disk again.
 * `STRIDE_X`: (integer, >0) The stride in the x-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than they are computed on internally.
 * `STRIDE_Y`: (integer, >0) The stride in the x-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than they are computed on internally.
@@ -113,7 +113,7 @@ __Remarks__:
 
 __Remarks__:
 
-* Given the number of gridpoints $n$ in the x-direction by `GRIDPOINTS_X` and the stride $s$ in the x-direction by `STRIDE_X`, the number of gridpoints in the output is computed by $(n+s-1)/s$ rounded down towards the next integer. The output gridpoints are evenly spaced within the number of gridpoints used for internal computations.
+* Given the number of gridpoints $$n$$ in the x-direction by `GRIDPOINTS_X` and the stride $$s$$ in the x-direction by `STRIDE_X`, the number of gridpoints in the output is computed by $$(n+s-1)/s$$ rounded down towards the next integer. The output gridpoints are evenly spaced within the number of gridpoints used for internal computations.
 
 __Examples__:
 
@@ -129,7 +129,7 @@ STRIDE_Y="1"
 STRIDE_Z="6"
 ```
 
-then the computation would be done on a $256 \times 200 \times 59$ grid. However the output of the fields would be on a $64 \times 200 \times 10$.
+then the computation would be done on a $$256 \times 200 \times 59$$ grid. However the output of the fields would be on a $$64 \times 200 \times 10$$.
 
 ## Performance parameters
 
@@ -156,11 +156,11 @@ The parameters in this section are only relevant if `INTEGRATION_METHOD="DOPRI85
 * `INTEGRATION_METHOD`: There are two integration routines available:
     - `"RK4"`: The standard fourth order Runge Kutte stepper with fixed time step size.
     - `"DOPRI853"`: A more sophisticated adaptive Dormand Prince stepper of 8th order with 5th and 3rd order errors for adaptive time stepping. A detailed description can be found in TODO(link numerical recipes).
-* `PSI_METHOD`: There are three different equations according to which we can evolve the fields $\psi$ and $\dot{\psi}$. For more information see TODO(link to the thesis). The valid options are
+* `PSI_METHOD`: There are three different equations according to which we can evolve the fields $$\psi$$ and $$\dot{\psi}$$. For more information see TODO(link to the thesis). The valid options are
     - `"PSI_ELLIPTIC"`
     - `"PSI_PARABOLIC"`
     - `"PSI_HYPERBOLIC"`
-* `ENABLE_FFT_FILTER`: Switch on/off a spectral filter for the fields. If turned on, in each time step the highest modes of $\phi$, $\dot{\phi}$, $\psi$, $\dot{\psi}$ are cut off to avoid aliasing. A more detailed description can be found in TODO(link to thesis).
+* `ENABLE_FFT_FILTER`: Switch on/off a spectral filter for the fields. If turned on, in each time step the highest modes of $$\phi$$, $$\dot{\phi}$$, $$\psi$$, $$\dot{\psi}$$ are cut off to avoid aliasing. A more detailed description can be found in TODO(link to thesis).
 
 ## Miscellaneous
 
@@ -170,25 +170,25 @@ The parameters in this section are only relevant if `INTEGRATION_METHOD="DOPRI85
 
 Most of the simulation parameters are always present in the output. The optional values are
 
-* `PHI`: The scalar field $\phi$.
-* `DPHI`: The temporal derivative of the scalar field $\dot{\phi}$.
-* `PSI`: The scalar metric perturbation $\psi$.
-* `DPSI`: The scalar metric perturbation $\dot{\psi}$.
-* `RHO`: The energy density $\rho$.
-* `PHI_MEAN`: The mean value of the scalar field $\phi$.
-* `DPHI_MEAN`: The mean value of the temporal derivative of the scalar field $\dot{\phi}$.
-* `PSI_MEAN`: The mean value of the scalar metric perturbation $\psi$.
-* `DPSI_MEAN`: The mean value of the scalar metric perturbation $\dot{\psi}$.
-* `RHO_MEAN`: The mean value of the energy density $\rho$.
-* `PHI_VARIANCE`: The variance of the scalar field $\phi$.
-* `DPHI_VARIANCE`: The variance of the temporal derivative of the scalar field $\dot{\phi}$.
-* `PSI_VARIANCE`: The variance of the scalar metric perturbation $\psi$.
-* `DPSI_VARIANCE`: The variance of the scalar metric perturbation $\dot{\psi}$.
-* `RHO_VARIANCE`: The variance of the energy density $\rho$.
-* `POWER_SPECTRUM`: The power spectrum of the field $\phi$.
+* `PHI`: The scalar field $$\phi$$.
+* `DPHI`: The temporal derivative of the scalar field $$\dot{\phi}$$.
+* `PSI`: The scalar metric perturbation $$\psi$$.
+* `DPSI`: The scalar metric perturbation $$\dot{\psi}$$.
+* `RHO`: The energy density $$\rho$$.
+* `PHI_MEAN`: The mean value of the scalar field $$\phi$$.
+* `DPHI_MEAN`: The mean value of the temporal derivative of the scalar field $$\dot{\phi}$$.
+* `PSI_MEAN`: The mean value of the scalar metric perturbation $$\psi$$.
+* `DPSI_MEAN`: The mean value of the scalar metric perturbation $$\dot{\psi}$$.
+* `RHO_MEAN`: The mean value of the energy density $$\rho$$.
+* `PHI_VARIANCE`: The variance of the scalar field $$\phi$$.
+* `DPHI_VARIANCE`: The variance of the temporal derivative of the scalar field $$\dot{\phi}$$.
+* `PSI_VARIANCE`: The variance of the scalar metric perturbation $$\psi$$.
+* `DPSI_VARIANCE`: The variance of the scalar metric perturbation $$\dot{\psi}$$.
+* `RHO_VARIANCE`: The variance of the energy density $$\rho$$.
+* `POWER_SPECTRUM`: The power spectrum of the field $$\phi$$.
 
 __Remarks__:
 
-* `PHI`, `DPHI`, `PSI`, `DPSI`, `RHO` result in an output of xout*yout*zout double values where {x,y,z}out are determined from `GRIDPOINTS_{X,Y,Z}` and `STRIDE_{X,Y,Z}` (see [file IO](#file-io)) on __each__ time slice (that is output).
+* `PHI`, `DPHI`, `PSI`, `DPSI`, `RHO` result in an output of `xout*yout*zout` double values where {x,y,z}out are determined from `GRIDPOINTS_{X,Y,Z}` and `STRIDE_{X,Y,Z}` (see [file IO](#file-io)) on __each__ time slice (that is output).
 * All values ending in `MEAN` or `VARIANCE` result in the output of one double value on each time slice (that is output).
 * `POWER_SPECTRUM` results in the output of `POWER_SPECTRUM_BINS` double values on each time slice (that is output).
