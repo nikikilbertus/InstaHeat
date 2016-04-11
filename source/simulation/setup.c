@@ -452,9 +452,19 @@ inline double filter_window(const double x)
  */
 void mk_initial_conditions()
 {
+    const size_t Nall = pars.Nall;
+    #pragma omp parallel for
+    for (size_t i = 0; i < Nall; ++i) {
+        field[i] = 0.0;
+        dfield[i] = 0.0;
+        field_new[i] = 0.0;
+        dfield_new[i] = 0.0;
+    }
+
     #if INITIAL_CONDITIONS == IC_FROM_H5_FILE
     h5_read_timeslice();
-    #elif INITIAL_CONDITIONS == IC_FROM_DAT_FILE
+    #elif INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITH_PSI || \
+          INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITHOUT_PSI
     initialize_from_dat();
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
     initialize_from_bunch_davies();
@@ -463,12 +473,7 @@ void mk_initial_conditions()
     #endif
 
     #ifdef EVOLVE_WITHOUT_PSI
-    #if PSI_METHOD == PSI_ELLIPTIC
-    fputs("EVOLVE_WITHOUT_PSI and PSI_ELLIPTIC are not compatible.\n", stderr);
-    exit(EXIT_FAILURE);
-    #endif
     const size_t N2p = 2 * pars.N + 2;
-    const size_t Nall = pars.Nall;
     #pragma omp parallel for
     for (size_t i = N2p; i < Nall; ++i) {
         field[i] = 0.0;
@@ -487,11 +492,11 @@ void mk_initial_conditions()
 void initialize_from_dat()
 {
     read_initial_data();
-    field[2 * pars.N] = A_INITIAL;
-    field[2 * pars.N + 1] = 0.0;
     /* center(field + 2 * pars.N + 2, pars.N); */
     /* center(field + 3 * pars.N + 2, pars.N); */
-    #if PSI_METHOD != PSI_ELLIPTIC
+    field[2 * pars.N] = A_INITIAL;
+    #if PSI_METHOD != PSI_ELLIPTIC && \
+        INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITHOUT_PSI
     mk_initial_psi();
     #endif
 }
@@ -505,12 +510,10 @@ void mk_initial_psi()
     const size_t N = pars.N;
     const size_t N2p = 2 * N + 2;
     const size_t Nall = pars.Nall;
-
     #pragma omp parallel for
     for (size_t i = N2p; i < Nall; ++i) {
         field[i] = 0.0;
     }
-
     mk_gradient_squared_and_laplacian(field);
     mk_rho(field);
     mk_psi(field);
@@ -553,7 +556,6 @@ void initialize_from_bunch_davies()
     mk_bunch_davies(field, hubble, phi0, -0.25);
     mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
     field[2 * pars.N] = A_INITIAL;
-    field[2 * pars.N + 1] = 0.0;
     #if PSI_METHOD != PSI_ELLIPTIC
     mk_initial_psi();
     #endif
@@ -710,7 +712,6 @@ void initialize_from_internal_function()
     free(grid);
     free(theta);
     field[2 * N] = A_INITIAL;
-    field[2 * N + 1] = 0.0;
     #if PSI_METHOD != PSI_ELLIPTIC
     mk_initial_psi();
     #endif
@@ -842,7 +843,7 @@ double phi_init(const double x, const double y, const double z,
     /* double amplitude = -2.26961e-06; */
 
     // compare_2, pos= 6000
-    const double scale= 1.0e0;
+    const double scale = 1.0e0;
     const double mean = 0.0510864;
     const double amplitude = -3.743790000000000e-07 * scale;
 
@@ -850,10 +851,8 @@ double phi_init(const double x, const double y, const double z,
     /* double mean = 5.0; */
     /* double amplitude = 0.01; */
 
-    /* double k = 1.0/6.0e3; */
-    const double k = 1.0;
     if (pars.dim == 1) {
-        return mean + amplitude * cos(k * x);
+        return mean + amplitude * cos(x);
         /* return mean - amplitude * wrapped_gaussian(x, y, z); */
     } else if (pars.dim == 2) {
         /* return mean + amplitude * cos(x + y + ph[0]); */
