@@ -38,6 +38,7 @@ void mk_rhs(const double t, double *f, double *result)
 
     // equation for dpsi when parabolic; copy dpsi and equation for ddpsi when
     // hyperbolic
+    #ifndef EVOLVE_WITHOUT_PSI
     #if PSI_METHOD != PSI_ELLIPTIC
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
@@ -52,6 +53,7 @@ void mk_rhs(const double t, double *f, double *result)
     }
     #else
     mk_psi(f);
+    #endif
     #endif
 
     // equation for ddphi in all cases (psi & dpsi have to be provided first)
