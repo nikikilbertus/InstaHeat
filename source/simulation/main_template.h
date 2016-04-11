@@ -56,11 +56,12 @@
 #define PSI_PARABOLIC           (2)
 #define PSI_METHOD              (_PM_)
 
-#define IC_FROM_INTERNAL_FUNCTION   (0)
-#define IC_FROM_H5_FILE             (1)
-#define IC_FROM_DAT_FILE            (2)
-#define IC_FROM_BUNCH_DAVIES        (3)
-#define INITIAL_CONDITIONS          (_IC_)
+#define IC_FROM_INTERNAL_FUNCTION       (0)
+#define IC_FROM_H5_FILE                 (1)
+#define IC_FROM_DAT_FILE_WITH_PSI       (2)
+#define IC_FROM_DAT_FILE_WITHOUT_PSI    (3)
+#define IC_FROM_BUNCH_DAVIES            (4)
+#define INITIAL_CONDITIONS              (_IC_)
 
 #define _WOPSI_
 
