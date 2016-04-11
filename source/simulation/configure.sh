@@ -82,4 +82,3 @@ setdef ${RHO_VARIANCE} "_ORHOV_" "OUTPUT_RHO_VARIANCE"
 setdef ${POWER_SPECTRUM} "_OPOWSPEC_" "OUTPUT_POWER_SPECTRUM"
 
 rm main.h-e
-#TODO: output stuff
