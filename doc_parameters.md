@@ -161,6 +161,7 @@ The parameters in this section are only relevant if `INTEGRATION_METHOD="DOPRI85
     - `"PSI_PARABOLIC"`
     - `"PSI_HYPERBOLIC"`
 * `ENABLE_FFT_FILTER`: Switch on/off a spectral filter for the fields. If turned on, in each time step the highest modes of $$\phi$$, $$\dot{\phi}$$, $$\psi$$, $$\dot{\psi}$$ are cut off to avoid aliasing. A more detailed description can be found in TODO(link to thesis).
+* `EVOLVE_WITHOUT_PSI`: If this is set the simulation is run with $$\psi = 0$$ at all times. While certain parts of the code are not executed, if this option is set, the memory usage is still roughly the same and does not drop by half as one could expect. This option was mostly used for debugging and comparisons.
 
 ## Miscellaneous
 
