@@ -466,24 +466,43 @@ void allocate_dopri853_values()
     const size_t Ntot = pars.Ntot;
     const size_t Nall = pars.Nall;
 
-    dpv.k2    = fftw_malloc(Ntot * sizeof *dpv.k2);
-    dpv.k3    = fftw_malloc(Ntot * sizeof *dpv.k3);
-    dpv.k4    = fftw_malloc(Ntot * sizeof *dpv.k4);
-    dpv.k5    = fftw_malloc(Ntot * sizeof *dpv.k5);
-    dpv.k6    = fftw_malloc(Ntot * sizeof *dpv.k6);
-    dpv.k7    = fftw_malloc(Ntot * sizeof *dpv.k7);
-    dpv.k8    = fftw_malloc(Ntot * sizeof *dpv.k8);
-    dpv.k9    = fftw_malloc(Ntot * sizeof *dpv.k9);
-    dpv.k10   = fftw_malloc(Ntot * sizeof *dpv.k10);
+    dpv.k2 = fftw_malloc(Ntot * sizeof *dpv.k2);
+    dpv.k3 = fftw_malloc(Ntot * sizeof *dpv.k3);
+    dpv.k4 = fftw_malloc(Ntot * sizeof *dpv.k4);
+    dpv.k5 = fftw_malloc(Ntot * sizeof *dpv.k5);
+    dpv.k6 = fftw_malloc(Ntot * sizeof *dpv.k6);
+    dpv.k7 = fftw_malloc(Ntot * sizeof *dpv.k7);
+    dpv.k8 = fftw_malloc(Ntot * sizeof *dpv.k8);
+    dpv.k9 = fftw_malloc(Ntot * sizeof *dpv.k9);
+    dpv.k10 = fftw_malloc(Ntot * sizeof *dpv.k10);
     dpv.k_tmp = fftw_malloc(Nall * sizeof *dpv.k_tmp);
 
-    dpv.yerr  = fftw_malloc(Ntot * sizeof *dpv.yerr);
+    dpv.yerr = fftw_malloc(Ntot * sizeof *dpv.yerr);
     dpv.yerr2 = fftw_malloc(Ntot * sizeof *dpv.yerr2);
 
     if (!(dpv.k2 && dpv.k3 && dpv.k4 && dpv.k5 && dpv.k6 && dpv.k7 && dpv.k8 &&
           dpv.k9 && dpv.k10 && dpv.k_tmp && dpv.yerr && dpv.yerr2)) {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
+    }
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < Ntot; ++i) {
+        dpv.k2[i] = 0.0;
+        dpv.k3[i] = 0.0;
+        dpv.k4[i] = 0.0;
+        dpv.k5[i] = 0.0;
+        dpv.k6[i] = 0.0;
+        dpv.k7[i] = 0.0;
+        dpv.k8[i] = 0.0;
+        dpv.k9[i] = 0.0;
+        dpv.k10[i] = 0.0;
+        dpv.yerr[i] = 0.0;
+        dpv.yerr2[i] = 0.0;
+    }
+    #pragma omp parallel for
+    for (size_t i = 0; i < Nall; ++i) {
+        dpv.k_tmp[i] = 0.0;
     }
     INFO(puts("Allocated memory for dopri853 variables.\n"));
 }
