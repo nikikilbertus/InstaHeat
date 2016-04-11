@@ -459,13 +459,13 @@ void save()
                 id = osy + k;
                 idb = osyb + k / pars.z.stride;
                 #ifdef OUTPUT_PHI
-                phi_buf[os + idb]  = field[id];
+                phi_buf[os + idb] = field[id];
                 #endif
                 #ifdef OUTPUT_DPHI
                 dphi_buf[os + idb] = field[N + id];
                 #endif
                 #ifdef OUTPUT_PSI
-                psi_buf[os + idb]  = field[N2p + id];
+                psi_buf[os + idb] = field[N2p + id];
                 #endif
                 #ifdef OUTPUT_DPSI
                     #if PSI_METHOD == PSI_PARABOLIC
@@ -475,7 +475,7 @@ void save()
                     #endif
                 #endif
                 #ifdef OUTPUT_RHO
-                rho_buf[os + idb]  = rho[id];
+                rho_buf[os + idb] = rho[id];
                 #endif
                 #ifdef CHECK_FOR_NAN
                 if (isnan(field[id]) || isnan(rho[id])) {
