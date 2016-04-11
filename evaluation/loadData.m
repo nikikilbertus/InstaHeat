@@ -1,4 +1,4 @@
-name = 'comp_ell';
+name = 'test_hyp_6000_scal-2';
 comp = true;
 karstenpsi = true;
 loadtimes = true;

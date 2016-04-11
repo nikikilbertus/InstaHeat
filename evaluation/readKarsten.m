@@ -1,12 +1,11 @@
 dim = 1;
 namepre = 'compare_psi';
-scaleamp = 1e0;
+scaleamp = 1e-2;
 massk = 1e-2;
 
 name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten_compare/' namepre '.dat'];
 
 raw = importdata(name);
-
 if strcmp(namepre, 'compare')
     tk = raw(:,1);
     ak = raw(:,2);
