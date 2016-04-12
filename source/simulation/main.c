@@ -35,42 +35,13 @@ struct output dpsi_smry;
 struct output rho_smry;
 struct output a_out;
 struct output phi_ps;
-/* double *time_buf; */
 double *field;
 double *field_new;
 double *dfield;
 double *dfield_new;
-/* double *phi_buf; */
-/* double *dphi_buf; */
-/* double *psi_buf; */
-/* double *dpsi_buf; */
-/* double phi_mean; */
-/* double phi_var; */
-/* double *phi_mean_buf; */
-/* double *phi_var_buf; */
-/* double dphi_mean; */
-/* double dphi_var; */
-/* double *dphi_mean_buf; */
-/* double *dphi_var_buf; */
-/* double psi_mean; */
-/* double psi_var; */
-/* double *psi_mean_buf; */
-/* double *psi_var_buf; */
-/* double dpsi_mean; */
-/* double dpsi_var; */
-/* double *dpsi_mean_buf; */
-/* double *dpsi_var_buf; */
-/* double *a_buf; */
 double *rho;
-/* double *rho_buf; */
-/* double rho_mean; */
-/* double rho_var; */
-/* double *rho_mean_buf; */
-/* double *rho_var_buf; */
 double *pressure;
 double pressure_mean;
-/* double *pow_spec; */
-/* double *pow_spec_buf; */
 double *filter;
 struct k_grid kvec;
 struct temporary tmp;
