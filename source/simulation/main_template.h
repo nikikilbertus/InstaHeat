@@ -281,7 +281,7 @@ extern struct output dphi_smry;
 extern struct output psi_smry;
 extern struct output dpsi_smry;
 
-extern struct time;
+extern struct output time;
 extern struct output a_out;
 
 extern double *rho;
