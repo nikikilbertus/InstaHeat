@@ -8,19 +8,18 @@
 #define     H5_PSI_NAME                     ("psi")
 #define     H5_DPSI_NAME                    ("dpsi")
 #define     H5_RHO_NAME                     ("rho")
-#define     H5_POWER_SPECTRUM_NAME          ("power_spectrum")
+#define     H5_PHI_PS_NAME                  ("phi_power_spectrum")
+#define     H5_DPHI_PS_NAME                 ("dphi_power_spectrum")
+#define     H5_PSI_PS_NAME                  ("psi_power_spectrum")
+#define     H5_DPSI_PS_NAME                 ("dpsi_power_spectrum")
+#define     H5_RHO_PS_NAME                  ("rho_power_spectrum")
 #define     H5_TIME_NAME                    ("time")
 #define     H5_A_NAME                       ("a")
-#define     H5_PHI_MEAN_NAME                ("phi_mean")
-#define     H5_PHI_VARIANCE_NAME            ("phi_variance")
-#define     H5_DPHI_MEAN_NAME               ("dphi_mean")
-#define     H5_DPHI_VARIANCE_NAME           ("dphi_variance")
-#define     H5_PSI_MEAN_NAME                ("psi_mean")
-#define     H5_PSI_VARIANCE_NAME            ("psi_variance")
-#define     H5_DPSI_MEAN_NAME               ("dpsi_mean")
-#define     H5_DPSI_VARIANCE_NAME           ("dpsi_variance")
-#define     H5_RHO_MEAN_NAME                ("rho_mean")
-#define     H5_RHO_VARIANCE_NAME            ("rho_variance")
+#define     H5_PHI_SMRY_NAME                ("phi_summary")
+#define     H5_DPHI_SMRY_NAME               ("dphi_summary")
+#define     H5_PSI_SMRY_NAME                ("psi_summary")
+#define     H5_DPSI_SMRY_NAME               ("dpsi_summary")
+#define     H5_RHO_SMRY_NAME                ("rho_summary")
 #define     H5_MASS_NAME                    ("mass")
 #define     H5_DIMENSION_NAME               ("dimension")
 #define     H5_SEED_NAME                    ("seed")
@@ -47,9 +46,8 @@
 #define     H5_MAX_DT_HUBBLE_FRACTION_NAME  ("max_dt_hubble_fraction")
 
 void h5_create_empty_by_path(const char *name);
-void h5_create_dset(const hsize_t rank, const hsize_t *dim,
-        const hsize_t *max, const hsize_t *chunk, hsize_t *dset_id,
-        const char *name);
+void h5_create_dset(const hsize_t rank, const hsize_t Nt, const hsize_t N,
+        hsize_t *dset, const char *name);
 void h5_write_parameter(const char *name, const double *val, const size_t N);
 void h5_get_extent(hsize_t *max, hsize_t *cur);
 void h5_write_buffer(const hsize_t rank, const hsize_t *start,
