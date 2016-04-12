@@ -22,7 +22,7 @@ void mk_rho(const double *f);
 extern double potential(const double f);
 extern double potential_prime(const double f);
 void mk_psi(double *f);
-void mk_power_spectrum(const fftw_complex *in);
+void mk_power_spectrum(const fftw_complex *in, struct output out);
 void apply_filter_real(double *inout);
 void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
         fftw_complex *psi_io, fftw_complex *dpsi_io);
@@ -30,7 +30,8 @@ void prepare_and_save_timeslice();
 void center(double *f, const size_t N);
 void mk_means_and_variances();
 extern double mean(const double *f, const size_t N);
-extern double variance(const double mean, const double *f, const size_t N);
+void mean_var_min_max(const double *f, double *smry);
+double variance(const double mean, const double *f, const size_t N);
 void contains_nan(const double *f, const size_t N);
 void contains_nanc(const complex *f, const size_t N);
 
