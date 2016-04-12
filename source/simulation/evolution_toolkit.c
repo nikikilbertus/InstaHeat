@@ -92,7 +92,7 @@ void mk_gradient_squared_and_laplacian(double *in)
     #endif
 
     if (evo_flags.compute_pow_spec == 1) {
-        mk_power_spectrum(tmp.phic);
+        mk_power_spectrum(tmp.phic, phi_ps);
     }
 
     complex pre;
@@ -253,7 +253,7 @@ void mk_psi(double *f)
     fftw_time_exe += get_wall_time();
     #endif
 
-    dphi_mean = mean(f + N, N);
+    const double dphi_mean = mean(f + N, N);
     const double dphiextra = 0.5 * dphi_mean * dphi_mean;
 
     tmp.fc[0] = 0.0;
@@ -286,8 +286,8 @@ void mk_psi(double *f)
     #endif
 
     // simplest possible
-    /* phi_mean = mean(f, N); */
-    /* dphi_mean = mean(f + N, N); */
+    /* const double phi_mean = mean(f, N); */
+    /* const double dphi_mean = mean(f + N, N); */
     /* for (size_t i = 0; i < N; ++i) { */
     /*     tmp.deltarho[i] = rho[i] - rho_mean; */
     /*     tmp.f[i] = dphi_mean * (f[i] - phi_mean); */
@@ -307,21 +307,21 @@ void mk_psi(double *f)
 }
 
 // computes a crude estimation of the power spectrum, more info in main.h
-void mk_power_spectrum(const fftw_complex *in)
+void mk_power_spectrum(const fftw_complex *in, struct output out)
 {
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
     const size_t Nz = pars.z.N;
     const size_t N = pars.N;
     const size_t M = pars.M;
-    const size_t bins = pars.file.bins_powspec;
+    const size_t bins = out.dim;
 
     const double k2_max = pars.x.k2 * (Nx/2) * (Nx/2) +
                     pars.y.k2 * (Ny/2) * (Ny/2) + pars.z.k2 * (Nz/2) * (Nz/2);
 
     #pragma omp parallel for
     for (size_t i = 0; i < bins; ++i) {
-        pow_spec[i] = 0.0;
+        out.tmp[i] = 0.0;
     }
 
     double pow2_tmp = 0.0;
@@ -333,7 +333,7 @@ void mk_power_spectrum(const fftw_complex *in)
             pow2_tmp = 2.0 * in[i] * conj(in[i]);
         }
         idx = (int)trunc(bins * sqrt(kvec.sq[i] / k2_max) - 1.0e-14);
-        pow_spec[idx] += pow2_tmp / N;
+        out.tmp[idx] += pow2_tmp / N;
     }
 }
 
@@ -424,49 +424,25 @@ void center(double *f, const size_t N)
 
 void mk_means_and_variances()
 {
-    const size_t N = pars.N;
-    const size_t N2p = 2 * N + 2;
-    const size_t N3p = 3 * N + 2;
-
     //TODO[performance]: parallel sections instead of parallel loops here?
-    #if defined(OUTPUT_PHI_MEAN) || defined(OUTPUT_PHI_VARIANCE)
-    phi_mean = mean(field, N);
+    #ifdef OUTPUT_PHI_SMRY
+    mean_var_min_max(field, phi_smry.tmp);
     #endif
-    #ifdef OUTPUT_PHI_VARIANCE
-    phi_var = variance(phi_mean, field, N);
+    #ifdef OUTPUT_DPHI_SMRY
+    mean_var_min_max(field + pars.N, dphi_smry.tmp);
     #endif
-
-    #if defined(OUTPUT_DPHI_MEAN) || defined(OUTPUT_DPHI_VARIANCE)
-    dphi_mean = mean(field + N, N);
+    #ifdef OUTPUT_PSI_SMRY
+    mean_var_min_max(field + 2 * pars.N + 2, psi_smry.tmp);
     #endif
-    #ifdef OUTPUT_DPHI_VARIANCE
-    dphi_var = variance(dphi_mean, field + N, N);
-    #endif
-
-    #if defined(OUTPUT_PSI_MEAN) || defined(OUTPUT_PSI_VARIANCE)
-    psi_mean = mean(field + N2p, N);
-    #endif
-    #ifdef OUTPUT_PSI_VARIANCE
-    psi_var = variance(psi_mean, field + N2p, N);
-    #endif
-
-    #if defined(OUTPUT_DPSI_MEAN) || defined(OUTPUT_DPSI_VARIANCE)
+    #ifdef OUTPUT_DPSI_SMRY
         #if PSI_METHOD == PSI_PARABOLIC
-        dpsi_mean = mean(dfield + N2p, N);
+        mean_var_min_max(dfield + 2 * pars.N + 2, dpsi_smry.tmp);
         #else
-        dpsi_mean = mean(field + N3p, N);
+        mean_var_min_max(field + 3 * pars.N + 2, dpsi_smry.tmp);
         #endif
     #endif
-    #ifdef OUTPUT_DPSI_VARIANCE
-        #if PSI_METHOD == PSI_PARABOLIC
-        dpsi_var = variance(dpsi_mean, dfield + N2p, N);
-        #else
-        dpsi_var = variance(dpsi_mean, field + N3p, N);
-        #endif
-    #endif
-
-    #ifdef OUTPUT_RHO_VARIANCE
-    rho_var = variance(rho_mean, rho, N);
+    #ifdef OUTPUT_RHO_SMRY
+    mean_var_min_max(rho, rho_smry.tmp);
     #endif
 }
 
@@ -480,7 +456,25 @@ inline double mean(const double *f, const size_t N)
     return mean / (double)N;
 }
 
-inline double variance(const double mean, const double *f, const size_t N)
+void mean_var_min_max(const double *f, double *smry)
+{
+    const size_t N = pars.N;
+    double mean = 0.0;
+    double min_val = f[0];
+    double max_val = f[0];
+    #pragma omp parallel for reduction(+: mean, max: max_val, min: min_val)
+    for (size_t i = 0; i < N; ++i) {
+        mean += f[i];
+        min_val = MIN(min_val, f[i]);
+        max_val = MAX(max_val, f[i]);
+    }
+    smry[0] = mean / (double)N;
+    smry[1] = variance(smry[0], f, N);
+    smry[2] = min_val;
+    smry[3] = max_val;
+}
+
+double variance(const double mean, const double *f, const size_t N)
 {
     double sum1 = 0.0;
     double sum2 = 0.0;
