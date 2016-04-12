@@ -219,6 +219,7 @@ void allocate_external()
     rho_out.dim = outN;
     rho_out.buf = calloc(Nbuf * rho_out.dim * sizeof *rho_out.buf);
     #endif
+
     #ifdef OUTPUT_PHI_SMRY
     phi_smry.dim = SUMMARY_VALUES;
     phi_smry.tmp = calloc(phi_smry.dim, sizeof *phi_smry.tmp);
@@ -241,15 +242,16 @@ void allocate_external()
     #endif
     #ifdef OUTPUT_RHO_SMRY
     rho_smry.dim = SUMMARY_VALUES;
+    rho_smry.tmp = calloc(rho_smry.dim, sizeof *rho_smry.tmp);
     rho_smry.buf = calloc(Nbuf * rho_smry.dim, sizeof *rho_smry.buf);
     #endif
+
     #ifdef OUTPUT_PHI_PS
     phi_ps.dim = bins;
     phi_ps.tmp = calloc(phi_ps.dim, sizeof *phi_ps.tmp);
     phi_ps.buf = calloc(Nbuf * bins, sizeof *phi_ps.buf);
     #endif
 
-    //TODO: check that alloc and free agree
     kvec.sq = fftw_malloc(M * sizeof *kvec.sq);
     kvec.x = fftw_malloc(M * sizeof *kvec.x);
     kvec.y = fftw_malloc(M * sizeof *kvec.y);
@@ -1021,63 +1023,56 @@ void free_external()
     fftw_free(field_new);
     fftw_free(dfield);
     fftw_free(dfield_new);
-    free(rho);
+    fftw_free(rho);
     #if PSI_METHOD == PSI_HYPERBOLIC
-    free(pressure);
+    fftw_free(pressure);
     #endif
-    free(pow_spec);
-    free(time_buf);
-    free(a_buf);
+    free(time.buf);
+    free(a_out.buf);
     #ifdef OUTPUT_PHI
-    free(phi_buf);
+    free(phi.buf);
     #endif
     #ifdef OUTPUT_DPHI
-    free(dphi_buf);
-    #endif
-    #ifdef OUTPUT_PHI_MEAN
-    free(phi_mean_buf);
-    #endif
-    #ifdef OUTPUT_PHI_VARIANCE
-    free(phi_var_buf);
-    #endif
-    #ifdef OUTPUT_DPHI_MEAN
-    free(dphi_mean_buf);
-    #endif
-    #ifdef OUTPUT_DPHI_VARIANCE
-    free(dphi_var_buf);
+    free(dphi.buf);
     #endif
     #ifdef OUTPUT_PSI
-    free(psi_buf);
+    free(psi.buf);
     #endif
     #ifdef OUTPUT_DPSI
-    free(dpsi_buf);
-    #endif
-    #ifdef OUTPUT_PSI_MEAN
-    free(psi_mean_buf);
-    #endif
-    #ifdef OUTPUT_PSI_VARIANCE
-    free(psi_var_buf);
-    #endif
-    #ifdef OUTPUT_DPSI_MEAN
-    free(dpsi_mean_buf);
-    #endif
-    #ifdef OUTPUT_DPSI_VARIANCE
-    free(dpsi_var_buf);
+    free(dpsi.buf);
     #endif
     #ifdef OUTPUT_RHO
-    free(rho_buf);
+    free(rho.buf);
     #endif
-    #ifdef OUTPUT_RHO_MEAN
-    free(rho_mean_buf);
+
+    #ifdef OUTPUT_PHI_SMRY
+    free(phi_smry.tmp);
+    free(phi_smry.buf);
     #endif
-    #ifdef OUTPUT_RHO_VARIANCE
-    free(rho_var_buf);
+    #ifdef OUTPUT_DPHI_SMRY
+    free(dphi_smry.tmp);
+    free(dphi_smry.buf);
     #endif
-    #ifdef OUTPUT_POWER_SPECTRUM
-    free(pow_spec_buf);
+    #ifdef OUTPUT_PSI_SMRY
+    free(psi_smry.tmp);
+    free(psi_smry.buf);
     #endif
+    #ifdef OUTPUT_DPSI_SMRY
+    free(dpsi_smry.tmp);
+    free(dpsi_smry.buf);
+    #endif
+    #ifdef OUTPUT_RHO_SMRY
+    free(rho_smry.tmp);
+    free(rho_smry.buf);
+    #endif
+
+    #ifdef OUTPUT_PHI_PS
+    free(phi_ps.tmp);
+    free(phi_ps.buf);
+    #endif
+
     #ifdef ENABLE_FFT_FILTER
-    free(filter);
+    fftw_free(filter);
     #endif
     fftw_free(kvec.sq);
     fftw_free(kvec.x);
@@ -1093,9 +1088,9 @@ void free_external()
     fftw_free(tmp.grad);
     fftw_free(tmp.lap);
     fftw_free(tmp.psic);
+    fftw_free(tmp.dpsic);
     fftw_free(tmp.fc);
     fftw_free(tmp.deltarhoc);
-    fftw_free(tmp.dpsic);
     fftw_free(tmp.f);
     fftw_free(tmp.deltarho);
     INFO(puts("Freed external variables.\n"));

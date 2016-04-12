@@ -267,8 +267,6 @@ struct k_grid
 };
 
 extern struct parameters pars;
-extern struct time;
-/* extern double *time_buf; */
 
 // contain phi, dphi, a, psi, dpsi (only first Ntot entries are integrated)
 extern double *field;
@@ -288,6 +286,7 @@ extern struct output dphi_smry;
 extern struct output psi_smry;
 extern struct output dpsi_smry;
 
+extern struct time;
 extern struct output a_out;
 
 extern double *rho;
