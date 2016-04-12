@@ -154,7 +154,6 @@ void initialize_parameters()
 
     pars.t.dt = DELTA_T;
     pars.t.t  = INITIAL_TIME;
-    t_out.tmp[0] = INITIAL_TIME;
     pars.t.ti = INITIAL_TIME;
     pars.t.tf = FINAL_TIME;
     pars.t.Nt = ceil((pars.t.tf - pars.t.ti) / pars.t.dt) + 1;
@@ -493,6 +492,7 @@ void mk_initial_conditions()
         field[i] = 0.0;
     }
     #endif
+    t_out.tmp[0] = pars.t.ti;
     a_out.tmp[0] = field[2 * pars.N];
     INFO(puts("Initialized fields on first time slice.\n"));
 }
@@ -1052,7 +1052,7 @@ void free_external()
     free(dpsi.buf);
     #endif
     #ifdef OUTPUT_RHO
-    free(rho.buf);
+    free(rho_out.buf);
     #endif
 
     #ifdef OUTPUT_PHI_SMRY
