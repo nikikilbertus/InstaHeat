@@ -287,8 +287,8 @@ void h5_write_all_buffers(const hsize_t Nt)
     h5_write_buffer(rank, Nt, rho_smry.dim, os, rho_smry.id, rho_smry.buf);
     #endif
 
-    // ---------------------------time and  a-----------------------------------
     rank = 1;
+    // ---------------------------time and  a-----------------------------------
     h5_write_buffer(rank, Nt, time.dim, os, time.id, time.buf);
     h5_write_buffer(rank, Nt, a_out.dim, os, a_out.id, a_out.buf);
 
