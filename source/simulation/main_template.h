@@ -175,6 +175,17 @@ struct datasets
 };
 
 /**
+ * @brief Specifies a dataset in the output h5 file.
+ */
+struct output
+{
+    size_t dim;     ///< length of output on a single time slice
+    hsize_t id;     ///< id for the dataset in the h5 file
+    double *buf;    ///< buffer WRITE_OUT_BUFFER_NUMBER many time slices
+    double *tmp;    ///< the output values on the current time slice
+};
+
+/**
  * @brief All parameters related to file IO operations
  */
 struct file_parameters
@@ -264,46 +275,58 @@ extern double *dfield;
 extern double *field_new;
 extern double *dfield_new;
 
-extern double *phi_buf;
-extern double *dphi_buf;
-extern double *psi_buf;
-extern double *dpsi_buf;
+/* extern double *phi_buf; */
+/* extern double *dphi_buf; */
+/* extern double *psi_buf; */
+/* extern double *dpsi_buf; */
+extern struct output phi;
+extern struct output dphi;
+extern struct output psi;
+extern struct output dpsi;
 
-extern double phi_mean;
-extern double phi_var;
-extern double *phi_mean_buf;
-extern double *phi_var_buf;
+extern struct output phi_smry;
+/* extern double phi_mean; */
+/* extern double phi_var; */
+/* extern double *phi_mean_buf; */
+/* extern double *phi_var_buf; */
 
-extern double dphi_mean;
-extern double dphi_var;
-extern double *dphi_mean_buf;
-extern double *dphi_var_buf;
+extern struct output dphi_smry;
+/* extern double dphi_mean; */
+/* extern double dphi_var; */
+/* extern double *dphi_mean_buf; */
+/* extern double *dphi_var_buf; */
 
-extern double psi_mean;
-extern double psi_var;
-extern double *psi_mean_buf;
-extern double *psi_var_buf;
+extern struct output psi_smry;
+/* extern double psi_mean; */
+/* extern double psi_var; */
+/* extern double *psi_mean_buf; */
+/* extern double *psi_var_buf; */
 
-extern double dpsi_mean;
-extern double dpsi_var;
-extern double *dpsi_mean_buf;
-extern double *dpsi_var_buf;
+extern struct output dpsi_smry;
+/* extern double dpsi_mean; */
+/* extern double dpsi_var; */
+/* extern double *dpsi_mean_buf; */
+/* extern double *dpsi_var_buf; */
 
-extern double *a_buf;
+extern struct output a_out;
+/* extern double *a_buf; */
 
 extern double *rho;
-extern double *rho_buf;
-extern double rho_mean;
-extern double rho_var;
-extern double *rho_mean_buf;
-extern double *rho_var_buf;
+/* extern double *rho_buf; */
+extern struct output rho_out;
+extern struct output rho_smry;
+/* extern double rho_mean; */
+/* extern double rho_var; */
+/* extern double *rho_mean_buf; */
+/* extern double *rho_var_buf; */
 
 // only needed for PSI_METHOD == PSI_HYPERBOLIC, but always defined
 extern double *pressure;
 extern double pressure_mean;
 
-extern double *pow_spec;
-extern double *pow_spec_buf;
+extern struct output phi_ps;
+/* extern double *pow_spec; */
+/* extern double *pow_spec_buf; */
 
 extern double *filter;
 
