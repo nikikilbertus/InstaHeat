@@ -13,6 +13,14 @@
  * @brief A simple standard 4th order explicit Runge Kutta integrator with fixed
  * stepsize.
  */
+
+/**
+ * @brief Standard 4th order explicit Runge Kutta integrator with fixed
+ * stepsize.
+ *
+ * @note The stepsize might be changed for the very last time step in order to
+ * exactly end at the given final time.
+ */
 void run_rk4()
 {
     const size_t Ntot = pars.Ntot;
