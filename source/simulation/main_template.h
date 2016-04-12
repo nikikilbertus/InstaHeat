@@ -70,17 +70,12 @@
 #define _OPSI_
 #define _ODPSI_
 #define _ORHO_
-#define _OPOWSPEC_
-#define _OPHIM_
-#define _ODPHIM_
-#define _OPSIM_
-#define _ODPSIM_
-#define _ORHOM_
-#define _OPHIV_
-#define _ODPHIV_
-#define _OPSIV_
-#define _ODPSIV_
-#define _ORHOV_
+#define _OPHIPS_
+#define _OPHIS_
+#define _ODPHIS_
+#define _OPSIS_
+#define _ODPSIS_
+#define _ORHOS_
 
 #if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || defined(OUTPUT_PSI) \
     || defined(OUTPUT_DPSI)|| defined(OUTPUT_RHO)
