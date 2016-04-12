@@ -113,6 +113,7 @@ void h5_create_empty_by_path(const char *name)
 
     // ---------------------------commit hash-----------------------------------
     hid_t filetype, memtype, dspace_str, dset_str;
+    hsize_t dim[1] = {1};
     size_t len;
     #if VERSION_CONTROL != VERSION_CONTROL_NONE
     #if VERSION_CONTROL == VERSION_CONTROL_HG
@@ -120,7 +121,6 @@ void h5_create_empty_by_path(const char *name)
     #elif VERSION_CONTROL == VERSION_CONTROL_GIT
     const char *cmd = "git rev-parse --short HEAD";
     #endif
-    hsize_t dim[1] = {1};
     len = 16;
     char hash[len];
     FILE *output;
