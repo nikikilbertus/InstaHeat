@@ -1,7 +1,8 @@
-name = 'comp_hyp_6000';
+name = 'testoutput';
 comp = true;
 karstenpsi = true;
 loadtimes = true;
+newoutput = true;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
@@ -16,23 +17,52 @@ phi = h5read(name, '/phi');
 dphi = h5read(name, '/dphi');
 psi = h5read(name, '/psi');
 dpsi = h5read(name, '/dpsi');
-powspec = h5read(name, '/power_spectrum');
 mass = h5read(name, '/mass');
 tols = h5read(name, '/tolerances');
 
 Nt = length(t);
 N = length(phi(:,1));
 
-phimean = h5read(name, '/phi_mean')';
-phivar = h5read(name, '/phi_variance')';
-dphimean = h5read(name, '/dphi_mean')';
-dphivar = h5read(name, '/dphi_variance')';
-psimean = h5read(name, '/psi_mean')';
-psivar = h5read(name, '/psi_variance')';
-dpsimean = h5read(name, '/dpsi_mean')';
-dpsivar = h5read(name, '/dpsi_variance')';
-rhomean = h5read(name, '/rho_mean')';
-rhovar = h5read(name, '/rho_variance')';
+if (newoutput)
+    powspec = h5read(name, '/phi_power_spectrum');
+    phismry = h5read(name, '/phi_summary');
+    dphismry = h5read(name, '/dphi_summary');
+    psismry = h5read(name, '/psi_summary');
+    dpsismry = h5read(name, '/dpsi_summary');
+    rhosmry = h5read(name, '/rho_summary');
+    phimean  = phismry(1,:);
+    phivar   = phismry(2,:);
+    phimin   = phismry(3,:);
+    phimax   = phismry(4,:);
+    dphimean = dphismry(1,:);
+    dphivar  = dphismry(2,:);
+    dphimin  = dphismry(3,:);
+    dphimax  = dphismry(4,:);
+    psimean  = psismry(1,:);
+    psivar   = psismry(2,:);
+    psimin   = psismry(3,:);
+    psimax   = psismry(4,:);
+    dpsimean = dpsismry(1,:);
+    dpsivar  = dpsismry(2,:);
+    dpsimin  = dpsismry(3,:);
+    dpsimax  = dpsismry(4,:);
+    rhomean  = rhosmry(1,:);
+    rhovar   = rhosmry(2,:);
+    rhomin   = rhosmry(3,:);
+    rhomax   = rhosmry(4,:);
+else
+    powspec = h5read(name, '/power_spectrum');
+    phimean = h5read(name, '/phi_mean')';
+    phivar = h5read(name, '/phi_variance')';
+    dphimean = h5read(name, '/dphi_mean')';
+    dphivar = h5read(name, '/dphi_variance')';
+    psimean = h5read(name, '/psi_mean')';
+    psivar = h5read(name, '/psi_variance')';
+    dpsimean = h5read(name, '/dpsi_mean')';
+    dpsivar = h5read(name, '/dpsi_variance')';
+    rhomean = h5read(name, '/rho_mean')';
+    rhovar = h5read(name, '/rho_variance')';
+end
 
 H = sqrt(rhomean / 3);
 
