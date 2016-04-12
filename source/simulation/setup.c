@@ -186,6 +186,15 @@ void allocate_external()
     const size_t outN = pars.outN;
     #endif
 
+    // ---------------------------time, a---------------------------------------
+    time.dim = 1;
+    time.tmp = calloc(time.dim, sizeof *time.tmp);
+    time.buf = calloc(Nbuf * time.dim, sizeof *time.buf);
+    a_out.dim = 1;
+    a_out.tmp = calloc(a_out.dim, sizeof *a_out.tmp);
+    a_out.buf = calloc(Nbuf * time.dim, sizeof *a_out.buf);
+
+    // ---------------------------full fields: phi, dphi, psi, dpsi, rho--------
     field = fftw_malloc(Nall * sizeof *field);
     field_new = fftw_malloc(Nall * sizeof *field_new);
     dfield = fftw_malloc(Nall * sizeof *dfield);
@@ -194,13 +203,6 @@ void allocate_external()
     #if PSI_METHOD == PSI_HYPERBOLIC
     pressure = fftw_malloc(N * sizeof *pressure);
     #endif
-
-    time.dim = 1;
-    time.tmp = calloc(time.dim, sizeof *time.tmp);
-    time.buf = calloc(Nbuf * time.dim, sizeof *time.buf);
-    a_out.dim = 1;
-    a_out.tmp = calloc(a_out.dim, sizeof *a_out.tmp);
-    a_out.buf = calloc(Nbuf * time.dim, sizeof *a_out.buf);
 
     #ifdef OUTPUT_PHI
     phi.dim = outN;
@@ -223,6 +225,7 @@ void allocate_external()
     rho_out.buf = calloc(Nbuf * rho_out.dim * sizeof *rho_out.buf);
     #endif
 
+    // ---------------------------summaries-------------------------------------
     #ifdef OUTPUT_PHI_SMRY
     phi_smry.dim = SUMMARY_VALUES;
     phi_smry.tmp = calloc(phi_smry.dim, sizeof *phi_smry.tmp);
@@ -249,12 +252,14 @@ void allocate_external()
     rho_smry.buf = calloc(Nbuf * rho_smry.dim, sizeof *rho_smry.buf);
     #endif
 
+    // ---------------------------power spectra---------------------------------
     #ifdef OUTPUT_PHI_PS
     phi_ps.dim = bins;
     phi_ps.tmp = calloc(phi_ps.dim, sizeof *phi_ps.tmp);
     phi_ps.buf = calloc(Nbuf * phi_ps.dim, sizeof *phi_ps.buf);
     #endif
 
+    // ---------------------------k grids---------------------------------------
     kvec.sq = fftw_malloc(M * sizeof *kvec.sq);
     kvec.x = fftw_malloc(M * sizeof *kvec.x);
     kvec.y = fftw_malloc(M * sizeof *kvec.y);
@@ -263,7 +268,7 @@ void allocate_external()
     filter = fftw_malloc(M * sizeof *filter);
     #endif
 
-    // default arrays for fourier transforms
+    // ---------------------------default arrays for fourier transforms--------
     tmp.phic = fftw_malloc(M * sizeof *tmp.phic);
     tmp.xphic = fftw_malloc(M * sizeof *tmp.xphic);
     tmp.yphic = fftw_malloc(M * sizeof *tmp.yphic);
@@ -273,7 +278,7 @@ void allocate_external()
     tmp.fc = fftw_malloc(M * sizeof *tmp.fc);
     tmp.deltarhoc = fftw_malloc(M * sizeof *tmp.deltarhoc);
 
-    // general purpose memory blocks for temporary use
+    // ------------general purpose memory blocks for temporary use-------------
     tmp.xphi = fftw_malloc(N * sizeof *tmp.xphi);
     tmp.yphi = fftw_malloc(N * sizeof *tmp.yphi);
     tmp.zphi = fftw_malloc(N * sizeof *tmp.zphi);
