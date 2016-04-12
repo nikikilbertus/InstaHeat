@@ -427,7 +427,7 @@ void prepare_and_save_timeslice()
     #if PSI_METHOD == PSI_ELLIPTIC && !defined(EVOLVE_WITHOUT_PSI)
     mk_psi(field);
     #endif
-    mk_means_and_variances();
+    mk_summary();
     save();
 }
 
@@ -440,7 +440,7 @@ void center(double *f, const size_t N)
     }
 }
 
-void mk_means_and_variances()
+void mk_summary()
 {
     //TODO[performance]: parallel sections instead of parallel loops here?
     #ifdef OUTPUT_PHI_SMRY
