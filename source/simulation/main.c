@@ -40,6 +40,7 @@ double *field_new;
 double *dfield;
 double *dfield_new;
 double *rho;
+double rho_mean;
 double *pressure;
 double pressure_mean;
 double *filter;
