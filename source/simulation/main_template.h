@@ -281,6 +281,8 @@ extern struct output dphi;
 extern struct output psi;
 extern struct output dpsi;
 
+#define SUMMARY_VALUES      (4)
+
 extern struct output phi_smry;
 extern struct output dphi_smry;
 extern struct output psi_smry;

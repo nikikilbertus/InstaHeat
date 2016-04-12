@@ -166,6 +166,7 @@ void initialize_parameters()
     pars.file.buf_size = WRITE_OUT_BUFFER_NUMBER;
     pars.file.skip = TIME_STEP_SKIPS;
     pars.file.bins_powspec = POWER_SPECTRUM_BINS;
+
     INFO(printf("Initialized parameters for %zu dimension(s).\n\n", pars.dim));
 }
 
@@ -188,49 +189,63 @@ void allocate_external()
     field_new = fftw_malloc(Nall * sizeof *field_new);
     dfield = fftw_malloc(Nall * sizeof *dfield);
     dfield_new = fftw_malloc(Nall * sizeof *dfield_new);
-    time.buf = calloc(Nbuf, sizeof *time.buf);
-    a_out.buf = calloc(Nbuf, sizeof *a_out.buf);
     rho = fftw_malloc(N * sizeof *rho);
     #if PSI_METHOD == PSI_HYPERBOLIC
     pressure = fftw_malloc(N * sizeof *pressure);
     #endif
 
+    time.dim = 1;
+    time.buf = calloc(Nbuf, sizeof *time.buf);
+    a_out.dim = 1;
+    a_out.buf = calloc(Nbuf, sizeof *a_out.buf);
+
     #ifdef OUTPUT_PHI
-    phi.buf = calloc(Nbuf * outN, sizeof *phi.buf);
+    phi.dim = outN;
+    phi.buf = calloc(Nbuf * phi.dim, sizeof *phi.buf);
     #endif
     #ifdef OUTPUT_DPHI
-    dphi.buf = calloc(Nbuf * outN, sizeof *dphi.buf);
+    dphi.dim = outN;
+    dphi.buf = calloc(Nbuf * dphi.dim, sizeof *dphi.buf);
     #endif
     #ifdef OUTPUT_PSI
-    psi.buf = calloc(Nbuf * outN * sizeof *psi.buf);
+    psi.dim = outN;
+    psi.buf = calloc(Nbuf * psi.dim * sizeof *psi.buf);
     #endif
     #ifdef OUTPUT_DPSI
-    dpsi.buf = calloc(Nbuf * outN * sizeof *dpsi.buf);
+    dpsi.dim = outN;
+    dpsi.buf = calloc(Nbuf * dpsi.dim * sizeof *dpsi.buf);
     #endif
     #ifdef OUTPUT_RHO
-    rho.buf = calloc(Nbuf * outN * sizeof *rho.buf);
+    rho_out.dim = outN;
+    rho_out.buf = calloc(Nbuf * rho_out.dim * sizeof *rho_out.buf);
     #endif
     #ifdef OUTPUT_PHI_SMRY
+    phi_smry.dim = SUMMARY_VALUES;
     phi_smry.tmp = calloc(phi_smry.dim, sizeof *phi_smry.tmp);
     phi_smry.buf = calloc(Nbuf * phi_smry.dim, sizeof *phi_smry.buf);
     #endif
     #ifdef OUTPUT_DPHI_SMRY
+    dphi_smry.dim = SUMMARY_VALUES;
     dphi_smry.tmp = calloc(dphi_smry.dim, sizeof *dphi_smry.tmp);
     dphi_smry.buf = calloc(Nbuf * dphi_smry.dim, sizeof *dphi_smry.buf);
     #endif
     #ifdef OUTPUT_PSI_SMRY
+    psi_smry.dim = SUMMARY_VALUES;
     psi_smry.tmp = calloc(psi_smry.dim, sizeof *psi_smry.tmp);
     psi_smry.buf = calloc(Nbuf * psi_smry.dim, sizeof *psi_smry.buf);
     #endif
     #ifdef OUTPUT_DPSI_SMRY
+    dpsi_smry.dim = SUMMARY_VALUES;
     dpsi_smry.tmp = calloc(dpsi_smry.dim, sizeof *dpsi_smry.tmp);
     dpsi_smry.buf = calloc(Nbuf * dpsi_smry.dim, sizeof *dpsi_smry.buf);
     #endif
     #ifdef OUTPUT_RHO_SMRY
+    rho_smry.dim = SUMMARY_VALUES;
     rho_smry.buf = calloc(Nbuf * rho_smry.dim, sizeof *rho_smry.buf);
     #endif
     #ifdef OUTPUT_PHI_PS
-    phi_ps.tmp = calloc(bins, sizeof *phi_ps.tmp);
+    phi_ps.dim = bins;
+    phi_ps.tmp = calloc(phi_ps.dim, sizeof *phi_ps.tmp);
     phi_ps.buf = calloc(Nbuf * bins, sizeof *phi_ps.buf);
     #endif
 
