@@ -996,7 +996,7 @@ double wrapped_gaussian(const double x, const double y, const double z)
  */
 void free_and_destroy_all()
 {
-    h5_close(pars.file.id);
+    h5_close();
     destroy_and_cleanup_fftw();
     free_external();
 }
