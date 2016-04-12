@@ -213,15 +213,15 @@ void allocate_external()
     #endif
     #ifdef OUTPUT_PSI
     psi.dim = outN;
-    psi.buf = calloc(Nbuf * psi.dim * sizeof *psi.buf);
+    psi.buf = calloc(Nbuf * psi.dim, sizeof *psi.buf);
     #endif
     #ifdef OUTPUT_DPSI
     dpsi.dim = outN;
-    dpsi.buf = calloc(Nbuf * dpsi.dim * sizeof *dpsi.buf);
+    dpsi.buf = calloc(Nbuf * dpsi.dim, sizeof *dpsi.buf);
     #endif
     #ifdef OUTPUT_RHO
     rho_out.dim = outN;
-    rho_out.buf = calloc(Nbuf * rho_out.dim * sizeof *rho_out.buf);
+    rho_out.buf = calloc(Nbuf * rho_out.dim, sizeof *rho_out.buf);
     #endif
 
     // ---------------------------summaries-------------------------------------
