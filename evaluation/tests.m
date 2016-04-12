@@ -1,5 +1,4 @@
 %% Laplacian
-
 N = 64;
 dim = 3;
 aa=-pi;
@@ -98,8 +97,6 @@ n2 = norm(phi(:))^2;
 
 xiint = @(k, r) k.*(k.^2+meff2).^(-.25)*normfac.*exp(-k.^2/kcut2).*sin(k.*r)*mrat./r;
 xi = @(r) integral(@(k) xiint(k,r), 0, kmax);
-
-
 dx = L/n;
 x = (0:n-1)*dx;
 
@@ -114,3 +111,123 @@ end
 %% how far is rho0 from rho
 tmp = abs( rho0 - mean(rho0(:)) );
 mean(tmp(:))
+
+%% Hamiltonian and momentum karsten vs. code
+L=1;
+N=64;
+name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64psi_3.dat';
+raw = importdata(name);
+phika = reshape(raw(:,4),N,N,N);
+dphika = reshape(raw(:,5),N,N,N);
+psika = reshape(raw(:,6),N,N,N);
+dpsika = reshape(raw(:,7),N,N,N);
+evaluate3D
+rhoka = mkrho(phika,dphika,psika,a(1),mass,L);
+N = N(1);
+psi = h5read(name,'/psi');
+psi = reshape(psi(:,1),N,N,N);
+phi = h5read(name,'/phi');
+phi = reshape(phi(:,1),N,N,N);
+rho = h5read(name,'/rho');
+rho = reshape(rho(:,1),N,N,N);
+dphi = h5read(name,'/dphi');
+dphi = reshape(dphi(:,1),N,N,N);
+dpsi = h5read(name,'/dpsi');
+dpsi = reshape(dpsi(:,1),N,N,N);
+prn = @(f) num2str(max(abs(f(:))));
+disp(' '); disp(' ');
+disp(['----comparison, mass=' num2str(mass) ', a=' num2str(a(1)) '----'])
+[check, t1, t2, t3] = hamiltonianConstraint(psika, dpsika, a(1), rhoka, L);
+disp('karstens psi hamiltonian')
+disp(['sum: ' prn(check(:))])
+disp(['1  : ' prn(t1(:))])
+disp(['2  : ' prn(t2(:))])
+disp(['3  : ' prn(t3(:))])
+[check, t1, t2] = momentumConstraint(psika, dpsika, phika, dphika, rhoka, L);
+disp('karstens psi momentum')
+disp(['sum: ' num2str(check)])
+disp(['1  : ' num2str(t1)])
+disp(['2  : ' num2str(t2)])
+[check, t1, t2, t3] = hamiltonianConstraint(psi, dpsi, a(1), rho, L);
+disp(' ');
+disp('code psi hamiltonian')
+disp(['sum: ' prn(check(:))])
+disp(['1  : ' prn(t1(:))])
+disp(['2  : ' prn(t2(:))])
+disp(['3  : ' prn(t3(:))])
+[check, t1, t2] = momentumConstraint(psi, dpsi, phi, dphi, rho, L);
+disp('code psi momentum')
+disp(['sum: ' num2str(check)])
+disp(['1  : ' num2str(t1)])
+disp(['2  : ' num2str(t2)])
+
+%% Hamiltonian and momentum for bunch davies
+nums = [1 2 3 4 5 6 7 8];
+L = 10;
+mabs = @(f) max(abs(f(:)));
+prn = @(f) num2str(max(abs(f(:))));
+herrs = zeros(4, length(nums));
+mxerrs = zeros(3,length(nums));
+myerrs = zeros(3,length(nums));
+mzerrs = zeros(3,length(nums));
+for i=1:length(nums)
+    name = ['bunch' num2str(nums(i))];
+    evaluate3D
+    N = N(1);
+    psi = h5read(name,'/psi');
+    psi = reshape(psi(:,1),N,N,N);
+    phi = h5read(name,'/phi');
+    phi = reshape(phi(:,1),N,N,N);
+    rho = h5read(name,'/rho');
+    rho = reshape(rho(:,1),N,N,N);
+    dphi = h5read(name,'/dphi');
+    dphi = reshape(dphi(:,1),N,N,N);
+    dpsi = h5read(name,'/dpsi');
+    dpsi = reshape(dpsi(:,1),N,N,N);
+    disp(' '); disp(' ');
+    disp(['----comparison, mass=' num2str(mass) ', a=' num2str(a(1)) '----'])
+    disp('code psi hamiltonian')
+    [check, t1, t2, t3] = hamiltonianConstraint(psi, dpsi, a(1), rho, L);
+    disp(['sum: ' prn(check(:))])
+    disp(['1  : ' prn(t1(:))])
+    disp(['2  : ' prn(t2(:))])
+    disp(['3  : ' prn(t3(:))])
+    herrs(:,i) = [mabs(check) mabs(t1) mabs(t2) mabs(t3)];
+    disp('code psi momentum')
+    [check, t1, t2] = momentumConstraint(psi, dpsi, phi, dphi, rho, L);
+    disp(['sum: ' num2str(check)])
+    disp(['1  : ' num2str(t1)])
+    disp(['2  : ' num2str(t2)])
+    mxerrs(:,i) = [check(1) t1(1) t2(1)];
+    myerrs(:,i) = [check(2) t1(2) t2(2)];
+    mzerrs(:,i) = [check(3) t1(3) t2(3)];
+end
+herr = herrs(1,:) ./ max(herrs(2:4,:));
+mxerr = mxerrs(1,:) ./ max(mxerrs(2:3,:));
+myerr = myerrs(1,:) ./ max(myerrs(2:3,:));
+mzerr = mzerrs(1,:) ./ max(mzerrs(2:3,:));
+ms = 5 * 10.^(-nums);
+loglog(ms, ms.^2 / ms(end)^2 * herrs(1,end),'--', ms, herrs(1,:),'linewidth',2);
+xlabel('planck mass'); ylabel('max. abs error of hamiltonian');
+shg
+figure
+loglog(ms, ms.^2 / ms(end)^2 * mxerrs(1,end),'--', ms, mxerrs(1,:),'linewidth',2);
+hold on
+loglog(ms, myerrs(1,:),'linewidth',2);
+loglog(ms, mzerrs(1,:),'linewidth',2);
+hold off
+xlabel('planck mass'); ylabel('max. abs error of momenutm');
+
+%% plot long time bunch davies
+name = '64_2_6e4';
+evaluate3D
+scal = ones(size(a))';
+% scal = a';
+plot(a,phimean.*scal); xlabel('a'); ylabel('<\phi>'); shg; pause;
+plot(a,dphimean.*scal); xlabel('a'); ylabel('<d\phi>'); shg; pause;
+plot(a,psimean.*scal); xlabel('a'); ylabel('<\psi>'); shg; pause;
+plot(a,dpsimean.*scal); xlabel('a'); ylabel('<d\psi>'); shg; pause;
+plot(a,sqrt(phivar).*scal); xlabel('a'); ylabel('std \phi'); shg; pause;
+plot(a,sqrt(dphivar).*scal); xlabel('a'); ylabel('std d\phi'); shg; pause;
+plot(a,sqrt(psivar).*scal); xlabel('a'); ylabel('std \psi'); shg; pause;
+plot(a,sqrt(dpsivar).*scal); xlabel('a'); ylabel('std d\psi'); shg; pause;
