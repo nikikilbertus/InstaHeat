@@ -57,7 +57,7 @@ void h5_create_empty_by_path(const char *name)
 
     rank = 1;
     // ---------------------------time, a---------------------------------------
-    h5_create_dset(rank, time.dim, &(time.id), H5_TIME_NAME);
+    h5_create_dset(rank, t_out.dim, &(t_out.id), H5_TIME_NAME);
     h5_create_dset(rank, a_out.dim, &(a_out.id), H5_A_NAME);
 
     // ---------------------------parameters------------------------------------
@@ -228,7 +228,7 @@ void h5_write_parameter(const char *name, const double *val, const size_t N)
 
 void h5_get_extent(hsize_t *max, hsize_t *cur)
 {
-    hid_t dspace = H5Dget_space(time.id);
+    hid_t dspace = H5Dget_space(t_out.id);
     H5Sget_simple_extent_dims(dspace, cur, max);
 }
 
@@ -262,7 +262,7 @@ void h5_write_all_buffers(const hsize_t Nt)
     h5_write_buffer(rank, Nt, dpsi.dim, os, dpsi.id, dpsi.buf);
     #endif
     #ifdef OUTPUT_RHO
-    h5_write_buffer(rank, Nt, rho.dim, os, rho_out.id, rho_out.buf);
+    h5_write_buffer(rank, Nt, rho_out.dim, os, rho_out.id, rho_out.buf);
     #endif
 
     // --------------------------power spectra----------------------------------
@@ -289,7 +289,7 @@ void h5_write_all_buffers(const hsize_t Nt)
 
     rank = 1;
     // ---------------------------time and  a-----------------------------------
-    h5_write_buffer(rank, Nt, time.dim, os, time.id, time.buf);
+    h5_write_buffer(rank, Nt, t_out.dim, os, t_out.id, t_out.buf);
     h5_write_buffer(rank, Nt, a_out.dim, os, a_out.id, a_out.buf);
 
     #ifdef SHOW_TIMING_INFO
@@ -338,7 +338,7 @@ void save()
     hsize_t N = pars.N;
     hsize_t N2 = 2 * N;
 
-    time.buf[index] = time.tmp[0];
+    t_out.buf[index] = t_out.tmp[0];
     a_out.tmp[0] = field[N2];
     a_out.buf[index] = a_out.tmp[0];
 

@@ -154,7 +154,7 @@ void initialize_parameters()
 
     pars.t.dt = DELTA_T;
     pars.t.t  = INITIAL_TIME;
-    time.tmp[0] = INITIAL_TIME;
+    t_out.tmp[0] = INITIAL_TIME;
     pars.t.ti = INITIAL_TIME;
     pars.t.tf = FINAL_TIME;
     pars.t.Nt = ceil((pars.t.tf - pars.t.ti) / pars.t.dt) + 1;
@@ -186,12 +186,12 @@ void allocate_external()
     #endif
 
     // ---------------------------time, a---------------------------------------
-    time.dim = 1;
-    time.tmp = calloc(time.dim, sizeof *time.tmp);
-    time.buf = calloc(Nbuf * time.dim, sizeof *time.buf);
+    t_out.dim = 1;
+    t_out.tmp = calloc(t_out.dim, sizeof *t_out.tmp);
+    t_out.buf = calloc(Nbuf * t_out.dim, sizeof *t_out.buf);
     a_out.dim = 1;
     a_out.tmp = calloc(a_out.dim, sizeof *a_out.tmp);
-    a_out.buf = calloc(Nbuf * time.dim, sizeof *a_out.buf);
+    a_out.buf = calloc(Nbuf * a_out.dim, sizeof *a_out.buf);
 
     // ---------------------------full fields: phi, dphi, psi, dpsi, rho--------
     field = fftw_malloc(Nall * sizeof *field);
@@ -1035,8 +1035,8 @@ void free_external()
     #if PSI_METHOD == PSI_HYPERBOLIC
     fftw_free(pressure);
     #endif
-    free(time.tmp);
-    free(time.buf);
+    free(t_out.tmp);
+    free(t_out.buf);
     free(a_out.tmp);
     free(a_out.buf);
     #ifdef OUTPUT_PHI

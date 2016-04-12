@@ -462,7 +462,8 @@ void mean_var_min_max(const double *f, double *smry)
     double mean = 0.0;
     double min_val = f[0];
     double max_val = f[0];
-    #pragma omp parallel for reduction(+: mean, max: max_val, min: min_val)
+    #pragma omp parallel for reduction(+: mean) reduction(max: max_val) \
+        reduction(min: min_val)
     for (size_t i = 0; i < N; ++i) {
         mean += f[i];
         min_val = MIN(min_val, f[i]);

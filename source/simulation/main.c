@@ -22,7 +22,7 @@
  */
 
 struct parameters pars;
-struct output time;
+struct output t_out;
 struct output phi;
 struct output dphi;
 struct output psi;

@@ -134,7 +134,7 @@ void run_dopri853()
     }
 
     size_t index = pars.file.index;
-    if (index != 0 && time_buf[index - 1] < dp.t) {
+    if (index != 0 && t_out.buf[index - 1] < dp.t) {
         prepare_and_save_timeslice();
     }
 
@@ -214,7 +214,7 @@ int perform_step(const double dt_try)
     dp.t_old = dp.t;
     dp.t += (dp.dt_did = dt);
     pars.t.t = dp.t;
-    time.tmp[0] = dp.t;
+    t_out.tmp[0] = dp.t;
     return 0;
 }
 
