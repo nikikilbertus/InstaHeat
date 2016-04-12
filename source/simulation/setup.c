@@ -188,63 +188,53 @@ void allocate_external()
     field_new = fftw_malloc(Nall * sizeof *field_new);
     dfield = fftw_malloc(Nall * sizeof *dfield);
     dfield_new = fftw_malloc(Nall * sizeof *dfield_new);
-    time_buf = calloc(Nbuf, sizeof *time_buf);
-    a_buf = calloc(Nbuf, sizeof *a_buf);
+    time.buf = calloc(Nbuf, sizeof *time.buf);
+    a_out.buf = calloc(Nbuf, sizeof *a_out.buf);
     rho = fftw_malloc(N * sizeof *rho);
     #if PSI_METHOD == PSI_HYPERBOLIC
     pressure = fftw_malloc(N * sizeof *pressure);
     #endif
-    pow_spec = calloc(bins, sizeof *pow_spec);
 
     #ifdef OUTPUT_PHI
-    phi_buf = calloc(Nbuf * outN, sizeof *phi_buf);
+    phi.buf = calloc(Nbuf * outN, sizeof *phi.buf);
     #endif
     #ifdef OUTPUT_DPHI
-    dphi_buf = calloc(Nbuf * outN, sizeof *dphi_buf);
-    #endif
-    #ifdef OUTPUT_PHI_MEAN
-    phi_mean_buf = calloc(Nbuf, sizeof *phi_mean_buf);
-    #endif
-    #ifdef OUTPUT_PHI_VARIANCE
-    phi_var_buf = calloc(Nbuf, sizeof *phi_var_buf);
-    #endif
-    #ifdef OUTPUT_DPHI_MEAN
-    dphi_mean_buf = calloc(Nbuf, sizeof *dphi_mean_buf);
-    #endif
-    #ifdef OUTPUT_DPHI_VARIANCE
-    dphi_var_buf = calloc(Nbuf, sizeof *dphi_var_buf);
+    dphi.buf = calloc(Nbuf * outN, sizeof *dphi.buf);
     #endif
     #ifdef OUTPUT_PSI
-    psi_buf = fftw_malloc(Nbuf * outN * sizeof *psi_buf);
+    psi.buf = calloc(Nbuf * outN * sizeof *psi.buf);
     #endif
     #ifdef OUTPUT_DPSI
-    dpsi_buf = fftw_malloc(Nbuf * outN * sizeof *dpsi_buf);
-    #endif
-    #ifdef OUTPUT_PSI_MEAN
-    psi_mean_buf = calloc(Nbuf, sizeof *psi_mean_buf);
-    #endif
-    #ifdef OUTPUT_PSI_VARIANCE
-    psi_var_buf = calloc(Nbuf, sizeof *psi_var_buf);
-    #endif
-    #ifdef OUTPUT_DPSI_MEAN
-    dpsi_mean_buf = calloc(Nbuf, sizeof *dpsi_mean_buf);
-    #endif
-    #ifdef OUTPUT_DPSI_VARIANCE
-    dpsi_var_buf = calloc(Nbuf, sizeof *dpsi_var_buf);
+    dpsi.buf = calloc(Nbuf * outN * sizeof *dpsi.buf);
     #endif
     #ifdef OUTPUT_RHO
-    rho_buf = fftw_malloc(Nbuf * outN * sizeof *rho_buf);
+    rho.buf = calloc(Nbuf * outN * sizeof *rho.buf);
     #endif
-    #ifdef OUTPUT_RHO_MEAN
-    rho_mean_buf = calloc(Nbuf, sizeof *rho_mean_buf);
+    #ifdef OUTPUT_PHI_SMRY
+    phi_smry.tmp = calloc(phi_smry.dim, sizeof *phi_smry.tmp);
+    phi_smry.buf = calloc(Nbuf * phi_smry.dim, sizeof *phi_smry.buf);
     #endif
-    #ifdef OUTPUT_RHO_VARIANCE
-    rho_var_buf = calloc(Nbuf, sizeof *rho_var_buf);
+    #ifdef OUTPUT_DPHI_SMRY
+    dphi_smry.tmp = calloc(dphi_smry.dim, sizeof *dphi_smry.tmp);
+    dphi_smry.buf = calloc(Nbuf * dphi_smry.dim, sizeof *dphi_smry.buf);
     #endif
-    #ifdef OUTPUT_POWER_SPECTRUM
-    pow_spec_buf = calloc(Nbuf * bins, sizeof *pow_spec_buf);
+    #ifdef OUTPUT_PSI_SMRY
+    psi_smry.tmp = calloc(psi_smry.dim, sizeof *psi_smry.tmp);
+    psi_smry.buf = calloc(Nbuf * psi_smry.dim, sizeof *psi_smry.buf);
+    #endif
+    #ifdef OUTPUT_DPSI_SMRY
+    dpsi_smry.tmp = calloc(dpsi_smry.dim, sizeof *dpsi_smry.tmp);
+    dpsi_smry.buf = calloc(Nbuf * dpsi_smry.dim, sizeof *dpsi_smry.buf);
+    #endif
+    #ifdef OUTPUT_RHO_SMRY
+    rho_smry.buf = calloc(Nbuf * rho_smry.dim, sizeof *rho_smry.buf);
+    #endif
+    #ifdef OUTPUT_PHI_PS
+    phi_ps.tmp = calloc(bins, sizeof *phi_ps.tmp);
+    phi_ps.buf = calloc(Nbuf * bins, sizeof *phi_ps.buf);
     #endif
 
+    //TODO: check that alloc and free agree
     kvec.sq = fftw_malloc(M * sizeof *kvec.sq);
     kvec.x = fftw_malloc(M * sizeof *kvec.x);
     kvec.y = fftw_malloc(M * sizeof *kvec.y);
@@ -273,8 +263,8 @@ void allocate_external()
     tmp.deltarho = fftw_malloc(N * sizeof *tmp.deltarho);
 
     if (!(field && field_new && dfield && dfield_new &&
-        rho && pow_spec && tmp.phic  && tmp.xphic && tmp.yphic && tmp.zphic &&
-        tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap && tmp.psic  &&
+        tmp.phic && tmp.xphic && tmp.yphic && tmp.zphic &&
+        tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap && tmp.psic &&
         tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f && tmp.deltarho)) {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
