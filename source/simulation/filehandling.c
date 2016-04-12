@@ -339,7 +339,7 @@ void save()
     hsize_t N2 = 2 * N;
     hsize_t bins = pars.file.bins_powspec;
 
-    time_buf[index] = pars.t.t;
+    time.buf[index] = pars.t.t;
     a_buf[index] = field[N2];
 
     #ifdef CHECK_FOR_NAN

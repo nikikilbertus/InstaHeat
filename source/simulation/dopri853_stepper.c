@@ -214,6 +214,7 @@ int perform_step(const double dt_try)
     dp.t_old = dp.t;
     dp.t += (dp.dt_did = dt);
     pars.t.t = dp.t;
+    time.tmp[0] = dp.t;
     return 0;
 }
 

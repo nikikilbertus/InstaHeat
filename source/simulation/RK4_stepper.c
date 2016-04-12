@@ -95,6 +95,7 @@ void run_rk4()
 
         t += dt;
         pars.t.t = t;
+        time.tmp[0] = t;
     }
 
     // make sure to write out last time slice

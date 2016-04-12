@@ -154,6 +154,7 @@ void initialize_parameters()
 
     pars.t.dt = DELTA_T;
     pars.t.t  = INITIAL_TIME;
+    time.tmp[0] = INITIAL_TIME;
     pars.t.ti = INITIAL_TIME;
     pars.t.tf = FINAL_TIME;
     pars.t.Nt = ceil((pars.t.tf - pars.t.ti) / pars.t.dt) + 1;
@@ -195,9 +196,11 @@ void allocate_external()
     #endif
 
     time.dim = 1;
-    time.buf = calloc(Nbuf, sizeof *time.buf);
+    time.tmp = calloc(time.dim, sizeof *time.tmp);
+    time.buf = calloc(Nbuf * time.dim, sizeof *time.buf);
     a_out.dim = 1;
-    a_out.buf = calloc(Nbuf, sizeof *a_out.buf);
+    a_out.tmp = calloc(a_out.dim, sizeof *a_out.tmp);
+    a_out.buf = calloc(Nbuf * time.dim, sizeof *a_out.buf);
 
     #ifdef OUTPUT_PHI
     phi.dim = outN;
@@ -486,6 +489,7 @@ void mk_initial_conditions()
         field[i] = 0.0;
     }
     #endif
+    a_out.tmp[0] = field[2 * pars.N];
     INFO(puts("Initialized fields on first time slice.\n"));
 }
 
