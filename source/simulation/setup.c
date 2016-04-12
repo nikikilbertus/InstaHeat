@@ -249,7 +249,7 @@ void allocate_external()
     #ifdef OUTPUT_PHI_PS
     phi_ps.dim = bins;
     phi_ps.tmp = calloc(phi_ps.dim, sizeof *phi_ps.tmp);
-    phi_ps.buf = calloc(Nbuf * bins, sizeof *phi_ps.buf);
+    phi_ps.buf = calloc(Nbuf * phi_ps.dim, sizeof *phi_ps.buf);
     #endif
 
     kvec.sq = fftw_malloc(M * sizeof *kvec.sq);
