@@ -1036,7 +1036,9 @@ void free_external()
     #if PSI_METHOD == PSI_HYPERBOLIC
     fftw_free(pressure);
     #endif
+    free(time.tmp);
     free(time.buf);
+    free(a_out.tmp);
     free(a_out.buf);
     #ifdef OUTPUT_PHI
     free(phi.buf);
