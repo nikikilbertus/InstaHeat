@@ -46,8 +46,8 @@
 #define     H5_MAX_DT_HUBBLE_FRACTION_NAME  ("max_dt_hubble_fraction")
 
 void h5_create_empty_by_path(const char *name);
-void h5_create_dset(const hsize_t rank, const hsize_t Nt, const hsize_t N,
-        hsize_t *dset, const char *name);
+void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,
+        const char *name);
 void h5_write_parameter(const char *name, const double *val, const size_t N);
 void h5_get_extent(hsize_t *max, hsize_t *cur);
 void h5_write_buffer(const hsize_t rank, const hsize_t Nt,

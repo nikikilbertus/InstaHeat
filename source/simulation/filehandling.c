@@ -9,7 +9,6 @@
 
 void h5_create_empty_by_path(const char *name)
 {
-    const hsize_t Nt = pars.file.buf_size;
     hsize_t rank;
 
     // create file
@@ -19,47 +18,47 @@ void h5_create_empty_by_path(const char *name)
     rank = 2;
     // ---------------------------full fields: phi, dphi, psi, dpsi, rho--------
     #ifdef OUTPUT_PHI
-    h5_create_dset(rank, Nt, phi.dim, &(phi.id), H5_PHI_NAME);
+    h5_create_dset(rank, phi.dim, &(phi.id), H5_PHI_NAME);
     #endif
     #ifdef OUTPUT_DPHI
-    h5_create_dset(rank, Nt, dphi.dim, &(dphi.id), H5_DPHI_NAME);
+    h5_create_dset(rank, dphi.dim, &(dphi.id), H5_DPHI_NAME);
     #endif
     #ifdef OUTPUT_PSI
-    h5_create_dset(rank, Nt, psi.dim, &(psi.id), H5_PSI_NAME);
+    h5_create_dset(rank, psi.dim, &(psi.id), H5_PSI_NAME);
     #endif
     #ifdef OUTPUT_DPSI
-    h5_create_dset(rank, Nt, dpsi.dim, &(dpsi.id), H5_DPSI_NAME);
+    h5_create_dset(rank, dpsi.dim, &(dpsi.id), H5_DPSI_NAME);
     #endif
     #ifdef OUTPUT_RHO
-    h5_create_dset(rank, Nt, rho_out.dim, &(rho_out.id), H5_RHO_NAME);
+    h5_create_dset(rank, rho_out.dim, &(rho_out.id), H5_RHO_NAME);
     #endif
 
     // ---------------------------summaries-------------------------------------
     #ifdef OUTPUT_PHI_SMRY
-    h5_create_dset(rank, Nt, phi_smry.dim, &(phi_smry.id), H5_PHI_SMRY_NAME);
+    h5_create_dset(rank, phi_smry.dim, &(phi_smry.id), H5_PHI_SMRY_NAME);
     #endif
     #ifdef OUTPUT_DPHI_SMRY
-    h5_create_dset(rank, Nt, dphi_smry.dim, &(dphi_smry.id), H5_DPHI_SMRY_NAME);
+    h5_create_dset(rank, dphi_smry.dim, &(dphi_smry.id), H5_DPHI_SMRY_NAME);
     #endif
     #ifdef OUTPUT_PSI_SMRY
-    h5_create_dset(rank, Nt, psi_smry.dim, &(psi_smry.id), H5_PSI_SMRY_NAME);
+    h5_create_dset(rank, psi_smry.dim, &(psi_smry.id), H5_PSI_SMRY_NAME);
     #endif
     #ifdef OUTPUT_DPSI_SMRY
-    h5_create_dset(rank, Nt, dpsi_smry.dim, &(dpsi_smry.id), H5_DPSI_SMRY_NAME);
+    h5_create_dset(rank, dpsi_smry.dim, &(dpsi_smry.id), H5_DPSI_SMRY_NAME);
     #endif
     #ifdef OUTPUT_RHO_SMRY
-    h5_create_dset(rank, Nt, rho_smry.dim, &(rho_smry.id), H5_RHO_SMRY_NAME);
+    h5_create_dset(rank, rho_smry.dim, &(rho_smry.id), H5_RHO_SMRY_NAME);
     #endif
 
     // ---------------------------power spectra---------------------------------
     #ifdef OUTPUT_PHI_PS
-    h5_create_dset(rank, Nt, phi_ps.dim, &(phi_ps.id), H5_PHI_PS_NAME);
+    h5_create_dset(rank, phi_ps.dim, &(phi_ps.id), H5_PHI_PS_NAME);
     #endif
 
     rank = 1;
     // ---------------------------time, a---------------------------------------
-    h5_create_dset(rank, Nt, time.dim, &(time.id), H5_TIME_NAME);
-    h5_create_dset(rank, Nt, a_out.dim, &(a_out.id), H5_A_NAME);
+    h5_create_dset(rank, time.dim, &(time.id), H5_TIME_NAME);
+    h5_create_dset(rank, a_out.dim, &(a_out.id), H5_A_NAME);
 
     // ---------------------------parameters------------------------------------
     double val[3] = {MASS, 0.0, 0.0};
@@ -184,9 +183,10 @@ void h5_create_empty_by_path(const char *name)
     INFO(puts("Created hdf5 file with datasets for output.\n"));
 }
 
-void h5_create_dset(const hsize_t rank, const hsize_t Nt, const hsize_t N,
-        hsize_t *dset, const char *name)
+void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,
+        const char *name)
 {
+    const hsize_t Nt = pars.file.buf_size;
     hsize_t dim[2] = {0, N};
     hsize_t max[2] = {H5S_UNLIMITED, N};
     hsize_t chunk[2] = {Nt, N};
@@ -339,46 +339,65 @@ void save()
     hsize_t N2 = 2 * N;
     hsize_t bins = pars.file.bins_powspec;
 
-    time.buf[index] = pars.t.t;
-    a_buf[index] = field[N2];
+    time.buf[index] = time.tmp[0];
+    a_out.tmp[0] = field[N2];
+    a_out.buf[index] = a_out.tmp[0];
 
     #ifdef CHECK_FOR_NAN
     if (isnan(pars.t.t) || isnan(field[N2])) {
         fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
-            exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
     #endif
 
-    #ifdef OUTPUT_PHI_MEAN
-    phi_mean_buf[index] = phi_mean;
-    #endif
-    #ifdef OUTPUT_PHI_VARIANCE
-    phi_var_buf[index] = phi_var;
-    #endif
-    #ifdef OUTPUT_DPHI_MEAN
-    dphi_mean_buf[index] = dphi_mean;
-    #endif
-    #ifdef OUTPUT_DPHI_VARIANCE
-    dphi_var_buf[index] = dphi_var;
-    #endif
-    #ifdef OUTPUT_PSI_MEAN
-    psi_mean_buf[index] = psi_mean;
-    #endif
-    #ifdef OUTPUT_PSI_VARIANCE
-    psi_var_buf[index] = psi_var;
-    #endif
-    #ifdef OUTPUT_DPSI_MEAN
-    dpsi_mean_buf[index] = dpsi_mean;
-    #endif
-    #ifdef OUTPUT_DPSI_VARIANCE
-    dpsi_var_buf[index] = dpsi_var;
-    #endif
-    #ifdef OUTPUT_RHO_MEAN
-    rho_mean_buf[index] = rho_mean;
-    #endif
-    #ifdef OUTPUT_RHO_VARIANCE
-    rho_var_buf[index] = rho_var;
-    #endif
+    #pragma omp parallel sections
+    {
+        #ifdef OUTPUT_PHI_SMRY
+            #pragma omp section
+            {
+            const size_t os = index * phi_smry.dim;
+            for (size_t i = 0; i < phi_smry.dim; ++i) {
+                phi_smry.buf[os + i] = phi_smry.tmp[i];
+            }
+        }
+        #endif
+        #ifdef OUTPUT_DPHI_SMRY
+            #pragma omp section
+            {
+            const size_t os = index * dphi_smry.dim;
+            for (size_t i = 0; i < dphi_smry.dim; ++i) {
+                dphi_smry.buf[os + i] = dphi_smry.tmp[i];
+            }
+        }
+        #endif
+        #ifdef OUTPUT_PSI_SMRY
+            #pragma omp section
+            {
+            const size_t os = index * psi_smry.dim;
+            for (size_t i = 0; i < psi_smry.dim; ++i) {
+                psi_smry.buf[os + i] = psi_smry.tmp[i];
+            }
+        }
+        #endif
+        #ifdef OUTPUT_DPSI_SMRY
+            #pragma omp section
+            {
+            const size_t os = index * dpsi_smry.dim;
+            for (size_t i = 0; i < dpsi_smry.dim; ++i) {
+                dpsi_smry.buf[os + i] = dpsi_smry.tmp[i];
+            }
+        }
+        #endif
+        #ifdef OUTPUT_RHO_SMRY
+            #pragma omp section
+            {
+            const size_t os = index * rho_smry.dim;
+            for (size_t i = 0; i < rho_smry.dim; ++i) {
+                rho_smry.buf[os + i] = rho_smry.tmp[i];
+            }
+        }
+        #endif
+    }
 
     #ifdef LARGE_OUTPUT
     hsize_t N2p = N2 + 2;
@@ -403,23 +422,23 @@ void save()
                 id = osy + k;
                 idb = osyb + k / pars.z.stride;
                 #ifdef OUTPUT_PHI
-                phi_buf[os + idb] = field[id];
+                phi.buf[os + idb] = field[id];
                 #endif
                 #ifdef OUTPUT_DPHI
-                dphi_buf[os + idb] = field[N + id];
+                dphi.buf[os + idb] = field[N + id];
                 #endif
                 #ifdef OUTPUT_PSI
-                psi_buf[os + idb] = field[N2p + id];
+                psi.buf[os + idb] = field[N2p + id];
                 #endif
                 #ifdef OUTPUT_DPSI
                     #if PSI_METHOD == PSI_PARABOLIC
-                    dpsi_buf[os + idb] = dfield[N2p + id];
+                    dpsi.buf[os + idb] = dfield[N2p + id];
                     #else
-                    dpsi_buf[os + idb] = field[N3p + id];
+                    dpsi.buf[os + idb] = field[N3p + id];
                     #endif
                 #endif
                 #ifdef OUTPUT_RHO
-                rho_buf[os + idb] = rho[id];
+                rho_out.buf[os + idb] = rho[id];
                 #endif
                 #ifdef CHECK_FOR_NAN
                 if (isnan(field[id]) || isnan(rho[id])) {
@@ -432,13 +451,13 @@ void save()
     }
     #endif
 
-    #ifdef OUTPUT_POWER_SPECTRUM
-    hsize_t os1 = index * bins;
+    #ifdef OUTPUT_PHI_PS
+    hsize_t os1 = index * phi_ps.dim;
     #pragma omp parallel for
-    for (size_t i = 0; i < bins; ++i) {
-        pow_spec_buf[os1 + i] = pow_spec[i];
+    for (size_t i = 0; i < phi_ps.dim; ++i) {
+        phi_ps.buf[os1 + i] = phi_ps.tmp[i];
         #ifdef CHECK_FOR_NAN
-        if (isnan(pow_spec[i])) {
+        if (isnan(phi_ps.tmp[i])) {
             fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
             exit(EXIT_FAILURE);
         }
