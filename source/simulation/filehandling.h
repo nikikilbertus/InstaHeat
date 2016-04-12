@@ -50,8 +50,8 @@ void h5_create_dset(const hsize_t rank, const hsize_t Nt, const hsize_t N,
         hsize_t *dset, const char *name);
 void h5_write_parameter(const char *name, const double *val, const size_t N);
 void h5_get_extent(hsize_t *max, hsize_t *cur);
-void h5_write_buffer(const hsize_t rank, const hsize_t *start,
-        const hsize_t *add, const hsize_t *new_dim, const hsize_t dset,
+void h5_write_buffer(const hsize_t rank, const hsize_t Nt,
+        const hsize_t N, const hsize_t os, const hsize_t dset,
         const double *buf);
 void h5_write_all_buffers(const hsize_t Nt);
 void h5_close();

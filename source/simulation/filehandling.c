@@ -234,75 +234,63 @@ void h5_get_extent(hsize_t *max, hsize_t *cur)
 
 void h5_write_all_buffers(const hsize_t Nt)
 {
-    hsize_t N = pars.outN;
-    hsize_t bins = pars.file.bins_powspec;
-    hsize_t rank;
-    struct file_parameters f = pars.file;
     // TODO[performance] maybe use static variable to count dataset size instead
     // of reading it from the file each time
     // static hsize_t counter;
-
     #ifdef SHOW_TIMING_INFO
     h5_time_write -= get_wall_time();
     #endif
 
-    rank = 2;
+    hsize_t rank;
     hsize_t curr_dim[1];
-    hsize_t max[2];
+    hsize_t max[1];
     h5_get_extent(max, curr_dim);
+    const hsize_t os = curr_dim[0];
 
-    hsize_t add[2] = {Nt, N};
-    hsize_t new_dim[2] = {curr_dim[0] + Nt, N};
-    hsize_t start[2] = {curr_dim[0], 0};
-    max[1] = N;
-
+    rank = 2;
     // ---------------------------full fields: phi, psi, rho--------------------
     #ifdef OUTPUT_PHI
-    h5_write_buffer(rank, start, add, new_dim, phi.id, phi.buf);
+    h5_write_buffer(rank, Nt, phi.dim, os, phi.id, phi.buf);
     #endif
     #ifdef OUTPUT_DPHI
-    h5_write_buffer(rank, start, add, new_dim, dphi.id, dphi.buf);
+    h5_write_buffer(rank, Nt, dphi.dim, os, dphi.id, dphi.buf);
     #endif
     #ifdef OUTPUT_PSI
-    h5_write_buffer(rank, start, add, new_dim, psi.id, psi.buf);
+    h5_write_buffer(rank, Nt, psi.dim, os, psi.id, psi.buf);
     #endif
     #ifdef OUTPUT_DPSI
-    h5_write_buffer(rank, start, add, new_dim, dpsi.id, dpsi.buf);
+    h5_write_buffer(rank, Nt, dpsi.dim, os, dpsi.id, dpsi.buf);
     #endif
     #ifdef OUTPUT_RHO
-    h5_write_buffer(rank, start, add, new_dim, rho_out.id, rho_out.buf);
+    h5_write_buffer(rank, Nt, rho.dim, os, rho_out.id, rho_out.buf);
     #endif
 
-    add[1] = bins;
-    new_dim[1] = bins;
     // --------------------------power spectra----------------------------------
     #ifdef OUTPUT_PHI_PS
-    h5_write_buffer(rank, start, add, new_dim, f.dset_powspec, pow_spec_buf);
+    h5_write_buffer(rank, Nt, phi_ps.dim, os, phi_ps.id, phi_ps.buf);
     #endif
 
-    add[1] = SUMMARY_VALUES;
-    new_dim[1] = SUMMARY_VALUES;
     // --------------------------summaries--------------------------------------
     #ifdef OUTPUT_PHI_SMRY
-    h5_write_buffer(rank, start, add, new_dim, phi_smry.id, phi_smry.buf);
+    h5_write_buffer(rank, Nt, phi_smry.dim, os, phi_smry.id, phi_smry.buf);
     #endif
     #ifdef OUTPUT_DPHI_SMRY
-    h5_write_buffer(rank, start, add, new_dim, dphi_smry.id, dphi_smry.buf);
+    h5_write_buffer(rank, Nt, dphi_smry.dim, os, dphi_smry.id, dphi_smry.buf);
     #endif
     #ifdef OUTPUT_PSI_SMRY
-    h5_write_buffer(rank, start, add, new_dim, psi_smry.id, psi_smry.buf);
+    h5_write_buffer(rank, Nt, psi_smry.dim, os, psi_smry.id, psi_smry.buf);
     #endif
     #ifdef OUTPUT_DPSI_SMRY
-    h5_write_buffer(rank, start, add, new_dim, dpsi_smry.id, dpsi_smry.buf);
+    h5_write_buffer(rank, Nt, dpsi_smry.dim, os, dpsi_smry.id, dpsi_smry.buf);
     #endif
     #ifdef OUTPUT_RHO_SMRY
-    h5_write_buffer(rank, start, add, new_dim, rho_smry.id, rho_smry.buf);
+    h5_write_buffer(rank, Nt, rho_smry.dim, os, rho_smry.id, rho_smry.buf);
     #endif
 
-    // ---------------------------time, a, means, variances---------------------
+    // ---------------------------time and  a-----------------------------------
     rank = 1;
-    h5_write_buffer(rank, start, add, new_dim, time.id, time.buf);
-    h5_write_buffer(rank, start, add, new_dim, a_out.id, a_out.buf);
+    h5_write_buffer(rank, Nt, time.dim, os, time.id, time.buf);
+    h5_write_buffer(rank, Nt, a_out.dim, os, a_out.id, a_out.buf);
 
     #ifdef SHOW_TIMING_INFO
     h5_time_write += get_wall_time();
@@ -310,10 +298,13 @@ void h5_write_all_buffers(const hsize_t Nt)
     INFO(printf("Dumping to disk at t = %f\n", pars.t.t));
 }
 
-void h5_write_buffer(const hsize_t rank, const hsize_t *start,
-        const hsize_t *add, const hsize_t *new_dim, const hsize_t dset,
+void h5_write_buffer(const hsize_t rank, const hsize_t Nt,
+        const hsize_t N, const hsize_t os, const hsize_t dset,
         const double *buf)
 {
+    hsize_t add[2] = {Nt, N};
+    hsize_t new_dim[2] = {os + Nt, N};
+    hsize_t start[2] = {os, 0};
     hid_t mem_space = H5Screate_simple(rank, add, NULL);
     hid_t dspace = H5Dget_space(dset);
     H5Dset_extent(dset, new_dim);
