@@ -178,7 +178,7 @@ void allocate_external()
     const size_t Nall = pars.Nall;
     const size_t M = pars.M;
     const size_t bins = pars.file.bins_powspec;
-    const size_t buf_size = pars.file.buf_size;
+    const size_t Nbuf = pars.file.buf_size;
 
     #ifdef LARGE_OUTPUT
     const size_t outN = pars.outN;
@@ -188,8 +188,8 @@ void allocate_external()
     field_new = fftw_malloc(Nall * sizeof *field_new);
     dfield = fftw_malloc(Nall * sizeof *dfield);
     dfield_new = fftw_malloc(Nall * sizeof *dfield_new);
-    time_buf = calloc(buf_size, sizeof *time_buf);
-    a_buf = calloc(buf_size, sizeof *a_buf);
+    time_buf = calloc(Nbuf, sizeof *time_buf);
+    a_buf = calloc(Nbuf, sizeof *a_buf);
     rho = fftw_malloc(N * sizeof *rho);
     #if PSI_METHOD == PSI_HYPERBOLIC
     pressure = fftw_malloc(N * sizeof *pressure);
@@ -197,52 +197,52 @@ void allocate_external()
     pow_spec = calloc(bins, sizeof *pow_spec);
 
     #ifdef OUTPUT_PHI
-    phi_buf = calloc(buf_size * outN, sizeof *phi_buf);
+    phi_buf = calloc(Nbuf * outN, sizeof *phi_buf);
     #endif
     #ifdef OUTPUT_DPHI
-    dphi_buf = calloc(buf_size * outN, sizeof *dphi_buf);
+    dphi_buf = calloc(Nbuf * outN, sizeof *dphi_buf);
     #endif
     #ifdef OUTPUT_PHI_MEAN
-    phi_mean_buf = calloc(buf_size, sizeof *phi_mean_buf);
+    phi_mean_buf = calloc(Nbuf, sizeof *phi_mean_buf);
     #endif
     #ifdef OUTPUT_PHI_VARIANCE
-    phi_var_buf = calloc(buf_size, sizeof *phi_var_buf);
+    phi_var_buf = calloc(Nbuf, sizeof *phi_var_buf);
     #endif
     #ifdef OUTPUT_DPHI_MEAN
-    dphi_mean_buf = calloc(buf_size, sizeof *dphi_mean_buf);
+    dphi_mean_buf = calloc(Nbuf, sizeof *dphi_mean_buf);
     #endif
     #ifdef OUTPUT_DPHI_VARIANCE
-    dphi_var_buf = calloc(buf_size, sizeof *dphi_var_buf);
+    dphi_var_buf = calloc(Nbuf, sizeof *dphi_var_buf);
     #endif
     #ifdef OUTPUT_PSI
-    psi_buf = fftw_malloc(buf_size * outN * sizeof *psi_buf);
+    psi_buf = fftw_malloc(Nbuf * outN * sizeof *psi_buf);
     #endif
     #ifdef OUTPUT_DPSI
-    dpsi_buf = fftw_malloc(buf_size * outN * sizeof *dpsi_buf);
+    dpsi_buf = fftw_malloc(Nbuf * outN * sizeof *dpsi_buf);
     #endif
     #ifdef OUTPUT_PSI_MEAN
-    psi_mean_buf = calloc(buf_size, sizeof *psi_mean_buf);
+    psi_mean_buf = calloc(Nbuf, sizeof *psi_mean_buf);
     #endif
     #ifdef OUTPUT_PSI_VARIANCE
-    psi_var_buf = calloc(buf_size, sizeof *psi_var_buf);
+    psi_var_buf = calloc(Nbuf, sizeof *psi_var_buf);
     #endif
     #ifdef OUTPUT_DPSI_MEAN
-    dpsi_mean_buf = calloc(buf_size, sizeof *dpsi_mean_buf);
+    dpsi_mean_buf = calloc(Nbuf, sizeof *dpsi_mean_buf);
     #endif
     #ifdef OUTPUT_DPSI_VARIANCE
-    dpsi_var_buf = calloc(buf_size, sizeof *dpsi_var_buf);
+    dpsi_var_buf = calloc(Nbuf, sizeof *dpsi_var_buf);
     #endif
     #ifdef OUTPUT_RHO
-    rho_buf = fftw_malloc(buf_size * outN * sizeof *rho_buf);
+    rho_buf = fftw_malloc(Nbuf * outN * sizeof *rho_buf);
     #endif
     #ifdef OUTPUT_RHO_MEAN
-    rho_mean_buf = calloc(buf_size, sizeof *rho_mean_buf);
+    rho_mean_buf = calloc(Nbuf, sizeof *rho_mean_buf);
     #endif
     #ifdef OUTPUT_RHO_VARIANCE
-    rho_var_buf = calloc(buf_size, sizeof *rho_var_buf);
+    rho_var_buf = calloc(Nbuf, sizeof *rho_var_buf);
     #endif
     #ifdef OUTPUT_POWER_SPECTRUM
-    pow_spec_buf = calloc(buf_size * bins, sizeof *pow_spec_buf);
+    pow_spec_buf = calloc(Nbuf * bins, sizeof *pow_spec_buf);
     #endif
 
     kvec.sq = fftw_malloc(M * sizeof *kvec.sq);
