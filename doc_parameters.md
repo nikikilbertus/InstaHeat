@@ -2,23 +2,36 @@
 
 This is an explanation of the parameters in the file `parameters.sh`. We want to keep the parameter file itself short and concise to allow for quick changes. Therefore we do not clutter it by comments, but outsource the documentation to this document.
 
-__IMPORTANT:__ Unlike parameters that are passed to the program at runtime, here parameters are read _before_ compilation. In the build process initiated by `make`, first the `parameters.sh` file is read by a shell script and the values are filled directly into the source code. Then the code is compiled. The executable program does not take any arguments anymore. After compilation no parameters can be changed. This allows us to compile only the code needed for a specific choice of parameters in a highly optimized way. Thereby we can optimize program size as well as memory usage and runtime, because we save potentially unnecessary memory allocations and conditionals.
+__IMPORTANT:__ Unlike parameters that are passed to a program at runtime, our parameters are read even _before_ compilation. The build process initiated by `make` (see `Makefile`) goes as follows:
+
+1. From within the `Makefile` the script `configure.sh` is called. It performs the following steps:
+    * It loads the values given in `parameters.sh`.
+    * It makes a copy of `main_template.h` the template main header and saves it as `main.h`.
+    * It replaces placeholders in `main.h` file by the values found in `parameters.sh`.
+2. The source files (including the newly generated `main.h`) are compiled and linked.
+3. The final executable is called `run`. It does not take any arguments anymore. All parameters have been determined during the build process. After the build process no parameters can be changed.
+
+The advantage of this method is that we can compile solely the code needed for a specific choice of parameters in a highly optimized way. This results in:
+
+* Optimized memory usage by omitting unnecessary allocations and avoiding unused or dead code.
+* Runtime optimization due to elimination of conditionals that determine program flow during runtime.
+* Runtime optimization by fixing values during compile time with preprocessor directives. This allows the compiler to perform more optimizations.
 
 ## How to handle this file
 
-* Do not delete any parameters. All of them are needed.
+* Do not delete or comment any parameters. All of them are required and have to be specified.
 * Do not change the names of any parameters.
 * All parameter values are given as strings, i.e. enclosed by `" "`.
-* Boolean values are encoded by 1 (true) and 0 (false).
-* Numerical values can be given in any format that is known by C99. One can use `"PI"` for the value of pi.
-* You can add comments to the file, starting with #.
-* The order of the parameters does not matter. We grouped parameters into groups:
-    - __common__: These are changed frequently in different simulation. Feel free to play around with them.
-    - __uncommon__: These are not changed as often. However, you might want to try some special things or tune some of the parameters. Some of them are useful for debugging.
+* Boolean values are encoded by `"1"` (true) and `"0"` (false).
+* Numerical values can be given in any format that is known by C99. One can use `"PI"` or `"-PI"`.
+* You can add comments to the file, starting with #. (It is a normal shell script.)
+* The order of the parameters does not matter. We grouped parameters into the following categories:
+    - __common__: These are changed frequently in different simulation runs. Feel free to play around with them.
+    - __uncommon__: These are not changed as often. However, you might want to try some special things. Some of them are useful for debugging.
     - __rare__: There is hardly any reason to change these parameters. Only perform changes if you know exactly what you are doing and why you are doing it.
     - __output__: Here we specify the output of the simulation.
 
-In the documentation, we will group the parameters according to other criteria.
+In the documentation, we will group the parameters differently as follows:
 
 ## Simulation volume
 
@@ -92,7 +105,7 @@ __Remarks__:
 
 * `MASS`: (double, >0) The mass parameter used in the code. Note that this value can be easily rescaled, hence has little physical relevance.
 * `MASS_PLANCK`: (double, >0) If `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"`, this value is the ratio Planck mass/inflaton mass. This determines the amplitude of the vacuum fluctuations of the Bunch Davies vacuum. Note in the code $$8 \pi G = 1$$, hence the reduced Planck mass is one. Also the `MASS` is a parameter that does not itself carry physical meaning. This `MASS_PLANCK` is the only value that carries physical meaning.
-* `MASS_KARSTEN`: (double, >0) Obsolete. Internal use only.
+* `MASS_KARSTEN`: (double, >0) Obsolete. Internal use only. Has been used to scale certain amplitudes for comparison with Karsten Jedamzik's code.
 
 ## File IO
 
@@ -108,8 +121,8 @@ __Remarks__:
 * `POWER_SPECTRUM_BINS`: (integer, >0) The number of bins used to compute the power spectrum. This is only relevant if`POWER_SPECTRUM="1"`, i.e. the power spectrum of $$\phi$$ is included in the output. See TODO(link thesis) for details.
 * `TIME_STEP_SKIPS`: (integer, >0) The number of time steps skipped between outputs. To avoid large output files, one can skip `TIME_STEP_SKIPS` many time steps, before writing a time slice to disk again.
 * `STRIDE_X`: (integer, >0) The stride in the x-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than they are computed on internally.
-* `STRIDE_Y`: (integer, >0) The stride in the x-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than they are computed on internally.
-* `STRIDE_Z`: (integer, >0) The stride in the x-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than they are computed on internally.
+* `STRIDE_Y`: (integer, >0) The stride in the y-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than they are computed on internally.
+* `STRIDE_Z`: (integer, >0) The stride in the z-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than they are computed on internally.
 
 __Remarks__:
 
@@ -176,20 +189,15 @@ Most of the simulation parameters are always present in the output. The optional
 * `PSI`: The scalar metric perturbation $$\psi$$.
 * `DPSI`: The scalar metric perturbation $$\dot{\psi}$$.
 * `RHO`: The energy density $$\rho$$.
-* `PHI_MEAN`: The mean value of the scalar field $$\phi$$.
-* `DPHI_MEAN`: The mean value of the temporal derivative of the scalar field $$\dot{\phi}$$.
-* `PSI_MEAN`: The mean value of the scalar metric perturbation $$\psi$$.
-* `DPSI_MEAN`: The mean value of the scalar metric perturbation $$\dot{\psi}$$.
-* `RHO_MEAN`: The mean value of the energy density $$\rho$$.
-* `PHI_VARIANCE`: The variance of the scalar field $$\phi$$.
-* `DPHI_VARIANCE`: The variance of the temporal derivative of the scalar field $$\dot{\phi}$$.
-* `PSI_VARIANCE`: The variance of the scalar metric perturbation $$\psi$$.
-* `DPSI_VARIANCE`: The variance of the scalar metric perturbation $$\dot{\psi}$$.
-* `RHO_VARIANCE`: The variance of the energy density $$\rho$$.
-* `POWER_SPECTRUM`: The power spectrum of the field $$\phi$$.
+* `PHI_SUMMARY`: The mean value, the variance, the minimum and the maximum of the scalar field $$\phi$$ on each timeslice (in this order).
+* `DPHI_SUMMARY`: The mean value, the variance, the minimum and the maximum of the temporal derivative of the scalar field $$\dot{\phi}$$ on each timeslice (in this order).
+* `PSI_SUMMARY`: The mean value, the variance, the minimum and the maximum of the scalar metric perturbation $$\psi$$ on each timeslice (in this order).
+* `DPSI_SUMMARY`: The mean value, the variance, the minimum and the maximum of the scalar metric perturbation $$\dot{\psi}$$ on each timeslice (in this order).
+* `RHO_SUMMARY`: The mean value, the variance, the minimum and the maximum of the energy density $$\rho$$ on each timeslice (in this order).
+* `PHI_POWER_SPECTRUM`: The power spectrum of the field $$\phi$$.
 
 __Remarks__:
 
-* `PHI`, `DPHI`, `PSI`, `DPSI`, `RHO` result in an output of `xout*yout*zout` double values where {x,y,z}out are determined from `GRIDPOINTS_{X,Y,Z}` and `STRIDE_{X,Y,Z}` (see [file IO](#file-io)) on __each__ time slice (that is output).
-* All values ending in `MEAN` or `VARIANCE` result in the output of one double value on each time slice (that is output).
-* `POWER_SPECTRUM` results in the output of `POWER_SPECTRUM_BINS` double values on each time slice (that is output).
+* `PHI`, `DPHI`, `PSI`, `DPSI`, `RHO` result in `xout*yout*zout` double values where {x,y,z}out are determined from `GRIDPOINTS_{X,Y,Z}` and `STRIDE_{X,Y,Z}` (see [file IO](#file-io)) on __each__ time slice of the output.
+* All values ending in `SUMMARY` result in four double values on each time slice of the output.
+* All values ending in `POWER_SPECTRUM` result in `POWER_SPECTRUM_BINS` double values on each time slice of the output.
