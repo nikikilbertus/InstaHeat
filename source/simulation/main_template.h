@@ -290,6 +290,7 @@ extern struct time;
 extern struct output a_out;
 
 extern double *rho;
+extern double rho_mean;
 extern struct output rho_out;
 extern struct output rho_smry;
 
