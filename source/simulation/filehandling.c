@@ -121,7 +121,7 @@ void h5_create_empty_by_path(const char *name)
     #elif VERSION_CONTROL == VERSION_CONTROL_GIT
     const char *cmd = "git rev-parse --short HEAD";
     #endif
-    dim[0] = 1;
+    hsize_t dim[1] = {1};
     len = 16;
     char hash[len];
     FILE *output;
@@ -228,23 +228,8 @@ void h5_write_parameter(const char *name, const double *val, const size_t N)
 
 void h5_get_extent(hsize_t *max, hsize_t *cur)
 {
-    hid_t dspace = H5Dget_space(pars.file.dset_time);
+    hid_t dspace = H5Dget_space(time.id);
     H5Sget_simple_extent_dims(dspace, cur, max);
-}
-
-void h5_write_buffer(const hsize_t rank, const hsize_t *start,
-        const hsize_t *add, const hsize_t *new_dim, const hsize_t dset,
-        const double *buf)
-{
-    hid_t mem_space = H5Screate_simple(rank, add, NULL);
-    hid_t dspace = H5Dget_space(dset);
-    H5Dset_extent(dset, new_dim);
-    //TODO: necessary to call this again?
-    dspace = H5Dget_space(dset);
-    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start, NULL, add, NULL);
-    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, buf);
-    H5Sclose(mem_space);
-    H5Sclose(dspace);
 }
 
 void h5_write_all_buffers(const hsize_t Nt)
@@ -273,67 +258,71 @@ void h5_write_all_buffers(const hsize_t Nt)
 
     // ---------------------------full fields: phi, psi, rho--------------------
     #ifdef OUTPUT_PHI
-    h5_write_buffer(rank, start, add, new_dim, f.dset_phi.field, phi_buf);
+    h5_write_buffer(rank, start, add, new_dim, phi.id, phi.buf);
     #endif
     #ifdef OUTPUT_DPHI
-    h5_write_buffer(rank, start, add, new_dim, f.dset_phi.dfield, dphi_buf);
+    h5_write_buffer(rank, start, add, new_dim, dphi.id, dphi.buf);
     #endif
     #ifdef OUTPUT_PSI
-    h5_write_buffer(rank, start, add, new_dim, f.dset_psi.field, psi_buf);
+    h5_write_buffer(rank, start, add, new_dim, psi.id, psi.buf);
     #endif
     #ifdef OUTPUT_DPSI
-    h5_write_buffer(rank, start, add, new_dim, f.dset_psi.dfield, dpsi_buf);
+    h5_write_buffer(rank, start, add, new_dim, dpsi.id, dpsi.buf);
     #endif
     #ifdef OUTPUT_RHO
-    h5_write_buffer(rank, start, add, new_dim, f.dset_rho.field, rho_buf);
+    h5_write_buffer(rank, start, add, new_dim, rho_out.id, rho_out.buf);
     #endif
 
-    // --------------------------power spectrum---------------------------------
-    #ifdef OUTPUT_POWER_SPECTRUM
     add[1] = bins;
     new_dim[1] = bins;
+    // --------------------------power spectra----------------------------------
+    #ifdef OUTPUT_PHI_PS
     h5_write_buffer(rank, start, add, new_dim, f.dset_powspec, pow_spec_buf);
+    #endif
+
+    add[1] = SUMMARY_VALUES;
+    new_dim[1] = SUMMARY_VALUES;
+    // --------------------------summaries--------------------------------------
+    #ifdef OUTPUT_PHI_SMRY
+    h5_write_buffer(rank, start, add, new_dim, phi_smry.id, phi_smry.buf);
+    #endif
+    #ifdef OUTPUT_DPHI_SMRY
+    h5_write_buffer(rank, start, add, new_dim, dphi_smry.id, dphi_smry.buf);
+    #endif
+    #ifdef OUTPUT_PSI_SMRY
+    h5_write_buffer(rank, start, add, new_dim, psi_smry.id, psi_smry.buf);
+    #endif
+    #ifdef OUTPUT_DPSI_SMRY
+    h5_write_buffer(rank, start, add, new_dim, dpsi_smry.id, dpsi_smry.buf);
+    #endif
+    #ifdef OUTPUT_RHO_SMRY
+    h5_write_buffer(rank, start, add, new_dim, rho_smry.id, rho_smry.buf);
     #endif
 
     // ---------------------------time, a, means, variances---------------------
     rank = 1;
-    h5_write_buffer(rank, start, add, new_dim, f.dset_time, time_buf);
-    h5_write_buffer(rank, start, add, new_dim, f.dset_a, a_buf);
-    #ifdef OUTPUT_PHI_MEAN
-    h5_write_buffer(rank, start, add, new_dim, f.dset_phi.mean, phi_mean_buf);
-    #endif
-    #ifdef OUTPUT_PHI_VARIANCE
-    h5_write_buffer(rank, start, add, new_dim, f.dset_phi.var, phi_var_buf);
-    #endif
-    #ifdef OUTPUT_DPHI_MEAN
-    h5_write_buffer(rank, start, add, new_dim, f.dset_phi.dmean, dphi_mean_buf);
-    #endif
-    #ifdef OUTPUT_DPHI_VARIANCE
-    h5_write_buffer(rank, start, add, new_dim, f.dset_phi.dvar, dphi_var_buf);
-    #endif
-    #ifdef OUTPUT_PSI_MEAN
-    h5_write_buffer(rank, start, add, new_dim, f.dset_psi.mean, psi_mean_buf);
-    #endif
-    #ifdef OUTPUT_PSI_VARIANCE
-    h5_write_buffer(rank, start, add, new_dim, f.dset_psi.var, psi_var_buf);
-    #endif
-    #ifdef OUTPUT_DPSI_MEAN
-    h5_write_buffer(rank, start, add, new_dim, f.dset_psi.dmean, dpsi_mean_buf);
-    #endif
-    #ifdef OUTPUT_DPSI_VARIANCE
-    h5_write_buffer(rank, start, add, new_dim, f.dset_psi.dvar, dpsi_var_buf);
-    #endif
-    #ifdef OUTPUT_RHO_MEAN
-    h5_write_buffer(rank, start, add, new_dim, f.dset_rho.mean, rho_mean_buf);
-    #endif
-    #ifdef OUTPUT_RHO_VARIANCE
-    h5_write_buffer(rank, start, add, new_dim, f.dset_rho.var, rho_var_buf);
-    #endif
+    h5_write_buffer(rank, start, add, new_dim, time.id, time.buf);
+    h5_write_buffer(rank, start, add, new_dim, a_out.id, a_out.buf);
 
     #ifdef SHOW_TIMING_INFO
     h5_time_write += get_wall_time();
     #endif
     INFO(printf("Dumping to disk at t = %f\n", pars.t.t));
+}
+
+void h5_write_buffer(const hsize_t rank, const hsize_t *start,
+        const hsize_t *add, const hsize_t *new_dim, const hsize_t dset,
+        const double *buf)
+{
+    hid_t mem_space = H5Screate_simple(rank, add, NULL);
+    hid_t dspace = H5Dget_space(dset);
+    H5Dset_extent(dset, new_dim);
+    //TODO: necessary to call this again?
+    dspace = H5Dget_space(dset);
+    H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start, NULL, add, NULL);
+    H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, buf);
+    H5Sclose(mem_space);
+    H5Sclose(dspace);
 }
 
 void h5_close()
