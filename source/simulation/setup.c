@@ -166,7 +166,6 @@ void initialize_parameters()
     pars.file.index = 0;
     pars.file.buf_size = WRITE_OUT_BUFFER_NUMBER;
     pars.file.skip = TIME_STEP_SKIPS;
-    pars.file.bins_powspec = POWER_SPECTRUM_BINS;
 
     INFO(printf("Initialized parameters for %zu dimension(s).\n\n", pars.dim));
 }
@@ -179,7 +178,7 @@ void allocate_external()
     const size_t N = pars.N;
     const size_t Nall = pars.Nall;
     const size_t M = pars.M;
-    const size_t bins = pars.file.bins_powspec;
+    const size_t bins = POWER_SPECTRUM_BINS;
     const size_t Nbuf = pars.file.buf_size;
 
     #ifdef LARGE_OUTPUT

@@ -337,7 +337,6 @@ void save()
     hsize_t Nt = pars.file.buf_size;
     hsize_t N = pars.N;
     hsize_t N2 = 2 * N;
-    hsize_t bins = pars.file.bins_powspec;
 
     time.buf[index] = time.tmp[0];
     a_out.tmp[0] = field[N2];

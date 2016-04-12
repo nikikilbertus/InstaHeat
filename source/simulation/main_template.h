@@ -157,19 +157,6 @@ struct timing
 };
 
 /**
- * @brief A collection of dataset IDs for a single field.
- */
-struct datasets
-{
-    hsize_t field;  ///< id for the field
-    hsize_t mean;   ///< id for the mean of the field
-    hsize_t var;    ///< id for the variance of the field
-    hsize_t dfield; ///< id for the time derivative of the field
-    hsize_t dmean;  ///< id for the mean of the time derivative of the field
-    hsize_t dvar;   ///< id for the variance of the time derivative of the field
-};
-
-/**
  * @brief Specifies a dataset in the output h5 file.
  */
 struct output
@@ -186,16 +173,9 @@ struct output
 struct file_parameters
 {
     hsize_t id;               ///< h5 file id of the output file
-    struct datasets dset_phi; ///< h5 dataset ids for the scalar field phi
-    struct datasets dset_psi; ///< h5 dataset ids for the perturbation psi
-    struct datasets dset_rho; ///< h5 dataset ids for the energy density rho
-    hsize_t dset_powspec;     ///< h5 dataset id for the power spectrum
-    hsize_t dset_time;        ///< h5 dataset id for the time parameter
-    hsize_t dset_a;           ///< h5 dataset id for the scaling parameter a
     size_t index;             ///< current index within the buffers
     size_t buf_size;          ///< size of the buffer
     size_t skip;              ///< timesteps to skip in between write outs
-    size_t bins_powspec;      ///< number of bins for the power spectrum
 };
 
 /**
@@ -274,7 +254,7 @@ extern struct output dphi;
 extern struct output psi;
 extern struct output dpsi;
 
-#define SUMMARY_VALUES      (4)
+#define SUMMARY_VALUES      (4) ///< mean, variance, minimum, maximum
 
 extern struct output phi_smry;
 extern struct output dphi_smry;
