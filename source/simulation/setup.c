@@ -78,9 +78,9 @@ void initialize_threading()
  * @brief Initialize the values in the struct parameters pars.
  *
  * Most of the values come from preprocessor defines, which in turn are filled
- * from the external parameters.sh file before compilation. However, some
+ * from the external `parameters.sh` file before compilation. However, some
  * parameters are computed from others in non trivial ways. The struct pars
- * provides a flexible way to access all parameters in a centeral global scope.
+ * provides a flexible way to access all parameters in a global scope.
  */
 void initialize_parameters()
 {
@@ -349,7 +349,7 @@ void mk_fftw_plans()
  * corresponding components of the k vector and its square respectively.
  *
  * @note The Nx/2, Ny/2, Nz/2 entries of k_x, k_y, k_z are set to zero for
- * differentiation via discrete fourier transforms. However those entries are
+ * differentiation via discrete fourier transforms. However, those entries are
  * used normally for k^2.
  */
 void mk_k_grid()
@@ -409,7 +409,7 @@ void mk_k_grid()
 /**
  * @brief Construct an arrray for filtering out high modes in Fourier space.
  *
- * Fills the global array filter with multiplicative factors that can be applied
+ * Fills the global array `filter` with multiplicative factors that can be applied
  * pointwise to a field in Fourier space to cut off high frequency modes.
  */
 void mk_filter_mask()
@@ -445,11 +445,14 @@ void mk_filter_mask()
 /**
  * @brief The specific shape of the cutoff for high frequency modes.
  *
- * We have found the exponential cutoff function described in TODO[link] to
- * paper to workd well for our purposes. It keeps more modes than the common two
- * thrids rule.
+ * We have found the exponential cutoff function described in the references to
+ * work well for our purposes. It keeps more modes than the common two thirds
+ * rule.
  *
- * @see mk_filter_mask(), TODO[link]
+ * @see `mk_filter_mask()`
+ * @see [Computing Nearly Singular Solutions Using Pseudo-Spectral Methods](http://arxiv.org/abs/math/0701337)
+ * @see [Numerical Study of Nearly Singular Solutions of the 3-D Incompressible Euler Equations](http://arxiv.org/abs/physics/0608126)
+ * @see [On the stability of the unsmoothed Fourier method for hyperbolic equations](http://link.springer.com/article/10.1007%2Fs002110050019)
  */
 inline double filter_window(const double x)
 {
@@ -460,8 +463,12 @@ inline double filter_window(const double x)
 }
 
 /**
- * @brief Decides which initialization routine to call based on preprocessor
- * defines given in the parameter file.
+ * @brief Initializes the fields based on preprocessor defines given in the
+ * parameter file.
+ *
+ * As a first step all fields are set to zero. Then the desired initialization
+ * rountine is called. Once the function returns, $$\phi$$, $$\dot{\phi}$$,
+ * $$\psi$$, $$\dot{\psi}$$, $$t$$ and $$a$$ have their initial values.
  */
 void mk_initial_conditions()
 {
@@ -502,7 +509,7 @@ void mk_initial_conditions()
  *
  * This is currently for internal use only. TODO[fill]
  *
- * @see read_initial_data() in filehandling.c
+ * @see `read_initial_data()` in `filehandling.c`
  */
 void initialize_from_dat()
 {
@@ -517,8 +524,9 @@ void initialize_from_dat()
 }
 
 /**
- * @brief Given that the initial phi, dphi and a are already provided in field,
- * construct the corresponding psi and dpsi.
+ * @brief Given that the initial $$\phi$$, $$\dot{\phi}$$ and $$a$$ are already
+ * provided in `field`, construct the corresponding $$\psi$$ and
+ * $$\dot{\psi}$$.
  */
 void mk_initial_psi()
 {
@@ -536,14 +544,16 @@ void mk_initial_psi()
 
 /**
  * @brief Construct a Bunch Davies vacuum as initial conditions if the
- * parameters satisfy the conditions and then construct corresponding psi, dpsi.
+ * parameters satisfy the conditions and then construct corresponding $$\psi$$,
+ * $$\dot{psi}$$.
  *
- * We use the exact same values as in DEFROST TODO[link] defrost paper, hence we
- * need 3 dimension, MASS=1, a box length of 10 in each direction. DEFROST uses
- * MASS_PLANCK=2e5.
+ * We use the exact same values as in the DEFROST paper (in the references), hence we
+ * need 3 dimensions, `MASS=1`, a box length of 10 in each direction. DEFROST uses
+ * `MASS_PLANCK=2e5`.
  *
- * @see mk_bunch_davies(double *f, const double H, const double homo, const
- * double gamma)
+ * @see [DEFROST: A New Code for Simulating Preheating after Inflation](http://arxiv.org/abs/0809.4904)
+ * @see `mk_bunch_davies(double *f, const double H, const double homo, const
+ * double gamma)`
  */
 void initialize_from_bunch_davies()
 {
@@ -577,10 +587,10 @@ void initialize_from_bunch_davies()
 }
 
 /**
- * @brief Construct a Bunch Davies vacuum for phi and dphi as initial conditions
- * following the description in DEFROST.
+ * @brief Construct a Bunch Davies vacuum for $$\phi$$ and $$\dot{\phi}$$ as
+ * initial conditions following the description in DEFROST.
  *
- * @see TODO[link] to defrost
+ * @see [DEFROST: A New Code for Simulating Preheating after Inflation](http://arxiv.org/abs/0809.4904)
  */
 void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma)
@@ -684,13 +694,13 @@ inline complex box_muller()
 /**
  * @brief Construct initial conditions for phi from internally defined functions
  *
- * First the actual spatial grid values are computed by calling mk_x_grid(double
- * *grid) and then phi and dphi are computed by
- * phi_init(const double x, const double y, const double z, const double *ph),
- * dphi_init(const double x, const double y, const double z, const double *ph)
- * potentially using some random phases.
- * The initial scale factor a comes from the parameter file and psi, dpsi are
- * then computed from phi and dphi.
+ * First the actual spatial grid values are computed by calling
+ * `mk_x_grid(double *grid)` and then $$\phi$$ and $$\dot{\phi}$$ are computed
+ * by `phi_init(const double x, const double y, const double z, const double
+ * *ph)`, `dphi_init(const double x, const double y, const double z, const
+ * double *ph)` potentially using some random phases `ph`.  The initial scale
+ * factor $$a$$ comes from the parameter file and $$\psi$$, $$\dot{\psi}$$ are
+ * then computed from $$\phi$$ and $$\dot{\phi}$$.
  */
 void initialize_from_internal_function()
 {
@@ -735,7 +745,7 @@ void initialize_from_internal_function()
 /**
  * @brief Construct the spatial grid.
  *
- * @param[in,out] grid A double array of size Nx + Ny + Nz that is filled up
+ * @param[in,out] grid A double array of size `Nx + Ny + Nz` that is filled up
  * with the grid values in each direction.
  *
  * Since the grid is rectangular with uniform spacing in each direction, only
@@ -771,9 +781,9 @@ void mk_x_grid(double *grid)
 /**
  * @brief The initial value of phi.
  *
- * @param[in] x The x coordinate where we want to evaluate phi.
- * @param[in] y The y coordinate where we want to evaluate phi.
- * @param[in] z The z coordinate where we want to evaluate phi.
+ * @param[in] x The x coordinate where we want to evaluate $$\phi$$.
+ * @param[in] y The y coordinate where we want to evaluate $$\phi$$.
+ * @param[in] z The z coordinate where we want to evaluate $$\phi$$.
  * @param[in] ph Random phases for various modes.
  *
  * @return The value of phi at the specified coordinates @p param1, @p param2,
@@ -782,8 +792,8 @@ void mk_x_grid(double *grid)
  * @note This function was mostly used for getting started and debugging and
  * is subject to constant change. If one has an analytic/algorithmic expression
  * for physically interesting initial conditions, one can implement them here,
- * or call another function (like wrapped_gaussian(const double x, const double
- * y, const double z)
+ * or call another function (like `wrapped_gaussian(const double x, const double
+ * y, const double z)`
  */
 double phi_init(const double x, const double y, const double z,
         const double *ph)
@@ -888,11 +898,11 @@ double phi_init(const double x, const double y, const double z,
 }
 
 /**
- * @brief The initial value of dphi.
+ * @brief The initial value of $$\dot{\phi}$$.
  *
- * @param[in] x The x coordinate where we want to evaluate dphi.
- * @param[in] y The y coordinate where we want to evaluate dphi.
- * @param[in] z The z coordinate where we want to evaluate dphi.
+ * @param[in] x The x coordinate where we want to evaluate $$\dot{\phi}$$.
+ * @param[in] y The y coordinate where we want to evaluate $$\dot{\phi}$$.
+ * @param[in] z The z coordinate where we want to evaluate $$\dot{\phi}$$.
  * @param[in] ph Random phases for various modes.
  *
  * @return The value of dphi at the specified coordinates @p param1, @p param2,
@@ -901,8 +911,8 @@ double phi_init(const double x, const double y, const double z,
  * @note This function was mostly used for getting started and debugging and
  * is subject to constant change. If one has an analytic/algorithmic expression
  * for physically interesting initial conditions, one can implement them here,
- * or call another function (like wrapped_gaussian(const double x, const double
- * y, const double z)
+ * or call another function (like `wrapped_gaussian(const double x, const double
+ * y, const double z)`
  */
 double dphi_init(const double x, const double y, const double z,
         const double *ph)
@@ -1000,7 +1010,7 @@ double wrapped_gaussian(const double x, const double y, const double z)
  *
  * A single call to this function cleans up everything after the simulation.
  * After this call, the program can exit. It should be the last function called,
- * see main.c.
+ * see `main.c`.
  */
 void free_and_destroy_all()
 {
@@ -1023,7 +1033,7 @@ void destroy_and_cleanup_fftw()
 /**
  * @brief Free memory from all external (i.e. global) variables.
  *
- * @note Everything allocated in allocate_external() must be freed here.
+ * @note Everything allocated in `allocate_external()` must be freed here.
  */
 void free_external()
 {
