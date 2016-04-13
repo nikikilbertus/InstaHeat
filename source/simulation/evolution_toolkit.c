@@ -11,6 +11,7 @@
 #include "setup.h"
 
 /**
+ * @file evolution_toolkit.c
  * @brief A collection of routines to compute the right hand side of the pde as
  * well as the desired output.
  */
