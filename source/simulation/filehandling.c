@@ -288,11 +288,19 @@ void h5_get_extent(hsize_t *cur)
     H5Sget_simple_extent_dims(dspace, cur, max);
 }
 
+/**
+ * @brief Write all relevant data in the current buffers to disk.
+ *
+ * @param[in] Nt The number of relevant time slices in the buffers.
+ *
+ * @note Usually @p Nt will just be the buffer size `WRITE_OUT_BUFFER_NUMBER`.
+ * However, when the simulation finishes while the buffer is only partially
+ * full, @p Nt will be smaller than the buffer size.
+ */
 void h5_write_all_buffers(const hsize_t Nt)
 {
-    // TODO[performance] maybe use static variable to count dataset size instead
-    // of reading it from the file each time
-    // static hsize_t counter;
+    // TODO[performance] maybe use static variable to count dataset size
+    // instead of reading it from the file each time static hsize_t counter;
     #ifdef SHOW_TIMING_INFO
     h5_time_write -= get_wall_time();
     #endif
@@ -353,6 +361,19 @@ void h5_write_all_buffers(const hsize_t Nt)
     INFO(printf("Dumping to disk at t = %f\n", pars.t.t));
 }
 
+/**
+ * @brief Write a single buffer to disk.
+ *
+ * @param[in] rank The rank of the buffer/dataset.
+ * @param[in] Nt The relevant length in the temporal direction of the buffer to
+ * write to disk.
+ * @param[in] N The length of the buffer/dataset in the non-temporal
+ * direcetion.
+ * @param[in] os The offset within the current dataset in the temporal
+ * direction.
+ * @param[in] dset The dataset id within the `.h5` output file.
+ * @param[in] buf A pointer to the buffer.
+ */
 void h5_write_buffer(const hsize_t rank, const hsize_t Nt,
         const hsize_t N, const hsize_t os, const hsize_t dset,
         const double *buf)
@@ -371,6 +392,9 @@ void h5_write_buffer(const hsize_t rank, const hsize_t Nt,
     H5Sclose(dspace);
 }
 
+/**
+ * @brief Flush and close all datasets within and the `.h5` file itself.
+ */
 void h5_close()
 {
     hid_t file = pars.file.id;
@@ -386,6 +410,10 @@ void h5_close()
     H5Fclose(file);
 }
 
+/**
+ * @brief Copy the current values of the desired output to the corresponding
+ * buffers.
+ */
 void save()
 {
     hsize_t index = pars.file.index;
@@ -530,6 +558,12 @@ void save()
     #endif
 }
 
+/**
+ * @brief Read one time slice of an extisting `.h5` file from a prior
+ * simulation as initial data for the current simulation.
+ *
+ * @see Documentation of the parameter file `doc_parameters.md`.
+ */
 void h5_read_timeslice()
 {
     hid_t file, dset, dspace;
@@ -604,6 +638,15 @@ void h5_read_timeslice()
     H5Fclose(file);
 }
 
+/**
+ * @brief Helper function to read a specific dataset to a given array.
+ *
+ * @param[in] file The id of the `.h5` file.
+ * @param[in] index The index of the time slice we want to read.
+ * @param[in] name The name of the dataset we want to read.
+ * @param[out] out Pointer to the memory where to store the time slice @p index
+ * of the dataset @p name in file @p file.
+ */
 void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
         double *out)
 {
@@ -632,6 +675,15 @@ void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
     H5Sclose(mspace);
 }
 
+/**
+ * @brief Read one time slice of an extisting `.dat` file.
+ *
+ * This mainly served debugging and comparison purposes. It might be a good
+ * starting point if you need to read initial data from a separate file in a
+ * different format.
+ *
+ * @see Documentation of the parameter file `doc_parameters.md`.
+ */
 void read_initial_data()
 {
     size_t N = pars.N;

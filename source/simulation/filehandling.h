@@ -3,6 +3,12 @@
 
 #include "hdf5.h"
 
+/**
+ * @file filehandling.h
+ * @brief Contains preprocessor definitions of the names of the datasets in the
+ * output `.h5` file and function declarations for `filehandling.c`.
+ */
+
 #define     H5_PHI_NAME                     ("phi")
 #define     H5_DPHI_NAME                    ("dphi")
 #define     H5_PSI_NAME                     ("psi")
