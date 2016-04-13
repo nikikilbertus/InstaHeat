@@ -7,12 +7,36 @@
 #include "filehandling.h"
 #include "main.h"
 
-void h5_create_empty_by_path(const char *name)
+/**
+ * @file filehandling.c
+ * @brief Contains all functions that read/write data from/to disk.
+ *
+ * All output data is stored in a single hdf5 file. The `DATAPATH` is a
+ * parameter in the `parameters.sh` file. The functions in this file provide
+ * all necessary functionality to create this hdf5 (extension: `.h5`) file and
+ * handles the output. We also provide functionality to read initial data from
+ * various files.
+ */
+
+/**
+ * @brief Creates the initial hdf5 file and writes out most of the simulation
+ * parameters.
+ *
+ * Within the hdf5 file, we store the various output values in datasets. We do
+ * not make use of groups, since the number of datasets is fairly small. Each
+ * field, the corresponding summaries and power spectra as well as each set of
+ * parameters gets a dataset. The simulation parameters which are already
+ * determined after `allocate_and_initialize_all()` in `setup.c` and before
+ * calling an integration routine `run_dopri853()` in `dopri853_stepper.c`  or
+ * `run_rk4()` in `RK4_stepper.c` are written to disk right away.
+ */
+void h5_create_empty_by_path()
 {
     hsize_t rank;
 
     // create file
-    const hid_t file = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    const hid_t file = H5Fcreate(DATAPATH, H5F_ACC_TRUNC, H5P_DEFAULT,
+            H5P_DEFAULT);
     pars.file.id = file;
 
     rank = 2;
@@ -183,6 +207,16 @@ void h5_create_empty_by_path(const char *name)
     INFO(puts("Created hdf5 file with datasets for output.\n"));
 }
 
+/**
+ * @brief Helper function to create a dataset.
+ *
+ * @param[in] rank The rank of the dataset.
+ * @param[in] N The second dimension of the dataset. The first dimension
+ * (corresponding to time) is always unlimited and chunked by the buffer size
+ * `WRITE_OUT_BUFFER_NUMBER`.
+ * @param[out] dset The id of the dset that gets created.
+ * @param[in] name The desired name of the dataset in the `.h5` file.
+ */
 void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,
         const char *name)
 {
@@ -208,6 +242,19 @@ void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,
     H5Sclose(dspace);
 }
 
+/**
+ * @brief Helper function to create a dataset for and directly write the @p N
+ * parameters to disk.
+ *
+ * @param[in] name The name of the dataset of the parameter in the `.h5` file.
+ * @param[in] val An array holding the value of the parameter(s). This function
+ * only writes parameters which can be given as a one dimensional array of
+ * doubles.
+ * @param[in] N The number of parameters, i.e. the length of the array @p val.
+ *
+ * @note We do not get back a handle to the dataset, i.e. the parameters are
+ * written once and for all and not modified later.
+ */
 void h5_write_parameter(const char *name, const double *val, const size_t N)
 {
     hsize_t rank = 1;
@@ -226,8 +273,17 @@ void h5_write_parameter(const char *name, const double *val, const size_t N)
     H5Sclose(dspace_par);
 }
 
-void h5_get_extent(hsize_t *max, hsize_t *cur)
+/**
+ * @brief Get the extent of the current `time` dataset.
+ *
+ * @param[out] cur The current extent of the `time` dataset.
+
+ * Since we are using chunked output, we need to find the current extent in the
+ * time dimension to know where to write the next chunk.
+ */
+void h5_get_extent(hsize_t *cur)
 {
+    hsize_t max[1];
     hid_t dspace = H5Dget_space(t_out.id);
     H5Sget_simple_extent_dims(dspace, cur, max);
 }
@@ -243,8 +299,7 @@ void h5_write_all_buffers(const hsize_t Nt)
 
     hsize_t rank;
     hsize_t curr_dim[1];
-    hsize_t max[1];
-    h5_get_extent(max, curr_dim);
+    h5_get_extent(curr_dim);
     const hsize_t os = curr_dim[0];
 
     rank = 2;

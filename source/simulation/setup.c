@@ -39,7 +39,7 @@ void allocate_and_initialize_all()
     mk_filter_mask();
     #endif
     mk_initial_conditions();
-    h5_create_empty_by_path(DATAPATH);
+    h5_create_empty_by_path();
     #ifdef ENABLE_FFT_FILTER
     INFO(puts("Frequency cutoff filtering enabled.\n"));
     #else
