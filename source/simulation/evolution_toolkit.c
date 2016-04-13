@@ -10,7 +10,11 @@
 #include "filehandling.h"
 #include "setup.h"
 
-// see header file for more info
+/**
+ * @brief A collection of routines to compute the right hand side of the pde as
+ * well as the desired output.
+ */
+
 struct evolution_flags evo_flags = {.filter = 0, .compute_pow_spec = 0};
 
 // compute right hand side of the pde, i.e. all first order temporal derivatives

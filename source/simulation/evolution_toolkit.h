@@ -5,15 +5,22 @@
 #include <fftw3.h>
 #include "main.h"
 
-// some flags to pass information about the progress of the stepping to the
-// evolution_toolkit
+/**
+ * @file evolution_toolkit.h
+ * @brief Struct and function declarations for `evolution_toolkit.c`
+ */
+
+/**
+ * @brief Flags to pass information about the progress of the integration to
+ * the routines in `evolution_toolkit.c`.
+ */
 struct evolution_flags
 {
-    uint8_t filter; // apply a filter in this step? (currently unused)
-    uint8_t compute_pow_spec; // compute the power spectrum in this step?
+    uint8_t filter; ///< If set, apply filtering (unused)
+    uint8_t compute_pow_spec; ///< If set, compute power spectra
 };
 
-extern struct evolution_flags evo_flags;
+extern struct evolution_flags evo_flags; ///< Instance of `evolution_flags`
 
 void mk_rhs(const double t, double *f, double *result);
 void mk_gradient_squared_and_laplacian(double *in);
