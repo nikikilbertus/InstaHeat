@@ -1114,7 +1114,6 @@ void free_external()
     INFO(puts("Freed external variables.\n"));
 }
 
-// for debugging mostly
 /**
  * @brief Print a vector to standard output.
  *
