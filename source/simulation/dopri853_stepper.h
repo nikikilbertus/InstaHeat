@@ -5,8 +5,8 @@
 
 /**
  * @file dopri853_stepper.h
- * @brief Typedefs and function declarations for dopri853_stepper.c and for
- * dopri853_constants.c.
+ * @brief Typedefs and function declarations for `dopri853_stepper.c` and for
+ * `dopri853_constants.c`.
  * @see <a href="http://numerical.recipes">Numerical Recipes</a>
  */
 
@@ -64,30 +64,33 @@ struct dopri853_values
  */
 struct dopri853_control
 {
-    double t;
-    double t_old;
-    double ti;
-    double tf;
-    double dt;
-    double dt_did;
-    double dt_next;
-    double dt_min;
-    size_t max_steps;
-    int n_stp;
-    int n_ok;
-    int n_bad;
-    double beta, alpha;
-    double safe;
-    double minscale, maxscale;
-    double a_tol, r_tol;
-    double err_old;
-    int reject;
-    double eps;
+    double t; ///< The current time
+    double t_old; ///< The previous time (on last time slice)
+    double ti; ///< The initial time
+    double tf; ///< The final time
+    double dt; ///< The time step size
+    double dt_did; ///< The previously used time step size
+    double dt_next; ///< The proposed next time step size
+    double dt_min; ///< The minimal permissible time step size
+    size_t max_steps; ///< The maximal number of steps
+    int n_stp; ///< The number of performed steps
+    int n_ok; ///< The number of successful steps
+    int n_bad; ///< The number of unsuccessful steps
+    double beta; ///< Internal parameter for the error estimates
+    double alpha; ///< Internal parameter for the error estimates
+    double safe; ///< Internal parameter for the error estimates
+    double minscale; ///< Minimal permissible rescaling of the time step size
+    double maxscale; ///< Maximal permissible rescaling of the time step size
+    double a_tol; ///< Absolute tolerance
+    double r_tol; ///< Relative tolerance
+    double err_old; ///< The previous error (on the last time slice)
+    int reject; ///< Flag whether time step is rejected or accepted
+    double eps; ///< Epsilon value for comparisons
 };
 
-extern struct dopri853_constants dpc; //< Dormand Prince Butcher tableaux constants
-extern struct dopri853_values dpv; //< Intermediate fields and errors
-extern struct dopri853_control dp; //< Dormand Prince parameters
+extern struct dopri853_constants dpc; ///< Dormand Prince Butcher tableaux constants
+extern struct dopri853_values dpv; ///< Intermediate fields and errors
+extern struct dopri853_control dp; ///< Dormand Prince parameters
 
 void initialize_dopri853();
 void run_dopri853();
