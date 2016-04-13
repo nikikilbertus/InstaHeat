@@ -305,11 +305,11 @@ a96	dopri853_stepper.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:dopri853_cons
 a97	dopri853_stepper.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:dopri853_constants
 a98	dopri853_stepper.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:dopri853_constants
 a_out	main.c	/^struct output a_out;$/;"	v	typeref:struct:output
-a_tol	dopri853_stepper.h	/^    double a_tol, r_tol;$/;"	m	struct:dopri853_control
+a_tol	dopri853_stepper.h	/^    double a_tol; \/\/\/< Absolute tolerance$/;"	m	struct:dopri853_control
 allocate_and_initialize_all	setup.c	/^void allocate_and_initialize_all()$/;"	f
 allocate_dopri853_values	dopri853_stepper.c	/^void allocate_dopri853_values()$/;"	f
 allocate_external	setup.c	/^void allocate_external()$/;"	f
-alpha	dopri853_stepper.h	/^    double beta, alpha;$/;"	m	struct:dopri853_control
+alpha	dopri853_stepper.h	/^    double alpha; \/\/\/< Internal parameter for the error estimates$/;"	m	struct:dopri853_control
 apply_filter_fourier	evolution_toolkit.c	/^void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,$/;"	f
 apply_filter_real	evolution_toolkit.c	/^void apply_filter_real(double *inout)$/;"	f
 are_fields_equal	tests.c	/^int are_fields_equal(const double *f, const double *g)$/;"	f
@@ -324,7 +324,7 @@ b6	dopri853_stepper.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:dopri853_co
 b7	dopri853_stepper.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:dopri853_constants
 b8	dopri853_stepper.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:dopri853_constants
 b9	dopri853_stepper.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:dopri853_constants
-beta	dopri853_stepper.h	/^    double beta, alpha;$/;"	m	struct:dopri853_control
+beta	dopri853_stepper.h	/^    double beta; \/\/\/< Internal parameter for the error estimates$/;"	m	struct:dopri853_control
 bhh1	dopri853_stepper.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:dopri853_constants
 bhh2	dopri853_stepper.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:dopri853_constants
 bhh3	dopri853_stepper.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:dopri853_constants
@@ -347,7 +347,7 @@ c7	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15
 c8	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
 c9	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
 center	evolution_toolkit.c	/^void center(double *f, const size_t N)$/;"	f
-compute_pow_spec	evolution_toolkit.h	/^    uint8_t compute_pow_spec; \/\/ compute the power spectrum in this step?$/;"	m	struct:evolution_flags
+compute_pow_spec	evolution_toolkit.h	/^    uint8_t compute_pow_spec; \/\/\/< If set, compute power spectra$/;"	m	struct:evolution_flags
 contains_nan	evolution_toolkit.c	/^void contains_nan(const double *f, const size_t N)$/;"	f
 contains_nanc	evolution_toolkit.c	/^void contains_nanc(const complex *f, const size_t N)$/;"	f
 d41	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
@@ -422,13 +422,13 @@ dpsi_smry	main.c	/^struct output dpsi_smry;$/;"	v	typeref:struct:output
 dpsic	main.h	/^    complex *dpsic;$/;"	m	struct:temporary
 dpsic	main_template.h	/^    complex *dpsic;$/;"	m	struct:temporary
 dpv	dopri853_stepper.c	/^struct dopri853_values dpv;$/;"	v	typeref:struct:dopri853_values
-dt	dopri853_stepper.h	/^    double dt;$/;"	m	struct:dopri853_control
+dt	dopri853_stepper.h	/^    double dt; \/\/\/< The time step size$/;"	m	struct:dopri853_control
 dt	main.h	/^    double dt; \/\/\/< size of the (initial) timestep delta t$/;"	m	struct:timing
 dt	main_template.h	/^    double dt; \/\/\/< size of the (initial) timestep delta t$/;"	m	struct:timing
-dt_did	dopri853_stepper.h	/^    double dt_did;$/;"	m	struct:dopri853_control
-dt_min	dopri853_stepper.h	/^    double dt_min;$/;"	m	struct:dopri853_control
-dt_next	dopri853_stepper.h	/^    double dt_next;$/;"	m	struct:dopri853_control
-eps	dopri853_stepper.h	/^    double eps;$/;"	m	struct:dopri853_control
+dt_did	dopri853_stepper.h	/^    double dt_did; \/\/\/< The previously used time step size$/;"	m	struct:dopri853_control
+dt_min	dopri853_stepper.h	/^    double dt_min; \/\/\/< The minimal permissible time step size$/;"	m	struct:dopri853_control
+dt_next	dopri853_stepper.h	/^    double dt_next; \/\/\/< The proposed next time step size$/;"	m	struct:dopri853_control
+eps	dopri853_stepper.h	/^    double eps; \/\/\/< Epsilon value for comparisons$/;"	m	struct:dopri853_control
 equal	tests.c	/^int equal(const double a, const double b)$/;"	f
 er1	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
 er10	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
@@ -438,7 +438,7 @@ er6	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:do
 er7	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
 er8	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
 er9	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
-err_old	dopri853_stepper.h	/^    double err_old;$/;"	m	struct:dopri853_control
+err_old	dopri853_stepper.h	/^    double err_old; \/\/\/< The previous error (on the last time slice)$/;"	m	struct:dopri853_control
 error	dopri853_stepper.c	/^double error(const double dt)$/;"	f
 evo_flags	evolution_toolkit.c	/^struct evolution_flags evo_flags = {.filter = 0, .compute_pow_spec = 0};$/;"	v	typeref:struct:evolution_flags
 evolution_flags	evolution_toolkit.h	/^struct evolution_flags$/;"	s
@@ -455,7 +455,7 @@ file	main_template.h	/^    struct file_parameters file; \/\/\/< file IO paramete
 file_parameters	main.h	/^struct file_parameters$/;"	s
 file_parameters	main_template.h	/^struct file_parameters$/;"	s
 fill_field	tests.c	/^void fill_field(double *f, double (*func)(const double, const double,$/;"	f
-filter	evolution_toolkit.h	/^    uint8_t filter; \/\/ apply a filter in this step? (currently unused)$/;"	m	struct:evolution_flags
+filter	evolution_toolkit.h	/^    uint8_t filter; \/\/\/< If set, apply filtering (unused)$/;"	m	struct:evolution_flags
 filter	main.c	/^double *filter;$/;"	v
 filter_time	main.c	/^double filter_time = 0.0;$/;"	v
 filter_window	setup.c	/^inline double filter_window(const double x)$/;"	f
@@ -469,8 +469,8 @@ grid_dimension	main.h	/^struct grid_dimension$/;"	s
 grid_dimension	main_template.h	/^struct grid_dimension$/;"	s
 h5_close	filehandling.c	/^void h5_close()$/;"	f
 h5_create_dset	filehandling.c	/^void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,$/;"	f
-h5_create_empty_by_path	filehandling.c	/^void h5_create_empty_by_path(const char *name)$/;"	f
-h5_get_extent	filehandling.c	/^void h5_get_extent(hsize_t *max, hsize_t *cur)$/;"	f
+h5_create_empty_by_path	filehandling.c	/^void h5_create_empty_by_path()$/;"	f
+h5_get_extent	filehandling.c	/^void h5_get_extent(hsize_t *cur)$/;"	f
 h5_read_and_fill	filehandling.c	/^void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,$/;"	f
 h5_read_timeslice	filehandling.c	/^void h5_read_timeslice()$/;"	f
 h5_time_write	main.c	/^double h5_time_write = 0.0;$/;"	v
@@ -509,11 +509,11 @@ kvec	main.c	/^struct k_grid kvec;$/;"	v	typeref:struct:k_grid
 lap	main.h	/^    double  *lap;$/;"	m	struct:temporary
 lap	main_template.h	/^    double  *lap;$/;"	m	struct:temporary
 main	main.c	/^int main(int argc, const char * argv[])$/;"	f
-max_steps	dopri853_stepper.h	/^    size_t max_steps;$/;"	m	struct:dopri853_control
-maxscale	dopri853_stepper.h	/^    double minscale, maxscale;$/;"	m	struct:dopri853_control
+max_steps	dopri853_stepper.h	/^    size_t max_steps; \/\/\/< The maximal number of steps$/;"	m	struct:dopri853_control
+maxscale	dopri853_stepper.h	/^    double maxscale; \/\/\/< Maximal permissible rescaling of the time step size$/;"	m	struct:dopri853_control
 mean	evolution_toolkit.c	/^inline double mean(const double *f, const size_t N)$/;"	f
 mean_var_min_max	evolution_toolkit.c	/^void mean_var_min_max(const double *f, double *smry)$/;"	f
-minscale	dopri853_stepper.h	/^    double minscale, maxscale;$/;"	m	struct:dopri853_control
+minscale	dopri853_stepper.h	/^    double minscale; \/\/\/< Minimal permissible rescaling of the time step size$/;"	m	struct:dopri853_control
 mk_bunch_davies	setup.c	/^void mk_bunch_davies(double *f, const double H, const double homo,$/;"	f
 mk_fftw_plans	setup.c	/^void mk_fftw_plans()$/;"	f
 mk_filter_mask	setup.c	/^void mk_filter_mask()$/;"	f
@@ -521,15 +521,15 @@ mk_gradient_squared_and_laplacian	evolution_toolkit.c	/^void mk_gradient_squared
 mk_initial_conditions	setup.c	/^void mk_initial_conditions()$/;"	f
 mk_initial_psi	setup.c	/^void mk_initial_psi()$/;"	f
 mk_k_grid	setup.c	/^void mk_k_grid()$/;"	f
-mk_means_and_variances	evolution_toolkit.c	/^void mk_means_and_variances()$/;"	f
 mk_power_spectrum	evolution_toolkit.c	/^void mk_power_spectrum(const fftw_complex *in, struct output out)$/;"	f
 mk_psi	evolution_toolkit.c	/^void mk_psi(double *f)$/;"	f
 mk_rho	evolution_toolkit.c	/^void mk_rho(const double *f)$/;"	f
 mk_rhs	evolution_toolkit.c	/^void mk_rhs(const double t, double *f, double *result)$/;"	f
+mk_summary	evolution_toolkit.c	/^void mk_summary()$/;"	f
 mk_x_grid	setup.c	/^void mk_x_grid(double *grid)$/;"	f
-n_bad	dopri853_stepper.h	/^    int n_bad;$/;"	m	struct:dopri853_control
-n_ok	dopri853_stepper.h	/^    int n_ok;$/;"	m	struct:dopri853_control
-n_stp	dopri853_stepper.h	/^    int n_stp;$/;"	m	struct:dopri853_control
+n_bad	dopri853_stepper.h	/^    int n_bad; \/\/\/< The number of unsuccessful steps$/;"	m	struct:dopri853_control
+n_ok	dopri853_stepper.h	/^    int n_ok; \/\/\/< The number of successful steps$/;"	m	struct:dopri853_control
+n_stp	dopri853_stepper.h	/^    int n_stp; \/\/\/< The number of performed steps$/;"	m	struct:dopri853_control
 outN	main.h	/^    size_t outN; \/\/\/< number of output points in this dimension$/;"	m	struct:grid_dimension
 outN	main.h	/^    size_t outN; \/\/\/< number of spatial gridpoints for output$/;"	m	struct:parameters
 outN	main_template.h	/^    size_t outN; \/\/\/< number of output points in this dimension$/;"	m	struct:grid_dimension
@@ -559,9 +559,9 @@ psi	main.c	/^struct output psi;$/;"	v	typeref:struct:output
 psi_smry	main.c	/^struct output psi_smry;$/;"	v	typeref:struct:output
 psic	main.h	/^    complex *psic;$/;"	m	struct:temporary
 psic	main_template.h	/^    complex *psic;$/;"	m	struct:temporary
-r_tol	dopri853_stepper.h	/^    double a_tol, r_tol;$/;"	m	struct:dopri853_control
+r_tol	dopri853_stepper.h	/^    double r_tol; \/\/\/< Relative tolerance$/;"	m	struct:dopri853_control
 read_initial_data	filehandling.c	/^void read_initial_data()$/;"	f
-reject	dopri853_stepper.h	/^    int reject;$/;"	m	struct:dopri853_control
+reject	dopri853_stepper.h	/^    int reject; \/\/\/< Flag whether time step is rejected or accepted$/;"	m	struct:dopri853_control
 rho	main.c	/^double *rho;$/;"	v
 rho_mean	main.c	/^double rho_mean;$/;"	v
 rho_out	main.c	/^struct output rho_out;$/;"	v	typeref:struct:output
@@ -569,9 +569,9 @@ rho_smry	main.c	/^struct output rho_smry;$/;"	v	typeref:struct:output
 run_all_tests	tests.c	/^void run_all_tests()$/;"	f
 run_dopri853	dopri853_stepper.c	/^void run_dopri853()$/;"	f
 run_rk4	RK4_stepper.c	/^void run_rk4()$/;"	f
-safe	dopri853_stepper.h	/^    double safe;$/;"	m	struct:dopri853_control
+safe	dopri853_stepper.h	/^    double safe; \/\/\/< Internal parameter for the error estimates$/;"	m	struct:dopri853_control
 save	filehandling.c	/^void save()$/;"	f
-setdef	configure.sh	/^function setdef {$/;"	f
+setdef	configure	/^function setdef {$/;"	f
 skip	main.h	/^    size_t skip;              \/\/\/< timesteps to skip in between write outs$/;"	m	struct:file_parameters
 skip	main_template.h	/^    size_t skip;              \/\/\/< timesteps to skip in between write outs$/;"	m	struct:file_parameters
 sq	main.h	/^    double *sq;$/;"	m	struct:k_grid
@@ -579,12 +579,12 @@ sq	main_template.h	/^    double *sq;$/;"	m	struct:k_grid
 stride	main.h	/^    size_t stride; \/\/\/< strides for output$/;"	m	struct:grid_dimension
 stride	main_template.h	/^    size_t stride; \/\/\/< strides for output$/;"	m	struct:grid_dimension
 success	dopri853_stepper.c	/^int success(const double err, double *dt)$/;"	f
-t	dopri853_stepper.h	/^    double t;$/;"	m	struct:dopri853_control
+t	dopri853_stepper.h	/^    double t; \/\/\/< The current time$/;"	m	struct:dopri853_control
 t	main.h	/^    double t;  \/\/\/< current time (constantly updated during simulation)$/;"	m	struct:timing
 t	main.h	/^    struct timing t; \/\/\/< time evolution parameters$/;"	m	struct:parameters	typeref:struct:parameters::timing
 t	main_template.h	/^    double t;  \/\/\/< current time (constantly updated during simulation)$/;"	m	struct:timing
 t	main_template.h	/^    struct timing t; \/\/\/< time evolution parameters$/;"	m	struct:parameters	typeref:struct:parameters::timing
-t_old	dopri853_stepper.h	/^    double t_old;$/;"	m	struct:dopri853_control
+t_old	dopri853_stepper.h	/^    double t_old; \/\/\/< The previous time (on last time slice)$/;"	m	struct:dopri853_control
 t_out	main.c	/^struct output t_out;$/;"	v	typeref:struct:output
 temporary	main.h	/^struct temporary$/;"	s
 temporary	main_template.h	/^struct temporary$/;"	s
@@ -598,10 +598,10 @@ test_func_Dz	tests.c	/^double test_func_Dz(const double x, const double y, const
 test_func_gradsq	tests.c	/^double test_func_gradsq(const double x, const double y, const double z)$/;"	f
 test_func_lap	tests.c	/^double test_func_lap(const double x, const double y, const double z)$/;"	f
 test_mk_gradient_squared_and_laplacian	tests.c	/^void test_mk_gradient_squared_and_laplacian()$/;"	f
-tf	dopri853_stepper.h	/^    double tf;$/;"	m	struct:dopri853_control
+tf	dopri853_stepper.h	/^    double tf; \/\/\/< The final time$/;"	m	struct:dopri853_control
 tf	main.h	/^    double tf; \/\/\/< final time$/;"	m	struct:timing
 tf	main_template.h	/^    double tf; \/\/\/< final time$/;"	m	struct:timing
-ti	dopri853_stepper.h	/^    double ti;$/;"	m	struct:dopri853_control
+ti	dopri853_stepper.h	/^    double ti; \/\/\/< The initial time$/;"	m	struct:dopri853_control
 ti	main.h	/^    double ti; \/\/\/< initial time$/;"	m	struct:timing
 ti	main_template.h	/^    double ti; \/\/\/< initial time$/;"	m	struct:timing
 timing	main.h	/^struct timing$/;"	s
