@@ -745,7 +745,7 @@ void initialize_from_internal_function()
 /**
  * @brief Construct the spatial grid.
  *
- * @param[in,out] grid A double array of size `Nx + Ny + Nz` that is filled up
+ * @param[out] grid A double array of size `Nx + Ny + Nz` that is filled up
  * with the grid values in each direction.
  *
  * Since the grid is rectangular with uniform spacing in each direction, only
@@ -786,8 +786,7 @@ void mk_x_grid(double *grid)
  * @param[in] z The z coordinate where we want to evaluate $$\phi$$.
  * @param[in] ph Random phases for various modes.
  *
- * @return The value of phi at the specified coordinates @p param1, @p param2,
- * @p param3.
+ * @return The value of phi at the specified coordinates @p x, @p y, @p z.
  *
  * @note This function was mostly used for getting started and debugging and
  * is subject to constant change. If one has an analytic/algorithmic expression
@@ -905,8 +904,7 @@ double phi_init(const double x, const double y, const double z,
  * @param[in] z The z coordinate where we want to evaluate $$\dot{\phi}$$.
  * @param[in] ph Random phases for various modes.
  *
- * @return The value of dphi at the specified coordinates @p param1, @p param2,
- * @p param3.
+ * @return The value of dphi at the specified coordinates @p x, @p y, @p z.
  *
  * @note This function was mostly used for getting started and debugging and
  * is subject to constant change. If one has an analytic/algorithmic expression

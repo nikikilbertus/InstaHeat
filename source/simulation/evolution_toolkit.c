@@ -17,8 +17,29 @@
 
 struct evolution_flags evo_flags = {.filter = 0, .compute_pow_spec = 0};
 
-// compute right hand side of the pde, i.e. all first order temporal derivatives
-// which fields are contained depends on PSI_METHOD
+/**
+ * @brief Compute the right hand side of the pde, i.e. all first order temporal
+ * derivatives.
+ *
+ * Depending on `PSI_METHOD` we are computing the temporal derivatives of different fields, and hence also evovle different fields in the integration routine:
+ *
+ *   @param[in] t The current time
+ *   @param[in] All necessary fields bundled in one array
+ *   @param[out] The right hand side of the partial differential equation, i.e.
+ *   the first temporal derivatives of the fields
+ *
+ * - For `PSI_METHOD=PSI_ELLIPTIC` we are only evolving $$\phi$$,
+ *   $$\dot{\phi}$$ and $$a$$ withthe integration routine and use an elliptic
+ *   constraint equation to compute $$\psi$$ and $$\dot{\psi}$$ separately on
+ *   each timeslice.
+ * - For 'PSI_METHOD=PSI_PARABOLIC` we are evolving $$\phi$$, $$\dot{\phi}$$,
+ *   $$\psi$$ and $$a$$ according to a parabolic constraint equation with the
+ *   integration routine. $$\dot{\psi}$$ is computed separately on each
+ *   timeslice.
+ * - For 'PSI_METHOD=PSI_HYPERBOLIC` we are evolving $$\phi$$, $$\dot{\phi}$$,
+ *   $$\psi$$, $$\dot{\psi}$$ and $$a$$ according to a hyperbolic constraint
+ *   equation with the integration routine.
+ */
 void mk_rhs(const double t, double *f, double *result)
 {
     const size_t N = pars.N;
@@ -77,7 +98,15 @@ void mk_rhs(const double t, double *f, double *result)
     result[N2] = a * hubble;
 }
 
-// compute the laplacian and the squared gradient of the input and store them
+/**
+ * @brief Compute the Laplacian and the sqaure gradient.
+ *
+ * @param[in] in An array containing the fields, in particular $$\phi$$ and
+ * $$\dot{\phi}$$
+ *
+ * The Laplacian and the squared gradient as well as the partial derivatives of
+ * $$\phi$$ are stored in global variables for reuse in other functions.
+ */
 void mk_gradient_squared_and_laplacian(double *in)
 {
     const size_t N = pars.N;
@@ -133,6 +162,13 @@ void mk_gradient_squared_and_laplacian(double *in)
     assemble_gradient_squared();
 }
 
+/**
+ * @brief Constructs the squared gradient from the (up to) three partial
+ * spatial derivatives.
+ *
+ * The partial derivatives as well as the gradient are stored in globally
+ * accessible arrays.
+ */
 void assemble_gradient_squared()
 {
     const size_t N = pars.N;
@@ -148,7 +184,15 @@ void assemble_gradient_squared()
     }
 }
 
-// compute energy density rho & average value
+/**
+ * @brief Compute the energy density $$\rho$$ and it's average value. For
+ * `PSI_METHOD=PSI_HYPERBOLIC` also compute the pressure and it's average
+ * value.
+ *
+ * @param[in] f An array containing the fields
+ *
+ * Everything is stored in global variables for reuse in other functions.
+ */
 void mk_rho(const double *f)
 {
     const size_t N = pars.N;
@@ -186,8 +230,12 @@ void mk_rho(const double *f)
     #endif
 }
 
-// A selection of potentials one can try, make sure to set the corresponding
-// potential_prime, the derivative is not computed automatically
+/**
+ * @brief The potential of the scalar inflaton field $$\phi$$
+ *
+ * @param[in] f The field value where to evaluate the potential
+ * @return The potential value at given input
+ */
 inline double potential(const double f)
 {
     // higgs metastability potential
@@ -206,6 +254,13 @@ inline double potential(const double f)
     return MASS * MASS * f * f / 2.0;
 }
 
+/**
+ * @brief The derivative of the potential of the scalar inflaton field $$\phi$$
+ *
+ * @param[in] f The field value where to evaluate the derivative of the
+ * potential
+ * @return The value of the derivative of the potential at given input
+ */
 inline double potential_prime(const double f)
 {
     // higgs metastability potential
@@ -227,6 +282,15 @@ inline double potential_prime(const double f)
 }
 
 // solve poisson like equation for scalar perturbation and its derivative
+/**
+ * @brief Compute $$\psi$$ and $$\dot{\psi}$$
+ *
+ * @param[in] f An array containing the fields
+ *
+ * We use an elliptic equation from the Hamiltonian constraint combined with
+ * the momentum contraint to compute $$\psi$$ and $$\dot{\psi}$$ from given
+ * $$\phi$$ and $$\dot{\phi}$$.
+ */
 void mk_psi(double *f)
 {
     //TODO[performance]: optimize be saving often used values (h3, dphiextra...)
@@ -328,7 +392,16 @@ void mk_psi(double *f)
     }
 }
 
-// computes a crude estimation of the power spectrum, more info in main.h
+/**
+ * @brief Compute the power spectrum
+ *
+ * @param[in] in The Fourier amplitudes of the field
+ * @param[in, out] out The output struct providing information about and memory
+ * for the power spectrum of the field.
+ *
+ * The power spectrum is constructed by binning the Fourier modes according to
+ * the size of their wave vectors.
+ */
 void mk_power_spectrum(const fftw_complex *in, struct output out)
 {
     const size_t Nx = pars.x.N;
@@ -359,7 +432,16 @@ void mk_power_spectrum(const fftw_complex *in, struct output out)
     }
 }
 
-// filter the real input field, input gets overwritten with filtered data
+/**
+ * @brief Apply a Fourier filter to each field of a given input to cutoff high
+ * frequency modes
+ *
+ * @param[in, out] inout The field which we want to filter
+ *
+ * The highest modes of the field are cut off according to `filter_window` in
+ * `setup.c`. All four fields $$\phi$$, $$\dot{\phi}$$, $$\psi$$,
+ * $$\dot{\psi}$$ are filtered.
+ */
 void apply_filter_real(double *inout)
 {
     const size_t N = pars.N;
@@ -401,7 +483,16 @@ void apply_filter_real(double *inout)
     #endif
 }
 
-// filtering in fourier domain for phi, dphi, psi simultaneously
+/**
+ * @brief Applying the filter mask to the complex fields
+ *
+ * @param[in, out] phi_io The field $$\phi$$ in Fourier space
+ * @param[in, out] dphi_io The field $$\dot{\phi}$$ in Fourier space
+ * @param[in, out] psi_io The field $$\psi$$ in Fourier space
+ * @param[in, out] dpsi_io The field $$\dot{\phi}$$ in Fourier space
+ *
+ * @see The `filter` is constructed in `mk_filter_mask()` in `setup.c`
+ */
 void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
         fftw_complex *psi_io, fftw_complex *dpsi_io)
 {
@@ -421,7 +512,10 @@ void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
     }
 }
 
-// recompute current power spectrum and rho and save current timeslice to buffer
+/**
+ * @brief Recompute all desired output quantities and save the current
+ * timeslice to buffers
+ */
 void prepare_and_save_timeslice()
 {
     evo_flags.compute_pow_spec = 1;
@@ -435,6 +529,14 @@ void prepare_and_save_timeslice()
     save();
 }
 
+/**
+ * @brief Center input vector around it's average.
+ *
+ * @param[in, out] f Any double vector of length @p N
+ * @param[in] N The length of the vector @p f
+ *
+ * The vector @p f is overwritten by f - <f>
+ */
 void center(double *f, const size_t N)
 {
     double avg = mean(f, N);
@@ -444,6 +546,10 @@ void center(double *f, const size_t N)
     }
 }
 
+/**
+ * @brief Save the summaries of the fields (containing the mean, variance,
+ * minimum and maximum value at the current time).
+ */
 void mk_summary()
 {
     //TODO[performance]: parallel sections instead of parallel loops here?
@@ -468,6 +574,13 @@ void mk_summary()
     #endif
 }
 
+/**
+ * @brief Compute the mean (or average) of a vector
+ *
+ * @param[in] f Any vector of length @p N
+ * @param[in] N The length of the vector @p f
+ * @return The mean value of @p f
+ */
 inline double mean(const double *f, const size_t N)
 {
     double mean = 0.0;
@@ -478,6 +591,16 @@ inline double mean(const double *f, const size_t N)
     return mean / (double)N;
 }
 
+/**
+ * @brief Compute the summary of a vector, i.e. the mean, variance, minimum and
+ * maximum value
+ *
+ * @param[in] f The input  vector
+ * @param[out] smry An array of size 4 which is filled with the summary: mean,
+ * variance, min, max (in this order)
+ *
+ * @note The vector is implicitly assumed to have length `pars.N`
+ */
 void mean_var_min_max(const double *f, double *smry)
 {
     const size_t N = pars.N;
@@ -497,6 +620,14 @@ void mean_var_min_max(const double *f, double *smry)
     smry[3] = max_val;
 }
 
+/**
+ * @brief Compute the variance of a vector
+ *
+ * @param[in] mean The mean of the vector @p f
+ * @param[in] f Any vector of length @p N
+ * @param[in] N The length of the vector @p f
+ * @return The variance value of @p f
+ */
 double variance(const double mean, const double *f, const size_t N)
 {
     double sum1 = 0.0;
@@ -511,6 +642,12 @@ double variance(const double mean, const double *f, const size_t N)
     return (sum1 - sum2 * sum2 / (double)N) / (double)(N - 1);
 }
 
+/**
+ * @brief Check and print whether a vector contains NaNs __(debugging only)__
+ *
+ * @param[in] f Any vector of length @p N
+ * @param[in] N The length of the vector @p f
+ */
 void contains_nan(const double *f, const size_t N)
 {
     size_t count = 0;
@@ -522,6 +659,12 @@ void contains_nan(const double *f, const size_t N)
     printf("found %zu nans\n", count);
 }
 
+/**
+ * @brief Check and print whether a vector contains NaNs __(debugging only)__
+ *
+ * @param[in] f Any vector of length @p N
+ * @param[in] N The length of the vector @p f
+ */
 void contains_nanc(const complex *f, const size_t N)
 {
     size_t count = 0;

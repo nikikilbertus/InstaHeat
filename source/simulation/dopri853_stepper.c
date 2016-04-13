@@ -171,7 +171,7 @@ void run_dopri853()
  * @return Returns 0 in case of success and 1 in case of failure, in this case a
  * underflow of the specified minimal stepsize.
  *
- * Starting with the input @p param1 this function repeatedly calls
+ * Starting with the input @p dt_try this function repeatedly calls
  * try_step(const double dt), computes the normalized overall error by calling
  * error(const double dt), plugs that into success(const double err, double
  * *dt) to determine, whether the step is accepted or rejected. In the first
@@ -406,9 +406,9 @@ double error(const double dt)
  * the current step in case of failure.
  * @return Returns 1 in case of success and 0 in case of failure.
  *
- * When the error @p param1 is smaller than 1, the current step is accepted. In
+ * When the error @p err is smaller than 1, the current step is accepted. In
  * this case the new stepsize is computed and set accordingly. Otherwise the
- * current stepsize @p param2 is adjusted and the current step is retried.
+ * current stepsize @p dt is adjusted and the current step is retried.
  * Various rules enter the scaling of the stepsize and various counters and
  * flags are set.
  */
