@@ -52,6 +52,9 @@ void mk_rhs(const double t, double *f, double *result)
 
     mk_gradient_squared_and_laplacian(f);
     mk_rho(f);
+    #ifdef OUTPUT_CONSTRAINTS
+    mk_constraints();
+    #endif
     const double hubble = sqrt(rho_mean / 3.0);
     const double h3 = 3.0 * hubble;
 
@@ -115,8 +118,8 @@ void mk_rhs(const double t, double *f, double *result)
  * `tmp.grad` contains the _squared_ gradient $$(\nabla \phi)^2$$
  * All the above values persist until the next call of `mk_rhs(const double t,
  * double *f, double *result)`
- * If `PSI_METHOD=PSI_PARABOLIC`, additionally, `tmp.f` contains $$\Delta
- * \psi$$, the Lagrangian of $$\psi$$
+ * If `PSI_METHOD=PSI_PARABOLIC` or `OUTPUT_CONSTRAINTS` is defined,
+ * additionally, `tmp.f` contains $$\Delta \psi$$, the Lagrangian of $$\psi$$.
  */
 void mk_gradient_squared_and_laplacian(double *in)
 {
@@ -127,7 +130,7 @@ void mk_gradient_squared_and_laplacian(double *in)
     fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_r2c(p_fw, in, tmp.phic);
-        #if PSI_METHOD == PSI_PARABOLIC
+        #if PSI_METHOD == PSI_PARABOLIC || defined(OUTPUT_CONSTRAINTS)
         const size_t N2p = 2 * N + 2;
         fftw_execute_dft_r2c(p_fw, in + N2p, tmp.psic);
         #endif
@@ -147,7 +150,7 @@ void mk_gradient_squared_and_laplacian(double *in)
         tmp.yphic[i] = pre * kvec.y[i];
         tmp.zphic[i] = pre * kvec.z[i];
         tmp.phic[i] *= kvec.sq[i] / N;
-        #if PSI_METHOD == PSI_PARABOLIC
+        #if PSI_METHOD == PSI_PARABOLIC || defined(OUTPUT_CONSTRAINTS)
         tmp.psic[i] *= kvec.sq[i] / N;
         #endif
     }
@@ -163,7 +166,7 @@ void mk_gradient_squared_and_laplacian(double *in)
         }
     }
     fftw_execute_dft_c2r(p_bw, tmp.phic, tmp.lap);
-    #if PSI_METHOD == PSI_PARABOLIC
+    #if PSI_METHOD == PSI_PARABOLIC || defined(OUTPUT_CONSTRAINTS)
     fftw_execute_dft_c2r(p_bw, tmp.psic, tmp.f);
     #endif
     #ifdef SHOW_TIMING_INFO
@@ -298,6 +301,11 @@ inline double potential_prime(const double f)
 
     // standard f squared potential
     return MASS * MASS * f;
+}
+
+void mk_constraints()
+{
+
 }
 
 /**
