@@ -26,6 +26,7 @@
 #define     H5_PSI_SMRY_NAME                ("psi_summary")
 #define     H5_DPSI_SMRY_NAME               ("dpsi_summary")
 #define     H5_RHO_SMRY_NAME                ("rho_summary")
+#define     H5_CONSTRAINTS_NAME             ("constraints")
 #define     H5_MASS_NAME                    ("mass")
 #define     H5_DIMENSION_NAME               ("dimension")
 #define     H5_SEED_NAME                    ("seed")
