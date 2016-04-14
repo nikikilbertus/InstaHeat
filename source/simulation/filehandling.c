@@ -426,7 +426,8 @@ void h5_close()
  */
 void save()
 {
-    a_out.tmp[0] = field[N2];
+    const size_t index = pars.file.index;
+    a_out.tmp[0] = field[2 * pars.N];
     append_to_buffer(a_out);
     append_to_buffer(t_out);
 
