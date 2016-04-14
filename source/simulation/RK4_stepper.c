@@ -65,7 +65,9 @@ void run_rk4()
 
         // step 1 (and write out data if required)
         if (nt % pars.file.skip == 0) {
+            #ifdef OUTPUT_PHI_PS
             evo_flags.compute_pow_spec = 1;
+            #endif
             mk_rhs(t, field, k1);
             evo_flags.compute_pow_spec = 0;
             mk_summary();
