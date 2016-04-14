@@ -70,12 +70,16 @@
 #define _OPSI_
 #define _ODPSI_
 #define _ORHO_
+
 #define _OPHIPS_
+
 #define _OPHIS_
 #define _ODPHIS_
 #define _OPSIS_
 #define _ODPSIS_
 #define _ORHOS_
+
+#define _OCSTR_
 
 #if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || defined(OUTPUT_PSI) \
     || defined(OUTPUT_DPSI)|| defined(OUTPUT_RHO)
