@@ -63,6 +63,7 @@ void h5_write_buffer(const hsize_t rank, const hsize_t Nt,
 void h5_write_all_buffers(const hsize_t Nt);
 void h5_close();
 void save();
+void append_to_buffer(struct output f);
 void h5_read_timeslice();
 void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
         double *out);
