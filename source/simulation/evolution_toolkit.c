@@ -106,7 +106,17 @@ void mk_rhs(const double t, double *f, double *result)
  * $$\dot{\phi}$$
  *
  * The Laplacian and the squared gradient as well as the partial derivatives of
- * $$\phi$$ are stored in global variables for reuse in other functions.
+ * $$\phi$$ are stored in global variables for reuse in other functions. When
+ * the function returns:
+ * `tmp.xphi` contains $$\partial_x \phi$$
+ * `tmp.yphi` contains $$\partial_y \phi$$
+ * `tmp.zphi` contains $$\partial_z \phi$$
+ * `tmp.lap` contains the Laplacian $$\sum_{i=1}^3 \partial_i^2 \phi$$
+ * `tmp.grad` contains the _squared_ gradient $$(\nabla \phi)^2$$
+ * All the above values persist until the next call of `mk_rhs(const double t,
+ * double *f, double *result)`
+ * If `PSI_METHOD=PSI_PARABOLIC`, additionally, `tmp.f` contains $$\Delta
+ * \psi$$, the Lagrangian of $$\psi$$
  */
 void mk_gradient_squared_and_laplacian(double *in)
 {
@@ -159,7 +169,6 @@ void mk_gradient_squared_and_laplacian(double *in)
     #ifdef SHOW_TIMING_INFO
     fftw_time_exe += get_wall_time();
     #endif
-
     assemble_gradient_squared();
 }
 
@@ -167,8 +176,9 @@ void mk_gradient_squared_and_laplacian(double *in)
  * @brief Constructs the squared gradient from the (up to) three partial
  * spatial derivatives.
  *
- * The partial derivatives as well as the gradient are stored in globally
- * accessible arrays.
+ * The partial derivatives of $$\phi$$ computed in
+ * `mk_gradient_squared_and_laplacian(double *in)` are indiviually squared,
+ * added up and the result is stored in `tmp.grad`
  */
 void assemble_gradient_squared()
 {
@@ -186,13 +196,21 @@ void assemble_gradient_squared()
 }
 
 /**
- * @brief Compute the energy density $$\rho$$ and it's average value. For
- * `PSI_METHOD=PSI_HYPERBOLIC` also compute the pressure and it's average
+ * @brief Compute the energy density $$\rho$$ and its average value. For
+ * `PSI_METHOD=PSI_HYPERBOLIC` also compute the pressure and its average
  * value.
  *
  * @param[in] f An array containing the fields
  *
- * Everything is stored in global variables for reuse in other functions.
+ * Everything is stored in global variables for reuse in other functions. When
+ * the function returns:
+ * `rho` contains the energy density $$\rho$$
+ * `rho_mean` contains the average energy density $$< \rho >$$
+ * If `PSI_METHOD=PSI_HYPERBOLIC`
+ * `pressure` contains the pressure $$p$$
+ * `pressure_mean` contains the average pressure $$< p >$$
+ * All the above values persist until the next call of `mk_rhs(const double t,
+ * double *f, double *result)`
  */
 void mk_rho(const double *f)
 {
@@ -235,7 +253,7 @@ void mk_rho(const double *f)
  * @brief The potential of the scalar inflaton field $$\phi$$
  *
  * @param[in] f The field value where to evaluate the potential
- * @return The potential value at given input
+ * @return The potential value at the given input
  */
 inline double potential(const double f)
 {
@@ -282,15 +300,15 @@ inline double potential_prime(const double f)
     return MASS * MASS * f;
 }
 
-// solve poisson like equation for scalar perturbation and its derivative
 /**
  * @brief Compute $$\psi$$ and $$\dot{\psi}$$
  *
- * @param[in] f An array containing the fields
+ * @param[in] f An array containing the fields. Expects $$\phi$$,
+ * $$\dot{\phi}$$ and $$a$$ right after each other in @p f.
  *
  * We use an elliptic equation from the Hamiltonian constraint combined with
  * the momentum contraint to compute $$\psi$$ and $$\dot{\psi}$$ from given
- * $$\phi$$ and $$\dot{\phi}$$.
+ * $$\phi$$, $$\dot{\phi}$$ and $$a$$.
  */
 void mk_psi(double *f)
 {
@@ -401,7 +419,8 @@ void mk_psi(double *f)
  * for the power spectrum of the field.
  *
  * The power spectrum is constructed by binning the Fourier modes according to
- * the size of their wave vectors.
+ * the size of their wave vectors. The number of bins is determined by
+ * `POWER_SPECTRUM_BINS`
  */
 void mk_power_spectrum(const fftw_complex *in, struct output out)
 {
