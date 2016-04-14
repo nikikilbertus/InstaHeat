@@ -68,8 +68,12 @@ void run_rk4()
             #ifdef OUTPUT_PHI_PS
             evo_flags.compute_pow_spec = 1;
             #endif
+            #ifdef OUTPUT_CONSTRAINTS
+            evo_flags.compute_cstr = 1;
+            #endif
             mk_rhs(t, field, k1);
             evo_flags.compute_pow_spec = 0;
+            evo_flags.compute_cstr = 0;
             mk_summary();
             save();
         } else {
