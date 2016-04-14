@@ -257,7 +257,7 @@ void allocate_external()
     phi_ps.buf = calloc(Nbuf * phi_ps.dim, sizeof *phi_ps.buf);
     #endif
 
-    // ---------------------------power spectra---------------------------------
+    // ---------------------------constraints-----------------------------------
     #ifdef OUTPUT_CONSTRAINTS
     cstr.dim = NUMBER_CONSTRAINTS;
     cstr.tmp = calloc(cstr.dim, sizeof *cstr.tmp);
