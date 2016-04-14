@@ -434,48 +434,31 @@ void save()
     {
         #ifdef OUTPUT_PHI_SMRY
             #pragma omp section
-            {
-            const size_t os = index * phi_smry.dim;
-            for (size_t i = 0; i < phi_smry.dim; ++i) {
-                phi_smry.buf[os + i] = phi_smry.tmp[i];
-            }
-        }
+            append_to_buffer(phi_smry);
         #endif
         #ifdef OUTPUT_DPHI_SMRY
             #pragma omp section
-            {
-            const size_t os = index * dphi_smry.dim;
-            for (size_t i = 0; i < dphi_smry.dim; ++i) {
-                dphi_smry.buf[os + i] = dphi_smry.tmp[i];
-            }
-        }
+            append_to_buffer(dphi_smry);
         #endif
         #ifdef OUTPUT_PSI_SMRY
             #pragma omp section
-            {
-            const size_t os = index * psi_smry.dim;
-            for (size_t i = 0; i < psi_smry.dim; ++i) {
-                psi_smry.buf[os + i] = psi_smry.tmp[i];
-            }
-        }
+            append_to_buffer(psi_smry);
         #endif
         #ifdef OUTPUT_DPSI_SMRY
             #pragma omp section
-            {
-            const size_t os = index * dpsi_smry.dim;
-            for (size_t i = 0; i < dpsi_smry.dim; ++i) {
-                dpsi_smry.buf[os + i] = dpsi_smry.tmp[i];
-            }
-        }
+            append_to_buffer(dpsi_smry);
         #endif
         #ifdef OUTPUT_RHO_SMRY
             #pragma omp section
-            {
-            const size_t os = index * rho_smry.dim;
-            for (size_t i = 0; i < rho_smry.dim; ++i) {
-                rho_smry.buf[os + i] = rho_smry.tmp[i];
-            }
-        }
+            append_to_buffer(rho_smry);
+        #endif
+        #ifdef OUTPUT_PHI_PS
+            #pragma omp section
+            append_to_buffer(phi_ps);
+        #endif
+        #ifdef OUTPUT_CONSTRAINTS
+            #pragma omp section
+            append_to_buffer(cstr);
         #endif
     }
 
@@ -534,33 +517,12 @@ void save()
     }
     #endif
 
-    #ifdef OUTPUT_PHI_PS
-    hsize_t os1 = index * phi_ps.dim;
-    #pragma omp parallel for
-    for (size_t i = 0; i < phi_ps.dim; ++i) {
-        phi_ps.buf[os1 + i] = phi_ps.tmp[i];
-        #ifdef CHECK_FOR_NAN
-        if (isnan(phi_ps.tmp[i])) {
-            fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
-            exit(EXIT_FAILURE);
-        }
-        #endif
-    }
-    #endif
-
     if (index == Nt - 1) {
         h5_write_all_buffers(Nt);
         pars.file.index = 0;
     } else {
         pars.file.index += 1;
     }
-
-    #ifdef CHECK_FOR_NAN
-    if (isnan(pars.t.t) || isnan(field[N2])) {
-        fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
-        exit(EXIT_FAILURE);
-    }
-    #endif
     #ifdef DEBUG
     printf("Writing to file at t = %f\n", pars.t.t);
     #endif
