@@ -28,6 +28,7 @@ void assemble_gradient_squared();
 void mk_rho(const double *f);
 extern double potential(const double f);
 extern double potential_prime(const double f);
+void mk_constraints();
 void mk_psi(double *f);
 void mk_power_spectrum(const fftw_complex *in, struct output out);
 void apply_filter_real(double *inout);
