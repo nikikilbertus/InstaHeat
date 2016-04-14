@@ -7,20 +7,21 @@ export HDF5_CLINKER = gcc-5
 
 .PHONY: default all clean
 
-default: $(TARGET)
-all: default
+default: config $(TARGET)
 
 OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
 HEADERS = $(wildcard *.h)
 
 %.o: %.c $(HEADERS)
-	./configure
 	$(CC) $(CFLAGS) -c $< -o $@
 
 .PRECIOUS: $(TARGET) $(OBJECTS)
 
 $(TARGET): $(OBJECTS)
 	$(CC) $(OBJECTS) -Wall $(LIBS) -o $@
+
+config:
+	./configure
 
 clean:
 	-rm -f *.o
