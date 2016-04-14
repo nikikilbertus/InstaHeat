@@ -528,6 +528,16 @@ void save()
     #endif
 }
 
+/**
+ * @brief Append the current value(s) `.tmp` of the output struct @p f to the
+ * buffer `.buf`
+ *
+ * @param[in, out] f The output structure in which the current values should be
+ * appended to the internal buffer"
+ *
+ * To _append_ means in our case simple to start writing at the index saved at
+ * `pars.file.index`
+ */
 void append_to_buffer(struct output f)
 {
     const size_t os = pars.file.index * f.dim;
