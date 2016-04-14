@@ -275,6 +275,9 @@ extern double pressure_mean;
 
 extern struct output phi_ps;
 
+// constraints
+extern struct output ham_const;
+
 extern double *filter;
 
 extern struct k_grid kvec;
