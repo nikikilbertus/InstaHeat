@@ -303,6 +303,15 @@ inline double potential_prime(const double f)
     return MASS * MASS * f;
 }
 
+/**
+ * @brief Monitor how well the Hamiltonian and momentum constraint are fulfilled.
+ *
+ * Computes the Hamiltonian and momentum constraint in a form such they should
+ * give 0, if fulfilled exactly. Of these combinations save the l2 Norm as well
+ * as the maximum asbolute value to `cstr.tmp` for output.
+ *
+ * @note So far only the Hamiltonian constraint is implemented! (4/14/2016)
+ */
 void mk_constraints()
 {
     const size_t N = pars.N;
