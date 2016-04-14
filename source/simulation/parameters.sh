@@ -1,5 +1,5 @@
 # common
-DATAPATH="../../../data/bunch8.h5"
+DATAPATH="../../../data/bunch.h5"
 INITIAL_DATAPATH="../../../data/karsten/data_64psi_3.dat"
 INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"
 PSI_METHOD="PSI_HYPERBOLIC"
@@ -73,3 +73,5 @@ DPHI_SUMMARY="1"
 PSI_SUMMARY="1"
 DPSI_SUMMARY="1"
 RHO_SUMMARY="1"
+
+CONSTRAINTS="1"
