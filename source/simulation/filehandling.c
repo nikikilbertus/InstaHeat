@@ -338,6 +338,11 @@ void h5_write_all_buffers(const hsize_t Nt)
     h5_write_buffer(rank, Nt, phi_ps.dim, os, phi_ps.id, phi_ps.buf);
     #endif
 
+    // --------------------------constraints------------------------------------
+    #ifdef OUTPUT_CONSTRAINTS
+    h5_write_buffer(rank, Nt, cstr.dim, os, cstr.id, cstr.buf);
+    #endif
+
     // --------------------------summaries--------------------------------------
     #ifdef OUTPUT_PHI_SMRY
     h5_write_buffer(rank, Nt, phi_smry.dim, os, phi_smry.id, phi_smry.buf);
@@ -421,21 +426,9 @@ void h5_close()
  */
 void save()
 {
-    hsize_t index = pars.file.index;
-    hsize_t Nt = pars.file.buf_size;
-    hsize_t N = pars.N;
-    hsize_t N2 = 2 * N;
-
-    t_out.buf[index] = t_out.tmp[0];
     a_out.tmp[0] = field[N2];
-    a_out.buf[index] = a_out.tmp[0];
-
-    #ifdef CHECK_FOR_NAN
-    if (isnan(pars.t.t) || isnan(field[N2])) {
-        fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
-        exit(EXIT_FAILURE);
-    }
-    #endif
+    append_to_buffer(a_out);
+    append_to_buffer(t_out);
 
     #pragma omp parallel sections
     {
@@ -487,6 +480,9 @@ void save()
     }
 
     #ifdef LARGE_OUTPUT
+    hsize_t Nt = pars.file.buf_size;
+    hsize_t N = pars.N;
+    hsize_t N2 = 2 * N;
     hsize_t N2p = N2 + 2;
     hsize_t N3p = 3 * N + 2;
     hsize_t Nx = pars.x.N;
@@ -558,9 +554,24 @@ void save()
     } else {
         pars.file.index += 1;
     }
+
+    #ifdef CHECK_FOR_NAN
+    if (isnan(pars.t.t) || isnan(field[N2])) {
+        fprintf(stderr, "Discovered nan at time: %f \n", pars.t.t);
+        exit(EXIT_FAILURE);
+    }
+    #endif
     #ifdef DEBUG
     printf("Writing to file at t = %f\n", pars.t.t);
     #endif
+}
+
+void append_to_buffer(struct output f)
+{
+    const size_t os = pars.file.index * f.dim;
+    for (size_t i = 0; i < f.dim; ++i) {
+        f.buf[os + i] = f.tmp[i];
+    }
 }
 
 /**
