@@ -276,7 +276,8 @@ extern double pressure_mean;
 extern struct output phi_ps;
 
 // constraints
-extern struct output ham_const;
+#define NUMBER_CONSTRAINTS      (4) ///< Hamiltonian + three times momentum
+extern struct output cstr;
 
 extern double *filter;
 
