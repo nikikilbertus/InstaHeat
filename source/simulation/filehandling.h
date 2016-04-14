@@ -2,6 +2,7 @@
 #define __FILEHANDLING__
 
 #include "hdf5.h"
+#include "main.h"
 
 /**
  * @file filehandling.h
