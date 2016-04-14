@@ -79,6 +79,11 @@ void h5_create_empty_by_path()
     h5_create_dset(rank, phi_ps.dim, &(phi_ps.id), H5_PHI_PS_NAME);
     #endif
 
+    // ---------------------------constraints-----------------------------------
+    #ifdef OUTPUT_CONSTRAINTS
+    h5_create_dset(rank, cstr.dim, &(cstr.id), H5_CONSTRAINTS_NAME);
+    #endif
+
     rank = 1;
     // ---------------------------time, a---------------------------------------
     h5_create_dset(rank, t_out.dim, &(t_out.id), H5_TIME_NAME);
