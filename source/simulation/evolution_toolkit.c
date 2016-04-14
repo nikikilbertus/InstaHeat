@@ -458,8 +458,8 @@ void mk_power_spectrum(const fftw_complex *in, struct output out)
  *
  * @param[in, out] inout The field which we want to filter
  *
- * The highest modes of the field are cut off according to `filter_window` in
- * `setup.c`. All four fields $$\phi$$, $$\dot{\phi}$$, $$\psi$$,
+ * The highest modes of the field are cut off according to `filter_window(const
+ * double x)` in `setup.c`. All four fields $$\phi$$, $$\dot{\phi}$$, $$\psi$$,
  * $$\dot{\psi}$$ are filtered.
  */
 void apply_filter_real(double *inout)
