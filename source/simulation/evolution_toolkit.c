@@ -456,11 +456,11 @@ void mk_power_spectrum(const fftw_complex *in, struct output out)
  * @brief Apply a Fourier filter to each field of a given input to cutoff high
  * frequency modes
  *
- * @param[in, out] inout The field which we want to filter
- *
- * The highest modes of the field are cut off according to `filter_window(const
- * double x)` in `setup.c`. All four fields $$\phi$$, $$\dot{\phi}$$, $$\psi$$,
- * $$\dot{\psi}$$ are filtered.
+ * @param[in, out] inout The field which we want to filter. Expect $$\phi$$ at
+ * index 0, $$\dot{\phi}$ at index N, $$\psi$$ at index 2*N+2, $$\dot{\psi}$$
+ * at index 3*N+2. All four are overwritten by their filtered results.
+ * The highest modes of each field are cut off according to `filter_window(const
+ * double x)` in `setup.c`.
  */
 void apply_filter_real(double *inout)
 {
@@ -509,9 +509,10 @@ void apply_filter_real(double *inout)
  * @param[in, out] phi_io The field $$\phi$$ in Fourier space
  * @param[in, out] dphi_io The field $$\dot{\phi}$$ in Fourier space
  * @param[in, out] psi_io The field $$\psi$$ in Fourier space
- * @param[in, out] dpsi_io The field $$\dot{\phi}$$ in Fourier space
+ * @param[in, out] dpsi_io The field $$\dot{\psi}$$ in Fourier space
  *
- * @see The `filter` is constructed in `mk_filter_mask()` in `setup.c`
+ * The `filter` is constructed in `mk_filter_mask()` using the filter window
+ * `filter_window(const double x)` in `setup.c`.
  */
 void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
         fftw_complex *psi_io, fftw_complex *dpsi_io)
