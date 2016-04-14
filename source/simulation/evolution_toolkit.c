@@ -16,7 +16,9 @@
  * well as the desired output.
  */
 
-struct evolution_flags evo_flags = {.filter = 0, .compute_pow_spec = 0};
+struct evolution_flags evo_flags = {.filter = 0,
+                                    .compute_pow_spec = 0,
+                                    .compute_cstr = 0};
 
 /**
  * @brief Compute the right hand side of the pde, i.e. all first order temporal
