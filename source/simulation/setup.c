@@ -257,6 +257,13 @@ void allocate_external()
     phi_ps.buf = calloc(Nbuf * phi_ps.dim, sizeof *phi_ps.buf);
     #endif
 
+    // ---------------------------power spectra---------------------------------
+    #ifdef OUTPUT_CONSTRAINTS
+    cstr.dim = NUMBER_CONSTRAINTS;
+    cstr.tmp = calloc(cstr.dim, sizeof *cstr.tmp);
+    cstr.buf = calloc(Nbuf * cstr.dim, sizeof *cstr.buf);
+    #endif
+
     // ---------------------------k grids---------------------------------------
     kvec.sq = fftw_malloc(M * sizeof *kvec.sq);
     kvec.x = fftw_malloc(M * sizeof *kvec.x);
@@ -1087,6 +1094,11 @@ void free_external()
     #ifdef OUTPUT_PHI_PS
     free(phi_ps.tmp);
     free(phi_ps.buf);
+    #endif
+
+    #ifdef OUTPUT_CONSTRAINTS
+    free(cstr.tmp);
+    free(cstr.buf);
     #endif
 
     #ifdef ENABLE_FFT_FILTER
