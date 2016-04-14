@@ -320,7 +320,7 @@ void mk_constraints()
     const size_t N2 = 2 * N;
     const size_t N2p = 2 * N + 2;
     const size_t N3p = 3 * N + 2;
-    const double a = f[N2];
+    const double a = field[N2];
     const double a2 = a * a;
     const double hubble = sqrt(rho_mean / 3.0);
     const double h3 = 3.0 * hubble;
@@ -577,12 +577,17 @@ void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
  */
 void prepare_and_save_timeslice()
 {
+    #ifdef OUTPUT_PHI_PS
     evo_flags.compute_pow_spec = 1;
+    #endif
     mk_gradient_squared_and_laplacian(field);
     evo_flags.compute_pow_spec = 0;
     mk_rho(field);
     #if PSI_METHOD == PSI_ELLIPTIC && !defined(EVOLVE_WITHOUT_PSI)
     mk_psi(field);
+    #endif
+    #ifdef OUTPUT_CONSTRAINTS
+    mk_constraints();
     #endif
     mk_summary();
     save();
