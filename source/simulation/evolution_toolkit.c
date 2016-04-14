@@ -305,7 +305,26 @@ inline double potential_prime(const double f)
 
 void mk_constraints()
 {
+    const size_t N = pars.N;
+    const size_t N2 = 2 * N;
+    const size_t N2p = 2 * N + 2;
+    const size_t N3p = 3 * N + 2;
+    const double a = f[N2];
+    const double a2 = a * a;
+    const double hubble = sqrt(rho_mean / 3.0);
+    const double h3 = 3.0 * hubble;
+    double ham, ham_l2 = 0.0, ham_max = 0.0;
 
+    #pragma omp parallel for private(ham) reduction(+: ham_l2) \
+                                        reduction(max: ham_max)
+    for (size_t i = 0; i < N; ++i) {
+        ham = tmp.f[i] / a2 - h3 * (hubble * field[N2p + i] + field[N3p + i]) -
+            0.5 * (rho[i] - rho_mean);
+        ham_l2 += ham * ham;
+        ham_max = MAX(fabs(ham_max), fabs(ham));
+    }
+    cstr.tmp[0] = ham_l2;
+    cstr.tmp[1] = ham_max;
 }
 
 /**
