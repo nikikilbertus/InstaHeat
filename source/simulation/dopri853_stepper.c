@@ -95,8 +95,12 @@ void run_dopri853()
     #ifdef OUTPUT_PHI_PS
     evo_flags.compute_pow_spec = 1;
     #endif
+    #ifdef OUTPUT_CONSTRAINTS
+    evo_flags.compute_cstr = 1;
+    #endif
     mk_rhs(dp.t, field, dfield);
     evo_flags.compute_pow_spec = 0;
+    evo_flags.compute_cstr = 0;
     mk_summary();
     save();
 
@@ -207,8 +211,14 @@ int perform_step(const double dt_try)
         evo_flags.compute_pow_spec = 1;
     }
     #endif
+    #ifdef OUTPUT_CONSTRAINTS
+    if ((dp.n_stp + 1) % pars.file.skip == 0) {
+        evo_flags.compute_cstr = 1;
+    }
+    #endif
     mk_rhs(dp.t + dt, field_new, dfield_new);
     evo_flags.compute_pow_spec = 0;
+    evo_flags.compute_cstr = 0;
 
     #pragma omp parallel for
     for (size_t i = 0; i < Ntot; ++i) {
