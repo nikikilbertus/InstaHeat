@@ -328,14 +328,14 @@ void mk_constraints()
     const double dphi_mean = mean(field + N, N);
     double ham, ham_l2 = 0.0, ham_max = 0.0;
     double mom, mom_l2 = 0.0, mom_max = 0.0;
-    double tmp;
+    double tmp1;
 
-    #pragma omp parallel for private(tmp, ham, mom) \
+    #pragma omp parallel for private(tmp1, ham, mom) \
         reduction(max: ham_max, mom_max) reduction(+: ham_l2, mom_l2)
     for (size_t i = 0; i < N; ++i) {
-        tmp = hubble * field[N2p + i] + field[N3p + i];
-        ham = tmp.f[i] / a2 - h3 * tmp - 0.5 * (rho[i] - rho_mean);
-        mom = tmp - 0.5 * dphi_mean * (field[i] - phi_mean);
+        tmp1 = hubble * field[N2p + i] + field[N3p + i];
+        ham = tmp.f[i] / a2 - h3 * tmp1 - 0.5 * (rho[i] - rho_mean);
+        mom = tmp1 - 0.5 * dphi_mean * (field[i] - phi_mean);
         ham_l2 += ham * ham;
         ham_max = MAX(ham_max, fabs(ham));
     }
