@@ -337,7 +337,9 @@ void mk_constraints()
         ham = tmp.f[i] / a2 - h3 * tmp1 - 0.5 * (rho[i] - rho_mean);
         mom = tmp1 - 0.5 * dphi_mean * (field[i] - phi_mean);
         ham_l2 += ham * ham;
+        mom_l2 += mom * mom;
         ham_max = MAX(ham_max, fabs(ham));
+        mom_max = MAX(mom_max, fabs(mom));
     }
     cstr.tmp[0] = ham_l2;
     cstr.tmp[1] = ham_max;
