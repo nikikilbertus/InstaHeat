@@ -30,7 +30,7 @@ sed -i -e "s/_UX_/${SPATIAL_UPPER_BOUND_X}/g" main.h
 sed -i -e "s/_UY_/${SPATIAL_UPPER_BOUND_Y}/g" main.h
 sed -i -e "s/_UZ_/${SPATIAL_UPPER_BOUND_Z}/g" main.h
 
-sed -i -e "s/_MPLANCK_/${MASS_PLANCK}/g" main.h
+sed -i -e "s/_MINFL_/${INFLATON_MASS}/g" main.h
 sed -i -e "s/_MKARSTEN_/${MASS_KARSTEN}/g" main.h
 sed -i -e "s/_BUF_/${WRITE_OUT_BUFFER_NUMBER}/g" main.h
 sed -i -e "s/_BINS_/${POWER_SPECTRUM_BINS}/g" main.h
