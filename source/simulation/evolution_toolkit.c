@@ -595,10 +595,10 @@ void prepare_and_save_timeslice()
     #if PSI_METHOD == PSI_ELLIPTIC && !defined(EVOLVE_WITHOUT_PSI)
     mk_psi(field);
     #endif
+    mk_summary();
     #ifdef OUTPUT_CONSTRAINTS
     mk_constraints();
     #endif
-    mk_summary();
     save();
 }
 
