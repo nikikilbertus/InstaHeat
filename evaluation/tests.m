@@ -219,14 +219,25 @@ hold off
 xlabel('planck mass'); ylabel('max. abs error of momenutm');
 
 %% plot long time bunch davies
-name = '64_2_6e4';
+figure
+for i = 1:5
+name = ['64_' num2str(i) '_1e5'];
+evaluate3D
+loglog(a,rhorms)
+hold on
+end
+hold off
+legend('1','2','3','4','5')
+
+%% plot long time bunch davies
+name = 'testcstr';
 evaluate3D
 scal = ones(size(a))';
-% scal = a';
-plot(a,phimean.*scal); xlabel('a'); ylabel('<\phi>'); shg; pause;
-plot(a,dphimean.*scal); xlabel('a'); ylabel('<d\phi>'); shg; pause;
-plot(a,psimean.*scal); xlabel('a'); ylabel('<\psi>'); shg; pause;
-plot(a,dpsimean.*scal); xlabel('a'); ylabel('<d\psi>'); shg; pause;
+% scal = a.^(3/2)';
+plot(a,phimax.*scal,a,phimin.*scal,a,phimean.*scal); xlabel('a'); ylabel('<\phi>'); shg; pause;
+plot(a,dphimax.*scal,a,dphimin.*scal,a,dphimean.*scal); xlabel('a'); ylabel('<d\phi>'); shg; pause;
+plot(a,psimax.*scal,a,psimin.*scal,a,psimean.*scal); xlabel('a'); ylabel('<\psi>'); shg; pause;
+plot(a,dpsimax.*scal,a,dpsimin.*scal,a,dpsimean.*scal); xlabel('a'); ylabel('<d\psi>'); shg; pause;
 plot(a,sqrt(phivar).*scal); xlabel('a'); ylabel('std \phi'); shg; pause;
 plot(a,sqrt(dphivar).*scal); xlabel('a'); ylabel('std d\phi'); shg; pause;
 plot(a,sqrt(psivar).*scal); xlabel('a'); ylabel('std \psi'); shg; pause;
