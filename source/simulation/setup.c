@@ -556,9 +556,10 @@ void mk_initial_psi()
  *
  * We use the exact same values as in the DEFROST paper (in the references), hence we
  * need 3 dimensions, `MASS=1`, a box length of 10 in each direction. DEFROST uses
- * `MASS_PLANCK=2e5`.
+ * `INFLATON_MASS=5e-6`.
  *
- * @see [DEFROST: A New Code for Simulating Preheating after Inflation](http://arxiv.org/abs/0809.4904)
+ * @see [DEFROST: A New Code for Simulating Preheating after
+ * Inflation](http://arxiv.org/abs/0809.4904)
  * @see `mk_bunch_davies(double *f, const double H, const double homo, const
  * double gamma)`
  */
@@ -616,7 +617,7 @@ void mk_bunch_davies(double *f, const double H, const double homo,
     //TODO: pspectre uses kcutpspectre = 2 * kcutdefrost
     const double kcut2 = 0.25 * nn * nn * dk * dk;
     const double meff2 = MASS * MASS - 2.25 * H * H;
-    const double norm = 0.5 / (N * sqrt(TWOPI * pow(dk, 3)) * MASS_PLANCK) *
+    const double norm = 0.5 * INFLATON_MASS / (N * sqrt(TWOPI * pow(dk, 3))) *
         (dkos / dxos);
 
     if (meff2 <= 0.0) {
