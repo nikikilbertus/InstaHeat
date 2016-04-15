@@ -1,6 +1,7 @@
-% name = 'bunch3';
-interp = true;
-newoutput = false;
+name = 'testcstr';
+interp = false;
+newoutput = true;
+cstr = true;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
@@ -44,6 +45,9 @@ if (newoutput)
     rhovar   = rhosmry(2,:);
     rhomin   = rhosmry(3,:);
     rhomax   = rhosmry(4,:);
+    if (cstr)
+       cstr = h5read(name, '/constraints'); 
+    end
 else
     powspec = h5read(name, '/power_spectrum');
     phimean = h5read(name, '/phi_mean')';
