@@ -29,6 +29,7 @@
 #define     H5_RHO_SMRY_NAME                ("rho_summary")
 #define     H5_CONSTRAINTS_NAME             ("constraints")
 #define     H5_MASS_NAME                    ("mass")
+#define     H5_INFLATON_MASS_NAME           ("inflaton_mass")
 #define     H5_DIMENSION_NAME               ("dimension")
 #define     H5_SEED_NAME                    ("seed")
 #define     H5_STRIDES_TIME_NAME            ("strides_time")
