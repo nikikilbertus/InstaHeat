@@ -93,6 +93,13 @@ void h5_create_empty_by_path()
     double val[3] = {MASS, 0.0, 0.0};
     h5_write_parameter(H5_MASS_NAME, val, 1);
 
+    #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
+    val[0] = INFLATON_MASS;
+    #else
+    val[0] = -1.0;
+    #endif
+    h5_write_parameter(H5_INFLATON_MASS_NAME, val, 1);
+
     val[0] = pars.dim;
     h5_write_parameter(H5_DIMENSION_NAME, val, 1);
 
