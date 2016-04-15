@@ -60,7 +60,7 @@ COUPLING="1.0"
 LAMBDA="1.876e-4"
 
 # outputs (0=no output, 1=output)
-PHI="1"
+PHI="0"
 DPHI="0"
 PSI="0"
 DPSI="0"

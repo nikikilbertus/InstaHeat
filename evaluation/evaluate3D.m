@@ -1,7 +1,7 @@
-name = 'testcstr';
+% name = 'comp_karsten_5_simp2';
 interp = false;
 newoutput = true;
-cstr = true;
+cstr = false;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation

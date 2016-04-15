@@ -109,13 +109,13 @@ end
 
 
 %% how far is rho0 from rho
-tmp = abs( rho0 - mean(rho0(:)) );
+tmp = atol( rho0 - mean(rho0(:)) );
 mean(tmp(:))
 
 %% Hamiltonian and momentum karsten vs. code
 L=1;
 N=64;
-name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64psi_3.dat';
+name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64psi_5.dat';
 raw = importdata(name);
 phika = reshape(raw(:,4),N,N,N);
 dphika = reshape(raw(:,5),N,N,N);
@@ -134,7 +134,7 @@ dphi = h5read(name,'/dphi');
 dphi = reshape(dphi(:,1),N,N,N);
 dpsi = h5read(name,'/dpsi');
 dpsi = reshape(dpsi(:,1),N,N,N);
-prn = @(f) num2str(max(abs(f(:))));
+prn = @(f) num2str(max(atol(f(:))));
 disp(' '); disp(' ');
 disp(['----comparison, mass=' num2str(mass) ', a=' num2str(a(1)) '----'])
 [check, t1, t2, t3] = hamiltonianConstraint(psika, dpsika, a(1), rhoka, L);
@@ -160,12 +160,14 @@ disp('code psi momentum')
 disp(['sum: ' num2str(check)])
 disp(['1  : ' num2str(t1)])
 disp(['2  : ' num2str(t2)])
+disp(' ')
+disp(['l2 and l\infty differences in \psi ' num2str(norm(psi(:)-psika(:))) ', ' prn(psi(:)-psika(:))])
 
 %% Hamiltonian and momentum for bunch davies
 nums = [1 2 3 4 5 6 7 8];
 L = 10;
-mabs = @(f) max(abs(f(:)));
-prn = @(f) num2str(max(abs(f(:))));
+mabs = @(f) max(atol(f(:)));
+prn = @(f) num2str(max(atol(f(:))));
 herrs = zeros(4, length(nums));
 mxerrs = zeros(3,length(nums));
 myerrs = zeros(3,length(nums));
@@ -220,14 +222,29 @@ xlabel('planck mass'); ylabel('max. abs error of momenutm');
 
 %% plot long time bunch davies
 figure
-for i = 1:5
+m = 5;
+masses = 1./(2*10.^((1:5)));
+rhormsi = zeros(m,4);
+for i = 1:m
 name = ['64_' num2str(i) '_1e5'];
 evaluate3D
-loglog(a,rhorms)
+loglog(a,rhorms,'linewidth',2)
+legendinfo{i} = ['mass=' num2str(masses(i))];
+rhormsi(i,1) = rhorms(1);
+[~,idx] = min( (a - 1e2).^2);
+rhormsi(i,2) = rhorms(idx);
+[~,idx] = min( (a - 1e3).^2);
+rhormsi(i,3) = rhorms(idx);
+rhormsi(i,4) = rhorms(end);
 hold on
 end
 hold off
-legend('1','2','3','4','5')
+xlabel('a'); ylabel('std(\rho) / |<\rho>|');
+legend(legendinfo,'location','southeast');
+figure
+loglog(masses, rhormsi, masses, masses/masses(1) * rhormsi(1,1) * 0.9,'--','linewidth',2);
+xlabel('mass'); ylabel('std(\rho) / |<\rho>|');
+legend('a=1', 'a=1e2', 'a=1e3', ['a=' num2str(a(end))], 'linear reference','location','northwest');
 
 %% plot long time bunch davies
 name = 'testcstr';
@@ -242,3 +259,72 @@ plot(a,sqrt(phivar).*scal); xlabel('a'); ylabel('std \phi'); shg; pause;
 plot(a,sqrt(dphivar).*scal); xlabel('a'); ylabel('std d\phi'); shg; pause;
 plot(a,sqrt(psivar).*scal); xlabel('a'); ylabel('std \psi'); shg; pause;
 plot(a,sqrt(dpsivar).*scal); xlabel('a'); ylabel('std d\psi'); shg; pause;
+
+%% timing analysis for different tolerances
+base = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/tolerances/64_2_1e4_tol_';
+rtol = 4:2:10; atol = 6:2:12;
+relval = 10.^(-rtol); absval = 10.^(-atol);
+time = zeros(length(rtol), length(atol));
+steps = zeros(size(time));
+errinf = zeros(size(time));
+errl2 = zeros(size(time));
+as = zeros(size(time));
+cstrl2 = zeros(size(time));
+getname = @(x,y) [base num2str(x) '_' num2str(y) '.h5'];
+phiref = h5read(getname(max(rtol),max(atol)), '/phi_summary');
+aref = h5read(getname(max(rtol),max(atol)), '/a');
+cstrl2ref = h5read(getname(max(rtol),max(atol)),'/constraints');
+cstrl2ref = cstrl2ref(1,end);
+phiref = phiref(1,:);
+arefs = h5read(getname(min(rtol),min(atol)), '/a');
+phirefs = spline(aref,phiref,arefs);
+for i = 1:length(rtol)
+    for j = 1:length(atol)
+        name = getname(rtol(i),atol(j));
+        tols = h5read(name, '/tolerances');
+        if relval(i) ~= tols(1) || absval(j) ~= tols(2)
+            error('didnt load the right file')
+        end
+        time(i,j) = h5read(name,'/runtime_stepper');
+        steps(i,j) = h5read(name,'/steps_total');
+        phi = h5read(name, '/phi_summary');
+        a = h5read(name, '/a');
+        cstr = h5read(name,'/constraints');
+        semilogy(a,cstr(1,:)); shg; pause;
+        cstrl2(i,j) = -log10(abs((cstr(1,end) - cstrl2ref) / cstrl2ref));
+        as(i,j) = -log10(abs((a(end) - aref(end))/aref(end)));
+%         I = (a>0.9*aref(end));
+%         Iref = (aref>0.9*aref(end));
+%         plot(a(I),phi(1,I).*a(I)'.^(3/2),aref(Iref),phiref(Iref).*aref(Iref)'.^(3/2)); shg; pause;
+        errinf(i,j) = abs((phiref(end) - phi(1,end))/phiref(end));
+        phi = spline(a, phi(1,:),arefs);
+        errl2(i,j) = norm(phirefs - phi);
+    end
+end
+% semilogx(relval, time, 'linewidth',2); xlabel('rel tol'); ylabel('time [s]');
+% legend('abs: 1e-6', 'abs: 1e-8', 'abs: 1e-10', 'abs: 1e-12'); shg;
+% figure
+% semilogx(relval, steps, 'linewidth',2); xlabel('rel tol'); ylabel('#steps');
+% legend('abs: 1e-6', 'abs: 1e-8', 'abs: 1e-10', 'abs: 1e-12'); shg;
+% figure
+% semilogx(absval, time', 'linewidth',2); xlabel('abs tol'); ylabel('time [s]');
+% legend('rel: 1e-6', 'rel: 1e-8', 'rel: 1e-10', 'rel: 1e-12'); shg;
+% figure
+% semilogx(absval, steps', 'linewidth',2); xlabel('abs tol'); ylabel('#steps');
+% legend('rel: 1e-6', 'rel: 1e-8', 'rel: 1e-10', 'rel: 1e-12'); shg;
+
+figure
+bar3(as); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',relval);
+xlabel('atol'); ylabel('rtol'); zlabel('-log10 (a_{f} - a_{f}^{ref}) / a_{f}^{ref}');
+figure
+bar3(steps); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',relval);
+xlabel('atol'); ylabel('rtol'); zlabel('#steps');
+figure
+bar3(cstrl2); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',relval);
+xlabel('atol'); ylabel('rtol'); zlabel('hamiltonian constraint norm');
+figure
+bar3(-log10(errinf)); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',relval);
+xlabel('atol'); ylabel('rtol'); zlabel('-log10 (\phi_{f}^{ref} - \phi_{f}) / \phi_{f}^{ref}');
+figure
+bar3(-log10(errl2)); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',relval);
+xlabel('atol'); ylabel('rtol'); zlabel('-log10 error l_{2}');

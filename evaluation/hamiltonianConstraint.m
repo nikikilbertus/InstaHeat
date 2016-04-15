@@ -13,8 +13,8 @@ H = sqrt(mean(rho(:)) / 3);
 
 psilap = ifftn(-kk.*fftn(psi));
 % psilap = del2(psi, dx) * 2 * dim;
-t1 = psilap / a^2;
-t2 = - 3 * H * (H * psi + dpsi);
-t3 = - 0.5 * (rho - mean(rho(:)));
+t1 = psilap;
+t2 = - 3 * H * (H * psi + dpsi) .* a^2;
+t3 = - 0.5 * (rho - mean(rho(:))) .* a^2;
 check = t1 + t2 + t3;
 end
