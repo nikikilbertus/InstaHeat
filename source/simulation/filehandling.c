@@ -427,6 +427,7 @@ void h5_close()
 void save()
 {
     const size_t index = pars.file.index;
+    const hsize_t Nt = pars.file.buf_size;
     a_out.tmp[0] = field[2 * pars.N];
     append_to_buffer(a_out);
     append_to_buffer(t_out);
@@ -464,18 +465,17 @@ void save()
     }
 
     #ifdef LARGE_OUTPUT
-    hsize_t Nt = pars.file.buf_size;
-    hsize_t N = pars.N;
-    hsize_t N2 = 2 * N;
-    hsize_t N2p = N2 + 2;
-    hsize_t N3p = 3 * N + 2;
-    hsize_t Nx = pars.x.N;
-    hsize_t Ny = pars.y.N;
-    hsize_t Nz = pars.z.N;
-    hsize_t outy = pars.y.outN;
-    hsize_t outz = pars.z.outN;
-    hsize_t outN = pars.outN;
-    hsize_t os = index * outN;
+    const hsize_t N = pars.N;
+    const hsize_t N2 = 2 * N;
+    const hsize_t N2p = N2 + 2;
+    const hsize_t N3p = 3 * N + 2;
+    const hsize_t Nx = pars.x.N;
+    const hsize_t Ny = pars.y.N;
+    const hsize_t Nz = pars.z.N;
+    const hsize_t outy = pars.y.outN;
+    const hsize_t outz = pars.z.outN;
+    const hsize_t outN = pars.outN;
+    const hsize_t os = index * outN;
     size_t osx, osy, id;
     size_t osxb, osyb, idb;
     #pragma omp parallel for private(osx, osxb, osy, osyb, id, idb)
