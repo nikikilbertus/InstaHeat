@@ -104,7 +104,7 @@ __Remarks__:
 ## Potential parameters
 
 * `MASS`: (double, >0) The mass parameter used in the code. Note that this value can be easily rescaled, hence has little physical relevance.
-* `MASS_PLANCK`: (double, >0) If `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"`, this value is the ratio Planck mass/inflaton mass. This determines the amplitude of the vacuum fluctuations of the Bunch Davies vacuum. Note in the code $$8 \pi G = 1$$, hence the reduced Planck mass is one. Also the `MASS` is a parameter that does not itself carry physical meaning. This `MASS_PLANCK` is the only value that carries physical meaning.
+* `INFLATON_MASS`: (double, >0) If `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"`, this value is the inflaton mass in units of the Planck mass. While the actual mass parameter in used in the code (for example when computing the potential) can be rescaled to arbitrary values, `INFLATON_MASS` is a physical quantity and only enters once when setting the amplitude of initial fluctuations when the initial conditions come from the internally computed Bunch Davies vacuum. Note that in the code $$8 \pi G = 1$$, hence we set the reduced Planck mass to one. `INFLATON_MASS` is the only mass value that carries physical meaning.
 * `MASS_KARSTEN`: (double, >0) Obsolete. Internal use only. Has been used to scale certain amplitudes for comparison with Karsten Jedamzik's code.
 
 ## File IO
