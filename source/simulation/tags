@@ -32,6 +32,7 @@ GRIDPOINTS_Z	main.h	/^#define GRIDPOINTS_Z /;"	d
 GRIDPOINTS_Z	main_template.h	/^#define GRIDPOINTS_Z /;"	d
 H5_A_NAME	filehandling.h	/^#define     H5_A_NAME /;"	d
 H5_COMMIT_HASH_NAME	filehandling.h	/^#define     H5_COMMIT_HASH_NAME /;"	d
+H5_CONSTRAINTS_NAME	filehandling.h	/^#define     H5_CONSTRAINTS_NAME /;"	d
 H5_DIMENSION_NAME	filehandling.h	/^#define     H5_DIMENSION_NAME /;"	d
 H5_DPHI_NAME	filehandling.h	/^#define     H5_DPHI_NAME /;"	d
 H5_DPHI_PS_NAME	filehandling.h	/^#define     H5_DPHI_PS_NAME /;"	d
@@ -84,6 +85,8 @@ IC_FROM_H5_FILE	main.h	/^#define IC_FROM_H5_FILE /;"	d
 IC_FROM_H5_FILE	main_template.h	/^#define IC_FROM_H5_FILE /;"	d
 IC_FROM_INTERNAL_FUNCTION	main.h	/^#define IC_FROM_INTERNAL_FUNCTION /;"	d
 IC_FROM_INTERNAL_FUNCTION	main_template.h	/^#define IC_FROM_INTERNAL_FUNCTION /;"	d
+INFLATON_MASS	main.h	/^#define INFLATON_MASS /;"	d
+INFLATON_MASS	main_template.h	/^#define INFLATON_MASS /;"	d
 INFO	main.h	/^#define INFO(/;"	d
 INFO	main_template.h	/^#define INFO(/;"	d
 INITIAL_CONDITIONS	main.h	/^#define INITIAL_CONDITIONS /;"	d
@@ -109,8 +112,6 @@ MASS	main.h	/^#define MASS /;"	d
 MASS	main_template.h	/^#define MASS /;"	d
 MASS_KARSTEN	main.h	/^#define MASS_KARSTEN /;"	d
 MASS_KARSTEN	main_template.h	/^#define MASS_KARSTEN /;"	d
-MASS_PLANCK	main.h	/^#define MASS_PLANCK /;"	d
-MASS_PLANCK	main_template.h	/^#define MASS_PLANCK /;"	d
 MAX	main.h	/^#define MAX(/;"	d
 MAX	main_template.h	/^#define MAX(/;"	d
 MAX_DT_HUBBLE_FRACTION	main.h	/^#define MAX_DT_HUBBLE_FRACTION /;"	d
@@ -126,6 +127,8 @@ N	main.h	/^    size_t N; \/\/\/< number of gridpoints in real space$/;"	m	struct
 N	main.h	/^    size_t N; \/\/\/< number of spatial gridpoints: N=Nx*Ny*Nz$/;"	m	struct:parameters
 N	main_template.h	/^    size_t N; \/\/\/< number of gridpoints in real space$/;"	m	struct:grid_dimension
 N	main_template.h	/^    size_t N; \/\/\/< number of spatial gridpoints: N=Nx*Ny*Nz$/;"	m	struct:parameters
+NUMBER_CONSTRAINTS	main.h	/^#define NUMBER_CONSTRAINTS /;"	d
+NUMBER_CONSTRAINTS	main_template.h	/^#define NUMBER_CONSTRAINTS /;"	d
 Nall	main.h	/^    size_t Nall; \/\/\/< size of field: Nall=4*N+2$/;"	m	struct:parameters
 Nall	main_template.h	/^    size_t Nall; \/\/\/< size of field: Nall=4*N+2$/;"	m	struct:parameters
 Nt	main.h	/^    size_t Nt; \/\/\/< number of timesteps (only relevant for fixed step size)$/;"	m	struct:timing
@@ -133,16 +136,13 @@ Nt	main_template.h	/^    size_t Nt; \/\/\/< number of timesteps (only relevant f
 Ntot	main.h	/^    size_t Ntot; \/\/\/< number of scalar equations evolved depending on PSI_METHOD$/;"	m	struct:parameters
 Ntot	main_template.h	/^    size_t Ntot; \/\/\/< number of scalar equations evolved depending on PSI_METHOD$/;"	m	struct:parameters
 OBJECTS	Makefile	/^OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))$/;"	m
-OUTPUT_DPHI	main.h	/^#define OUTPUT_DPHI$/;"	d
+OUTPUT_CONSTRAINTS	main.h	/^#define OUTPUT_CONSTRAINTS$/;"	d
 OUTPUT_DPHI_SMRY	main.h	/^#define OUTPUT_DPHI_SMRY$/;"	d
-OUTPUT_DPSI	main.h	/^#define OUTPUT_DPSI$/;"	d
 OUTPUT_DPSI_SMRY	main.h	/^#define OUTPUT_DPSI_SMRY$/;"	d
 OUTPUT_PHI	main.h	/^#define OUTPUT_PHI$/;"	d
 OUTPUT_PHI_PS	main.h	/^#define OUTPUT_PHI_PS$/;"	d
 OUTPUT_PHI_SMRY	main.h	/^#define OUTPUT_PHI_SMRY$/;"	d
-OUTPUT_PSI	main.h	/^#define OUTPUT_PSI$/;"	d
 OUTPUT_PSI_SMRY	main.h	/^#define OUTPUT_PSI_SMRY$/;"	d
-OUTPUT_RHO	main.h	/^#define OUTPUT_RHO$/;"	d
 OUTPUT_RHO_SMRY	main.h	/^#define OUTPUT_RHO_SMRY$/;"	d
 PI	main.h	/^#define PI /;"	d
 PI	main_template.h	/^#define PI /;"	d
@@ -208,6 +208,7 @@ VERSION_CONTROL_NONE	main_template.h	/^#define VERSION_CONTROL_NONE /;"	d
 WRITE_OUT_BUFFER_NUMBER	main.h	/^#define WRITE_OUT_BUFFER_NUMBER /;"	d
 WRITE_OUT_BUFFER_NUMBER	main_template.h	/^#define WRITE_OUT_BUFFER_NUMBER /;"	d
 _FILTER_	main_template.h	/^#define _FILTER_$/;"	d
+_OCSTR_	main_template.h	/^#define _OCSTR_$/;"	d
 _ODPHIS_	main_template.h	/^#define _ODPHIS_$/;"	d
 _ODPHI_	main_template.h	/^#define _ODPHI_$/;"	d
 _ODPSIS_	main_template.h	/^#define _ODPSIS_$/;"	d
@@ -310,6 +311,7 @@ allocate_and_initialize_all	setup.c	/^void allocate_and_initialize_all()$/;"	f
 allocate_dopri853_values	dopri853_stepper.c	/^void allocate_dopri853_values()$/;"	f
 allocate_external	setup.c	/^void allocate_external()$/;"	f
 alpha	dopri853_stepper.h	/^    double alpha; \/\/\/< Internal parameter for the error estimates$/;"	m	struct:dopri853_control
+append_to_buffer	filehandling.c	/^void append_to_buffer(struct output f)$/;"	f
 apply_filter_fourier	evolution_toolkit.c	/^void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,$/;"	f
 apply_filter_real	evolution_toolkit.c	/^void apply_filter_real(double *inout)$/;"	f
 are_fields_equal	tests.c	/^int are_fields_equal(const double *f, const double *g)$/;"	f
@@ -347,9 +349,11 @@ c7	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15
 c8	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
 c9	dopri853_stepper.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
 center	evolution_toolkit.c	/^void center(double *f, const size_t N)$/;"	f
-compute_pow_spec	evolution_toolkit.h	/^    uint8_t compute_pow_spec; \/\/\/< If set, compute power spectra$/;"	m	struct:evolution_flags
+compute_cstr	evolution_toolkit.h	/^    uint8_t compute_cstr;$/;"	m	struct:evolution_flags
+compute_pow_spec	evolution_toolkit.h	/^    uint8_t compute_pow_spec;$/;"	m	struct:evolution_flags
 contains_nan	evolution_toolkit.c	/^void contains_nan(const double *f, const size_t N)$/;"	f
 contains_nanc	evolution_toolkit.c	/^void contains_nanc(const complex *f, const size_t N)$/;"	f
+cstr	main.c	/^struct output cstr;$/;"	v	typeref:struct:output
 d41	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
 d410	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
 d411	dopri853_stepper.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
@@ -440,7 +444,7 @@ er8	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:do
 er9	dopri853_stepper.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
 err_old	dopri853_stepper.h	/^    double err_old; \/\/\/< The previous error (on the last time slice)$/;"	m	struct:dopri853_control
 error	dopri853_stepper.c	/^double error(const double dt)$/;"	f
-evo_flags	evolution_toolkit.c	/^struct evolution_flags evo_flags = {.filter = 0, .compute_pow_spec = 0};$/;"	v	typeref:struct:evolution_flags
+evo_flags	evolution_toolkit.c	/^struct evolution_flags evo_flags = {.filter = 0,$/;"	v	typeref:struct:evolution_flags
 evolution_flags	evolution_toolkit.h	/^struct evolution_flags$/;"	s
 f	main.h	/^    double  *f;$/;"	m	struct:temporary
 f	main_template.h	/^    double  *f;$/;"	m	struct:temporary
@@ -515,6 +519,7 @@ mean	evolution_toolkit.c	/^inline double mean(const double *f, const size_t N)$/
 mean_var_min_max	evolution_toolkit.c	/^void mean_var_min_max(const double *f, double *smry)$/;"	f
 minscale	dopri853_stepper.h	/^    double minscale; \/\/\/< Minimal permissible rescaling of the time step size$/;"	m	struct:dopri853_control
 mk_bunch_davies	setup.c	/^void mk_bunch_davies(double *f, const double H, const double homo,$/;"	f
+mk_constraints	evolution_toolkit.c	/^void mk_constraints()$/;"	f
 mk_fftw_plans	setup.c	/^void mk_fftw_plans()$/;"	f
 mk_filter_mask	setup.c	/^void mk_filter_mask()$/;"	f
 mk_gradient_squared_and_laplacian	evolution_toolkit.c	/^void mk_gradient_squared_and_laplacian(double *in)$/;"	f
