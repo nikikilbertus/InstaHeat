@@ -324,18 +324,25 @@ void mk_constraints()
     const double a2 = a * a;
     const double hubble = sqrt(rho_mean / 3.0);
     const double h3 = 3.0 * hubble;
+    const double phi_mean = mean(field, N);
+    const double dphi_mean = mean(field + N, N);
     double ham, ham_l2 = 0.0, ham_max = 0.0;
+    double mom, mom_l2 = 0.0, mom_max = 0.0;
+    double tmp;
 
-    #pragma omp parallel for private(ham) reduction(max: ham_max) \
-                                        reduction(+: ham_l2)
+    #pragma omp parallel for private(tmp, ham, mom) \
+        reduction(max: ham_max, mom_max) reduction(+: ham_l2, mom_l2)
     for (size_t i = 0; i < N; ++i) {
-        ham = tmp.f[i] / a2 - h3 * (hubble * field[N2p + i] + field[N3p + i]) -
-            0.5 * (rho[i] - rho_mean);
+        tmp = hubble * field[N2p + i] + field[N3p + i];
+        ham = tmp.f[i] / a2 - h3 * tmp - 0.5 * (rho[i] - rho_mean);
+        mom = tmp - 0.5 * dphi_mean * (field[i] - phi_mean);
         ham_l2 += ham * ham;
         ham_max = MAX(ham_max, fabs(ham));
     }
     cstr.tmp[0] = ham_l2;
     cstr.tmp[1] = ham_max;
+    cstr.tmp[2] = mom_l2;
+    cstr.tmp[3] = mom_max;
 }
 
 /**
