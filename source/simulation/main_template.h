@@ -118,7 +118,7 @@
 
 #define MASS                    (_M_)
 #define MASS_KARSTEN            (_MKARSTEN_)
-#define MASS_PLANCK             (_MPLANCK_)
+#define INFLATON_MASS           (_MINFL_)
 #define COUPLING                (_COUPLING_)
 #define LAMBDA                  (_LAMBDA_)
 #define A_INITIAL               (_A_)
