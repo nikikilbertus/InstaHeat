@@ -1,6 +1,7 @@
-# _Inflation Potential Tester_
+# Pseudospectral inflation/preheating with scalar metric perturbations
 
-Currently this repository is only used for some random code to get started and
-test a few things.
+An integrator for the Friedmann Robertson Walker equations with scalar metric perturbations.
 
-This will be updated later on.
+## Parameter file
+
+[Here](doc_parameters.md) is more information on the input parameters.

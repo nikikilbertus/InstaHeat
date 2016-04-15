@@ -17,7 +17,7 @@ phi = shapedField(1:Nx, : );
 name = [prefix 'a_00' int2str(num) '.txt'];
 frwa = csvread(name);
 
-name = [prefix 'energy_00' int2str(num) '.txt'];
+name = [prefix 'rho_00' int2str(num) '.txt'];
 rho = csvread(name);
 energyloss = (max(rho) - min(rho));
 

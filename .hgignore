@@ -6,6 +6,14 @@ syntax: glob
 # object files and executable
 *.o
 *prog
-*.txt
 
+# actual main header file (is created from main_template.h)
+main.h
+
+# any data and input files (might allow .txt input files later)
+*.txt
+*.h5
+
+# temporary files such as vim undo and vim swap files
 *~
+*.swp
