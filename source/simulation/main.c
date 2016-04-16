@@ -12,7 +12,7 @@
 #include "setup.h"
 #include "rk4.h"
 #include "dopri853.h"
-#include "filehandling.h"
+#include "io.h"
 #include "tests.h"
 
 /**
