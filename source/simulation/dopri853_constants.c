@@ -1,9 +1,9 @@
 #include <stdlib.h>
-#include "dopri853_stepper.h"
+#include "dopri853.h"
 
 /**
  * @brief Holds the Butcher tableaux for the Dormand Prince 853 stepper in
- * `dopri853_stepper.c`.
+ * `dopri853.c`.
  */
 struct dopri853_constants dpc =
 {
