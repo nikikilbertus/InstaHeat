@@ -25,4 +25,5 @@ config:
 
 clean:
 	-rm -f *.o
+	-rm -r run.dSYM
 	-rm -f $(TARGET)
