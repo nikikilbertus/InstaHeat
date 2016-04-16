@@ -226,7 +226,7 @@ __EVOLUTION_TOOLKIT__	evolution_toolkit.h	/^#define __EVOLUTION_TOOLKIT__$/;"	d
 __FILEHANDLING__	filehandling.h	/^#define __FILEHANDLING__$/;"	d
 __MAIN__	main.h	/^#define __MAIN__$/;"	d
 __MAIN__	main_template.h	/^#define __MAIN__$/;"	d
-__RK4_STEPPER__	RK4_stepper.h	/^#define __RK4_STEPPER__$/;"	d
+__RK4_STEPPER__	rk4.h	/^#define __RK4_STEPPER__$/;"	d
 __SETUP__	setup.h	/^#define __SETUP__$/;"	d
 __tests__	tests.h	/^#define __tests__$/;"	d
 a	main.h	/^    double a; \/\/\/< lower bound of the interval$/;"	m	struct:grid_dimension
@@ -573,7 +573,7 @@ rho_out	main.c	/^struct output rho_out;$/;"	v	typeref:struct:output
 rho_smry	main.c	/^struct output rho_smry;$/;"	v	typeref:struct:output
 run_all_tests	tests.c	/^void run_all_tests()$/;"	f
 run_dopri853	dopri853_stepper.c	/^void run_dopri853()$/;"	f
-run_rk4	RK4_stepper.c	/^void run_rk4()$/;"	f
+run_rk4	rk4.c	/^void run_rk4()$/;"	f
 safe	dopri853_stepper.h	/^    double safe; \/\/\/< Internal parameter for the error estimates$/;"	m	struct:dopri853_control
 save	filehandling.c	/^void save()$/;"	f
 setdef	configure	/^function setdef {$/;"	f
