@@ -10,7 +10,7 @@
 #include <gperftools/profiler.h>
 #endif
 #include "setup.h"
-#include "RK4_stepper.h"
+#include "rk4.h"
 #include "dopri853_stepper.h"
 #include "filehandling.h"
 #include "tests.h"
