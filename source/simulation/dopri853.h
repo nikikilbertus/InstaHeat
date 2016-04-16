@@ -47,7 +47,7 @@ struct dopri853_constants
  *
  * Holds pointers to memory blocks for the intermediate evaluations of
  * the right hand side of the partial differential equation (as determined in
- * mk_rhs(const double t, double *f, double *result) in evolution_toolkit.c as
+ * mk_rhs(const double t, double *f, double *result) in toolbox.c as
  * well as memory blocks for the error estimates (5th and 3rd order).
  */
 struct dopri853_values
