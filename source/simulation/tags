@@ -222,7 +222,7 @@ _ORHOS_	main_template.h	/^#define _ORHOS_$/;"	d
 _ORHO_	main_template.h	/^#define _ORHO_$/;"	d
 _WOPSI_	main_template.h	/^#define _WOPSI_$/;"	d
 __DOPRI853_STEPPER__	dopri853.h	/^#define __DOPRI853_STEPPER__$/;"	d
-__EVOLUTION_TOOLKIT__	evolution_toolkit.h	/^#define __EVOLUTION_TOOLKIT__$/;"	d
+__EVOLUTION_TOOLKIT__	toolbox.h	/^#define __EVOLUTION_TOOLKIT__$/;"	d
 __FILEHANDLING__	io.h	/^#define __FILEHANDLING__$/;"	d
 __MAIN__	main.h	/^#define __MAIN__$/;"	d
 __MAIN__	main_template.h	/^#define __MAIN__$/;"	d
@@ -312,10 +312,10 @@ allocate_dopri853_values	dopri853.c	/^void allocate_dopri853_values()$/;"	f
 allocate_external	setup.c	/^void allocate_external()$/;"	f
 alpha	dopri853.h	/^    double alpha; \/\/\/< Internal parameter for the error estimates$/;"	m	struct:dopri853_control
 append_to_buffer	io.c	/^void append_to_buffer(struct output f)$/;"	f
-apply_filter_fourier	evolution_toolkit.c	/^void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,$/;"	f
-apply_filter_real	evolution_toolkit.c	/^void apply_filter_real(double *inout)$/;"	f
+apply_filter_fourier	toolbox.c	/^void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,$/;"	f
+apply_filter_real	toolbox.c	/^void apply_filter_real(double *inout)$/;"	f
 are_fields_equal	tests.c	/^int are_fields_equal(const double *f, const double *g)$/;"	f
-assemble_gradient_squared	evolution_toolkit.c	/^void assemble_gradient_squared()$/;"	f
+assemble_gradient_squared	toolbox.c	/^void assemble_gradient_squared()$/;"	f
 b	main.h	/^    double b; \/\/\/< upper bound of the interval$/;"	m	struct:grid_dimension
 b	main_template.h	/^    double b; \/\/\/< upper bound of the interval$/;"	m	struct:grid_dimension
 b1	dopri853.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:dopri853_constants
@@ -348,11 +348,11 @@ c6	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;
 c7	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
 c8	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
 c9	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
-center	evolution_toolkit.c	/^void center(double *f, const size_t N)$/;"	f
-compute_cstr	evolution_toolkit.h	/^    uint8_t compute_cstr;$/;"	m	struct:evolution_flags
-compute_pow_spec	evolution_toolkit.h	/^    uint8_t compute_pow_spec;$/;"	m	struct:evolution_flags
-contains_nan	evolution_toolkit.c	/^void contains_nan(const double *f, const size_t N)$/;"	f
-contains_nanc	evolution_toolkit.c	/^void contains_nanc(const complex *f, const size_t N)$/;"	f
+center	toolbox.c	/^void center(double *f, const size_t N)$/;"	f
+compute_cstr	toolbox.h	/^    uint8_t compute_cstr;$/;"	m	struct:evolution_flags
+compute_pow_spec	toolbox.h	/^    uint8_t compute_pow_spec;$/;"	m	struct:evolution_flags
+contains_nan	toolbox.c	/^void contains_nan(const double *f, const size_t N)$/;"	f
+contains_nanc	toolbox.c	/^void contains_nanc(const complex *f, const size_t N)$/;"	f
 cstr	main.c	/^struct output cstr;$/;"	v	typeref:struct:output
 d41	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
 d410	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
@@ -444,8 +444,8 @@ er8	dopri853.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_c
 er9	dopri853.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
 err_old	dopri853.h	/^    double err_old; \/\/\/< The previous error (on the last time slice)$/;"	m	struct:dopri853_control
 error	dopri853.c	/^double error(const double dt)$/;"	f
-evo_flags	evolution_toolkit.c	/^struct evolution_flags evo_flags = {.filter = 0,$/;"	v	typeref:struct:evolution_flags
-evolution_flags	evolution_toolkit.h	/^struct evolution_flags$/;"	s
+evo_flags	toolbox.c	/^struct evolution_flags evo_flags = {.filter = 0,$/;"	v	typeref:struct:evolution_flags
+evolution_flags	toolbox.h	/^struct evolution_flags$/;"	s
 f	main.h	/^    double  *f;$/;"	m	struct:temporary
 f	main_template.h	/^    double  *f;$/;"	m	struct:temporary
 fc	main.h	/^    complex *fc;$/;"	m	struct:temporary
@@ -459,8 +459,8 @@ file	main_template.h	/^    struct file_parameters file; \/\/\/< file IO paramete
 file_parameters	main.h	/^struct file_parameters$/;"	s
 file_parameters	main_template.h	/^struct file_parameters$/;"	s
 fill_field	tests.c	/^void fill_field(double *f, double (*func)(const double, const double,$/;"	f
-filter	evolution_toolkit.h	/^    uint8_t filter; \/\/\/< If set, apply filtering (unused)$/;"	m	struct:evolution_flags
 filter	main.c	/^double *filter;$/;"	v
+filter	toolbox.h	/^    uint8_t filter; \/\/\/< If set, apply filtering (unused)$/;"	m	struct:evolution_flags
 filter_time	main.c	/^double filter_time = 0.0;$/;"	v
 filter_window	setup.c	/^inline double filter_window(const double x)$/;"	f
 free_and_destroy_all	setup.c	/^void free_and_destroy_all()$/;"	f
@@ -515,22 +515,22 @@ lap	main_template.h	/^    double  *lap;$/;"	m	struct:temporary
 main	main.c	/^int main(int argc, const char * argv[])$/;"	f
 max_steps	dopri853.h	/^    size_t max_steps; \/\/\/< The maximal number of steps$/;"	m	struct:dopri853_control
 maxscale	dopri853.h	/^    double maxscale; \/\/\/< Maximal permissible rescaling of the time step size$/;"	m	struct:dopri853_control
-mean	evolution_toolkit.c	/^inline double mean(const double *f, const size_t N)$/;"	f
-mean_var_min_max	evolution_toolkit.c	/^void mean_var_min_max(const double *f, double *smry)$/;"	f
+mean	toolbox.c	/^inline double mean(const double *f, const size_t N)$/;"	f
+mean_var_min_max	toolbox.c	/^void mean_var_min_max(const double *f, double *smry)$/;"	f
 minscale	dopri853.h	/^    double minscale; \/\/\/< Minimal permissible rescaling of the time step size$/;"	m	struct:dopri853_control
 mk_bunch_davies	setup.c	/^void mk_bunch_davies(double *f, const double H, const double homo,$/;"	f
-mk_constraints	evolution_toolkit.c	/^void mk_constraints()$/;"	f
+mk_constraints	toolbox.c	/^void mk_constraints()$/;"	f
 mk_fftw_plans	setup.c	/^void mk_fftw_plans()$/;"	f
 mk_filter_mask	setup.c	/^void mk_filter_mask()$/;"	f
-mk_gradient_squared_and_laplacian	evolution_toolkit.c	/^void mk_gradient_squared_and_laplacian(double *in)$/;"	f
+mk_gradient_squared_and_laplacian	toolbox.c	/^void mk_gradient_squared_and_laplacian(double *in)$/;"	f
 mk_initial_conditions	setup.c	/^void mk_initial_conditions()$/;"	f
 mk_initial_psi	setup.c	/^void mk_initial_psi()$/;"	f
 mk_k_grid	setup.c	/^void mk_k_grid()$/;"	f
-mk_power_spectrum	evolution_toolkit.c	/^void mk_power_spectrum(const fftw_complex *in, struct output out)$/;"	f
-mk_psi	evolution_toolkit.c	/^void mk_psi(double *f)$/;"	f
-mk_rho	evolution_toolkit.c	/^void mk_rho(const double *f)$/;"	f
-mk_rhs	evolution_toolkit.c	/^void mk_rhs(const double t, double *f, double *result)$/;"	f
-mk_summary	evolution_toolkit.c	/^void mk_summary()$/;"	f
+mk_power_spectrum	toolbox.c	/^void mk_power_spectrum(const fftw_complex *in, struct output out)$/;"	f
+mk_psi	toolbox.c	/^void mk_psi(double *f)$/;"	f
+mk_rho	toolbox.c	/^void mk_rho(const double *f)$/;"	f
+mk_rhs	toolbox.c	/^void mk_rhs(const double t, double *f, double *result)$/;"	f
+mk_summary	toolbox.c	/^void mk_summary()$/;"	f
 mk_x_grid	setup.c	/^void mk_x_grid(double *grid)$/;"	f
 n_bad	dopri853.h	/^    int n_bad; \/\/\/< The number of unsuccessful steps$/;"	m	struct:dopri853_control
 n_ok	dopri853.h	/^    int n_ok; \/\/\/< The number of successful steps$/;"	m	struct:dopri853_control
@@ -554,9 +554,9 @@ phi_smry	main.c	/^struct output phi_smry;$/;"	v	typeref:struct:output
 phic	main.h	/^    complex *phic;$/;"	m	struct:temporary
 phic	main_template.h	/^    complex *phic;$/;"	m	struct:temporary
 poisson_time	main.c	/^double poisson_time = 0.0;$/;"	v
-potential	evolution_toolkit.c	/^inline double potential(const double f)$/;"	f
-potential_prime	evolution_toolkit.c	/^inline double potential_prime(const double f)$/;"	f
-prepare_and_save_timeslice	evolution_toolkit.c	/^void prepare_and_save_timeslice()$/;"	f
+potential	toolbox.c	/^inline double potential(const double f)$/;"	f
+potential_prime	toolbox.c	/^inline double potential_prime(const double f)$/;"	f
+prepare_and_save_timeslice	toolbox.c	/^void prepare_and_save_timeslice()$/;"	f
 pressure	main.c	/^double *pressure;$/;"	v
 pressure_mean	main.c	/^double pressure_mean;$/;"	v
 print_vector	setup.c	/^void print_vector(const double *vector, const size_t N)$/;"	f
@@ -615,7 +615,7 @@ tmp	main.c	/^struct temporary tmp;$/;"	v	typeref:struct:temporary
 tmp	main.h	/^    double *tmp;    \/\/\/< the output values on the current time slice$/;"	m	struct:output
 tmp	main_template.h	/^    double *tmp;    \/\/\/< the output values on the current time slice$/;"	m	struct:output
 try_step	dopri853.c	/^void try_step(const double dt)$/;"	f
-variance	evolution_toolkit.c	/^double variance(const double mean, const double *f, const size_t N)$/;"	f
+variance	toolbox.c	/^double variance(const double mean, const double *f, const size_t N)$/;"	f
 wrapped_gaussian	setup.c	/^double wrapped_gaussian(const double x, const double y, const double z)$/;"	f
 x	main.h	/^    double *x;$/;"	m	struct:k_grid
 x	main.h	/^    struct grid_dimension x; \/\/\/< specification of the x direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
