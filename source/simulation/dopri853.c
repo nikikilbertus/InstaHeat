@@ -1,3 +1,6 @@
+#include "main.h"
+#if INTEGRATION_METHOD == DOPRI853
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
@@ -5,7 +8,6 @@
 #include <omp.h>
 #include <fftw3.h>
 #include "dopri853.h"
-#include "main.h"
 #include "toolbox.h"
 #include "io.h"
 
@@ -546,3 +548,5 @@ void free_dopri853_values()
     free(dpv.yerr2);
     INFO(puts("Freed memory of dopri853 variables.\n"));
 }
+
+#endif
