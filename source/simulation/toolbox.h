@@ -6,13 +6,13 @@
 #include "main.h"
 
 /**
- * @file evolution_toolkit.h
- * @brief Struct and function declarations for `evolution_toolkit.c`
+ * @file toolbox.h
+ * @brief Struct and function declarations for `toolbox.c`
  */
 
 /**
  * @brief Flags to pass information about the progress of the integration to
- * the routines in `evolution_toolkit.c`.
+ * the routines in `toolbox.c`.
  */
 struct evolution_flags
 {
