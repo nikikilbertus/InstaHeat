@@ -5,9 +5,9 @@
 #include "main.h"
 
 /**
- * @file filehandling.h
+ * @file io.h
  * @brief Contains preprocessor definitions of the names of the datasets in the
- * output `.h5` file and function declarations for `filehandling.c`.
+ * output `.h5` file and function declarations for `io.c`.
  */
 
 #define     H5_PHI_NAME                     ("phi")
