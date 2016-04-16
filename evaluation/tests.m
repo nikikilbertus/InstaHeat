@@ -226,7 +226,7 @@ m = 5;
 masses = 1./(2*10.^((1:5)));
 rhormsi = zeros(m,4);
 for i = 1:m
-name = ['64_' num2str(i) '_1e5'];
+name = ['64_1e5_' num2str(i)];
 evaluate3D
 loglog(a,rhorms,'linewidth',2)
 legendinfo{i} = ['mass=' num2str(masses(i))];
