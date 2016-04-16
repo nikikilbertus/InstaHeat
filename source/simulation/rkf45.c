@@ -33,25 +33,26 @@ void run_rkf45()
     save();
 
     gsl_odeiv2_system sys = {mk_rhs_wrapper, NULL, pars.Nall, NULL};
+
     //TODO: use gsl_odeiv2_driver_alloc_scaled_new for abs err vector
     gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(&sys,
             gsl_odeiv2_step_rkf45, pars.t.dt, ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE);
 
     gsl_odeiv2_driver_set_hmin(d, MINIMAL_DELTA_T);
 
-    for (size_t i = 1; i <= 100; i++) {
-        double ti = i * pars.t.tf / 100.0;
+    for (size_t i = 1; i <= OUTPUT_NUMBER; i++) {
+        double ti = i * (pars.t.tf - pars.t.ti) / OUTPUT_NUMBER;
         int status = gsl_odeiv2_driver_apply(d, &pars.t.t, ti, field);
         if (status != GSL_SUCCESS) {
           printf ("error, return value=%d\n", status);
           break;
         }
-        printf("t = %f\n", ti);
+        printf("t = %f\n", pars.t.t);
     }
-    gsl_odeiv2_driver_free (d);
+    gsl_odeiv2_driver_free(d);
 }
 
-int mk_rhs_wrapper(double t, const double f[], double result[], void * params)
+int mk_rhs_wrapper(double t, const double f[], double result[], void *params)
 {
     mk_rhs(t, f, result);
     return GSL_SUCCESS;
