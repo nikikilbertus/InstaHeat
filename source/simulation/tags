@@ -11,7 +11,7 @@ A_INITIAL	main_template.h	/^#define A_INITIAL /;"	d
 BETA	main.h	/^#define BETA /;"	d
 BETA	main_template.h	/^#define BETA /;"	d
 CC	Makefile	/^CC = h5cc$/;"	m
-CFLAGS	Makefile	/^CFLAGS = -std=c99 -fopenmp -O2 -g -Wall -march=native -I \/usr\/local\/include$/;"	m
+CFLAGS	Makefile	/^CFLAGS = -std=c99 -g -Wall -fopenmp -O2 -march=native -I \/usr\/local\/include$/;"	m
 COUPLING	main.h	/^#define COUPLING /;"	d
 COUPLING	main_template.h	/^#define COUPLING /;"	d
 DATAPATH	main.h	/^#define DATAPATH /;"	d
@@ -42,6 +42,7 @@ H5_DPSI_PS_NAME	filehandling.h	/^#define     H5_DPSI_PS_NAME /;"	d
 H5_DPSI_SMRY_NAME	filehandling.h	/^#define     H5_DPSI_SMRY_NAME /;"	d
 H5_GRIDPOINTS_INTERNAL_NAME	filehandling.h	/^#define     H5_GRIDPOINTS_INTERNAL_NAME /;"	d
 H5_GRIDPOINTS_OUTPUT_NAME	filehandling.h	/^#define     H5_GRIDPOINTS_OUTPUT_NAME /;"	d
+H5_INFLATON_MASS_NAME	filehandling.h	/^#define     H5_INFLATON_MASS_NAME /;"	d
 H5_MASS_NAME	filehandling.h	/^#define     H5_MASS_NAME /;"	d
 H5_MAX_DT_HUBBLE_FRACTION_NAME	filehandling.h	/^#define     H5_MAX_DT_HUBBLE_FRACTION_NAME /;"	d
 H5_METHOD_NAME	filehandling.h	/^#define     H5_METHOD_NAME /;"	d
@@ -103,7 +104,7 @@ LARGEST_SCALING	main.h	/^#define LARGEST_SCALING /;"	d
 LARGEST_SCALING	main_template.h	/^#define LARGEST_SCALING /;"	d
 LARGE_OUTPUT	main.h	/^    #define LARGE_OUTPUT$/;"	d
 LARGE_OUTPUT	main_template.h	/^    #define LARGE_OUTPUT$/;"	d
-LIBS	Makefile	/^LIBS = -L \/usr\/local\/lib -lfftw3_omp -lfftw3 -lm -fopenmp$/;"	m
+LIBS	Makefile	/^LIBS = -L \/usr\/local\/lib -g -lfftw3_omp -lfftw3 -lm -fopenmp$/;"	m
 M	main.h	/^    size_t M; \/\/\/< number of gridpoints in Fourier space$/;"	m	struct:grid_dimension
 M	main.h	/^    size_t M; \/\/\/< number of gridpoints in Fourier space$/;"	m	struct:parameters
 M	main_template.h	/^    size_t M; \/\/\/< number of gridpoints in Fourier space$/;"	m	struct:grid_dimension
@@ -139,7 +140,6 @@ OBJECTS	Makefile	/^OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))$/;"	m
 OUTPUT_CONSTRAINTS	main.h	/^#define OUTPUT_CONSTRAINTS$/;"	d
 OUTPUT_DPHI_SMRY	main.h	/^#define OUTPUT_DPHI_SMRY$/;"	d
 OUTPUT_DPSI_SMRY	main.h	/^#define OUTPUT_DPSI_SMRY$/;"	d
-OUTPUT_PHI	main.h	/^#define OUTPUT_PHI$/;"	d
 OUTPUT_PHI_PS	main.h	/^#define OUTPUT_PHI_PS$/;"	d
 OUTPUT_PHI_SMRY	main.h	/^#define OUTPUT_PHI_SMRY$/;"	d
 OUTPUT_PSI_SMRY	main.h	/^#define OUTPUT_PSI_SMRY$/;"	d
