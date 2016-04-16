@@ -168,6 +168,7 @@ The parameters in this section are only relevant if `INTEGRATION_METHOD="DOPRI85
 
 * `INTEGRATION_METHOD`: There are two integration routines available:
     - `"RK4"`: The standard fourth order Runge Kutte stepper with fixed time step size.
+    - `"RKF45"`: The Runge Kutta Fehlberg 4 (5) method with adaptive time stepping, using the implementation by the Gnu scientific library (gsl) ode library.
     - `"DOPRI853"`: A more sophisticated adaptive Dormand Prince stepper of 8th order with 5th and 3rd order errors for adaptive time stepping. A detailed description can be found in TODO(link numerical recipes).
 * `PSI_METHOD`: There are three different equations according to which we can evolve the fields $$\psi$$ and $$\dot{\psi}$$. For more information see TODO(link to the thesis). The valid options are
     - `"PSI_ELLIPTIC"`
