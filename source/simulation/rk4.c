@@ -3,13 +3,13 @@
 #include <math.h>
 #include <omp.h>
 #include <fftw3.h>
-#include "RK4_stepper.h"
+#include "rk4.h"
 #include "main.h"
 #include "evolution_toolkit.h"
 #include "filehandling.h"
 
 /**
- * @file RK4_stepper.c
+ * @file rk4.c
  * @brief A simple standard 4th order explicit Runge Kutta integrator with fixed
  * stepsize.
  */
