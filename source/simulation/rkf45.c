@@ -7,7 +7,8 @@
 #include <gsl/gsl_odeiv2.h>
 #include "rkf45.h"
 #include "main.h"
-#include "evolution_toolkit.h"
+#include "toolbox.h"
+#include "io.h"
 
 void run_rkf45()
 {
@@ -16,7 +17,7 @@ void run_rkf45()
     INFO(printf("final time: %f\n", pars.t.tf));
     INFO(printf("initial time step dt: %f\n", pars.t.dt));
     INFO(printf("minimal time step dt: %f\n", MINIMAL_DELTA_T));
-    INFO(printf("max number of steps: %zu\n", MAX_STEPS));
+    INFO(printf("max number of steps: %f\n", MAX_STEPS));
     INFO(printf("relative tolerance: %.15f\n", RELATIVE_TOLERANCE));
     INFO(printf("absolute tolerance: %.15f\n\n", ABSOLUTE_TOLERANCE));
 
@@ -57,6 +58,6 @@ void run_rkf45()
 
 int mk_rhs_wrapper(double t, const double f[], double result[], void *params)
 {
-    mk_rhs(t, f, result);
+    mk_rhs(t, (double*) f, result);
     return GSL_SUCCESS;
 }
