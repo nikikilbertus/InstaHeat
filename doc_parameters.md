@@ -118,6 +118,7 @@ __Remarks__:
   - `"VERSION_CONTROL_GIT"`: Try to get the hash of the current git revision and include it in the output.
   - `"VERSION_CONTROL_NONE"`: Do not try to get the hash of the current revision. Nothing is added to the output file.
 * `WRITE_OUT_BUFFER_NUMBER`: (integer, >0) The program uses an internal buffer where outputs are accumulated before they are actually written to disk. Since rare and large writeouts are usually faster than frequent small ones, this should result in a speed up. `WRITE_OUT_BUFFER_NUMBER` specifies how many timeslices of the output should be buffered before disk access. If one uses many gridpoints, memory constraints might not allow for a large buffer.
+* `OUTPUT_NUMBER`: (integer, >0) This is only used when `INTEGRATION_METHOD=RKF45`. The Runge Kutta Fehlberg 4 (5) is not implemented natively, but provided by the gsl library. Therefore we specify how many time slices we want to write to disk, which is specified by `OUTPUT_NUMBER`. Those will be equidistantly distributed over the range from the initial to the final time.
 * `POWER_SPECTRUM_BINS`: (integer, >0) The number of bins used to compute the power spectrum. This is only relevant if`POWER_SPECTRUM="1"`, i.e. the power spectrum of $$\phi$$ is included in the output. See TODO(link thesis) for details.
 * `TIME_STEP_SKIPS`: (integer, >0) The number of time steps skipped between outputs. To avoid large output files, one can skip `TIME_STEP_SKIPS` many time steps, before writing a time slice to disk again.
 * `STRIDE_X`: (integer, >0) The stride in the x-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than they are computed on internally.
@@ -168,6 +169,7 @@ The parameters in this section are only relevant if `INTEGRATION_METHOD="DOPRI85
 
 * `INTEGRATION_METHOD`: There are two integration routines available:
     - `"RK4"`: The standard fourth order Runge Kutte stepper with fixed time step size.
+    - `"RKF45"`: The Runge Kutta Fehlberg 4 (5) method with adaptive time stepping, using the implementation by the Gnu scientific library (gsl) ode library.
     - `"DOPRI853"`: A more sophisticated adaptive Dormand Prince stepper of 8th order with 5th and 3rd order errors for adaptive time stepping. A detailed description can be found in TODO(link numerical recipes).
 * `PSI_METHOD`: There are three different equations according to which we can evolve the fields $$\psi$$ and $$\dot{\psi}$$. For more information see TODO(link to the thesis). The valid options are
     - `"PSI_ELLIPTIC"`

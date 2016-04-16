@@ -10,6 +10,7 @@
 #include <gperftools/profiler.h>
 #endif
 #include "setup.h"
+#include "rkf45.h"
 #include "rk4.h"
 #include "dopri853.h"
 #include "io.h"
@@ -80,6 +81,8 @@ int main(int argc, const char * argv[])
     run_rk4();
     #elif INTEGRATION_METHOD == DOPRI853
     run_dopri853();
+    #elif INTEGRATION_METHOD == RKF45
+    run_rkf45();
     #endif
 
     #ifdef ENABLE_PROFILER
