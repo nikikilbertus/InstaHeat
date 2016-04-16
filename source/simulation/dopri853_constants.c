@@ -1,3 +1,6 @@
+#include "main.h"
+#if INTEGRATION_METHOD == DOPRI853
+
 #include <stdlib.h>
 #include "dopri853.h"
 
@@ -169,3 +172,5 @@ struct dopri853_constants dpc =
 .d715  = -0.39177261675615439165231486172e+02,
 .d716  = -0.14972683625798562581422125276e+03
 };
+
+#endif
