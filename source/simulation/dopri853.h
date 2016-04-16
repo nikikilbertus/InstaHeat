@@ -4,8 +4,8 @@
 #include "main.h"
 
 /**
- * @file dopri853_stepper.h
- * @brief Typedefs and function declarations for `dopri853_stepper.c` and for
+ * @file dopri853.h
+ * @brief Typedefs and function declarations for `dopri853.c` and for
  * `dopri853_constants.c`.
  * @see <a href="http://numerical.recipes">Numerical Recipes</a>
  */
