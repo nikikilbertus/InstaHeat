@@ -4,13 +4,13 @@
 #include <math.h>
 #include <omp.h>
 #include <fftw3.h>
-#include "dopri853_stepper.h"
+#include "dopri853.h"
 #include "main.h"
 #include "evolution_toolkit.h"
 #include "filehandling.h"
 
 /**
- * @file dopri853_stepper.c
+ * @file dopri853.c
  * @brief A 8th order explicit Dormand Prince integrator with 5th and 3rd order
  * error estimates for adaptive stepsizes.
  *
@@ -22,13 +22,13 @@
 
 /**
  * @brief The parameters for the Dormand Prince intergrator.
- * @see dopri853_stepper.h
+ * @see dopri853.h
  */
 struct dopri853_control dp;
 
 /**
  * @brief Holds intermediate fields as well as the error estimates.
- * @see dopri853_stepper.h
+ * @see dopri853.h
  */
 struct dopri853_values dpv;
 
@@ -73,7 +73,7 @@ void initialize_dopri853()
 /**
  * @brief Run the Dormand Prince integrator to evolve the fields.
  *
- * This is the main routine of dopri853_stepper.c. It initializes the
+ * This is the main routine of dopri853.c. It initializes the
  * integration parameters, allocates necessary memory, integrates the field
  * (assuming initial values are already present), writes the evolution to disk
  * as specified and frees the memory allocated earlier. All steps are reported
