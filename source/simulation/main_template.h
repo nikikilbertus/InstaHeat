@@ -43,7 +43,8 @@
 #endif
 
 #define RK4                 (0)
-#define DOPRI853            (1)
+#define RKF45               (1)
+#define DOPRI853            (2)
 #define INTEGRATION_METHOD  (_IM_)
 
 #define VERSION_CONTROL_NONE    (0)
