@@ -7,7 +7,7 @@
 #include <fftw3.h>
 #include "setup.h"
 #include "evolution_toolkit.h"
-#include "filehandling.h"
+#include "io.h"
 #include "main.h"
 
 /**
@@ -516,7 +516,7 @@ void mk_initial_conditions()
  *
  * This is currently for internal use only. TODO[fill]
  *
- * @see `read_initial_data()` in `filehandling.c`
+ * @see `read_initial_data()` in `io.c`
  */
 void initialize_from_dat()
 {
