@@ -4,11 +4,11 @@
 #include <math.h>
 #include <omp.h>
 #include "hdf5.h"
-#include "filehandling.h"
+#include "io.h"
 #include "main.h"
 
 /**
- * @file filehandling.c
+ * @file io.c
  * @brief Contains all functions that read/write data from/to disk.
  *
  * All output data is stored in a single hdf5 file. The `DATAPATH` is a
