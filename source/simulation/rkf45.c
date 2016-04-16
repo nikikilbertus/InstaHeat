@@ -48,7 +48,6 @@ void run_rkf45()
           printf ("error, return value=%d\n", status);
           break;
         }
-        printf("t = %f\n", pars.t.t);
         mk_summary();
         mk_constraints();
         save();
