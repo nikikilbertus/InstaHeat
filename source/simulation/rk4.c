@@ -1,3 +1,6 @@
+#include "main.h"
+#if INTEGRATION_METHOD == RK4
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -136,3 +139,5 @@ void run_rk4()
     fftw_free(k4);
     fftw_free(tmp_k);
 }
+
+#endif
