@@ -2,6 +2,7 @@
 #define __DOPRI853_STEPPER__
 
 #include "main.h"
+#if INTEGRATION_METHOD == DOPRI853
 
 /**
  * @file dopri853.h
@@ -101,4 +102,5 @@ int success(const double err, double *dt);
 void allocate_dopri853_values();
 void free_dopri853_values();
 
+#endif
 #endif
