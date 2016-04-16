@@ -5,13 +5,13 @@
 #include <complex.h>
 #include <omp.h>
 #include <fftw3.h>
-#include "evolution_toolkit.h"
+#include "toolbox.h"
 #include "main.h"
 #include "io.h"
 #include "setup.h"
 
 /**
- * @file evolution_toolkit.c
+ * @file toolbox.c
  * @brief A collection of routines to compute the right hand side of the pde as
  * well as the desired output.
  */
