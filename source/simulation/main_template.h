@@ -95,6 +95,7 @@
 #define STRIDE_X                (_XSKIP_)
 #define STRIDE_Y                (_YSKIP_)
 #define STRIDE_Z                (_ZSKIP_)
+#define OUTPUT_NUMBER           (_ONUM_)
 #define THREAD_NUMBER           (_THREADS_)
 #define FFTW_DEFAULT_FLAG       (_FFTW_)
 #define _FILTER_
