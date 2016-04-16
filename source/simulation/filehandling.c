@@ -27,7 +27,7 @@
  * field, the corresponding summaries and power spectra as well as each set of
  * parameters gets a dataset. The simulation parameters which are already
  * determined after `allocate_and_initialize_all()` in `setup.c` and before
- * calling an integration routine `run_dopri853()` in `dopri853_stepper.c`  or
+ * calling an integration routine `run_dopri853()` in `dopri853.c`  or
  * `run_rk4()` in `rk4.c` are written to disk right away.
  */
 void h5_create_empty_by_path()
