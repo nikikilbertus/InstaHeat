@@ -1,3 +1,6 @@
+#include "main.h"
+#if INTEGRATION_METHOD == RKF45
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -6,7 +9,6 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_odeiv2.h>
 #include "rkf45.h"
-#include "main.h"
 #include "toolbox.h"
 #include "io.h"
 
@@ -60,3 +62,5 @@ int mk_rhs_wrapper(double t, const double f[], double result[], void *params)
     mk_rhs(t, (double*) f, result);
     return GSL_SUCCESS;
 }
+
+#endif
