@@ -11,7 +11,7 @@
 #endif
 #include "setup.h"
 #include "rk4.h"
-#include "dopri853_stepper.h"
+#include "dopri853.h"
 #include "filehandling.h"
 #include "tests.h"
 
