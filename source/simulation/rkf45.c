@@ -48,6 +48,9 @@ void run_rkf45()
           break;
         }
         printf("t = %f\n", pars.t.t);
+        mk_summary();
+        mk_constraints();
+        save();
     }
     gsl_odeiv2_driver_free(d);
 }
