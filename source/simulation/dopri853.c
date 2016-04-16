@@ -6,7 +6,7 @@
 #include <fftw3.h>
 #include "dopri853.h"
 #include "main.h"
-#include "evolution_toolkit.h"
+#include "toolbox.h"
 #include "io.h"
 
 /**
@@ -239,7 +239,7 @@ int perform_step(const double dt_try)
  *
  * Computes all necessary (12) intermediate evaluations of the right hand side
  * of the differential equation (specified by mk_rhs(const double t, double *f,
- * double *result) in evolution_toolkit.c) to perform one step of the Dormand
+ * double *result) in toolbox.c) to perform one step of the Dormand
  * Prince integrator, evolves the field forward in time by the given stepsize
  * and computes the error estimates w.r.t.  the previous timeslice (still as
  * vectors, i.e. not a single value).  Intermediate evaluations and errors are
