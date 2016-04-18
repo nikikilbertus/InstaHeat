@@ -64,12 +64,17 @@ void initialize_dopri853()
     dp.safe = SAFE;
     dp.minscale = SMALLEST_SCALING;
     dp.maxscale = LARGEST_SCALING;
-    dp.a_tol = ABSOLUTE_TOLERANCE;
-    dp.r_tol = RELATIVE_TOLERANCE;
     dp.err_old = 1.0e-4;
     dp.reject = 0;
     dp.eps = DBL_EPSILON;
+    allocate_and_initialize_tolerances();
     INFO(puts("Initialized dopri853 parameters.\n"));
+}
+
+void allocate_and_initialize_tolerances()
+{
+    dp.r_tol = fftw_malloc(Ntot * sizeof *dp.r_tol);
+    dp.a_tol = fftw_malloc(Ntot * sizeof *dp.a_tol);
 }
 
 /**
