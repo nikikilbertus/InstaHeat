@@ -134,8 +134,8 @@ void run_dopri853()
     INFO(printf("initial time step dt: %f\n", dp.dt));
     INFO(printf("minimal time step dt: %f\n", dp.dt_min));
     INFO(printf("max number of steps: %zu\n", dp.max_steps));
-    INFO(printf("relative tolerance: %.15f\n", dp.r_tol));
-    INFO(printf("absolute tolerance: %.15f\n\n", dp.a_tol));
+    INFO(printf("proxy relative tolerance: %.15f\n", RELATIVE_TOLERANCE));
+    INFO(printf("proxy absolute tolerance: %.15f\n\n", ABSOLUTE_TOLERANCE));
 
     #ifdef OUTPUT_PHI_PS
     evo_flags.compute_pow_spec = 1;
@@ -441,7 +441,8 @@ double error(const double dt)
     double tmp;
     #pragma omp parallel for private(sk, tmp) reduction(+: err, err2)
     for (size_t i = 0; i < Ntot; ++i) {
-        sk = dp.a_tol + dp.r_tol * MAX(fabs(field[i]), fabs(field_new[i]));
+        sk = dp.a_tol[i] +
+            dp.r_tol[i] * MAX(fabs(field[i]), fabs(field_new[i]));
         tmp = dpv.yerr[i] / sk;
         err2 += tmp * tmp;
         tmp = dpv.yerr2[i] / sk;
