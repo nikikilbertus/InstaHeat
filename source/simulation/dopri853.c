@@ -416,7 +416,7 @@ void try_step(const double dt)
     #pragma omp parallel for
     for (i = 0; i < Ntot; ++i) {
         dpv.yerr[i] = dpv.k4[i] - dpc.bhh1 * dfield[i] - dpc.bhh2 * dpv.k9[i] -
-                        dpc.bhh3 * dpv.k3[i];
+                      dpc.bhh3 * dpv.k3[i];
         dpv.yerr2[i] = dpc.er1 * dfield[i] + dpc.er6 * dpv.k6[i] +
                        dpc.er7 * dpv.k7[i] + dpc.er8 * dpv.k8[i] +
                        dpc.er9 * dpv.k9[i] + dpc.er10 * dpv.k10[i] +
