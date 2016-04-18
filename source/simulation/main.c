@@ -49,7 +49,7 @@ struct k_grid kvec;
 struct temporary tmp;
 fftw_plan p_fw;
 fftw_plan p_bw;
-double fftw_time_exe  = 0.0;
+double fftw_time_exe = 0.0;
 double fftw_time_plan = 0.0;
 double filter_time = 0.0;
 double poisson_time = 0.0;
