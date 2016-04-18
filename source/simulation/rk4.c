@@ -33,10 +33,10 @@ void run_rk4()
     double t = pars.t.t;
 
     double *k1, *k2, *k3, *k4, *tmp_k;
-    k1    = fftw_malloc(Ntot * sizeof *k1);
-    k2    = fftw_malloc(Ntot * sizeof *k2);
-    k3    = fftw_malloc(Ntot * sizeof *k3);
-    k4    = fftw_malloc(Ntot * sizeof *k4);
+    k1 = fftw_malloc(Ntot * sizeof *k1);
+    k2 = fftw_malloc(Ntot * sizeof *k2);
+    k3 = fftw_malloc(Ntot * sizeof *k3);
+    k4 = fftw_malloc(Ntot * sizeof *k4);
     tmp_k = fftw_malloc(Nall * sizeof *tmp_k);
 
     if (!(k1 && k2 && k3 && k4 && tmp_k)) {
