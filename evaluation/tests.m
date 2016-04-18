@@ -273,8 +273,6 @@ cstrl2 = zeros(size(time));
 getname = @(x,y) [base num2str(x) '_' num2str(y) '.h5'];
 phiref = h5read(getname(max(rtol),max(atol)), '/phi_summary');
 aref = h5read(getname(max(rtol),max(atol)), '/a');
-cstrl2ref = h5read(getname(max(rtol),max(atol)),'/constraints');
-cstrl2ref = cstrl2ref(1,end);
 phiref = phiref(1,:);
 arefs = h5read(getname(min(rtol),min(atol)), '/a');
 phirefs = spline(aref,phiref,arefs);
@@ -291,7 +289,7 @@ for i = 1:length(rtol)
         a = h5read(name, '/a');
         cstr = h5read(name,'/constraints');
 %         semilogy(a,cstr(1,:)); shg; pause;
-        cstrl2(i,j) = -log10(abs((cstr(1,end) - cstrl2ref) / cstrl2ref));
+        cstrl2(i,j) = norm(cstr(1,:)) / length(cstr(1,:));
         as(i,j) = -log10(abs((a(end) - aref(end))/aref(end)));
 %         I = (a>0.9*aref(end));
 %         Iref = (aref>0.9*aref(end));
@@ -330,12 +328,12 @@ bar3(-log10(errl2)); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',relval);
 xlabel('atol'); ylabel('rtol'); zlabel('-log10 error l_{2}');
 
 %% resolutions study
-res = [32 48 64];
+res = [16 24 32 48 64 96 128];
 for i = 1:length(res)
-    name = [num2str(res(i)) '_2_1e5'];
+    name = ['resolutions2/' num2str(res(i)) '_5e-4_1e3'];
     evaluate3D
-    loglog(a, rhorms)
+    semilogx(a, phimean,'linewidth',1.3)
     hold on
 end
 hold off
-legend('32','48','64'); shg;
+legend('16','24','32','48','64','96','128'); shg;
