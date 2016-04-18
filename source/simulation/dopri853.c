@@ -396,7 +396,7 @@ double error(const double dt)
     double err = 0.0, err2 = 0.0, sk, deno;
 
     double tmp;
-    #pragma omp parallel for private(sk, tmp) reduction(+:err, err2)
+    #pragma omp parallel for private(sk, tmp) reduction(+: err, err2)
     for (size_t i = 0; i < Ntot; ++i) {
         sk = dp.a_tol + dp.r_tol * MAX(fabs(field[i]), fabs(field_new[i]));
         tmp = dpv.yerr[i] / sk;
