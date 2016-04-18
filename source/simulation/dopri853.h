@@ -82,8 +82,8 @@ struct dopri853_control
     double safe; ///< Internal parameter for the error estimates
     double minscale; ///< Minimal permissible rescaling of the time step size
     double maxscale; ///< Maximal permissible rescaling of the time step size
-    double a_tol; ///< Absolute tolerance
-    double r_tol; ///< Relative tolerance
+    double *a_tol; ///< Absolute tolerances
+    double *r_tol; ///< Relative tolerances
     double err_old; ///< The previous error (on the last time slice)
     int reject; ///< Flag whether time step is rejected or accepted
     double eps; ///< Epsilon value for comparisons
@@ -94,6 +94,7 @@ extern struct dopri853_values dpv; ///< Intermediate fields and errors
 extern struct dopri853_control dp; ///< Dormand Prince parameters
 
 void initialize_dopri853();
+void allocate_and_initialize_tolerances();
 void run_dopri853();
 int perform_step(const double dt_try);
 void try_step(const double dt);
