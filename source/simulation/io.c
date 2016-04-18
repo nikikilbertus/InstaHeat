@@ -27,7 +27,7 @@
  * field, the corresponding summaries and power spectra as well as each set of
  * parameters gets a dataset. The simulation parameters which are already
  * determined after `allocate_and_initialize_all()` in `setup.c` and before
- * calling an integration routine `run_dopri853()` in `dopri853.c`  or
+ * calling an integration routine `run_dopri853()` in `dopri853.c` or
  * `run_rk4()` in `rk4.c` are written to disk right away.
  */
 void h5_create_empty_by_path()
@@ -368,7 +368,7 @@ void h5_write_all_buffers(const hsize_t Nt)
     #endif
 
     rank = 1;
-    // ---------------------------time and  a-----------------------------------
+    // ---------------------------time and a-----------------------------------
     h5_write_buffer(rank, Nt, t_out.dim, os, t_out.id, t_out.buf);
     h5_write_buffer(rank, Nt, a_out.dim, os, a_out.id, a_out.buf);
 
