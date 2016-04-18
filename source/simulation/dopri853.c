@@ -59,7 +59,7 @@ void initialize_dopri853()
     dp.n_stp = 0;
     dp.n_ok = 0;
     dp.n_bad = 0;
-    dp.beta  = BETA;
+    dp.beta = BETA;
     dp.alpha = 1.0/8.0 - dp.beta * 0.2;
     dp.safe = SAFE;
     dp.minscale = SMALLEST_SCALING;
@@ -243,8 +243,8 @@ int perform_step(const double dt_try)
  * of the differential equation (specified by mk_rhs(const double t, double *f,
  * double *result) in toolbox.c) to perform one step of the Dormand
  * Prince integrator, evolves the field forward in time by the given stepsize
- * and computes the error estimates w.r.t.  the previous timeslice (still as
- * vectors, i.e. not a single value).  Intermediate evaluations and errors are
+ * and computes the error estimates w.r.t. the previous timeslice (still as
+ * vectors, i.e. not a single value). Intermediate evaluations and errors are
  * stored in members of the struct dopri853_values dp.
  *
  * @note Contrary to perform_step(const double dt_try) this function is not
@@ -372,7 +372,7 @@ void try_step(const double dt)
     // ------------ error estimates ------------
     #pragma omp parallel for
     for (i = 0; i < Ntot; ++i) {
-        dpv.yerr[i]  = dpv.k4[i] - dpc.bhh1 * dfield[i] - dpc.bhh2 * dpv.k9[i] -
+        dpv.yerr[i] = dpv.k4[i] - dpc.bhh1 * dfield[i] - dpc.bhh2 * dpv.k9[i] -
                         dpc.bhh3 * dpv.k3[i];
         dpv.yerr2[i] = dpc.er1 * dfield[i] + dpc.er6 * dpv.k6[i] +
                        dpc.er7 * dpv.k7[i] + dpc.er8 * dpv.k8[i] +
@@ -430,9 +430,9 @@ double error(const double dt)
  */
 int success(const double err, double *dt)
 {
-    const double beta  = dp.beta;
+    const double beta = dp.beta;
     const double alpha = dp.alpha;
-    const double safe  = dp.safe;
+    const double safe = dp.safe;
     const double minscale = dp.minscale;
     const double maxscale = dp.maxscale;
     double scale;
