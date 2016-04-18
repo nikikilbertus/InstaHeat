@@ -176,10 +176,10 @@ struct output
  */
 struct file_parameters
 {
-    hsize_t id;               ///< h5 file id of the output file
-    size_t index;             ///< current index within the buffers
-    size_t buf_size;          ///< size of the buffer
-    size_t skip;              ///< timesteps to skip in between write outs
+    hsize_t id;        ///< h5 file id of the output file
+    size_t index;      ///< current index within the buffers
+    size_t buf_size;   ///< size of the buffer
+    size_t skip;       ///< timesteps to skip in between write outs
 };
 
 /**
