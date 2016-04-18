@@ -73,8 +73,46 @@ void initialize_dopri853()
 
 void allocate_and_initialize_tolerances()
 {
+    const size_t N = pars.N;
+    const size_t N2 = 2 * N;
+
     dp.r_tol = fftw_malloc(Ntot * sizeof *dp.r_tol);
     dp.a_tol = fftw_malloc(Ntot * sizeof *dp.a_tol);
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < N; ++i) {
+        dp.r_tol[i] = RELATIVE_TOLERANCE;
+        dp.a_tol[i] = ABSOLUTE_TOLERANCE;
+    }
+
+    #pragma omp parallel for
+    for (size_t i = N; i < N2; ++i) {
+        dp.r_tol[i] = RELATIVE_TOLERANCE;
+        dp.a_tol[i] = ABSOLUTE_TOLERANCE;
+    }
+
+    #if PSI_METHOD != PSI_ELLIPTIC
+    const size_t N2p = N2 + 2;
+    const size_t N3p = 3 * N + 2;
+    #pragma omp parallel for
+    for (size_t i = N2p; i < N3p; ++i) {
+        dp.r_tol[i] = RELATIVE_TOLERANCE;
+        dp.a_tol[i] = ABSOLUTE_TOLERANCE;
+    }
+        #if PSI_METHOD == PSI_HYPERBOLIC
+        const size_t Ntot = pars.Ntot;
+        #pragma omp parallel for
+        for (size_t i = N3p; i < Ntot; ++i) {
+            dp.r_tol[i] = RELATIVE_TOLERANCE;
+            dp.a_tol[i] = ABSOLUTE_TOLERANCE;
+        }
+        #endif
+    #endif
+
+    dp.r_tol[N2] = RELATIVE_TOLERANCE;
+    dp.a_tol[N2] = ABSOLUTE_TOLERANCE;
+    dp.r_tol[N2 + 1] = 1.0;
+    dp.a_tol[N2 + 1] = 1.0;
 }
 
 /**
