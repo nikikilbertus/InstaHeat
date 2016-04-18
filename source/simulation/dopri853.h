@@ -94,6 +94,7 @@ extern struct dopri853_values dpv; ///< Intermediate fields and errors
 extern struct dopri853_control dp; ///< Dormand Prince parameters
 
 void initialize_dopri853();
+void allocate_and_initialize_tolerances();
 void run_dopri853();
 int perform_step(const double dt_try);
 void try_step(const double dt);
