@@ -576,19 +576,19 @@ void allocate_dopri853_values()
  */
 void free_dopri853_values()
 {
-    free(dpv.k2);
-    free(dpv.k3);
-    free(dpv.k4);
-    free(dpv.k5);
-    free(dpv.k6);
-    free(dpv.k7);
-    free(dpv.k8);
-    free(dpv.k9);
-    free(dpv.k10);
-    free(dpv.k_tmp);
+    fftw_free(dpv.k2);
+    fftw_free(dpv.k3);
+    fftw_free(dpv.k4);
+    fftw_free(dpv.k5);
+    fftw_free(dpv.k6);
+    fftw_free(dpv.k7);
+    fftw_free(dpv.k8);
+    fftw_free(dpv.k9);
+    fftw_free(dpv.k10);
+    fftw_free(dpv.k_tmp);
 
-    free(dpv.yerr);
-    free(dpv.yerr2);
+    fftw_free(dpv.yerr);
+    fftw_free(dpv.yerr2);
     INFO(puts("Freed memory of dopri853 variables.\n"));
 }
 
