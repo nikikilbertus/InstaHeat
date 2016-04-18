@@ -328,3 +328,14 @@ xlabel('atol'); ylabel('rtol'); zlabel('-log10 (\phi_{f}^{ref} - \phi_{f}) / \ph
 figure
 bar3(-log10(errl2)); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',relval);
 xlabel('atol'); ylabel('rtol'); zlabel('-log10 error l_{2}');
+
+%% resolutions study
+res = [32 48 64];
+for i = 1:length(res)
+    name = [num2str(res(i)) '_2_1e5'];
+    evaluate3D
+    loglog(a, rhorms)
+    hold on
+end
+hold off
+legend('32','48','64'); shg;
