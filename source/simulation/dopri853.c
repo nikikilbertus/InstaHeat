@@ -576,6 +576,9 @@ void allocate_dopri853_values()
  */
 void free_dopri853_values()
 {
+    fftw_free(dp.r_tol);
+    fftw_free(dp.a_tol);
+
     fftw_free(dpv.k2);
     fftw_free(dpv.k3);
     fftw_free(dpv.k4);
