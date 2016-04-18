@@ -5,7 +5,7 @@ cstr = false;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
-name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/' name '.h5'];
+name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/resolutions/' name '.h5'];
 
 % built in functions for reading makes it easy
 dim = h5read(name, '/dimension');
