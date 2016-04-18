@@ -26,10 +26,10 @@ struct evolution_flags evo_flags = {.filter = 0,
  *
  * Depending on `PSI_METHOD` we are computing the temporal derivatives of different fields, and hence also evovle different fields in the integration routine:
  *
- *   @param[in] t The current time
- *   @param[in] All necessary fields bundled in one array
- *   @param[out] The right hand side of the partial differential equation, i.e.
- *   the first temporal derivatives of the fields
+ * @param[in] t The current time
+ * @param[in] All necessary fields bundled in one array
+ * @param[out] The right hand side of the partial differential equation, i.e.
+ * the first temporal derivatives of the fields
  *
  * - For `PSI_METHOD=PSI_ELLIPTIC` we are only evolving $$\phi$$,
  *   $$\dot{\phi}$$ and $$a$$ withthe integration routine and use an elliptic
@@ -569,12 +569,12 @@ void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
     #pragma omp parallel for private(fil)
     for (size_t i = 0; i < M; ++i) {
         fil = filter[i];
-        phi_io[i]  *= fil;
+        phi_io[i] *= fil;
         dphi_io[i] *= fil;
         #if PSI_METHOD != PSI_ELLIPTIC
-        psi_io[i]  *= fil;
+        psi_io[i] *= fil;
             #if PSI_METHOD == PSI_HYPERBOLIC
-            dpsi_io[i]  *= fil;
+            dpsi_io[i] *= fil;
             #endif
         #endif
     }
@@ -668,7 +668,7 @@ inline double mean(const double *f, const size_t N)
  * @brief Compute the summary of a vector, i.e. the mean, variance, minimum and
  * maximum value
  *
- * @param[in] f The input  vector
+ * @param[in] f The input vector
  * @param[out] smry An array of size 4 which is filled with the summary: mean,
  * variance, min, max (in this order)
  *
