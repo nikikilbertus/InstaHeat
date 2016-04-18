@@ -84,24 +84,24 @@ void initialize_threading()
  */
 void initialize_parameters()
 {
-    pars.x.N  = GRIDPOINTS_X;
-    pars.x.a  = SPATIAL_LOWER_BOUND_X;
-    pars.x.b  = SPATIAL_UPPER_BOUND_X;
-    pars.x.k  = TWOPI / (pars.x.b - pars.x.a);
+    pars.x.N = GRIDPOINTS_X;
+    pars.x.a = SPATIAL_LOWER_BOUND_X;
+    pars.x.b = SPATIAL_UPPER_BOUND_X;
+    pars.x.k = TWOPI / (pars.x.b - pars.x.a);
     pars.x.k2 = -TWOPI * TWOPI / ((pars.x.b - pars.x.a) * (pars.x.b - pars.x.a));
     pars.x.stride = STRIDE_X;
 
-    pars.y.N  = GRIDPOINTS_Y;
-    pars.y.a  = SPATIAL_LOWER_BOUND_Y;
-    pars.y.b  = SPATIAL_UPPER_BOUND_Y;
-    pars.y.k  = TWOPI / (pars.y.b - pars.y.a);
+    pars.y.N = GRIDPOINTS_Y;
+    pars.y.a = SPATIAL_LOWER_BOUND_Y;
+    pars.y.b = SPATIAL_UPPER_BOUND_Y;
+    pars.y.k = TWOPI / (pars.y.b - pars.y.a);
     pars.y.k2 = -TWOPI * TWOPI / ((pars.y.b - pars.y.a) * (pars.y.b - pars.y.a));
     pars.y.stride = STRIDE_Y;
 
-    pars.z.N  = GRIDPOINTS_Z;
-    pars.z.a  = SPATIAL_LOWER_BOUND_Z;
-    pars.z.b  = SPATIAL_UPPER_BOUND_Z;
-    pars.z.k  = TWOPI / (pars.z.b - pars.z.a);
+    pars.z.N = GRIDPOINTS_Z;
+    pars.z.a = SPATIAL_LOWER_BOUND_Z;
+    pars.z.b = SPATIAL_UPPER_BOUND_Z;
+    pars.z.k = TWOPI / (pars.z.b - pars.z.a);
     pars.z.k2 = -TWOPI * TWOPI / ((pars.z.b - pars.z.a) * (pars.z.b - pars.z.a));
     pars.z.stride = STRIDE_Z;
 
@@ -153,7 +153,7 @@ void initialize_parameters()
     #endif
 
     pars.t.dt = DELTA_T;
-    pars.t.t  = INITIAL_TIME;
+    pars.t.t = INITIAL_TIME;
     pars.t.ti = INITIAL_TIME;
     pars.t.tf = FINAL_TIME;
     pars.t.Nt = ceil((pars.t.tf - pars.t.ti) / pars.t.dt) + 1;
@@ -606,7 +606,7 @@ void mk_bunch_davies(double *f, const double H, const double homo,
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
     const size_t Nz = pars.z.N;
-    const size_t N  = pars.N;
+    const size_t N = pars.N;
     const size_t nn = Nx / 2 + 1;
     const size_t os = 16;
     const size_t nos = Nx * os * os;
@@ -706,7 +706,7 @@ inline complex box_muller()
  * `mk_x_grid(double *grid)` and then $$\phi$$ and $$\dot{\phi}$$ are computed
  * by `phi_init(const double x, const double y, const double z, const double
  * *ph)`, `dphi_init(const double x, const double y, const double z, const
- * double *ph)` potentially using some random phases `ph`.  The initial scale
+ * double *ph)` potentially using some random phases `ph`. The initial scale
  * factor $$a$$ comes from the parameter file and $$\psi$$, $$\dot{\psi}$$ are
  * then computed from $$\phi$$ and $$\dot{\phi}$$.
  */
