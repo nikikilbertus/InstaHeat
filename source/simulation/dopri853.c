@@ -75,6 +75,7 @@ void allocate_and_initialize_tolerances()
 {
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
+    const size_t Ntot = pars.Ntot;
 
     dp.r_tol = fftw_malloc(Ntot * sizeof *dp.r_tol);
     dp.a_tol = fftw_malloc(Ntot * sizeof *dp.a_tol);
@@ -100,7 +101,6 @@ void allocate_and_initialize_tolerances()
         dp.a_tol[i] = ABSOLUTE_TOLERANCE;
     }
         #if PSI_METHOD == PSI_HYPERBOLIC
-        const size_t Ntot = pars.Ntot;
         #pragma omp parallel for
         for (size_t i = N3p; i < Ntot; ++i) {
             dp.r_tol[i] = RELATIVE_TOLERANCE;
