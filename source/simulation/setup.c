@@ -321,7 +321,7 @@ void mk_fftw_plans()
     const size_t Nz = pars.z.N;
 
     #ifdef SHOW_TIMING_INFO
-    fftw_time_plan -= get_wall_time();
+    mon.fftw_time_plan -= get_wall_time();
     #endif
     switch (pars.dim) {
         case 1:
@@ -344,7 +344,7 @@ void mk_fftw_plans()
             break;
     }
     #ifdef SHOW_TIMING_INFO
-    fftw_time_plan += get_wall_time();
+    mon.fftw_time_plan += get_wall_time();
     #endif
     INFO(puts("Created fftw plans.\n"));
 }
