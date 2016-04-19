@@ -441,6 +441,9 @@ void mk_psi(double *f)
     /* #endif */
 
     // simpler version
+    #ifdef SHOW_TIMING_INFO
+    poisson_time -= get_wall_time();
+    #endif
     const double phi_mean = mean(f, N);
     const double dphi_mean = mean(f + N, N);
     double extra1 = 0.0;
@@ -453,17 +456,33 @@ void mk_psi(double *f)
         extra2 += tmp.grad[i];
     }
     const double extra = 0.5 * (extra1 - extra2 / a2) / N;
+    #ifdef SHOW_TIMING_INFO
+    mon.fftw_time_exe -= get_wall_time();
+    #endif
     fftw_execute_dft_r2c(p_fw, tmp.deltarho, tmp.deltarhoc);
     fftw_execute_dft_r2c(p_fw, tmp.f, tmp.fc);
+    #ifdef SHOW_TIMING_INFO
+    mon.fftw_time_exe += get_wall_time();
+    #endif
+
     for (size_t i = 1; i < M; ++i) {
         tmp.phic[i] = 0.5 * (tmp.deltarhoc[i] +
                 3 * hubble * tmp.fc[i]) / ((kvec.sq[i] / a2 + extra) * N);
     }
     tmp.phic[0] = 0.0;
+    #ifdef SHOW_TIMING_INFO
+    mon.fftw_time_exe -= get_wall_time();
+    #endif
     fftw_execute_dft_c2r(p_bw, tmp.phic, f + N2p);
+    #ifdef SHOW_TIMING_INFO
+    mon.fftw_time_exe += get_wall_time();
+    #endif
     for (size_t i = 0; i < N; ++i) {
         f[N3p + i] = 0.5 * tmp.f[i] - hubble * f[N2p + i];
     }
+    #ifdef SHOW_TIMING_INFO
+    poisson_time += get_wall_time();
+    #endif
 }
 
 /**
@@ -634,6 +653,10 @@ void center(double *f, const size_t N)
 void mk_summary()
 {
     //TODO[performance]: parallel sections instead of parallel loops here?
+    #ifdef SHOW_TIMING_INFO
+    mon.smry_time -= get_wall_time();
+    #endif
+
     #ifdef OUTPUT_PHI_SMRY
     mean_var_min_max(field, phi_smry.tmp);
     #endif
@@ -652,6 +675,10 @@ void mk_summary()
     #endif
     #ifdef OUTPUT_RHO_SMRY
     mean_var_min_max(rho, rho_smry.tmp);
+    #endif
+
+    #ifdef SHOW_TIMING_INFO
+    mon.smry_time += get_wall_time();
     #endif
 }
 
