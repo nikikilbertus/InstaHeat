@@ -330,9 +330,7 @@ void mk_fftw_plans()
     const size_t Ny = pars.y.N;
     const size_t Nz = pars.z.N;
 
-    #ifdef SHOW_TIMING_INFO
-    mon.fftw_time_plan -= get_wall_time();
-    #endif
+    TIME(mon.fftw_time_plan -= get_wall_time());
     switch (pars.dim) {
         case 1:
             p_fw = fftw_plan_dft_r2c_1d(Nx, field, tmp.phic,
@@ -353,9 +351,7 @@ void mk_fftw_plans()
                     FFTW_DEFAULT_FLAG);
             break;
     }
-    #ifdef SHOW_TIMING_INFO
-    mon.fftw_time_plan += get_wall_time();
-    #endif
+    TIME(mon.fftw_time_plan += get_wall_time());
     INFO(puts("Created fftw plans.\n"));
 }
 
