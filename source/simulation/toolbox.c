@@ -317,6 +317,9 @@ inline double potential_prime(const double f)
  */
 void mk_constraints()
 {
+    #ifdef SHOW_TIMING_INFO
+    mon.cstr_time -= get_wall_time();
+    #endif
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
     const size_t N2p = 2 * N + 2;
@@ -346,6 +349,10 @@ void mk_constraints()
     cstr.tmp[1] = ham_max;
     cstr.tmp[2] = mom_l2;
     cstr.tmp[3] = mom_max;
+
+    #ifdef SHOW_TIMING_INFO
+    mon.cstr_time += get_wall_time();
+    #endif
 }
 
 /**
