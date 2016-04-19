@@ -1,7 +1,7 @@
 % name = '64_5e-3_1e4_tol_10_16';
 interp = false;
 newoutput = true;
-cstr = true;
+cstr = false;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
