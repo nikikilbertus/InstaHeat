@@ -508,7 +508,7 @@ void check_for_stiffness(const double dt)
         dp.nonstiff = 0;
         dp.stiff += 1;
         if (dp.stiff == 15) {
-            fprintf(stderr, "Potential stiffness detected at t = %f\n", dp.t.t);
+            fprintf(stderr, "Potential stiffness detected at t = %f\n", dp.t);
             exit(EXIT_FAILURE);
         }
     } else {
