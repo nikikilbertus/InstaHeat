@@ -16,6 +16,21 @@
  * well as the desired output.
  */
 
+static void assemble_gradient_squared();
+static double potential(const double f);
+static double potential_prime(const double f);
+static void mk_constraints();
+static void mk_power_spectrum(const fftw_complex *in, struct output out);
+static void apply_filter_real(double *inout);
+static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
+        fftw_complex *psi_io, fftw_complex *dpsi_io);
+static void center(double *f, const size_t N);
+static double mean(const double *f, const size_t N);
+static void mean_var_min_max(const double *f, double *smry);
+static double variance(const double mean, const double *f, const size_t N);
+static void contains_nan(const double *f, const size_t N);
+static void contains_nanc(const complex *f, const size_t N);
+
 struct evolution_flags evo_flags = {.filter = 0,
                                     .compute_pow_spec = 0,
                                     .compute_cstr = 0};
@@ -178,7 +193,7 @@ void mk_gradient_squared_and_laplacian(double *in)
  * `mk_gradient_squared_and_laplacian(double *in)` are indiviually squared,
  * added up and the result is stored in `tmp.grad`
  */
-void assemble_gradient_squared()
+static void assemble_gradient_squared()
 {
     const size_t N = pars.N;
     #pragma omp parallel for
@@ -253,7 +268,7 @@ void mk_rho(const double *f)
  * @param[in] f The field value where to evaluate the potential
  * @return The potential value at the given input
  */
-inline double potential(const double f)
+static double potential(const double f)
 {
     // higgs metastability potential
     /* double l = LAMBDA / 1.0e-10; */
@@ -278,7 +293,7 @@ inline double potential(const double f)
  * potential
  * @return The value of the derivative of the potential at given input
  */
-inline double potential_prime(const double f)
+static double potential_prime(const double f)
 {
     // higgs metastability potential
     /* double l = LAMBDA / 1.0e-10; */
@@ -307,7 +322,7 @@ inline double potential_prime(const double f)
  *
  * @note So far only the Hamiltonian constraint is implemented! (4/14/2016)
  */
-void mk_constraints()
+static void mk_constraints()
 {
     TIME(mon.cstr_time -= get_wall_time());
     const size_t N = pars.N;
@@ -471,7 +486,7 @@ void mk_psi(double *f)
  * the size of their wave vectors. The number of bins is determined by
  * `POWER_SPECTRUM_BINS`
  */
-void mk_power_spectrum(const fftw_complex *in, struct output out)
+static void mk_power_spectrum(const fftw_complex *in, struct output out)
 {
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
@@ -511,7 +526,7 @@ void mk_power_spectrum(const fftw_complex *in, struct output out)
  * The highest modes of each field are cut off according to `filter_window(const
  * double x)` in `setup.c`.
  */
-void apply_filter_real(double *inout)
+static void apply_filter_real(double *inout)
 {
     const size_t N = pars.N;
     const size_t N2p = 2 * N + 2;
@@ -555,7 +570,7 @@ void apply_filter_real(double *inout)
  * The `filter` is constructed in `mk_filter_mask()` using the filter window
  * `filter_window(const double x)` in `setup.c`.
  */
-void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
+static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
         fftw_complex *psi_io, fftw_complex *dpsi_io)
 {
     const size_t M = pars.M;
@@ -604,7 +619,7 @@ void prepare_and_save_timeslice()
  *
  * The vector @p f is overwritten by f - <f>
  */
-void center(double *f, const size_t N)
+static void center(double *f, const size_t N)
 {
     double avg = mean(f, N);
     #pragma omp parallel for
@@ -650,7 +665,7 @@ void mk_summary()
  * @param[in] N The length of the vector @p f
  * @return The mean value of @p f
  */
-inline double mean(const double *f, const size_t N)
+static double mean(const double *f, const size_t N)
 {
     double mean = 0.0;
     #pragma omp parallel for reduction(+: mean)
@@ -670,7 +685,7 @@ inline double mean(const double *f, const size_t N)
  *
  * @note The vector is implicitly assumed to have length `pars.N`
  */
-void mean_var_min_max(const double *f, double *smry)
+static void mean_var_min_max(const double *f, double *smry)
 {
     const size_t N = pars.N;
     double mean = 0.0;
@@ -697,7 +712,7 @@ void mean_var_min_max(const double *f, double *smry)
  * @param[in] N The length of the vector @p f
  * @return The variance value of @p f
  */
-double variance(const double mean, const double *f, const size_t N)
+static double variance(const double mean, const double *f, const size_t N)
 {
     double sum1 = 0.0;
     double sum2 = 0.0;
@@ -717,7 +732,7 @@ double variance(const double mean, const double *f, const size_t N)
  * @param[in] f Any vector of length @p N
  * @param[in] N The length of the vector @p f
  */
-void contains_nan(const double *f, const size_t N)
+static void contains_nan(const double *f, const size_t N)
 {
     size_t count = 0;
     for (size_t i = 0; i < N; ++i) {
@@ -734,7 +749,7 @@ void contains_nan(const double *f, const size_t N)
  * @param[in] f Any vector of length @p N
  * @param[in] N The length of the vector @p f
  */
-void contains_nanc(const complex *f, const size_t N)
+static void contains_nanc(const complex *f, const size_t N)
 {
     size_t count = 0;
     for (size_t i = 0; i < N; ++i) {
