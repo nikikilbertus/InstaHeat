@@ -6,12 +6,27 @@
 #include "setup.h"
 #include "toolbox.h"
 
+static void test_mk_gradient_squared_and_laplacian();
+static double test_func_gradsq(const double x, const double y, const double z);
+static double test_func_lap(const double x, const double y, const double z);
+static double test_func(const double x, const double y, const double z);
+static double test_func_Dx(const double x, const double y, const double z);
+static double test_func_Dy(const double x, const double y, const double z);
+static double test_func_Dz(const double x, const double y, const double z);
+static double test_func_D2x(const double x, const double y, const double z);
+static double test_func_D2y(const double x, const double y, const double z);
+static double test_func_D2z(const double x, const double y, const double z);
+static void fill_field(double *f, double (*func)(const double, const double,
+            const double));
+static int are_fields_equal(const double *f, const double *g);
+static int equal(const double a, const double b);
+
 void run_all_tests()
 {
     test_mk_gradient_squared_and_laplacian();
 }
 
-void test_mk_gradient_squared_and_laplacian()
+static void test_mk_gradient_squared_and_laplacian()
 {
     fill_field(field, test_func);
     mk_gradient_squared_and_laplacian(field);
@@ -63,7 +78,7 @@ void test_mk_gradient_squared_and_laplacian()
     #endif
 }
 
-double test_func_gradsq(const double x, const double y, const double z)
+static double test_func_gradsq(const double x, const double y, const double z)
 {
     const double grad_x = test_func_Dx(x,y,z);
     const double grad_y = test_func_Dy(x,y,z);
@@ -71,41 +86,41 @@ double test_func_gradsq(const double x, const double y, const double z)
     return grad_x * grad_x + grad_y * grad_y + grad_z * grad_z;
 }
 
-double test_func_lap(const double x, const double y, const double z)
+static double test_func_lap(const double x, const double y, const double z)
 {
     return test_func_D2x(x, y, z) + test_func_D2y(x, y, z) +
         test_func_D2z(x, y, z);
 }
 
-double test_func(const double x, const double y, const double z)
+static double test_func(const double x, const double y, const double z)
 {
     return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
         cos(2.0 * x) * cos(y) * cos(4.0 * z);
     /* return sin(x) * sin(y) * sin(z); */
 }
 
-double test_func_Dx(const double x, const double y, const double z)
+static double test_func_Dx(const double x, const double y, const double z)
 {
     return -2.0 * exp(-2. * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
         cos(y) * cos(4.0 * z) * (2.0 * x * cos(2.0 * x) + sin(2.0 * x));
     /* return cos(x) * sin(y) * sin(z); */
 }
 
-double test_func_Dy(const double x, const double y, const double z)
+static double test_func_Dy(const double x, const double y, const double z)
 {
     return -exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
         cos(2.0 * x) * cos(4.0 * z) * (8.0 * y * cos(y) + sin(y));
     /* return sin(x) * cos(y) * sin(z); */
 }
 
-double test_func_Dz(const double x, const double y, const double z)
+static double test_func_Dz(const double x, const double y, const double z)
 {
     return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
         cos(2.0 * x) * cos(y) * (-3.0 * z * cos(4.0 * z) - 4.0 * sin(4.0 * z));
     /* return sin(x) * sin(y) * cos(z); */
 }
 
-double test_func_D2x(const double x, const double y, const double z)
+static double test_func_D2x(const double x, const double y, const double z)
 {
     return 8.0 * exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
         cos(y) * cos(4.0 * z) * ((-1.0 + 2.0 * pow(x, 2)) * cos(2.0 * x) +
@@ -113,7 +128,7 @@ double test_func_D2x(const double x, const double y, const double z)
     /* return -sin(x) * sin(y) * sin(z); */
 }
 
-double test_func_D2y(const double x, const double y, const double z)
+static double test_func_D2y(const double x, const double y, const double z)
 {
     return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
         cos(2.0 * x) * cos(4.0 * z) * ((-9.0 + 64.0 * pow(y, 2)) * cos(y) +
@@ -121,7 +136,7 @@ double test_func_D2y(const double x, const double y, const double z)
     /* return -sin(x) * sin(y) * sin(z); */
 }
 
-double test_func_D2z(const double x, const double y, const double z)
+static double test_func_D2z(const double x, const double y, const double z)
 {
     return exp(-2.0 * pow(x, 2) - 4.0 * pow(y, 2) - 1.5 * pow(z, 2)) *
         cos(2.0 * x) * cos(y) * ((-19.0 + 9.0 * pow(z, 2)) * cos(4.0 * z) +
@@ -129,7 +144,7 @@ double test_func_D2z(const double x, const double y, const double z)
     /* return -sin(x) * sin(y) * sin(z); */
 }
 
-void fill_field(double *f, double (*func)(const double, const double,
+static void fill_field(double *f, double (*func)(const double, const double,
                                                         const double))
 {
     const size_t Nx = pars.x.N;
@@ -155,7 +170,7 @@ void fill_field(double *f, double (*func)(const double, const double,
     free(grid);
 }
 
-int are_fields_equal(const double *f, const double *g)
+static int are_fields_equal(const double *f, const double *g)
 {
     size_t errs = 0;
     for (size_t i = 0; i < pars.N; ++i) {
@@ -172,7 +187,7 @@ int are_fields_equal(const double *f, const double *g)
     }
 }
 
-int equal(const double a, const double b)
+static int equal(const double a, const double b)
 {
     return fabs(a - b) < 1e-5 ? 0 : -1;
 }
