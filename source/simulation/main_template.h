@@ -96,6 +96,11 @@
     #define LARGE_OUTPUT
 #endif
 
+#if defined(OUTPUT_PHI_PS) || defined(OUTPUT_DPHI_PS) || defined(OUTPUT_PSI_PS) \
+    || defined(OUTPUT_DPSI_PS) || defined(OUTPUT_RHO_PS)
+    #define OUTPUT_PS
+#endif
+
 #define DATAPATH                ("_PATH_")
 #define INITIAL_DATAPATH        ("_IPATH_")
 #define WRITE_OUT_BUFFER_NUMBER (_BUF_)
