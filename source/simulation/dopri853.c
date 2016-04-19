@@ -70,8 +70,8 @@ void initialize_dopri853()
     dp.reject = 0;
     dp.eps = DBL_EPSILON;
     dp.n_stiff = 10;
-    dp.c_stiff = 0;
-    dp.c_nonstiff = 0;
+    dp.stiff = 0;
+    dp.nonstiff = 0;
     INFO(puts("Initialized dopri853 parameters.\n"));
 }
 
@@ -225,7 +225,9 @@ int perform_step(const double dt_try)
     evo_flags.compute_pow_spec = 0;
     evo_flags.compute_cstr = 0;
 
-    check_for_stiffness();
+    if ((dp.n_ok % dp.n_stiff) == 0 || dp.stiff > 0) {
+        check_for_stiffness(dt_try);
+    }
 
     #pragma omp parallel for
     for (size_t i = 0; i < Ntot; ++i) {
@@ -477,15 +479,35 @@ int success(const double err, double *dt)
     }
 }
 
-void check_for_stiffness()
+void check_for_stiffness(const double dt)
 {
     double num = 0.0;
     double den = 0.0;
-#pragma omp parallel for
+    double tmp;
+
+    #pragma omp parallel for private(tmp) reduction(+: num, den)
     for (size_t i = 0; i < Ntot; ++i) {
-        sqr = dpv.k4[i] 
-
-
+        tmp = dfield_new[i] - dpv.k3[i];
+        num += tmp * tmp;
+        tmp = field_new[i] - dpv.k_tmp[i];
+        den += tmp * tmp;
+    }
+    if (den > 0.0) {
+        dtlamb = dt * sqrt(num / den);
+    }
+    if (dtlamb > 6.1) {
+        dp.nonstiff = 0;
+        dp.stiff += 1;
+        if (dp.stiff == 15) {
+            fprintf(stderr, "Potential stiffness detected at t = %f\n", dp.t.t);
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        dp.nonstiff += 1;
+        if (dp.nonstiff == 6) {
+            dp.stiff = 0;
+        }
+    }
 }
 
 /**
