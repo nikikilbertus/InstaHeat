@@ -20,6 +20,30 @@
  * simulation. Therefore, performance is not an issue in this file.
  */
 
+static void initialize_threading();
+static void initialize_parameters();
+static void allocate_external();
+static void mk_fftw_plans();
+static void mk_k_grid();
+static void mk_filter_mask();
+static double filter_window(const double x);
+static void mk_initial_conditions();
+static void initialize_from_dat();
+static void initialize_from_bunch_davies();
+static void mk_bunch_davies(double *f, const double H, const double homo,
+        const double gamma);
+static complex box_muller();
+static void initialize_from_internal_function();
+static void mk_x_grid(double *grid);
+static double phi_init(const double x, const double y, const double z,
+        const double *ph);
+static double dphi_init(const double x, const double y, const double z,
+        const double *ph);
+static double wrapped_gaussian(const double x, const double y, const double z);
+static void mk_initial_psi();
+static void destroy_and_cleanup_fftw();
+static void free_external();
+
 /**
  * @brief Successively calls the subroutines in this file necessary to setup
  * everything for the simulation.
@@ -60,7 +84,7 @@ void allocate_and_initialize_all()
  * If the parameter THREAD_NUMBER is 0, we initialize fftw3 with
  * omp_set_num_threads() threads.
  */
-void initialize_threading()
+static void initialize_threading()
 {
     int threadnum, threadinit;
     threadinit = fftw_init_threads();
@@ -82,7 +106,7 @@ void initialize_threading()
  * parameters are computed from others in non trivial ways. The struct pars
  * provides a flexible way to access all parameters in a global scope.
  */
-void initialize_parameters()
+static void initialize_parameters()
 {
     pars.x.N = GRIDPOINTS_X;
     pars.x.a = SPATIAL_LOWER_BOUND_X;
@@ -182,7 +206,7 @@ void initialize_parameters()
 /**
  * @brief Allocate memory for all external (i.e. global) variables.
  */
-void allocate_external()
+static void allocate_external()
 {
     const size_t N = pars.N;
     const size_t Nall = pars.Nall;
@@ -324,7 +348,7 @@ void allocate_external()
  * @see FFTW3 documentation for more information on memory alignment (for SIMD
  * operations).
  */
-void mk_fftw_plans()
+static void mk_fftw_plans()
 {
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
@@ -365,7 +389,7 @@ void mk_fftw_plans()
  * differentiation via discrete fourier transforms. However, those entries are
  * used normally for k^2.
  */
-void mk_k_grid()
+static void mk_k_grid()
 {
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
@@ -425,7 +449,7 @@ void mk_k_grid()
  * Fills the global array `filter` with multiplicative factors that can be applied
  * pointwise to a field in Fourier space to cut off high frequency modes.
  */
-void mk_filter_mask()
+static void mk_filter_mask()
 {
     const size_t N = pars.N;
     const size_t Nx = pars.x.N;
@@ -467,7 +491,7 @@ void mk_filter_mask()
  * @see [Numerical Study of Nearly Singular Solutions of the 3-D Incompressible Euler Equations](http://arxiv.org/abs/physics/0608126)
  * @see [On the stability of the unsmoothed Fourier method for hyperbolic equations](http://link.springer.com/article/10.1007%2Fs002110050019)
  */
-inline double filter_window(const double x)
+static double filter_window(const double x)
 {
     return exp(-36.0 * pow(x, 36));
 
@@ -483,7 +507,7 @@ inline double filter_window(const double x)
  * rountine is called. Once the function returns, $$\phi$$, $$\dot{\phi}$$,
  * $$\psi$$, $$\dot{\psi}$$, $$t$$ and $$a$$ have their initial values.
  */
-void mk_initial_conditions()
+static void mk_initial_conditions()
 {
     const size_t Nall = pars.Nall;
     #pragma omp parallel for
@@ -524,7 +548,7 @@ void mk_initial_conditions()
  *
  * @see `read_initial_data()` in `io.c`
  */
-void initialize_from_dat()
+static void initialize_from_dat()
 {
     read_initial_data();
     /* center(field + 2 * pars.N + 2, pars.N); */
@@ -541,7 +565,7 @@ void initialize_from_dat()
  * provided in `field`, construct the corresponding $$\psi$$ and
  * $$\dot{\psi}$$.
  */
-void mk_initial_psi()
+static void mk_initial_psi()
 {
     const size_t N = pars.N;
     const size_t N2p = 2 * N + 2;
@@ -569,7 +593,7 @@ void mk_initial_psi()
  * @see `mk_bunch_davies(double *f, const double H, const double homo, const
  * double gamma)`
  */
-void initialize_from_bunch_davies()
+static void initialize_from_bunch_davies()
 {
     size_t Nx = pars.x.N;
     size_t Ny = pars.y.N;
@@ -606,7 +630,7 @@ void initialize_from_bunch_davies()
  *
  * @see [DEFROST: A New Code for Simulating Preheating after Inflation](http://arxiv.org/abs/0809.4904)
  */
-void mk_bunch_davies(double *f, const double H, const double homo,
+static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma)
 {
     const size_t Nx = pars.x.N;
@@ -698,7 +722,7 @@ void mk_bunch_davies(double *f, const double H, const double homo,
  * @note The two independent uniformly distributed random values are computed
  * via the standard library rand() function.
  */
-inline complex box_muller()
+static complex box_muller()
 {
     const double u1 = (double)rand() / (double)RAND_MAX;
     const double u2 = (double)rand() / (double)RAND_MAX;
@@ -716,7 +740,7 @@ inline complex box_muller()
  * factor $$a$$ comes from the parameter file and $$\psi$$, $$\dot{\psi}$$ are
  * then computed from $$\phi$$ and $$\dot{\phi}$$.
  */
-void initialize_from_internal_function()
+static void initialize_from_internal_function()
 {
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
@@ -765,7 +789,7 @@ void initialize_from_internal_function()
  * Since the grid is rectangular with uniform spacing in each direction, only
  * the x, y and z values are computed.
  */
-void mk_x_grid(double *grid)
+static void mk_x_grid(double *grid)
 {
     const size_t Nx = pars.x.N;
     const size_t Ny = pars.y.N;
@@ -808,7 +832,7 @@ void mk_x_grid(double *grid)
  * or call another function (like `wrapped_gaussian(const double x, const double
  * y, const double z)`
  */
-double phi_init(const double x, const double y, const double z,
+static double phi_init(const double x, const double y, const double z,
         const double *ph)
 {
     // localized for higgs metastability potential
@@ -926,7 +950,7 @@ double phi_init(const double x, const double y, const double z,
  * or call another function (like `wrapped_gaussian(const double x, const double
  * y, const double z)`
  */
-double dphi_init(const double x, const double y, const double z,
+static double dphi_init(const double x, const double y, const double z,
         const double *ph)
 {
     /* return 0.0; */
@@ -979,7 +1003,7 @@ double dphi_init(const double x, const double y, const double z,
 /**
  * @brief A periodic version of a Gaussian for localized initial conditions.
  */
-double wrapped_gaussian(const double x, const double y, const double z)
+static double wrapped_gaussian(const double x, const double y, const double z)
 {
     const double s = 0.5;
     double res = 0.0;
@@ -1034,7 +1058,7 @@ void free_and_destroy_all()
 /**
  * @brief Destroy fftw plans and clean up threads.
  */
-void destroy_and_cleanup_fftw()
+static void destroy_and_cleanup_fftw()
 {
     fftw_destroy_plan(p_fw);
     fftw_destroy_plan(p_bw);
@@ -1047,7 +1071,7 @@ void destroy_and_cleanup_fftw()
  *
  * @note Everything allocated in `allocate_external()` must be freed here.
  */
-void free_external()
+static void free_external()
 {
     fftw_free(field);
     fftw_free(field_new);
@@ -1131,20 +1155,4 @@ void free_external()
     fftw_free(tmp.f);
     fftw_free(tmp.deltarho);
     INFO(puts("Freed external variables.\n"));
-}
-
-/**
- * @brief Print a vector to standard output.
- *
- * @param[in] vector The vector to print.
- * @param[in] N The length of the vector, i.e. how many etries to print.
- *
- * This function was mostly used for debugging, hence is obsolete/for internal
- * use only.
- */
-void print_vector(const double *vector, const size_t N)
-{
-    for (size_t i = 0; i < N; i++) {
-        printf("%f\n", vector[i]);
-    }
 }
