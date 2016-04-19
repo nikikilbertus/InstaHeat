@@ -56,9 +56,8 @@ struct monitor mon;
  */
 int main(int argc, const char * argv[])
 {
-    #ifdef SHOW_TIMING_INFO
-    double secs = get_wall_time();
-    #endif
+    double secs = 0.0;
+    TIME(secs = -get_wall_time());
 
     allocate_and_initialize_all();
 
@@ -83,7 +82,7 @@ int main(int argc, const char * argv[])
     #endif
 
     #ifdef SHOW_TIMING_INFO
-    secs = get_wall_time() - secs;
+    secs += get_wall_time();
     INFO(printf("main took %f seconds.\n", secs));
     INFO(puts("as percentage of total, not mutually disjoint:"));
     INFO(printf("fftw execution took %f seconds (%.2f %%).\n",
