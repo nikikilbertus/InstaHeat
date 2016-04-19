@@ -19,7 +19,9 @@
 static void assemble_gradient_squared();
 static double potential(const double f);
 static double potential_prime(const double f);
+#ifdef OUTPUT_CONSTRAINTS
 static void mk_constraints();
+#endif
 static void mk_power_spectrum(const fftw_complex *in, struct output out);
 #ifdef ENABLE_FFT_FILTER
 static void apply_filter_real(double *inout);
@@ -317,6 +319,7 @@ static double potential_prime(const double f)
     return MASS * MASS * f;
 }
 
+#ifdef OUTPUT_CONSTRAINTS
 /**
  * @brief Monitor how well the Hamiltonian and momentum constraint are fulfilled.
  *
@@ -360,6 +363,7 @@ static void mk_constraints()
     cstr.tmp[3] = mom_max;
     TIME(mon.cstr_time += get_wall_time());
 }
+#endif
 
 /**
  * @brief Compute $$\psi$$ and $$\dot{\psi}$$
