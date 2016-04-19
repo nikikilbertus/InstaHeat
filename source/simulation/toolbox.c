@@ -21,15 +21,19 @@ static double potential(const double f);
 static double potential_prime(const double f);
 static void mk_constraints();
 static void mk_power_spectrum(const fftw_complex *in, struct output out);
+#ifdef ENABLE_FFT_FILTER
 static void apply_filter_real(double *inout);
 static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
         fftw_complex *psi_io, fftw_complex *dpsi_io);
-static void center(double *f, const size_t N);
+#endif
+/* static void center(double *f, const size_t N); */
 static double mean(const double *f, const size_t N);
 static void mean_var_min_max(const double *f, double *smry);
 static double variance(const double mean, const double *f, const size_t N);
+#ifdef CHECK_FOR_NAN
 static void contains_nan(const double *f, const size_t N);
 static void contains_nanc(const complex *f, const size_t N);
+#endif
 
 struct evolution_flags evo_flags = {.filter = 0,
                                     .compute_pow_spec = 0,
@@ -516,6 +520,7 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
     }
 }
 
+#ifdef ENABLE_FFT_FILTER
 /**
  * @brief Apply a Fourier filter to each field of a given input to cutoff high
  * frequency modes
@@ -588,6 +593,7 @@ static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
         #endif
     }
 }
+#endif
 
 /**
  * @brief Recompute all desired output quantities and save the current
@@ -619,14 +625,14 @@ void prepare_and_save_timeslice()
  *
  * The vector @p f is overwritten by f - <f>
  */
-static void center(double *f, const size_t N)
-{
-    double avg = mean(f, N);
-    #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i) {
-        f[i] -= avg;
-    }
-}
+/* static void center(double *f, const size_t N) */
+/* { */
+/*     double avg = mean(f, N); */
+/*     #pragma omp parallel for */
+/*     for (size_t i = 0; i < N; ++i) { */
+/*         f[i] -= avg; */
+/*     } */
+/* } */
 
 /**
  * @brief Save the summaries of the fields (containing the mean, variance,
@@ -726,6 +732,7 @@ static double variance(const double mean, const double *f, const size_t N)
     return (sum1 - sum2 * sum2 / (double)N) / (double)(N - 1);
 }
 
+#ifdef ENABLE_FFT_FILTER
 /**
  * @brief Check and print whether a vector contains NaNs __(debugging only)__
  *
@@ -759,3 +766,4 @@ static void contains_nanc(const complex *f, const size_t N)
     }
     printf("found %zu nans\n", count);
 }
+#endif
