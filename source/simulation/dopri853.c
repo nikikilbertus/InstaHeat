@@ -64,12 +64,55 @@ void initialize_dopri853()
     dp.safe = SAFE;
     dp.minscale = SMALLEST_SCALING;
     dp.maxscale = LARGEST_SCALING;
-    dp.a_tol = ABSOLUTE_TOLERANCE;
-    dp.r_tol = RELATIVE_TOLERANCE;
     dp.err_old = 1.0e-4;
     dp.reject = 0;
     dp.eps = DBL_EPSILON;
+    allocate_and_initialize_tolerances();
     INFO(puts("Initialized dopri853 parameters.\n"));
+}
+
+void allocate_and_initialize_tolerances()
+{
+    const size_t N = pars.N;
+    const size_t N2 = 2 * N;
+    const size_t Ntot = pars.Ntot;
+
+    dp.r_tol = fftw_malloc(Ntot * sizeof *dp.r_tol);
+    dp.a_tol = fftw_malloc(Ntot * sizeof *dp.a_tol);
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < N; ++i) {
+        dp.r_tol[i] = RELATIVE_TOLERANCE;
+        dp.a_tol[i] = ABSOLUTE_TOLERANCE;
+    }
+
+    #pragma omp parallel for
+    for (size_t i = N; i < N2; ++i) {
+        dp.r_tol[i] = RELATIVE_TOLERANCE;
+        dp.a_tol[i] = ABSOLUTE_TOLERANCE;
+    }
+
+    #if PSI_METHOD != PSI_ELLIPTIC
+    const size_t N2p = N2 + 2;
+    const size_t N3p = 3 * N + 2;
+    #pragma omp parallel for
+    for (size_t i = N2p; i < N3p; ++i) {
+        dp.r_tol[i] = RELATIVE_TOLERANCE;
+        dp.a_tol[i] = ABSOLUTE_TOLERANCE;
+    }
+        #if PSI_METHOD == PSI_HYPERBOLIC
+        #pragma omp parallel for
+        for (size_t i = N3p; i < Ntot; ++i) {
+            dp.r_tol[i] = RELATIVE_TOLERANCE;
+            dp.a_tol[i] = ABSOLUTE_TOLERANCE;
+        }
+        #endif
+    #endif
+
+    dp.r_tol[N2] = RELATIVE_TOLERANCE;
+    dp.a_tol[N2] = ABSOLUTE_TOLERANCE;
+    dp.r_tol[N2 + 1] = 1.0;
+    dp.a_tol[N2 + 1] = 1.0;
 }
 
 /**
@@ -91,8 +134,8 @@ void run_dopri853()
     INFO(printf("initial time step dt: %f\n", dp.dt));
     INFO(printf("minimal time step dt: %f\n", dp.dt_min));
     INFO(printf("max number of steps: %zu\n", dp.max_steps));
-    INFO(printf("relative tolerance: %.15f\n", dp.r_tol));
-    INFO(printf("absolute tolerance: %.15f\n\n", dp.a_tol));
+    INFO(printf("proxy relative tolerance: %.15f\n", RELATIVE_TOLERANCE));
+    INFO(printf("proxy absolute tolerance: %.15f\n\n", ABSOLUTE_TOLERANCE));
 
     #ifdef OUTPUT_PHI_PS
     evo_flags.compute_pow_spec = 1;
@@ -368,7 +411,7 @@ void try_step(const double dt)
     #pragma omp parallel for
     for (i = 0; i < Ntot; ++i) {
         dpv.yerr[i] = dpv.k4[i] - dpc.bhh1 * dfield[i] - dpc.bhh2 * dpv.k9[i] -
-                        dpc.bhh3 * dpv.k3[i];
+                      dpc.bhh3 * dpv.k3[i];
         dpv.yerr2[i] = dpc.er1 * dfield[i] + dpc.er6 * dpv.k6[i] +
                        dpc.er7 * dpv.k7[i] + dpc.er8 * dpv.k8[i] +
                        dpc.er9 * dpv.k9[i] + dpc.er10 * dpv.k10[i] +
@@ -393,7 +436,8 @@ double error(const double dt)
     double tmp;
     #pragma omp parallel for private(sk, tmp) reduction(+: err, err2)
     for (size_t i = 0; i < Ntot; ++i) {
-        sk = dp.a_tol + dp.r_tol * MAX(fabs(field[i]), fabs(field_new[i]));
+        sk = dp.a_tol[i] +
+            dp.r_tol[i] * MAX(fabs(field[i]), fabs(field_new[i]));
         tmp = dpv.yerr[i] / sk;
         err2 += tmp * tmp;
         tmp = dpv.yerr2[i] / sk;
@@ -528,6 +572,9 @@ void allocate_dopri853_values()
  */
 void free_dopri853_values()
 {
+    fftw_free(dp.r_tol);
+    fftw_free(dp.a_tol);
+
     fftw_free(dpv.k2);
     fftw_free(dpv.k3);
     fftw_free(dpv.k4);
