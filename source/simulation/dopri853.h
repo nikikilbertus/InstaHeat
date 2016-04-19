@@ -73,6 +73,7 @@ struct dopri853_control
     double dt_did; ///< The previously used time step size
     double dt_next; ///< The proposed next time step size
     double dt_min; ///< The minimal permissible time step size
+    double dtlamb; ///< The multiple of dt used for stiffness detection
     size_t max_steps; ///< The maximal number of steps
     int n_stp; ///< The number of performed steps
     int n_ok; ///< The number of successful steps
@@ -87,6 +88,9 @@ struct dopri853_control
     double err_old; ///< The previous error (on the last time slice)
     int reject; ///< Flag whether time step is rejected or accepted
     double eps; ///< Epsilon value for comparisons
+    int n_stiff; ///< Skips for stiffness detection
+    int stiff; ///< Counter for stiffness detection (set)
+    int nonstiff; ///< Counter for stiffness detection (reset)
 };
 
 extern struct dopri853_constants dpc; ///< Dormand Prince Butcher tableaux constants
@@ -99,6 +103,7 @@ int perform_step(const double dt_try);
 void try_step(const double dt);
 double error(const double dt);
 int success(const double err, double *dt);
+void check_for_stiffness(const double dt);
 void allocate_dopri853_values();
 void free_dopri853_values();
 

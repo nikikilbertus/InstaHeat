@@ -55,6 +55,7 @@ void initialize_dopri853()
     dp.dt_did = 0.0;
     dp.dt_next = pars.t.dt;
     dp.dt_min = MINIMAL_DELTA_T;
+    dp.dtlamb = 0.0;
     dp.max_steps = MAX_STEPS;
     dp.n_stp = 0;
     dp.n_ok = 0;
@@ -69,6 +70,9 @@ void initialize_dopri853()
     dp.err_old = 1.0e-4;
     dp.reject = 0;
     dp.eps = DBL_EPSILON;
+    dp.n_stiff = 10;
+    dp.stiff = 0;
+    dp.nonstiff = 0;
     INFO(puts("Initialized dopri853 parameters.\n"));
 }
 
@@ -221,6 +225,10 @@ int perform_step(const double dt_try)
     mk_rhs(dp.t + dt, field_new, dfield_new);
     evo_flags.compute_pow_spec = 0;
     evo_flags.compute_cstr = 0;
+
+    if ((dp.n_ok % dp.n_stiff) == 0 || dp.stiff > 0) {
+        check_for_stiffness(dt_try);
+    }
 
     #pragma omp parallel for
     for (size_t i = 0; i < Ntot; ++i) {
@@ -469,6 +477,45 @@ int success(const double err, double *dt)
         (*dt) *= scale;
         dp.reject = 1;
         return 0;
+    }
+}
+
+/**
+ * @brief Performs a check whether the evolution becomes stiff and aborts if
+ * necessary.
+ *
+ * If stiffness requirements are fulfilled on 15 subsequent time steps, the
+ * integration is aborted.
+ */
+void check_for_stiffness(const double dt)
+{
+    const size_t Ntot = pars.Ntot;
+    double num = 0.0;
+    double den = 0.0;
+    double tmp;
+
+    #pragma omp parallel for private(tmp) reduction(+: num, den)
+    for (size_t i = 0; i < Ntot; ++i) {
+        tmp = dfield_new[i] - dpv.k3[i];
+        num += tmp * tmp;
+        tmp = field_new[i] - dpv.k_tmp[i];
+        den += tmp * tmp;
+    }
+    if (den > 0.0) {
+        dp.dtlamb = dt * sqrt(num / den);
+    }
+    if (dp.dtlamb > 6.1) {
+        dp.nonstiff = 0;
+        dp.stiff += 1;
+        if (dp.stiff == 15) {
+            fprintf(stderr, "Potential stiffness detected at t = %f\n", dp.t);
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        dp.nonstiff += 1;
+        if (dp.nonstiff == 6) {
+            dp.stiff = 0;
+        }
     }
 }
 
