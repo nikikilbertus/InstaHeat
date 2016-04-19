@@ -50,6 +50,7 @@
 #define     H5_RUNTIME_WRITEOUT_NAME        ("runtime_writeout")
 #define     H5_RUNTIME_COPY_BUFFER_NAME     ("runtime_copy_buffer")
 #define     H5_RUNTIME_STEPPER_NAME         ("runtime_stepper")
+#define     H5_RUNTIME_CSTR_NAME            ("runtime_constraints")
 #define     H5_COUNTER_RHS                  ("calls_rhs")
 #define     H5_STEPS_TOTAL_NAME             ("steps_total")
 #define     H5_STEPS_OK_NAME                ("steps_ok")
