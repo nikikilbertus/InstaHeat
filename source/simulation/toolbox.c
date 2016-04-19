@@ -630,16 +630,13 @@ void prepare_and_save_timeslice()
     #ifdef OUTPUT_PS
     evo_flags.compute_pow_spec = 1;
     #endif
-    mk_gradient_squared_and_laplacian(field);
-    evo_flags.compute_pow_spec = 0;
-    mk_rho(field);
-    #if PSI_METHOD == PSI_ELLIPTIC && !defined(EVOLVE_WITHOUT_PSI)
-    mk_psi(field);
-    #endif
-    mk_summary();
     #ifdef OUTPUT_CONSTRAINTS
-    mk_constraints();
+    evo_flags.compute_cstr = 1;
     #endif
+    mk_rhs(pars.t.t, field, dfield);
+    evo_flags.compute_pow_spec = 0;
+    evo_flags.compute_cstr = 0;
+    mk_summary();
     save();
 }
 
