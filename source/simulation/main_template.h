@@ -250,12 +250,16 @@ struct k_grid
  */
 struct monitor
 {
+    /**
+     * @brief Number of calls to `mk_rhs(const double t, double *f, double
+     * *result)`
+     */
     size_t calls_rhs;
-    double fftw_time_exe;
-    double fftw_time_plan;
-    double filter_time;
-    double poisson_time;
-    double h5_time_write;
+    double fftw_time_exe; ///< Total wall clock time for fft execution
+    double fftw_time_plan; ///< Total wall clock time for fftw planning
+    double filter_time; ///< Total wall clock time for filtering
+    double poisson_time; ///< Total wall clock time for `mk_psi(double *f)`
+    double h5_time_write; ///< Total wall clock time for write out
 };
 
 extern struct parameters pars;
