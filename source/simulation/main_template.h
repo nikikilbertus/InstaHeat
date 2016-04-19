@@ -245,6 +245,19 @@ struct k_grid
     double *z;
 };
 
+/**
+ * @brief Collection of variables monitoring timing and function calls.
+ */
+struct monitor
+{
+    size_t calls_rhs;
+    double fftw_time_exe;
+    double fftw_time_plan;
+    double filter_time;
+    double poisson_time;
+    double h5_time_write;
+};
+
 extern struct parameters pars;
 
 // contain phi, dphi, a, psi, dpsi (only first Ntot entries are integrated)
@@ -292,11 +305,7 @@ extern struct temporary tmp;
 extern fftw_plan p_fw;
 extern fftw_plan p_bw;
 
-extern double fftw_time_exe;
-extern double fftw_time_plan;
-extern double filter_time;
-extern double poisson_time;
-extern double h5_time_write;
+extern struct monitor mon;
 
 #ifdef SHOW_TIMING_INFO
 double get_wall_time();
