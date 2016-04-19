@@ -129,7 +129,7 @@ void mk_gradient_squared_and_laplacian(double *in)
     const size_t M = pars.M;
 
     #ifdef SHOW_TIMING_INFO
-    fftw_time_exe -= get_wall_time();
+    mon.fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_r2c(p_fw, in, tmp.phic);
         #if PSI_METHOD == PSI_PARABOLIC || defined(OUTPUT_CONSTRAINTS)
@@ -137,7 +137,7 @@ void mk_gradient_squared_and_laplacian(double *in)
         fftw_execute_dft_r2c(p_fw, in + N2p, tmp.psic);
         #endif
     #ifdef SHOW_TIMING_INFO
-    fftw_time_exe += get_wall_time();
+    mon.fftw_time_exe += get_wall_time();
     #endif
 
     if (evo_flags.compute_pow_spec == 1) {
@@ -158,7 +158,7 @@ void mk_gradient_squared_and_laplacian(double *in)
     }
 
     #ifdef SHOW_TIMING_INFO
-    fftw_time_exe -= get_wall_time();
+    mon.fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_c2r(p_bw, tmp.xphic, tmp.xphi);
     if (pars.dim > 1) {
@@ -172,7 +172,7 @@ void mk_gradient_squared_and_laplacian(double *in)
     fftw_execute_dft_c2r(p_bw, tmp.psic, tmp.f);
     #endif
     #ifdef SHOW_TIMING_INFO
-    fftw_time_exe += get_wall_time();
+    mon.fftw_time_exe += get_wall_time();
     #endif
     assemble_gradient_squared();
 }
@@ -369,12 +369,12 @@ void mk_psi(double *f)
     const double hubble = sqrt(rho_mean / 3.0);
 
     /* #ifdef SHOW_TIMING_INFO */
-    /* fftw_time_exe -= get_wall_time(); */
+    /* mon.fftw_time_exe -= get_wall_time(); */
     /* #endif */
     /* fftw_execute_dft_c2r(p_bw, tmp.psic, f + N2p); */
     /* fftw_execute_dft_c2r(p_bw, tmp.dpsic, f + N3p); */
     /* #ifdef SHOW_TIMING_INFO */
-    /* fftw_time_exe += get_wall_time(); */
+    /* mon.fftw_time_exe += get_wall_time(); */
     /* poisson_time += get_wall_time(); */
     /* #endif */
 
@@ -395,12 +395,12 @@ void mk_psi(double *f)
     /* const double extra = 0.5 * (extra1 - extra2 / a2) / N; */
 
     /* #ifdef SHOW_TIMING_INFO */
-    /* fftw_time_exe -= get_wall_time(); */
+    /* mon.fftw_time_exe -= get_wall_time(); */
     /* #endif */
     /* fftw_execute_dft_r2c(p_fw, tmp.f, tmp.fc); */
     /* fftw_execute_dft_r2c(p_fw, tmp.deltarho, tmp.deltarhoc); */
     /* #ifdef SHOW_TIMING_INFO */
-    /* fftw_time_exe += get_wall_time(); */
+    /* mon.fftw_time_exe += get_wall_time(); */
     /* #endif */
 
     /* tmp.fc[0] = 0.0; */
@@ -423,12 +423,12 @@ void mk_psi(double *f)
     /* } */
 
     /* #ifdef SHOW_TIMING_INFO */
-    /* fftw_time_exe -= get_wall_time(); */
+    /* mon.fftw_time_exe -= get_wall_time(); */
     /* #endif */
     /* fftw_execute_dft_c2r(p_bw, tmp.psic, f + N2p); */
     /* fftw_execute_dft_c2r(p_bw, tmp.dpsic, f + N3p); */
     /* #ifdef SHOW_TIMING_INFO */
-    /* fftw_time_exe += get_wall_time(); */
+    /* mon.fftw_time_exe += get_wall_time(); */
     /* poisson_time += get_wall_time(); */
     /* #endif */
 
@@ -517,7 +517,7 @@ void apply_filter_real(double *inout)
 
     #ifdef SHOW_TIMING_INFO
     filter_time -= get_wall_time();
-    fftw_time_exe -= get_wall_time();
+    mon.fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_r2c(p_fw, inout, tmp.phic);
     fftw_execute_dft_r2c(p_fw, inout + N, tmp.xphic);
@@ -528,13 +528,13 @@ void apply_filter_real(double *inout)
         #endif
     #endif
     #ifdef SHOW_TIMING_INFO
-    fftw_time_exe += get_wall_time();
+    mon.fftw_time_exe += get_wall_time();
     #endif
 
     apply_filter_fourier(tmp.phic, tmp.xphic, tmp.yphic, tmp.zphic);
 
     #ifdef SHOW_TIMING_INFO
-    fftw_time_exe -= get_wall_time();
+    mon.fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_c2r(p_bw, tmp.phic, inout);
     fftw_execute_dft_c2r(p_bw, tmp.xphic, inout + N);
@@ -545,7 +545,7 @@ void apply_filter_real(double *inout)
         #endif
     #endif
     #ifdef SHOW_TIMING_INFO
-    fftw_time_exe += get_wall_time();
+    mon.fftw_time_exe += get_wall_time();
     filter_time += get_wall_time();
     #endif
 }
