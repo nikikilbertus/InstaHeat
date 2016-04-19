@@ -94,6 +94,8 @@ int main(int argc, const char * argv[])
             mon.filter_time, 100. * (mon.filter_time / secs)));
     INFO(printf("poisson equation took %f seconds (%.2f %%).\n",
             mon.poisson_time, 100. * (mon.poisson_time / secs)));
+    INFO(printf("computing constraints took %f seconds (%.2f %%).\n",
+            mon.cstr_time, 100. * (mon.cstr_time / secs)));
     INFO(printf("copying buffers took %f seconds (%.2f %%).\n",
             mon.copy_buffer_time, 100. * (mon.copy_buffer_time / secs)));
     INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
@@ -106,6 +108,7 @@ int main(int argc, const char * argv[])
     h5_write_parameter(H5_RUNTIME_FILTER_NAME, &mon.filter_time, 1);
     h5_write_parameter(H5_RUNTIME_ELLIPTIC_NAME, &mon.poisson_time, 1);
     h5_write_parameter(H5_RUNTIME_COPY_BUFFER_NAME, &mon.copy_buffer_time, 1);
+    h5_write_parameter(H5_RUNTIME_CSTR_NAME, &mon.cstr_time, 1);
     h5_write_parameter(H5_RUNTIME_WRITEOUT_NAME, &mon.h5_time_write, 1);
     #endif
 
