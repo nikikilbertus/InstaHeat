@@ -479,6 +479,13 @@ int success(const double err, double *dt)
     }
 }
 
+/**
+ * @brief Performs a check whether the evolution becomes stiff and aborts if
+ * necessary.
+ *
+ * If stiffness requirements are fulfilled on 15 subsequent time steps, the
+ * integration is aborted.
+ */
 void check_for_stiffness(const double dt)
 {
     double num = 0.0;
