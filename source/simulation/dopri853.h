@@ -87,6 +87,7 @@ struct dopri853_control
     double err_old; ///< The previous error (on the last time slice)
     int reject; ///< Flag whether time step is rejected or accepted
     double eps; ///< Epsilon value for comparisons
+    int n_stiff; ///< Counter for stiffness detection
 };
 
 extern struct dopri853_constants dpc; ///< Dormand Prince Butcher tableaux constants
