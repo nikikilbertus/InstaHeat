@@ -55,6 +55,7 @@ void initialize_dopri853()
     dp.dt_did = 0.0;
     dp.dt_next = pars.t.dt;
     dp.dt_min = MINIMAL_DELTA_T;
+    dp.dtlamb = 0.0;
     dp.max_steps = MAX_STEPS;
     dp.n_stp = 0;
     dp.n_ok = 0;
@@ -488,6 +489,7 @@ int success(const double err, double *dt)
  */
 void check_for_stiffness(const double dt)
 {
+    const size_t Ntot = pars.Ntot;
     double num = 0.0;
     double den = 0.0;
     double tmp;
@@ -500,9 +502,9 @@ void check_for_stiffness(const double dt)
         den += tmp * tmp;
     }
     if (den > 0.0) {
-        dtlamb = dt * sqrt(num / den);
+        dp.dtlamb = dt * sqrt(num / den);
     }
-    if (dtlamb > 6.1) {
+    if (dp.dtlamb > 6.1) {
         dp.nonstiff = 0;
         dp.stiff += 1;
         if (dp.stiff == 15) {
