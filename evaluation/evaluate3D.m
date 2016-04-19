@@ -1,7 +1,7 @@
 % name = '64_5e-3_1e4_tol_10_16';
 interp = false;
 newoutput = true;
-cstr = true;
+cstr = false;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
@@ -46,7 +46,8 @@ if (newoutput)
     rhomin   = rhosmry(3,:);
     rhomax   = rhosmry(4,:);
     if (cstr)
-       cstr = h5read(name, '/constraints'); 
+       cstr = h5read(name, '/constraints');
+       hamcstr = cstr(1,:);
        hubblefrac = h5read(name, '/max_dt_hubble_fraction');
        inflmass = h5read(name, '/inflaton_mass');
        steps = h5read(name, '/steps_total');
