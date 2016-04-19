@@ -88,7 +88,8 @@ struct dopri853_control
     int reject; ///< Flag whether time step is rejected or accepted
     double eps; ///< Epsilon value for comparisons
     int n_stiff; ///< Skips for stiffness detection
-    int c_stiff; ///< Counter for stiffness detection
+    int c_stiff; ///< Counter for stiffness detection (set)
+    int c_nonstiff; ///< Counter for stiffness detection (reset)
 };
 
 extern struct dopri853_constants dpc; ///< Dormand Prince Butcher tableaux constants
@@ -101,6 +102,7 @@ int perform_step(const double dt_try);
 void try_step(const double dt);
 double error(const double dt);
 int success(const double err, double *dt);
+void check_for_stiffness();
 void allocate_dopri853_values();
 void free_dopri853_values();
 
