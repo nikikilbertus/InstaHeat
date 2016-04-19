@@ -260,6 +260,7 @@ struct monitor
     double filter_time; ///< Total wall clock time for filtering
     double poisson_time; ///< Total wall clock time for `mk_psi(double *f)`
     double h5_time_write; ///< Total wall clock time for write out
+    double copy_buffer_time; ///< Total wall clock time for copying buffers
 };
 
 extern struct parameters pars;
