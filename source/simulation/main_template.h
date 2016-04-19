@@ -178,10 +178,10 @@ struct output
  */
 struct file_parameters
 {
-    hsize_t id;               ///< h5 file id of the output file
-    size_t index;             ///< current index within the buffers
-    size_t buf_size;          ///< size of the buffer
-    size_t skip;              ///< timesteps to skip in between write outs
+    hsize_t id;        ///< h5 file id of the output file
+    size_t index;      ///< current index within the buffers
+    size_t buf_size;   ///< size of the buffer
+    size_t skip;       ///< timesteps to skip in between write outs
 };
 
 /**
@@ -247,6 +247,23 @@ struct k_grid
     double *z;
 };
 
+/**
+ * @brief Collection of variables monitoring timing and function calls.
+ */
+struct monitor
+{
+    /**
+     * @brief Number of calls to `mk_rhs(const double t, double *f, double
+     * *result)`
+     */
+    size_t calls_rhs;
+    double fftw_time_exe; ///< Total wall clock time for fft execution
+    double fftw_time_plan; ///< Total wall clock time for fftw planning
+    double filter_time; ///< Total wall clock time for filtering
+    double poisson_time; ///< Total wall clock time for `mk_psi(double *f)`
+    double h5_time_write; ///< Total wall clock time for write out
+};
+
 extern struct parameters pars;
 
 // contain phi, dphi, a, psi, dpsi (only first Ntot entries are integrated)
@@ -294,11 +311,7 @@ extern struct temporary tmp;
 extern fftw_plan p_fw;
 extern fftw_plan p_bw;
 
-extern double fftw_time_exe;
-extern double fftw_time_plan;
-extern double filter_time;
-extern double poisson_time;
-extern double h5_time_write;
+extern struct monitor mon;
 
 #ifdef SHOW_TIMING_INFO
 double get_wall_time();

@@ -247,7 +247,7 @@ xlabel('mass'); ylabel('std(\rho) / |<\rho>|');
 legend('a=1', 'a=1e2', 'a=1e3', ['a=' num2str(a(end))], 'linear reference','location','northwest');
 
 %% plot long time bunch davies
-name = 'testcstr';
+% name = 'testcstr';
 evaluate3D
 scal = ones(size(a))';
 % scal = a.^(3/2)';
@@ -261,8 +261,8 @@ plot(a,sqrt(psivar).*scal); xlabel('a'); ylabel('std \psi'); shg; pause;
 plot(a,sqrt(dpsivar).*scal); xlabel('a'); ylabel('std d\psi'); shg; pause;
 
 %% timing analysis for different tolerances
-base = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/tolerances/64_2_1e4_tol_';
-rtol = 4:2:10; atol = 6:2:12;
+base = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/tolerances2/64_5e-3_1e4_tol_';
+rtol = 4:2:10; atol = 6:2:16;
 relval = 10.^(-rtol); absval = 10.^(-atol);
 time = zeros(length(rtol), length(atol));
 steps = zeros(size(time));
@@ -290,7 +290,7 @@ for i = 1:length(rtol)
         phi = h5read(name, '/phi_summary');
         a = h5read(name, '/a');
         cstr = h5read(name,'/constraints');
-        semilogy(a,cstr(1,:)); shg; pause;
+%         semilogy(a,cstr(1,:)); shg; pause;
         cstrl2(i,j) = -log10(abs((cstr(1,end) - cstrl2ref) / cstrl2ref));
         as(i,j) = -log10(abs((a(end) - aref(end))/aref(end)));
 %         I = (a>0.9*aref(end));
@@ -328,3 +328,14 @@ xlabel('atol'); ylabel('rtol'); zlabel('-log10 (\phi_{f}^{ref} - \phi_{f}) / \ph
 figure
 bar3(-log10(errl2)); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',relval);
 xlabel('atol'); ylabel('rtol'); zlabel('-log10 error l_{2}');
+
+%% resolutions study
+res = [32 48 64];
+for i = 1:length(res)
+    name = [num2str(res(i)) '_2_1e5'];
+    evaluate3D
+    loglog(a, rhorms)
+    hold on
+end
+hold off
+legend('32','48','64'); shg;

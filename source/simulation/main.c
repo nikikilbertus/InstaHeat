@@ -50,11 +50,7 @@ struct k_grid kvec;
 struct temporary tmp;
 fftw_plan p_fw;
 fftw_plan p_bw;
-double fftw_time_exe  = 0.0;
-double fftw_time_plan = 0.0;
-double filter_time = 0.0;
-double poisson_time = 0.0;
-double h5_time_write = 0.0;
+struct monitor mon;
 
 /**
  * @brief Main routine: Calls setup, integration and cleanup routines.
@@ -62,7 +58,7 @@ double h5_time_write = 0.0;
 int main(int argc, const char * argv[])
 {
     #ifdef SHOW_TIMING_INFO
-    double start = get_wall_time();
+    double secs = get_wall_time();
     #endif
 
     allocate_and_initialize_all();
@@ -90,28 +86,32 @@ int main(int argc, const char * argv[])
     #endif
 
     #ifdef SHOW_TIMING_INFO
-    double secs = get_wall_time() - start;
+    secs = get_wall_time() - secs;
     INFO(printf("main took %f seconds.\n", secs));
     INFO(puts("as percentage of total, not mutually disjoint:"));
     INFO(printf("fftw execution took %f seconds (%.2f %%).\n",
-                        fftw_time_exe, 100. * (fftw_time_exe / secs)));
+                    mon.fftw_time_exe, 100. * (mon.fftw_time_exe / secs)));
     INFO(printf("fftw planning took %f seconds (%.2f %%).\n",
-                        fftw_time_plan, 100. * (fftw_time_plan / secs)));
+                    mon.fftw_time_plan, 100. * (mon.fftw_time_plan / secs)));
     INFO(printf("fft filtering took %f seconds (%.2f %%).\n",
-                        filter_time, 100. * (filter_time / secs)));
+                    mon.filter_time, 100. * (mon.filter_time / secs)));
     INFO(printf("poisson equation took %f seconds (%.2f %%).\n",
-                        poisson_time, 100. * (poisson_time / secs)));
+                    mon.poisson_time, 100. * (mon.poisson_time / secs)));
     INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
-                        h5_time_write, 100. * (h5_time_write / secs)));
+                    mon.h5_time_write, 100. * (mon.h5_time_write / secs)));
 
     INFO(puts("Writing runtimes to disk\n"));
     h5_write_parameter(H5_RUNTIME_TOTAL_NAME, &secs, 1);
-    h5_write_parameter(H5_RUNTIME_FFTW_NAME, &fftw_time_exe, 1);
-    h5_write_parameter(H5_RUNTIME_FFTWPLAN_NAME, &fftw_time_plan, 1);
-    h5_write_parameter(H5_RUNTIME_FILTER_NAME, &filter_time, 1);
-    h5_write_parameter(H5_RUNTIME_ELLIPTIC_NAME, &poisson_time, 1);
-    h5_write_parameter(H5_RUNTIME_WRITEOUT_NAME, &h5_time_write, 1);
+    h5_write_parameter(H5_RUNTIME_FFTW_NAME, &mon.fftw_time_exe, 1);
+    h5_write_parameter(H5_RUNTIME_FFTWPLAN_NAME, &mon.fftw_time_plan, 1);
+    h5_write_parameter(H5_RUNTIME_FILTER_NAME, &mon.filter_time, 1);
+    h5_write_parameter(H5_RUNTIME_ELLIPTIC_NAME, &mon.poisson_time, 1);
+    h5_write_parameter(H5_RUNTIME_WRITEOUT_NAME, &mon.h5_time_write, 1);
     #endif
+
+    INFO(printf("rhs was called %zu times.\n", mon.calls_rhs));
+    double tmp = (double) mon.calls_rhs;
+    h5_write_parameter(H5_COUNTER_RHS, &tmp, 1);
 
     free_and_destroy_all();
     return 0;

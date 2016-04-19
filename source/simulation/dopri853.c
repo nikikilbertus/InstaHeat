@@ -59,7 +59,7 @@ void initialize_dopri853()
     dp.n_stp = 0;
     dp.n_ok = 0;
     dp.n_bad = 0;
-    dp.beta  = BETA;
+    dp.beta = BETA;
     dp.alpha = 1.0/8.0 - dp.beta * 0.2;
     dp.safe = SAFE;
     dp.minscale = SMALLEST_SCALING;
@@ -243,8 +243,8 @@ int perform_step(const double dt_try)
  * of the differential equation (specified by mk_rhs(const double t, double *f,
  * double *result) in toolbox.c) to perform one step of the Dormand
  * Prince integrator, evolves the field forward in time by the given stepsize
- * and computes the error estimates w.r.t.  the previous timeslice (still as
- * vectors, i.e. not a single value).  Intermediate evaluations and errors are
+ * and computes the error estimates w.r.t. the previous timeslice (still as
+ * vectors, i.e. not a single value). Intermediate evaluations and errors are
  * stored in members of the struct dopri853_values dp.
  *
  * @note Contrary to perform_step(const double dt_try) this function is not
@@ -372,7 +372,7 @@ void try_step(const double dt)
     // ------------ error estimates ------------
     #pragma omp parallel for
     for (i = 0; i < Ntot; ++i) {
-        dpv.yerr[i]  = dpv.k4[i] - dpc.bhh1 * dfield[i] - dpc.bhh2 * dpv.k9[i] -
+        dpv.yerr[i] = dpv.k4[i] - dpc.bhh1 * dfield[i] - dpc.bhh2 * dpv.k9[i] -
                         dpc.bhh3 * dpv.k3[i];
         dpv.yerr2[i] = dpc.er1 * dfield[i] + dpc.er6 * dpv.k6[i] +
                        dpc.er7 * dpv.k7[i] + dpc.er8 * dpv.k8[i] +
@@ -396,7 +396,7 @@ double error(const double dt)
     double err = 0.0, err2 = 0.0, sk, deno;
 
     double tmp;
-    #pragma omp parallel for private(sk, tmp) reduction(+:err,err2)
+    #pragma omp parallel for private(sk, tmp) reduction(+: err, err2)
     for (size_t i = 0; i < Ntot; ++i) {
         sk = dp.a_tol + dp.r_tol * MAX(fabs(field[i]), fabs(field_new[i]));
         tmp = dpv.yerr[i] / sk;
@@ -430,9 +430,9 @@ double error(const double dt)
  */
 int success(const double err, double *dt)
 {
-    const double beta  = dp.beta;
+    const double beta = dp.beta;
     const double alpha = dp.alpha;
-    const double safe  = dp.safe;
+    const double safe = dp.safe;
     const double minscale = dp.minscale;
     const double maxscale = dp.maxscale;
     double scale;
@@ -533,19 +533,19 @@ void allocate_dopri853_values()
  */
 void free_dopri853_values()
 {
-    free(dpv.k2);
-    free(dpv.k3);
-    free(dpv.k4);
-    free(dpv.k5);
-    free(dpv.k6);
-    free(dpv.k7);
-    free(dpv.k8);
-    free(dpv.k9);
-    free(dpv.k10);
-    free(dpv.k_tmp);
+    fftw_free(dpv.k2);
+    fftw_free(dpv.k3);
+    fftw_free(dpv.k4);
+    fftw_free(dpv.k5);
+    fftw_free(dpv.k6);
+    fftw_free(dpv.k7);
+    fftw_free(dpv.k8);
+    fftw_free(dpv.k9);
+    fftw_free(dpv.k10);
+    fftw_free(dpv.k_tmp);
 
-    free(dpv.yerr);
-    free(dpv.yerr2);
+    fftw_free(dpv.yerr);
+    fftw_free(dpv.yerr2);
     INFO(puts("Freed memory of dopri853 variables.\n"));
 }
 
