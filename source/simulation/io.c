@@ -314,7 +314,7 @@ void h5_write_all_buffers(const hsize_t Nt)
     // TODO[performance] maybe use static variable to count dataset size
     // instead of reading it from the file each time static hsize_t counter;
     #ifdef SHOW_TIMING_INFO
-    h5_time_write -= get_wall_time();
+    mon.h5_time_write -= get_wall_time();
     #endif
 
     hsize_t rank;
@@ -373,7 +373,7 @@ void h5_write_all_buffers(const hsize_t Nt)
     h5_write_buffer(rank, Nt, a_out.dim, os, a_out.id, a_out.buf);
 
     #ifdef SHOW_TIMING_INFO
-    h5_time_write += get_wall_time();
+    mon.h5_time_write += get_wall_time();
     #endif
     INFO(printf("Dumping to disk at t = %f\n", pars.t.t));
 }
