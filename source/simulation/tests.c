@@ -139,7 +139,7 @@ void fill_field(double *f, double (*func)(const double, const double,
     double x, y, z;
 
     double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
-    mk_x_grid(grid);
+    /* mk_x_grid(grid); */
     for (size_t i = 0; i < Nx; ++i) {
         x = grid[i];
         osx = i * Ny * Nz;
