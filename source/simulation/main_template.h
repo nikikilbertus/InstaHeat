@@ -42,6 +42,14 @@
 #define INFO(f)
 #endif
 
+#ifdef SHOW_TIMING_INFO
+#define TIME(f) do {\
+        (f); \
+    } while (0)
+#else
+#define TIME(f)
+#endif
+
 #define RK4                 (0)
 #define DOPRI853            (1)
 #define INTEGRATION_METHOD  (_IM_)
