@@ -332,7 +332,7 @@ res = [16 24 32 48 64 96 128];
 for i = 1:length(res)
     name = ['resolutions2/' num2str(res(i)) '_5e-4_1e3'];
     evaluate3D
-    semilogx(a, phimean,'linewidth',1.3)
+    loglog(a, rhorms,'linewidth',1.3)
     hold on
 end
 hold off
