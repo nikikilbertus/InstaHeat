@@ -34,23 +34,9 @@ extern struct evolution_flags evo_flags; ///< Instance of `evolution_flags`
 
 void mk_rhs(const double t, double *f, double *result);
 void mk_gradient_squared_and_laplacian(double *in);
-void assemble_gradient_squared();
 void mk_rho(const double *f);
-extern double potential(const double f);
-extern double potential_prime(const double f);
-void mk_constraints();
 void mk_psi(double *f);
-void mk_power_spectrum(const fftw_complex *in, struct output out);
-void apply_filter_real(double *inout);
-void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
-        fftw_complex *psi_io, fftw_complex *dpsi_io);
-void prepare_and_save_timeslice();
-void center(double *f, const size_t N);
 void mk_summary();
-extern double mean(const double *f, const size_t N);
-void mean_var_min_max(const double *f, double *smry);
-double variance(const double mean, const double *f, const size_t N);
-void contains_nan(const double *f, const size_t N);
-void contains_nanc(const complex *f, const size_t N);
+void prepare_and_save_timeslice();
 
 #endif
