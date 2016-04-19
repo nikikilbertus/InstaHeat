@@ -22,6 +22,61 @@
  * @see <a href="http://numerical.recipes">Numerical Recipes</a>
  */
 
+static void initialize_dopri853();
+static int perform_step(const double dt_try);
+static void try_step(const double dt);
+static double error(const double dt);
+static int success(const double err, double *dt);
+static void allocate_dopri853_values();
+static void free_dopri853_values();
+
+/**
+ * @brief Holds intermediate evaluations of the right hand side and errors for
+ * the Dormand Prince integrator.
+ *
+ * Holds pointers to memory blocks for the intermediate evaluations of
+ * the right hand side of the partial differential equation (as determined in
+ * mk_rhs(const double t, double *f, double *result) in toolbox.c as
+ * well as memory blocks for the error estimates (5th and 3rd order).
+ */
+struct dopri853_values
+{
+        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;
+        double *yerr, *yerr2;
+};
+
+/**
+ * @brief Holds parameters for the Dormand Prince integrator.
+ *
+ * Most of these parameters should be self explanatory by their names. For more
+ * information see <a href="http://numerical.recipes">Numerical Recipes</a>.
+ */
+struct dopri853_control
+{
+    double t; ///< The current time
+    double t_old; ///< The previous time (on last time slice)
+    double ti; ///< The initial time
+    double tf; ///< The final time
+    double dt; ///< The time step size
+    double dt_did; ///< The previously used time step size
+    double dt_next; ///< The proposed next time step size
+    double dt_min; ///< The minimal permissible time step size
+    size_t max_steps; ///< The maximal number of steps
+    int n_stp; ///< The number of performed steps
+    int n_ok; ///< The number of successful steps
+    int n_bad; ///< The number of unsuccessful steps
+    double beta; ///< Internal parameter for the error estimates
+    double alpha; ///< Internal parameter for the error estimates
+    double safe; ///< Internal parameter for the error estimates
+    double minscale; ///< Minimal permissible rescaling of the time step size
+    double maxscale; ///< Maximal permissible rescaling of the time step size
+    double a_tol; ///< Absolute tolerance
+    double r_tol; ///< Relative tolerance
+    double err_old; ///< The previous error (on the last time slice)
+    int reject; ///< Flag whether time step is rejected or accepted
+    double eps; ///< Epsilon value for comparisons
+};
+
 /**
  * @brief The parameters for the Dormand Prince intergrator.
  * @see dopri853.h
@@ -33,44 +88,6 @@ struct dopri853_control dp;
  * @see dopri853.h
  */
 struct dopri853_values dpv;
-
-/**
- * @brief Initializes parameters in the struct dopri853_control dp of the
- * Dormand Prince integrator.
- *
- * All fields of the struct dopri853_control dp are set according either as
- * fixed initial values or according to parameters entered by the user. All
- * parameters of the integration routine are saved in this struct.
- *
- * @note Changes in here are not recommended. All parameters that can/should be
- * chosen by the user are determined somewhere else and only copied here.
- */
-void initialize_dopri853()
-{
-    dp.t = pars.t.ti;
-    dp.t_old = pars.t.ti;
-    dp.ti = pars.t.ti;
-    dp.tf = pars.t.tf;
-    dp.dt = pars.t.dt;
-    dp.dt_did = 0.0;
-    dp.dt_next = pars.t.dt;
-    dp.dt_min = MINIMAL_DELTA_T;
-    dp.max_steps = MAX_STEPS;
-    dp.n_stp = 0;
-    dp.n_ok = 0;
-    dp.n_bad = 0;
-    dp.beta = BETA;
-    dp.alpha = 1.0/8.0 - dp.beta * 0.2;
-    dp.safe = SAFE;
-    dp.minscale = SMALLEST_SCALING;
-    dp.maxscale = LARGEST_SCALING;
-    dp.a_tol = ABSOLUTE_TOLERANCE;
-    dp.r_tol = RELATIVE_TOLERANCE;
-    dp.err_old = 1.0e-4;
-    dp.reject = 0;
-    dp.eps = DBL_EPSILON;
-    INFO(puts("Initialized dopri853 parameters.\n"));
-}
 
 /**
  * @brief Run the Dormand Prince integrator to evolve the fields.
@@ -168,6 +185,44 @@ void run_dopri853()
 }
 
 /**
+ * @brief Initializes parameters in the struct dopri853_control dp of the
+ * Dormand Prince integrator.
+ *
+ * All fields of the struct dopri853_control dp are set according either as
+ * fixed initial values or according to parameters entered by the user. All
+ * parameters of the integration routine are saved in this struct.
+ *
+ * @note Changes in here are not recommended. All parameters that can/should be
+ * chosen by the user are determined somewhere else and only copied here.
+ */
+static void initialize_dopri853()
+{
+    dp.t = pars.t.ti;
+    dp.t_old = pars.t.ti;
+    dp.ti = pars.t.ti;
+    dp.tf = pars.t.tf;
+    dp.dt = pars.t.dt;
+    dp.dt_did = 0.0;
+    dp.dt_next = pars.t.dt;
+    dp.dt_min = MINIMAL_DELTA_T;
+    dp.max_steps = MAX_STEPS;
+    dp.n_stp = 0;
+    dp.n_ok = 0;
+    dp.n_bad = 0;
+    dp.beta = BETA;
+    dp.alpha = 1.0/8.0 - dp.beta * 0.2;
+    dp.safe = SAFE;
+    dp.minscale = SMALLEST_SCALING;
+    dp.maxscale = LARGEST_SCALING;
+    dp.a_tol = ABSOLUTE_TOLERANCE;
+    dp.r_tol = RELATIVE_TOLERANCE;
+    dp.err_old = 1.0e-4;
+    dp.reject = 0;
+    dp.eps = DBL_EPSILON;
+    INFO(puts("Initialized dopri853 parameters.\n"));
+}
+
+/**
  * @brief Evolves field forward in time by one step.
  *
  * @param[in] dt_dry The initially proposed stepsize for this step.
@@ -185,7 +240,7 @@ void run_dopri853()
  * If the stepsize is decreased up to the minimal specified stepsize without
  * succeeding, a error message is reported and the exit code 1 is returned.
  */
-int perform_step(const double dt_try)
+static int perform_step(const double dt_try)
 {
     const size_t Ntot = pars.Ntot;
     double dt = dt_try;
@@ -247,7 +302,7 @@ int perform_step(const double dt_try)
  * for a step, which is evaluated by the errors it produced. It might get
  * discarded and recomputed with a different dt.
  */
-void try_step(const double dt)
+static void try_step(const double dt)
 {
     const size_t Ntot = pars.Ntot;
     const double t = dp.t;
@@ -385,7 +440,7 @@ void try_step(const double dt)
  * Computes the collective error of <b>all</b> the fields in the integration
  * routine normalized such that the threshold value is 1.
  */
-double error(const double dt)
+static double error(const double dt)
 {
     const size_t Ntot = pars.Ntot;
     double err = 0.0, err2 = 0.0, sk, deno;
@@ -423,7 +478,7 @@ double error(const double dt)
  * Various rules enter the scaling of the stepsize and various counters and
  * flags are set.
  */
-int success(const double err, double *dt)
+static int success(const double err, double *dt)
 {
     const double beta = dp.beta;
     const double alpha = dp.alpha;
@@ -473,7 +528,7 @@ int success(const double err, double *dt)
  * Allocates memory for the intermediate evaluations of the Dormand Prince
  * integration routine as well as temporary memory for the erros.
  */
-void allocate_dopri853_values()
+static void allocate_dopri853_values()
 {
     const size_t Ntot = pars.Ntot;
     const size_t Nall = pars.Nall;
@@ -526,7 +581,7 @@ void allocate_dopri853_values()
  * Dormand Prince integration routine as well as temporary memory for the
  * errors.
  */
-void free_dopri853_values()
+static void free_dopri853_values()
 {
     fftw_free(dpv.k2);
     fftw_free(dpv.k3);
