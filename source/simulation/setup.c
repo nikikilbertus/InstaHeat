@@ -265,6 +265,7 @@ static void allocate_external()
     rho_out.buf = calloc(Nbuf * rho_out.dim, sizeof *rho_out.buf);
     #endif
 
+    //TODO: write method for these allocations, nicely standardized
     // ---------------------------summaries-------------------------------------
     #ifdef OUTPUT_PHI_SMRY
     phi_smry.dim = SUMMARY_VALUES;
@@ -297,6 +298,16 @@ static void allocate_external()
     phi_ps.dim = bins;
     phi_ps.tmp = calloc(phi_ps.dim, sizeof *phi_ps.tmp);
     phi_ps.buf = calloc(Nbuf * phi_ps.dim, sizeof *phi_ps.buf);
+    #endif
+    #ifdef OUTPUT_PSI_PS
+    psi_ps.dim = bins;
+    psi_ps.tmp = calloc(psi_ps.dim, sizeof *psi_ps.tmp);
+    psi_ps.buf = calloc(Nbuf * psi_ps.dim, sizeof *psi_ps.buf);
+    #endif
+    #ifdef OUTPUT_RHO_PS
+    rho_ps.dim = bins;
+    rho_ps.tmp = calloc(rho_ps.dim, sizeof *rho_ps.tmp);
+    rho_ps.buf = calloc(Nbuf * rho_ps.dim, sizeof *rho_ps.buf);
     #endif
 
     // ---------------------------constraints-----------------------------------
@@ -1141,6 +1152,14 @@ static void free_external()
     #ifdef OUTPUT_PHI_PS
     free(phi_ps.tmp);
     free(phi_ps.buf);
+    #endif
+    #ifdef OUTPUT_PSI_PS
+    free(psi_ps.tmp);
+    free(psi_ps.buf);
+    #endif
+    #ifdef OUTPUT_RHO_PS
+    free(rho_ps.tmp);
+    free(rho_ps.buf);
     #endif
 
     #ifdef OUTPUT_CONSTRAINTS

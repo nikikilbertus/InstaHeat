@@ -1,7 +1,6 @@
 #ifndef __FILEHANDLING__
 #define __FILEHANDLING__
 
-#include "hdf5.h"
 #include "main.h"
 
 /**

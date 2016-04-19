@@ -1,7 +1,6 @@
 #ifndef __SETUP__
 #define __SETUP__
 
-#include <stddef.h>
 #include "main.h"
 
 /**

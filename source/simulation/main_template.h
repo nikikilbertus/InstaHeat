@@ -80,6 +80,8 @@
 #define _ORHO_
 
 #define _OPHIPS_
+#define _OPSIPS_
+#define _ORHOPS_
 
 #define _OPHIS_
 #define _ODPHIS_
@@ -92,6 +94,11 @@
 #if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || defined(OUTPUT_PSI) \
     || defined(OUTPUT_DPSI)|| defined(OUTPUT_RHO)
     #define LARGE_OUTPUT
+#endif
+
+#if defined(OUTPUT_PHI_PS) || defined(OUTPUT_DPHI_PS) || defined(OUTPUT_PSI_PS) \
+    || defined(OUTPUT_DPSI_PS) || defined(OUTPUT_RHO_PS)
+    #define OUTPUT_PS
 #endif
 
 #define DATAPATH                ("_PATH_")
@@ -306,6 +313,8 @@ extern double *pressure;
 extern double pressure_mean;
 
 extern struct output phi_ps;
+extern struct output psi_ps;
+extern struct output rho_ps;
 
 // constraints
 #define NUMBER_CONSTRAINTS      (4) ///< Hamiltonian+momentum: l2 and l\infty

@@ -1,8 +1,6 @@
 #ifndef __EVOLUTION_TOOLKIT__
 #define __EVOLUTION_TOOLKIT__
 
-#include <stddef.h>
-#include <fftw3.h>
 #include "main.h"
 
 /**

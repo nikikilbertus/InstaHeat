@@ -111,7 +111,7 @@ void run_dopri853()
     INFO(printf("relative tolerance: %.15f\n", dp.r_tol));
     INFO(printf("absolute tolerance: %.15f\n\n", dp.a_tol));
 
-    #ifdef OUTPUT_PHI_PS
+    #ifdef OUTPUT_PS
     evo_flags.compute_pow_spec = 1;
     #endif
     #ifdef OUTPUT_CONSTRAINTS
@@ -258,7 +258,7 @@ static int perform_step(const double dt_try)
     #ifdef ENABLE_FFT_FILTER
     apply_filter_real(field_new);
     #endif
-    #ifdef OUTPUT_PHI_PS
+    #ifdef OUTPUT_PS
     if ((dp.n_stp + 1) % pars.file.skip == 0) {
         evo_flags.compute_pow_spec = 1;
     }

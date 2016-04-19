@@ -1,7 +1,7 @@
-% name = '64_5e-3_1e4_tol_10_16';
+name = 'testps';
 interp = false;
 newoutput = true;
-cstr = false;
+cstr = true;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
@@ -19,7 +19,13 @@ timestride = h5read(name,'/strides_time');
 tols = h5read(name, '/tolerances');
 
 if (newoutput)
-    powspec  = h5read(name, '/phi_power_spectrum');
+    phips  = h5read(name, '/phi_power_spectrum');
+    try
+    psips  = h5read(name, '/psi_power_spectrum');
+    rhops  = h5read(name, '/rho_power_spectrum');
+    catch me
+        %
+    end
     phismry  = h5read(name, '/phi_summary');
     dphismry = h5read(name, '/dphi_summary');
     psismry  = h5read(name, '/psi_summary');

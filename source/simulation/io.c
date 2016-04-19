@@ -89,6 +89,12 @@ void h5_create_empty_by_path()
     #ifdef OUTPUT_PHI_PS
     h5_create_dset(rank, phi_ps.dim, &(phi_ps.id), H5_PHI_PS_NAME);
     #endif
+    #ifdef OUTPUT_PSI_PS
+    h5_create_dset(rank, psi_ps.dim, &(psi_ps.id), H5_PSI_PS_NAME);
+    #endif
+    #ifdef OUTPUT_RHO_PS
+    h5_create_dset(rank, rho_ps.dim, &(rho_ps.id), H5_RHO_PS_NAME);
+    #endif
 
     // ---------------------------constraints-----------------------------------
     #ifdef OUTPUT_CONSTRAINTS
@@ -353,6 +359,12 @@ static void h5_write_all_buffers(const hsize_t Nt)
     #ifdef OUTPUT_PHI_PS
     h5_write_buffer(rank, Nt, phi_ps.dim, os, phi_ps.id, phi_ps.buf);
     #endif
+    #ifdef OUTPUT_PSI_PS
+    h5_write_buffer(rank, Nt, psi_ps.dim, os, psi_ps.id, psi_ps.buf);
+    #endif
+    #ifdef OUTPUT_RHO_PS
+    h5_write_buffer(rank, Nt, rho_ps.dim, os, rho_ps.id, rho_ps.buf);
+    #endif
 
     // --------------------------constraints------------------------------------
     #ifdef OUTPUT_CONSTRAINTS
@@ -473,6 +485,14 @@ void save()
         #ifdef OUTPUT_PHI_PS
             #pragma omp section
             append_to_buffer(phi_ps);
+        #endif
+        #ifdef OUTPUT_PSI_PS
+            #pragma omp section
+            append_to_buffer(psi_ps);
+        #endif
+        #ifdef OUTPUT_RHO_PS
+            #pragma omp section
+            append_to_buffer(rho_ps);
         #endif
         #ifdef OUTPUT_CONSTRAINTS
             #pragma omp section
