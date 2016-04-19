@@ -69,6 +69,7 @@ void initialize_dopri853()
     dp.err_old = 1.0e-4;
     dp.reject = 0;
     dp.eps = DBL_EPSILON;
+    dp.n_stiff = 0;
     INFO(puts("Initialized dopri853 parameters.\n"));
 }
 
