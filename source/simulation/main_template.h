@@ -261,6 +261,7 @@ struct monitor
     double poisson_time; ///< Total wall clock time for `mk_psi(double *f)`
     double h5_time_write; ///< Total wall clock time for write out
     double copy_buffer_time; ///< Total wall clock time for copying buffers
+    double cstr_time; ///< Total wall clock time for computing constraints
 };
 
 extern struct parameters pars;
