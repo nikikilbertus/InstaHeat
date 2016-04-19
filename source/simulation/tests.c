@@ -1,8 +1,10 @@
+#include "main.h"
+#ifdef RUN_TESTS_ONLY
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "tests.h"
-#include "main.h"
 #include "setup.h"
 #include "toolbox.h"
 
@@ -191,3 +193,5 @@ static int equal(const double a, const double b)
 {
     return fabs(a - b) < 1e-5 ? 0 : -1;
 }
+
+#endif
