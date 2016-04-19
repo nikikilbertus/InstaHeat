@@ -106,6 +106,9 @@ int main(int argc, const char * argv[])
     h5_write_parameter(H5_RUNTIME_WRITEOUT_NAME, &mon.h5_time_write, 1);
     #endif
 
+    double tmp = (double) mon.calls_rhs;
+    h5_write_parameter(H5_COUNTER_RHS, &tmp, 1);
+
     free_and_destroy_all();
     return 0;
 }
