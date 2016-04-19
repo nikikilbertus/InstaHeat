@@ -42,65 +42,9 @@ struct dopri853_constants
     d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;
 };
 
-/**
- * @brief Holds intermediate evaluations of the right hand side and errors for
- * the Dormand Prince integrator.
- *
- * Holds pointers to memory blocks for the intermediate evaluations of
- * the right hand side of the partial differential equation (as determined in
- * mk_rhs(const double t, double *f, double *result) in toolbox.c as
- * well as memory blocks for the error estimates (5th and 3rd order).
- */
-struct dopri853_values
-{
-        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;
-        double *yerr, *yerr2;
-};
-
-/**
- * @brief Holds parameters for the Dormand Prince integrator.
- *
- * Most of these parameters should be self explanatory by their names. For more
- * information see <a href="http://numerical.recipes">Numerical Recipes</a>.
- */
-struct dopri853_control
-{
-    double t; ///< The current time
-    double t_old; ///< The previous time (on last time slice)
-    double ti; ///< The initial time
-    double tf; ///< The final time
-    double dt; ///< The time step size
-    double dt_did; ///< The previously used time step size
-    double dt_next; ///< The proposed next time step size
-    double dt_min; ///< The minimal permissible time step size
-    size_t max_steps; ///< The maximal number of steps
-    int n_stp; ///< The number of performed steps
-    int n_ok; ///< The number of successful steps
-    int n_bad; ///< The number of unsuccessful steps
-    double beta; ///< Internal parameter for the error estimates
-    double alpha; ///< Internal parameter for the error estimates
-    double safe; ///< Internal parameter for the error estimates
-    double minscale; ///< Minimal permissible rescaling of the time step size
-    double maxscale; ///< Maximal permissible rescaling of the time step size
-    double a_tol; ///< Absolute tolerance
-    double r_tol; ///< Relative tolerance
-    double err_old; ///< The previous error (on the last time slice)
-    int reject; ///< Flag whether time step is rejected or accepted
-    double eps; ///< Epsilon value for comparisons
-};
-
 extern struct dopri853_constants dpc; ///< Dormand Prince Butcher tableaux constants
-extern struct dopri853_values dpv; ///< Intermediate fields and errors
-extern struct dopri853_control dp; ///< Dormand Prince parameters
 
-void initialize_dopri853();
 void run_dopri853();
-int perform_step(const double dt_try);
-void try_step(const double dt);
-double error(const double dt);
-int success(const double err, double *dt);
-void allocate_dopri853_values();
-void free_dopri853_values();
 
 #endif
 #endif
