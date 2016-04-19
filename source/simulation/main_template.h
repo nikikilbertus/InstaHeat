@@ -262,6 +262,7 @@ struct monitor
     double h5_time_write; ///< Total wall clock time for write out
     double copy_buffer_time; ///< Total wall clock time for copying buffers
     double cstr_time; ///< Total wall clock time for computing constraints
+    double smry_time; ///< Total wall clock time for computing summaries
 };
 
 extern struct parameters pars;
