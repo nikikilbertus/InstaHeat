@@ -25,14 +25,21 @@ static void initialize_parameters();
 static void allocate_external();
 static void mk_fftw_plans();
 static void mk_k_grid();
+#ifdef ENABLE_FFT_FILTER
 static void mk_filter_mask();
 static double filter_window(const double x);
+#endif
 static void mk_initial_conditions();
+#if INITIAL_CONDITIONS == IC_FROM_DAT_FILE
 static void initialize_from_dat();
+#endif
+#if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
 static void initialize_from_bunch_davies();
 static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma);
 static complex box_muller();
+#endif
+#if INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
 static void initialize_from_internal_function();
 static void mk_x_grid(double *grid);
 static double phi_init(const double x, const double y, const double z,
@@ -40,6 +47,7 @@ static double phi_init(const double x, const double y, const double z,
 static double dphi_init(const double x, const double y, const double z,
         const double *ph);
 static double wrapped_gaussian(const double x, const double y, const double z);
+#endif
 static void mk_initial_psi();
 static void destroy_and_cleanup_fftw();
 static void free_external();
@@ -443,6 +451,7 @@ static void mk_k_grid()
     INFO(puts("Constructed grids for wave vectors.\n"));
 }
 
+#ifdef ENABLE_FFT_FILTER
 /**
  * @brief Construct an arrray for filtering out high modes in Fourier space.
  *
@@ -498,6 +507,7 @@ static double filter_window(const double x)
     // two thirds rule
     // return x < 2.0/3.0 ? x : 0.0;
 }
+#endif
 
 /**
  * @brief Initializes the fields based on preprocessor defines given in the
@@ -541,6 +551,7 @@ static void mk_initial_conditions()
     INFO(puts("Initialized fields on first time slice.\n"));
 }
 
+#if INITIAL_CONDITIONS == IC_FROM_DAT_FILE
 /**
  * @brief Read initial conditions from a .dat file.
  *
@@ -559,6 +570,7 @@ static void initialize_from_dat()
     mk_initial_psi();
     #endif
 }
+#endif
 
 /**
  * @brief Given that the initial $$\phi$$, $$\dot{\phi}$$ and $$a$$ are already
@@ -579,6 +591,7 @@ static void mk_initial_psi()
     mk_psi(field);
 }
 
+#if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
 /**
  * @brief Construct a Bunch Davies vacuum as initial conditions if the
  * parameters satisfy the conditions and then construct corresponding $$\psi$$,
@@ -728,7 +741,9 @@ static complex box_muller()
     const double u2 = (double)rand() / (double)RAND_MAX;
     return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * I);
 }
+#endif
 
+#if INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
 /**
  * @brief Construct initial conditions for phi from internally defined functions
  *
@@ -1039,6 +1054,7 @@ static double wrapped_gaussian(const double x, const double y, const double z)
     }
     return res / TWOPI;
 }
+#endif
 
 /**
  * @brief Successively calls the subroutines in this file necessary to cleanup
