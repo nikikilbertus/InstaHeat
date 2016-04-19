@@ -1,11 +1,11 @@
-name = '64_5e-3_1e4_tol_10_16';
+% name = '64_5e-3_1e4_tol_10_16';
 interp = false;
 newoutput = true;
 cstr = true;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
-name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/tolerances2/' name '.h5'];
+name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/' name '.h5'];
 
 % built in functions for reading makes it easy
 dim = h5read(name, '/dimension');
@@ -47,6 +47,9 @@ if (newoutput)
     rhomax   = rhosmry(4,:);
     if (cstr)
        cstr = h5read(name, '/constraints'); 
+       hubblefrac = h5read(name, '/max_dt_hubble_fraction');
+       inflmass = h5read(name, '/inflaton_mass');
+       steps = h5read(name, '/steps_total');
     end
 else
     powspec = h5read(name, '/power_spectrum');

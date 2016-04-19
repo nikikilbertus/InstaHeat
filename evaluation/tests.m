@@ -260,7 +260,7 @@ plot(a,sqrt(dphivar).*scal); xlabel('a'); ylabel('std d\phi'); shg; pause;
 plot(a,sqrt(psivar).*scal); xlabel('a'); ylabel('std \psi'); shg; pause;
 plot(a,sqrt(dpsivar).*scal); xlabel('a'); ylabel('std d\psi'); shg; pause;
 
-%% timing analysis for different tolerances
+%% tolerances analysis
 base = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/tolerances2/64_5e-3_1e4_tol_';
 rtol = 4:2:10; atol = 6:2:16;
 relval = 10.^(-rtol); absval = 10.^(-atol);
@@ -330,12 +330,36 @@ bar3(-log10(errl2)); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',relval);
 xlabel('atol'); ylabel('rtol'); zlabel('-log10 error l_{2}');
 
 %% resolutions study
-res = [32 48 64];
+res = [16 24 32 48 64 96 128];
+disp(['         grid        steps'])
 for i = 1:length(res)
-    name = [num2str(res(i)) '_2_1e5'];
+    name = ['resolutions2/' num2str(res(i)) '_5e-4_1e3'];
     evaluate3D
-    loglog(a, rhorms)
-    hold on
+    figure(1)
+    plot(diff(t)); hold on
+    figure(2)
+    loglog(a, rhorms); hold on
+    disp([N(1) steps])
+    figure(3)
+    subplot(4,1,1)
+    semilogx(a,phimean); xlabel('a'); ylabel('<\phi>'); hold on
+    subplot(4,1,2)
+    loglog(a,sqrt(phivar)); xlabel('a'); ylabel('std \phi'); hold on
+    subplot(4,1,3)
+    semilogx(a,dphimean); xlabel('a'); ylabel('<d\phi>'); hold on
+    subplot(4,1,4)
+    loglog(a,sqrt(dphivar)); xlabel('a'); ylabel('std d\phi'); hold on
+    figure(4)
+    subplot(2,1,1)
+    loglog(a,sqrt(psivar)); xlabel('a'); ylabel('std \psi'); hold on
+    subplot(2,1,2)
+    loglog(a,sqrt(dpsivar)); xlabel('a'); ylabel('std d\psi'); hold on
 end
 hold off
-legend('32','48','64'); shg;
+figure(1)
+xlabel('steps'); ylabel('dt');
+legend('16','24','32','48','64','96','128'); shg;
+figure(2)
+xlabel('a'); ylabel('std \rho / <|\rho|>');
+legend('16','24','32','48','64','96','128'); shg;
+inflmass
