@@ -383,12 +383,12 @@ void mk_psi(double *f)
     /* fftw_execute_dft_c2r(p_bw, tmp.dpsic, f + N3p); */
     /* #ifdef SHOW_TIMING_INFO */
     /* mon.fftw_time_exe += get_wall_time(); */
-    /* poisson_time += get_wall_time(); */
+    /* mon.poisson_time += get_wall_time(); */
     /* #endif */
 
     // sophisticated version square first then average plus gradient
     /* #ifdef SHOW_TIMING_INFO */
-    /* poisson_time -= get_wall_time(); */
+    /* mon.poisson_time -= get_wall_time(); */
     /* #endif */
 
     /* double extra1 = 0.0; */
@@ -437,12 +437,12 @@ void mk_psi(double *f)
     /* fftw_execute_dft_c2r(p_bw, tmp.dpsic, f + N3p); */
     /* #ifdef SHOW_TIMING_INFO */
     /* mon.fftw_time_exe += get_wall_time(); */
-    /* poisson_time += get_wall_time(); */
+    /* mon.poisson_time += get_wall_time(); */
     /* #endif */
 
     // simpler version
     #ifdef SHOW_TIMING_INFO
-    poisson_time -= get_wall_time();
+    mon.poisson_time -= get_wall_time();
     #endif
     const double phi_mean = mean(f, N);
     const double dphi_mean = mean(f + N, N);
@@ -481,7 +481,7 @@ void mk_psi(double *f)
         f[N3p + i] = 0.5 * tmp.f[i] - hubble * f[N2p + i];
     }
     #ifdef SHOW_TIMING_INFO
-    poisson_time += get_wall_time();
+    mon.poisson_time += get_wall_time();
     #endif
 }
 
