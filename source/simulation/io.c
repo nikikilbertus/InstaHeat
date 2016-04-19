@@ -18,6 +18,17 @@
  * various files.
  */
 
+static void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,
+        const char *name);
+static void h5_get_extent(hsize_t *cur);
+static void h5_write_buffer(const hsize_t rank, const hsize_t Nt,
+        const hsize_t N, const hsize_t os, const hsize_t dset,
+        const double *buf);
+static void h5_write_all_buffers(const hsize_t Nt);
+static void append_to_buffer(struct output f);
+static void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
+        double *out);
+
 /**
  * @brief Creates the initial hdf5 file and writes out most of the simulation
  * parameters.
@@ -229,7 +240,7 @@ void h5_create_empty_by_path()
  * @param[out] dset The id of the dset that gets created.
  * @param[in] name The desired name of the dataset in the `.h5` file.
  */
-void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,
+static void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,
         const char *name)
 {
     const hsize_t Nt = pars.file.buf_size;
@@ -293,7 +304,7 @@ void h5_write_parameter(const char *name, const double *val, const size_t N)
  * Since we are using chunked output, we need to find the current extent in the
  * time dimension to know where to write the next chunk.
  */
-void h5_get_extent(hsize_t *cur)
+static void h5_get_extent(hsize_t *cur)
 {
     hsize_t max[1];
     hid_t dspace = H5Dget_space(t_out.id);
@@ -309,7 +320,7 @@ void h5_get_extent(hsize_t *cur)
  * However, when the simulation finishes while the buffer is only partially
  * full, @p Nt will be smaller than the buffer size.
  */
-void h5_write_all_buffers(const hsize_t Nt)
+static void h5_write_all_buffers(const hsize_t Nt)
 {
     // TODO[performance] maybe use static variable to count dataset size
     // instead of reading it from the file each time static hsize_t counter;
@@ -387,7 +398,7 @@ void h5_write_all_buffers(const hsize_t Nt)
  * @param[in] dset The dataset id within the `.h5` output file.
  * @param[in] buf A pointer to the buffer.
  */
-void h5_write_buffer(const hsize_t rank, const hsize_t Nt,
+static void h5_write_buffer(const hsize_t rank, const hsize_t Nt,
         const hsize_t N, const hsize_t os, const hsize_t dset,
         const double *buf)
 {
@@ -546,7 +557,7 @@ void save()
  * To _append_ means in our case simple to start writing at the index saved at
  * `pars.file.index`
  */
-void append_to_buffer(struct output f)
+static void append_to_buffer(struct output f)
 {
     const size_t os = pars.file.index * f.dim;
     for (size_t i = 0; i < f.dim; ++i) {
@@ -643,7 +654,7 @@ void h5_read_timeslice()
  * @param[out] out Pointer to the memory where to store the time slice @p index
  * of the dataset @p name in file @p file.
  */
-void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
+static void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
         double *out)
 {
     size_t N = pars.N;
