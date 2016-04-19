@@ -105,10 +105,8 @@ void run_dopri853()
     evo_flags.compute_cstr = 0;
     mk_summary();
     save();
-
-    #ifdef SHOW_TIMING_INFO
-    double secs = -get_wall_time();
-    #endif
+    double secs = 0.0;
+    TIME(secs = -get_wall_time());
 
     for (dp.n_stp = 0; dp.n_stp < dp.max_steps; ++dp.n_stp) {
         if (dp.t + dp.dt * 1.0001 > dp.tf) {
@@ -146,10 +144,7 @@ void run_dopri853()
         prepare_and_save_timeslice();
     }
 
-    #ifdef SHOW_TIMING_INFO
-    secs += get_wall_time();
-    #endif
-
+    TIME(secs += get_wall_time());
     free_dopri853_values();
 
     INFO(puts("Writing simulation meta data to disk\n"));
