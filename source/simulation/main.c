@@ -35,6 +35,8 @@ struct output dpsi_smry;
 struct output rho_smry;
 struct output a_out;
 struct output phi_ps;
+struct output psi_ps;
+struct output rho_ps;
 struct output cstr;
 double *field;
 double *field_new;
