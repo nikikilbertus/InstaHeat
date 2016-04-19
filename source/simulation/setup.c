@@ -173,6 +173,7 @@ void initialize_parameters()
     mon.poisson_time = 0.0;
     mon.h5_time_write = 0.0;
     mon.copy_buffer_time = 0.0;
+    mon.cstr_time = 0.0;
 
     INFO(printf("Initialized parameters for %zu dimension(s).\n\n", pars.dim));
 }
