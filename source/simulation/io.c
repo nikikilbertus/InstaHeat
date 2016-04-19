@@ -433,6 +433,10 @@ void h5_close()
  */
 void save()
 {
+    #ifdef SHOW_TIMING_INFO
+    mon.copy_buffer_time -= get_wall_time();
+    #endif
+
     const size_t index = pars.file.index;
     const hsize_t Nt = pars.file.buf_size;
     a_out.tmp[0] = field[2 * pars.N];
@@ -523,6 +527,10 @@ void save()
             }
         }
     }
+    #endif
+
+    #ifdef SHOW_TIMING_INFO
+    mon.copy_buffer_time += get_wall_time();
     #endif
 
     if (index == Nt - 1) {
