@@ -71,6 +71,7 @@ void initialize_dopri853()
     dp.eps = DBL_EPSILON;
     dp.n_stiff = 10;
     dp.c_stiff = 0;
+    dp.c_nonstiff = 0;
     INFO(puts("Initialized dopri853 parameters.\n"));
 }
 
@@ -223,6 +224,8 @@ int perform_step(const double dt_try)
     mk_rhs(dp.t + dt, field_new, dfield_new);
     evo_flags.compute_pow_spec = 0;
     evo_flags.compute_cstr = 0;
+
+    check_for_stiffness();
 
     #pragma omp parallel for
     for (size_t i = 0; i < Ntot; ++i) {
@@ -472,6 +475,17 @@ int success(const double err, double *dt)
         dp.reject = 1;
         return 0;
     }
+}
+
+void check_for_stiffness()
+{
+    double num = 0.0;
+    double den = 0.0;
+#pragma omp parallel for
+    for (size_t i = 0; i < Ntot; ++i) {
+        sqr = dpv.k4[i] 
+
+
 }
 
 /**
