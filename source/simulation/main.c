@@ -56,9 +56,8 @@ struct monitor mon;
  */
 int main(int argc, const char * argv[])
 {
-    #ifdef SHOW_TIMING_INFO
-    double secs = get_wall_time();
-    #endif
+    double secs = 0.0;
+    TIME(secs = -get_wall_time());
 
     allocate_and_initialize_all();
 
@@ -83,19 +82,25 @@ int main(int argc, const char * argv[])
     #endif
 
     #ifdef SHOW_TIMING_INFO
-    secs = get_wall_time() - secs;
+    secs += get_wall_time();
     INFO(printf("main took %f seconds.\n", secs));
     INFO(puts("as percentage of total, not mutually disjoint:"));
     INFO(printf("fftw execution took %f seconds (%.2f %%).\n",
-                    mon.fftw_time_exe, 100. * (mon.fftw_time_exe / secs)));
+            mon.fftw_time_exe, 100. * (mon.fftw_time_exe / secs)));
     INFO(printf("fftw planning took %f seconds (%.2f %%).\n",
-                    mon.fftw_time_plan, 100. * (mon.fftw_time_plan / secs)));
+            mon.fftw_time_plan, 100. * (mon.fftw_time_plan / secs)));
     INFO(printf("fft filtering took %f seconds (%.2f %%).\n",
-                    mon.filter_time, 100. * (mon.filter_time / secs)));
+            mon.filter_time, 100. * (mon.filter_time / secs)));
     INFO(printf("poisson equation took %f seconds (%.2f %%).\n",
-                    mon.poisson_time, 100. * (mon.poisson_time / secs)));
+            mon.poisson_time, 100. * (mon.poisson_time / secs)));
+    INFO(printf("computing constraints took %f seconds (%.2f %%).\n",
+            mon.cstr_time, 100. * (mon.cstr_time / secs)));
+    INFO(printf("computing summaries took %f seconds (%.2f %%).\n",
+            mon.smry_time, 100. * (mon.smry_time / secs)));
+    INFO(printf("copying buffers took %f seconds (%.2f %%).\n",
+            mon.copy_buffer_time, 100. * (mon.copy_buffer_time / secs)));
     INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
-                    mon.h5_time_write, 100. * (mon.h5_time_write / secs)));
+            mon.h5_time_write, 100. * (mon.h5_time_write / secs)));
 
     INFO(puts("Writing runtimes to disk\n"));
     h5_write_parameter(H5_RUNTIME_TOTAL_NAME, &secs, 1);
@@ -103,6 +108,9 @@ int main(int argc, const char * argv[])
     h5_write_parameter(H5_RUNTIME_FFTWPLAN_NAME, &mon.fftw_time_plan, 1);
     h5_write_parameter(H5_RUNTIME_FILTER_NAME, &mon.filter_time, 1);
     h5_write_parameter(H5_RUNTIME_ELLIPTIC_NAME, &mon.poisson_time, 1);
+    h5_write_parameter(H5_RUNTIME_COPY_BUFFER_NAME, &mon.copy_buffer_time, 1);
+    h5_write_parameter(H5_RUNTIME_CSTR_NAME, &mon.cstr_time, 1);
+    h5_write_parameter(H5_RUNTIME_SMRY_NAME, &mon.smry_time, 1);
     h5_write_parameter(H5_RUNTIME_WRITEOUT_NAME, &mon.h5_time_write, 1);
     #endif
 

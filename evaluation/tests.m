@@ -335,11 +335,11 @@ disp(['         grid        steps'])
 for i = 1:length(res)
     name = ['resolutions2/' num2str(res(i)) '_5e-4_1e3'];
     evaluate3D
+    disp([N(1) steps])
     figure(1)
     plot(diff(t)); hold on
     figure(2)
     loglog(a, rhorms); hold on
-    disp([N(1) steps])
     figure(3)
     subplot(4,1,1)
     semilogx(a,phimean); xlabel('a'); ylabel('<\phi>'); hold on
@@ -354,6 +354,8 @@ for i = 1:length(res)
     loglog(a,sqrt(psivar)); xlabel('a'); ylabel('std \psi'); hold on
     subplot(2,1,2)
     loglog(a,sqrt(dpsivar)); xlabel('a'); ylabel('std d\psi'); hold on
+    figure(5)
+    loglog(a, hamcstr); xlabel('a'); ylabel('ham constr'); hold on
 end
 hold off
 figure(1)
