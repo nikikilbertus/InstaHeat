@@ -516,7 +516,7 @@ void apply_filter_real(double *inout)
     const size_t N3p = 3 * N + 2;
 
     #ifdef SHOW_TIMING_INFO
-    filter_time -= get_wall_time();
+    mon.filter_time -= get_wall_time();
     mon.fftw_time_exe -= get_wall_time();
     #endif
     fftw_execute_dft_r2c(p_fw, inout, tmp.phic);
@@ -546,7 +546,7 @@ void apply_filter_real(double *inout)
     #endif
     #ifdef SHOW_TIMING_INFO
     mon.fftw_time_exe += get_wall_time();
-    filter_time += get_wall_time();
+    mon.filter_time += get_wall_time();
     #endif
 }
 
