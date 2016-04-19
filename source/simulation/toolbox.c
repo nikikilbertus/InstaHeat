@@ -22,7 +22,9 @@ static double potential_prime(const double f);
 #ifdef OUTPUT_CONSTRAINTS
 static void mk_constraints();
 #endif
+#ifdef OUTPUT_PS
 static void mk_power_spectrum(const fftw_complex *in, struct output out);
+#endif
 #ifdef ENABLE_FFT_FILTER
 static void apply_filter_real(double *inout);
 static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
@@ -76,6 +78,17 @@ void mk_rhs(const double t, double *f, double *result)
 
     mk_gradient_squared_and_laplacian(f);
     mk_rho(f);
+
+    // power spectrum of rho here, because need rho first
+    if (evo_flags.compute_pow_spec == 1) {
+        #ifdef OUTPUT_RHO_PS
+        TIME(mon.fftw_time_exe -= get_wall_time());
+        fftw_execute_dft_r2c(p_fw, rho, tmp.phic);
+        TIME(mon.fftw_time_exe += get_wall_time());
+        mk_power_spectrum(tmp.phic, rho_ps);
+        #endif
+    }
+
     #ifdef OUTPUT_CONSTRAINTS
     mk_constraints();
     #endif
@@ -152,14 +165,21 @@ void mk_gradient_squared_and_laplacian(double *in)
 
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, in, tmp.phic);
-        #if PSI_METHOD == PSI_PARABOLIC || defined(OUTPUT_CONSTRAINTS)
+        #if PSI_METHOD == PSI_PARABOLIC || defined(OUTPUT_CONSTRAINTS) \
+            || defined(OUTPUT_PSI_PS)
         const size_t N2p = 2 * N + 2;
         fftw_execute_dft_r2c(p_fw, in + N2p, tmp.psic);
         #endif
     TIME(mon.fftw_time_exe += get_wall_time());
 
+    // good place for power spectrum of phi and psi, because fft exists
     if (evo_flags.compute_pow_spec == 1) {
+        #ifdef OUTPUT_PHI_PS
         mk_power_spectrum(tmp.phic, phi_ps);
+        #endif
+        #ifdef OUTPUT_PSI_PS
+        mk_power_spectrum(tmp.psic, psi_ps);
+        #endif
     }
 
     complex pre;
@@ -483,6 +503,7 @@ void mk_psi(double *f)
     TIME(mon.poisson_time += get_wall_time());
 }
 
+#ifdef OUTPUT_PS
 /**
  * @brief Compute the power spectrum
  *
@@ -523,6 +544,7 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
         out.tmp[idx] += pow2_tmp / N;
     }
 }
+#endif
 
 #ifdef ENABLE_FFT_FILTER
 /**
@@ -605,7 +627,7 @@ static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
  */
 void prepare_and_save_timeslice()
 {
-    #ifdef OUTPUT_PHI_PS
+    #ifdef OUTPUT_PS
     evo_flags.compute_pow_spec = 1;
     #endif
     mk_gradient_squared_and_laplacian(field);
