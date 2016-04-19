@@ -45,6 +45,7 @@ struct evolution_flags evo_flags = {.filter = 0,
  */
 void mk_rhs(const double t, double *f, double *result)
 {
+    mon.calls_rhs += 1;
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
     const size_t N2p = N2 + 2;
