@@ -225,9 +225,12 @@ figure
 m = 5;
 masses = 1./(2*10.^((1:5)));
 rhormsi = zeros(m,4);
+as = zeros(m,1);
+maxrhos = zeros(m,1);
 for i = 1:m
-name = ['64_1e5_' num2str(i)];
+name = ['32_1e5_' num2str(i)];
 evaluate3D
+maxrhos(i) = max(rhorms);
 loglog(a,rhorms,'linewidth',2)
 legendinfo{i} = ['mass=' num2str(masses(i))];
 rhormsi(i,1) = rhorms(1);
@@ -237,9 +240,9 @@ rhormsi(i,2) = rhorms(idx);
 rhormsi(i,3) = rhorms(idx);
 rhormsi(i,4) = rhorms(end);
 hold on
-figure(2)
-plot(diff(t)); title(['mass = ' num2str(masses(i))]); shg; pause;
-figure(1)
+% figure(2)
+% plot(diff(t)); title(['mass = ' num2str(masses(i))]); shg; pause;
+% figure(1)
 end
 hold off
 xlabel('a'); ylabel('std(\rho) / |<\rho>|');
@@ -249,8 +252,23 @@ loglog(masses, rhormsi, masses, masses/masses(1) * rhormsi(1,1) * 0.9,'--','line
 xlabel('mass'); ylabel('std(\rho) / |<\rho>|');
 legend('a=1', 'a=1e2', 'a=1e3', ['a=' num2str(a(end))], 'linear reference','location','northwest');
 
+%% extrapolate to nonlinear regime
+tmp = 2;
+name = ['32_1e5_' num2str(tmp)];
+evaluate3D
+I = (a>100) & (a<1000);
+figure
+slope = logfit(a(I),rhorms(I), 'loglog'); shg; pause;
+rhormsnonlin = max(maxrhos);
+anonlin = a(end) * (rhormsnonlin/rhorms(end))^(1/slope)
+aratio = anonlin / a(end);
+tnonlin = aratio^(3/2) * t(end)
+atmp = linspace(a(find(I,1)), anonlin, 10);
+loglog(a, rhorms, atmp, slope * atmp / (slope*atmp(1)) * rhorms(find(I,1))); shg;
+estimatedruntime = h5read(name,'/runtime_total') / 3600 * tnonlin/t(end) 
+
 %% plot long time bunch davies
-% name = 'testcstr';
+name = 'longruns/32_5e-4_1e6_beta_0';
 evaluate3D
 scal = ones(size(a))';
 % scal = a.^(3/2)';
@@ -262,6 +280,24 @@ plot(a,sqrt(phivar).*scal); xlabel('a'); ylabel('std \phi'); shg; pause;
 plot(a,sqrt(dphivar).*scal); xlabel('a'); ylabel('std d\phi'); shg; pause;
 plot(a,sqrt(psivar).*scal); xlabel('a'); ylabel('std \psi'); shg; pause;
 plot(a,sqrt(dpsivar).*scal); xlabel('a'); ylabel('std d\psi'); shg; pause;
+
+%% long runs
+name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/longruns/32_5e-4_1e6_beta_004.h5';
+a = h5read(name, '/a');
+t = h5read(name, '/time');
+rhosmry = h5read(name, '/rho_summary');
+rhorms = sqrt(rhosmry(2,:) ./ rhosmry(1,:).^2);
+figure(1);
+semilogx(a,rhorms); xlabel('a'); ylabel('rhorms'); shg;
+rhops = h5read(name, '/rho_power_spectrum');
+I = (1:1000:length(a));
+figure(2);
+surf(a(I),1:50,log10(rhops(:,I))); xlabel('a'); ylabel('bins'); shading interp; view(2); title('ps rho');
+shg;
+figure(3);
+plot(diff(t)); hold on
+steps = h5read(name, '/steps_total')
+a(end)
 
 %% tolerances analysis
 base = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/tolerances2/64_5e-3_1e4_tol_';
@@ -340,12 +376,15 @@ bar3(-log10(phistderrl2)); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',re
 xlabel('atol'); ylabel('rtol'); zlabel('-log10 std \phi error l_{2}');
 
 %% resolutions study
-res = [16 24 32 48 64 96 128];
-disp(['         grid        steps'])
+res = [32 48 64 96 128];
+rhos = zeros(length(res),1);
+disp('         grid      steps')
 for i = 1:length(res)
-    name = ['resolutions2/' num2str(res(i)) '_5e-4_1e3'];
+    name = ['resolutions5/' num2str(res(i)) '_5e-3_3e3'];
     evaluate3D
     disp([N(1) steps])
+    legendinfo{i} = num2str(res(i));
+    rhos(i) = rhorms(end);
     figure(1)
     plot(diff(t)); hold on
     figure(2)
@@ -365,13 +404,18 @@ for i = 1:length(res)
     subplot(2,1,2)
     loglog(a,sqrt(dpsivar)); xlabel('a'); ylabel('std d\psi'); hold on
     figure(5)
-    loglog(a, hamcstr); xlabel('a'); ylabel('ham constr'); hold on
+    loglog(a, hamcstrl2/res(i)^3); xlabel('a'); ylabel('ham cstr l2'); hold on
+    figure(6)
+    loglog(a, hamcstrinf); xlabel('a'); ylabel('ham cstr \infty'); hold on
+%     figure(7)
+%     surf(a,1:50,log10(rhops)); xlabel('a'); ylabel('bins'); shading interp; view(2); title(num2str(res(i)));
+%     pause;
 end
 hold off
 figure(1)
-xlabel('steps'); ylabel('dt');
-legend('16','24','32','48','64','96','128'); shg;
+xlabel('steps'); ylabel('dt'); legend(legendinfo); shg;
 figure(2)
-xlabel('a'); ylabel('std \rho / <|\rho|>');
-legend('16','24','32','48','64','96','128'); shg;
+xlabel('a'); ylabel('std \rho / <|\rho|>'); legend(legendinfo); shg;
 inflmass
+figure
+plot(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('final rhorms'); shg;

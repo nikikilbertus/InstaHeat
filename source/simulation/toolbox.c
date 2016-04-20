@@ -397,7 +397,8 @@ static void mk_constraints()
  */
 void mk_psi(double *f)
 {
-    //TODO[performance]: optimize be saving often used values (h3, dphiextra...)
+    //TODO[performance]: optimize by saving often used values (h3, dphiextra...)
+    TIME(mon.poisson_time -= get_wall_time());
     const size_t N = pars.N;
     const size_t M = pars.M;
     const size_t N2p = 2 * N + 2;
@@ -406,72 +407,6 @@ void mk_psi(double *f)
     const double a2 = a * a;
     const double hubble = sqrt(rho_mean / 3.0);
 
-    /* #ifdef SHOW_TIMING_INFO */
-    /* mon.fftw_time_exe -= get_wall_time(); */
-    /* #endif */
-    /* fftw_execute_dft_c2r(p_bw, tmp.psic, f + N2p); */
-    /* fftw_execute_dft_c2r(p_bw, tmp.dpsic, f + N3p); */
-    /* #ifdef SHOW_TIMING_INFO */
-    /* mon.fftw_time_exe += get_wall_time(); */
-    /* mon.poisson_time += get_wall_time(); */
-    /* #endif */
-
-    // sophisticated version square first then average plus gradient
-    /* #ifdef SHOW_TIMING_INFO */
-    /* mon.poisson_time -= get_wall_time(); */
-    /* #endif */
-
-    /* double extra1 = 0.0; */
-    /* double extra2 = 0.0; */
-    /* #pragma omp parallel for reduction(+: extra1, extra2) */
-    /* for (size_t i = 0; i < N; ++i) { */
-    /*     tmp.f[i] = f[N + i] * tmp.xphi[i]; */
-    /*     tmp.deltarho[i] = rho[i] - rho_mean; */
-    /*     extra1 += f[N + i] * f[N + i]; */
-    /*     extra2 += tmp.grad[i]; */
-    /* } */
-    /* const double extra = 0.5 * (extra1 - extra2 / a2) / N; */
-
-    /* #ifdef SHOW_TIMING_INFO */
-    /* mon.fftw_time_exe -= get_wall_time(); */
-    /* #endif */
-    /* fftw_execute_dft_r2c(p_fw, tmp.f, tmp.fc); */
-    /* fftw_execute_dft_r2c(p_fw, tmp.deltarho, tmp.deltarhoc); */
-    /* #ifdef SHOW_TIMING_INFO */
-    /* mon.fftw_time_exe += get_wall_time(); */
-    /* #endif */
-
-    /* tmp.fc[0] = 0.0; */
-    /* tmp.psic[0] = 0.0; */
-    /* tmp.dpsic[0] = 0.0; */
-    /* #pragma omp parallel for */
-    /* for (size_t i = 1; i < M; ++i) { */
-    /*     if (fabs(kvec.x[i]) < DBL_EPSILON) { */
-    /*         tmp.fc[i] = 0.0; */
-    /*     } else { */
-    /*         tmp.fc[i] /= kvec.x[i] * I; */
-    /*     } */
-    /*     if (fabs(kvec.sq[i] / a2 + extra) < 1.0e-14) { */
-    /*         tmp.psic[i] = 0.0; */
-    /*     } else { */
-    /*         tmp.psic[i] = 0.5 * (tmp.deltarhoc[i] + 3.0 * hubble * tmp.fc[i]) / */
-    /*             ((kvec.sq[i] / a2 + extra) * N); */
-    /*     } */
-    /*     tmp.dpsic[i] = 0.5 * tmp.fc[i] / N - hubble * tmp.psic[i]; */
-    /* } */
-
-    /* #ifdef SHOW_TIMING_INFO */
-    /* mon.fftw_time_exe -= get_wall_time(); */
-    /* #endif */
-    /* fftw_execute_dft_c2r(p_bw, tmp.psic, f + N2p); */
-    /* fftw_execute_dft_c2r(p_bw, tmp.dpsic, f + N3p); */
-    /* #ifdef SHOW_TIMING_INFO */
-    /* mon.fftw_time_exe += get_wall_time(); */
-    /* mon.poisson_time += get_wall_time(); */
-    /* #endif */
-
-    // simpler version
-    TIME(mon.poisson_time -= get_wall_time());
     const double phi_mean = mean(f, N);
     const double dphi_mean = mean(f + N, N);
     double extra1 = 0.0;
@@ -484,6 +419,7 @@ void mk_psi(double *f)
         extra2 += tmp.grad[i];
     }
     const double extra = 0.5 * (extra1 - extra2 / a2) / N;
+
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, tmp.deltarho, tmp.deltarhoc);
     fftw_execute_dft_r2c(p_fw, tmp.f, tmp.fc);
@@ -494,9 +430,11 @@ void mk_psi(double *f)
                 3 * hubble * tmp.fc[i]) / ((kvec.sq[i] / a2 + extra) * N);
     }
     tmp.phic[0] = 0.0;
+
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_c2r(p_bw, tmp.phic, f + N2p);
     TIME(mon.fftw_time_exe += get_wall_time());
+
     for (size_t i = 0; i < N; ++i) {
         f[N3p + i] = 0.5 * tmp.f[i] - hubble * f[N2p + i];
     }
@@ -663,7 +601,6 @@ void prepare_and_save_timeslice()
  */
 void mk_summary()
 {
-    //TODO[performance]: parallel sections instead of parallel loops here?
     TIME(mon.smry_time -= get_wall_time());
     #ifdef OUTPUT_PHI_SMRY
     mean_var_min_max(field, phi_smry.tmp);

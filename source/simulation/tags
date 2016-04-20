@@ -508,6 +508,7 @@ id	main_template.h	/^    hsize_t id;        \/\/\/< h5 file id of the output fil
 id	main_template.h	/^    hsize_t id;     \/\/\/< id for the dataset in the h5 file$/;"	m	struct:output
 index	main.h	/^    size_t index;      \/\/\/< current index within the buffers$/;"	m	struct:file_parameters
 index	main_template.h	/^    size_t index;      \/\/\/< current index within the buffers$/;"	m	struct:file_parameters
+init_output	setup.c	/^static void init_output(struct output *out, const size_t dim, const int mode)$/;"	f	file:
 initialize_dopri853	dopri853.c	/^static void initialize_dopri853()$/;"	f	file:
 initialize_from_bunch_davies	setup.c	/^static void initialize_from_bunch_davies()$/;"	f	file:
 initialize_from_dat	setup.c	/^static void initialize_from_dat()$/;"	f	file:

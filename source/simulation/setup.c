@@ -650,6 +650,7 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     const size_t Ny = pars.y.N;
     const size_t Nz = pars.z.N;
     const size_t N = pars.N;
+    const size_t M = pars.M;
     const size_t nn = Nx / 2 + 1;
     const size_t os = 16;
     const size_t nos = Nx * os * os;
@@ -710,15 +711,9 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     fftw_free(ker);
     fftw_execute_dft_r2c(p_fw, f, tmp.phic);
 
-    #pragma omp parallel for private(osx, osy)
-    for (size_t i = 0; i < Nx; ++i) {
-        osx = i * Ny * nn;
-        for (size_t j = 0; j < Ny; ++j) {
-            osy = osx + j * nn;
-            for (size_t k = 0; k < nn; ++k) {
-                tmp.phic[osy + k] *= box_muller();
-            }
-        }
+    #pragma omp parallel for
+    for (size_t i = 0; i < M; ++i) {
+        tmp.phic[i] *= box_muller();
     }
 
     tmp.phic[0] = homo;
