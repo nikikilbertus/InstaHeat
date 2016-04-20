@@ -23,6 +23,7 @@
 static void initialize_threading();
 static void initialize_parameters();
 static void allocate_external();
+static void init_output(struct output *out, const size_t dim, const int mode);
 static void mk_fftw_plans();
 static void mk_k_grid();
 #ifdef ENABLE_FFT_FILTER
@@ -219,20 +220,13 @@ static void allocate_external()
     const size_t N = pars.N;
     const size_t Nall = pars.Nall;
     const size_t M = pars.M;
-    const size_t bins = POWER_SPECTRUM_BINS;
-    const size_t Nbuf = pars.file.buf_size;
-
     #ifdef LARGE_OUTPUT
     const size_t outN = pars.outN;
     #endif
 
     // ---------------------------time, a---------------------------------------
-    t_out.dim = 1;
-    t_out.tmp = calloc(t_out.dim, sizeof *t_out.tmp);
-    t_out.buf = calloc(Nbuf * t_out.dim, sizeof *t_out.buf);
-    a_out.dim = 1;
-    a_out.tmp = calloc(a_out.dim, sizeof *a_out.tmp);
-    a_out.buf = calloc(Nbuf * a_out.dim, sizeof *a_out.buf);
+    init_output(&t_out, 1, 1);
+    init_output(&a_out, 1, 1);
 
     // ---------------------------full fields: phi, dphi, psi, dpsi, rho--------
     field = fftw_malloc(Nall * sizeof *field);
@@ -245,76 +239,52 @@ static void allocate_external()
     #endif
 
     #ifdef OUTPUT_PHI
-    phi.dim = outN;
-    phi.buf = calloc(Nbuf * phi.dim, sizeof *phi.buf);
+    init_output(&phi, outN, 0);
     #endif
     #ifdef OUTPUT_DPHI
-    dphi.dim = outN;
-    dphi.buf = calloc(Nbuf * dphi.dim, sizeof *dphi.buf);
+    init_output(&dphi, outN, 0);
     #endif
     #ifdef OUTPUT_PSI
-    psi.dim = outN;
-    psi.buf = calloc(Nbuf * psi.dim, sizeof *psi.buf);
+    init_output(&psi, outN, 0);
     #endif
     #ifdef OUTPUT_DPSI
-    dpsi.dim = outN;
-    dpsi.buf = calloc(Nbuf * dpsi.dim, sizeof *dpsi.buf);
+    init_output(&dpsi, outN, 0);
     #endif
     #ifdef OUTPUT_RHO
-    rho_out.dim = outN;
-    rho_out.buf = calloc(Nbuf * rho_out.dim, sizeof *rho_out.buf);
+    init_output(&rho, outN, 0);
     #endif
 
-    //TODO: write method for these allocations, nicely standardized
     // ---------------------------summaries-------------------------------------
     #ifdef OUTPUT_PHI_SMRY
-    phi_smry.dim = SUMMARY_VALUES;
-    phi_smry.tmp = calloc(phi_smry.dim, sizeof *phi_smry.tmp);
-    phi_smry.buf = calloc(Nbuf * phi_smry.dim, sizeof *phi_smry.buf);
+    init_output(&phi_smry, SUMMARY_VALUES, 1);
     #endif
     #ifdef OUTPUT_DPHI_SMRY
-    dphi_smry.dim = SUMMARY_VALUES;
-    dphi_smry.tmp = calloc(dphi_smry.dim, sizeof *dphi_smry.tmp);
-    dphi_smry.buf = calloc(Nbuf * dphi_smry.dim, sizeof *dphi_smry.buf);
+    init_output(&dphi_smry, SUMMARY_VALUES, 1);
     #endif
     #ifdef OUTPUT_PSI_SMRY
-    psi_smry.dim = SUMMARY_VALUES;
-    psi_smry.tmp = calloc(psi_smry.dim, sizeof *psi_smry.tmp);
-    psi_smry.buf = calloc(Nbuf * psi_smry.dim, sizeof *psi_smry.buf);
+    init_output(&psi_smry, SUMMARY_VALUES, 1);
     #endif
     #ifdef OUTPUT_DPSI_SMRY
-    dpsi_smry.dim = SUMMARY_VALUES;
-    dpsi_smry.tmp = calloc(dpsi_smry.dim, sizeof *dpsi_smry.tmp);
-    dpsi_smry.buf = calloc(Nbuf * dpsi_smry.dim, sizeof *dpsi_smry.buf);
+    init_output(&dpsi_smry, SUMMARY_VALUES, 1);
     #endif
     #ifdef OUTPUT_RHO_SMRY
-    rho_smry.dim = SUMMARY_VALUES;
-    rho_smry.tmp = calloc(rho_smry.dim, sizeof *rho_smry.tmp);
-    rho_smry.buf = calloc(Nbuf * rho_smry.dim, sizeof *rho_smry.buf);
+    init_output(&rho_smry, SUMMARY_VALUES, 1);
     #endif
 
     // ---------------------------power spectra---------------------------------
     #ifdef OUTPUT_PHI_PS
-    phi_ps.dim = bins;
-    phi_ps.tmp = calloc(phi_ps.dim, sizeof *phi_ps.tmp);
-    phi_ps.buf = calloc(Nbuf * phi_ps.dim, sizeof *phi_ps.buf);
+    init_output(&phi_ps, POWER_SPECTRUM_BINS, 1);
     #endif
     #ifdef OUTPUT_PSI_PS
-    psi_ps.dim = bins;
-    psi_ps.tmp = calloc(psi_ps.dim, sizeof *psi_ps.tmp);
-    psi_ps.buf = calloc(Nbuf * psi_ps.dim, sizeof *psi_ps.buf);
+    init_output(&psi_ps, POWER_SPECTRUM_BINS, 1);
     #endif
     #ifdef OUTPUT_RHO_PS
-    rho_ps.dim = bins;
-    rho_ps.tmp = calloc(rho_ps.dim, sizeof *rho_ps.tmp);
-    rho_ps.buf = calloc(Nbuf * rho_ps.dim, sizeof *rho_ps.buf);
+    init_output(&rho_ps, POWER_SPECTRUM_BINS, 1);
     #endif
 
     // ---------------------------constraints-----------------------------------
     #ifdef OUTPUT_CONSTRAINTS
-    cstr.dim = NUMBER_CONSTRAINTS;
-    cstr.tmp = calloc(cstr.dim, sizeof *cstr.tmp);
-    cstr.buf = calloc(Nbuf * cstr.dim, sizeof *cstr.buf);
+    init_output(&cstr, NUMBER_CONSTRAINTS, 1);
     #endif
 
     // ---------------------------k grids---------------------------------------
@@ -353,6 +323,25 @@ static void allocate_external()
         exit(EXIT_FAILURE);
     }
     INFO(puts("Allocated memory for external variables.\n"));
+}
+
+/**
+ * @brief Allocate and initialize a `struct output`
+ *
+ * @param[out] out The struct output for which to set the dimension and
+ * allocate memory.
+ * @param[in] dim The dimension of the output structure
+ * @param[in] mode If @p mode == 0, the field `out.tmp` of @p out is not
+ * allocated. For @p mode != 0 memory for `out.tmp` will be allocated.
+ */
+static void init_output(struct output *out, const size_t dim, const int mode)
+{
+    const size_t Nbuf = pars.file.buf_size;
+    out->dim = dim;
+    if (mode != 0) {
+        out->tmp = calloc(out->dim, sizeof *out->tmp);
+    }
+    out->buf = calloc(Nbuf * out->dim, sizeof *out->buf);
 }
 
 /**
