@@ -237,6 +237,9 @@ rhormsi(i,2) = rhorms(idx);
 rhormsi(i,3) = rhorms(idx);
 rhormsi(i,4) = rhorms(end);
 hold on
+figure(2)
+plot(diff(t)); title(['mass = ' num2str(masses(i))]); shg; pause;
+figure(1)
 end
 hold off
 xlabel('a'); ylabel('std(\rho) / |<\rho>|');
@@ -267,7 +270,8 @@ relval = 10.^(-rtol); absval = 10.^(-atol);
 time = zeros(length(rtol), length(atol));
 steps = zeros(size(time));
 errinf = zeros(size(time));
-errl2 = zeros(size(time));
+phimeanerrl2 = zeros(size(time));
+phistderrl2 = zeros(size(time));
 as = zeros(size(time));
 cstrl2 = zeros(size(time));
 getname = @(x,y) [base num2str(x) '_' num2str(y) '.h5'];
@@ -275,9 +279,10 @@ phiref = h5read(getname(max(rtol),max(atol)), '/phi_summary');
 aref = h5read(getname(max(rtol),max(atol)), '/a');
 cstrl2ref = h5read(getname(max(rtol),max(atol)),'/constraints');
 cstrl2ref = cstrl2ref(1,end);
-phiref = phiref(1,:);
+% phiref = phiref(1,:);
 arefs = h5read(getname(min(rtol),min(atol)), '/a');
-phirefs = spline(aref,phiref,arefs);
+phimeanrefs = spline(aref,phiref(1,:),arefs);
+phistdrefs = spline(aref,sqrt(phiref(2,:)),arefs);
 for i = 1:length(rtol)
     for j = 1:length(atol)
         name = getname(rtol(i),atol(j));
@@ -296,9 +301,11 @@ for i = 1:length(rtol)
 %         I = (a>0.9*aref(end));
 %         Iref = (aref>0.9*aref(end));
 %         plot(a(I),phi(1,I).*a(I)'.^(3/2),aref(Iref),phiref(Iref).*aref(Iref)'.^(3/2)); shg; pause;
-        errinf(i,j) = abs((phiref(end) - phi(1,end))/phiref(end));
-        phi = spline(a, phi(1,:),arefs);
-        errl2(i,j) = norm(phirefs - phi);
+        errinf(i,j) = abs((phiref(1,end) - phi(1,end))/phiref(1,end));
+        phimean = spline(a, phi(1,:),arefs);
+        phistd= spline(a, sqrt(phi(2,:)),arefs);
+        phimeanerrl2(i,j) = norm(phimeanrefs - phimean);
+        phistderrl2(i,j) = norm(phistdrefs - phistd);
     end
 end
 % semilogx(relval, time, 'linewidth',2); xlabel('rel tol'); ylabel('time [s]');
@@ -326,8 +333,11 @@ figure
 bar3(-log10(errinf)); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',relval);
 xlabel('atol'); ylabel('rtol'); zlabel('-log10 (\phi_{f}^{ref} - \phi_{f}) / \phi_{f}^{ref}');
 figure
-bar3(-log10(errl2)); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',relval);
-xlabel('atol'); ylabel('rtol'); zlabel('-log10 error l_{2}');
+bar3(-log10(phimeanerrl2)); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',relval);
+xlabel('atol'); ylabel('rtol'); zlabel('-log10 <\phi> error l_{2}');
+figure
+bar3(-log10(phistderrl2)); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',relval);
+xlabel('atol'); ylabel('rtol'); zlabel('-log10 std \phi error l_{2}');
 
 %% resolutions study
 res = [16 24 32 48 64 96 128];

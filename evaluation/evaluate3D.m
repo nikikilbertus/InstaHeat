@@ -1,7 +1,6 @@
-name = 'testps';
+% name = 'testps';
 interp = false;
 newoutput = true;
-cstr = true;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
@@ -51,12 +50,14 @@ if (newoutput)
     rhovar   = rhosmry(2,:);
     rhomin   = rhosmry(3,:);
     rhomax   = rhosmry(4,:);
-    if (cstr)
+    try
        cstr = h5read(name, '/constraints');
        hamcstr = cstr(1,:);
        hubblefrac = h5read(name, '/max_dt_hubble_fraction');
        inflmass = h5read(name, '/inflaton_mass');
        steps = h5read(name, '/steps_total');
+    catch me
+        %
     end
 else
     powspec = h5read(name, '/power_spectrum');
