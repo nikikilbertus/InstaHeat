@@ -61,6 +61,7 @@ struct dopri853_control
     double dt_did; ///< The previously used time step size
     double dt_next; ///< The proposed next time step size
     double dt_min; ///< The minimal permissible time step size
+    double dtlamb; ///< The multiple of dt used for stiffness detection
     size_t max_steps; ///< The maximal number of steps
     int n_stp; ///< The number of performed steps
     int n_ok; ///< The number of successful steps
@@ -75,6 +76,9 @@ struct dopri853_control
     double err_old; ///< The previous error (on the last time slice)
     int reject; ///< Flag whether time step is rejected or accepted
     double eps; ///< Epsilon value for comparisons
+    int n_stiff; ///< Skips for stiffness detection
+    int stiff; ///< Counter for stiffness detection (set)
+    int nonstiff; ///< Counter for stiffness detection (reset)
 };
 
 /**
@@ -205,6 +209,7 @@ static void initialize_dopri853()
     dp.dt_did = 0.0;
     dp.dt_next = pars.t.dt;
     dp.dt_min = MINIMAL_DELTA_T;
+    dp.dtlamb = 0.0;
     dp.max_steps = MAX_STEPS;
     dp.n_stp = 0;
     dp.n_ok = 0;
@@ -219,6 +224,9 @@ static void initialize_dopri853()
     dp.err_old = 1.0e-4;
     dp.reject = 0;
     dp.eps = DBL_EPSILON;
+    dp.n_stiff = 10;
+    dp.stiff = 0;
+    dp.nonstiff = 0;
     INFO(puts("Initialized dopri853 parameters.\n"));
 }
 
