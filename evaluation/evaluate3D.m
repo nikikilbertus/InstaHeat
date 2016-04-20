@@ -52,7 +52,8 @@ if (newoutput)
     rhomax   = rhosmry(4,:);
     try
        cstr = h5read(name, '/constraints');
-       hamcstr = cstr(1,:);
+       hamcstrl2 = cstr(1,:);
+       hamcstrinf = cstr(2,:);
        hubblefrac = h5read(name, '/max_dt_hubble_fraction');
        inflmass = h5read(name, '/inflaton_mass');
        steps = h5read(name, '/steps_total');
