@@ -544,6 +544,7 @@ static int success(const double err, double *dt)
  */
 static void check_for_stiffness(const double dt)
 {
+    TIME(mon.stiffcheck_time -= get_wall_time());
     const size_t Ntot = pars.Ntot;
     double num = 0.0;
     double den = 0.0;
@@ -572,6 +573,7 @@ static void check_for_stiffness(const double dt)
             dp.stiff = 0;
         }
     }
+    TIME(mon.stiffcheck_time += get_wall_time());
 }
 
 /**
