@@ -207,6 +207,7 @@ static void initialize_parameters()
     mon.copy_buffer_time = 0.0;
     mon.cstr_time = 0.0;
     mon.smry_time = 0.0;
+    mon.stiffcheck_time = 0.0;
 
     INFO(printf("Initialized parameters for %zu dimension(s).\n\n", pars.dim));
 }
