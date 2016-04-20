@@ -27,6 +27,7 @@ static int perform_step(const double dt_try);
 static void try_step(const double dt);
 static double error(const double dt);
 static int success(const double err, double *dt);
+static void check_for_stiffness(const double dt);
 static void allocate_dopri853_values();
 static void free_dopri853_values();
 
@@ -541,7 +542,7 @@ static int success(const double err, double *dt)
  * If stiffness requirements are fulfilled on 15 subsequent time steps, the
  * integration is aborted.
  */
-void check_for_stiffness(const double dt)
+static void check_for_stiffness(const double dt)
 {
     const size_t Ntot = pars.Ntot;
     double num = 0.0;
