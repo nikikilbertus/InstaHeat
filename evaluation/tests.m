@@ -225,9 +225,12 @@ figure
 m = 5;
 masses = 1./(2*10.^((1:5)));
 rhormsi = zeros(m,4);
+as = zeros(m,1);
+maxrhos = zeros(m,1);
 for i = 1:m
-name = ['64_1e5_' num2str(i)];
+name = ['32_1e5_' num2str(i)];
 evaluate3D
+maxrhos(i) = max(rhorms);
 loglog(a,rhorms,'linewidth',2)
 legendinfo{i} = ['mass=' num2str(masses(i))];
 rhormsi(i,1) = rhorms(1);
@@ -237,9 +240,9 @@ rhormsi(i,2) = rhorms(idx);
 rhormsi(i,3) = rhorms(idx);
 rhormsi(i,4) = rhorms(end);
 hold on
-figure(2)
-plot(diff(t)); title(['mass = ' num2str(masses(i))]); shg; pause;
-figure(1)
+% figure(2)
+% plot(diff(t)); title(['mass = ' num2str(masses(i))]); shg; pause;
+% figure(1)
 end
 hold off
 xlabel('a'); ylabel('std(\rho) / |<\rho>|');
@@ -248,6 +251,21 @@ figure
 loglog(masses, rhormsi, masses, masses/masses(1) * rhormsi(1,1) * 0.9,'--','linewidth',2);
 xlabel('mass'); ylabel('std(\rho) / |<\rho>|');
 legend('a=1', 'a=1e2', 'a=1e3', ['a=' num2str(a(end))], 'linear reference','location','northwest');
+
+%% extrapolate to nonlinear regime
+tmp = 2;
+name = ['32_1e5_' num2str(tmp)];
+evaluate3D
+I = (a>100) & (a<1000);
+figure
+slope = logfit(a(I),rhorms(I), 'loglog'); shg; pause;
+rhormsnonlin = max(maxrhos);
+anonlin = a(end) * (rhormsnonlin/rhorms(end))^(1/slope)
+aratio = anonlin / a(end);
+tnonlin = aratio^(3/2) * t(end)
+atmp = linspace(a(find(I,1)), anonlin, 10);
+loglog(a, rhorms, atmp, slope * atmp / (slope*atmp(1)) * rhorms(find(I,1))); shg;
+estimatedruntime = h5read(name,'/runtime_total') / 3600 * tnonlin/t(end) 
 
 %% plot long time bunch davies
 name = 'longruns/32_5e-4_1e6_beta_0';
