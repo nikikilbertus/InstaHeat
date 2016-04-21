@@ -228,7 +228,7 @@ rhormsi = zeros(m,4);
 as = zeros(m,1);
 maxrhos = zeros(m,1);
 for i = 1:m
-name = ['32_1e5_' num2str(i)];
+name = ['64_1e5_' num2str(i)];
 evaluate3D
 maxrhos(i) = max(rhorms);
 loglog(a,rhorms,'linewidth',2)
@@ -254,7 +254,7 @@ legend('a=1', 'a=1e2', 'a=1e3', ['a=' num2str(a(end))], 'linear reference','loca
 
 %% extrapolate to nonlinear regime
 tmp = 2;
-name = ['32_1e5_' num2str(tmp)];
+name = ['64_1e5_' num2str(tmp)];
 evaluate3D
 I = (a>100) & (a<1000);
 figure
@@ -265,7 +265,40 @@ aratio = anonlin / a(end);
 tnonlin = aratio^(3/2) * t(end)
 atmp = linspace(a(find(I,1)), anonlin, 10);
 loglog(a, rhorms, atmp, slope * atmp / (slope*atmp(1)) * rhorms(find(I,1))); shg;
-estimatedruntime = h5read(name,'/runtime_total') / 3600 * tnonlin/t(end) 
+estimatedruntime = h5read(name,'/runtime_total') / 3600 * tnonlin/t(end)
+
+%% playing with quantities in karstens paper
+L = 10;
+k = 2*pi/L;
+mpl = 1; m = 1; % again compare to karstens paper
+Hend = H(1); aend = a(1); Trh = 1e7;
+lc = 1./sqrt(2*H*m);
+% slope = logfit(a, lc, 'loglog'); shg; pause; slope
+% slope = logfit(a, 1./H, 'loglog'); shg; pause; slope
+% shg; pause;
+ks = [0.02 * a, 0.16 * a, a, 10 * a, 100 * a ];
+kphys = k ./ a;
+kmax = Hend * 1.37e3 * sqrt(m / (1.4e-6 * mpl)) * (Trh/1e7)^(-1/3) * (Hend/1e13)^(-1/3);
+kmin = Hend * 2.74e-6 * (Trh/1e7)^(2/3) * (Hend/1e13)^(-1/3);
+deltak = 2/5 * (k^2 ./ (a'.^2 .* H.^2) + 3) .* sqrt(psivar);
+deltak = deltak / deltak(end) * rhorms(end);
+h=loglog(a, ks, '--k','linewidth',0.5); hold on;
+arrayfun(@(x) set(get(get(x,'Annotation'),'LegendInformation'),'IconDisplayStyle','off'),h);
+loglog(a, mpl*lc, a, mpl./H, a, mpl./kphys, a, rhorms, a, deltak, a, a/kmax, a, a/kmin); hold off; shg;
+legend('mpl/sqrt(3 H m)', 'mpl/H', 'mpl/k_{phys}', '\delta \rho / \rho', '\delta k', 'kmax', 'kmin');
+%% power spectrum comparison
+tmp = 2;
+bins = 2:50;
+name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/resolutions5/64_5e-3_3e3.h5';
+a = h5read(name, '/a');
+N = h5read(name, '/gridpoints_internal');
+N = N(1);
+rhosmry = h5read(name, '/rho_summary');
+rhomean = rhosmry(1,:);
+rhops = h5read(name, '/rho_power_spectrum');
+for i = 1:100:length(rhops(1,:))
+    loglog(bins, rhops(2:end,i)); shg; pause;
+end
 
 %% plot long time bunch davies
 name = 'longruns/32_5e-4_1e6_beta_0';
