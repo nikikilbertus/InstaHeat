@@ -31,7 +31,7 @@ static void mk_filter_mask();
 static double filter_window(const double x);
 #endif
 static void mk_initial_conditions();
-#if INITIAL_CONDITIONS == IC_FROM_DAT_FILE
+#ifdef IC_FROM_DAT_FILE
 static void initialize_from_dat();
 #endif
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
@@ -530,8 +530,7 @@ static void mk_initial_conditions()
 
     #if INITIAL_CONDITIONS == IC_FROM_H5_FILE
     h5_read_timeslice();
-    #elif INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITH_PSI || \
-          INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITHOUT_PSI
+    #elif defined(IC_FROM_DAT_FILE)
     initialize_from_dat();
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
     initialize_from_bunch_davies();
@@ -551,7 +550,7 @@ static void mk_initial_conditions()
     INFO(puts("Initialized fields on first time slice.\n"));
 }
 
-#if INITIAL_CONDITIONS == IC_FROM_DAT_FILE
+#ifdef IC_FROM_DAT_FILE
 /**
  * @brief Read initial conditions from a .dat file.
  *
