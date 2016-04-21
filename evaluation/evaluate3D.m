@@ -1,5 +1,5 @@
-% name = 'testps';
-interp = false;
+% name = 'bunch2';
+interp = true;
 newoutput = true;
 
 % loading the data, replace 'name' with the path where you stored the .h5

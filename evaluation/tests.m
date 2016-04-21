@@ -29,7 +29,7 @@ testl1 = ifftn(-kk.*fftn(test));
 testl2 = del2(test, dx) * 2 * dim;
 
 %% powerspectrum check
-bins = 40;
+bins = 50;
 L=10;
 n = size(phi,1);
 meff2 = mass^2 - 9 * H(1)^2 / 4;
@@ -74,9 +74,9 @@ end
 ps2 = ps2 / ps2(match) * ps(match);
 dps2 = dps2 / dps2(match) * dps(match);
 
-loglog(k,ps,k,ps1,k,ps2)
+loglog(k,ps,k,ps1,k,ps2,k,mkPowerSpectrum(phika,50,1))
 hold on
-loglog(k,dps,k,dps1,k,dps2)
+loglog(k,dps,k,dps1,k,dps2,k,mkPowerSpectrum(dphika,50,1))
 hold off
 shg
 
@@ -112,6 +112,13 @@ end
 tmp = atol( rho0 - mean(rho0(:)) );
 mean(tmp(:))
 
+%% construct karstens IC from fourier
+L=1;
+N=64;
+name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64psi_5.dat';
+raw = importdata(name);
+
+
 %% Hamiltonian and momentum karsten vs. code
 L=1;
 N=64;
@@ -134,7 +141,7 @@ dphi = h5read(name,'/dphi');
 dphi = reshape(dphi(:,1),N,N,N);
 dpsi = h5read(name,'/dpsi');
 dpsi = reshape(dpsi(:,1),N,N,N);
-prn = @(f) num2str(max(atol(f(:))));
+prn = @(f) num2str(max(abs(f(:))));
 disp(' '); disp(' ');
 disp(['----comparison, mass=' num2str(mass) ', a=' num2str(a(1)) '----'])
 [check, t1, t2, t3] = hamiltonianConstraint(psika, dpsika, a(1), rhoka, L);
@@ -166,8 +173,8 @@ disp(['l2 and l\infty differences in \psi ' num2str(norm(psi(:)-psika(:))) ', ' 
 %% Hamiltonian and momentum for bunch davies
 nums = [1 2 3 4 5 6 7 8];
 L = 10;
-mabs = @(f) max(atol(f(:)));
-prn = @(f) num2str(max(atol(f(:))));
+mabs = @(f) max(abs(f(:)));
+prn = @(f) num2str(max(abs(f(:))));
 herrs = zeros(4, length(nums));
 mxerrs = zeros(3,length(nums));
 myerrs = zeros(3,length(nums));
@@ -220,7 +227,7 @@ loglog(ms, mzerrs(1,:),'linewidth',2);
 hold off
 xlabel('planck mass'); ylabel('max. abs error of momenutm');
 
-%% plot long time bunch davies
+%% masses study for bunch davies
 figure
 m = 5;
 masses = 1./(2*10.^((1:5)));
