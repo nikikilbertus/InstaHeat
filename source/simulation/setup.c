@@ -625,9 +625,10 @@ static void initialize_from_bunch_davies()
         fputs("Bunch Davies vacuum works only for box size 10.0.\n", stderr);
         exit(EXIT_FAILURE);
     }
+    // directly form DEFROST(v1.0), factor in dphi0 and H0 adjusts modes
     const double phi0 = 1.0093430384226378929425913902459;
-    const double dphi0 = -0.713706915863227;
-    const double hubble = sqrt((dphi0 * dphi0 + MASS * MASS * phi0 * phi0) / 6.0);
+    const double dphi0 = -4.0 * 0.7137133070120812430962278466136;
+    const double hubble = 4.0 * 0.5046715192113189464712956951230;
     mk_bunch_davies(field, hubble, phi0, -0.25);
     mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
     field[2 * pars.N] = A_INITIAL;
