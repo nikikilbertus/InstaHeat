@@ -28,7 +28,7 @@ testg1 = phix.^2 + phiy.^2 + phiz.^2;
 testl1 = ifftn(-kk.*fftn(test));
 testl2 = del2(test, dx) * 2 * dim;
 
-%% powerspectrum check
+%% powerspectrum check bunch davies
 bins = 50;
 L=10;
 n = size(phi,1);
@@ -74,9 +74,9 @@ end
 ps2 = ps2 / ps2(match) * ps(match);
 dps2 = dps2 / dps2(match) * dps(match);
 
-loglog(k,ps,k,ps1,k,ps2,k,mkPowerSpectrum(phika,50,1))
+loglog(k,ps,k,ps1,k,ps2)
 hold on
-loglog(k,dps,k,dps1,k,dps2,k,mkPowerSpectrum(dphika,50,1))
+loglog(k,dps,k,dps1,k,dps2)
 hold off
 shg
 
@@ -107,7 +107,6 @@ for i = 1:numel(phigen)
     phigen(i) = xi(R(i));
 end
 
-
 %% how far is rho0 from rho
 tmp = atol( rho0 - mean(rho0(:)) );
 mean(tmp(:))
@@ -115,7 +114,7 @@ mean(tmp(:))
 %% construct karstens IC from fourier
 L=1;
 N=64;
-name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64psi_5.dat';
+name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64fourier_3.dat';
 raw = importdata(name);
 
 
@@ -124,11 +123,12 @@ L=1;
 N=64;
 name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64psi_5.dat';
 raw = importdata(name);
+name = 'comp_karsten_5_simp2';
+evaluate3D
 phika = reshape(raw(:,4),N,N,N);
 dphika = reshape(raw(:,5),N,N,N);
 psika = reshape(raw(:,6),N,N,N);
 dpsika = reshape(raw(:,7),N,N,N);
-evaluate3D
 rhoka = mkrho(phika,dphika,psika,a(1),mass,L);
 N = N(1);
 psi = h5read(name,'/psi');
@@ -169,6 +169,28 @@ disp(['1  : ' num2str(t1)])
 disp(['2  : ' num2str(t2)])
 disp(' ')
 disp(['l2 and l\infty differences in \psi ' num2str(norm(psi(:)-psika(:))) ', ' prn(psi(:)-psika(:))])
+
+%% power spectrum check karsten
+L=1;
+N=64;
+bins = 50;
+name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64psi_5.dat';
+raw = importdata(name);
+name = 'comp_karsten_5_simp2';
+evaluate3D
+N = N(1);
+phika = reshape(raw(:,4),N,N,N);
+dphika = reshape(raw(:,5),N,N,N);
+psika = reshape(raw(:,6),N,N,N);
+dpsika = reshape(raw(:,7),N,N,N);
+rhoka = mkrho(phika, dphika, psika, a(1), mass, L);
+rhormska = sqrt(var(rhoka) ./ mean(rhoka).^2);
+kmax = sqrt(3) * (N/2) * (2*pi/L);
+k = linspace(1,kmax,bins);
+phikaps = mkPowerSpectrum(phika,bins,L);
+rhormskaps = mkPowerSpectrum(rhormska,bins,L);
+loglog(1:bins,phikaps, 1:bins,rhormskaps); shg;
+
 
 %% Hamiltonian and momentum for bunch davies
 nums = [1 2 3 4 5 6 7 8];
@@ -276,24 +298,42 @@ estimatedruntime = h5read(name,'/runtime_total') / 3600 * tnonlin/t(end)
 
 %% playing with quantities in karstens paper
 L = 10;
+N = 64;
 k = 2*pi/L;
 mpl = 1; m = 1; % again compare to karstens paper
-Hend = H(1); aend = a(1); Trh = 1e7;
-lc = 1./sqrt(2*H*m);
+alpha = 4;
+ms = alpha*mass;
+Hs = alpha*H;
+Hend = Hs(1); aend = a(1); Trh = 1e7;
+lc = 1./sqrt(3*Hs*ms);
+lcfit = fit(log(a), log(mpl*lc)', 'linear');
+
+kphys = k ./ a;
+kmingrid = k;
+kmaxgrid = sqrt(3) * N/2 * k;
+kmaxfit = fit(log(a), log(a/kmaxgrid), 'linear');
+
 % slope = logfit(a, lc, 'loglog'); shg; pause; slope
 % slope = logfit(a, 1./H, 'loglog'); shg; pause; slope
 % shg; pause;
-ks = [0.02 * a, 0.16 * a, a, 10 * a, 100 * a ];
-kphys = k ./ a;
-kmax = Hend * 1.37e3 * sqrt(m / (1.4e-6 * mpl)) * (Trh/1e7)^(-1/3) * (Hend/1e13)^(-1/3);
+% ks = [0.02 * a, 0.16 * a, a, 10 * a, 100 * a ];
+% h=loglog(a, ks, '--k','linewidth',0.5); hold on;
+% arrayfun(@(x) set(get(get(x,'Annotation'),'LegendInformation'),'IconDisplayStyle','off'),h);
+
+kmax = Hend * 1.37e3 * sqrt(ms / (1.4e-6 * mpl)) * (Trh/1e7)^(-1/3) * (Hend/1e13)^(-1/3);
 kmin = Hend * 2.74e-6 * (Trh/1e7)^(2/3) * (Hend/1e13)^(-1/3);
-deltak = 2/5 * (k^2 ./ (a'.^2 .* H.^2) + 3) .* sqrt(psivar);
+
+deltak = 2/5 * (k^2 ./ (a'.^2 .* Hs.^2) + 3) .* sqrt(psivar);
 deltak = deltak / deltak(end) * rhorms(end);
-h=loglog(a, ks, '--k','linewidth',0.5); hold on;
-arrayfun(@(x) set(get(get(x,'Annotation'),'LegendInformation'),'IconDisplayStyle','off'),h);
-loglog(a, mpl*lc, a, mpl./H, a, mpl./kphys, a, rhorms, a, deltak, a, a/kmax, a, a/kmin); hold off; shg;
-legend('mpl/sqrt(3 H m)', 'mpl/H', 'mpl/k_{phys}', '\delta \rho / \rho', '\delta k', 'kmax', 'kmin');
-%% power spectrum comparison
+
+loglog(a, mpl*lc, a, mpl./Hs, a, mpl./kphys, a, rhorms, a, deltak, a, a/kmaxgrid, a, a/kmingrid); hold on; shg;
+legend('mpl/sqrt(3 H m)', 'mpl/H', 'mpl/k_{phys}', '\delta \rho / \rho', '\delta k (norm)', 'kmax', 'kmin');
+pause;
+aint = exp(fminsearch(@(x) (kmaxfit(x) - lcfit(x)).^2, a(end)))
+aext = linspace(log(a(1)),log(aint),100);
+loglog(exp(aext), exp(kmaxfit(aext)), exp(aext), exp(lcfit(aext)),'linewidth',0.8); hold off; shg;
+
+%% power spectrum analysis
 tmp = 2;
 bins = 2:50;
 name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/resolutions5/64_5e-3_3e3.h5';
