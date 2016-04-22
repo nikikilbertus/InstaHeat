@@ -31,7 +31,7 @@ static void mk_filter_mask();
 static double filter_window(const double x);
 #endif
 static void mk_initial_conditions();
-#if INITIAL_CONDITIONS == IC_FROM_DAT_FILE
+#ifdef IC_FROM_DAT_FILE
 static void initialize_from_dat();
 #endif
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
@@ -530,8 +530,7 @@ static void mk_initial_conditions()
 
     #if INITIAL_CONDITIONS == IC_FROM_H5_FILE
     h5_read_timeslice();
-    #elif INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITH_PSI || \
-          INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITHOUT_PSI
+    #elif defined(IC_FROM_DAT_FILE)
     initialize_from_dat();
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
     initialize_from_bunch_davies();
@@ -551,7 +550,7 @@ static void mk_initial_conditions()
     INFO(puts("Initialized fields on first time slice.\n"));
 }
 
-#if INITIAL_CONDITIONS == IC_FROM_DAT_FILE
+#ifdef IC_FROM_DAT_FILE
 /**
  * @brief Read initial conditions from a .dat file.
  *
@@ -626,9 +625,10 @@ static void initialize_from_bunch_davies()
         fputs("Bunch Davies vacuum works only for box size 10.0.\n", stderr);
         exit(EXIT_FAILURE);
     }
+    // directly form DEFROST(v1.0), factor in dphi0 and H0 adjusts modes
     const double phi0 = 1.0093430384226378929425913902459;
-    const double dphi0 = -0.713706915863227;
-    const double hubble = sqrt((dphi0 * dphi0 + MASS * MASS * phi0 * phi0) / 6.0);
+    const double dphi0 = -4.0 * 0.7137133070120812430962278466136;
+    const double hubble = 4.0 * 0.5046715192113189464712956951230;
     mk_bunch_davies(field, hubble, phi0, -0.25);
     mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
     field[2 * pars.N] = A_INITIAL;
