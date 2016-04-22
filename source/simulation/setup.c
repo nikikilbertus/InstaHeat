@@ -269,7 +269,7 @@ static void allocate_external()
     init_output(&dpsi, outN, 0);
     #endif
     #ifdef OUTPUT_RHO
-    init_output(&rho, outN, 0);
+    init_output(&rho_out, outN, 0);
     #endif
 
     // ---------------------------summaries-------------------------------------
