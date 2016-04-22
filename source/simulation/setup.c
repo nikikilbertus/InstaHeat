@@ -783,9 +783,8 @@ static void initialize_from_internal_function()
     double *theta = calloc(Nmodes, sizeof *theta);
 
     // random phases
-    srand(SEED);
     for (size_t i = 0; i < Nmodes; ++i) {
-        theta[i] = TWOPI * (double)rand() / (double)RAND_MAX;
+        theta[i] = TWOPI * gsl_rng_uniform(rng);
     }
 
     for (size_t i = 0; i < Nx; ++i) {
