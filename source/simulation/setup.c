@@ -746,14 +746,13 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
  * two independent standard normal random variables.
  *
  * @note The two independent uniformly distributed random values are computed
- * via the standard library rand() function.
+ * via the Mersenne Twister MT19937 generator of Makoto Matsumoto and Takuji
+ * Nishimura.
  */
 static complex box_muller()
 {
-    const double u1 = (double)rand() / (double)RAND_MAX;
-    const double u2 = (double)rand() / (double)RAND_MAX;
-    const double u1 = ;
-    const double u2 = (double)rand() / (double)RAND_MAX;
+    const double u1 = gsl_rng_uniform(rng);
+    const double u2 = gsl_rng_uniform(rng);
     return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * I);
 }
 #endif
