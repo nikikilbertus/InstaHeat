@@ -101,6 +101,8 @@ int main(int argc, const char * argv[])
             mon.smry_time, 100. * (mon.smry_time / secs)));
     INFO(printf("copying buffers took %f seconds (%.2f %%).\n",
             mon.copy_buffer_time, 100. * (mon.copy_buffer_time / secs)));
+    INFO(printf("checking stiffness took %f seconds (%.2f %%).\n",
+            mon.stiffcheck_time, 100. * (mon.stiffcheck_time / secs)));
     INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
             mon.h5_time_write, 100. * (mon.h5_time_write / secs)));
 
@@ -113,6 +115,7 @@ int main(int argc, const char * argv[])
     h5_write_parameter(H5_RUNTIME_COPY_BUFFER_NAME, &mon.copy_buffer_time, 1);
     h5_write_parameter(H5_RUNTIME_CSTR_NAME, &mon.cstr_time, 1);
     h5_write_parameter(H5_RUNTIME_SMRY_NAME, &mon.smry_time, 1);
+    h5_write_parameter(H5_RUNTIME_STIFF_NAME, &mon.stiffcheck_time, 1);
     h5_write_parameter(H5_RUNTIME_WRITEOUT_NAME, &mon.h5_time_write, 1);
     #endif
 
