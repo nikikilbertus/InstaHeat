@@ -1,6 +1,7 @@
-name = 'compkarsten/64_1e-4_5e7';
-interp = false;
+name = 'scaledbunch/64_5e-3_2e5_m4';
+interp = true;
 newoutput = true;
+amax = 600;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
@@ -18,10 +19,10 @@ timestride = h5read(name,'/strides_time');
 tols = h5read(name, '/tolerances');
 
 if (newoutput)
-    phips  = h5read(name, '/phi_power_spectrum');
+    phips = h5read(name, '/phi_power_spectrum');
     try
-    psips  = h5read(name, '/psi_power_spectrum');
-    rhops  = h5read(name, '/rho_power_spectrum');
+    psips = h5read(name, '/psi_power_spectrum');
+    rhops = h5read(name, '/rho_power_spectrum');
     catch me
         %
     end
@@ -95,4 +96,45 @@ if interp
 [dphipks, dphipkpos] = findpeaks(dphivar);
 dphivarenv = spline(a(dphipkpos), dphipks, a);
 dphirms = sqrt(dphivarenv ./ dphienv.^2);
+end
+
+if amax > 1
+    I = (a < amax);
+    a = a(I);
+    t = t(I);
+    H = H(I);
+    rhorms   = rhorms(I);
+    
+    phimean  = phimean(I);
+    phivar   = phivar(I);
+    phimin   = phimin(I);
+    phimax   = phimax(I); 
+    dphimean = dphimean(I);
+    dphivar  = dphivar(I);
+    dphimin  = dphimin(I);
+    dphimax  = dphimax(I);
+    psimean  = psimean(I);
+    psivar   = psivar(I);
+    psimin   = psimin(I);
+    psimax   = psimax(I);
+    dpsimean = dpsimean(I);
+    dpsivar  = dpsivar(I);
+    dpsimin  = dpsimin(I);
+    dpsimax  = dpsimax(I);
+    
+    try
+    phips = phips(:,I);
+    psips = psips(:,I);
+    rhops = rhops(:,I);
+    catch m
+        %
+    end;
+    
+    hamcstrl2 = hamcstrl2(I);
+    hamcstrinf = hamcstrinf(I);
+    
+    phirms = phirms(I);
+    phienv = phienv(I);
+    dphirms = dphirms(I);
+    dphienv = dphienv(I);
 end
