@@ -618,9 +618,14 @@ static void mk_initial_psi()
  * parameters satisfy the conditions and then construct corresponding $$\psi$$,
  * $$\dot{psi}$$.
  *
- * We use the exact same values as in the DEFROST paper (in the references), hence we
- * need 3 dimensions, `MASS=1`, a box length of 10 in each direction. DEFROST uses
- * `INFLATON_MASS=5e-6`.
+ * We build upon the values in the DEFROST paper (in the references), hence we
+ * need 3 dimensions with the same number of gridpoints and a box length of 10
+ * in each direction. DEFROST uses `INFLATON_MASS=5e-6` and `MASS=1`. We can
+ * freely adjust the `INFLATON_MASS` to change the amplitude of the initial
+ * fluctuations. By scaling `MASS`, we can shift the initial Hubble length.
+ * (Initial values for H and $$\dot{\phi}$$ are scaled automatically according
+ * to the value of `MASS`.) We recommend keeping the bos length fixed at 10 and
+ * only rescaling `MASS`.
  *
  * @see [DEFROST: A New Code for Simulating Preheating after
  * Inflation](http://arxiv.org/abs/0809.4904)

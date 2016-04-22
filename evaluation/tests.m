@@ -31,12 +31,14 @@ testl2 = del2(test, dx) * 2 * dim;
 %% powerspectrum check bunch davies
 bins = 50;
 L=10;
-n = size(phi,1);
+% n = size(phi,1);
 meff2 = mass^2 - 9 * H(1)^2 / 4;
 match = 2;
 
-ps = mkPowerSpectrum(phi,bins,L);
-dps = mkPowerSpectrum(dphi,bins,L);
+% ps = mkPowerSpectrum(phi,bins,L);
+% dps = mkPowerSpectrum(dphi,bins,L);
+ps = phips(:,1);
+dps = dphips(:,1);
 
 kmax = sqrt(3) * (n/2) * (2*pi/L);
 k = linspace(0,kmax,bins);
@@ -336,7 +338,7 @@ loglog(exp(aext), exp(kmaxfit(aext)), exp(aext), exp(lcfit(aext)),'linewidth',0.
 %% power spectrum analysis
 tmp = 2;
 bins = 2:50;
-name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/resolutions5/64_5e-3_3e3.h5';
+name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/scaledbunch/64_5e-3_2e5_m4.h5';
 a = h5read(name, '/a');
 N = h5read(name, '/gridpoints_internal');
 N = N(1);
