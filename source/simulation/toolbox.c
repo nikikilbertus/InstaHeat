@@ -463,7 +463,7 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
     const size_t bins = out.dim;
 
     const double k2_max = pars.x.k2 * (Nx/2) * (Nx/2) +
-                    pars.y.k2 * (Ny/2) * (Ny/2) + pars.z.k2 * (Nz/2) * (Nz/2);
+                pars.y.k2 * (Ny/2) * (Ny/2) + pars.z.k2 * (Nz/2) * (Nz/2);
 
     #pragma omp parallel for
     for (size_t i = 0; i < bins; ++i) {
@@ -472,7 +472,8 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
 
     double pow2_tmp = 0.0;
     size_t idx;
-    for (size_t i = 0; i < M; ++i) {
+    // starting with 1 to explicitly exclude constant average
+    for (size_t i = 1; i < M; ++i) {
         if (fabs(kvec.z[i]) < DBL_EPSILON) {
             pow2_tmp = in[i] * conj(in[i]);
         } else {
