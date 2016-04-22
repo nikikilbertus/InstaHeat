@@ -514,12 +514,16 @@ static void mk_filter_mask()
  * rule.
  *
  * @see `mk_filter_mask()`
- * @see [Computing Nearly Singular Solutions Using Pseudo-Spectral Methods](http://arxiv.org/abs/math/0701337)
- * @see [Numerical Study of Nearly Singular Solutions of the 3-D Incompressible Euler Equations](http://arxiv.org/abs/physics/0608126)
- * @see [On the stability of the unsmoothed Fourier method for hyperbolic equations](http://link.springer.com/article/10.1007%2Fs002110050019)
+ * @see [Computing Nearly Singular Solutions Using Pseudo-Spectral
+ * Methods](http://arxiv.org/abs/math/0701337)
+ * @see [Numerical Study of Nearly Singular Solutions of the 3-D Incompressible
+ * Euler Equations](http://arxiv.org/abs/physics/0608126)
+ * @see [On the stability of the unsmoothed Fourier method for hyperbolic
+ * equations](http://link.springer.com/article/10.1007%2Fs002110050019)
  */
 static double filter_window(const double x)
 {
+    // exponential cutoff smoothing
     return exp(-36.0 * pow(x, 36));
 
     // two thirds rule
@@ -659,7 +663,8 @@ static void initialize_from_bunch_davies()
  * @brief Construct a Bunch Davies vacuum for $$\phi$$ and $$\dot{\phi}$$ as
  * initial conditions following the description in DEFROST.
  *
- * @see [DEFROST: A New Code for Simulating Preheating after Inflation](http://arxiv.org/abs/0809.4904)
+ * @see [DEFROST: A New Code for Simulating Preheating after
+ * Inflation](http://arxiv.org/abs/0809.4904)
  */
 static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma)
@@ -712,9 +717,9 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
         for (int j = 0; j < Ny; ++j) {
             osy = osx + j * Nz;
             for (int k = 0; k < Nz; ++k) {
-                kk = sqrt((double)( (i + 1 - nn) * (i + 1 - nn) +
-                                    (j + 1 - nn) * (j + 1 - nn) +
-                                    (k + 1 - nn) * (k + 1 - nn))) * os;
+                kk = sqrt((double)((i + 1 - nn) * (i + 1 - nn) +
+                                   (j + 1 - nn) * (j + 1 - nn) +
+                                   (k + 1 - nn) * (k + 1 - nn))) * os;
                 l = (size_t) floor(kk);
 
                 if (l > 0) {
@@ -809,7 +814,7 @@ static void initialize_from_internal_function()
 }
 
 /**
- * @brief Construct the spatial grid.
+ * @brief Constructs the spatial grid.
  *
  * @param[out] grid A double array of size `Nx + Ny + Nz` that is filled up
  * with the grid values in each direction.
@@ -896,38 +901,6 @@ static double phi_init(const double x, const double y, const double z,
     /* double mean = 14.1421356; // for 50 e-fold inflation */
     /* double mean = 6.319569842; // somewhere at the end of 50 e-fold inflation */
 
-    // karstens first set original
-    /* double mean = 1.0; */
-    /* double amplitude = 1.0e-5; */
-
-    // karstens first set rescaling field instead of mass
-    /* double mean = 6.0e3; */
-    /* double amplitude = 6.0e-2; */
-
-    // 25063
-    /* double mean = 0.001543576559919; */
-    /* double amplitude = 2.194936266463790e-6; */
-
-    //10138
-    /* double mean = 0.003801532800616; */
-    /* double amplitude = 2.200533462675648e-7; */
-
-    //1833
-    /* double mean = 0.021019511647747; */
-    /* double amplitude = 1.890808635066822e-6; */
-
-    //30
-    /* double mean = 0.999993224388493; */
-    /* double amplitude = 1.000511520852772e-05; */
-
-    //499
-    /* double mean = 0.077381458703679; */
-    /* double amplitude = -2.306228596956429e-07; */
-
-    // compare_2, pos= 7671
-    /* double mean = 0.0150052; */
-    /* double amplitude = 4.048590000000000e-07; */
-
     // compare_2, pos= 5500
     /* double mean = 0.0202977; */
     /* double amplitude = -2.26961e-06; */
@@ -936,10 +909,6 @@ static double phi_init(const double x, const double y, const double z,
     const double scale = 1.0e0;
     const double mean = 0.0510864;
     const double amplitude = -3.743790000000000e-07 * scale;
-
-    // compare_2, pos= 1
-    /* double mean = 5.0; */
-    /* double amplitude = 0.01; */
 
     if (pars.dim == 1) {
         return mean + amplitude * cos(x);
@@ -981,35 +950,14 @@ static double phi_init(const double x, const double y, const double z,
 static double dphi_init(const double x, const double y, const double z,
         const double *ph)
 {
-    /* return 0.0; */
-
-    /* double mean = -1.447595527218249e-8; */
-    /* double amplitude = 1.794195724493731e-7; */
-
-    /* double mean = 9.996023030535600e-9; */
-    /* double amplitude = 1.794182821708652e-7; */
-
-    /* double mean = -7.814852944111800e-8; */
-    /* double amplitude = 1.791222773169365e-7; */
-
-    /* double mean = -5.351102009251914e-06; */
-    /* double amplitude = 1.865069892229237e-09; */
-
-    /* double mean = 9.369552970351966e-07; */
-    /* double amplitude = 1.768837536606555e-07; */
-
-    /* double mean = -4.397960000000000e-06; */
-    /* double amplitude = 1.816140000000000e-08; */
-
+    // compare_2, pos= 5500
     /* double mean = -0.00475989; */
     /* double amplitude = -2.91473e-09; */
 
+    // compare_2, pos= 6000
     const double scale = 1.0e0;
     const double mean = 3.255190000000000e-04;
     const double amplitude = 1.742130000000000e-08 * scale;
-
-    /* double mean = -0.00806088; */
-    /* double amplitude = -1.134420000000000e-20; */
 
     if (pars.dim == 1) {
         return (mean + amplitude * cos(x)) * MASS / MASS_KARSTEN;
@@ -1074,8 +1022,10 @@ static double wrapped_gaussian(const double x, const double y, const double z)
  * everything after the simulation is done.
  *
  * A single call to this function cleans up everything after the simulation.
- * After this call, the program can exit. It should be the last function called,
- * see `main.c`.
+ * After this function returns, the program can exit. It should be the last
+ * function called,
+
+ * @see `main.c`.
  */
 void free_and_destroy_all()
 {
@@ -1085,7 +1035,7 @@ void free_and_destroy_all()
 }
 
 /**
- * @brief Destroy fftw plans and clean up threads.
+ * @brief Destroy fftw plans and clean up fftw threads.
  */
 static void destroy_and_cleanup_fftw()
 {
@@ -1096,7 +1046,7 @@ static void destroy_and_cleanup_fftw()
 }
 
 /**
- * @brief Free memory from all external (i.e. global) variables.
+ * @brief Free memory of all external (i.e. global) variables.
  *
  * @note Everything allocated in `allocate_external()` must be freed here.
  */
