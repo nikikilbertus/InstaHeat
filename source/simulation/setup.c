@@ -5,6 +5,7 @@
 #include <complex.h>
 #include <omp.h>
 #include <fftw3.h>
+#include <gsl/gsl_rng.h>
 #include "setup.h"
 #include "toolbox.h"
 #include "io.h"
@@ -20,6 +21,7 @@
  * simulation. Therefore, performance is not an issue in this file.
  */
 
+static void initialize_rng();
 static void initialize_threading();
 static void initialize_parameters();
 static void allocate_external();
@@ -53,6 +55,8 @@ static void mk_initial_psi();
 static void destroy_and_cleanup_fftw();
 static void free_external();
 
+static gsl_rng *rng;
+
 /**
  * @brief Successively calls the subroutines in this file necessary to setup
  * everything for the simulation.
@@ -63,6 +67,7 @@ static void free_external();
  */
 void allocate_and_initialize_all()
 {
+    initialize_rng();
     initialize_threading();
     initialize_parameters();
     allocate_external();
@@ -73,6 +78,7 @@ void allocate_and_initialize_all()
     #endif
     mk_initial_conditions();
     h5_create_empty_by_path();
+    gsl_rng_free(rng);
     #ifdef ENABLE_FFT_FILTER
     INFO(puts("Frequency cutoff filtering enabled.\n"));
     #else
@@ -85,6 +91,18 @@ void allocate_and_initialize_all()
     #elif PSI_METHOD == PSI_HYPERBOLIC
     INFO(puts("Integrating psi using the hyperbolic constraint.\n"));
     #endif
+}
+
+/**
+ * @brief Allocate and set the seed of the gsl pseudo random number generator.
+ *
+ * We use the _Mersenne Twister_, i.e. the MT19937 generator of Makoto
+ * Matsumoto and Takuji Nishimura.
+ */
+static void initialize_rng()
+{
+    rng = gsl_rng_alloc(gsl_rng_mt19937);
+    gsl_rng_set(rng, SEED);
 }
 
 /**
@@ -733,6 +751,8 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
 static complex box_muller()
 {
     const double u1 = (double)rand() / (double)RAND_MAX;
+    const double u2 = (double)rand() / (double)RAND_MAX;
+    const double u1 = ;
     const double u2 = (double)rand() / (double)RAND_MAX;
     return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * I);
 }
