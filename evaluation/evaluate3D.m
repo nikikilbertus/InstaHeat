@@ -1,4 +1,4 @@
-% name = 'bunch2';
+name = 'compkarsten/64_1e-4_5e7';
 interp = false;
 newoutput = true;
 
@@ -57,6 +57,7 @@ if (newoutput)
        hubblefrac = h5read(name, '/max_dt_hubble_fraction');
        inflmass = h5read(name, '/inflaton_mass');
        steps = h5read(name, '/steps_total');
+       timetotal = h5read(name, '/runtime_total');
     catch me
         %
     end
