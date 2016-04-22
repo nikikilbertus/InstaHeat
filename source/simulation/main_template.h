@@ -72,6 +72,11 @@
 #define IC_FROM_BUNCH_DAVIES            (4)
 #define INITIAL_CONDITIONS              (_IC_)
 
+#if INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITH_PSI \
+    || INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITHOUT_PSI
+    #define IC_FROM_DAT_FILE
+#endif
+
 #define _WOPSI_
 
 #define _OPHI_
