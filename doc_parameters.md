@@ -4,34 +4,41 @@ This is an explanation of the parameters in the file `parameters.sh`. We want to
 
 __IMPORTANT:__ Unlike parameters that are passed to a program at runtime, our parameters are read even _before_ compilation. The build process initiated by `make` (see `Makefile`) goes as follows:
 
-1. From within the `Makefile` the script `configure.sh` is called. It performs the following steps:
-    * It loads the values given in `parameters.sh`.
+1. From within the `Makefile` the executable script `configure` is called. It performs the following steps:
+    * It loads the values specified in `parameters.sh`.
     * It makes a copy of `main_template.h` the template main header and saves it as `main.h`.
-    * It replaces placeholders in `main.h` file by the values found in `parameters.sh`.
-2. The source files (including the newly generated `main.h`) are compiled and linked.
-3. The final executable is called `run`. It does not take any arguments anymore. All parameters have been determined during the build process. After the build process no parameters can be changed.
+    * It replaces placeholders in `main.h` file by the values found in `parameters.sh`. Almost all parameters are provided as preprocessor defines in `main.h`.
 
-The advantage of this method is that we can compile solely the code needed for a specific choice of parameters in a highly optimized way. This results in:
+    This step is not yet optimal and will probably be optimized in the future.
 
-* Optimized memory usage by omitting unnecessary allocations and avoiding unused or dead code.
-* Runtime optimization due to elimination of conditionals that determine program flow during runtime.
-* Runtime optimization by fixing values during compile time with preprocessor directives. This allows the compiler to perform more optimizations.
+2. The source files, i.e. the `.c` and `.h` files (including the newly generated `main.h`) are compiled and linked, see `Makefile` for details.
 
-## How to handle this file
+3. The final executable is called `run` and can be run with `./run`. It does not take any arguments anymore. All parameters have been determined during the build process.
 
-* Do not delete or comment any parameters. All of them are required and have to be specified.
+This method has several advantages in terms of optimization and also usability:
+
+* Everything is controlled from a single file `parameters.sh` that clearly lists all options and parameters. It contains solely the definition of the parameters and nothing else.
+* For a given parameter file, only the necessary parts of the source are compiled. Thereby we can optimize memory usage and avoid superfluous allocations as well as unused or dead code.
+* The runtime is optimized due to elimination of conditionals that determine program flow during runtime. Most of the program flow is already determined at compile time.
+* Most parameters are available as fixed constant numbers before compilation starts. This information gives the compiler a lot of room for optimizations and all sorts of compiler magic.
+
+## How to handle the `parameters.sh` file
+
+* Do not delete or comment any parameters in `parameters.sh`. All of them are required and have to be specified.
 * Do not change the names of any parameters.
 * All parameter values are given as strings, i.e. enclosed by `" "`.
 * Boolean values are encoded by `"1"` (true) and `"0"` (false).
-* Numerical values can be given in any format that is known by C99. One can use `"PI"` or `"-PI"`.
+* Numerical values can be given in any format that is known to C99. Additionally one can use `"PI"` and `"-PI"`.
 * You can add comments to the file, starting with #. (It is a normal shell script.)
-* The order of the parameters does not matter. We grouped parameters into the following categories:
+* The order of the parameters does not matter. We grouped parameters into the following categories by default:
     - __common__: These are changed frequently in different simulation runs. Feel free to play around with them.
     - __uncommon__: These are not changed as often. However, you might want to try some special things. Some of them are useful for debugging.
     - __rare__: There is hardly any reason to change these parameters. Only perform changes if you know exactly what you are doing and why you are doing it.
     - __output__: Here we specify the output of the simulation.
 
-In the documentation, we will group the parameters differently as follows:
+    These categories are only rough guidelines. In various cases you might well want to change _uncommon_ or rare_ values frequently.
+
+In this documentation, we choose the following grouping of the parameters:
 
 ## Simulation volume
 
@@ -48,11 +55,11 @@ In the documentation, we will group the parameters differently as follows:
 __Remarks__:
 
 * The code can handle 1, 2 and 3 dimensional simulations. The dimension is implicitly deduced from the `GRIDPOINTS` in X, Y, and Z direction. See examples for further information. If there is only one gridpoint in a certain direction, the `SPATIAL_LOWER_BOUND` is used as a value for this point.
-* The simulation always runs in an interval, rectangle or cuboid with periodic boundary conditions in each direction.
-* Integer powers of 2 (generally numbers that factor into only small primes) for the number of gridpoints result in the fastest code, due to the discrete Fourier transforms performed by FFTW3. In general any combination of numbers should work. However, we only extensively tested equal numbers of gridpoints in each direction, all being integer powers of 2.
+* The simulation always runs in an interval, rectangle or cuboid (depending on the dimension) with periodic boundary conditions in each direction.
+* Integer powers of 2 (generally numbers that factor into small primes only) for the number of gridpoints result in the fastest code, due to the discrete Fourier transforms performed by FFTW3. In general any combination of numbers are supported. (One exception is when `INITIAL_CONDITIONS==IC_FROM_BUNCH_DAVIES` in which case the number of gridpoints has to be equal in each direction and the box length hast to be 10 in each direction. See [initial conditions](#initial-conditions) for details.) However, we only extensively tested equal numbers of gridpoints in each direction, all being integer powers of 2.
 * The number of spatial gridpoints is also the number of Fourier modes used in the spectral parts of the code. (There is no padding in momentum space, hence one has to choose sufficiently many gridpoints to avoid aliasing. See also the section on filtering for more information.)
 * The `SPATIAL_UPPER_BOUND` must be larger than `SPATIAL_LOWER_BOUND` for each direction.
-* For the simulation usually only the box length in each direction (i.e. `SPATIAL_UPPER_BOUND - SPATIAL_LOWER_BOUND`) is relevant. However, the actual spatial gridpoint coordinates are needed, if the initial conditions are constructed from internal functions. See [initial conditions](#initial-conditions) for the construction of initial conditions.
+* For the simulation usually only the box length in each direction (i.e. `SPATIAL_UPPER_BOUND - SPATIAL_LOWER_BOUND`) is relevant. However, the actual spatial gridpoint coordinates are required, if the initial conditions are constructed from internal functions. See [initial conditions](#initial-conditions) for the construction of initial conditions.
 
 __Examples__:
 
@@ -72,17 +79,18 @@ __Examples__:
 
 ## Time evolution
 
-* `INITIAL_TIME`: (double) The start time of the simulation. Since the evolution equations do not explicitly depend on time, this can be chosen arbitrarily.
-* `FINAL_TIME`: (double, >`INITIAL_TIME`) The end time of the simulation. This is one of the key drivers of the duration of the simulation.
+* `INITIAL_TIME`: (double) The starting time of the simulation. Since the evolution equations do not explicitly depend on time, this can be chosen arbitrarily. We recommend leaving it at 0.0.
+* `FINAL_TIME`: (double, >`INITIAL_TIME`) The final time of the simulation. This is obviously one of the key drivers for the overall runtime of the simulation.
 * `DELTA_T`: (double, >0) The initial value for the time step. Its meaning depends on the chosen integration routine [program flow](#program-flow).
-    - If the evolution is performed by the fixed time step RK4 routine this is the fixed time step used throughout the simulation (see remarks for one exception).
-    - If the evolution is performed by the adaptive time step Dormand Prince 853 routine, the time step is adjusted. Thus `DELTA_T` is just the initial try.
-* `MINIMAL_DELTA_T`: (double, >0) This is only relevant if the chosen integration routine is the Dormand Prince 853 stepper (adaptive stepsize) [program flow](#program-flow). It gives a lower bound on the step size. Once the integration routine tries to reduce the step size below this limit, the integration is terminated.
+    - If the evolution is performed by the fixed time step RK4 routine (see `rk4.c`) this is the fixed time step used throughout the simulation (see remarks for one exception).
+    - If the evolution is performed by the adaptive time step Dormand Prince 8(5,3) or the Runge Kutta Felberg 4(5) routine (see`dopri853.c` and `rkf45.c` respectively),the time step is adjusted after each step. Thus `DELTA_T` is just the initial try for the first step.
+* `MINIMAL_DELTA_T`: (double, >0) This is only relevant if the chosen integration routine has adaptive step sizes (i.e. `dopri853` or `rkf45`), see [program flow](#program-flow). It gives a lower bound on the step size. Once the integration routine would have to reduce the step size below this limit to satisfy the tolerances, the integration is terminated.
 * `MAX_STEPS`: (integer, >0) The maximal number of steps performed by the integration routine.
 * `MAX_DT_HUBBLE_FRACTION`: (double, >0) This is only relevant if the chosen integration routine is the Dormand Prince 853 stepper (adaptive stepsize) [program flow](#program-flow). To avoid large timesteps in the beginning of the evolution that could lead to instabilities, we limit the time step from above by `MAX_DT_HUBBLE_FRACTION` times the Hubble time $$1/H$$. A typical values is on the order of $$10^{-3}$$ to $$10^{-2}$$.
 
 __Remarks__:
 * Even for the fixed time step RK4 method, the time step might be different for the very last step. To ensure that the simulation always ends exactly at the specified `FINAL_TIME`, the time step might be adjusted for the very last step.
+* When using one of the adaptive time step integrators (`dopri853` or `rkf45`), we recommend a very small `DELTA_T`. The routines will quickly increase the time steps, if they are sufficiently small initially, such that the code does not have to do much extra work. However, if the initial time step is too large, small errors in the first steps can lead to a seriously flawed evolution later on.
 
 ## Initial conditions
 
