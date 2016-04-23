@@ -85,12 +85,13 @@ __Examples__:
     - If the evolution is performed by the fixed time step RK4 routine (see `rk4.c`) this is the fixed time step used throughout the simulation (see remarks for one exception).
     - If the evolution is performed by the adaptive time step Dormand Prince 8(5,3) or the Runge Kutta Felberg 4(5) routine (see`dopri853.c` and `rkf45.c` respectively),the time step is adjusted after each step. Thus `DELTA_T` is just the initial try for the first step.
 * `MINIMAL_DELTA_T`: (double, >0) This is only relevant if the chosen integration routine has adaptive step sizes (i.e. `dopri853` or `rkf45`), see [program flow](#program-flow). It gives a lower bound on the step size. Once the integration routine would have to reduce the step size below this limit to satisfy the tolerances, the integration is terminated.
-* `MAX_STEPS`: (integer, >0) The maximal number of steps performed by the integration routine.
-* `MAX_DT_HUBBLE_FRACTION`: (double, >0) This is only relevant if the chosen integration routine is the Dormand Prince 853 stepper (adaptive stepsize) [program flow](#program-flow). To avoid large timesteps in the beginning of the evolution that could lead to instabilities, we limit the time step from above by `MAX_DT_HUBBLE_FRACTION` times the Hubble time $$1/H$$. A typical values is on the order of $$10^{-3}$$ to $$10^{-2}$$.
+* `MAX_STEPS`: (integer, >0) The maximal number of steps performed by the integration routine. If (`FINAL_TIME` - `INITIAL_TIME`) / `DELTA_T` is larger than `MAX_STEPS`, the integration will not start.
+* `MAX_DT_HUBBLE_FRACTION`: (double, >0) This is only relevant if the chosen integration routine is the Dormand Prince 8(5,3) stepper (adaptive stepsize) [program flow](#program-flow). To avoid large timesteps in the beginning of the evolution that could lead to instabilities, we limit the time step from above by `MAX_DT_HUBBLE_FRACTION` times the Hubble time $$1/H$$. Typical values are on the order of $$10^{-3}$$ to $$10^{-2}$$.
 
 __Remarks__:
 * Even for the fixed time step RK4 method, the time step might be different for the very last step. To ensure that the simulation always ends exactly at the specified `FINAL_TIME`, the time step might be adjusted for the very last step.
 * When using one of the adaptive time step integrators (`dopri853` or `rkf45`), we recommend a very small `DELTA_T`. The routines will quickly increase the time steps, if they are sufficiently small initially, such that the code does not have to do much extra work. However, if the initial time step is too large, small errors in the first steps can lead to a seriously flawed evolution later on.
+* Technically, `MAX_STEPS` is only a sensible strict bound on the number of time steps for the fixed time step RK4 (`rk4`) routine. However, it is also used for the adaptive step size routines as a proxy whether the parameters make sense. In case one uses a very small initial `DELTA_T` which is expected to grow by a few orders of magnitude, `MAX_STEPS` can easily abort the integration and should thus be chosen very large.
 
 ## Initial conditions
 
