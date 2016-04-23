@@ -31,12 +31,14 @@ testl2 = del2(test, dx) * 2 * dim;
 %% powerspectrum check bunch davies
 bins = 50;
 L=10;
-n = size(phi,1);
+% n = size(phi,1);
 meff2 = mass^2 - 9 * H(1)^2 / 4;
 match = 2;
 
-ps = mkPowerSpectrum(phi,bins,L);
-dps = mkPowerSpectrum(dphi,bins,L);
+% ps = mkPowerSpectrum(phi,bins,L);
+% dps = mkPowerSpectrum(dphi,bins,L);
+ps = phips(:,1);
+dps = dphips(:,1);
 
 kmax = sqrt(3) * (n/2) * (2*pi/L);
 k = linspace(0,kmax,bins);
@@ -114,9 +116,72 @@ mean(tmp(:))
 %% construct karstens IC from fourier
 L=1;
 N=64;
+mass = 1e-2;
+
+% read fourier karsten
 name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64fourier_3.dat';
 raw = importdata(name);
+k = 2*pi/L;
+ks = raw(:,1);
+xi = raw(:,2);
+yi = raw(:,3);
+zi = raw(:,4);
+ph = raw(:,5);
 
+% read real space karsten
+name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64psi_3.dat';
+raw2 = importdata(name);
+phika = reshape(raw2(:,4),N,N,N);
+dphika = reshape(raw2(:,5),N,N,N);
+psika = reshape(raw2(:,6),N,N,N);
+dpsika = reshape(raw2(:,7),N,N,N);
+
+nn = 16;
+indices = (0:16);
+[kx,ky,kz] = meshgrid(indices,indices,indices);
+ks1 = sqrt(kx.^2 + ky.^2 + kz.^2) * k;
+
+ks2 = zeros(nn,nn,nn);
+for i = 1:length(ks)
+    ii = int64(xi(i));
+    jj = int64(yi(i));
+    kk = int64(zi(i));
+    ks2(ii+1,jj+1,kk+1) = ks(i);
+end
+
+cphi = raw(:,6);
+sphi = raw(:,7);
+cdphi = raw(:,8);
+sdphi = raw(:,9);
+cpsi = raw(:,10);
+spsi = raw(:,11);
+cdpsi = raw(:,12);
+sdpsi = raw(:,13);
+
+x = linspace(0,L-L/N,N);
+y = linspace(0,L-L/N,N);
+z = linspace(0,L-L/N,N);
+[x,y,z] = ndgrid(x,y,z);
+
+phi = zeros(N,N,N);
+dphi = zeros(N,N,N);
+psi = zeros(N,N,N);
+dpsi = zeros(N,N,N);
+for i = 1:length(ks)
+    in = k * (xi(i) * x + yi(i) * y + zi(i) * z) + ph(i);
+    ct = cos(in);
+    st = sin(in);
+    phi = phi + cphi(i) *  ct - sphi(i) * st;
+    dphi = dphi + cdphi(i) *  ct - sdphi(i) * st;
+    psi = psi + cpsi(i) *  ct - spsi(i) * st;
+    dpsi = dpsi + cdpsi(i) *  ct - sdpsi(i) * st;
+    disp(i);
+end
+fac = 6.193e-6;
+phi = phi * fac + mean(phika(:));
+dphi = dphi * fac + mean(dphika(:));
+psi = psi * fac + mean(psika(:));
+dpsi = dpsi * fac + mean(dpsika(:));
 
 %% Hamiltonian and momentum karsten vs. code
 L=1;
@@ -335,16 +400,35 @@ loglog(exp(aext), exp(kmaxfit(aext)), exp(aext), exp(lcfit(aext)),'linewidth',0.
 
 %% power spectrum analysis
 tmp = 2;
-bins = 2:50;
-name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/resolutions5/64_5e-3_3e3.h5';
-a = h5read(name, '/a');
-N = h5read(name, '/gridpoints_internal');
+L=10;
+k = 2*pi/L;
+N = 64;
+
+name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/scaledbunch/64_5e-3_2e5_m4.h5';
+evaluate3D
 N = N(1);
-rhosmry = h5read(name, '/rho_summary');
-rhomean = rhosmry(1,:);
-rhops = h5read(name, '/rho_power_spectrum');
-for i = 1:100:length(rhops(1,:))
-    loglog(bins, rhops(2:end,i)); shg; pause;
+% a = h5read(name, '/a');
+% N = h5read(name, '/gridpoints_internal');
+% rhosmry = h5read(name, '/rho_summary');
+% rhomean = rhosmry(1,:);
+% rhops = h5read(name, '/rho_power_spectrum');
+lc = 1./sqrt(3*H*mass);
+kmin = k;
+kmax = sqrt(3) * N/2 * k;
+bins = (1:50)/50 * kmax;
+for i = 1:100:length(phips(1,:))
+    subplot(1,2,1)
+    hax=loglog(bins, phips(1:50,i)); xlabel('k bins'); ylabel('power'); hold on
+    k = lc(i);
+    kmax = 1/H(i);
+    plot([k k],[min(phips(1:50,i)) max(phips(1:50,i))]);
+    plot([kmax kmax],[min(phips(1:50,i)) max(phips(1:50,i))]);
+    hold off;
+    title(['a = ' num2str(a(i)) ' / ' num2str(a(end))]);
+    subplot(1,2,2)
+    plot(a, rhorms, a(i), rhorms(i),'or'); xlabel('a'); ylabel('std \rho / <\rho>');
+    shg;
+    pause(0.1);
 end
 
 %% plot long time bunch davies
@@ -499,3 +583,7 @@ xlabel('a'); ylabel('std \rho / <|\rho|>'); legend(legendinfo); shg;
 inflmass
 figure
 plot(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('final rhorms'); shg;
+
+%% time scaling
+
+tfactor = @(Nold, Nnew) Nnew^3*log(Nnew^3) / (Nold^3*log(Nold^3));
