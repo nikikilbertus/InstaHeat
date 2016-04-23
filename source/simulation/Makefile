@@ -1,5 +1,5 @@
 TARGET = run
-LIBS = -L/usr/local/lib -g -lfftw3_omp -lfftw3 -lgsl -lgslcblas -lm -fopenmp
+LIBS = -L /usr/local/lib -g -lfftw3_omp -lfftw3 -lgsl -lgslcblas -lm -fopenmp
 CC = h5cc
 CFLAGS = -std=c99 -g -Wall -fopenmp -O2 -march=native -I/usr/local/include
 export HDF5_CC = gcc-5
