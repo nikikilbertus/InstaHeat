@@ -686,7 +686,7 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     const double dxos = dx / os;
     const double dk = TWOPI / (pars.x.b - pars.x.a);
     const double dkos = 0.5 * dk / os;
-    //TODO: pspectre uses kcutpspectre = 2 * kcutdefrost
+    // pspectre uses kcutpspectre = 2 * kcutdefrost (without square!)
     const double kcut2 = 0.25 * nn * nn * dk * dk;
     const double meff2 = MASS * MASS - 2.25 * H * H;
     const double norm = 0.5 * INFLATON_MASS / (N * sqrt(TWOPI * pow(dk, 3))) *
@@ -696,8 +696,8 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
         fputs("The effective mass turned out to be negative.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    double *ker = fftw_malloc(nos * sizeof *ker);
 
+    double *ker = fftw_malloc(nos * sizeof *ker);
     double kk;
     #pragma omp parallel for private(kk)
     for (size_t i = 0; i < nos; ++i) {
@@ -706,9 +706,9 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
             exp(-kk * kk / kcut2);
     }
 
-    fftw_plan pl = fftw_plan_r2r_1d(nos, ker, ker, FFTW_RODFT10, FFTW_ESTIMATE);
-    fftw_execute(pl);
-    fftw_destroy_plan(pl);
+    fftw_plan p = fftw_plan_r2r_1d(nos, ker, ker, FFTW_RODFT10, FFTW_ESTIMATE);
+    fftw_execute(p);
+    fftw_destroy_plan(p);
 
     #pragma omp parallel for
     for (size_t i = 0; i < nos; ++i) {
