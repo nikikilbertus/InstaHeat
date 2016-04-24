@@ -30,6 +30,7 @@ sed -i.bak "s/_UX_/${SPATIAL_UPPER_BOUND_X}/g" main.h
 sed -i.bak "s/_UY_/${SPATIAL_UPPER_BOUND_Y}/g" main.h
 sed -i.bak "s/_UZ_/${SPATIAL_UPPER_BOUND_Z}/g" main.h
 
+sed -i.bak "s/_ONUM_/${OUTPUT_NUMBER}/g" main.h
 sed -i.bak "s/_MINFL_/${INFLATON_MASS}/g" main.h
 sed -i.bak "s/_MKARSTEN_/${MASS_KARSTEN}/g" main.h
 sed -i.bak "s/_BUF_/${WRITE_OUT_BUFFER_NUMBER}/g" main.h
