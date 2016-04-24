@@ -56,7 +56,7 @@ __Remarks__:
 
 * The code can handle 1, 2 and 3 dimensional simulations. The dimension is implicitly deduced from the `GRIDPOINTS` in X, Y, and Z direction. See examples for further information. If there is only one gridpoint in a certain direction, the `SPATIAL_LOWER_BOUND` is used as a value for this point.
 * The simulation always runs in an interval, rectangle or cuboid (depending on the dimension) with periodic boundary conditions in each direction.
-* Integer powers of 2 (generally numbers that factor into small primes only) for the number of gridpoints result in the fastest code, due to the discrete Fourier transforms performed by FFTW3. In general any combination of numbers are supported. (One exception is when `INITIAL_CONDITIONS==IC_FROM_BUNCH_DAVIES` in which case the number of gridpoints has to be equal in each direction and the box length hast to be 10 in each direction. See [initial conditions](#initial-conditions) for details.) However, we only extensively tested equal numbers of gridpoints in each direction, all being integer powers of 2.
+* Integer powers of 2 (generally numbers that factor into small primes only) for the number of gridpoints result in the fastest code, due to the discrete Fourier transforms performed by FFTW3. In general any combination of numbers are supported. (One exception is when `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"` in which case the number of gridpoints has to be equal in each direction and the box length hast to be 10 in each direction. See [initial conditions](#initial-conditions) for details.) However, we only extensively tested equal numbers of gridpoints in each direction, all being integer powers of 2.
 * The number of spatial gridpoints is also the number of Fourier modes used in the spectral parts of the code. (There is no padding in momentum space, hence one has to choose sufficiently many gridpoints to avoid aliasing. See also the section on filtering for more information.)
 * The `SPATIAL_UPPER_BOUND` must be larger than `SPATIAL_LOWER_BOUND` for each direction.
 * For the simulation usually only the box length in each direction (i.e. `SPATIAL_UPPER_BOUND - SPATIAL_LOWER_BOUND`) is relevant. However, the actual spatial gridpoint coordinates are required, if the initial conditions are constructed from internal functions. See [initial conditions](#initial-conditions) for the construction of initial conditions.
@@ -113,25 +113,25 @@ __Remarks__:
 ## Potential parameters
 
 * `MASS`: (double, >0) The mass parameter used in the code. Note that this value can be easily rescaled, hence has little physical relevance.
-* `INFLATON_MASS`: (double, >0) If `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"`, this value is the inflaton mass in units of the Planck mass. While the actual mass parameter in used in the code (for example when computing the potential) can be rescaled to arbitrary values, `INFLATON_MASS` is a physical quantity and only enters once when setting the amplitude of initial fluctuations when the initial conditions come from the internally computed Bunch Davies vacuum. Note that in the code $$8 \pi G = 1$$, hence we set the reduced Planck mass to one. `INFLATON_MASS` is the only mass value that carries physical meaning.
-* `MASS_KARSTEN`: (double, >0) Obsolete. Internal use only. Has been used to scale certain amplitudes for comparison with Karsten Jedamzik's code.
+* `INFLATON_MASS`: (double, >0) If `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"`, this value is the inflaton mass in units of the Planck mass. While the actual mass parameter used in the code (for example when computing the potential) can be rescaled to arbitrary values, `INFLATON_MASS` is a physical quantity and only enters once when setting the amplitude of initial fluctuations in the Bunch Davies vacuum. Note that in the code $$8 \pi G = 1$$, hence we set the reduced Planck mass to one. `INFLATON_MASS` is the only mass related parameter in the code that carries physical meaning.
+* `MASS_KARSTEN`: (double, >0) Obsolete, intended for developmental use only. This parameter was usde to scale certain amplitudes for comparison with Karsten Jedamzik's code.
 
 ## File IO
 
 * `DATAPATH`: (string) The full path to the output file. All output of a single run is bundled into one `.h5` file. The `DATAPATH` can be relative to the working directory. It also needs to include the filename and `.h5` extension. The file does not have to exist. It will be created. If it does already exist, it will be __overwritten__. __Example__: `DATAPATH="../data/myrun.h5"`.
 * `INITIAL_DATAPATH`: (string) The full path to the file that contains initial conditions for the simulation.
-    - If `INITIAL_CONDITIONS="IC_FROM_DAT_FILE"`, this is the full path (including filename and `.dat` extension) to the file. See [initial conditions](#initial-conditions) for detailed instructions.
+    - If `INITIAL_CONDITIONS="IC_FROM_DAT_FILE_WITH_PSI"` or `INITIAL_CONDITIONS="IC_FROM_DAT_FILE_WITHOUT_PSI"`, this is the full path (including filename and `.dat` extension) to the file. See [initial conditions](#initial-conditions) for detailed instructions.
     - If `INITIAL_CONDITIONS="IC_FROM_H5_FILE"`, this is the full path (including filename and `.h5` extension) to the file. See [initial conditions](#initial-conditions) for detailed instructions.
-* `VERSION_CONTROL`: If git or mercurial is used as a version control system, one can add a hash of the current revision to the output file. This helps identify the data later. This was most useful during development. Since the program has to call shell command and receive their output, this is not guaranteed to work on different systems. Valid options are
+* `VERSION_CONTROL`: If git or mercurial is used as a version control system, one can add a hash of the current revision to the output file. This helps identify the data later. This option was most useful during development. __Warning__: Since the program has to create a pipe, invoke a shell and call git or mercurial as well as receive the output, this is not guaranteed to work on different systems. Choose the `VERSION_CONTROL_NONE` option when in doubt. Valid options are
   - `"VERSION_CONTROL_HG"`: Try to get the hash of the current mercurial revision and include it in the output.
   - `"VERSION_CONTROL_GIT"`: Try to get the hash of the current git revision and include it in the output.
-  - `"VERSION_CONTROL_NONE"`: Do not try to get the hash of the current revision. Nothing is added to the output file.
-* `WRITE_OUT_BUFFER_NUMBER`: (integer, >0) The program uses an internal buffer where outputs are accumulated before they are actually written to disk. Since rare and large writeouts are usually faster than frequent small ones, this should result in a speed up. `WRITE_OUT_BUFFER_NUMBER` specifies how many timeslices of the output should be buffered before disk access. If one uses many gridpoints, memory constraints might not allow for a large buffer.
-* `POWER_SPECTRUM_BINS`: (integer, >0) The number of bins used to compute the power spectrum. This is only relevant if`POWER_SPECTRUM="1"`, i.e. the power spectrum of $$\phi$$ is included in the output. See TODO(link thesis) for details.
-* `TIME_STEP_SKIPS`: (integer, >0) The number of time steps skipped between outputs. To avoid large output files, one can skip `TIME_STEP_SKIPS` many time steps, before writing a time slice to disk again.
-* `STRIDE_X`: (integer, >0) The stride in the x-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than they are computed on internally.
-* `STRIDE_Y`: (integer, >0) The stride in the y-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than they are computed on internally.
-* `STRIDE_Z`: (integer, >0) The stride in the z-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than they are computed on internally.
+  - `"VERSION_CONTROL_NONE"`: Do not try to get the hash of the current revision. Nothing is added to the output file. __Note__: This is the recommended choice, because it is quite possible that the program does not compile or fail at runtime on different systems.
+* `WRITE_OUT_BUFFER_NUMBER`: (integer, >0) The program uses an internal buffer where output is accumulated before it is written to disk. Since rare and large writeouts are usually faster than frequent small ones, this gives a speedup despite the memory overhead and copy instructions to the buffers. `WRITE_OUT_BUFFER_NUMBER` specifies how many timeslices of the output should be buffered before disk access. If one outputs full 3D fields ([see output](#output)), memory constraints might not allow for a large buffer or slow down the simulation.
+* `POWER_SPECTRUM_BINS`: (integer, >0) The number of bins used to compute the power spectrum. This is only relevant if one of the outputs (see [output](#output)) ending in `POWER_SPECTRUM` is activated, i.e. the power spectrum of one of the fields is included in the output. In the computation of the power spectrum, modes are binned into this number of bins. See TODO(link thesis) for details.
+* `TIME_STEP_SKIPS`: (integer, >0) The number of time steps skipped between outputs. To avoid large output files, one can skip `TIME_STEP_SKIPS` many time slices, before writing a time slice to disk again.
+* `STRIDE_X`: (integer, >0) The stride in the x-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than are used for the computation internally.
+* `STRIDE_Y`: (integer, >0) The stride in the y-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than are used for the computation internally.
+* `STRIDE_Z`: (integer, >0) The stride in the z-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than are used for the computation internally.
 
 __Remarks__:
 
@@ -155,43 +155,44 @@ then the computation would be done on a $$256 \times 200 \times 59$$ grid. Howev
 
 ## Performance parameters
 
-* `THREAD_NUMBER`: (integer, >=0) The number of threads used in openMP and also for the discrete Fourier transforms performed by FFTW3. __Important__: If `THREAD_NUMBER="0"`, the number of threads is determined automatically by `omp_get_max_threads()`. This is the default value.
+* `THREAD_NUMBER`: (integer, >=0) The number of threads used in OpenMP and also for the discrete Fourier transforms performed by FFTW3. __Important__: If `THREAD_NUMBER="0"`, the number of threads is determined automatically by `omp_get_max_threads()`. The default value is 0.
 * `FFTW_DEFAULT_FLAG`: The planning flag used in the discrete Fourier transforms performed by FFTW3. Take a look at the FFTW3 documentation TODO(link) for more. The valid options are:
     - `"FFTW_ESTIMATE"`
     - `"FFTW_MEASURE"`
     - `"FFTW_PATIENT"`
     - `"FFTW_EXHAUSTIVE"`
 
-## Special paramaters for the Dormand Prince 853 integrator
+## Special paramaters for the Dormand Prince 8(5,3) integrator
 
-The parameters in this section are only relevant if `INTEGRATION_METHOD="DOPRI853"`.
+The parameters in this section are only relevant if one of the adaptive time step size integration routine is used, i.e. if `INTEGRATION_METHOD="DOPRI853"` or `INTEGRATION_METHOD="RKF45"`.
 
-* `RELATIVE_TOLERANCE`: The relative tolerance in the Dormand Prince 853 integration routine. See TODO(link numerical recipes) for more information.
-* `ABSOLUTE_TOLERANCE`: The absolute tolerance in the Dormand Prince 853 integration routine. See TODO(link numerical recipes) for more information.
+* `RELATIVE_TOLERANCE`: The relative tolerance in the integration routine. See TODO(link numerical recipes, paper?) for more information.
+* `ABSOLUTE_TOLERANCE`: The absolute tolerance in the integration routine. See TODO(link numerical recipes, paper?) for more information.
 * `SMALLEST_SCALING`: The smallest possible rescaling of the step size in any step.
 * `LARGEST_SCALING`: The largest possible rescaling of the step size in any step.
-* `BETA`: This is an internal parameter of the adaptive step size control. Only change this if you know exactly what you are doing. See TODO(link numerical recipes) for more information.
-* `SAFE`: This is an internal parameter of the adaptive step size control. Only change this if you know exactly what you are doing. See TODO(link numerical recipes) for more information.
+* `BETA`: This is an internal parameter of the adaptive step size control for PI control of the step size following the rescaling method of Lund. Only change this if you know exactly what you are doing. See TODO(link numerical recipes, Gustaffson paper) for more information.
+* `SAFE`: This is an internal safety parameter of the adaptive step size control, which makes the next step size more likely to be accepted. Only change this if you know exactly what you are doing. See TODO(link numerical recipes, hairer book) for more information.
 
 ## Program flow
 
-* `INTEGRATION_METHOD`: There are two integration routines available:
+* `INTEGRATION_METHOD`: There are three integration routines available:
     - `"RK4"`: The standard fourth order Runge Kutte stepper with fixed time step size.
-    - `"DOPRI853"`: A more sophisticated adaptive Dormand Prince stepper of 8th order with 5th and 3rd order errors for adaptive time stepping. A detailed description can be found in TODO(link numerical recipes).
+    - `"RKF45"`: A fourth order Runge Kutta method with 5th order error estimation for adaptive time stepping. We are using the GSL implementation TODO(link to gsl).
+    - `"DOPRI853"`: A more sophisticated adaptive Dormand Prince stepper of 8th order with 5th and 3rd order error estimation for adaptive time stepping. A detailed description can be found in TODO(link numerical recipes).
 * `PSI_METHOD`: There are three different equations according to which we can evolve the fields $$\psi$$ and $$\dot{\psi}$$. For more information see TODO(link to the thesis). The valid options are
     - `"PSI_ELLIPTIC"`
     - `"PSI_PARABOLIC"`
     - `"PSI_HYPERBOLIC"`
-* `ENABLE_FFT_FILTER`: Switch on/off a spectral filter for the fields. If turned on, in each time step the highest modes of $$\phi$$, $$\dot{\phi}$$, $$\psi$$, $$\dot{\psi}$$ are cut off to avoid aliasing. A more detailed description can be found in TODO(link to thesis).
-* `EVOLVE_WITHOUT_PSI`: If this is set the simulation is run with $$\psi = 0$$ at all times. While certain parts of the code are not executed, if this option is set, the memory usage is still roughly the same and does not drop by half as one could expect. This option was mostly used for debugging and comparisons.
+* `ENABLE_FFT_FILTER`: Switch for a spectral filter for the fields. If switched on, at each time step the highest modes of $$\phi$$, $$\dot{\phi}$$, $$\psi$$, $$\dot{\psi}$$ are cut off to avoid aliasing. A more detailed description can be found in TODO(link to thesis).
+* `EVOLVE_WITHOUT_PSI`: If this is set, the simulation is run with $$\psi = 0$$ at all times. While certain parts of the code are thus not executed, the memory usage is still roughly the same and does not drop by half as one could expect. This option was mostly used for debugging and comparisons.
 
 ## Miscellaneous
 
-* `SEED`: The seed for the random number generation used for example to create the Bunch Davies vacuum if `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"` or also for `INITIAL_CONDITIONS="IC_FROM_INTERNAL_FUNCTION"` (depending on what the functions do).
+* `SEED`: The seed for the random number generation used for example to create the Bunch Davies vacuum if `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"` or also for `INITIAL_CONDITIONS="IC_FROM_INTERNAL_FUNCTION"` (depending on what the functions do). We use the GSL implementation of the Mersenne Twister.
 
 ## Output
 
-Most of the simulation parameters are always present in the output. The optional values are
+Most of the simulation parameters are always present in the output (and cannot be switched off). The optional values are
 
 * `PHI`: The scalar field $$\phi$$.
 * `DPHI`: The temporal derivative of the scalar field $$\dot{\phi}$$.
@@ -204,9 +205,11 @@ Most of the simulation parameters are always present in the output. The optional
 * `DPSI_SUMMARY`: The mean value, the variance, the minimum and the maximum of the scalar metric perturbation $$\dot{\psi}$$ on each timeslice (in this order).
 * `RHO_SUMMARY`: The mean value, the variance, the minimum and the maximum of the energy density $$\rho$$ on each timeslice (in this order).
 * `PHI_POWER_SPECTRUM`: The power spectrum of the field $$\phi$$.
+* `DPHI_POWER_SPECTRUM`: The power spectrum of the field $$\dot{\phi}$$.
+* `PSI_POWER_SPECTRUM`: The power spectrum of the field $$\psi$$.
 
 __Remarks__:
 
-* `PHI`, `DPHI`, `PSI`, `DPSI`, `RHO` result in `xout*yout*zout` double values where {x,y,z}out are determined from `GRIDPOINTS_{X,Y,Z}` and `STRIDE_{X,Y,Z}` (see [file IO](#file-io)) on __each__ time slice of the output.
-* All values ending in `SUMMARY` result in four double values on each time slice of the output.
-* All values ending in `POWER_SPECTRUM` result in `POWER_SPECTRUM_BINS` double values on each time slice of the output.
+* `PHI`, `DPHI`, `PSI`, `DPSI`, `RHO` result in `xout*yout*zout` double values where {x,y,z}out are determined from `GRIDPOINTS_{X,Y,Z}` and `STRIDE_{X,Y,Z}` (see [file IO](#file-io)) on __each__ time slice of the output (per field).
+* All values ending in `SUMMARY` result in four double values on each time slice of the output (per field).
+* All values ending in `POWER_SPECTRUM` result in `POWER_SPECTRUM_BINS` double values on each time slice of the output (per field).
