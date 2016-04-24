@@ -328,8 +328,8 @@ d76	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"
 d77	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
 d78	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
 d79	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
-deltarho	main_template.h	/^    double  *deltarho;$/;"	m	struct:temporary
-deltarhoc	main_template.h	/^    complex *deltarhoc;$/;"	m	struct:temporary
+deltarho	main_template.h	/^    double  *deltarho; \/\/\/< $$\\delta \\rho = \\rho - <\\rho>$$ in real space$/;"	m	struct:temporary
+deltarhoc	main_template.h	/^    complex *deltarhoc; \/\/\/< $$\\delta \\rho = \\rho - <\\rho>$$ in Fourier space$/;"	m	struct:temporary
 destroy_and_cleanup_fftw	setup.c	/^static void destroy_and_cleanup_fftw()$/;"	f	file:
 dfield	main.c	/^double *dfield;$/;"	v
 dfield_new	main.c	/^double *dfield_new;$/;"	v
@@ -345,7 +345,7 @@ dphi_init	setup.c	/^static double dphi_init(const double x, const double y, cons
 dphi_smry	main.c	/^struct output dphi_smry;$/;"	v	typeref:struct:output
 dpsi	main.c	/^struct output dpsi;$/;"	v	typeref:struct:output
 dpsi_smry	main.c	/^struct output dpsi_smry;$/;"	v	typeref:struct:output
-dpsic	main_template.h	/^    complex *dpsic;$/;"	m	struct:temporary
+dpsic	main_template.h	/^    complex *dpsic; \/\/\/< The derivative $$\\dot{\\psi}$$ in Fourier space$/;"	m	struct:temporary
 dpv	dopri853.c	/^struct dopri853_values dpv;$/;"	v	typeref:struct:dopri853_values
 dt	dopri853.c	/^    double dt; \/\/\/< The time step size$/;"	m	struct:dopri853_control	file:
 dt	main_template.h	/^    double dt; \/\/\/< size of the (initial) timestep delta t$/;"	m	struct:timing
@@ -366,8 +366,8 @@ err_old	dopri853.c	/^    double err_old; \/\/\/< The previous error (on the last
 error	dopri853.c	/^static double error(const double dt)$/;"	f	file:
 evo_flags	toolbox.c	/^struct evolution_flags evo_flags = {.filter = 0,$/;"	v	typeref:struct:evolution_flags
 evolution_flags	toolbox.h	/^struct evolution_flags$/;"	s
-f	main_template.h	/^    double  *f;$/;"	m	struct:temporary
-fc	main_template.h	/^    complex *fc;$/;"	m	struct:temporary
+f	main_template.h	/^    double  *f; \/\/\/< Various purposes (real space)$/;"	m	struct:temporary
+fc	main_template.h	/^    complex *fc; \/\/\/< Various purposes (Fourier space)$/;"	m	struct:temporary
 fftw_time_exe	main_template.h	/^    double fftw_time_exe; \/\/\/< Total wall clock time for fft execution$/;"	m	struct:monitor
 fftw_time_plan	main_template.h	/^    double fftw_time_plan; \/\/\/< Total wall clock time for fftw planning$/;"	m	struct:monitor
 field	main.c	/^double *field;$/;"	v
@@ -383,7 +383,7 @@ free_and_destroy_all	setup.c	/^void free_and_destroy_all()$/;"	f
 free_dopri853_values	dopri853.c	/^static void free_dopri853_values()$/;"	f	file:
 free_external	setup.c	/^static void free_external()$/;"	f	file:
 get_wall_time	main.c	/^double get_wall_time()$/;"	f
-grad	main_template.h	/^    double  *grad;$/;"	m	struct:temporary
+grad	main_template.h	/^    double  *grad; \/\/\/< The _squared_ gradient of $$\\phi$$ in real space$/;"	m	struct:temporary
 grid_dimension	main_template.h	/^struct grid_dimension$/;"	s
 h5_close	io.c	/^void h5_close()$/;"	f
 h5_create_dset	io.c	/^static void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,$/;"	f	file:
@@ -420,7 +420,7 @@ k9	dopri853.c	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_
 k_grid	main_template.h	/^struct k_grid$/;"	s
 k_tmp	dopri853.c	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
 kvec	main.c	/^struct k_grid kvec;$/;"	v	typeref:struct:k_grid
-lap	main_template.h	/^    double  *lap;$/;"	m	struct:temporary
+lap	main_template.h	/^    double  *lap; \/\/\/< The Laplacian of $$\\phi$$ in real space$/;"	m	struct:temporary
 main	main.c	/^int main(int argc, const char * argv[])$/;"	f
 max_steps	dopri853.c	/^    size_t max_steps; \/\/\/< The maximal number of steps$/;"	m	struct:dopri853_control	file:
 maxscale	dopri853.c	/^    double maxscale; \/\/\/< Maximal permissible rescaling of the time step size$/;"	m	struct:dopri853_control	file:
@@ -458,7 +458,7 @@ phi	main.c	/^struct output phi;$/;"	v	typeref:struct:output
 phi_init	setup.c	/^static double phi_init(const double x, const double y, const double z,$/;"	f	file:
 phi_ps	main.c	/^struct output phi_ps;$/;"	v	typeref:struct:output
 phi_smry	main.c	/^struct output phi_smry;$/;"	v	typeref:struct:output
-phic	main_template.h	/^    complex *phic;$/;"	m	struct:temporary
+phic	main_template.h	/^    complex *phic; \/\/\/< The inflaton field $$\\phi$$ in real space$/;"	m	struct:temporary
 poisson_time	main_template.h	/^    double poisson_time; \/\/\/< Total wall clock time for `mk_psi(double *f)`$/;"	m	struct:monitor
 potential	toolbox.c	/^static double potential(const double f)$/;"	f	file:
 potential_prime	toolbox.c	/^static double potential_prime(const double f)$/;"	f	file:
@@ -468,7 +468,7 @@ pressure_mean	main.c	/^double pressure_mean;$/;"	v
 psi	main.c	/^struct output psi;$/;"	v	typeref:struct:output
 psi_ps	main.c	/^struct output psi_ps;$/;"	v	typeref:struct:output
 psi_smry	main.c	/^struct output psi_smry;$/;"	v	typeref:struct:output
-psic	main_template.h	/^    complex *psic;$/;"	m	struct:temporary
+psic	main_template.h	/^    complex *psic; \/\/\/< The metric perturbation $$\\psi$$ in Fourier space$/;"	m	struct:temporary
 r_tol	dopri853.c	/^    double r_tol; \/\/\/< Relative tolerance$/;"	m	struct:dopri853_control	file:
 read_initial_data	io.c	/^void read_initial_data()$/;"	f
 reject	dopri853.c	/^    int reject; \/\/\/< Flag whether time step is rejected or accepted$/;"	m	struct:dopri853_control	file:
@@ -486,7 +486,7 @@ save	io.c	/^void save()$/;"	f
 setdef	configure	/^function setdef {$/;"	f
 skip	main_template.h	/^    size_t skip;       \/\/\/< timesteps to skip in between write outs$/;"	m	struct:file_parameters
 smry_time	main_template.h	/^    double smry_time; \/\/\/< Total wall clock time for computing summaries$/;"	m	struct:monitor
-sq	main_template.h	/^    double *sq;$/;"	m	struct:k_grid
+sq	main_template.h	/^    double *sq; \/\/\/< The sqaure of the k vector (of all modes)$/;"	m	struct:k_grid
 stride	main_template.h	/^    size_t stride; \/\/\/< strides for output$/;"	m	struct:grid_dimension
 success	dopri853.c	/^static int success(const double err, double *dt)$/;"	f	file:
 t	dopri853.c	/^    double t; \/\/\/< The current time$/;"	m	struct:dopri853_control	file:
@@ -515,17 +515,14 @@ tmp	main_template.h	/^    double *tmp;    \/\/\/< the output values on the curre
 try_step	dopri853.c	/^static void try_step(const double dt)$/;"	f	file:
 variance	toolbox.c	/^static double variance(const double mean, const double *f, const size_t N)$/;"	f	file:
 wrapped_gaussian	setup.c	/^static double wrapped_gaussian(const double x, const double y, const double z)$/;"	f	file:
-x	main_template.h	/^    double *x;$/;"	m	struct:k_grid
+x	main_template.h	/^    double *x; \/\/\/< The x direction of the k vector (of al modes)$/;"	m	struct:k_grid
 x	main_template.h	/^    struct grid_dimension x; \/\/\/< specification of the x direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
-xphi	main_template.h	/^    double  *xphi;$/;"	m	struct:temporary
-xphic	main_template.h	/^    complex *xphic;$/;"	m	struct:temporary
-y	main_template.h	/^    double *y;$/;"	m	struct:k_grid
+xphi	main_template.h	/^    double  *xphi; \/\/\/< The x derivative of $$\\phi$$ in real space$/;"	m	struct:temporary
+y	main_template.h	/^    double *y; \/\/\/< The y direction of the k vector (of al modes)$/;"	m	struct:k_grid
 y	main_template.h	/^    struct grid_dimension y; \/\/\/< specification of the y direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
 yerr	dopri853.c	/^        double *yerr, *yerr2;$/;"	m	struct:dopri853_values	file:
 yerr2	dopri853.c	/^        double *yerr, *yerr2;$/;"	m	struct:dopri853_values	file:
-yphi	main_template.h	/^    double  *yphi;$/;"	m	struct:temporary
-yphic	main_template.h	/^    complex *yphic;$/;"	m	struct:temporary
-z	main_template.h	/^    double *z;$/;"	m	struct:k_grid
+yphi	main_template.h	/^    double  *yphi; \/\/\/< The y derivative of $$\\phi$$ in real space$/;"	m	struct:temporary
+z	main_template.h	/^    double *z; \/\/\/< The z direction of the k vector (of al modes)$/;"	m	struct:k_grid
 z	main_template.h	/^    struct grid_dimension z; \/\/\/< specification of the z direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
-zphi	main_template.h	/^    double  *zphi;$/;"	m	struct:temporary
-zphic	main_template.h	/^    complex *zphic;$/;"	m	struct:temporary
+zphi	main_template.h	/^    double  *zphi; \/\/\/< The z derivative of $$\\phi$$ in real space$/;"	m	struct:temporary
