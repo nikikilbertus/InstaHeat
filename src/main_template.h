@@ -7,18 +7,19 @@
 
 /**
  * @file main.h
+ *
  * @brief Contains most parameters and compiler switches (for program flow and
  * options) as preprocessor defines, definitions of global structures,
- * declaration of global variables and function declarations for main.c.
+ * declaration of global variables and function declarations for `main.c`.
  *
- * The main.h file is created from a shell script that is called from the
+ * The `main.h` file is created by a shell script that is called from the
  * Makefile __before__ compilation. There is a main_template.h file which
- * contains placeholder that are filled according to the values in
- * parameters.sh. To keep this file short, we do not comment and document the
- * preprocessor directives. An extensive documentation of the parameter.sh file
- * is found in a separate documentation file.
+ * contains placeholder that are replaced according to the values in
+ * `parameters.sh`. An extensive documentation of the `parameter.sh` file is
+ * found in a separate documentation file `doc_parameters.md` in the root
+ * directory. One should not look for documentation and explanation here.
  *
- * @see doc_parameters.md
+ * @see `doc_parameters.md` in the root directory.
  */
 
 #define PI                      (3.141592653589793238462643383279)
@@ -33,7 +34,6 @@
 /* #define DEBUG // only recommended for debugging (huge output!) */
 /* #define RUN_TESTS_ONLY // testing only (tests.c) */
 
-// always leave this here uncommented
 #ifdef SHOW_RUNTIME_INFO
 #define INFO(f) do {\
         (f); \
@@ -77,23 +77,19 @@
 #endif
 
 #define _WOPSI_
-
 #define _OPHI_
 #define _ODPHI_
 #define _OPSI_
 #define _ODPSI_
 #define _ORHO_
-
 #define _OPHIPS_
 #define _OPSIPS_
 #define _ORHOPS_
-
 #define _OPHIS_
 #define _ODPHIS_
 #define _OPSIS_
 #define _ODPSIS_
 #define _ORHOS_
-
 #define _OCSTR_
 
 #if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || defined(OUTPUT_PSI) \
@@ -117,7 +113,6 @@
 #define THREAD_NUMBER           (_THREADS_)
 #define FFTW_DEFAULT_FLAG       (_FFTW_)
 #define _FILTER_
-
 #define GRIDPOINTS_X            (_GPX_)
 #define GRIDPOINTS_Y            (_GPY_)
 #define GRIDPOINTS_Z            (_GPZ_)
@@ -127,22 +122,18 @@
 #define SPATIAL_UPPER_BOUND_Y   (_UY_)
 #define SPATIAL_LOWER_BOUND_Z   (_LZ_)
 #define SPATIAL_UPPER_BOUND_Z   (_UZ_)
-
 #define DELTA_T                 (_DELT_)
 #define INITIAL_TIME            (_TI_)
 #define FINAL_TIME              (_TF_)
 #define MAX_STEPS               (_MAXSTEPS_)
 #define MINIMAL_DELTA_T         (_MINDELT_)
-
 #define SEED                    (_SEED_)
-
 #define MASS                    (_M_)
 #define MASS_KARSTEN            (_MKARSTEN_)
 #define INFLATON_MASS           (_MINFL_)
 #define COUPLING                (_COUPLING_)
 #define LAMBDA                  (_LAMBDA_)
 #define A_INITIAL               (_A_)
-
 #define SMALLEST_SCALING        (_MINSCAL_)
 #define LARGEST_SCALING         (_MAXSCAL_)
 #define BETA                    (_BETA_) // ALPHA = 1.0/8.0 - BETA * 0.2
@@ -211,8 +202,8 @@ struct file_parameters
  *  Nz = number of grid points in the z direction
  *  N  = number of gridpoints for the whole spatial grid = Nx * Ny * Nz
  *  N2 = 2 * N, N3 = 3 * N, N2p = 2 * N + 2, N3p = 3 * N + 2
- *  Nall = size of field = 4 * N + 2
- *  Ntot = number of scalar equations; depends on the used method
+ *  Nall = size of `field`, `dfield`, `field_new`, `dfield_new`, = 4 * N + 2
+ *  Ntot = number of scalar equations in the integration; depends on method:
  *  elliptic: Ntot = 2 * N + 1 (order: phi, dphi, a)
  *  parabolic: Ntot = 3 * N + 1 (oder: phi, dphi, psi, a)
  *  hyperbolic: Ntot = 4 * N + 1 (oder: phi, dphi, psi, dpsi, a)
@@ -237,21 +228,21 @@ struct parameters
  */
 struct temporary
 {
-    double  *xphi;
-    double  *yphi;
-    double  *zphi;
-    complex *phic;
-    complex *xphic;
-    complex *yphic;
-    complex *zphic;
-    double  *grad;
-    double  *lap;
-    double  *deltarho;
-    double  *f;
-    complex *deltarhoc;
-    complex *fc;
-    complex *psic;
-    complex *dpsic;
+    double  *xphi; ///< The x derivative of $$\phi$$ in real space
+    double  *yphi; ///< The y derivative of $$\phi$$ in real space
+    double  *zphi; ///< The z derivative of $$\phi$$ in real space
+    complex *phic; ///< The inflaton field $$\phi$$ in real space
+    complex *xphic ///< The x derivative of $$\phi$$ in Fourier space
+    complex *yphic ///< The y derivative of $$\phi$$ in Fourier space
+    complex *zphic ///< The z derivative of $$\phi$$ in Fourier space
+    double  *grad; ///< The _squared_ gradient of $$\phi$$ in real space
+    double  *lap; ///< The Laplacian of $$\phi$$ in real space
+    double  *deltarho; ///< $$\delta \rho = \rho - <\rho>$$ in real space
+    double  *f; ///< Various purposes (real space)
+    complex *deltarhoc; ///< $$\delta \rho = \rho - <\rho>$$ in Fourier space
+    complex *fc; ///< Various purposes (Fourier space)
+    complex *psic; ///< The metric perturbation $$\psi$$ in Fourier space
+    complex *dpsic; ///< The derivative $$\dot{\psi}$$ in Fourier space
 };
 
 /**
@@ -259,10 +250,10 @@ struct temporary
  */
 struct k_grid
 {
-    double *sq;
-    double *x;
-    double *y;
-    double *z;
+    double *sq; ///< The sqaure of the k vector (of all modes)
+    double *x; ///< The x direction of the k vector (of al modes)
+    double *y; ///< The y direction of the k vector (of al modes)
+    double *z; ///< The z direction of the k vector (of al modes)
 };
 
 /**
@@ -285,55 +276,41 @@ struct monitor
     double smry_time; ///< Total wall clock time for computing summaries
 };
 
-extern struct parameters pars;
+extern struct parameters pars; ///< Only instance of the parameters_t struct
 
 // contain phi, dphi, a, psi, dpsi (only first Ntot entries are integrated)
 extern double *field;
 extern double *dfield;
 extern double *field_new;
 extern double *dfield_new;
-
 extern struct output phi;
 extern struct output dphi;
 extern struct output psi;
 extern struct output dpsi;
-
 #define SUMMARY_VALUES      (4) ///< mean, variance, minimum, maximum
-
 extern struct output phi_smry;
 extern struct output dphi_smry;
 extern struct output psi_smry;
 extern struct output dpsi_smry;
-
 extern struct output t_out;
 extern struct output a_out;
-
 extern double *rho;
 extern double rho_mean;
 extern struct output rho_out;
 extern struct output rho_smry;
-
 // only needed for PSI_METHOD == PSI_HYPERBOLIC, but always defined
 extern double *pressure;
 extern double pressure_mean;
-
 extern struct output phi_ps;
 extern struct output psi_ps;
 extern struct output rho_ps;
-
-// constraints
-#define NUMBER_CONSTRAINTS      (4) ///< Hamiltonian+momentum: l2 and l\infty
+#define NUMBER_CONSTRAINTS  (4) ///< Hamiltonian and momentum: l2 and l\infty
 extern struct output cstr;
-
 extern double *filter;
-
 extern struct k_grid kvec;
-
 extern struct temporary tmp;
-
 extern fftw_plan p_fw;
 extern fftw_plan p_bw;
-
 extern struct monitor mon;
 
 #ifdef SHOW_TIMING_INFO
