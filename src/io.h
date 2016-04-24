@@ -5,6 +5,7 @@
 
 /**
  * @file io.h
+ *
  * @brief Contains preprocessor definitions of the names of the datasets in the
  * output `.h5` file and function declarations for `io.c`.
  */
