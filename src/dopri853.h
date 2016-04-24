@@ -7,7 +7,7 @@
 /**
  * @file dopri853.h
  *
- * @brief Typedefs and function declarations for `dopri853.c` and for
+ * @brief Struct definitions and function declarations for `dopri853.c` and for
  * `dopri853_constants.c`.
  *
  * @see <a href="http://numerical.recipes">Numerical Recipes</a>
