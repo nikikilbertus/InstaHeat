@@ -5,12 +5,13 @@
 
 /**
  * @file toolbox.h
- * @brief Struct and function declarations for `toolbox.c`
+ *
+ * @brief Struct definitions and function declarations for `toolbox.c`
  */
 
 /**
- * @brief Flags to pass information about the progress of the integration to
- * the routines in `toolbox.c`.
+ * @brief Flags to pass program flow information and the status of the
+ * integration to the routines in `toolbox.c`.
  */
 struct evolution_flags
 {

@@ -6,14 +6,17 @@
 
 /**
  * @file dopri853.h
- * @brief Typedefs and function declarations for `dopri853.c` and for
+ *
+ * @brief Struct definitions and function declarations for `dopri853.c` and for
  * `dopri853_constants.c`.
+ *
  * @see <a href="http://numerical.recipes">Numerical Recipes</a>
  */
 
 /**
  * @brief Holds the Butcher tableaux for the Dormand Prince integration routine.
- * @note This is just a huge list of constant double values. Do not change
+ *
+ * @note This is just a list of constant double values. Do not change
  * anything here.
  */
 struct dopri853_constants
