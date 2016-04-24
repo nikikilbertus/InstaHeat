@@ -496,7 +496,7 @@ for i = 1:length(rtol)
         a = h5read(name, '/a');
         cstr = h5read(name,'/constraints');
 %         semilogy(a,cstr(1,:)); shg; pause;
-        cstrl2(i,j) = -log10(abs((cstr(1,end) - cstrl2ref) / cstrl2ref));
+        cstrl2(i,j) = norm(cstr(1,:)) / length(cstr(1,:));
         as(i,j) = -log10(abs((a(end) - aref(end))/aref(end)));
 %         I = (a>0.9*aref(end));
 %         Iref = (aref>0.9*aref(end));
