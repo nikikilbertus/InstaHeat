@@ -1,6 +1,6 @@
 # common
-DATAPATH="../../../data/testcstr.h5"
-INITIAL_DATAPATH="../../../data/karsten/data_64psi_3.dat"
+DATAPATH="../../data/testcstr.h5"
+INITIAL_DATAPATH="../../data/karsten/data_64psi_3.dat"
 INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"
 PSI_METHOD="PSI_HYPERBOLIC"
 MASS="4.0" # bunch davies
