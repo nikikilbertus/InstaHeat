@@ -1029,7 +1029,7 @@ static double wrapped_gaussian(const double x, const double y, const double z)
  * A single call to this function cleans up everything after the simulation.
  * After this function returns, the program can exit. It should be the last
  * function called,
-
+ *
  * @see `main.c`.
  */
 void free_and_destroy_all()
