@@ -366,7 +366,7 @@ L = 10;
 N = 64;
 k = 2*pi/L;
 mpl = 1; m = 1; % again compare to karstens paper
-alpha = 4;
+alpha = 1;
 ms = alpha*mass;
 Hs = alpha*H;
 Hend = Hs(1); aend = a(1); Trh = 1e7;
