@@ -363,12 +363,12 @@ estimatedruntime = h5read(name,'/runtime_total') / 3600 * tnonlin/t(end)
 
 %% playing with quantities in karstens paper
 L = 10;
-N = 64;
+N = 32;
 k = 2*pi/L;
-mpl = 1; m = 1; % again compare to karstens paper
+mpl = 1; % again compare to karstens paper
 alpha = 1;
-ms = alpha*mass;
-Hs = alpha*H;
+ms = mass;
+Hs = H;
 Hend = Hs(1); aend = a(1); Trh = 1e7;
 lc = 1./sqrt(3*Hs*ms);
 lcfit = fit(log(a), log(mpl*lc)', 'linear');
@@ -399,12 +399,10 @@ aext = linspace(log(a(1)),log(aint),100);
 loglog(exp(aext), exp(kmaxfit(aext)), exp(aext), exp(lcfit(aext)),'linewidth',0.8); hold off; shg;
 
 %% power spectrum analysis
-tmp = 2;
 L=10;
 k = 2*pi/L;
-N = 64;
 
-name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/scaledbunch/64_5e-3_2e5_m4.h5';
+% name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/scaledbunch/64_5e-3_2e5_m4.h5';
 evaluate3D
 N = N(1);
 % a = h5read(name, '/a');
@@ -416,9 +414,10 @@ lc = 1./sqrt(3*H*mass);
 kmin = k;
 kmax = sqrt(3) * N/2 * k;
 bins = (1:50)/50 * kmax;
-for i = 1:100:length(phips(1,:))
+for ii = logspace(1,log(length(phips(1,:))),300)
+    i = int64(floor(ii));
     subplot(1,2,1)
-    hax=loglog(bins, phips(1:50,i)); xlabel('k bins'); ylabel('power'); hold on
+    loglog(bins, phips(1:50,i)); xlabel('k bins'); ylabel('power'); hold on
     k = lc(i);
     kmax = 1/H(i);
     plot([k k],[min(phips(1:50,i)) max(phips(1:50,i))]);
@@ -428,7 +427,7 @@ for i = 1:100:length(phips(1,:))
     subplot(1,2,2)
     plot(a, rhorms, a(i), rhorms(i),'or'); xlabel('a'); ylabel('std \rho / <\rho>');
     shg;
-    pause(0.1);
+    pause(0.05);
 end
 
 %% plot long time bunch davies
