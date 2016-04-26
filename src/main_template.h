@@ -274,6 +274,7 @@ struct monitor
     double copy_buffer_time; ///< Total wall clock time for copying buffers
     double cstr_time; ///< Total wall clock time for computing constraints
     double smry_time; ///< Total wall clock time for computing summaries
+    double stiffcheck_time; ///< Total wall clock time for checking stiffness
 };
 
 extern struct parameters pars; ///< Only instance of the parameters_t struct
