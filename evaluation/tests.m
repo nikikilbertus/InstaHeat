@@ -570,7 +570,7 @@ for i = 1:length(res)
     figure(1)
     plot(diff(t)); hold on
     figure(2)
-    loglog(a, rhorms); hold on
+    loglog(a, rhorms/rhorms(1)); hold on
     figure(3)
     subplot(4,1,1)
     semilogx(a,phimean); xlabel('a'); ylabel('<\phi>'); hold on
