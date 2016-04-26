@@ -232,9 +232,9 @@ struct temporary
     double  *yphi; ///< The y derivative of $$\phi$$ in real space
     double  *zphi; ///< The z derivative of $$\phi$$ in real space
     complex *phic; ///< The inflaton field $$\phi$$ in real space
-    complex *xphic ///< The x derivative of $$\phi$$ in Fourier space
-    complex *yphic ///< The y derivative of $$\phi$$ in Fourier space
-    complex *zphic ///< The z derivative of $$\phi$$ in Fourier space
+    complex *xphic; ///< The x derivative of $$\phi$$ in Fourier space
+    complex *yphic; ///< The y derivative of $$\phi$$ in Fourier space
+    complex *zphic; ///< The z derivative of $$\phi$$ in Fourier space
     double  *grad; ///< The _squared_ gradient of $$\phi$$ in real space
     double  *lap; ///< The Laplacian of $$\phi$$ in real space
     double  *deltarho; ///< $$\delta \rho = \rho - <\rho>$$ in real space
