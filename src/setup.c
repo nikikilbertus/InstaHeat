@@ -157,7 +157,14 @@ static void initialize_parameters()
     pars.z.stride = STRIDE_Z;
 
     pars.N = pars.x.N * pars.y.N * pars.z.N;
-    pars.Nall = 4 * pars.N + 2;
+    pars.Nall = 4 * pars.N + Nsimd;
+    #if PSI_METHOD != PSI_ELLIPTIC
+    pars.Nsimd = FFTW_SIMD_STRIDE;
+    pars.N2p = 2 * pars.N + pars.Nsimd;
+    #if PSI_METHOD == PSI_HYPERBOLIC
+    pars.N3p = 2 * pars.N + pars.Nsimd;
+    #endif
+    #endif
 
     pars.x.outN = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
     pars.y.outN = (pars.y.N + pars.y.stride - 1) / pars.y.stride;
