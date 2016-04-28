@@ -1,7 +1,7 @@
-name = 'scaledbunch/64_5e-3_2e5_m4';
-interp = true;
+% name = 'scaledbunch/64_5e-3_2e5_m4';
+interp = false;
 newoutput = true;
-amax = 600;
+amax = -1;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
