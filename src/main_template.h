@@ -216,6 +216,9 @@ struct parameters
     size_t N; ///< number of spatial gridpoints: N=Nx*Ny*Nz
     size_t Ntot; ///< number of scalar equations evolved depending on PSI_METHOD
     size_t Nall; ///< size of field: Nall=4*N+2
+    size_t Nsimd; ///< used to guarantee correct SIMD alignment for FFTW3
+    size_t N2p; ///< index of $$\psi$$ in the the field arrays
+    size_t N3p; ///< index of $$\dot{\psi}$$ in the the field arrays
     size_t outN; ///< number of spatial gridpoints for output
     size_t M; ///< number of gridpoints in Fourier space
     size_t dim; ///< dimensions of the simulation (1, 2 or 3)
