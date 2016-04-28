@@ -630,8 +630,8 @@ static void mk_initial_conditions()
 static void initialize_from_dat()
 {
     read_initial_data();
-    /* center(field + 2 * pars.N + 2, pars.N); */
-    /* center(field + 3 * pars.N + 2, pars.N); */
+    /* center(field + pars.N2p, pars.N); */
+    /* center(field + pars.N3p, pars.N); */
     field[2 * pars.N] = A_INITIAL;
     #if PSI_METHOD != PSI_ELLIPTIC && \
         INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITHOUT_PSI
