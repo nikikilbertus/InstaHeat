@@ -28,6 +28,7 @@ static void allocate_external();
 static void init_output(struct output *out, const size_t dim, const int mode);
 static void mk_fftw_plans();
 static void check_simd_alignment();
+static int get_simd_alignment_of(double *f)
 static void mk_k_grid();
 #ifdef ENABLE_FFT_FILTER
 static void mk_filter_mask();
@@ -415,11 +416,36 @@ static void mk_fftw_plans()
 
 static void check_simd_alignment()
 {
+}
+
+static int get_simd_alignment_of(double *f)
+{
+    int fail = 0;
     const size_t N = pars.N;
+    const int ref = fftw_alignment_of(f);
+    const int a1 = fftw_alignment_of(f + N);
+    if (ref != a1) {
+        fail = 1;
+    }
+    #if PSI_METHOD != PSI_ELLIPTIC
     const size_t N2p = pars.N2p;
+    const int a2 = fftw_alignment_of(f + N2p);
+    if (ref != a2) {
+        fail = 1;
+    }
+    #if PSI_METHOD == PSI_HYPERBOLIC
     const size_t N3p = pars.N3p;
-    int ref = fftw_alignment_of(field);
-    int a1 = fftw_alignment_of(field + N);
+    const int a3 = fftw_alignment_of(f + N3p);
+    if (ref != a3) {
+        fail = 1;
+    }
+    #endif
+    #endif
+    if (fail == 1) {
+        fputs("Alignment error! Try to double FFTW_SIMD_STRIDE\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    return ref;
 }
 
 /**
