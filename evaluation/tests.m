@@ -324,10 +324,10 @@ rhormsi = zeros(m-ml+1,4);
 as = zeros(m-ml+1,1);
 maxrhos = zeros(m-ml+1,1);
 for i = 1:m-ml+1
-name = ['masses/64_5e-' num2str(i+ml-1) '_2e4'];
+name = ['resolutions8/96_5e-' num2str(i+ml-1) '_2e4'];
 evaluate3D
 maxrhos(i) = max(rhorms);
-loglog(a,rhorms,'linewidth',2)
+loglog(a,rhorms/rhorms(1),'linewidth',2)
 legendinfo{i} = ['mass=' num2str(masses(i))];
 rhormsi(i,1) = rhorms(1);
 [~,idx] = min( (a - 1e2).^2);
@@ -562,7 +562,7 @@ res = [32 48 64 96];
 rhos = zeros(length(res),1);
 disp('         grid      steps')
 for i = 1:length(res)
-    name = ['resolutions7/' num2str(res(i)) '_5e-3_2e4'];
+    name = ['resolutions8/' num2str(res(i)) '_5e-3_2e4'];
     evaluate3D
     disp([N(1) steps])
     legendinfo{i} = num2str(res(i));
@@ -570,7 +570,7 @@ for i = 1:length(res)
     figure(1)
     plot(diff(t)); hold on
     figure(2)
-    loglog(a, rhorms/rhorms(1)); hold on
+    loglog(a, rhorms); hold on
     figure(3)
     subplot(4,1,1)
     semilogx(a,phimean); xlabel('a'); ylabel('<\phi>'); hold on
