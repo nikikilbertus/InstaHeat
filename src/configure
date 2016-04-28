@@ -43,6 +43,7 @@ sed -i.bak "s/_ABSTOL_/${ABSOLUTE_TOLERANCE}/g" main.h
 sed -i.bak "s/_HFRAC_/${MAX_DT_HUBBLE_FRACTION}/g" main.h
 sed -i.bak "s/_THREADS_/${THREAD_NUMBER}/g" main.h
 sed -i.bak "s/_FFTW_/${FFTW_DEFAULT_FLAG}/g" main.h
+sed -i.bak "s/_SIMD_/${FFTW_SIMD_STRIDE}/g" main.h
 sed -i.bak "s/_VC_/${VERSION_CONTROL}/g" main.h
 
 sed -i.bak "s/_IM_/${INTEGRATION_METHOD}/g" main.h
