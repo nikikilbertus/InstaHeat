@@ -205,9 +205,9 @@ static void initialize_parameters()
     #if PSI_METHOD == PSI_ELLIPTIC
     pars.Ntot = 2 * pars.N + 1;
     #elif PSI_METHOD == PSI_PARABOLIC
-    pars.Ntot = 3 * pars.N + 2;
+    pars.Ntot = pars.N2p + pars.N;
     #elif PSI_METHOD == PSI_HYPERBOLIC
-    pars.Ntot = 4 * pars.N + 2;
+    pars.Ntot = pars.N3p + pars.N;
     #endif
 
     pars.t.dt = DELTA_T;
