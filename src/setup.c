@@ -125,7 +125,7 @@ static void initialize_threading()
     threadnum = THREAD_NUMBER <= 0 ? omp_get_max_threads() : THREAD_NUMBER;
     omp_set_num_threads(threadnum);
     fftw_plan_with_nthreads(threadnum);
-    INFO(printf("\n\nRunning omp & fftw with %d thread(s)\n\n", threadnum));
+    INFO(printf("\n\nRunning omp & fftw with %d thread(s).\n\n", threadnum));
 }
 
 /**
@@ -425,6 +425,7 @@ static void check_simd_alignment()
         fputs("Alignment error! Try to double FFTW_SIMD_STRIDE\n", stderr);
         exit(EXIT_FAILURE);
     }
+    INFO(puts("All field arrays are correctly aligned.\n"));
 }
 
 static int get_simd_alignment_of(double *f)
