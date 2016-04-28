@@ -28,7 +28,7 @@ static void allocate_external();
 static void init_output(struct output *out, const size_t dim, const int mode);
 static void mk_fftw_plans();
 static void check_simd_alignment();
-static int get_simd_alignment_of(double *f)
+static int get_simd_alignment_of(double *f);
 static void mk_k_grid();
 #ifdef ENABLE_FFT_FILTER
 static void mk_filter_mask();
