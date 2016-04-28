@@ -568,7 +568,7 @@ static void mk_initial_conditions()
     #endif
 
     #ifdef EVOLVE_WITHOUT_PSI
-    const size_t N2p = 2 * pars.N + 2;
+    const size_t N2p = pars.N2p;
     #pragma omp parallel for
     for (size_t i = N2p; i < Nall; ++i) {
         field[i] = 0.0;
@@ -608,7 +608,7 @@ static void initialize_from_dat()
 static void mk_initial_psi()
 {
     const size_t N = pars.N;
-    const size_t N2p = 2 * N + 2;
+    const size_t N2p = pars.N2p;
     const size_t Nall = pars.Nall;
     #pragma omp parallel for
     for (size_t i = N2p; i < Nall; ++i) {
