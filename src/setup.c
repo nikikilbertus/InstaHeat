@@ -162,7 +162,7 @@ static void initialize_parameters()
     pars.Nsimd = FFTW_SIMD_STRIDE;
     pars.N2p = 2 * pars.N + pars.Nsimd;
     #if PSI_METHOD == PSI_HYPERBOLIC
-    pars.N3p = 2 * pars.N + pars.Nsimd;
+    pars.N3p = 3 * pars.N + pars.Nsimd;
     #endif
     #endif
 
