@@ -27,6 +27,7 @@ static void initialize_parameters();
 static void allocate_external();
 static void init_output(struct output *out, const size_t dim, const int mode);
 static void mk_fftw_plans();
+static void check_simd_alignment();
 static void mk_k_grid();
 #ifdef ENABLE_FFT_FILTER
 static void mk_filter_mask();
@@ -410,6 +411,15 @@ static void mk_fftw_plans()
     }
     TIME(mon.fftw_time_plan += get_wall_time());
     INFO(puts("Created fftw plans.\n"));
+}
+
+static void check_simd_alignment()
+{
+    const size_t N = pars.N;
+    const size_t N2p = pars.N2p;
+    const size_t N3p = pars.N3p;
+    int ref = fftw_alignment_of(field);
+    int a1 = fftw_alignment_of(field + N);
 }
 
 /**
