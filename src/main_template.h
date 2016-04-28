@@ -112,7 +112,7 @@
 #define STRIDE_Z                (_ZSKIP_)
 #define THREAD_NUMBER           (_THREADS_)
 #define FFTW_DEFAULT_FLAG       (_FFTW_)
-#define FFTW_SIMD_STRIDE        (_SIMD_)
+#define FFTW_SIMD_STRIDE        (_FFTWSS_)
 #define _FILTER_
 #define GRIDPOINTS_X            (_GPX_)
 #define GRIDPOINTS_Y            (_GPY_)
