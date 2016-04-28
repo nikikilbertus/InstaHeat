@@ -416,6 +416,14 @@ static void mk_fftw_plans()
 
 static void check_simd_alignment()
 {
+    int ref = get_simd_alignment_of(field);
+    int a1 = get_simd_alignment_of(dfield);
+    int a2 = get_simd_alignment_of(field_new);
+    int a3 = get_simd_alignment_of(dfield_new);
+    if (ref != a1 || ref != a2 || ref != a3) {
+        fputs("Alignment error! Try to double FFTW_SIMD_STRIDE\n", stderr);
+        exit(EXIT_FAILURE);
+    }
 }
 
 static int get_simd_alignment_of(double *f)
