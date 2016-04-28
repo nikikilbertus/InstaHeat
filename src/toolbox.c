@@ -71,8 +71,8 @@ void mk_rhs(const double t, double *f, double *result)
     mon.calls_rhs += 1;
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
-    const size_t N2p = N2 + 2;
-    const size_t N3p = 3 * N + 2;
+    const size_t N2p = pars.N2p;
+    const size_t N3p = pars.N3p;
     const double a = f[N2];
     const double a2 = a * a;
 
@@ -167,7 +167,7 @@ void mk_gradient_squared_and_laplacian(double *in)
     fftw_execute_dft_r2c(p_fw, in, tmp.phic);
         #if PSI_METHOD == PSI_PARABOLIC || defined(OUTPUT_CONSTRAINTS) \
             || defined(OUTPUT_PSI_PS)
-        const size_t N2p = 2 * N + 2;
+        const size_t N2p = pars.N2p;
         fftw_execute_dft_r2c(p_fw, in + N2p, tmp.psic);
         #endif
     TIME(mon.fftw_time_exe += get_wall_time());
@@ -255,7 +255,7 @@ void mk_rho(const double *f)
 {
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
-    const size_t N2p = N2 + 2;
+    const size_t N2p = pars.N2p;
     const double a = f[N2];
     const double a2 = a * a;
     rho_mean = 0.0;
@@ -354,8 +354,8 @@ static void mk_constraints()
     TIME(mon.cstr_time -= get_wall_time());
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
-    const size_t N2p = 2 * N + 2;
-    const size_t N3p = 3 * N + 2;
+    const size_t N2p = pars.N2p;
+    const size_t N3p = pars.N3p;
     const double a = field[N2];
     const double a2 = a * a;
     const double hubble = sqrt(rho_mean / 3.0);
@@ -401,8 +401,8 @@ void mk_psi(double *f)
     TIME(mon.poisson_time -= get_wall_time());
     const size_t N = pars.N;
     const size_t M = pars.M;
-    const size_t N2p = 2 * N + 2;
-    const size_t N3p = 3 * N + 2;
+    const size_t N2p = pars.N2p;
+    const size_t N3p = pars.N3p;
     const double a = f[2 * N];
     const double a2 = a * a;
     const double hubble = sqrt(rho_mean / 3.0);
@@ -499,8 +499,8 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
 static void apply_filter_real(double *inout)
 {
     const size_t N = pars.N;
-    const size_t N2p = 2 * N + 2;
-    const size_t N3p = 3 * N + 2;
+    const size_t N2p = pars.N2p;
+    const size_t N3p = pars.N3p;
 
     TIME(mon.filter_time -= get_wall_time());
     TIME(mon.fftw_time_exe -= get_wall_time());
@@ -610,13 +610,13 @@ void mk_summary()
     mean_var_min_max(field + pars.N, dphi_smry.tmp);
     #endif
     #ifdef OUTPUT_PSI_SMRY
-    mean_var_min_max(field + 2 * pars.N + 2, psi_smry.tmp);
+    mean_var_min_max(field + pars.N2p, psi_smry.tmp);
     #endif
     #ifdef OUTPUT_DPSI_SMRY
         #if PSI_METHOD == PSI_PARABOLIC
-        mean_var_min_max(dfield + 2 * pars.N + 2, dpsi_smry.tmp);
+        mean_var_min_max(dfield + pars.N2p, dpsi_smry.tmp);
         #else
-        mean_var_min_max(field + 3 * pars.N + 2, dpsi_smry.tmp);
+        mean_var_min_max(field + pars.N3p, dpsi_smry.tmp);
         #endif
     #endif
     #ifdef OUTPUT_RHO_SMRY
