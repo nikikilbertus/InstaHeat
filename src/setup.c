@@ -53,7 +53,9 @@ static double dphi_init(const double x, const double y, const double z,
         const double *ph);
 static double wrapped_gaussian(const double x, const double y, const double z);
 #endif
+#if PSI_METHOD != PSI_ELLIPTIC
 static void mk_initial_psi();
+#endif
 static void destroy_and_cleanup_fftw();
 static void free_external();
 
@@ -161,13 +163,9 @@ static void initialize_parameters()
 
     pars.N = pars.x.N * pars.y.N * pars.z.N;
     pars.Nall = 4 * pars.N + pars.Nsimd;
-    #if PSI_METHOD != PSI_ELLIPTIC
     pars.Nsimd = FFTW_SIMD_STRIDE;
     pars.N2p = 2 * pars.N + pars.Nsimd;
-    #if PSI_METHOD == PSI_HYPERBOLIC
     pars.N3p = 3 * pars.N + pars.Nsimd;
-    #endif
-    #endif
 
     pars.x.outN = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
     pars.y.outN = (pars.y.N + pars.y.stride - 1) / pars.y.stride;
@@ -437,20 +435,16 @@ static int get_simd_alignment_of(double *f)
     if (ref != a1) {
         fail = 1;
     }
-    #if PSI_METHOD != PSI_ELLIPTIC
     const size_t N2p = pars.N2p;
     const int a2 = fftw_alignment_of(f + N2p);
     if (ref != a2) {
         fail = 1;
     }
-    #if PSI_METHOD == PSI_HYPERBOLIC
     const size_t N3p = pars.N3p;
     const int a3 = fftw_alignment_of(f + N3p);
     if (ref != a3) {
         fail = 1;
     }
-    #endif
-    #endif
     if (fail == 1) {
         fputs("Alignment error! Try to double FFTW_SIMD_STRIDE\n", stderr);
         exit(EXIT_FAILURE);
@@ -646,6 +640,7 @@ static void initialize_from_dat()
 }
 #endif
 
+#if PSI_METHOD != PSI_ELLIPTIC
 /**
  * @brief Given that the initial $$\phi$$, $$\dot{\phi}$$ and $$a$$ are already
  * provided in `field`, construct the corresponding $$\psi$$ and
@@ -663,6 +658,7 @@ static void mk_initial_psi()
     mk_rho(field);
     mk_psi(field);
 }
+#endif
 
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
 /**
