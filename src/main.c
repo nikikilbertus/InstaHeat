@@ -104,7 +104,7 @@ int main(int argc, const char * argv[])
     INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
             mon.h5_time_write, 100. * (mon.h5_time_write / secs)));
 
-    INFO(puts("Writing runtimes to disk\n"));
+    INFO(puts("Writing runtimes to disk.\n"));
     h5_write_parameter(H5_RUNTIME_TOTAL_NAME, &secs, 1);
     h5_write_parameter(H5_RUNTIME_FFTW_NAME, &mon.fftw_time_exe, 1);
     h5_write_parameter(H5_RUNTIME_FFTWPLAN_NAME, &mon.fftw_time_plan, 1);

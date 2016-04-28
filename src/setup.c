@@ -27,6 +27,8 @@ static void initialize_parameters();
 static void allocate_external();
 static void init_output(struct output *out, const size_t dim, const int mode);
 static void mk_fftw_plans();
+static void check_simd_alignment();
+static int get_simd_alignment_of(double *f);
 static void mk_k_grid();
 #ifdef ENABLE_FFT_FILTER
 static void mk_filter_mask();
@@ -51,7 +53,9 @@ static double dphi_init(const double x, const double y, const double z,
         const double *ph);
 static double wrapped_gaussian(const double x, const double y, const double z);
 #endif
+#if PSI_METHOD != PSI_ELLIPTIC
 static void mk_initial_psi();
+#endif
 static void destroy_and_cleanup_fftw();
 static void free_external();
 
@@ -72,6 +76,7 @@ void allocate_and_initialize_all()
     initialize_parameters();
     allocate_external();
     mk_fftw_plans();
+    check_simd_alignment();
     mk_k_grid();
     #ifdef ENABLE_FFT_FILTER
     mk_filter_mask();
@@ -122,7 +127,7 @@ static void initialize_threading()
     threadnum = THREAD_NUMBER <= 0 ? omp_get_max_threads() : THREAD_NUMBER;
     omp_set_num_threads(threadnum);
     fftw_plan_with_nthreads(threadnum);
-    INFO(printf("\n\nRunning omp & fftw with %d thread(s)\n\n", threadnum));
+    INFO(printf("\n\nRunning omp & fftw with %d thread(s).\n\n", threadnum));
 }
 
 /**
@@ -157,7 +162,10 @@ static void initialize_parameters()
     pars.z.stride = STRIDE_Z;
 
     pars.N = pars.x.N * pars.y.N * pars.z.N;
-    pars.Nall = 4 * pars.N + 2;
+    pars.Nall = 4 * pars.N + pars.Nsimd;
+    pars.Nsimd = FFTW_SIMD_STRIDE;
+    pars.N2p = 2 * pars.N + pars.Nsimd;
+    pars.N3p = 3 * pars.N + pars.Nsimd;
 
     pars.x.outN = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
     pars.y.outN = (pars.y.N + pars.y.stride - 1) / pars.y.stride;
@@ -198,9 +206,9 @@ static void initialize_parameters()
     #if PSI_METHOD == PSI_ELLIPTIC
     pars.Ntot = 2 * pars.N + 1;
     #elif PSI_METHOD == PSI_PARABOLIC
-    pars.Ntot = 3 * pars.N + 2;
+    pars.Ntot = pars.N2p + pars.N;
     #elif PSI_METHOD == PSI_HYPERBOLIC
-    pars.Ntot = 4 * pars.N + 2;
+    pars.Ntot = pars.N3p + pars.N;
     #endif
 
     pars.t.dt = DELTA_T;
@@ -405,6 +413,45 @@ static void mk_fftw_plans()
     INFO(puts("Created fftw plans.\n"));
 }
 
+static void check_simd_alignment()
+{
+    int ref = get_simd_alignment_of(field);
+    int a1 = get_simd_alignment_of(dfield);
+    int a2 = get_simd_alignment_of(field_new);
+    int a3 = get_simd_alignment_of(dfield_new);
+    if (ref != a1 || ref != a2 || ref != a3) {
+        fputs("Alignment error! Try to double FFTW_SIMD_STRIDE\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    INFO(puts("All field arrays are correctly aligned.\n"));
+}
+
+static int get_simd_alignment_of(double *f)
+{
+    int fail = 0;
+    const size_t N = pars.N;
+    const int ref = fftw_alignment_of(f);
+    const int a1 = fftw_alignment_of(f + N);
+    if (ref != a1) {
+        fail = 1;
+    }
+    const size_t N2p = pars.N2p;
+    const int a2 = fftw_alignment_of(f + N2p);
+    if (ref != a2) {
+        fail = 1;
+    }
+    const size_t N3p = pars.N3p;
+    const int a3 = fftw_alignment_of(f + N3p);
+    if (ref != a3) {
+        fail = 1;
+    }
+    if (fail == 1) {
+        fputs("Alignment error! Try to double FFTW_SIMD_STRIDE\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    return ref;
+}
+
 /**
  * @brief Construct grids for the k vector and its square.
  *
@@ -561,7 +608,7 @@ static void mk_initial_conditions()
     #endif
 
     #ifdef EVOLVE_WITHOUT_PSI
-    const size_t N2p = 2 * pars.N + 2;
+    const size_t N2p = pars.N2p;
     #pragma omp parallel for
     for (size_t i = N2p; i < Nall; ++i) {
         field[i] = 0.0;
@@ -583,8 +630,8 @@ static void mk_initial_conditions()
 static void initialize_from_dat()
 {
     read_initial_data();
-    /* center(field + 2 * pars.N + 2, pars.N); */
-    /* center(field + 3 * pars.N + 2, pars.N); */
+    /* center(field + pars.N2p, pars.N); */
+    /* center(field + pars.N3p, pars.N); */
     field[2 * pars.N] = A_INITIAL;
     #if PSI_METHOD != PSI_ELLIPTIC && \
         INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITHOUT_PSI
@@ -593,6 +640,7 @@ static void initialize_from_dat()
 }
 #endif
 
+#if PSI_METHOD != PSI_ELLIPTIC
 /**
  * @brief Given that the initial $$\phi$$, $$\dot{\phi}$$ and $$a$$ are already
  * provided in `field`, construct the corresponding $$\psi$$ and
@@ -600,8 +648,7 @@ static void initialize_from_dat()
  */
 static void mk_initial_psi()
 {
-    const size_t N = pars.N;
-    const size_t N2p = 2 * N + 2;
+    const size_t N2p = pars.N2p;
     const size_t Nall = pars.Nall;
     #pragma omp parallel for
     for (size_t i = N2p; i < Nall; ++i) {
@@ -611,6 +658,7 @@ static void mk_initial_psi()
     mk_rho(field);
     mk_psi(field);
 }
+#endif
 
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
 /**
