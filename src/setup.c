@@ -652,7 +652,6 @@ static void initialize_from_dat()
  */
 static void mk_initial_psi()
 {
-    const size_t N = pars.N;
     const size_t N2p = pars.N2p;
     const size_t Nall = pars.Nall;
     #pragma omp parallel for
