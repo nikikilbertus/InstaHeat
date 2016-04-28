@@ -74,6 +74,7 @@ void allocate_and_initialize_all()
     initialize_parameters();
     allocate_external();
     mk_fftw_plans();
+    check_simd_alignment();
     mk_k_grid();
     #ifdef ENABLE_FFT_FILTER
     mk_filter_mask();
