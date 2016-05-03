@@ -53,9 +53,7 @@ static double dphi_init(const double x, const double y, const double z,
         const double *ph);
 static double wrapped_gaussian(const double x, const double y, const double z);
 #endif
-#if PSI_METHOD != PSI_ELLIPTIC
 static void mk_initial_psi();
-#endif
 static void destroy_and_cleanup_fftw();
 static void free_external();
 
@@ -89,13 +87,7 @@ void allocate_and_initialize_all()
     #else
     INFO(puts("Filtering disabled.\n"));
     #endif
-    #if PSI_METHOD == PSI_ELLIPTIC
-    INFO(puts("Solving elliptic equation for psi at each timesetp.\n"));
-    #elif PSI_METHOD == PSI_PARABOLIC
-    INFO(puts("Integrating psi using the parabolic constraint.\n"));
-    #elif PSI_METHOD == PSI_HYPERBOLIC
     INFO(puts("Integrating psi using the hyperbolic constraint.\n"));
-    #endif
 }
 
 /**
@@ -162,10 +154,11 @@ static void initialize_parameters()
     pars.z.stride = STRIDE_Z;
 
     pars.N = pars.x.N * pars.y.N * pars.z.N;
-    pars.Nall = 4 * pars.N + pars.Nsimd;
     pars.Nsimd = FFTW_SIMD_STRIDE;
     pars.N2p = 2 * pars.N + pars.Nsimd;
     pars.N3p = 3 * pars.N + pars.Nsimd;
+    pars.Nall = 4 * pars.N + pars.Nsimd;
+    pars.Ntot = pars.Nall;
 
     pars.x.outN = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
     pars.y.outN = (pars.y.N + pars.y.stride - 1) / pars.y.stride;
@@ -201,15 +194,6 @@ static void initialize_parameters()
             break;
     }
     pars.M = pars.x.M * pars.y.M * pars.z.M;
-
-    // the evolution scheme for psi dictates which fields are evolved
-    #if PSI_METHOD == PSI_ELLIPTIC
-    pars.Ntot = 2 * pars.N + 1;
-    #elif PSI_METHOD == PSI_PARABOLIC
-    pars.Ntot = pars.N2p + pars.N;
-    #elif PSI_METHOD == PSI_HYPERBOLIC
-    pars.Ntot = pars.N3p + pars.N;
-    #endif
 
     pars.t.dt = DELTA_T;
     pars.t.t = INITIAL_TIME;
@@ -260,9 +244,7 @@ static void allocate_external()
     dfield = fftw_malloc(Nall * sizeof *dfield);
     dfield_new = fftw_malloc(Nall * sizeof *dfield_new);
     rho = fftw_malloc(N * sizeof *rho);
-    #if PSI_METHOD == PSI_HYPERBOLIC
     pressure = fftw_malloc(N * sizeof *pressure);
-    #endif
 
     #ifdef OUTPUT_PHI
     init_output(&phi, outN, 0);
@@ -633,14 +615,12 @@ static void initialize_from_dat()
     /* center(field + pars.N2p, pars.N); */
     /* center(field + pars.N3p, pars.N); */
     field[2 * pars.N] = A_INITIAL;
-    #if PSI_METHOD != PSI_ELLIPTIC && \
-        INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITHOUT_PSI
+    #if INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITHOUT_PSI
     mk_initial_psi();
     #endif
 }
 #endif
 
-#if PSI_METHOD != PSI_ELLIPTIC
 /**
  * @brief Given that the initial $$\phi$$, $$\dot{\phi}$$ and $$a$$ are already
  * provided in `field`, construct the corresponding $$\psi$$ and
@@ -658,7 +638,6 @@ static void mk_initial_psi()
     mk_rho(field);
     mk_psi(field);
 }
-#endif
 
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
 /**
@@ -707,9 +686,7 @@ static void initialize_from_bunch_davies()
     mk_bunch_davies(field, hubble, phi0, -0.25);
     mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
     field[2 * pars.N] = A_INITIAL;
-    #if PSI_METHOD != PSI_ELLIPTIC
     mk_initial_psi();
-    #endif
 }
 
 /**
@@ -861,9 +838,7 @@ static void initialize_from_internal_function()
     free(grid);
     free(theta);
     field[2 * N] = A_INITIAL;
-    #if PSI_METHOD != PSI_ELLIPTIC
     mk_initial_psi();
-    #endif
 }
 
 /**
@@ -1110,9 +1085,7 @@ static void free_external()
     fftw_free(dfield);
     fftw_free(dfield_new);
     fftw_free(rho);
-    #if PSI_METHOD == PSI_HYPERBOLIC
     fftw_free(pressure);
-    #endif
     free(t_out.tmp);
     free(t_out.buf);
     free(a_out.tmp);
