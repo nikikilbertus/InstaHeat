@@ -198,8 +198,7 @@ struct file_parameters
  *  Nz = number of grid points in the z direction
  *  N  = number of gridpoints for the whole spatial grid = Nx * Ny * Nz
  *  N2 = 2 * N, N3 = 3 * N, N2p = 2 * N + 2, N3p = 3 * N + 2
- *  Nall = size of `field`, `dfield`, `field_new`, `dfield_new`, = 4 * N + 2
- *  Ntot = number of scalar equations in the integration; depends on method:
+ *  Ntot = number of scalar equations in the integration
  *  elliptic: Ntot = 2 * N + 1 (order: phi, dphi, a)
  *  parabolic: Ntot = 3 * N + 1 (oder: phi, dphi, psi, a)
  *  hyperbolic: Ntot = 4 * N + 1 (oder: phi, dphi, psi, dpsi, a)
@@ -211,7 +210,6 @@ struct parameters
     struct grid_dimension z; ///< specification of the z direction
     size_t N; ///< number of spatial gridpoints: N=Nx*Ny*Nz
     size_t Ntot; ///< number of scalar equations evolved
-    size_t Nall; ///< size of field: Nall=4*N+2
     size_t Nsimd; ///< used to guarantee correct SIMD alignment for FFTW3
     size_t N2p; ///< index of $$\psi$$ in the the field arrays
     size_t N3p; ///< index of $$\dot{\psi}$$ in the the field arrays
