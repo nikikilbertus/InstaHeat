@@ -71,7 +71,6 @@
     #define IC_FROM_DAT_FILE
 #endif
 
-#define _WOPSI_
 #define _OPHI_
 #define _ODPHI_
 #define _OPSI_
