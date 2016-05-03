@@ -157,8 +157,7 @@ static void initialize_parameters()
     pars.Nsimd = FFTW_SIMD_STRIDE;
     pars.N2p = 2 * pars.N + pars.Nsimd;
     pars.N3p = 3 * pars.N + pars.Nsimd;
-    pars.Nall = 4 * pars.N + pars.Nsimd;
-    pars.Ntot = pars.Nall;
+    pars.Ntot = 4 * pars.N + pars.Nsimd;
 
     pars.x.outN = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
     pars.y.outN = (pars.y.N + pars.y.stride - 1) / pars.y.stride;
@@ -228,7 +227,7 @@ static void initialize_parameters()
 static void allocate_external()
 {
     const size_t N = pars.N;
-    const size_t Nall = pars.Nall;
+    const size_t Ntot = pars.Ntot;
     const size_t M = pars.M;
     #ifdef LARGE_OUTPUT
     const size_t outN = pars.outN;
@@ -239,10 +238,10 @@ static void allocate_external()
     init_output(&a_out, 1, 1);
 
     // ---------------------------full fields: phi, dphi, psi, dpsi, rho--------
-    field = fftw_malloc(Nall * sizeof *field);
-    field_new = fftw_malloc(Nall * sizeof *field_new);
-    dfield = fftw_malloc(Nall * sizeof *dfield);
-    dfield_new = fftw_malloc(Nall * sizeof *dfield_new);
+    field = fftw_malloc(Ntot * sizeof *field);
+    field_new = fftw_malloc(Ntot * sizeof *field_new);
+    dfield = fftw_malloc(Ntot * sizeof *dfield);
+    dfield_new = fftw_malloc(Ntot * sizeof *dfield_new);
     rho = fftw_malloc(N * sizeof *rho);
     pressure = fftw_malloc(N * sizeof *pressure);
 
@@ -570,9 +569,9 @@ static double filter_window(const double x)
  */
 static void mk_initial_conditions()
 {
-    const size_t Nall = pars.Nall;
+    const size_t Ntot = pars.Ntot;
     #pragma omp parallel for
-    for (size_t i = 0; i < Nall; ++i) {
+    for (size_t i = 0; i < Ntot; ++i) {
         field[i] = 0.0;
         dfield[i] = 0.0;
         field_new[i] = 0.0;
@@ -592,7 +591,7 @@ static void mk_initial_conditions()
     #ifdef EVOLVE_WITHOUT_PSI
     const size_t N2p = pars.N2p;
     #pragma omp parallel for
-    for (size_t i = N2p; i < Nall; ++i) {
+    for (size_t i = N2p; i < Ntot; ++i) {
         field[i] = 0.0;
     }
     #endif
@@ -629,9 +628,9 @@ static void initialize_from_dat()
 static void mk_initial_psi()
 {
     const size_t N2p = pars.N2p;
-    const size_t Nall = pars.Nall;
+    const size_t Ntot = pars.Ntot;
     #pragma omp parallel for
-    for (size_t i = N2p; i < Nall; ++i) {
+    for (size_t i = N2p; i < Ntot; ++i) {
         field[i] = 0.0;
     }
     mk_gradient_squared_and_laplacian(field);
