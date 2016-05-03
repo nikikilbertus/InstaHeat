@@ -576,13 +576,6 @@ static void mk_initial_conditions()
     initialize_from_internal_function();
     #endif
 
-    #ifdef EVOLVE_WITHOUT_PSI
-    const size_t N2 = 2 * pars.N;
-    #pragma omp parallel for
-    for (size_t i = N2; i < Ntot - 1; ++i) {
-        field[i] = 0.0;
-    }
-    #endif
     t_out.tmp[0] = pars.t.ti;
     a_out.tmp[0] = field[pars.Ntot - 1];
     INFO(puts("Initialized fields on first time slice.\n"));
