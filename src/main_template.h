@@ -268,7 +268,7 @@ struct monitor
 
 extern struct parameters pars; ///< Only instance of the parameters_t struct
 
-// contain phi, dphi, a, psi, dpsi (only first Ntot entries are integrated)
+// contain phi, dphi, psi, dpsi, h1, h2, a
 extern double *field;
 extern double *dfield;
 extern double *field_new;
