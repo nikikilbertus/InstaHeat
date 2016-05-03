@@ -47,24 +47,13 @@ struct evolution_flags evo_flags = {.filter = 0,
  * @brief Compute the right hand side of the pde, i.e. all first order temporal
  * derivatives.
  *
- * Depending on `PSI_METHOD` we are computing the temporal derivatives of different fields, and hence also evovle different fields in the integration routine:
- *
  * @param[in] t The current time
  * @param[in] All necessary fields bundled in one array
  * @param[out] The right hand side of the partial differential equation, i.e.
  * the first temporal derivatives of the fields
  *
- * - For `PSI_METHOD=PSI_ELLIPTIC` we are only evolving $$\phi$$,
- *   $$\dot{\phi}$$ and $$a$$ withthe integration routine and use an elliptic
- *   constraint equation to compute $$\psi$$ and $$\dot{\psi}$$ separately on
- *   each timeslice.
- * - For 'PSI_METHOD=PSI_PARABOLIC` we are evolving $$\phi$$, $$\dot{\phi}$$,
- *   $$\psi$$ and $$a$$ according to a parabolic constraint equation with the
- *   integration routine. $$\dot{\psi}$$ is computed separately on each
- *   timeslice.
- * - For 'PSI_METHOD=PSI_HYPERBOLIC` we are evolving $$\phi$$, $$\dot{\phi}$$,
- *   $$\psi$$, $$\dot{\psi}$$ and $$a$$ according to a hyperbolic constraint
- *   equation with the integration routine.
+ * We evolve $$\phi$$, $$\dot{\phi}$$, $$\psi$$, $$\dot{\psi}$$ and $$a$$
+ * according to a hyperbolic constraint equation with the integration routine.
  */
 void mk_rhs(const double t, double *f, double *result)
 {
@@ -102,37 +91,22 @@ void mk_rhs(const double t, double *f, double *result)
     }
 
     #ifndef EVOLVE_WITHOUT_PSI
-    // parabolic: equation for dpsi; hyperbolic: copy dpsi and equation for ddpsi
-    #if PSI_METHOD != PSI_ELLIPTIC
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
-        #if PSI_METHOD == PSI_PARABOLIC
-        result[N2p + i] = -hubble * f[N2p + i] - 0.5 * (rho[i] - rho_mean) / h3
-            + tmp.f[i] / (h3 * a2);
-        #elif PSI_METHOD == PSI_HYPERBOLIC
         result[N2p + i] = f[N3p + i];
         result[N3p + i] = 0.5 * pressure[i] + (f[N2p + i] - 0.5) * pressure_mean
             - 4.0 * hubble * f[N3p + i];
-        #endif
     }
-    #else
-    mk_psi(f);
-    #endif
     #endif
 
     // equation for ddphi in all cases (psi & dpsi have to be provided first)
-    double df, p, dp;
-    #pragma omp parallel for private(df, p, dp)
+    double p;
+    #pragma omp parallel for private(p)
     for (size_t i = 0; i < N; ++i) {
-        df = f[N + i];
         p = f[N2p + i];
-        #if PSI_METHOD != PSI_PARABOLIC
-        dp = f[N3p + i];
-        #else
-        dp = result[N2p + i];
-        #endif
         result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / a2 -
-            (h3 - 4.0 * dp) * df - (1.0 + 2.0 * p) * potential_prime(f[i]);
+            (h3 - 4.0 * f[N3p + i]) * f[N + i] -
+            (1.0 + 2.0 * p) * potential_prime(f[i]);
     }
 
     // update da
@@ -155,8 +129,8 @@ void mk_rhs(const double t, double *f, double *result)
  * `tmp.grad` contains the _squared_ gradient $$(\nabla \phi)^2$$
  * All the above values persist until the next call of `mk_rhs(const double t,
  * double *f, double *result)`
- * If `PSI_METHOD=PSI_PARABOLIC` or `OUTPUT_CONSTRAINTS` is defined,
- * additionally, `tmp.f` contains $$\Delta \psi$$, the Lagrangian of $$\psi$$.
+ * If `OUTPUT_CONSTRAINTS` is defined, additionally, `tmp.f` contains $$\Delta
+ * \psi$$, the Lagrangian of $$\psi$$.
  */
 void mk_gradient_squared_and_laplacian(double *in)
 {
@@ -165,11 +139,10 @@ void mk_gradient_squared_and_laplacian(double *in)
 
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, in, tmp.phic);
-        #if PSI_METHOD == PSI_PARABOLIC || defined(OUTPUT_CONSTRAINTS) \
-            || defined(OUTPUT_PSI_PS)
-        const size_t N2p = pars.N2p;
-        fftw_execute_dft_r2c(p_fw, in + N2p, tmp.psic);
-        #endif
+    #if defined(OUTPUT_CONSTRAINTS) || defined(OUTPUT_PSI_PS)
+    const size_t N2p = pars.N2p;
+    fftw_execute_dft_r2c(p_fw, in + N2p, tmp.psic);
+    #endif
     TIME(mon.fftw_time_exe += get_wall_time());
 
     // good place for power spectrum of phi and psi, because fft exists
@@ -190,7 +163,7 @@ void mk_gradient_squared_and_laplacian(double *in)
         tmp.yphic[i] = pre * kvec.y[i];
         tmp.zphic[i] = pre * kvec.z[i];
         tmp.phic[i] *= kvec.sq[i] / N;
-        #if PSI_METHOD == PSI_PARABOLIC || defined(OUTPUT_CONSTRAINTS)
+        #ifdef OUTPUT_CONSTRAINTS
         tmp.psic[i] *= kvec.sq[i] / N;
         #endif
     }
@@ -204,7 +177,7 @@ void mk_gradient_squared_and_laplacian(double *in)
         }
     }
     fftw_execute_dft_c2r(p_bw, tmp.phic, tmp.lap);
-    #if PSI_METHOD == PSI_PARABOLIC || defined(OUTPUT_CONSTRAINTS)
+    #ifdef OUTPUT_CONSTRAINTS
     fftw_execute_dft_c2r(p_bw, tmp.psic, tmp.f);
     #endif
     TIME(mon.fftw_time_exe += get_wall_time());
@@ -235,9 +208,8 @@ static void assemble_gradient_squared()
 }
 
 /**
- * @brief Compute the energy density $$\rho$$ and its average value. For
- * `PSI_METHOD=PSI_HYPERBOLIC` also compute the pressure and its average
- * value.
+ * @brief Compute the energy density $$\rho$$ and its average value as well as
+ * the pressure and its average value.
  *
  * @param[in] f An array containing the fields
  *
@@ -245,7 +217,6 @@ static void assemble_gradient_squared()
  * the function returns:
  * `rho` contains the energy density $$\rho$$
  * `rho_mean` contains the average energy density $$< \rho >$$
- * If `PSI_METHOD=PSI_HYPERBOLIC`
  * `pressure` contains the pressure $$p$$
  * `pressure_mean` contains the average pressure $$< p >$$
  * All the above values persist until the next call of `mk_rhs(const double t,
@@ -259,33 +230,23 @@ void mk_rho(const double *f)
     const double a = f[N2];
     const double a2 = a * a;
     rho_mean = 0.0;
-    #if PSI_METHOD == PSI_HYPERBOLIC
     pressure_mean = 0.0;
-    #endif
 
     double df, p, t1, t2;
     #pragma omp parallel for private(df, p, t1, t2) \
                                 reduction(+: rho_mean, pressure_mean)
     for (size_t i = 0; i < N; ++i) {
         df = f[N + i];
-        #if PSI_METHOD != PSI_ELLIPTIC
         p = f[N2p + i];
         t1 = (0.5 - p) * df * df;
         t2 = (0.5 + p) * tmp.grad[i] / a2;
         rho[i] = t1 + t2 + potential(f[i]);
-            #if PSI_METHOD == PSI_HYPERBOLIC
-            pressure[i] = t1 - t2 / 3.0 - potential(f[i]);
-            pressure_mean += pressure[i];
-            #endif
-        #else
-        rho[i] = (df * df + tmp.grad[i] / a2) / 2.0 + potential(f[i]);
-        #endif
+        pressure[i] = t1 - t2 / 3.0 - potential(f[i]);
+        pressure_mean += pressure[i];
         rho_mean += rho[i];
     }
     rho_mean /= N;
-    #if PSI_METHOD == PSI_HYPERBOLIC
     pressure_mean /= N;
-    #endif
 }
 
 /**
@@ -506,12 +467,8 @@ static void apply_filter_real(double *inout)
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, inout, tmp.phic);
     fftw_execute_dft_r2c(p_fw, inout + N, tmp.xphic);
-    #if PSI_METHOD != PSI_ELLIPTIC
     fftw_execute_dft_r2c(p_fw, inout + N2p, tmp.yphic);
-        #if PSI_METHOD == PSI_HYPERBOLIC
-        fftw_execute_dft_r2c(p_fw, inout + N3p, tmp.zphic);
-        #endif
-    #endif
+    fftw_execute_dft_r2c(p_fw, inout + N3p, tmp.zphic);
     TIME(mon.fftw_time_exe += get_wall_time());
 
     apply_filter_fourier(tmp.phic, tmp.xphic, tmp.yphic, tmp.zphic);
@@ -519,12 +476,8 @@ static void apply_filter_real(double *inout)
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_c2r(p_bw, tmp.phic, inout);
     fftw_execute_dft_c2r(p_bw, tmp.xphic, inout + N);
-    #if PSI_METHOD != PSI_ELLIPTIC
     fftw_execute_dft_c2r(p_bw, tmp.yphic, inout + N2p);
-        #if PSI_METHOD == PSI_HYPERBOLIC
-        fftw_execute_dft_c2r(p_bw, tmp.zphic, inout + N3p);
-        #endif
-    #endif
+    fftw_execute_dft_c2r(p_bw, tmp.zphic, inout + N3p);
     TIME(mon.fftw_time_exe += get_wall_time());
     TIME(mon.filter_time += get_wall_time());
 }
@@ -550,12 +503,8 @@ static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
         fil = filter[i];
         phi_io[i] *= fil;
         dphi_io[i] *= fil;
-        #if PSI_METHOD != PSI_ELLIPTIC
         psi_io[i] *= fil;
-            #if PSI_METHOD == PSI_HYPERBOLIC
-            dpsi_io[i] *= fil;
-            #endif
-        #endif
+        dpsi_io[i] *= fil;
     }
 }
 #endif
@@ -613,11 +562,7 @@ void mk_summary()
     mean_var_min_max(field + pars.N2p, psi_smry.tmp);
     #endif
     #ifdef OUTPUT_DPSI_SMRY
-        #if PSI_METHOD == PSI_PARABOLIC
-        mean_var_min_max(dfield + pars.N2p, dpsi_smry.tmp);
-        #else
-        mean_var_min_max(field + pars.N3p, dpsi_smry.tmp);
-        #endif
+    mean_var_min_max(field + pars.N3p, dpsi_smry.tmp);
     #endif
     #ifdef OUTPUT_RHO_SMRY
     mean_var_min_max(rho, rho_smry.tmp);
@@ -693,7 +638,7 @@ static double variance(const double mean, const double *f, const size_t N)
     return (sum1 - sum2 * sum2 / (double)N) / (double)(N - 1);
 }
 
-#ifdef ENABLE_FFT_FILTER
+#ifdef CHECK_FOR_NAN
 /**
  * @brief Check and print whether a vector contains NaNs __(debugging only)__
  *
