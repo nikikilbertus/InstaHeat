@@ -209,16 +209,8 @@ void h5_create_empty_by_path()
     #endif
 
     //-----------------write out psi method-------------------------------------
-    #if PSI_METHOD == PSI_ELLIPTIC
-    len = 9;
-    const char *method = "elliptic";
-    #elif PSI_METHOD == PSI_PARABOLIC
-    len = 10;
-    const char *method = "parabolic";
-    #elif PSI_METHOD == PSI_HYPERBOLIC
     len = 11;
     const char *method = "hyperbolic";
-    #endif
     filetype = H5Tcopy(H5T_FORTRAN_S1);
     H5Tset_size(filetype, len - 1);
     memtype = H5Tcopy(H5T_C_S1);
@@ -534,11 +526,7 @@ void save()
                 psi.buf[os + idb] = field[N2p + id];
                 #endif
                 #ifdef OUTPUT_DPSI
-                    #if PSI_METHOD == PSI_PARABOLIC
-                    dpsi.buf[os + idb] = dfield[N2p + id];
-                    #else
-                    dpsi.buf[os + idb] = field[N3p + id];
-                    #endif
+                dpsi.buf[os + idb] = field[N3p + id];
                 #endif
                 #ifdef OUTPUT_RHO
                 rho_out.buf[os + idb] = rho[id];
