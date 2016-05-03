@@ -60,9 +60,8 @@ void mk_rhs(const double t, double *f, double *result)
     mon.calls_rhs += 1;
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
-    const size_t N2p = pars.N2p;
-    const size_t N3p = pars.N3p;
-    const double a = f[N2];
+    const size_t N3 = 3 * N;
+    const double a = f[pars.Ntot - 1];
     const double a2 = a * a;
 
     mk_gradient_squared_and_laplacian(f);
@@ -93,9 +92,9 @@ void mk_rhs(const double t, double *f, double *result)
     #ifndef EVOLVE_WITHOUT_PSI
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
-        result[N2p + i] = f[N3p + i];
-        result[N3p + i] = 0.5 * pressure[i] + (f[N2p + i] - 0.5) * pressure_mean
-            - 4.0 * hubble * f[N3p + i];
+        result[N2 + i] = f[N3 + i];
+        result[N3 + i] = 0.5 * pressure[i] + (f[N2 + i] - 0.5) * pressure_mean
+            - 4.0 * hubble * f[N3 + i];
     }
     #endif
 
@@ -103,14 +102,14 @@ void mk_rhs(const double t, double *f, double *result)
     double p;
     #pragma omp parallel for private(p)
     for (size_t i = 0; i < N; ++i) {
-        p = f[N2p + i];
+        p = f[N2 + i];
         result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / a2 -
-            (h3 - 4.0 * f[N3p + i]) * f[N + i] -
+            (h3 - 4.0 * f[N3 + i]) * f[N + i] -
             (1.0 + 2.0 * p) * potential_prime(f[i]);
     }
 
     // update da
-    result[N2] = a * hubble;
+    result[pars.Ntot - 1] = a * hubble;
 }
 
 /**
@@ -140,8 +139,7 @@ void mk_gradient_squared_and_laplacian(double *in)
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, in, tmp.phic);
     #if defined(OUTPUT_CONSTRAINTS) || defined(OUTPUT_PSI_PS)
-    const size_t N2p = pars.N2p;
-    fftw_execute_dft_r2c(p_fw, in + N2p, tmp.psic);
+    fftw_execute_dft_r2c(p_fw, in + 2 * N, tmp.psic);
     #endif
     TIME(mon.fftw_time_exe += get_wall_time());
 
@@ -226,8 +224,7 @@ void mk_rho(const double *f)
 {
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
-    const size_t N2p = pars.N2p;
-    const double a = f[N2];
+    const double a = f[pars.Ntot - 1];
     const double a2 = a * a;
     rho_mean = 0.0;
     pressure_mean = 0.0;
@@ -237,7 +234,7 @@ void mk_rho(const double *f)
                                 reduction(+: rho_mean, pressure_mean)
     for (size_t i = 0; i < N; ++i) {
         df = f[N + i];
-        p = f[N2p + i];
+        p = f[N2 + i];
         t1 = (0.5 - p) * df * df;
         t2 = (0.5 + p) * tmp.grad[i] / a2;
         rho[i] = t1 + t2 + potential(f[i]);
@@ -315,9 +312,8 @@ static void mk_constraints()
     TIME(mon.cstr_time -= get_wall_time());
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
-    const size_t N2p = pars.N2p;
-    const size_t N3p = pars.N3p;
-    const double a = field[N2];
+    const size_t N3 = 3 * N;
+    const double a = field[pars.Ntot - 1];
     const double a2 = a * a;
     const double hubble = sqrt(rho_mean / 3.0);
     const double h3 = 3.0 * hubble;
@@ -330,7 +326,7 @@ static void mk_constraints()
     #pragma omp parallel for private(tmp1, ham, mom) \
         reduction(max: ham_max, mom_max) reduction(+: ham_l2, mom_l2)
     for (size_t i = 0; i < N; ++i) {
-        tmp1 = hubble * field[N2p + i] + field[N3p + i];
+        tmp1 = hubble * field[N2 + i] + field[N3 + i];
         ham = tmp.f[i] / a2 - h3 * tmp1 - 0.5 * (rho[i] - rho_mean);
         mom = tmp1 - 0.5 * dphi_mean * (field[i] - phi_mean);
         ham_l2 += ham * ham;
@@ -362,9 +358,9 @@ void mk_psi(double *f)
     TIME(mon.poisson_time -= get_wall_time());
     const size_t N = pars.N;
     const size_t M = pars.M;
-    const size_t N2p = pars.N2p;
-    const size_t N3p = pars.N3p;
-    const double a = f[2 * N];
+    const size_t N2 = 2 * N;
+    const size_t N3 = 3 * N;
+    const double a = f[pars.Ntot - 1];
     const double a2 = a * a;
     const double hubble = sqrt(rho_mean / 3.0);
 
@@ -393,11 +389,11 @@ void mk_psi(double *f)
     tmp.phic[0] = 0.0;
 
     TIME(mon.fftw_time_exe -= get_wall_time());
-    fftw_execute_dft_c2r(p_bw, tmp.phic, f + N2p);
+    fftw_execute_dft_c2r(p_bw, tmp.phic, f + N2);
     TIME(mon.fftw_time_exe += get_wall_time());
 
     for (size_t i = 0; i < N; ++i) {
-        f[N3p + i] = 0.5 * tmp.f[i] - hubble * f[N2p + i];
+        f[N3 + i] = 0.5 * tmp.f[i] - hubble * f[N2 + i];
     }
     TIME(mon.poisson_time += get_wall_time());
 }
@@ -460,15 +456,15 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
 static void apply_filter_real(double *inout)
 {
     const size_t N = pars.N;
-    const size_t N2p = pars.N2p;
-    const size_t N3p = pars.N3p;
+    const size_t N2 = 2 * N;
+    const size_t N3 = 3 * N;
 
     TIME(mon.filter_time -= get_wall_time());
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, inout, tmp.phic);
     fftw_execute_dft_r2c(p_fw, inout + N, tmp.xphic);
-    fftw_execute_dft_r2c(p_fw, inout + N2p, tmp.yphic);
-    fftw_execute_dft_r2c(p_fw, inout + N3p, tmp.zphic);
+    fftw_execute_dft_r2c(p_fw, inout + N2, tmp.yphic);
+    fftw_execute_dft_r2c(p_fw, inout + N3, tmp.zphic);
     TIME(mon.fftw_time_exe += get_wall_time());
 
     apply_filter_fourier(tmp.phic, tmp.xphic, tmp.yphic, tmp.zphic);
@@ -476,8 +472,8 @@ static void apply_filter_real(double *inout)
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_c2r(p_bw, tmp.phic, inout);
     fftw_execute_dft_c2r(p_bw, tmp.xphic, inout + N);
-    fftw_execute_dft_c2r(p_bw, tmp.yphic, inout + N2p);
-    fftw_execute_dft_c2r(p_bw, tmp.zphic, inout + N3p);
+    fftw_execute_dft_c2r(p_bw, tmp.yphic, inout + N2);
+    fftw_execute_dft_c2r(p_bw, tmp.zphic, inout + N3);
     TIME(mon.fftw_time_exe += get_wall_time());
     TIME(mon.filter_time += get_wall_time());
 }
@@ -559,10 +555,10 @@ void mk_summary()
     mean_var_min_max(field + pars.N, dphi_smry.tmp);
     #endif
     #ifdef OUTPUT_PSI_SMRY
-    mean_var_min_max(field + pars.N2p, psi_smry.tmp);
+    mean_var_min_max(field + 2 * pars.N, psi_smry.tmp);
     #endif
     #ifdef OUTPUT_DPSI_SMRY
-    mean_var_min_max(field + pars.N3p, dpsi_smry.tmp);
+    mean_var_min_max(field + 3 * pars.N, dpsi_smry.tmp);
     #endif
     #ifdef OUTPUT_RHO_SMRY
     mean_var_min_max(rho, rho_smry.tmp);
