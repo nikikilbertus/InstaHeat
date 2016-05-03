@@ -59,11 +59,6 @@
 #define VERSION_CONTROL_GIT     (2)
 #define VERSION_CONTROL         (_VC_)
 
-#define PSI_ELLIPTIC            (0)
-#define PSI_HYPERBOLIC          (1)
-#define PSI_PARABOLIC           (2)
-#define PSI_METHOD              (_PM_)
-
 #define IC_FROM_INTERNAL_FUNCTION       (0)
 #define IC_FROM_H5_FILE                 (1)
 #define IC_FROM_DAT_FILE_WITH_PSI       (2)
@@ -215,7 +210,7 @@ struct parameters
     struct grid_dimension y; ///< specification of the y direction
     struct grid_dimension z; ///< specification of the z direction
     size_t N; ///< number of spatial gridpoints: N=Nx*Ny*Nz
-    size_t Ntot; ///< number of scalar equations evolved depending on PSI_METHOD
+    size_t Ntot; ///< number of scalar equations evolved
     size_t Nall; ///< size of field: Nall=4*N+2
     size_t Nsimd; ///< used to guarantee correct SIMD alignment for FFTW3
     size_t N2p; ///< index of $$\psi$$ in the the field arrays
@@ -302,7 +297,6 @@ extern double *rho;
 extern double rho_mean;
 extern struct output rho_out;
 extern struct output rho_smry;
-// only needed for PSI_METHOD == PSI_HYPERBOLIC, but always defined
 extern double *pressure;
 extern double pressure_mean;
 extern struct output phi_ps;
