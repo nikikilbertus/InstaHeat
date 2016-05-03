@@ -2,7 +2,6 @@
 DATAPATH="../../data/testcstr.h5"
 INITIAL_DATAPATH="../../data/karsten/data_64psi_3.dat"
 INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"
-PSI_METHOD="PSI_HYPERBOLIC"
 MASS="4.0" # bunch davies
 # MASS="0.002000003836216" # compare_2 compare_psi
 # MASS="1.0e-2" # data_64psi_{1,2,3}
