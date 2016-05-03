@@ -324,7 +324,7 @@ rhormsi = zeros(m-ml+1,4);
 as = zeros(m-ml+1,1);
 maxrhos = zeros(m-ml+1,1);
 for i = 1:m-ml+1
-name = ['resolutions8/96_5e-' num2str(i+ml-1) '_2e4'];
+name = ['resolutions9/96_5e-' num2str(i+ml-1) '_2e4'];
 evaluate3D
 maxrhos(i) = max(rhorms);
 loglog(a,rhorms/rhorms(1),'linewidth',2)
@@ -562,7 +562,7 @@ res = [32 48 64 96];
 rhos = zeros(length(res),1);
 disp('         grid      steps')
 for i = 1:length(res)
-    name = ['resolutions8/' num2str(res(i)) '_5e-3_2e4'];
+    name = ['resolutions9/' num2str(res(i)) '_5e-3_2e4'];
     evaluate3D
     disp([N(1) steps])
     legendinfo{i} = num2str(res(i));
