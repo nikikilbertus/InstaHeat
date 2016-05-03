@@ -89,14 +89,12 @@ void mk_rhs(const double t, double *f, double *result)
         result[i] = f[N + i];
     }
 
-    #ifndef EVOLVE_WITHOUT_PSI
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
         result[N2 + i] = f[N3 + i];
         result[N3 + i] = 0.5 * pressure[i] + (f[N2 + i] - 0.5) * pressure_mean
             - 4.0 * hubble * f[N3 + i];
     }
-    #endif
 
     // equation for ddphi in all cases (psi & dpsi have to be provided first)
     double p;
