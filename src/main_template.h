@@ -196,7 +196,7 @@ struct file_parameters
  *  Ny = number of grid points in the y direction
  *  Nz = number of grid points in the z direction
  *  N  = number of gridpoints for the whole spatial grid = Nx * Ny * Nz
- *  Ntot = number of scalar equations in the integration: 6 * N + 1 (oder: phi,
+ *  Ntot = number of scalar equations in the integration: 8 * N + 1 (oder: phi,
  *  dphi, psi, dpsi, h1, h2, a)
  */
 struct parameters
