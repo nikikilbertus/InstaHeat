@@ -60,14 +60,21 @@ void mk_rhs(const double t, double *f, double *result)
 {
     mon.calls_rhs += 1;
     const size_t N = pars.N;
+    const size_t Next = pars.Next;
     const size_t M = pars.M;
     const size_t N2 = 2 * N;
     const size_t N3 = 3 * N;
+    const size_t Nh1 = 4 * N;
+    const size_t Nh2 = 4 * N +  Next;
+    const size_t Ndh1 = 4 * N + 2 * Next;
+    const size_t Ndh2 = 4 * N + 3 * Next;
     const double a = f[pars.Ntot - 1];
     const double a2 = a * a;
 
     mk_gradient_squared_and_laplacian(f);
     mk_rho(f);
+    const double hubble = sqrt(rho_mean / 3.0);
+    const double h3 = 3.0 * hubble;
 
     // power spectrum of rho here, because need rho first
     if (evo_flags.compute_pow_spec == 1) {
@@ -82,8 +89,6 @@ void mk_rhs(const double t, double *f, double *result)
     #ifdef OUTPUT_CONSTRAINTS
     mk_constraints();
     #endif
-    const double hubble = sqrt(rho_mean / 3.0);
-    const double h3 = 3.0 * hubble;
 
     // copy dphi in all cases
     #pragma omp parallel for
@@ -98,7 +103,7 @@ void mk_rhs(const double t, double *f, double *result)
             - 4.0 * hubble * f[N3 + i];
     }
 
-    // equation for ddphi in all cases (psi & dpsi have to be provided first)
+    // equation for ddphi (psi & dpsi have to be provided first)
     double p;
     #pragma omp parallel for private(p)
     for (size_t i = 0; i < N; ++i) {
@@ -114,6 +119,78 @@ void mk_rhs(const double t, double *f, double *result)
         stt[i] = fftw_malloc(M * sizeof *stt[i]);
     }
     mk_sij(f, stt);
+
+    // copy first derivatives of hij's
+    #pragma omp parallel for
+    for (size_t i = 0; i < Next; ++i) {
+        result[Nh1 + i] = f[Ndh1 + i];
+        result[Nh2 + i] = f[Ndh2 + i];
+    }
+
+    const size_t Mx = pars.x.M;
+    const size_t My = pars.y.M;
+    const size_t Mz = pars.z.M;
+
+    // compute second derivatives of hij's
+    size_t osx, osy, id, idx;
+    #pragma omp parallel for private(osx, osy, id, idx)
+    for (size_t i = 0; i < Mx; ++i) {
+        osx = i * My * Mz;
+        for (size_t j = 0; j < My; ++j) {
+            osy = osx + j * Mz;
+            for (size_t k = 0; k < Mz; ++k) {
+                idx = osy + k;
+                id = 2 * idx;
+
+                // use h11 and h12
+                if (k != 0) {
+                    result[Ndh1 + id] = - (2.0 * pressure_mean +
+                        kvec.sq[idx] / a) * f[Nh1 + id] - h3 * f[Ndh1 + id] +
+                        2.0 / a2 * creal(stt[0][idx]);
+                    result[Ndh2 + id] = - (2.0 * pressure_mean +
+                        kvec.sq[idx] / a) * f[Nh2 + id] - h3 * f[Ndh2 + id] +
+                        2.0 / a2 * creal(stt[1][idx]);
+                    id += 1;
+                    result[Ndh1 + id] = - (2.0 * pressure_mean +
+                        kvec.sq[idx] / a) * f[Nh1 + id] - h3 * f[Ndh1 + id] +
+                        2.0 / a2 * cimag(stt[0][idx]);
+                    result[Ndh2 + id] = - (2.0 * pressure_mean +
+                        kvec.sq[idx] / a) * f[Nh2 + id] - h3 * f[Ndh2 + id] +
+                        2.0 / a2 * cimag(stt[1][idx]);
+                // use h11 and h13
+                } else if (j != 0) {
+                    result[Ndh1 + id] = - (2.0 * pressure_mean +
+                        kvec.sq[idx] / a) * f[Nh1 + id] - h3 * f[Ndh1 + id] +
+                        2.0 / a2 * creal(stt[0][idx]);
+                    result[Ndh2 + id] = - (2.0 * pressure_mean +
+                        kvec.sq[idx] / a) * f[Nh2 + id] - h3 * f[Ndh2 + id] +
+                        2.0 / a2 * creal(stt[2][idx]);
+                    id += 1;
+                    result[Ndh1 + id] = - (2.0 * pressure_mean +
+                        kvec.sq[idx] / a) * f[Nh1 + id] - h3 * f[Ndh1 + id] +
+                        2.0 / a2 * cimag(stt[0][idx]);
+                    result[Ndh2 + id] = - (2.0 * pressure_mean +
+                        kvec.sq[idx] / a) * f[Nh2 + id] - h3 * f[Ndh2 + id] +
+                        2.0 / a2 * cimag(stt[2][idx]);
+                // use h22 and h23
+                } else {
+                    result[Ndh1 + id] = - (2.0 * pressure_mean +
+                        kvec.sq[idx] / a) * f[Nh1 + id] - h3 * f[Ndh1 + id] +
+                        2.0 / a2 * creal(stt[3][idx]);
+                    result[Ndh2 + id] = - (2.0 * pressure_mean +
+                        kvec.sq[idx] / a) * f[Nh2 + id] - h3 * f[Ndh2 + id] +
+                        2.0 / a2 * creal(stt[4][idx]);
+                    id += 1;
+                    result[Ndh1 + id] = - (2.0 * pressure_mean +
+                        kvec.sq[idx] / a) * f[Nh1 + id] - h3 * f[Ndh1 + id] +
+                        2.0 / a2 * cimag(stt[3][idx]);
+                    result[Ndh2 + id] = - (2.0 * pressure_mean +
+                        kvec.sq[idx] / a) * f[Nh2 + id] - h3 * f[Ndh2 + id] +
+                        2.0 / a2 * cimag(stt[4][idx]);
+                }
+            }
+        }
+    }
 
     for (size_t i = 0; i < len; ++i) {
         fftw_free(stt[i]);
