@@ -448,7 +448,7 @@ void save()
 
     const size_t index = pars.file.index;
     const hsize_t Nt = pars.file.buf_size;
-    a_out.tmp[0] = field[2 * pars.N];
+    a_out.tmp[0] = field[pars.Ntot - 1];
     append_to_buffer(a_out);
     append_to_buffer(t_out);
 
@@ -494,9 +494,6 @@ void save()
 
     #ifdef LARGE_OUTPUT
     const hsize_t N = pars.N;
-    const hsize_t N2 = 2 * N;
-    const hsize_t N2p = pars.N2p;
-    const hsize_t N3p = pars.N3p;
     const hsize_t Nx = pars.x.N;
     const hsize_t Ny = pars.y.N;
     const hsize_t Nz = pars.z.N;
@@ -523,10 +520,10 @@ void save()
                 dphi.buf[os + idb] = field[N + id];
                 #endif
                 #ifdef OUTPUT_PSI
-                psi.buf[os + idb] = field[N2p + id];
+                psi.buf[os + idb] = field[2 * N + id];
                 #endif
                 #ifdef OUTPUT_DPSI
-                dpsi.buf[os + idb] = field[N3p + id];
+                dpsi.buf[os + idb] = field[3 * N + id];
                 #endif
                 #ifdef OUTPUT_RHO
                 rho_out.buf[os + idb] = rho[id];
@@ -583,8 +580,6 @@ void h5_read_timeslice()
 {
     hid_t file, dset, dspace;
     size_t N = pars.N;
-    size_t N2p = pars.N2p;
-    size_t N3p = pars.N3p;
     double t = pars.t.ti;
 
     file = H5Fopen(INITIAL_DATAPATH, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -626,8 +621,8 @@ void h5_read_timeslice()
     // ---------------------------read fields at index--------------------------
     h5_read_and_fill(file, index, H5_PHI_NAME, field);
     h5_read_and_fill(file, index, H5_DPHI_NAME, field + N);
-    h5_read_and_fill(file, index, H5_PSI_NAME, field + N2p);
-    h5_read_and_fill(file, index, H5_DPSI_NAME, field + N3p);
+    h5_read_and_fill(file, index, H5_PSI_NAME, field + 2 * N);
+    h5_read_and_fill(file, index, H5_DPSI_NAME, field + 3 * N);
 
     // ---------------------------read a at index-------------------------------
     dset = H5Dopen(file, H5_A_NAME, H5P_DEFAULT);
@@ -647,7 +642,8 @@ void h5_read_timeslice()
     hsize_t start[1] = {index};
     hsize_t count[1] = {1};
     H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start, NULL, count, NULL);
-    H5Dread(dset, H5T_NATIVE_DOUBLE, mspace, dspace, H5P_DEFAULT, field + 2 * N);
+    H5Dread(dset, H5T_NATIVE_DOUBLE, mspace, dspace, H5P_DEFAULT,
+            field + pars.Ntot - 1);
     H5Dclose(dset);
     H5Sclose(dspace);
     H5Fclose(file);
@@ -702,9 +698,6 @@ static void h5_read_and_fill(const hid_t file, const hsize_t index, const char *
 void read_initial_data()
 {
     size_t N = pars.N;
-    size_t N2p = pars.N2p;
-    size_t N3p = pars.N3p;
-
     FILE *file = fopen(INITIAL_DATAPATH, "r");
     if (!file) {
         fputs("Could not read initial data file.\n", stderr);
@@ -714,8 +707,8 @@ void read_initial_data()
     int ii, jj, kk;
     for (size_t i = 0; i < N; ++i) {
         if(!fscanf(file, " %d %d %d %lf %lf %lf %lf\n",
-                    &ii, &jj, &kk, &field[i], &field[i + N], &field[i + N2p],
-                    &field[i + N3p])) {
+                    &ii, &jj, &kk, &field[i], &field[i + N], &field[i + 2 * N],
+                    &field[i + 3 * N])) {
             fputs("Could not read initial data file.\n", stderr);
             exit(EXIT_FAILURE);
         }
