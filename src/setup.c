@@ -154,10 +154,7 @@ static void initialize_parameters()
     pars.z.stride = STRIDE_Z;
 
     pars.N = pars.x.N * pars.y.N * pars.z.N;
-    pars.Nsimd = FFTW_SIMD_STRIDE;
-    pars.N2p = 2 * pars.N + pars.Nsimd;
-    pars.N3p = 3 * pars.N + pars.Nsimd;
-    pars.Ntot = 4 * pars.N + pars.Nsimd;
+    pars.Ntot = 6 * pars.N + 1;
 
     pars.x.outN = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
     pars.y.outN = (pars.y.N + pars.y.stride - 1) / pars.y.stride;
@@ -359,9 +356,6 @@ static void init_output(struct output *out, const size_t dim, const int mode)
  * are destroyed during planning. We create the plans for fixed global arrays
  * and reuse them for various different arrays. One has to be careful that later
  * arrays fulfil the memory alignment.
- *
- * @see FFTW3 documentation for more information on memory alignment (for SIMD
- * operations).
  */
 static void mk_fftw_plans()
 {
@@ -401,7 +395,7 @@ static void check_simd_alignment()
     int a2 = get_simd_alignment_of(field_new);
     int a3 = get_simd_alignment_of(dfield_new);
     if (ref != a1 || ref != a2 || ref != a3) {
-        fputs("Alignment error! Try to double FFTW_SIMD_STRIDE\n", stderr);
+        fputs("Alignment error!\n", stderr);
         exit(EXIT_FAILURE);
     }
     INFO(puts("All field arrays are correctly aligned.\n"));
@@ -412,22 +406,16 @@ static int get_simd_alignment_of(double *f)
     int fail = 0;
     const size_t N = pars.N;
     const int ref = fftw_alignment_of(f);
-    const int a1 = fftw_alignment_of(f + N);
-    if (ref != a1) {
-        fail = 1;
-    }
-    const size_t N2p = pars.N2p;
-    const int a2 = fftw_alignment_of(f + N2p);
-    if (ref != a2) {
-        fail = 1;
-    }
-    const size_t N3p = pars.N3p;
-    const int a3 = fftw_alignment_of(f + N3p);
-    if (ref != a3) {
-        fail = 1;
+    int test;
+    for (size_t i = 1; i < 6; ++i) {
+        test = fftw_alignment_of(f + i * N);
+        if (test != ref) {
+            fail = 1;
+            break;
+        }
     }
     if (fail == 1) {
-        fputs("Alignment error! Try to double FFTW_SIMD_STRIDE\n", stderr);
+        fputs("Alignment error!\n", stderr);
         exit(EXIT_FAILURE);
     }
     return ref;
@@ -589,14 +577,14 @@ static void mk_initial_conditions()
     #endif
 
     #ifdef EVOLVE_WITHOUT_PSI
-    const size_t N2p = pars.N2p;
+    const size_t N2 = 2 * pars.N;
     #pragma omp parallel for
-    for (size_t i = N2p; i < Ntot; ++i) {
+    for (size_t i = N2; i < Ntot - 1; ++i) {
         field[i] = 0.0;
     }
     #endif
     t_out.tmp[0] = pars.t.ti;
-    a_out.tmp[0] = field[2 * pars.N];
+    a_out.tmp[0] = field[pars.Ntot - 1];
     INFO(puts("Initialized fields on first time slice.\n"));
 }
 
@@ -611,9 +599,9 @@ static void mk_initial_conditions()
 static void initialize_from_dat()
 {
     read_initial_data();
-    /* center(field + pars.N2p, pars.N); */
-    /* center(field + pars.N3p, pars.N); */
-    field[2 * pars.N] = A_INITIAL;
+    /* center(field + 2 * pars.N, pars.N); */
+    /* center(field + 3 * pars.N, pars.N); */
+    field[pars.Ntot - 1] = A_INITIAL;
     #if INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITHOUT_PSI
     mk_initial_psi();
     #endif
@@ -627,10 +615,9 @@ static void initialize_from_dat()
  */
 static void mk_initial_psi()
 {
-    const size_t N2p = pars.N2p;
-    const size_t Ntot = pars.Ntot;
+    const size_t N2 = 2 * pars.N;
     #pragma omp parallel for
-    for (size_t i = N2p; i < Ntot; ++i) {
+    for (size_t i = N2; i < pars.Ntot - 1; ++i) {
         field[i] = 0.0;
     }
     mk_gradient_squared_and_laplacian(field);
@@ -684,7 +671,7 @@ static void initialize_from_bunch_davies()
     const double hubble = MASS * 0.5046715192113189464712956951230;
     mk_bunch_davies(field, hubble, phi0, -0.25);
     mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
-    field[2 * pars.N] = A_INITIAL;
+    field[pars.Ntot - 1] = A_INITIAL;
     mk_initial_psi();
 }
 
@@ -836,7 +823,7 @@ static void initialize_from_internal_function()
     }
     free(grid);
     free(theta);
-    field[2 * N] = A_INITIAL;
+    field[pars.Ntot - 1] = A_INITIAL;
     mk_initial_psi();
 }
 
