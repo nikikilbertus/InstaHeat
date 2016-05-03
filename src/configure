@@ -16,7 +16,6 @@ cp main_template.h main.h
 sed -i.bak "s;_PATH_;${DATAPATH};g" main.h
 sed -i.bak "s;_IPATH_;${INITIAL_DATAPATH};g" main.h
 sed -i.bak "s/_IC_/${INITIAL_CONDITIONS}/g" main.h
-sed -i.bak "s/_PM_/${PSI_METHOD}/g" main.h
 sed -i.bak "s/_M_/${MASS}/g" main.h
 sed -i.bak "s/_A_/${A_INITIAL}/g" main.h
 sed -i.bak "s/_TF_/${FINAL_TIME}/g" main.h
