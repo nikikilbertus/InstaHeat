@@ -17,7 +17,7 @@
  */
 
 static void assemble_gradient_squared();
-static void mk_sij(const double *f);
+static void mk_sij(const double *f, complex **fsij);
 static double potential(const double f);
 static double potential_prime(const double f);
 #ifdef OUTPUT_CONSTRAINTS
@@ -60,6 +60,7 @@ void mk_rhs(const double t, double *f, double *result)
 {
     mon.calls_rhs += 1;
     const size_t N = pars.N;
+    const size_t M = pars.M;
     const size_t N2 = 2 * N;
     const size_t N3 = 3 * N;
     const double a = f[pars.Ntot - 1];
@@ -106,6 +107,18 @@ void mk_rhs(const double t, double *f, double *result)
             (h3 - 4.0 * f[N3 + i]) * f[N + i] -
             (1.0 + 2.0 * p) * potential_prime(f[i]);
     }
+
+    const size_t len = 6;
+    complex **stt = malloc(len * sizeof *stt);
+    for (size_t i = 0; i < len; ++i) {
+        stt[i] = fftw_malloc(M * sizeof *stt[i]);
+    }
+    mk_sij(f, stt);
+
+    for (size_t i = 0; i < len; ++i) {
+        fftw_free(stt[i]);
+    }
+    free(stt);
 
     // update da
     result[pars.Ntot - 1] = a * hubble;
@@ -181,7 +194,7 @@ void mk_gradient_squared_and_laplacian(double *in)
     assemble_gradient_squared();
 }
 
-static void mk_sij(const double *f)
+static void mk_sij(const double *f, complex **fsij)
 {
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
@@ -190,10 +203,8 @@ static void mk_sij(const double *f)
     const double a2 = a * a;
     const size_t len = 6;
     double **sij = malloc(len * sizeof *sij);
-    complex **fsij = malloc(len * sizeof *fsij);
     for (size_t i = 0; i < len; ++i) {
         sij[i] = fftw_malloc(N * sizeof *sij[i]);
-        fsij[i] = fftw_malloc(M * sizeof *fsij[i]);
     }
     double *smm = fftw_malloc(N * sizeof *smm);
     #pragma omp parallel for
@@ -278,10 +289,8 @@ static void mk_sij(const double *f)
     fftw_free(smm);
     for (size_t i = 0; i < len; ++i) {
         fftw_free(sij[i]);
-        fftw_free(fsij[i]);
     }
     free(sij);
-    free(fsij);
 }
 
 /**
