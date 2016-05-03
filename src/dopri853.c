@@ -531,7 +531,6 @@ static int success(const double err, double *dt)
 static void allocate_dopri853_values()
 {
     const size_t Ntot = pars.Ntot;
-    const size_t Nall = pars.Nall;
 
     dpv.k2 = fftw_malloc(Ntot * sizeof *dpv.k2);
     dpv.k3 = fftw_malloc(Ntot * sizeof *dpv.k3);
@@ -542,7 +541,7 @@ static void allocate_dopri853_values()
     dpv.k8 = fftw_malloc(Ntot * sizeof *dpv.k8);
     dpv.k9 = fftw_malloc(Ntot * sizeof *dpv.k9);
     dpv.k10 = fftw_malloc(Ntot * sizeof *dpv.k10);
-    dpv.k_tmp = fftw_malloc(Nall * sizeof *dpv.k_tmp);
+    dpv.k_tmp = fftw_malloc(Ntot * sizeof *dpv.k_tmp);
 
     dpv.yerr = fftw_malloc(Ntot * sizeof *dpv.yerr);
     dpv.yerr2 = fftw_malloc(Ntot * sizeof *dpv.yerr2);
@@ -568,7 +567,7 @@ static void allocate_dopri853_values()
         dpv.yerr2[i] = 0.0;
     }
     #pragma omp parallel for
-    for (size_t i = 0; i < Nall; ++i) {
+    for (size_t i = 0; i < Ntot; ++i) {
         dpv.k_tmp[i] = 0.0;
     }
     INFO(puts("Allocated memory for dopri853 variables.\n"));
