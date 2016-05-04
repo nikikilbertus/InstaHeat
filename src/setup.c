@@ -154,8 +154,6 @@ static void initialize_parameters()
     pars.z.stride = STRIDE_Z;
 
     pars.N = pars.x.N * pars.y.N * pars.z.N;
-    pars.N = pars.x.N * pars.y.N * (pars.z.N + 2);
-    pars.Ntot = 4 * pars.N + 4 * pars.Next + 1;
 
     pars.x.outN = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
     pars.y.outN = (pars.y.N + pars.y.stride - 1) / pars.y.stride;
@@ -191,6 +189,8 @@ static void initialize_parameters()
             break;
     }
     pars.M = pars.x.M * pars.y.M * pars.z.M;
+    pars.Next = 2 * pars.M;
+    pars.Ntot = 4 * pars.N + 4 * pars.Next + 1;
 
     pars.t.dt = DELTA_T;
     pars.t.t = INITIAL_TIME;
