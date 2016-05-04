@@ -347,36 +347,41 @@ static void mk_sij(const double *f, complex **fsij)
     for (size_t i = 0; i < len; ++i) {
         sij[i] = fftw_malloc(N * sizeof *sij[i]);
     }
+
     double *gphi = fftw_malloc(N * sizeof *gphi);
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
+        // TODO: do i include metric here?
         gphi[i] = - tmp.grad[i] * (2.0 + 4.0 * f[N2 + i]) / (3.0 * a2);
-        sij[0][i] = tmp.xphi[i] * tmp.xphi[i] - gphi[i];
+        sij[0][i] = tmp.xphi[i] * tmp.xphi[i] + gphi[i];
         sij[1][i] = tmp.xphi[i] * tmp.yphi[i];
         sij[2][i] = tmp.xphi[i] * tmp.zphi[i];
-        sij[3][i] = tmp.yphi[i] * tmp.yphi[i] - gphi[i];
+        sij[3][i] = tmp.yphi[i] * tmp.yphi[i] + gphi[i];
         sij[4][i] = tmp.yphi[i] * tmp.zphi[i];
-        sij[5][i] = tmp.zphi[i] * tmp.zphi[i] - gphi[i];
+        sij[5][i] = tmp.zphi[i] * tmp.zphi[i] + gphi[i];
     }
+    fftw_free(gphi);
+
     for (size_t i = 0; i < len; ++i) {
         fftw_execute_dft_r2c(p_fw, sij[i], fsij[i]);
     }
-    complex *fs = fftw_malloc(M * sizeof *fs);
-    complex *fsp = fftw_malloc(M * sizeof *fsp);
+
+    complex *fs1 = fftw_malloc(M * sizeof *fs1);
+    complex *fs2 = fftw_malloc(M * sizeof *fs2);
     //TODO: are the zeros in the kvec.x/y/z a problem here?
     #pragma omp parallel for
     for (size_t i = 1; i < M; ++i) {
-        fsp[i] = kvec.x[i] * kvec.x[i] * fsij[0][i] +
+        fs2[i] = kvec.x[i] * kvec.x[i] * fsij[0][i] +
                  kvec.x[i] * kvec.y[i] * fsij[1][i] +
                  kvec.x[i] * kvec.z[i] * fsij[2][i] +
                  kvec.y[i] * kvec.y[i] * fsij[3][i] +
                  kvec.y[i] * kvec.z[i] * fsij[4][i] +
                  kvec.z[i] * kvec.z[i] * fsij[5][i];
-        fsp[i] /= kvec.sq[i];
-        fs[i] = fsij[0][i] + fsij[3][i] + fsij[5][i];
+        fs2[i] /= kvec.sq[i];
+        fs1[i] = fsij[0][i] + fsij[3][i] + fsij[5][i];
     }
-    fsp[0] = 0.0;
-    fs[0] = 0.0;
+    fs2[0] = 0.0;
+    fs1[0] = 0.0;
     complex **fksij = malloc(len * sizeof *fksij);
     for (size_t i = 0; i < len; ++i) {
         fksij[i] = fftw_malloc(M * sizeof *fksij[i]);
@@ -404,25 +409,24 @@ static void mk_sij(const double *f, complex **fsij)
         fksij[4][i] = fksij[2][i] * yfac;
         fksij[5][i] = fksij[2][i] * zfac;
         fsij[0][i] += fksij[0][i] + 0.5 * (kvec.x[i] * kvec.x[i] *
-                (fsp[i] + fs[i] / kvec.sq[i]) + fsp[i] - fs[i]);
+                (fs2[i] + fs1[i] / kvec.sq[i]) + fs2[i] - fs1[i]);
         fsij[1][i] += fksij[1][i] + 0.5 * (kvec.x[i] * kvec.y[i] *
-                (fsp[i] + fs[i] / kvec.sq[i]));
+                (fs2[i] + fs1[i] / kvec.sq[i]));
         fsij[2][i] += fksij[2][i] + 0.5 * (kvec.x[i] * kvec.z[i] *
-                (fsp[i] + fs[i] / kvec.sq[i]));
+                (fs2[i] + fs1[i] / kvec.sq[i]));
         fsij[3][i] += fksij[3][i] + 0.5 * (kvec.y[i] * kvec.y[i] *
-                (fsp[i] + fs[i] / kvec.sq[i]) + fsp[i] - fs[i]);
+                (fs2[i] + fs1[i] / kvec.sq[i]) + fs2[i] - fs1[i]);
         fsij[4][i] += fksij[4][i] + 0.5 * (kvec.y[i] * kvec.z[i] *
-                (fsp[i] + fs[i] / kvec.sq[i]));
+                (fs2[i] + fs1[i] / kvec.sq[i]));
         fsij[5][i] += fksij[5][i] + 0.5 * (kvec.z[i] * kvec.z[i] *
-                (fsp[i] + fs[i] / kvec.sq[i]) + fsp[i] - fs[i]);
+                (fs2[i] + fs1[i] / kvec.sq[i]) + fs2[i] - fs1[i]);
     }
     for (size_t i = 0; i < len; ++i) {
         fftw_free(fksij[i]);
     }
     free(fksij);
-    fftw_free(fs);
-    fftw_free(fsp);
-    fftw_free(gphi);
+    fftw_free(fs1);
+    fftw_free(fs2);
     for (size_t i = 0; i < len; ++i) {
         fftw_free(sij[i]);
     }
