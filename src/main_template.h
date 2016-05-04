@@ -195,9 +195,9 @@ struct file_parameters
  *  Ny = number of grid points in the y direction
  *  Nz = number of grid points in the z direction
  *  N  = number of gridpoints for the whole spatial grid = Nx * Ny * Nz
- *  Next  = number of gridpoints for complex grid = Nx * Ny * (Nz + 2)
+ *  Next  = (extended) number of doubles in complex grid = Nx * Ny * (Nz + 2)
  *  Ntot = number of scalar equations in the integration: 4 * N + 4 * Next + 1
- *  (oder: phi, dphi, psi, dpsi, h1, h2, a)
+ *  (order: phi, dphi, psi, dpsi, h1, h2, dh1, dh2, a)
  */
 struct parameters
 {
@@ -205,8 +205,8 @@ struct parameters
     struct grid_dimension y; ///< specification of the y direction
     struct grid_dimension z; ///< specification of the z direction
     size_t N; ///< number of spatial gridpoints: N=Nx*Ny*Nz
-    size_t Next; ///< number of spatial gridpoints: N=Nx*Ny*Nz
-    size_t Ntot; ///< number of scalar equations evolved
+    size_t Next; ///< number of doubles in complex grid: N=Nx*Ny*(Nz+2)
+    size_t Ntot; ///< number of scalar equations
     size_t outN; ///< number of spatial gridpoints for output
     size_t M; ///< number of gridpoints in Fourier space
     size_t dim; ///< dimensions of the simulation (1, 2 or 3)
