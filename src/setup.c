@@ -610,8 +610,9 @@ static void initialize_from_dat()
 static void mk_initial_psi()
 {
     const size_t N2 = 2 * pars.N;
+    const size_t N4 = 2 * N2;
     #pragma omp parallel for
-    for (size_t i = N2; i < pars.Ntot - 1; ++i) {
+    for (size_t i = N2; i < N4; ++i) {
         field[i] = 0.0;
     }
     mk_gradient_squared_and_laplacian(field);
