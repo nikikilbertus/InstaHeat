@@ -347,16 +347,16 @@ static void mk_sij(const double *f, complex **fsij)
     for (size_t i = 0; i < len; ++i) {
         sij[i] = fftw_malloc(N * sizeof *sij[i]);
     }
-    double *smm = fftw_malloc(N * sizeof *smm);
+    double *gphi = fftw_malloc(N * sizeof *gphi);
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
-        smm[i] = - tmp.grad[i] * (2.0 + 4.0 * f[N2 + i]) / (3.0 * a2);
-        sij[0][i] = tmp.xphi[i] * tmp.xphi[i] - smm[i];
+        gphi[i] = - tmp.grad[i] * (2.0 + 4.0 * f[N2 + i]) / (3.0 * a2);
+        sij[0][i] = tmp.xphi[i] * tmp.xphi[i] - gphi[i];
         sij[1][i] = tmp.xphi[i] * tmp.yphi[i];
         sij[2][i] = tmp.xphi[i] * tmp.zphi[i];
-        sij[3][i] = tmp.yphi[i] * tmp.yphi[i] - smm[i];
+        sij[3][i] = tmp.yphi[i] * tmp.yphi[i] - gphi[i];
         sij[4][i] = tmp.yphi[i] * tmp.zphi[i];
-        sij[5][i] = tmp.zphi[i] * tmp.zphi[i] - smm[i];
+        sij[5][i] = tmp.zphi[i] * tmp.zphi[i] - gphi[i];
     }
     for (size_t i = 0; i < len; ++i) {
         fftw_execute_dft_r2c(p_fw, sij[i], fsij[i]);
@@ -422,7 +422,7 @@ static void mk_sij(const double *f, complex **fsij)
     free(fksij);
     fftw_free(fs);
     fftw_free(fsp);
-    fftw_free(smm);
+    fftw_free(gphi);
     for (size_t i = 0; i < len; ++i) {
         fftw_free(sij[i]);
     }
