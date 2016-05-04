@@ -271,105 +271,6 @@ void mk_gradient_squared_and_laplacian(double *in)
     assemble_gradient_squared();
 }
 
-static void mk_sij(const double *f, complex **fsij)
-{
-    const size_t N = pars.N;
-    const size_t N2 = 2 * N;
-    const size_t M = pars.M;
-    const double a = f[pars.Ntot - 1];
-    const double a2 = a * a;
-    const size_t len = 6;
-    double **sij = malloc(len * sizeof *sij);
-    for (size_t i = 0; i < len; ++i) {
-        sij[i] = fftw_malloc(N * sizeof *sij[i]);
-    }
-    double *smm = fftw_malloc(N * sizeof *smm);
-    #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i) {
-        smm[i] = - (2.0 + 4.0 * f[N2 + i]) / (3.0 * a2) * tmp.grad[i];
-    }
-    #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i) {
-        sij[0][i] = tmp.xphi[i] * tmp.xphi[i] - smm[i];
-        sij[1][i] = tmp.xphi[i] * tmp.yphi[i];
-        sij[2][i] = tmp.xphi[i] * tmp.zphi[i];
-        sij[3][i] = tmp.yphi[i] * tmp.yphi[i] - smm[i];
-        sij[4][i] = tmp.yphi[i] * tmp.zphi[i];
-        sij[5][i] = tmp.zphi[i] * tmp.zphi[i] - smm[i];
-    }
-    for (size_t i = 0; i < len; ++i) {
-        fftw_execute_dft_r2c(p_fw, sij[i], fsij[i]);
-    }
-    complex *fs = fftw_malloc(M * sizeof *fs);
-    complex *fsp = fftw_malloc(M * sizeof *fsp);
-    //TODO: are the zeros in the kvec.x/y/z a problem here?
-    #pragma omp parallel for
-    for (size_t i = 0; i < M; ++i) {
-        fsp[i] = kvec.x[i] * kvec.x[i] * fsij[0][i] +
-                 kvec.x[i] * kvec.y[i] * fsij[1][i] +
-                 kvec.x[i] * kvec.z[i] * fsij[2][i] +
-                 kvec.y[i] * kvec.y[i] * fsij[3][i] +
-                 kvec.y[i] * kvec.z[i] * fsij[4][i] +
-                 kvec.z[i] * kvec.z[i] * fsij[5][i];
-        fsp[i] /= kvec.sq[i];
-        fs[i] = fsij[0][i] + fsij[3][i] + fsij[5][i];
-    }
-    complex **fksij = malloc(len * sizeof *fksij);
-    for (size_t i = 0; i < len; ++i) {
-        fksij[i] = fftw_malloc(M * sizeof *fksij[i]);
-    }
-    double xfac;
-    double yfac;
-    double zfac;
-    #pragma omp parallel for private(xfac, yfac, zfac)
-    for (size_t i = 0; i < M; ++i) {
-        xfac = -2.0 * kvec.x[i] / kvec.sq[i];
-        yfac = -2.0 * kvec.y[i] / kvec.sq[i];
-        zfac = -2.0 * kvec.z[i] / kvec.sq[i];
-        fksij[0][i] = kvec.x[i] * fsij[0][i] +
-                      kvec.y[i] * fsij[1][i] +
-                      kvec.z[i] * fsij[2][i];
-        fksij[1][i] = kvec.x[i] * fsij[1][i] +
-                      kvec.y[i] * fsij[3][i] +
-                      kvec.z[i] * fsij[4][i];
-        fksij[2][i] = kvec.x[i] * fsij[2][i] +
-                      kvec.y[i] * fsij[4][i] +
-                      kvec.z[i] * fsij[5][i];
-        fksij[0][i] *= xfac;
-        fksij[1][i] *= xfac;
-        fksij[2][i] *= xfac;
-        fksij[3][i] = fksij[1][i] * yfac;
-        fksij[4][i] = fksij[2][i] * yfac;
-        fksij[5][i] = fksij[2][i] * zfac;
-    }
-    #pragma omp parallel for
-    for (size_t i = 0; i < M; ++i) {
-        fsij[0][i] += fksij[0][i] + 0.5 * (kvec.x[i] * kvec.x[i] *
-                (fsp[i] + fs[i] / kvec.sq[i]) + fsp[i] - fs[i]);
-        fsij[1][i] += fksij[1][i] + 0.5 * (kvec.x[i] * kvec.y[i] *
-                (fsp[i] + fs[i] / kvec.sq[i]));
-        fsij[2][i] += fksij[2][i] + 0.5 * (kvec.x[i] * kvec.z[i] *
-                (fsp[i] + fs[i] / kvec.sq[i]));
-        fsij[3][i] += fksij[3][i] + 0.5 * (kvec.y[i] * kvec.y[i] *
-                (fsp[i] + fs[i] / kvec.sq[i]) + fsp[i] - fs[i]);
-        fsij[4][i] += fksij[4][i] + 0.5 * (kvec.y[i] * kvec.z[i] *
-                (fsp[i] + fs[i] / kvec.sq[i]));
-        fsij[5][i] += fksij[5][i] + 0.5 * (kvec.z[i] * kvec.z[i] *
-                (fsp[i] + fs[i] / kvec.sq[i]) + fsp[i] - fs[i]);
-    }
-    for (size_t i = 0; i < len; ++i) {
-        fftw_free(fksij[i]);
-    }
-    free(fksij);
-    fftw_free(fs);
-    fftw_free(fsp);
-    fftw_free(smm);
-    for (size_t i = 0; i < len; ++i) {
-        fftw_free(sij[i]);
-    }
-    free(sij);
-}
-
 /**
  * @brief Constructs the squared gradient from the (up to) three partial
  * spatial derivatives.
@@ -432,6 +333,99 @@ void mk_rho(const double *f)
     }
     rho_mean /= N;
     pressure_mean /= N;
+}
+
+static void mk_sij(const double *f, complex **fsij)
+{
+    const size_t N = pars.N;
+    const size_t N2 = 2 * N;
+    const size_t M = pars.M;
+    const double a = f[pars.Ntot - 1];
+    const double a2 = a * a;
+    const size_t len = 6;
+    double **sij = malloc(len * sizeof *sij);
+    for (size_t i = 0; i < len; ++i) {
+        sij[i] = fftw_malloc(N * sizeof *sij[i]);
+    }
+    double *smm = fftw_malloc(N * sizeof *smm);
+    #pragma omp parallel for
+    for (size_t i = 0; i < N; ++i) {
+        smm[i] = - tmp.grad[i] * (2.0 + 4.0 * f[N2 + i]) / (3.0 * a2);
+        sij[0][i] = tmp.xphi[i] * tmp.xphi[i] - smm[i];
+        sij[1][i] = tmp.xphi[i] * tmp.yphi[i];
+        sij[2][i] = tmp.xphi[i] * tmp.zphi[i];
+        sij[3][i] = tmp.yphi[i] * tmp.yphi[i] - smm[i];
+        sij[4][i] = tmp.yphi[i] * tmp.zphi[i];
+        sij[5][i] = tmp.zphi[i] * tmp.zphi[i] - smm[i];
+    }
+    for (size_t i = 0; i < len; ++i) {
+        fftw_execute_dft_r2c(p_fw, sij[i], fsij[i]);
+    }
+    complex *fs = fftw_malloc(M * sizeof *fs);
+    complex *fsp = fftw_malloc(M * sizeof *fsp);
+    //TODO: are the zeros in the kvec.x/y/z a problem here?
+    #pragma omp parallel for
+    for (size_t i = 1; i < M; ++i) {
+        fsp[i] = kvec.x[i] * kvec.x[i] * fsij[0][i] +
+                 kvec.x[i] * kvec.y[i] * fsij[1][i] +
+                 kvec.x[i] * kvec.z[i] * fsij[2][i] +
+                 kvec.y[i] * kvec.y[i] * fsij[3][i] +
+                 kvec.y[i] * kvec.z[i] * fsij[4][i] +
+                 kvec.z[i] * kvec.z[i] * fsij[5][i];
+        fsp[i] /= kvec.sq[i];
+        fs[i] = fsij[0][i] + fsij[3][i] + fsij[5][i];
+    }
+    fsp[0] = 0.0;
+    fs[0] = 0.0;
+    complex **fksij = malloc(len * sizeof *fksij);
+    for (size_t i = 0; i < len; ++i) {
+        fksij[i] = fftw_malloc(M * sizeof *fksij[i]);
+    }
+    double xfac, yfac, zfac;
+    #pragma omp parallel for private(xfac, yfac, zfac)
+    for (size_t i = 0; i < M; ++i) {
+        xfac = -2.0 * kvec.x[i] / kvec.sq[i];
+        yfac = -2.0 * kvec.y[i] / kvec.sq[i];
+        zfac = -2.0 * kvec.z[i] / kvec.sq[i];
+        fksij[0][i] = kvec.x[i] * fsij[0][i] +
+                      kvec.y[i] * fsij[1][i] +
+                      kvec.z[i] * fsij[2][i];
+        fksij[1][i] = kvec.x[i] * fsij[1][i] +
+                      kvec.y[i] * fsij[3][i] +
+                      kvec.z[i] * fsij[4][i];
+        fksij[2][i] = kvec.x[i] * fsij[2][i] +
+                      kvec.y[i] * fsij[4][i] +
+                      kvec.z[i] * fsij[5][i];
+        fksij[0][i] *= xfac;
+        fksij[1][i] *= xfac;
+        fksij[2][i] *= xfac;
+        fksij[3][i] = fksij[1][i] * yfac;
+        fksij[4][i] = fksij[2][i] * yfac;
+        fksij[5][i] = fksij[2][i] * zfac;
+        fsij[0][i] += fksij[0][i] + 0.5 * (kvec.x[i] * kvec.x[i] *
+                (fsp[i] + fs[i] / kvec.sq[i]) + fsp[i] - fs[i]);
+        fsij[1][i] += fksij[1][i] + 0.5 * (kvec.x[i] * kvec.y[i] *
+                (fsp[i] + fs[i] / kvec.sq[i]));
+        fsij[2][i] += fksij[2][i] + 0.5 * (kvec.x[i] * kvec.z[i] *
+                (fsp[i] + fs[i] / kvec.sq[i]));
+        fsij[3][i] += fksij[3][i] + 0.5 * (kvec.y[i] * kvec.y[i] *
+                (fsp[i] + fs[i] / kvec.sq[i]) + fsp[i] - fs[i]);
+        fsij[4][i] += fksij[4][i] + 0.5 * (kvec.y[i] * kvec.z[i] *
+                (fsp[i] + fs[i] / kvec.sq[i]));
+        fsij[5][i] += fksij[5][i] + 0.5 * (kvec.z[i] * kvec.z[i] *
+                (fsp[i] + fs[i] / kvec.sq[i]) + fsp[i] - fs[i]);
+    }
+    for (size_t i = 0; i < len; ++i) {
+        fftw_free(fksij[i]);
+    }
+    free(fksij);
+    fftw_free(fs);
+    fftw_free(fsp);
+    fftw_free(smm);
+    for (size_t i = 0; i < len; ++i) {
+        fftw_free(sij[i]);
+    }
+    free(sij);
 }
 
 /**
