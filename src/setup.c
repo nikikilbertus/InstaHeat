@@ -408,7 +408,7 @@ static int get_simd_alignment_of(double *f)
     const size_t N = pars.N;
     const int ref = fftw_alignment_of(f);
     int test;
-    for (size_t i = 1; i < 6; ++i) {
+    for (size_t i = 1; i < 4; ++i) {
         test = fftw_alignment_of(f + i * N);
         if (test != ref) {
             fail = 1;
