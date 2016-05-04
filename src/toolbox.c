@@ -381,6 +381,7 @@ static void mk_sij(const double *f, complex **fsij)
     for (size_t i = 0; i < len; ++i) {
         fksij[i] = fftw_malloc(M * sizeof *fksij[i]);
     }
+    // TODO: already do correct layout here: k!=0, j!=0, ...
     double xfac, yfac, zfac;
     #pragma omp parallel for private(xfac, yfac, zfac)
     for (size_t i = 0; i < M; ++i) {
