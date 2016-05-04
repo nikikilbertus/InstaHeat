@@ -372,10 +372,10 @@ static void mk_sij(const double *f, complex **fsij)
     #pragma omp parallel for
     for (size_t i = 1; i < M; ++i) {
         fs2[i] = kvec.x[i] * kvec.x[i] * fsij[0][i] +
-                 kvec.x[i] * kvec.y[i] * fsij[1][i] +
-                 kvec.x[i] * kvec.z[i] * fsij[2][i] +
+                 kvec.x[i] * kvec.y[i] * fsij[1][i] * 2.0 +
+                 kvec.x[i] * kvec.z[i] * fsij[2][i] * 2.0 +
                  kvec.y[i] * kvec.y[i] * fsij[3][i] +
-                 kvec.y[i] * kvec.z[i] * fsij[4][i] +
+                 kvec.y[i] * kvec.z[i] * fsij[4][i] * 2.0 +
                  kvec.z[i] * kvec.z[i] * fsij[5][i];
         fs2[i] /= kvec.sq[i];
         fs1[i] = fsij[0][i] + fsij[3][i] + fsij[5][i];
