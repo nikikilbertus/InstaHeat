@@ -253,7 +253,6 @@ void mk_rho(const double *f)
     const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
     rho_mean = 0.0;
     pressure_mean = 0.0;
-
     #pragma omp parallel for reduction(+: rho_mean, pressure_mean)
     for (size_t i = 0; i < N; ++i) {
         double t1 = (0.5 - f[2 * N + i]) * f[N + i] * f[N + i];
@@ -281,21 +280,17 @@ void mk_rho(const double *f)
 static void mk_stt(const double *f, complex **fsij)
 {
     TIME(mon.stt_time -= get_wall_time());
-    const size_t N = pars.N;
-    const size_t N2 = 2 * N;
-    const double a = f[pars.Ntot - 1];
-    const double a2 = a * a;
+    const double atmp = 3.0 * f[pars.Ntot - 1] * f[pars.Ntot - 1];
     const size_t len = 6;
 
     double **sij = malloc(len * sizeof *sij);
     for (size_t i = 0; i < len; ++i) {
-        sij[i] = fftw_malloc(N * sizeof *sij[i]);
+        sij[i] = fftw_malloc(pars.N * sizeof *sij[i]);
     }
-    double gphi;
-    #pragma omp parallel for private(gphi)
-    for (size_t i = 0; i < N; ++i) {
+    #pragma omp parallel for
+    for (size_t i = 0; i < pars.N; ++i) {
         // TODO: do i include metric here?
-        gphi = - tmp.grad[i] * (2.0 + 4.0 * f[N2 + i]) / (3.0 * a2);
+        double gphi = - tmp.grad[i] * (2.0 + 4.0 * f[2 * pars.N + i]) / atmp;
         sij[0][i] = tmp.xphi[i] * tmp.xphi[i] + gphi;
         sij[1][i] = tmp.xphi[i] * tmp.yphi[i];
         sij[2][i] = tmp.xphi[i] * tmp.zphi[i];
@@ -311,44 +306,41 @@ static void mk_stt(const double *f, complex **fsij)
     TIME(mon.fftw_time_exe += get_wall_time());
     free(sij);
 
-    double kx, ky, kz, fx, fy, fz;
-    complex t1, t2, s1, s2, k1, k2, k3;
-    #pragma omp parallel for private(kx, ky, kz, fx, fy, fz, \
-                                     t1, t2, s1, s2, k1, k2, k3)
+    #pragma omp parallel for
     for (size_t i = 1; i < pars.M; ++i) {
-        kx = kvec.xf[i];
-        ky = kvec.yf[i];
-        kz = kvec.zf[i];
-        fx = kx / kvec.sq[i];
-        fy = ky / kvec.sq[i];
-        fz = kz / kvec.sq[i];
-        t1 = kx * fx * fsij[0][i] + 2.0 * kx * fy * fsij[1][i] +
+        double kx = kvec.xf[i];
+        double ky = kvec.yf[i];
+        double kz = kvec.zf[i];
+        double fx = kx / kvec.sq[i];
+        double fy = ky / kvec.sq[i];
+        double fz = kz / kvec.sq[i];
+        complex t1 = kx * fx * fsij[0][i] + 2.0 * kx * fy * fsij[1][i] +
              2.0 * kx * fz * fsij[2][i] + ky * fy * fsij[3][i] +
              2.0 * ky * fz * fsij[4][i] + kz * fz * fsij[5][i];
-        t2 = fsij[0][i] + fsij[3][i] + fsij[5][i];
-        s1 = t1 + t2;
-        s2 = t1 - t2;
+        complex t2 = fsij[0][i] + fsij[3][i] + fsij[5][i];
+        complex s1 = t1 + t2;
+        complex s2 = t1 - t2;
 
         // use s11 and s12
         if (fabs(kz) > DBL_EPSILON) {
-            k1 = kx * fsij[0][i] + ky * fsij[1][i] + kz * fsij[2][i];
-            k2 = kx * fsij[1][i] + ky * fsij[3][i] + kz * fsij[4][i];
+            complex k1 = kx * fsij[0][i] + ky * fsij[1][i] + kz * fsij[2][i];
+            complex k2 = kx * fsij[1][i] + ky * fsij[3][i] + kz * fsij[4][i];
             fsij[0][i] = fsij[0][i] - 2.0 * fx * k1 +
                 0.5 * (fx * kx * s1 + s2);
             fsij[1][i] = fsij[1][i] - fx * k2 - fy * k1 +
                 0.5 * fx * ky * s1;
         // use s11 and s13
         } else if (fabs(ky) > DBL_EPSILON) {
-            k1 = kx * fsij[0][i] + ky * fsij[1][i] + kz * fsij[2][i];
-            k3 = kx * fsij[2][i] + ky * fsij[4][i] + kz * fsij[5][i];
+            complex k1 = kx * fsij[0][i] + ky * fsij[1][i] + kz * fsij[2][i];
+            complex k3 = kx * fsij[2][i] + ky * fsij[4][i] + kz * fsij[5][i];
             fsij[0][i] = fsij[0][i] - 2.0 * fx * k1 +
                 0.5 * (fx * kx * s1 + s2);
             fsij[1][i] = fsij[2][i] - fx * k3 - fz * k1 +
                 0.5 * fx * kz * s1;
         // use s22 and s23
         } else {
-            k2 = kx * fsij[1][i] + ky * fsij[3][i] + kz * fsij[4][i];
-            k3 = kx * fsij[2][i] + ky * fsij[4][i] + kz * fsij[5][i];
+            complex k2 = kx * fsij[1][i] + ky * fsij[3][i] + kz * fsij[4][i];
+            complex k3 = kx * fsij[2][i] + ky * fsij[4][i] + kz * fsij[5][i];
             fsij[0][i] = fsij[3][i] - 2.0 * fy * k2 +
                 0.5 * (fy * ky * s1 + s2);
             fsij[1][i] = fsij[4][i] - fy * k3 - fz * k2 +
