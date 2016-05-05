@@ -43,6 +43,7 @@ H5_DPSI_PS_NAME	io.h	/^#define     H5_DPSI_PS_NAME /;"	d
 H5_DPSI_SMRY_NAME	io.h	/^#define     H5_DPSI_SMRY_NAME /;"	d
 H5_GRIDPOINTS_INTERNAL_NAME	io.h	/^#define     H5_GRIDPOINTS_INTERNAL_NAME /;"	d
 H5_GRIDPOINTS_OUTPUT_NAME	io.h	/^#define     H5_GRIDPOINTS_OUTPUT_NAME /;"	d
+H5_GW_PS_NAME	io.h	/^#define     H5_GW_PS_NAME /;"	d
 H5_INFLATON_MASS_NAME	io.h	/^#define     H5_INFLATON_MASS_NAME /;"	d
 H5_MASS_NAME	io.h	/^#define     H5_MASS_NAME /;"	d
 H5_MAX_DT_HUBBLE_FRACTION_NAME	io.h	/^#define     H5_MAX_DT_HUBBLE_FRACTION_NAME /;"	d
@@ -64,6 +65,7 @@ H5_RUNTIME_FFTW_NAME	io.h	/^#define     H5_RUNTIME_FFTW_NAME /;"	d
 H5_RUNTIME_FILTER_NAME	io.h	/^#define     H5_RUNTIME_FILTER_NAME /;"	d
 H5_RUNTIME_SMRY_NAME	io.h	/^#define     H5_RUNTIME_SMRY_NAME /;"	d
 H5_RUNTIME_STEPPER_NAME	io.h	/^#define     H5_RUNTIME_STEPPER_NAME /;"	d
+H5_RUNTIME_STT_NAME	io.h	/^#define     H5_RUNTIME_STT_NAME /;"	d
 H5_RUNTIME_TOTAL_NAME	io.h	/^#define     H5_RUNTIME_TOTAL_NAME /;"	d
 H5_RUNTIME_WRITEOUT_NAME	io.h	/^#define     H5_RUNTIME_WRITEOUT_NAME /;"	d
 H5_SEED_NAME	io.h	/^#define     H5_SEED_NAME /;"	d
@@ -356,8 +358,6 @@ c9	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;
 calls_rhs	main.h	/^    size_t calls_rhs;$/;"	m	struct:monitor
 calls_rhs	main_template.h	/^    size_t calls_rhs;$/;"	m	struct:monitor
 check_simd_alignment	setup.c	/^static void check_simd_alignment()$/;"	f	file:
-compute_cstr	toolbox.h	/^    uint8_t compute_cstr;$/;"	m	struct:evolution_flags
-compute_pow_spec	toolbox.h	/^    uint8_t compute_pow_spec;$/;"	m	struct:evolution_flags
 contains_nan	toolbox.c	/^static void contains_nan(const double *f, const size_t N)$/;"	f	file:
 contains_nanc	toolbox.c	/^static void contains_nanc(const complex *f, const size_t N)$/;"	f	file:
 copy_buffer_time	main.h	/^    double copy_buffer_time; \/\/\/< Total wall clock time for copying buffers$/;"	m	struct:monitor
@@ -486,6 +486,7 @@ grad	main.h	/^    double  *grad; \/\/\/< The _squared_ gradient of $$\\phi$$ in 
 grad	main_template.h	/^    double  *grad; \/\/\/< The _squared_ gradient of $$\\phi$$ in real space$/;"	m	struct:temporary
 grid_dimension	main.h	/^struct grid_dimension$/;"	s
 grid_dimension	main_template.h	/^struct grid_dimension$/;"	s
+gw	main.c	/^struct output gw;$/;"	v	typeref:struct:output
 h5_close	io.c	/^void h5_close()$/;"	f
 h5_create_dset	io.c	/^static void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,$/;"	f	file:
 h5_create_empty_by_path	io.c	/^void h5_create_empty_by_path()$/;"	f
@@ -537,10 +538,11 @@ mean	toolbox.c	/^static double mean(const double *f, const size_t N)$/;"	f	file:
 mean_var_min_max	toolbox.c	/^static void mean_var_min_max(const double *f, double *smry)$/;"	f	file:
 minscale	dopri853.c	/^    double minscale; \/\/\/< Minimal permissible rescaling of the time step size$/;"	m	struct:dopri853_control	file:
 mk_bunch_davies	setup.c	/^static void mk_bunch_davies(double *f, const double H, const double homo,$/;"	f	file:
-mk_constraints	toolbox.c	/^static void mk_constraints()$/;"	f	file:
+mk_constraints	toolbox.c	/^static void mk_constraints(double *f)$/;"	f	file:
 mk_fftw_plans	setup.c	/^static void mk_fftw_plans()$/;"	f	file:
 mk_filter_mask	setup.c	/^static void mk_filter_mask()$/;"	f	file:
 mk_gradient_squared_and_laplacian	toolbox.c	/^void mk_gradient_squared_and_laplacian(double *in)$/;"	f
+mk_gw_spectrum	toolbox.c	/^static void mk_gw_spectrum(double *f)$/;"	f	file:
 mk_initial_conditions	setup.c	/^static void mk_initial_conditions()$/;"	f	file:
 mk_initial_psi	setup.c	/^static void mk_initial_psi()$/;"	f	file:
 mk_k_grid	setup.c	/^static void mk_k_grid()$/;"	f	file:
@@ -548,7 +550,7 @@ mk_power_spectrum	toolbox.c	/^static void mk_power_spectrum(const fftw_complex *
 mk_psi	toolbox.c	/^void mk_psi(double *f)$/;"	f
 mk_rho	toolbox.c	/^void mk_rho(const double *f)$/;"	f
 mk_rhs	toolbox.c	/^void mk_rhs(const double t, double *f, double *result)$/;"	f
-mk_sij	toolbox.c	/^static void mk_sij(const double *f, complex **fsij)$/;"	f	file:
+mk_stt	toolbox.c	/^static void mk_stt(const double *f, complex **fsij)$/;"	f	file:
 mk_summary	toolbox.c	/^void mk_summary()$/;"	f
 mk_x_grid	setup.c	/^static void mk_x_grid(double *grid)$/;"	f	file:
 mon	main.c	/^struct monitor mon;$/;"	v	typeref:struct:monitor
@@ -563,6 +565,7 @@ outN	main_template.h	/^    size_t outN; \/\/\/< number of output points in this 
 outN	main_template.h	/^    size_t outN; \/\/\/< number of spatial gridpoints for output$/;"	m	struct:parameters
 output	main.h	/^struct output$/;"	s
 output	main_template.h	/^struct output$/;"	s
+output	toolbox.h	/^    uint8_t output;$/;"	m	struct:evolution_flags
 p_bw	main.c	/^fftw_plan p_bw;$/;"	v
 p_fw	main.c	/^fftw_plan p_fw;$/;"	v
 parameters	main.h	/^struct parameters$/;"	s
@@ -610,6 +613,8 @@ sq	main.h	/^    double *sq; \/\/\/< The sqaure of the k vector (of all modes)$/;
 sq	main_template.h	/^    double *sq; \/\/\/< The sqaure of the k vector (of all modes)$/;"	m	struct:k_grid
 stride	main.h	/^    size_t stride; \/\/\/< strides for output$/;"	m	struct:grid_dimension
 stride	main_template.h	/^    size_t stride; \/\/\/< strides for output$/;"	m	struct:grid_dimension
+stt_time	main.h	/^    double stt_time; \/\/\/< Total wall clock time for computing S_{ij}^{TT}$/;"	m	struct:monitor
+stt_time	main_template.h	/^    double stt_time; \/\/\/< Total wall clock time for computing S_{ij}^{TT}$/;"	m	struct:monitor
 success	dopri853.c	/^static int success(const double err, double *dt)$/;"	f	file:
 t	dopri853.c	/^    double t; \/\/\/< The current time$/;"	m	struct:dopri853_control	file:
 t	main.h	/^    double t;  \/\/\/< current time (constantly updated during simulation)$/;"	m	struct:timing
