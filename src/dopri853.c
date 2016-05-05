@@ -236,7 +236,6 @@ static void initialize_dopri853()
  */
 static int perform_step(const double dt_try)
 {
-    const size_t Ntot = pars.Ntot;
     double dt = dt_try;
     for ( ; ; ) {
         try_step(dt);
@@ -259,7 +258,7 @@ static int perform_step(const double dt_try)
     evo_flags.output = 0;
 
     #pragma omp parallel for
-    for (size_t i = 0; i < Ntot; ++i) {
+    for (size_t i = 0; i < pars.Ntot; ++i) {
         field[i] = field_new[i];
         dfield[i] = dfield_new[i];
     }
@@ -428,23 +427,21 @@ static void try_step(const double dt)
  */
 static double error(const double dt)
 {
-    const size_t Ntot = pars.Ntot;
-    double err = 0.0, err2 = 0.0, sk, deno;
-
-    double tmp;
-    #pragma omp parallel for private(sk, tmp) reduction(+: err, err2)
-    for (size_t i = 0; i < Ntot; ++i) {
-        sk = dp.a_tol + dp.r_tol * MAX(fabs(field[i]), fabs(field_new[i]));
-        tmp = dpv.yerr[i] / sk;
+    double err = 0.0, err2 = 0.0;
+    #pragma omp parallel for reduction(+: err, err2)
+    for (size_t i = 0; i < pars.Ntot; ++i) {
+        double sk = dp.a_tol + dp.r_tol *
+            MAX(fabs(field[i]), fabs(field_new[i]));
+        double tmp = dpv.yerr[i] / sk;
         err2 += tmp * tmp;
         tmp = dpv.yerr2[i] / sk;
         err += tmp * tmp;
     }
-    deno = err + 0.01 * err2;
+    double deno = err + 0.01 * err2;
     if (deno <= 0.0) {
         deno = 1.0;
     }
-    return dt * err * sqrt(1.0 / (Ntot * deno));
+    return dt * err * sqrt(1.0 / (pars.Ntot * deno));
 }
 
 /**
@@ -466,23 +463,17 @@ static double error(const double dt)
  */
 static int success(const double err, double *dt)
 {
-    const double beta = dp.beta;
-    const double alpha = dp.alpha;
-    const double safe = dp.safe;
-    const double minscale = dp.minscale;
-    const double maxscale = dp.maxscale;
     double scale;
-
     if (err <= 1.0) {
         if (err == 0.0) {
-            scale = maxscale;
+            scale = dp.maxscale;
         } else {
-            scale = safe * pow(err, -alpha) * pow(dp.err_old, beta);
-            if (scale < minscale) {
-                scale = minscale;
+            scale = dp.safe * pow(err, - dp.alpha) * pow(dp.err_old, dp.beta);
+            if (scale < dp.minscale) {
+                scale = dp.minscale;
             }
-            if (scale > maxscale) {
-                scale = maxscale;
+            if (scale > dp.maxscale) {
+                scale = dp.maxscale;
             }
         }
         if (dp.reject) {
@@ -496,12 +487,11 @@ static int success(const double err, double *dt)
             dp.dt_next = minstep;
         }
         #endif
-
         dp.err_old = MAX(err, 1.0e-4);
         dp.reject = 0;
         return 1;
     } else {
-        scale = MAX(safe * pow(err, -alpha), minscale);
+        scale = MAX(dp.safe * pow(err, - dp.alpha), dp.minscale);
         (*dt) *= scale;
         dp.reject = 1;
         return 0;
@@ -517,7 +507,6 @@ static int success(const double err, double *dt)
 static void allocate_dopri853_values()
 {
     const size_t Ntot = pars.Ntot;
-
     dpv.k2 = fftw_malloc(Ntot * sizeof *dpv.k2);
     dpv.k3 = fftw_malloc(Ntot * sizeof *dpv.k3);
     dpv.k4 = fftw_malloc(Ntot * sizeof *dpv.k4);
@@ -528,10 +517,8 @@ static void allocate_dopri853_values()
     dpv.k9 = fftw_malloc(Ntot * sizeof *dpv.k9);
     dpv.k10 = fftw_malloc(Ntot * sizeof *dpv.k10);
     dpv.k_tmp = fftw_malloc(Ntot * sizeof *dpv.k_tmp);
-
     dpv.yerr = fftw_malloc(Ntot * sizeof *dpv.yerr);
     dpv.yerr2 = fftw_malloc(Ntot * sizeof *dpv.yerr2);
-
     if (!(dpv.k2 && dpv.k3 && dpv.k4 && dpv.k5 && dpv.k6 && dpv.k7 && dpv.k8 &&
           dpv.k9 && dpv.k10 && dpv.k_tmp && dpv.yerr && dpv.yerr2)) {
         fputs("Allocating memory failed.\n", stderr);
@@ -551,9 +538,6 @@ static void allocate_dopri853_values()
         dpv.k10[i] = 0.0;
         dpv.yerr[i] = 0.0;
         dpv.yerr2[i] = 0.0;
-    }
-    #pragma omp parallel for
-    for (size_t i = 0; i < Ntot; ++i) {
         dpv.k_tmp[i] = 0.0;
     }
     INFO(puts("Allocated memory for dopri853 variables.\n"));
