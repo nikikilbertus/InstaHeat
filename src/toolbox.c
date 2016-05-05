@@ -290,6 +290,7 @@ void mk_rho(const double *f)
  */
 static void mk_sij(const double *f, complex **fsij)
 {
+    TIME(mon.stt_time -= get_wall_time());
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
     const size_t Mx = pars.x.M;
@@ -315,10 +316,12 @@ static void mk_sij(const double *f, complex **fsij)
         sij[4][i] = tmp.yphi[i] * tmp.zphi[i];
         sij[5][i] = tmp.zphi[i] * tmp.zphi[i] + gphi;
     }
+    TIME(mon.fftw_time_exe -= get_wall_time());
     for (size_t i = 0; i < len; ++i) {
         fftw_execute_dft_r2c(p_fw, sij[i], fsij[i]);
         fftw_free(sij[i]);
     }
+    TIME(mon.fftw_time_exe += get_wall_time());
     free(sij);
 
     size_t osx, osy, id;
@@ -376,6 +379,7 @@ static void mk_sij(const double *f, complex **fsij)
     }
     fsij[0][0] = 0.0;
     fsij[1][0] = 0.0;
+    TIME(mon.stt_time += get_wall_time());
 }
 
 /**
@@ -587,11 +591,11 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
  */
 static void apply_filter_real(double *inout)
 {
+    TIME(mon.filter_time -= get_wall_time());
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
     const size_t N3 = 3 * N;
 
-    TIME(mon.filter_time -= get_wall_time());
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, inout, tmp.phic);
     fftw_execute_dft_r2c(p_fw, inout + N, tmp.xphic);
