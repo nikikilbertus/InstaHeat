@@ -61,7 +61,6 @@ void mk_rhs(const double t, double *f, double *result)
     mon.calls_rhs += 1;
     const size_t N = pars.N;
     const size_t Next = pars.Next;
-    const size_t M = pars.M;
     const size_t N2 = 2 * N;
     const size_t N3 = 3 * N;
     const size_t Nh1 = 4 * N;
@@ -113,14 +112,14 @@ void mk_rhs(const double t, double *f, double *result)
     const size_t len = 6;
     complex **stt = malloc(len * sizeof *stt);
     for (size_t i = 0; i < len; ++i) {
-        stt[i] = fftw_malloc(M * sizeof *stt[i]);
+        stt[i] = fftw_malloc(pars.M * sizeof *stt[i]);
     }
     mk_stt(f, stt);
 
     size_t i1, i2;
     double t1, t2;
     #pragma omp parallel for private(i1, i2, t1, t2)
-    for (size_t i = 0; i < M; ++i) {
+    for (size_t i = 0; i < pars.M; ++i) {
         i1 = 2 * i;
         i2 = i1 + 1;
         t1 = - (2.0 * pressure_mean + kvec.sq[i] / a);
