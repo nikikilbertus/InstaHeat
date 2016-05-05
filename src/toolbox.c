@@ -17,7 +17,7 @@
  */
 
 static void assemble_gradient_squared();
-static void mk_sij(const double *f, complex **fsij);
+static void mk_stt(const double *f, complex **fsij);
 static double potential(const double f);
 static double potential_prime(const double f);
 #ifdef OUTPUT_CONSTRAINTS
@@ -114,7 +114,7 @@ void mk_rhs(const double t, double *f, double *result)
     for (size_t i = 0; i < len; ++i) {
         stt[i] = fftw_malloc(M * sizeof *stt[i]);
     }
-    mk_sij(f, stt);
+    mk_stt(f, stt);
 
     size_t i1, i2;
     double t1, t2;
@@ -288,7 +288,7 @@ void mk_rho(const double *f)
  *
  * @see TODO[link thesis and papers]
  */
-static void mk_sij(const double *f, complex **fsij)
+static void mk_stt(const double *f, complex **fsij)
 {
     TIME(mon.stt_time -= get_wall_time());
     const size_t N = pars.N;
