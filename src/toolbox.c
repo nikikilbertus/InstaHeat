@@ -65,7 +65,9 @@ void mk_rhs(const double t, double *f, double *result)
     const size_t N2 = 2 * N;
     const size_t N3 = 3 * N;
     const size_t Nh1 = 4 * N;
-    const size_t Ndh1 = Nh1 + 2 * Next;
+    const size_t Nh2 = Nh1 + Next;
+    const size_t Ndh1 = Nh2 + Next;
+    const size_t Ndh2 = Ndh1 + Next;
     const double a = f[pars.Ntot - 1];
     const double a2 = a * a;
 
@@ -113,73 +115,23 @@ void mk_rhs(const double t, double *f, double *result)
         stt[i] = fftw_malloc(M * sizeof *stt[i]);
     }
     mk_sij(f, stt);
-    #pragma omp parallel for
+
+    size_t i1, i2;
+    double t1, t2;
+    #pragma omp parallel for private(i1, i2, t1, t2)
     for (size_t i = 0; i < M; ++i) {
-    }
-
-    const size_t Mx = pars.x.M;
-    const size_t My = pars.y.M;
-    const size_t Mz = pars.z.M;
-
-    // compute second derivatives of hij's
-    size_t osx, osy, id, idx;
-    #pragma omp parallel for private(osx, osy, id, idx)
-    for (size_t i = 0; i < Mx; ++i) {
-        osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j) {
-            osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k) {
-                idx = osy + k;
-                id = 2 * idx;
-
-                // use h11 and h12
-                if (k != 0) {
-                    result[Ndh1 + id] = - (2.0 * pressure_mean +
-                        kvec.sq[idx] / a) * f[Nh1 + id] - h3 * f[Ndh1 + id] +
-                        2.0 / a2 * creal(stt[0][idx]);
-                    result[Ndh2 + id] = - (2.0 * pressure_mean +
-                        kvec.sq[idx] / a) * f[Nh2 + id] - h3 * f[Ndh2 + id] +
-                        2.0 / a2 * creal(stt[1][idx]);
-                    id += 1;
-                    result[Ndh1 + id] = - (2.0 * pressure_mean +
-                        kvec.sq[idx] / a) * f[Nh1 + id] - h3 * f[Ndh1 + id] +
-                        2.0 / a2 * cimag(stt[0][idx]);
-                    result[Ndh2 + id] = - (2.0 * pressure_mean +
-                        kvec.sq[idx] / a) * f[Nh2 + id] - h3 * f[Ndh2 + id] +
-                        2.0 / a2 * cimag(stt[1][idx]);
-                // use h11 and h13
-                } else if (j != 0) {
-                    result[Ndh1 + id] = - (2.0 * pressure_mean +
-                        kvec.sq[idx] / a) * f[Nh1 + id] - h3 * f[Ndh1 + id] +
-                        2.0 / a2 * creal(stt[0][idx]);
-                    result[Ndh2 + id] = - (2.0 * pressure_mean +
-                        kvec.sq[idx] / a) * f[Nh2 + id] - h3 * f[Ndh2 + id] +
-                        2.0 / a2 * creal(stt[2][idx]);
-                    id += 1;
-                    result[Ndh1 + id] = - (2.0 * pressure_mean +
-                        kvec.sq[idx] / a) * f[Nh1 + id] - h3 * f[Ndh1 + id] +
-                        2.0 / a2 * cimag(stt[0][idx]);
-                    result[Ndh2 + id] = - (2.0 * pressure_mean +
-                        kvec.sq[idx] / a) * f[Nh2 + id] - h3 * f[Ndh2 + id] +
-                        2.0 / a2 * cimag(stt[2][idx]);
-                // use h22 and h23
-                } else {
-                    result[Ndh1 + id] = - (2.0 * pressure_mean +
-                        kvec.sq[idx] / a) * f[Nh1 + id] - h3 * f[Ndh1 + id] +
-                        2.0 / a2 * creal(stt[3][idx]);
-                    result[Ndh2 + id] = - (2.0 * pressure_mean +
-                        kvec.sq[idx] / a) * f[Nh2 + id] - h3 * f[Ndh2 + id] +
-                        2.0 / a2 * creal(stt[4][idx]);
-                    id += 1;
-                    result[Ndh1 + id] = - (2.0 * pressure_mean +
-                        kvec.sq[idx] / a) * f[Nh1 + id] - h3 * f[Ndh1 + id] +
-                        2.0 / a2 * cimag(stt[3][idx]);
-                    result[Ndh2 + id] = - (2.0 * pressure_mean +
-                        kvec.sq[idx] / a) * f[Nh2 + id] - h3 * f[Ndh2 + id] +
-                        2.0 / a2 * cimag(stt[4][idx]);
-                }
-            }
-        }
+        i1 = 2 * i;
+        i2 = i1 + 1;
+        t1 = - (2.0 * pressure_mean + kvec.sq[i] / a);
+        t2 = 2.0 / a;
+        result[Ndh1 + i1] = t1 * f[Nh1 + i1] - h3 * f[Ndh1 + i1] +
+                            t2 * creal(stt[0][i]);
+        result[Ndh1 + i2] = t1 * f[Nh1 + i2] - h3 * f[Ndh1 + i2] +
+                            t2 * cimag(stt[0][i]);
+        result[Ndh2 + i1] = t1 * f[Nh2 + i1] - h3 * f[Ndh2 + i1] +
+                            t2 * creal(stt[1][i]);
+        result[Ndh2 + i2] = t1 * f[Nh2 + i2] - h3 * f[Ndh2 + i2] +
+                            t2 * cimag(stt[1][i]);
     }
 
     for (size_t i = 0; i < len; ++i) {
