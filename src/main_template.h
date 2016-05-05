@@ -297,6 +297,7 @@ extern struct output psi_ps;
 extern struct output rho_ps;
 #define NUMBER_CONSTRAINTS  (4) ///< Hamiltonian and momentum: l2 and l\infty
 extern struct output cstr;
+extern struct output gw;
 extern double *filter;
 extern struct k_grid kvec;
 extern struct temporary tmp;
