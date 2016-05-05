@@ -1,5 +1,5 @@
-% name = 'scaledbunch/64_5e-3_2e5_m4';
-interp = false;
+name = 'testgwnew';
+interp = true;
 newoutput = true;
 amax = -1;
 
