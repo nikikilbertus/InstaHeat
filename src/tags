@@ -455,7 +455,7 @@ er8	dopri853.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_c
 er9	dopri853.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
 err_old	dopri853.c	/^    double err_old; \/\/\/< The previous error (on the last time slice)$/;"	m	struct:dopri853_control	file:
 error	dopri853.c	/^static double error(const double dt)$/;"	f	file:
-evo_flags	toolbox.c	/^struct evolution_flags evo_flags = {.filter = 0,$/;"	v	typeref:struct:evolution_flags
+evo_flags	toolbox.c	/^struct evolution_flags evo_flags = {.filter = 0, .output = 0};$/;"	v	typeref:struct:evolution_flags
 evolution_flags	toolbox.h	/^struct evolution_flags$/;"	s
 f	main.h	/^    double  *f; \/\/\/< Various purposes (real space)$/;"	m	struct:temporary
 f	main_template.h	/^    double  *f; \/\/\/< Various purposes (real space)$/;"	m	struct:temporary
@@ -514,20 +514,20 @@ initialize_rng	setup.c	/^static void initialize_rng()$/;"	f	file:
 initialize_threading	setup.c	/^static void initialize_threading()$/;"	f	file:
 k	main.h	/^    double k; \/\/\/< used to compute k vectors: k = 2 pi I \/ (b - a)$/;"	m	struct:grid_dimension
 k	main_template.h	/^    double k; \/\/\/< used to compute k vectors: k = 2 pi I \/ (b - a)$/;"	m	struct:grid_dimension
-k10	dopri853.c	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
-k2	dopri853.c	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k10	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k2	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
 k2	main.h	/^    double k2; \/\/\/< used to compute k^2: k2 = k*k = -4 pi^2 \/ L^2$/;"	m	struct:grid_dimension
 k2	main_template.h	/^    double k2; \/\/\/< used to compute k^2: k2 = k*k = -4 pi^2 \/ L^2$/;"	m	struct:grid_dimension
-k3	dopri853.c	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
-k4	dopri853.c	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
-k5	dopri853.c	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
-k6	dopri853.c	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
-k7	dopri853.c	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
-k8	dopri853.c	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
-k9	dopri853.c	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k3	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k4	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k5	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k6	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k7	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k8	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k9	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
 k_grid	main.h	/^struct k_grid$/;"	s
 k_grid	main_template.h	/^struct k_grid$/;"	s
-k_tmp	dopri853.c	/^        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k_tmp	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
 kvec	main.c	/^struct k_grid kvec;$/;"	v	typeref:struct:k_grid
 lap	main.h	/^    double  *lap; \/\/\/< The Laplacian of $$\\phi$$ in real space$/;"	m	struct:temporary
 lap	main_template.h	/^    double  *lap; \/\/\/< The Laplacian of $$\\phi$$ in real space$/;"	m	struct:temporary
@@ -609,8 +609,8 @@ skip	main.h	/^    size_t skip;       \/\/\/< timesteps to skip in between write 
 skip	main_template.h	/^    size_t skip;       \/\/\/< timesteps to skip in between write outs$/;"	m	struct:file_parameters
 smry_time	main.h	/^    double smry_time; \/\/\/< Total wall clock time for computing summaries$/;"	m	struct:monitor
 smry_time	main_template.h	/^    double smry_time; \/\/\/< Total wall clock time for computing summaries$/;"	m	struct:monitor
-sq	main.h	/^    double *sq; \/\/\/< The sqaure of the k vector (of all modes)$/;"	m	struct:k_grid
-sq	main_template.h	/^    double *sq; \/\/\/< The sqaure of the k vector (of all modes)$/;"	m	struct:k_grid
+sq	main.h	/^    double *sq; \/\/\/< The sqaure of the k vector$/;"	m	struct:k_grid
+sq	main_template.h	/^    double *sq; \/\/\/< The sqaure of the k vector$/;"	m	struct:k_grid
 stride	main.h	/^    size_t stride; \/\/\/< strides for output$/;"	m	struct:grid_dimension
 stride	main_template.h	/^    size_t stride; \/\/\/< strides for output$/;"	m	struct:grid_dimension
 stt_time	main.h	/^    double stt_time; \/\/\/< Total wall clock time for computing S_{ij}^{TT}$/;"	m	struct:monitor
@@ -649,28 +649,34 @@ tmp	main_template.h	/^    double *tmp;    \/\/\/< the output values on the curre
 try_step	dopri853.c	/^static void try_step(const double dt)$/;"	f	file:
 variance	toolbox.c	/^static double variance(const double mean, const double *f, const size_t N)$/;"	f	file:
 wrapped_gaussian	setup.c	/^static double wrapped_gaussian(const double x, const double y, const double z)$/;"	f	file:
-x	main.h	/^    double *x; \/\/\/< The x direction of the k vector (of al modes)$/;"	m	struct:k_grid
+x	main.h	/^    double *x; \/\/\/< The x direction of the k vector (with zeros at N\/2)$/;"	m	struct:k_grid
 x	main.h	/^    struct grid_dimension x; \/\/\/< specification of the x direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
-x	main_template.h	/^    double *x; \/\/\/< The x direction of the k vector (of al modes)$/;"	m	struct:k_grid
+x	main_template.h	/^    double *x; \/\/\/< The x direction of the k vector (with zeros at N\/2)$/;"	m	struct:k_grid
 x	main_template.h	/^    struct grid_dimension x; \/\/\/< specification of the x direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
+xf	main.h	/^    double *xf; \/\/\/< The x direction of the k vector$/;"	m	struct:k_grid
+xf	main_template.h	/^    double *xf; \/\/\/< The x direction of the k vector$/;"	m	struct:k_grid
 xphi	main.h	/^    double  *xphi; \/\/\/< The x derivative of $$\\phi$$ in real space$/;"	m	struct:temporary
 xphi	main_template.h	/^    double  *xphi; \/\/\/< The x derivative of $$\\phi$$ in real space$/;"	m	struct:temporary
 xphic	main.h	/^    complex *xphic; \/\/\/< The x derivative of $$\\phi$$ in Fourier space$/;"	m	struct:temporary
 xphic	main_template.h	/^    complex *xphic; \/\/\/< The x derivative of $$\\phi$$ in Fourier space$/;"	m	struct:temporary
-y	main.h	/^    double *y; \/\/\/< The y direction of the k vector (of al modes)$/;"	m	struct:k_grid
+y	main.h	/^    double *y; \/\/\/< The y direction of the k vector (with zeros at N\/2)$/;"	m	struct:k_grid
 y	main.h	/^    struct grid_dimension y; \/\/\/< specification of the y direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
-y	main_template.h	/^    double *y; \/\/\/< The y direction of the k vector (of al modes)$/;"	m	struct:k_grid
+y	main_template.h	/^    double *y; \/\/\/< The y direction of the k vector (with zeros at N\/2)$/;"	m	struct:k_grid
 y	main_template.h	/^    struct grid_dimension y; \/\/\/< specification of the y direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
-yerr	dopri853.c	/^        double *yerr, *yerr2;$/;"	m	struct:dopri853_values	file:
-yerr2	dopri853.c	/^        double *yerr, *yerr2;$/;"	m	struct:dopri853_values	file:
+yerr	dopri853.c	/^    double *yerr, *yerr2;$/;"	m	struct:dopri853_values	file:
+yerr2	dopri853.c	/^    double *yerr, *yerr2;$/;"	m	struct:dopri853_values	file:
+yf	main.h	/^    double *yf; \/\/\/< The y direction of the k vector$/;"	m	struct:k_grid
+yf	main_template.h	/^    double *yf; \/\/\/< The y direction of the k vector$/;"	m	struct:k_grid
 yphi	main.h	/^    double  *yphi; \/\/\/< The y derivative of $$\\phi$$ in real space$/;"	m	struct:temporary
 yphi	main_template.h	/^    double  *yphi; \/\/\/< The y derivative of $$\\phi$$ in real space$/;"	m	struct:temporary
 yphic	main.h	/^    complex *yphic; \/\/\/< The y derivative of $$\\phi$$ in Fourier space$/;"	m	struct:temporary
 yphic	main_template.h	/^    complex *yphic; \/\/\/< The y derivative of $$\\phi$$ in Fourier space$/;"	m	struct:temporary
-z	main.h	/^    double *z; \/\/\/< The z direction of the k vector (of al modes)$/;"	m	struct:k_grid
+z	main.h	/^    double *z; \/\/\/< The z direction of the k vector (with zeros at N\/2)$/;"	m	struct:k_grid
 z	main.h	/^    struct grid_dimension z; \/\/\/< specification of the z direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
-z	main_template.h	/^    double *z; \/\/\/< The z direction of the k vector (of al modes)$/;"	m	struct:k_grid
+z	main_template.h	/^    double *z; \/\/\/< The z direction of the k vector (with zeros at N\/2)$/;"	m	struct:k_grid
 z	main_template.h	/^    struct grid_dimension z; \/\/\/< specification of the z direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
+zf	main.h	/^    double *zf; \/\/\/< The z direction of the k vector$/;"	m	struct:k_grid
+zf	main_template.h	/^    double *zf; \/\/\/< The z direction of the k vector$/;"	m	struct:k_grid
 zphi	main.h	/^    double  *zphi; \/\/\/< The z derivative of $$\\phi$$ in real space$/;"	m	struct:temporary
 zphi	main_template.h	/^    double  *zphi; \/\/\/< The z derivative of $$\\phi$$ in real space$/;"	m	struct:temporary
 zphic	main.h	/^    complex *zphic; \/\/\/< The z derivative of $$\\phi$$ in Fourier space$/;"	m	struct:temporary
