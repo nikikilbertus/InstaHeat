@@ -754,8 +754,7 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
  */
 static complex box_muller()
 {
-    const double u1 = gsl_rng_uniform(rng);
-    const double u2 = gsl_rng_uniform(rng);
+    const double u1 = gsl_rng_uniform(rng), u2 = gsl_rng_uniform(rng);
     return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * I);
 }
 #endif
@@ -774,32 +773,25 @@ static complex box_muller()
  */
 static void initialize_from_internal_function()
 {
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const size_t N = pars.N;
-    size_t osx, osy;
-    double x, y, z;
+    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
     double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
     mk_x_grid(grid);
     const size_t Nmodes = 16;
-    double *theta = calloc(Nmodes, sizeof *theta);
-
     // random phases
+    double *theta = calloc(Nmodes, sizeof *theta);
     for (size_t i = 0; i < Nmodes; ++i) {
         theta[i] = TWOPI * gsl_rng_uniform(rng);
     }
-
     for (size_t i = 0; i < Nx; ++i) {
-        x = grid[i];
-        osx = i * Ny * Nz;
+        double x = grid[i];
+        size_t osx = i * Ny * Nz;
         for (size_t j = 0; j < Ny; ++j) {
-            y = grid[Nx + j];
-            osy = osx + j * Nz;
+            double y = grid[Nx + j];
+            size_t osy = osx + j * Nz;
             for (size_t k = 0; k < Nz; ++k) {
-                z = grid[Nx + Ny + k];
+                double z = grid[Nx + Ny + k];
                 field[osy + k] = phi_init(x, y, z, theta);
-                field[N + osy + k] = dphi_init(x, y, z, theta);
+                field[pars.N + osy + k] = dphi_init(x, y, z, theta);
             }
         }
     }
