@@ -315,7 +315,7 @@ static void mk_stt(const double *f, complex **fsij)
     complex t1, t2, s1, s2, k1, k2, k3;
     #pragma omp parallel for private(kx, ky, kz, fx, fy, fz, \
                                      t1, t2, s1, s2, k1, k2, k3)
-    for (size_t i = 1; i < M; ++i) {
+    for (size_t i = 1; i < pars.M; ++i) {
         kx = kvec.xf[i];
         ky = kvec.yf[i];
         kz = kvec.zf[i];
@@ -440,7 +440,7 @@ static void mk_gw_spectrum(double *f)
     double kx, ky, kz, k2, dh1r, dh1i, dh2r, dh2i, pow;
     #pragma omp parallel for private(idx, kx, ky, kz, k2, \
                                      dh1r, dh1i, dh2r, dh2i, pow)
-    for (size_t i = 1; i < M; ++i) {
+    for (size_t i = 1; i < pars.M; ++i) {
         kx = kvec.xf[i];
         ky = kvec.yf[i];
         kz = kvec.zf[i];
