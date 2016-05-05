@@ -299,6 +299,9 @@ static void allocate_external()
     kvec.x = fftw_malloc(M * sizeof *kvec.x);
     kvec.y = fftw_malloc(M * sizeof *kvec.y);
     kvec.z = fftw_malloc(M * sizeof *kvec.z);
+    kvec.xf = fftw_malloc(M * sizeof *kvec.xf);
+    kvec.yf = fftw_malloc(M * sizeof *kvec.yf);
+    kvec.zf = fftw_malloc(M * sizeof *kvec.zf);
     #ifdef ENABLE_FFT_FILTER
     filter = fftw_malloc(M * sizeof *filter);
     #endif
@@ -456,30 +459,38 @@ static void mk_k_grid()
 
                 if (i > Nx / 2) {
                     kvec.x[id] = pars.x.k * ((int)i - (int)Nx);
+                    kvec.xf[id] = kvec.x[id];
                     k2 += pars.x.k2 * (Nx - i) * (Nx - i);
                 } else if (2 * i == Nx) {
                     kvec.x[id] = 0.0;
+                    kvec.xf[id] = pars.x.k * i;
                     k2 += pars.x.k2 * i * i;
                 } else {
                     kvec.x[id] = pars.x.k * i;
+                    kvec.xf[id] = kvec.x[id];
                     k2 += pars.x.k2 * i * i;
                 }
 
                 if (j > Ny / 2) {
                     kvec.y[id] = pars.y.k * ((int)j - (int)Ny);
+                    kvec.yf[id] = kvec.y[id];
                     k2 += pars.y.k2 * (Ny - j) * (Ny - j);
                 } else if (2 * j == Ny) {
                     kvec.y[id] = 0.0;
+                    kvec.yf[id] = pars.y.k * j;
                     k2 += pars.y.k2 * j * j;
                 } else {
                     kvec.y[id] = pars.y.k * j;
+                    kvec.yf[id] = kvec.y[id];
                     k2 += pars.y.k2 * j * j;
                 }
 
                 if (2 * k == Nz) {
                     kvec.z[id] = 0.0;
+                    kvec.zf[id] = pars.z.k * k;
                 } else {
                     kvec.z[id] = pars.z.k * k;
+                    kvec.zf[id] = kvec.z[id];
                 }
                 kvec.sq[id] = k2;
             }
@@ -1137,6 +1148,9 @@ static void free_external()
     fftw_free(kvec.x);
     fftw_free(kvec.y);
     fftw_free(kvec.z);
+    fftw_free(kvec.xf);
+    fftw_free(kvec.yf);
+    fftw_free(kvec.zf);
     fftw_free(tmp.phic);
     fftw_free(tmp.xphic);
     fftw_free(tmp.yphic);

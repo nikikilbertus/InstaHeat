@@ -242,9 +242,12 @@ struct temporary
 struct k_grid
 {
     double *sq; ///< The sqaure of the k vector
-    double *x; ///< The x direction of the k vector
-    double *y; ///< The y direction of the k vector
-    double *z; ///< The z direction of the k vector
+    double *x; ///< The x direction of the k vector (with zeros at N/2)
+    double *y; ///< The y direction of the k vector (with zeros at N/2)
+    double *z; ///< The z direction of the k vector (with zeros at N/2)
+    double *xf; ///< The x direction of the k vector
+    double *yf; ///< The y direction of the k vector
+    double *zf; ///< The z direction of the k vector
 };
 
 /**

@@ -326,57 +326,49 @@ static void mk_stt(const double *f, complex **fsij)
     TIME(mon.fftw_time_exe += get_wall_time());
     free(sij);
 
-    size_t osx, osy, id;
+
     double kx, ky, kz, fx, fy, fz;
     complex t1, t2, s1, s2, k1, k2, k3;
-    // TODO: are extra zeros in kx, ky, kz an issue here?
-    #pragma omp parallel for private(osx, osy, id, kx, ky, kz, fx, fy, fz, \
+    #pragma omp parallel for private(kx, ky, kz, fx, fy, fz, \
                                      t1, t2, s1, s2, k1, k2, k3)
-    for (size_t i = 0; i < Mx; ++i) {
-        osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j) {
-            osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k) {
-                id = osy + k;
-                kx = kvec.x[id];
-                ky = kvec.y[id];
-                kz = kvec.z[id];
-                fx = kx / kvec.sq[id];
-                fy = ky / kvec.sq[id];
-                fz = kz / kvec.sq[id];
-                t1 = kx * fx * fsij[0][id] + 2.0 * kx * fy * fsij[1][id] +
-                     2.0 * kx * fz * fsij[2][id] + ky * fy * fsij[3][id] +
-                     2.0 * ky * fz * fsij[4][id] + kz * fz * fsij[5][id];
-                t2 = fsij[0][id] + fsij[3][id] + fsij[5][id];
-                s1 = t1 + t2;
-                s2 = t1 - t2;
+    for (size_t i = 1; i < M; ++i) {
+        kx = kvec.xf[i];
+        ky = kvec.yf[i];
+        kz = kvec.zf[i];
+        fx = kx / kvec.sq[i];
+        fy = ky / kvec.sq[i];
+        fz = kz / kvec.sq[i];
+        t1 = kx * fx * fsij[0][i] + 2.0 * kx * fy * fsij[1][i] +
+             2.0 * kx * fz * fsij[2][i] + ky * fy * fsij[3][i] +
+             2.0 * ky * fz * fsij[4][i] + kz * fz * fsij[5][i];
+        t2 = fsij[0][i] + fsij[3][i] + fsij[5][i];
+        s1 = t1 + t2;
+        s2 = t1 - t2;
 
-                // use s11 and s12
-                if (k != 0) {
-                    k1 = kx * fsij[0][id] + ky * fsij[1][id] + kz * fsij[2][id];
-                    k2 = kx * fsij[1][id] + ky * fsij[3][id] + kz * fsij[4][id];
-                    fsij[0][id] = fsij[0][id] - 2.0 * fx * k1 +
-                        0.5 * (fx * kx * s1 + s2);
-                    fsij[1][id] = fsij[1][id] - fx * k2 - fy * k1 +
-                        0.5 * fx * ky * s1;
-                // use s11 and s13
-                } else if (j != 0) {
-                    k1 = kx * fsij[0][id] + ky * fsij[1][id] + kz * fsij[2][id];
-                    k3 = kx * fsij[2][id] + ky * fsij[4][id] + kz * fsij[5][id];
-                    fsij[0][id] = fsij[0][id] - 2.0 * fx * k1 +
-                        0.5 * (fx * kx * s1 + s2);
-                    fsij[1][id] = fsij[2][id] - fx * k3 - fz * k1 +
-                        0.5 * fx * kz * s1;
-                // use s22 and s23
-                } else {
-                    k2 = kx * fsij[1][id] + ky * fsij[3][id] + kz * fsij[4][id];
-                    k3 = kx * fsij[2][id] + ky * fsij[4][id] + kz * fsij[5][id];
-                    fsij[0][id] = fsij[3][id] - 2.0 * fy * k2 +
-                        0.5 * (fy * ky * s1 + s2);
-                    fsij[1][id] = fsij[4][id] - fy * k3 - fz * k2 +
-                        0.5 * fy * kz * s1;
-                }
-            }
+        // use s11 and s12
+        if (kz > DBL_EPSILON) {
+            k1 = kx * fsij[0][i] + ky * fsij[1][i] + kz * fsij[2][i];
+            k2 = kx * fsij[1][i] + ky * fsij[3][i] + kz * fsij[4][i];
+            fsij[0][i] = fsij[0][i] - 2.0 * fx * k1 +
+                0.5 * (fx * kx * s1 + s2);
+            fsij[1][i] = fsij[1][i] - fx * k2 - fy * k1 +
+                0.5 * fx * ky * s1;
+        // use s11 and s13
+        } else if (ky > DBL_EPSILON) {
+            k1 = kx * fsij[0][i] + ky * fsij[1][i] + kz * fsij[2][i];
+            k3 = kx * fsij[2][i] + ky * fsij[4][i] + kz * fsij[5][i];
+            fsij[0][i] = fsij[0][i] - 2.0 * fx * k1 +
+                0.5 * (fx * kx * s1 + s2);
+            fsij[1][i] = fsij[2][i] - fx * k3 - fz * k1 +
+                0.5 * fx * kz * s1;
+        // use s22 and s23
+        } else {
+            k2 = kx * fsij[1][i] + ky * fsij[3][i] + kz * fsij[4][i];
+            k3 = kx * fsij[2][i] + ky * fsij[4][i] + kz * fsij[5][i];
+            fsij[0][i] = fsij[3][i] - 2.0 * fy * k2 +
+                0.5 * (fy * ky * s1 + s2);
+            fsij[1][i] = fsij[4][i] - fy * k3 - fz * k2 +
+                0.5 * fy * kz * s1;
         }
     }
     fsij[0][0] = 0.0;
@@ -477,9 +469,9 @@ static void mk_gw_spectrum(double *f)
             osy = osx + j * Mz;
             for (size_t k = 0; k < Mz; ++k) {
                 id = osy + k;
-                kx = kvec.x[id];
-                ky = kvec.y[id];
-                kz = kvec.z[id];
+                kx = kvec.xf[id];
+                ky = kvec.yf[id];
+                kz = kvec.zf[id];
                 k2 = kvec.sq[id];
                 dh1r = f[Ndh1 + 2 * id];
                 dh2r = f[Ndh2 + 2 * id];
@@ -502,7 +494,7 @@ static void mk_gw_spectrum(double *f)
                     pow = 2.0 * (dh1r * dh1r + dh1i * dh1i +
                                  dh2r * dh2r + dh2i * dh2i);
                 }
-                if (fabs(kz) > DBL_EPSILON) {
+                if (fabs(kvec.z[id]) > DBL_EPSILON) {
                     pow *= 2.0;
                 }
                 idx = (int)trunc(bins * sqrt(k2 / k2_max) - 1.0e-14);
