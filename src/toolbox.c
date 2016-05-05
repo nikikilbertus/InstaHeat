@@ -20,9 +20,9 @@ static void assemble_gradient_squared();
 static void mk_stt(const double *f, complex **fsij);
 static double potential(const double f);
 static double potential_prime(const double f);
-static void mk_gw_spectrum();
+static void mk_gw_spectrum(double *f);
 #ifdef OUTPUT_CONSTRAINTS
-static void mk_constraints();
+static void mk_constraints(double *f);
 #endif
 #ifdef OUTPUT_PS
 static void mk_power_spectrum(const fftw_complex *in, struct output out);
@@ -85,10 +85,10 @@ void mk_rhs(const double t, double *f, double *result)
         mk_power_spectrum(tmp.phic, rho_ps);
         #endif
         #ifdef OUTPUT_CONSTRAINTS
-        mk_constraints();
+        mk_constraints(f);
         #endif
         //TODO: is this correct use and position?
-        mk_gw_spectrum();
+        mk_gw_spectrum(f);
     }
 
 
@@ -435,7 +435,7 @@ static double potential_prime(const double f)
     return MASS * MASS * f;
 }
 
-static void mk_gw_spectrum()
+static void mk_gw_spectrum(double *f)
 {
     const size_t N = pars.N;
     const size_t Nx = pars.x.N;
@@ -472,10 +472,10 @@ static void mk_gw_spectrum()
                 ky = kvec.y[id];
                 kz = kvec.z[id];
                 k2 = kvec.sq[id];
-                dh1r = field[Ndh1 + 2 * id];
-                dh2r = field[Ndh2 + 2 * id];
-                dh1i = field[Ndh1 + 2 * id + 1];
-                dh2i = field[Ndh2 + 2 * id + 1];
+                dh1r = f[Ndh1 + 2 * id];
+                dh2r = f[Ndh2 + 2 * id];
+                dh1i = f[Ndh1 + 2 * id + 1];
+                dh2i = f[Ndh2 + 2 * id + 1];
 
                 // use h11 and h12
                 if (k != 0) {
@@ -511,20 +511,21 @@ static void mk_gw_spectrum()
  * give 0, if fulfilled exactly. Of these combinations save the l2 Norm as well
  * as the maximum asbolute value to `cstr.tmp` for output.
  *
+ * @param[in] f An array containing the fields
  * @note So far only the Hamiltonian constraint is implemented! (4/14/2016)
  */
-static void mk_constraints()
+static void mk_constraints(double *f)
 {
     TIME(mon.cstr_time -= get_wall_time());
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
     const size_t N3 = 3 * N;
-    const double a = field[pars.Ntot - 1];
+    const double a = f[pars.Ntot - 1];
     const double a2 = a * a;
     const double hubble = sqrt(rho_mean / 3.0);
     const double h3 = 3.0 * hubble;
-    const double phi_mean = mean(field, N);
-    const double dphi_mean = mean(field + N, N);
+    const double phi_mean = mean(f, N);
+    const double dphi_mean = mean(f + N, N);
     double ham, ham_l2 = 0.0, ham_max = 0.0;
     double mom, mom_l2 = 0.0, mom_max = 0.0;
     double tmp1;
@@ -532,9 +533,9 @@ static void mk_constraints()
     #pragma omp parallel for private(tmp1, ham, mom) \
         reduction(max: ham_max, mom_max) reduction(+: ham_l2, mom_l2)
     for (size_t i = 0; i < N; ++i) {
-        tmp1 = hubble * field[N2 + i] + field[N3 + i];
+        tmp1 = hubble * f[N2 + i] + f[N3 + i];
         ham = tmp.f[i] / a2 - h3 * tmp1 - 0.5 * (rho[i] - rho_mean);
-        mom = tmp1 - 0.5 * dphi_mean * (field[i] - phi_mean);
+        mom = tmp1 - 0.5 * dphi_mean * (f[i] - phi_mean);
         ham_l2 += ham * ham;
         mom_l2 += mom * mom;
         ham_max = MAX(ham_max, fabs(ham));
