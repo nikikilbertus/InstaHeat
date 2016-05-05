@@ -370,10 +370,7 @@ static void init_output(struct output *out, const size_t dim, const int mode)
  */
 static void mk_fftw_plans()
 {
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-
+    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
     TIME(mon.fftw_time_plan -= get_wall_time());
     switch (pars.dim) {
         case 1:
@@ -414,12 +411,10 @@ static void check_simd_alignment()
 
 static int get_simd_alignment_of(double *f)
 {
-    int fail = 0;
-    const size_t N = pars.N;
     const int ref = fftw_alignment_of(f);
-    int test;
+    int fail = 0;
     for (size_t i = 1; i < 4; ++i) {
-        test = fftw_alignment_of(f + i * N);
+        int test = fftw_alignment_of(f + i * pars.N);
         if (test != ref) {
             fail = 1;
             break;
@@ -444,23 +439,16 @@ static int get_simd_alignment_of(double *f)
  */
 static void mk_k_grid()
 {
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const size_t Mx = pars.x.M;
-    const size_t My = pars.y.M;
-    const size_t Mz = pars.z.M;
-
-    double k2;
-    size_t osx, osy, id;
-    #pragma omp parallel for private(osx, osy, id, k2)
+    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
+    const size_t Mx = pars.x.M, My = pars.y.M, Mz = pars.z.M;
+    #pragma omp parallel for
     for (size_t i = 0; i < Mx; ++i) {
-        osx = i * My * Mz;
+        size_t osx = i * My * Mz;
         for (size_t j = 0; j < My; ++j) {
-            osy = osx + j * Mz;
+            size_t osy = osx + j * Mz;
             for (size_t k = 0; k < Mz; ++k) {
-                id = osy + k;
-                k2 = pars.z.k2 * k * k;
+                size_t id = osy + k;
+                double k2 = pars.z.k2 * k * k;
 
                 if (i > Nx / 2) {
                     kvec.x[id] = pars.x.k * ((int)i - (int)Nx);
@@ -513,28 +501,20 @@ static void mk_k_grid()
  */
 static void mk_filter_mask()
 {
-    const size_t N = pars.N;
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const size_t Mx = pars.x.M;
-    const size_t My = pars.y.M;
-    const size_t Mz = pars.z.M;
-
-    double tmp;
-    size_t osx, osy;
-    #pragma omp parallel for private(osx, osy, tmp)
+    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
+    const size_t Mx = pars.x.M, My = pars.y.M, Mz = pars.z.M;
+    #pragma omp parallel for
     for (size_t i = 0; i < Mx; ++i) {
-        osx = i * My * Mz;
+        size_t osx = i * My * Mz;
         for (size_t j = 0; j < My; ++j) {
-            osy = osx + j * Mz;
+            size_t osy = osx + j * Mz;
             for (size_t k = 0; k < Mz; ++k) {
-                tmp = filter_window(2.0 *
-                    (i > Nx / 2 ? (int)Nx - (int)i : i) / (double) Nx);
+                double tmp = filter_window(2.0 *
+                    (i > Nx / 2 ? (int)Nx - (int)i : i) / (double)Nx);
                 tmp *= filter_window(2.0 *
-                    (j > Ny / 2 ? (int)Ny - (int)j : j) / (double) Ny);
-                tmp *= filter_window(2.0 * k / (double) Nz);
-                filter[osy + k] = tmp / (double) N;
+                    (j > Ny / 2 ? (int)Ny - (int)j : j) / (double)Ny);
+                tmp *= filter_window(2.0 * k / (double)Nz);
+                filter[osy + k] = tmp / pars.N;
             }
         }
     }
@@ -576,15 +556,13 @@ static double filter_window(const double x)
  */
 static void mk_initial_conditions()
 {
-    const size_t Ntot = pars.Ntot;
     #pragma omp parallel for
-    for (size_t i = 0; i < Ntot; ++i) {
+    for (size_t i = 0; i < pars.Ntot; ++i) {
         field[i] = 0.0;
         dfield[i] = 0.0;
         field_new[i] = 0.0;
         dfield_new[i] = 0.0;
     }
-
     #if INITIAL_CONDITIONS == IC_FROM_H5_FILE
     h5_read_timeslice();
     #elif defined(IC_FROM_DAT_FILE)
@@ -594,7 +572,6 @@ static void mk_initial_conditions()
     #elif INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
     initialize_from_internal_function();
     #endif
-
     t_out.tmp[0] = pars.t.ti;
     a_out.tmp[0] = field[pars.Ntot - 1];
     INFO(puts("Initialized fields on first time slice.\n"));
@@ -627,10 +604,8 @@ static void initialize_from_dat()
  */
 static void mk_initial_psi()
 {
-    const size_t N2 = 2 * pars.N;
-    const size_t N4 = 2 * N2;
     #pragma omp parallel for
-    for (size_t i = N2; i < N4; ++i) {
+    for (size_t i = 2 * pars.N; i < 4 * pars.N; ++i) {
         field[i] = 0.0;
     }
     mk_gradient_squared_and_laplacian(field);
@@ -660,9 +635,7 @@ static void mk_initial_psi()
  */
 static void initialize_from_bunch_davies()
 {
-    size_t Nx = pars.x.N;
-    size_t Ny = pars.y.N;
-    size_t Nz = pars.z.N;
+    size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
     if (pars.dim != 3) {
         fputs("Bunch Davies vacuum works only in three dimensions.\n", stderr);
         exit(EXIT_FAILURE);
@@ -678,7 +651,7 @@ static void initialize_from_bunch_davies()
         fputs("Bunch Davies vacuum works only for box size 10.0.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    // directly form DEFROST(v1.0), factor in dphi0 and H0 adjusts modes
+    // directly from DEFROST(v1.0), factor in dphi0 and H0 adjusts modes
     const double phi0 = 1.0093430384226378929425913902459;
     const double dphi0 = -MASS * 0.7137133070120812430962278466136;
     const double hubble = MASS * 0.5046715192113189464712956951230;
@@ -698,11 +671,7 @@ static void initialize_from_bunch_davies()
 static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma)
 {
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const size_t N = pars.N;
-    const size_t M = pars.M;
+    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
     const size_t nn = Nx / 2 + 1;
     const size_t os = 16;
     const size_t nos = Nx * os * os;
@@ -713,8 +682,8 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     // pspectre uses kcutpspectre = 2 * kcutdefrost (without square!)
     const double kcut2 = 0.25 * nn * nn * dk * dk;
     const double meff2 = MASS * MASS - 2.25 * H * H;
-    const double norm = 0.5 * INFLATON_MASS / (N * sqrt(TWOPI * pow(dk, 3))) *
-        (dkos / dxos);
+    const double norm = 0.5 * INFLATON_MASS /
+        (pars.N * sqrt(TWOPI * pow(dk, 3))) * (dkos / dxos);
 
     if (meff2 <= 0.0) {
         fputs("The effective mass turned out to be negative.\n", stderr);
@@ -722,35 +691,33 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     }
 
     double *ker = fftw_malloc(nos * sizeof *ker);
-    double kk;
-    #pragma omp parallel for private(kk)
+    #pragma omp parallel for
     for (size_t i = 0; i < nos; ++i) {
-        kk = (i + 0.5) * dkos;
+        double kk = (i + 0.5) * dkos;
         ker[i] = kk * pow(kk * kk + meff2, gamma) *
             exp(-kk * kk / kcut2);
     }
 
+    TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_plan p = fftw_plan_r2r_1d(nos, ker, ker, FFTW_RODFT10, FFTW_ESTIMATE);
     fftw_execute(p);
     fftw_destroy_plan(p);
+    TIME(mon.fftw_time_exe += get_wall_time());
 
     #pragma omp parallel for
     for (size_t i = 0; i < nos; ++i) {
         ker[i] *= norm / (i + 1);
     }
-
-    size_t osx, osy, l;
-    #pragma omp parallel for private(osx, osy, kk, l)
+    #pragma omp parallel for
     for (int i = 0; i < Nx; ++i) {
-        osx = i * Ny * Nz;
+        size_t osx = i * Ny * Nz;
         for (int j = 0; j < Ny; ++j) {
-            osy = osx + j * Nz;
+            size_t osy = osx + j * Nz;
             for (int k = 0; k < Nz; ++k) {
-                kk = sqrt((double)((i + 1 - nn) * (i + 1 - nn) +
-                                   (j + 1 - nn) * (j + 1 - nn) +
-                                   (k + 1 - nn) * (k + 1 - nn))) * os;
-                l = (size_t) floor(kk);
-
+                double kk = sqrt((double)((i + 1 - nn) * (i + 1 - nn) +
+                                          (j + 1 - nn) * (j + 1 - nn) +
+                                          (k + 1 - nn) * (k + 1 - nn))) * os;
+                size_t l = (size_t) floor(kk);
                 if (l > 0) {
                     f[osy + k] = ker[l - 1] + (kk - l) * (ker[l] - ker[l - 1]);
                 } else {
@@ -759,17 +726,19 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
             }
         }
     }
-
     fftw_free(ker);
+    TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, f, tmp.phic);
+    TIME(mon.fftw_time_exe += get_wall_time());
 
     #pragma omp parallel for
-    for (size_t i = 0; i < M; ++i) {
+    for (size_t i = 0; i < pars.M; ++i) {
         tmp.phic[i] *= box_muller();
     }
-
     tmp.phic[0] = homo;
+    TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_c2r(p_bw, tmp.phic, f);
+    TIME(mon.fftw_time_exe += get_wall_time());
 }
 
 /**
