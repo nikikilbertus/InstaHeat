@@ -339,7 +339,6 @@ static void mk_sij(const double *f, complex **fsij)
 {
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
-    const size_t M = pars.M;
     const size_t Mx = pars.x.M;
     const size_t My = pars.y.M;
     const size_t Mz = pars.z.M;
@@ -372,6 +371,7 @@ static void mk_sij(const double *f, complex **fsij)
     size_t osx, osy, id;
     double kx, ky, kz, fx, fy, fz;
     complex t1, t2, s1, s2, k1, k2, k3;
+    // TODO: are extra zeros in kx, ky, kz an issue here?
     #pragma omp parallel for private(osx, osy, id, kx, ky, kz, fx, fy, fz \
                                      t1, t2, s1, s2, k1, k2, k3)
     for (size_t i = 0; i < Mx; ++i) {
