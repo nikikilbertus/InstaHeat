@@ -287,6 +287,7 @@ static void allocate_external()
     #ifdef OUTPUT_RHO_PS
     init_output(&rho_ps, POWER_SPECTRUM_BINS, 1);
     #endif
+    init_output(&gw, POWER_SPECTRUM_BINS, 1);
 
     // ---------------------------constraints-----------------------------------
     #ifdef OUTPUT_CONSTRAINTS
@@ -1121,6 +1122,8 @@ static void free_external()
     free(rho_ps.tmp);
     free(rho_ps.buf);
     #endif
+    free(gw.tmp);
+    free(gw.buf);
 
     #ifdef OUTPUT_CONSTRAINTS
     free(cstr.tmp);
