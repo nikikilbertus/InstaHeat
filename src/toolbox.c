@@ -435,6 +435,15 @@ static double potential_prime(const double f)
     return MASS * MASS * f;
 }
 
+/**
+ * @brief Compute the power spectrum of the gravitational waves.
+ *
+ * Computes the power spectrum of the gravitational waves associated with the
+ * tensor perturbations in @p f according to the prescription in TODO[link to
+ * paper].
+ *
+ * @param[in] f An array with the current fields values
+ */
 static void mk_gw_spectrum(double *f)
 {
     const size_t N = pars.N;
