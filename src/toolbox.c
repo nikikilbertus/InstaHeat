@@ -20,7 +20,7 @@ static void assemble_gradient_squared();
 static void mk_stt(const double *f, complex **fsij);
 static double potential(const double f);
 static double potential_prime(const double f);
-static void assemble_gw_spectrum();
+static void mk_gw_spectrum();
 #ifdef OUTPUT_CONSTRAINTS
 static void mk_constraints();
 #endif
@@ -88,7 +88,7 @@ void mk_rhs(const double t, double *f, double *result)
         mk_constraints();
         #endif
         //TODO: is this correct use and position?
-        assemble_gw_spectrum();
+        mk_gw_spectrum();
     }
 
 
@@ -435,7 +435,7 @@ static double potential_prime(const double f)
     return MASS * MASS * f;
 }
 
-static void assemble_gw_spectrum()
+static void mk_gw_spectrum()
 {
     const size_t N = pars.N;
     const size_t Nx = pars.x.N;
