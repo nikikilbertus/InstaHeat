@@ -444,6 +444,15 @@ static void assemble_gw_spectrum()
     const size_t Mx = pars.x.M;
     const size_t My = pars.y.M;
     const size_t Mz = pars.z.M;
+    const size_t bins = out.dim;
+    const double k2_max = pars.x.k2 * (Nx/2) * (Nx/2) +
+                pars.y.k2 * (Ny/2) * (Ny/2) + pars.z.k2 * (Nz/2) * (Nz/2);
+
+    //TODO: still need to create output gw
+    #pragma omp parallel for
+    for (size_t i = 0; i < bins; ++i) {
+        gw.tmp[i] = 0.0;
+    }
 
     size_t osx, osy, id;
     double kx, ky, kz, k2, dh1r, dh1i, dh2r, dh2i, pow;
@@ -607,7 +616,6 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
     const size_t N = pars.N;
     const size_t M = pars.M;
     const size_t bins = out.dim;
-
     const double k2_max = pars.x.k2 * (Nx/2) * (Nx/2) +
                 pars.y.k2 * (Ny/2) * (Ny/2) + pars.z.k2 * (Nz/2) * (Nz/2);
 
@@ -620,10 +628,9 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
     size_t idx;
     // starting with 1 to explicitly exclude constant average
     for (size_t i = 1; i < M; ++i) {
-        if (fabs(kvec.z[i]) < DBL_EPSILON) {
-            pow2_tmp = in[i] * conj(in[i]);
-        } else {
-            pow2_tmp = 2.0 * in[i] * conj(in[i]);
+        pow2_tmp = in[i] * conj(in[i]);
+        if (fabs(kvec.z[i]) > DBL_EPSILON) {
+            pow2_tmp *= 2.0;
         }
         idx = (int)trunc(bins * sqrt(kvec.sq[i] / k2_max) - 1.0e-14);
         out.tmp[idx] += pow2_tmp / N;
