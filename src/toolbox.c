@@ -187,9 +187,9 @@ void mk_gradient_squared_and_laplacian(double *in)
         tmp.xphic[i] = pre * kvec.x[i];
         tmp.yphic[i] = pre * kvec.y[i];
         tmp.zphic[i] = pre * kvec.z[i];
-        tmp.phic[i] *= kvec.sq[i] / N;
+        tmp.phic[i] *= - kvec.sq[i] / N;
         #ifdef OUTPUT_CONSTRAINTS
-        tmp.psic[i] *= kvec.sq[i] / N;
+        tmp.psic[i] *= - kvec.sq[i] / N;
         #endif
     }
 
@@ -537,7 +537,7 @@ void mk_psi(double *f)
     #pragma omp parallel for
     for (size_t i = 1; i < pars.M; ++i) {
         tmp.phic[i] = 0.5 * (tmp.deltarhoc[i] +
-            3.0 * hubble * tmp.fc[i]) / ((kvec.sq[i] / a2 + extra) * N);
+            3.0 * hubble * tmp.fc[i]) / ((- kvec.sq[i] / a2 + extra) * N);
     }
     tmp.phic[0] = 0.0;
 
