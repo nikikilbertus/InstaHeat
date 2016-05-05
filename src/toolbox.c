@@ -438,53 +438,39 @@ static double potential_prime(const double f)
 static void assemble_gw_spectrum()
 {
     const size_t N = pars.N;
+    const size_t M = pars.M;
     const size_t Next = pars.Next;
     const size_t Ndh1 = 4 * N + 2 * Next;
     const size_t Ndh2 = Ndh1 + Next;
-    const size_t Mx = pars.x.M;
-    const size_t My = pars.y.M;
-    const size_t Mz = pars.z.M;
 
-    size_t osx, osy, id;
     double kx, ky, kz, k2, dh1r, dh1i, dh2r, dh2i;
     // TODO: are extra zeros in kx, ky, kz an issue here?
-    #pragma omp parallel for private(osx, osy, id, kx, ky, kz, k2, \
-                                     dh1r, dh1i, dh2r, dh2i)
-    for (size_t i = 0; i < Mx; ++i) {
-        osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j) {
-            osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k) {
-                id = osy + k;
-                kx = kvec.x[id];
-                ky = kvec.y[id];
-                kz = kvec.z[id];
-                k2 = kvec.sq[id];
-                dh1r = field[Ndh1 + 2 * id];
-                dh2r = field[Ndh2 + 2 * id];
-                dh1i = field[Ndh1 + 2 * id + 1];
-                dh2i = field[Ndh2 + 2 * id + 1];
+    #pragma omp parallel for private(kx, ky, kz, k2, dh1r, dh1i, dh2r, dh2i, p)
+    for (size_t i = 1; i < M; ++i) {
+        kx = kvec.x[i];
+        ky = kvec.y[i];
+        kz = kvec.z[i];
+        k2 = kvec.sq[i];
+        dh1r = field[Ndh1 + 2 * i];
+        dh2r = field[Ndh2 + 2 * i];
+        dh1i = field[Ndh1 + 2 * i + 1];
+        dh2i = field[Ndh2 + 2 * i + 1];
 
-                // use h11 and h12
-                if (k != 0) {
-                    //TODO: absh is just a placeholder, need memory for this,
-                    //probably a output struct and compute spectrum directly in
-                    //here
-                    absh[id] = 2.0 * k2 / (kz * kz * (ky * ky + kz * kz)) *
-                        ((kx * kx + kz * kz) * (dh1r * dh1r + dh1i * dh1i) +
-                        2.0 * kx * ky * (dh1r * dh2r + dh1i * dh2i) +
-                        (kx * kx + kz * kz) * (dh2r * dh2r + dh2i * dh2i));
-                // use h11 and h13
-                } else if (j != 0) {
-                    absh[id] = 2.0 * (kx * kx + ky * ky) / (ky * ky * ky * ky) *
-                        ((kx * kx + ky * ky) * (dh1r * dh1r + dh1i * dh1i) +
-                        ky * ky * (dh2r * dh2r + dh2i * dh2i));
-                // use h22 and h23
-                } else {
-                    absh[id] = 2.0 * (dh1r * dh1r + dh1i * dh1i +
-                                      dh2r * dh2r + dh2i * dh2i);
-                }
-            }
+        // use h11 and h12
+        if (k != 0) {
+            p = 2.0 * k2 / (kz * kz * (ky * ky + kz * kz)) *
+                ((kx * kx + kz * kz) * (dh1r * dh1r + dh1i * dh1i) +
+                2.0 * kx * ky * (dh1r * dh2r + dh1i * dh2i) +
+                (kx * kx + kz * kz) * (dh2r * dh2r + dh2i * dh2i));
+        // use h11 and h13
+        } else if (j != 0) {
+            p = 2.0 * (kx * kx + ky * ky) / (ky * ky * ky * ky) *
+                ((kx * kx + ky * ky) * (dh1r * dh1r + dh1i * dh1i) +
+                ky * ky * (dh2r * dh2r + dh2i * dh2i));
+        // use h22 and h23
+        } else {
+            p = 2.0 * (dh1r * dh1r + dh1i * dh1i +
+                       dh2r * dh2r + dh2i * dh2i);
         }
     }
 }
