@@ -250,20 +250,14 @@ static void assemble_gradient_squared()
 void mk_rho(const double *f)
 {
     const size_t N = pars.N;
-    const size_t N2 = 2 * N;
-    const double a = f[pars.Ntot - 1];
-    const double a2 = a * a;
+    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
     rho_mean = 0.0;
     pressure_mean = 0.0;
 
-    double df, p, t1, t2;
-    #pragma omp parallel for private(df, p, t1, t2) \
-                                reduction(+: rho_mean, pressure_mean)
+    #pragma omp parallel for reduction(+: rho_mean, pressure_mean)
     for (size_t i = 0; i < N; ++i) {
-        df = f[N + i];
-        p = f[N2 + i];
-        t1 = (0.5 - p) * df * df;
-        t2 = (0.5 + p) * tmp.grad[i] / a2;
+        double t1 = (0.5 - f[2 * N + i]) * f[N + i] * f[N + i];
+        double t2 = (0.5 + f[2 * N + i]) * tmp.grad[i] / a2;
         rho[i] = t1 + t2 + potential(f[i]);
         pressure[i] = t1 - t2 / 3.0 - potential(f[i]);
         pressure_mean += pressure[i];
