@@ -419,13 +419,11 @@ static void mk_gw_spectrum(double *f)
     const double k2_max = pars.x.k2 * (pars.x.N/2) * (pars.x.N/2) +
                           pars.y.k2 * (pars.y.N/2) * (pars.y.N/2) +
                           pars.z.k2 * (pars.z.N/2) * (pars.z.N/2);
-
     #pragma omp parallel for
     for (size_t i = 0; i < gw.dim; ++i) {
         gw.tmp[i] = 0.0;
     }
-
-    // cannot parallelize due to binning
+    // start with 1 to exclude constant offset, no omp!
     for (size_t i = 1; i < pars.M; ++i) {
         double kx = kvec.xf[i];
         double ky = kvec.yf[i];
@@ -572,13 +570,11 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
     const double k2_max = pars.x.k2 * (pars.x.N/2) * (pars.x.N/2) +
                           pars.y.k2 * (pars.y.N/2) * (pars.y.N/2) +
                           pars.z.k2 * (pars.z.N/2) * (pars.z.N/2);
-
     #pragma omp parallel for
     for (size_t i = 0; i < out.dim; ++i) {
         out.tmp[i] = 0.0;
     }
-
-    // starting with 1 to explicitly exclude constant average
+    // starting with 1 to explicitly exclude constant average, no omp!
     for (size_t i = 1; i < pars.M; ++i) {
         double pow2_tmp = in[i] * conj(in[i]);
         if (fabs(kvec.z[i]) > DBL_EPSILON) {
@@ -605,14 +601,11 @@ static void apply_filter_real(double *inout)
 {
     TIME(mon.filter_time -= get_wall_time());
     const size_t N = pars.N;
-    const size_t N2 = 2 * N;
-    const size_t N3 = 3 * N;
-
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, inout, tmp.phic);
     fftw_execute_dft_r2c(p_fw, inout + N, tmp.xphic);
-    fftw_execute_dft_r2c(p_fw, inout + N2, tmp.yphic);
-    fftw_execute_dft_r2c(p_fw, inout + N3, tmp.zphic);
+    fftw_execute_dft_r2c(p_fw, inout + 2 * N, tmp.yphic);
+    fftw_execute_dft_r2c(p_fw, inout + 3 * N, tmp.zphic);
     TIME(mon.fftw_time_exe += get_wall_time());
 
     apply_filter_fourier(tmp.phic, tmp.xphic, tmp.yphic, tmp.zphic);
@@ -620,8 +613,8 @@ static void apply_filter_real(double *inout)
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_c2r(p_bw, tmp.phic, inout);
     fftw_execute_dft_c2r(p_bw, tmp.xphic, inout + N);
-    fftw_execute_dft_c2r(p_bw, tmp.yphic, inout + N2);
-    fftw_execute_dft_c2r(p_bw, tmp.zphic, inout + N3);
+    fftw_execute_dft_c2r(p_bw, tmp.yphic, inout + 2 * N);
+    fftw_execute_dft_c2r(p_bw, tmp.zphic, inout + 3 * N);
     TIME(mon.fftw_time_exe += get_wall_time());
     TIME(mon.filter_time += get_wall_time());
 }
