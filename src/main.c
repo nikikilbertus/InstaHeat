@@ -38,6 +38,7 @@ struct output phi_ps;
 struct output psi_ps;
 struct output rho_ps;
 struct output cstr;
+struct output gw;
 double *field;
 double *field_new;
 double *dfield;
