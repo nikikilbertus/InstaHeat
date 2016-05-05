@@ -454,10 +454,10 @@ static void assemble_gw_spectrum()
         gw.tmp[i] = 0.0;
     }
 
-    size_t osx, osy, id;
+    size_t osx, osy, id, idx;
     double kx, ky, kz, k2, dh1r, dh1i, dh2r, dh2i, pow;
     // TODO: are extra zeros in kx, ky, kz an issue here?
-    #pragma omp parallel for private(osx, osy, id, kx, ky, kz, k2, \
+    #pragma omp parallel for private(osx, osy, id, idx, kx, ky, kz, k2, \
                                      dh1r, dh1i, dh2r, dh2i, pow)
     for (size_t i = 0; i < Mx; ++i) {
         osx = i * My * Mz;
@@ -490,6 +490,11 @@ static void assemble_gw_spectrum()
                     pow = 2.0 * (dh1r * dh1r + dh1i * dh1i +
                                  dh2r * dh2r + dh2i * dh2i);
                 }
+                if (fabs(kz) > DBL_EPSILON) {
+                    pow *= 2.0;
+                }
+                idx = (int)trunc(bins * sqrt(k2 / k2_max) - 1.0e-14);
+                gw.tmp[idx] += pow / N;
             }
         }
     }
