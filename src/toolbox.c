@@ -419,11 +419,13 @@ static void mk_gw_spectrum(double *f)
     const double k2_max = pars.x.k2 * (pars.x.N/2) * (pars.x.N/2) +
                           pars.y.k2 * (pars.y.N/2) * (pars.y.N/2) +
                           pars.z.k2 * (pars.z.N/2) * (pars.z.N/2);
+
     #pragma omp parallel for
     for (size_t i = 0; i < gw.dim; ++i) {
         gw.tmp[i] = 0.0;
     }
-    #pragma omp parallel for
+
+    // cannot parallelize due to binning
     for (size_t i = 1; i < pars.M; ++i) {
         double kx = kvec.xf[i];
         double ky = kvec.yf[i];
@@ -567,30 +569,23 @@ void mk_psi(double *f)
  */
 static void mk_power_spectrum(const fftw_complex *in, struct output out)
 {
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const size_t N = pars.N;
-    const size_t M = pars.M;
-    const size_t bins = out.dim;
-    const double k2_max = pars.x.k2 * (Nx/2) * (Nx/2) +
-                pars.y.k2 * (Ny/2) * (Ny/2) + pars.z.k2 * (Nz/2) * (Nz/2);
+    const double k2_max = pars.x.k2 * (pars.x.N/2) * (pars.x.N/2) +
+                          pars.y.k2 * (pars.y.N/2) * (pars.y.N/2) +
+                          pars.z.k2 * (pars.z.N/2) * (pars.z.N/2);
 
     #pragma omp parallel for
-    for (size_t i = 0; i < bins; ++i) {
+    for (size_t i = 0; i < out.dim; ++i) {
         out.tmp[i] = 0.0;
     }
 
-    double pow2_tmp = 0.0;
-    size_t idx;
     // starting with 1 to explicitly exclude constant average
-    for (size_t i = 1; i < M; ++i) {
-        pow2_tmp = in[i] * conj(in[i]);
+    for (size_t i = 1; i < pars.M; ++i) {
+        double pow2_tmp = in[i] * conj(in[i]);
         if (fabs(kvec.z[i]) > DBL_EPSILON) {
             pow2_tmp *= 2.0;
         }
-        idx = (int)trunc(bins * sqrt(kvec.sq[i] / k2_max) - 1.0e-14);
-        out.tmp[idx] += pow2_tmp / N;
+        size_t idx = (int)trunc(out.dim * sqrt(kvec.sq[i] / k2_max) - 1.0e-14);
+        out.tmp[idx] += pow2_tmp / pars.N;
     }
 }
 #endif
