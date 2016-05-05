@@ -324,10 +324,12 @@ static void allocate_external()
     tmp.f = fftw_malloc(N * sizeof *tmp.f);
     tmp.deltarho = fftw_malloc(N * sizeof *tmp.deltarho);
 
-    if (!(field && field_new && dfield && dfield_new &&
+    if (!(field && field_new && dfield && dfield_new && rho && pressure &&
         tmp.phic && tmp.xphic && tmp.yphic && tmp.zphic &&
         tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap && tmp.psic &&
-        tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f && tmp.deltarho)) {
+        tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f && tmp.deltarho &&
+        kvec.sq && kvec.x && kvec.y && kvec.z && kvec.xf && kvec.yf &&
+        kvec.zf)) {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
     }
@@ -351,6 +353,10 @@ static void init_output(struct output *out, const size_t dim, const int mode)
         out->tmp = calloc(out->dim, sizeof *out->tmp);
     }
     out->buf = calloc(Nbuf * out->dim, sizeof *out->buf);
+    if (!out->buf || (mode != 0 && !out->tmp)) {
+        fputs("Allocating memory failed.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
 }
 
 /**
