@@ -512,20 +512,15 @@ static void mk_constraints(double *f)
  */
 void mk_psi(double *f)
 {
-    //TODO[performance]: optimize by saving often used values (h3, dphiextra...)
     TIME(mon.poisson_time -= get_wall_time());
     const size_t N = pars.N;
-    const size_t M = pars.M;
-    const size_t N2 = 2 * N;
-    const size_t N3 = 3 * N;
-    const double a = f[pars.Ntot - 1];
-    const double a2 = a * a;
+    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
     const double hubble = sqrt(rho_mean / 3.0);
-
     const double phi_mean = mean(f, N);
     const double dphi_mean = mean(f + N, N);
     double extra1 = 0.0;
     double extra2 = 0.0;
+
     #pragma omp parallel for reduction(+: extra1, extra2)
     for (size_t i = 0; i < N; ++i) {
         tmp.deltarho[i] = rho[i] - rho_mean;
@@ -540,18 +535,20 @@ void mk_psi(double *f)
     fftw_execute_dft_r2c(p_fw, tmp.f, tmp.fc);
     TIME(mon.fftw_time_exe += get_wall_time());
 
-    for (size_t i = 1; i < M; ++i) {
+    #pragma omp parallel for
+    for (size_t i = 1; i < pars.M; ++i) {
         tmp.phic[i] = 0.5 * (tmp.deltarhoc[i] +
-                3 * hubble * tmp.fc[i]) / ((kvec.sq[i] / a2 + extra) * N);
+            3.0 * hubble * tmp.fc[i]) / ((kvec.sq[i] / a2 + extra) * N);
     }
     tmp.phic[0] = 0.0;
 
     TIME(mon.fftw_time_exe -= get_wall_time());
-    fftw_execute_dft_c2r(p_bw, tmp.phic, f + N2);
+    fftw_execute_dft_c2r(p_bw, tmp.phic, f + 2 * N);
     TIME(mon.fftw_time_exe += get_wall_time());
 
+    #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
-        f[N3 + i] = 0.5 * tmp.f[i] - hubble * f[N2 + i];
+        f[3 * N + i] = 0.5 * tmp.f[i] - hubble * f[2 * N + i];
     }
     TIME(mon.poisson_time += get_wall_time());
 }
