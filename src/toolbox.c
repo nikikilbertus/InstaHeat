@@ -414,34 +414,26 @@ static double potential_prime(const double f)
  */
 static void mk_gw_spectrum(double *f)
 {
-    const size_t N = pars.N;
-    const size_t Next = pars.Next;
-    const size_t Ndh1 = 4 * N + 2 * Next;
-    const size_t Ndh2 = Ndh1 + Next;
-    const size_t bins = gw.dim;
+    const size_t Ndh1 = 4 * pars.N + 2 * pars.Next;
+    const size_t Ndh2 = Ndh1 + pars.Next;
     const double k2_max = pars.x.k2 * (pars.x.N/2) * (pars.x.N/2) +
                           pars.y.k2 * (pars.y.N/2) * (pars.y.N/2) +
                           pars.z.k2 * (pars.z.N/2) * (pars.z.N/2);
-
     #pragma omp parallel for
-    for (size_t i = 0; i < bins; ++i) {
+    for (size_t i = 0; i < gw.dim; ++i) {
         gw.tmp[i] = 0.0;
     }
-
-    size_t idx;
-    double kx, ky, kz, k2, dh1r, dh1i, dh2r, dh2i, pow;
-    #pragma omp parallel for private(idx, kx, ky, kz, k2, \
-                                     dh1r, dh1i, dh2r, dh2i, pow)
+    #pragma omp parallel for
     for (size_t i = 1; i < pars.M; ++i) {
-        kx = kvec.xf[i];
-        ky = kvec.yf[i];
-        kz = kvec.zf[i];
-        k2 = kvec.sq[i];
-        dh1r = f[Ndh1 + 2 * i];
-        dh2r = f[Ndh2 + 2 * i];
-        dh1i = f[Ndh1 + 2 * i + 1];
-        dh2i = f[Ndh2 + 2 * i + 1];
-
+        double kx = kvec.xf[i];
+        double ky = kvec.yf[i];
+        double kz = kvec.zf[i];
+        double k2 = kvec.sq[i];
+        double dh1r = f[Ndh1 + 2 * i];
+        double dh2r = f[Ndh2 + 2 * i];
+        double dh1i = f[Ndh1 + 2 * i + 1];
+        double dh2i = f[Ndh2 + 2 * i + 1];
+        double pow;
         // use h11 and h12
         if (fabs(kz) > DBL_EPSILON) {
             pow = 2.0 * k2 / (kz * kz * (ky * ky + kz * kz)) *
@@ -461,8 +453,8 @@ static void mk_gw_spectrum(double *f)
         if (fabs(kvec.z[i]) > DBL_EPSILON) {
             pow *= 2.0;
         }
-        idx = (int)trunc(bins * sqrt(k2 / k2_max) - 1.0e-14);
-        gw.tmp[idx] += pow / N;
+        size_t idx = (int)trunc(gw.dim * sqrt(k2 / k2_max) - 1.0e-14);
+        gw.tmp[idx] += pow / pars.N;
     }
 }
 
