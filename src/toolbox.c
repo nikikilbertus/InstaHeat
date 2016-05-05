@@ -41,8 +41,7 @@ static void contains_nanc(const complex *f, const size_t N);
 #endif
 
 struct evolution_flags evo_flags = {.filter = 0,
-                                    .compute_pow_spec = 0,
-                                    .compute_cstr = 0};
+                                    .output = 0};
 
 /**
  * @brief Compute the right hand side of the pde, i.e. all first order temporal
@@ -76,19 +75,19 @@ void mk_rhs(const double t, double *f, double *result)
     const double hubble = sqrt(rho_mean / 3.0);
     const double h3 = 3.0 * hubble;
 
-    // power spectrum of rho here, because need rho first
-    if (evo_flags.compute_pow_spec == 1) {
+    if (evo_flags.output == 1) {
+        // power spectrum of rho here, because need rho first
         #ifdef OUTPUT_RHO_PS
         TIME(mon.fftw_time_exe -= get_wall_time());
         fftw_execute_dft_r2c(p_fw, rho, tmp.phic);
         TIME(mon.fftw_time_exe += get_wall_time());
         mk_power_spectrum(tmp.phic, rho_ps);
         #endif
+        #ifdef OUTPUT_CONSTRAINTS
+        mk_constraints();
+        #endif
     }
 
-    #ifdef OUTPUT_CONSTRAINTS
-    mk_constraints();
-    #endif
 
     double p, dp;
     #pragma omp parallel for private(p, dp)
@@ -175,7 +174,7 @@ void mk_gradient_squared_and_laplacian(double *in)
     TIME(mon.fftw_time_exe += get_wall_time());
 
     // good place for power spectrum of phi and psi, because fft exists
-    if (evo_flags.compute_pow_spec == 1) {
+    if (evo_flags.output == 1) {
         #ifdef OUTPUT_PHI_PS
         mk_power_spectrum(tmp.phic, phi_ps);
         #endif
@@ -647,15 +646,9 @@ static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
  */
 void prepare_and_save_timeslice()
 {
-    #ifdef OUTPUT_PS
-    evo_flags.compute_pow_spec = 1;
-    #endif
-    #ifdef OUTPUT_CONSTRAINTS
-    evo_flags.compute_cstr = 1;
-    #endif
+    evo_flags.output = 1;
     mk_rhs(pars.t.t, field, dfield);
-    evo_flags.compute_pow_spec = 0;
-    evo_flags.compute_cstr = 0;
+    evo_flags.output = 0;
     mk_summary();
     save();
 }
