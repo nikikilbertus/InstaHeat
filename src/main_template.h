@@ -241,10 +241,10 @@ struct temporary
  */
 struct k_grid
 {
-    double *sq; ///< The sqaure of the k vector (of all modes)
-    double *x; ///< The x direction of the k vector (of al modes)
-    double *y; ///< The y direction of the k vector (of al modes)
-    double *z; ///< The z direction of the k vector (of al modes)
+    double *sq; ///< The sqaure of the k vector
+    double *x; ///< The x direction of the k vector
+    double *y; ///< The y direction of the k vector
+    double *z; ///< The z direction of the k vector
 };
 
 /**
