@@ -91,15 +91,14 @@ void mk_rhs(const double t, double *f, double *result)
 
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
-        double p = f[N2 + i];
-        double dp = f[N3 + i];
-        result[i] = f[N + i]; // copy dphi
+        double df = f[N + i], p = f[N2 + i], dp = f[N3 + i];
+        result[i] = df; // copy dphi
         result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / a2 -
-            (h3 - 4.0 * dp) * f[N + i] -
+            (h3 - 4.0 * dp) * df -
             (1.0 + 2.0 * p) * potential_prime(f[i]); // eq. for ddphi
         result[N2 + i] = dp; // copy dpsi
         result[N3 + i] = 0.5 * pressure[i] + (p - 0.5) * pressure_mean
-            - 4.0 * hubble * p; // eq. for ddpsi
+            - 4.0 * hubble * dp; // eq. for ddpsi
     }
 
     #pragma omp parallel for
@@ -250,8 +249,9 @@ void mk_rho(const double *f)
     pressure_mean = 0.0;
     #pragma omp parallel for reduction(+: rho_mean, pressure_mean)
     for (size_t i = 0; i < N; ++i) {
-        double t1 = (0.5 - f[2 * N + i]) * f[N + i] * f[N + i];
-        double t2 = (0.5 + f[2 * N + i]) * tmp.grad[i] / a2;
+        double df = f[N + i], p = f[2 * N + i];
+        double t1 = (0.5 - p) * df * df;
+        double t2 = (0.5 + p) * tmp.grad[i] / a2;
         rho[i] = t1 + t2 + potential(f[i]);
         pressure[i] = t1 - t2 / 3.0 - potential(f[i]);
         pressure_mean += pressure[i];
