@@ -812,16 +812,9 @@ static void initialize_from_internal_function()
  */
 static void mk_x_grid(double *grid)
 {
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const double ax = pars.x.a;
-    const double bx = pars.x.b;
-    const double ay = pars.y.a;
-    const double by = pars.y.b;
-    const double az = pars.z.a;
-    const double bz = pars.z.b;
-
+    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
+    const double ax = pars.x.a, ay = pars.y.a, az = pars.z.a;
+    const double bx = pars.x.b, by = pars.y.b, bz = pars.z.b;
     #pragma omp parallel for
     for (size_t i = 0; i < Nx; ++i) {
         grid[i] = ax + (bx - ax) * i / Nx;
