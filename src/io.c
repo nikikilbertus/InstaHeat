@@ -95,6 +95,7 @@ void h5_create_empty_by_path()
     #ifdef OUTPUT_RHO_PS
     h5_create_dset(rank, rho_ps.dim, &(rho_ps.id), H5_RHO_PS_NAME);
     #endif
+    h5_create_dset(rank, gw.dim, &(gw.id), H5_GW_PS_NAME);
 
     // ---------------------------constraints-----------------------------------
     #ifdef OUTPUT_CONSTRAINTS
@@ -357,6 +358,7 @@ static void h5_write_all_buffers(const hsize_t Nt)
     #ifdef OUTPUT_RHO_PS
     h5_write_buffer(rank, Nt, rho_ps.dim, os, rho_ps.id, rho_ps.buf);
     #endif
+    h5_write_buffer(rank, Nt, gw.dim, os, gw.id, gw.buf);
 
     // --------------------------constraints------------------------------------
     #ifdef OUTPUT_CONSTRAINTS
@@ -490,6 +492,8 @@ void save()
             #pragma omp section
             append_to_buffer(cstr);
         #endif
+        #pragma omp section
+        append_to_buffer(gw);
     }
 
     #ifdef LARGE_OUTPUT
