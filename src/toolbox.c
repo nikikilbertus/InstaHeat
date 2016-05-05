@@ -90,27 +90,18 @@ void mk_rhs(const double t, double *f, double *result)
     mk_constraints();
     #endif
 
-    // copy dphi in all cases
-    #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i) {
-        result[i] = f[N + i];
-    }
-
-    #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i) {
-        result[N2 + i] = f[N3 + i];
-        result[N3 + i] = 0.5 * pressure[i] + (f[N2 + i] - 0.5) * pressure_mean
-            - 4.0 * hubble * f[N3 + i];
-    }
-
-    // equation for ddphi (psi & dpsi have to be provided first)
-    double p;
-    #pragma omp parallel for private(p)
+    double p, dp;
+    #pragma omp parallel for private(p, dp)
     for (size_t i = 0; i < N; ++i) {
         p = f[N2 + i];
+        dp = f[N3 + i];
+        result[i] = f[N + i]; // copy dphi
         result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / a2 -
-            (h3 - 4.0 * f[N3 + i]) * f[N + i] -
-            (1.0 + 2.0 * p) * potential_prime(f[i]);
+            (h3 - 4.0 * dp) * f[N + i] -
+            (1.0 + 2.0 * p) * potential_prime(f[i]); // eq. for ddphi
+        result[N2 + i] = dp; // copy dpsi
+        result[N3 + i] = 0.5 * pressure[i] + (p - 0.5) * pressure_mean
+            - 4.0 * hubble * p; // eq. for ddpsi
     }
 
     const size_t len = 6;
@@ -122,9 +113,12 @@ void mk_rhs(const double t, double *f, double *result)
 
     // copy first derivatives of hij's
     #pragma omp parallel for
-    for (size_t i = 0; i < Next; ++i) {
+    for (size_t i = 0; i < 2 * Next; ++i) {
         result[Nh1 + i] = f[Ndh1 + i];
-        result[Nh2 + i] = f[Ndh2 + i];
+    }
+
+#pragma omp parallel for
+    for (size_t i = 0; i < M; ++i) {
     }
 
     const size_t Mx = pars.x.M;
