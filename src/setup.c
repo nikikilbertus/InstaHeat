@@ -110,13 +110,12 @@ static void initialize_rng()
  */
 static void initialize_threading()
 {
-    int threadnum, threadinit;
-    threadinit = fftw_init_threads();
+    int threadinit = fftw_init_threads();
     if (threadinit == 0) {
         fputs("\n\nCould not initialize fftw threads.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    threadnum = THREAD_NUMBER <= 0 ? omp_get_max_threads() : THREAD_NUMBER;
+    int threadnum = THREAD_NUMBER <= 0 ? omp_get_max_threads() : THREAD_NUMBER;
     omp_set_num_threads(threadnum);
     fftw_plan_with_nthreads(threadnum);
     INFO(printf("\n\nRunning omp & fftw with %d thread(s).\n\n", threadnum));
