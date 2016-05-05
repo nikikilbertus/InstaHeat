@@ -295,9 +295,6 @@ static void mk_stt(const double *f, complex **fsij)
     TIME(mon.stt_time -= get_wall_time());
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
-    const size_t Mx = pars.x.M;
-    const size_t My = pars.y.M;
-    const size_t Mz = pars.z.M;
     const double a = f[pars.Ntot - 1];
     const double a2 = a * a;
     const size_t len = 6;
@@ -325,7 +322,6 @@ static void mk_stt(const double *f, complex **fsij)
     }
     TIME(mon.fftw_time_exe += get_wall_time());
     free(sij);
-
 
     double kx, ky, kz, fx, fy, fz;
     complex t1, t2, s1, s2, k1, k2, k3;
