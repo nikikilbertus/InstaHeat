@@ -135,21 +135,21 @@ static void initialize_parameters()
     pars.x.a = SPATIAL_LOWER_BOUND_X;
     pars.x.b = SPATIAL_UPPER_BOUND_X;
     pars.x.k = TWOPI / (pars.x.b - pars.x.a);
-    pars.x.k2 = -TWOPI * TWOPI / ((pars.x.b - pars.x.a) * (pars.x.b - pars.x.a));
+    pars.x.k2 = TWOPI * TWOPI / ((pars.x.b - pars.x.a) * (pars.x.b - pars.x.a));
     pars.x.stride = STRIDE_X;
 
     pars.y.N = GRIDPOINTS_Y;
     pars.y.a = SPATIAL_LOWER_BOUND_Y;
     pars.y.b = SPATIAL_UPPER_BOUND_Y;
     pars.y.k = TWOPI / (pars.y.b - pars.y.a);
-    pars.y.k2 = -TWOPI * TWOPI / ((pars.y.b - pars.y.a) * (pars.y.b - pars.y.a));
+    pars.y.k2 = TWOPI * TWOPI / ((pars.y.b - pars.y.a) * (pars.y.b - pars.y.a));
     pars.y.stride = STRIDE_Y;
 
     pars.z.N = GRIDPOINTS_Z;
     pars.z.a = SPATIAL_LOWER_BOUND_Z;
     pars.z.b = SPATIAL_UPPER_BOUND_Z;
     pars.z.k = TWOPI / (pars.z.b - pars.z.a);
-    pars.z.k2 = -TWOPI * TWOPI / ((pars.z.b - pars.z.a) * (pars.z.b - pars.z.a));
+    pars.z.k2 = TWOPI * TWOPI / ((pars.z.b - pars.z.a) * (pars.z.b - pars.z.a));
     pars.z.stride = STRIDE_Z;
 
     pars.N = pars.x.N * pars.y.N * pars.z.N;
