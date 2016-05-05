@@ -340,97 +340,89 @@ static void mk_sij(const double *f, complex **fsij)
     const size_t N = pars.N;
     const size_t N2 = 2 * N;
     const size_t M = pars.M;
+    const size_t Mx = pars.x.M;
+    const size_t My = pars.y.M;
+    const size_t Mz = pars.z.M;
     const double a = f[pars.Ntot - 1];
     const double a2 = a * a;
     const size_t len = 6;
+
     double **sij = malloc(len * sizeof *sij);
     for (size_t i = 0; i < len; ++i) {
         sij[i] = fftw_malloc(N * sizeof *sij[i]);
     }
-
-    double *gphi = fftw_malloc(N * sizeof *gphi);
-    #pragma omp parallel for
+    double gphi;
+    #pragma omp parallel for private(gphi)
     for (size_t i = 0; i < N; ++i) {
         // TODO: do i include metric here?
-        gphi[i] = - tmp.grad[i] * (2.0 + 4.0 * f[N2 + i]) / (3.0 * a2);
-        sij[0][i] = tmp.xphi[i] * tmp.xphi[i] + gphi[i];
+        gphi = - tmp.grad[i] * (2.0 + 4.0 * f[N2 + i]) / (3.0 * a2);
+        sij[0][i] = tmp.xphi[i] * tmp.xphi[i] + gphi;
         sij[1][i] = tmp.xphi[i] * tmp.yphi[i];
         sij[2][i] = tmp.xphi[i] * tmp.zphi[i];
-        sij[3][i] = tmp.yphi[i] * tmp.yphi[i] + gphi[i];
+        sij[3][i] = tmp.yphi[i] * tmp.yphi[i] + gphi;
         sij[4][i] = tmp.yphi[i] * tmp.zphi[i];
-        sij[5][i] = tmp.zphi[i] * tmp.zphi[i] + gphi[i];
+        sij[5][i] = tmp.zphi[i] * tmp.zphi[i] + gphi;
     }
-    fftw_free(gphi);
-
     for (size_t i = 0; i < len; ++i) {
         fftw_execute_dft_r2c(p_fw, sij[i], fsij[i]);
-    }
-
-    complex *fs1 = fftw_malloc(M * sizeof *fs1);
-    complex *fs2 = fftw_malloc(M * sizeof *fs2);
-    //TODO: are the zeros in the kvec.x/y/z a problem here?
-    #pragma omp parallel for
-    for (size_t i = 1; i < M; ++i) {
-        fs2[i] = kvec.x[i] * kvec.x[i] * fsij[0][i] +
-                 kvec.x[i] * kvec.y[i] * fsij[1][i] * 2.0 +
-                 kvec.x[i] * kvec.z[i] * fsij[2][i] * 2.0 +
-                 kvec.y[i] * kvec.y[i] * fsij[3][i] +
-                 kvec.y[i] * kvec.z[i] * fsij[4][i] * 2.0 +
-                 kvec.z[i] * kvec.z[i] * fsij[5][i];
-        fs2[i] /= kvec.sq[i];
-        fs1[i] = fsij[0][i] + fsij[3][i] + fsij[5][i];
-    }
-    fs2[0] = 0.0;
-    fs1[0] = 0.0;
-    complex **fksij = malloc(len * sizeof *fksij);
-    for (size_t i = 0; i < len; ++i) {
-        fksij[i] = fftw_malloc(M * sizeof *fksij[i]);
-    }
-    // TODO: already do correct layout here: k!=0, j!=0, ...
-    double xfac, yfac, zfac;
-    #pragma omp parallel for private(xfac, yfac, zfac)
-    for (size_t i = 0; i < M; ++i) {
-        xfac = -2.0 * kvec.x[i] / kvec.sq[i];
-        yfac = -2.0 * kvec.y[i] / kvec.sq[i];
-        zfac = -2.0 * kvec.z[i] / kvec.sq[i];
-        fksij[0][i] = kvec.x[i] * fsij[0][i] +
-                      kvec.y[i] * fsij[1][i] +
-                      kvec.z[i] * fsij[2][i];
-        fksij[1][i] = kvec.x[i] * fsij[1][i] +
-                      kvec.y[i] * fsij[3][i] +
-                      kvec.z[i] * fsij[4][i];
-        fksij[2][i] = kvec.x[i] * fsij[2][i] +
-                      kvec.y[i] * fsij[4][i] +
-                      kvec.z[i] * fsij[5][i];
-        fksij[0][i] *= xfac;
-        fksij[1][i] *= xfac;
-        fksij[2][i] *= xfac;
-        fksij[3][i] = fksij[1][i] * yfac;
-        fksij[4][i] = fksij[2][i] * yfac;
-        fksij[5][i] = fksij[2][i] * zfac;
-        fsij[0][i] += fksij[0][i] + 0.5 * (kvec.x[i] * kvec.x[i] *
-                (fs2[i] + fs1[i] / kvec.sq[i]) + fs2[i] - fs1[i]);
-        fsij[1][i] += fksij[1][i] + 0.5 * (kvec.x[i] * kvec.y[i] *
-                (fs2[i] + fs1[i] / kvec.sq[i]));
-        fsij[2][i] += fksij[2][i] + 0.5 * (kvec.x[i] * kvec.z[i] *
-                (fs2[i] + fs1[i] / kvec.sq[i]));
-        fsij[3][i] += fksij[3][i] + 0.5 * (kvec.y[i] * kvec.y[i] *
-                (fs2[i] + fs1[i] / kvec.sq[i]) + fs2[i] - fs1[i]);
-        fsij[4][i] += fksij[4][i] + 0.5 * (kvec.y[i] * kvec.z[i] *
-                (fs2[i] + fs1[i] / kvec.sq[i]));
-        fsij[5][i] += fksij[5][i] + 0.5 * (kvec.z[i] * kvec.z[i] *
-                (fs2[i] + fs1[i] / kvec.sq[i]) + fs2[i] - fs1[i]);
-    }
-    for (size_t i = 0; i < len; ++i) {
-        fftw_free(fksij[i]);
-    }
-    free(fksij);
-    fftw_free(fs1);
-    fftw_free(fs2);
-    for (size_t i = 0; i < len; ++i) {
         fftw_free(sij[i]);
     }
     free(sij);
+
+    size_t osx, osy, id;
+    double kx, ky, kz, fx, fy, fz;
+    complex t1, t2, s1, s2, k1, k2, k3;
+    #pragma omp parallel for private(osx, osy, id, kx, ky, kz, fx, fy, fz \
+                                     t1, t2, s1, s2, k1, k2, k3)
+    for (size_t i = 0; i < Mx; ++i) {
+        osx = i * My * Mz;
+        for (size_t j = 0; j < My; ++j) {
+            osy = osx + j * Mz;
+            for (size_t k = 0; k < Mz; ++k) {
+                id = osy + k;
+                kx = kvec.x[id];
+                ky = kvec.y[id];
+                kz = kvec.z[id];
+                fx = kx / kvec.sq[id];
+                fy = ky / kvec.sq[id];
+                fz = kz / kvec.sq[id];
+                t1 = kx * fx * fsij[0][id] + 2.0 * kx * fy * fsij[1][id] +
+                     2.0 * kx * fz * fsij[2][id] + ky * fy * fsij[3][id] +
+                     2.0 * ky * fz * fsij[4][id] + kz * fz * fsij[5][id];
+                t2 = fsij[0][id] + fsij[3][id] + fsij[5][id];
+                s1 = t1 + t2;
+                s2 = t1 - t2;
+
+                // use s11 and s12
+                if (k != 0) {
+                    k1 = kx * fsij[0][id] + ky * fsij[1][id] + kz * fsij[2][id];
+                    k2 = kx * fsij[1][id] + ky * fsij[3][id] + kz * fsij[4][id];
+                    fsij[0][id] = fsij[0][id] - 2.0 * fx * k1 +
+                        0.5 * (fx * kx * s1 + s2);
+                    fsij[1][id] = fsij[1][id] - fx * k2 - fy * k1 +
+                        0.5 * fx * ky * s1;
+                // use s11 and s13
+                } else if (j != 0) {
+                    k1 = kx * fsij[0][id] + ky * fsij[1][id] + kz * fsij[2][id];
+                    k3 = kx * fsij[2][id] + ky * fsij[4][id] + kz * fsij[5][id];
+                    fsij[0][id] = fsij[0][id] - 2.0 * fx * k1 +
+                        0.5 * (fx * kx * s1 + s2);
+                    fsij[1][id] = fsij[2][id] - fx * k3 - fz * k1 +
+                        0.5 * fx * kz * s1;
+                // use s22 and s23
+                } else {
+                    k2 = kx * fsij[1][id] + ky * fsij[3][id] + kz * fsij[4][id];
+                    k3 = kx * fsij[2][id] + ky * fsij[4][id] + kz * fsij[5][id];
+                    fsij[0][id] = fsij[3][id] - 2.0 * fy * k2 +
+                        0.5 * (fy * ky * s1 + s2);
+                    fsij[1][id] = fsij[4][id] - fy * k3 - fz * k2 +
+                        0.5 * fy * kz * s1;
+                }
+            }
+        }
+    }
+    fsij[0][0] = 0.0;
+    fsij[1][0] = 0.0;
 }
 
 /**
