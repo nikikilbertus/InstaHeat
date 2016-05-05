@@ -217,8 +217,10 @@ static void initialize_parameters()
     mon.smry_time = 0.0;
 
     INFO(printf("Initialized parameters for %zu dimension(s).\n", pars.dim));
-    INFO(printf("Gridpoints: X = %zu, Y = %zu, Z = %zu.\n\n",
+    INFO(printf("Gridpoints: X: %zu, Y: %zu, Z: %zu.\n",
                 pars.x.N, pars.y.N, pars.z.N));
+    INFO(printf("N: %zu, Next: %zu, Ntot: %zu\n\n",
+                pars.N, pars.Next, pars.Ntot));
 }
 
 /**
