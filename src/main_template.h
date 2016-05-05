@@ -51,7 +51,8 @@
 #endif
 
 #define RK4                 (0)
-#define DOPRI853            (1)
+#define RKF45               (1)
+#define DOPRI853            (2)
 #define INTEGRATION_METHOD  (_IM_)
 
 #define VERSION_CONTROL_NONE    (0)
@@ -110,6 +111,7 @@
 #define STRIDE_X                (_XSKIP_)
 #define STRIDE_Y                (_YSKIP_)
 #define STRIDE_Z                (_ZSKIP_)
+#define OUTPUT_NUMBER           (_ONUM_)
 #define THREAD_NUMBER           (_THREADS_)
 #define FFTW_DEFAULT_FLAG       (_FFTW_)
 #define FFTW_SIMD_STRIDE        (_FFTWSS_)
