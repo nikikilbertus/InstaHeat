@@ -473,24 +473,20 @@ static void mk_constraints(double *f)
 {
     TIME(mon.cstr_time -= get_wall_time());
     const size_t N = pars.N;
-    const size_t N2 = 2 * N;
-    const size_t N3 = 3 * N;
-    const double a = f[pars.Ntot - 1];
-    const double a2 = a * a;
+    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
     const double hubble = sqrt(rho_mean / 3.0);
     const double h3 = 3.0 * hubble;
     const double phi_mean = mean(f, N);
     const double dphi_mean = mean(f + N, N);
-    double ham, ham_l2 = 0.0, ham_max = 0.0;
-    double mom, mom_l2 = 0.0, mom_max = 0.0;
-    double tmp1;
+    double ham_l2 = 0.0, ham_max = 0.0;
+    double mom_l2 = 0.0, mom_max = 0.0;
 
-    #pragma omp parallel for private(tmp1, ham, mom) \
-        reduction(max: ham_max, mom_max) reduction(+: ham_l2, mom_l2)
+    #pragma omp parallel for reduction(max: ham_max, mom_max) \
+                             reduction(+: ham_l2, mom_l2)
     for (size_t i = 0; i < N; ++i) {
-        tmp1 = hubble * f[N2 + i] + f[N3 + i];
-        ham = tmp.f[i] / a2 - h3 * tmp1 - 0.5 * (rho[i] - rho_mean);
-        mom = tmp1 - 0.5 * dphi_mean * (f[i] - phi_mean);
+        double tmp1 = hubble * f[2 * N + i] + f[3 * N + i];
+        double ham = tmp.f[i] / a2 - h3 * tmp1 - 0.5 * (rho[i] - rho_mean);
+        double mom = tmp1 - 0.5 * dphi_mean * (f[i] - phi_mean);
         ham_l2 += ham * ham;
         mom_l2 += mom * mom;
         ham_max = MAX(ham_max, fabs(ham));
