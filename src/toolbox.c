@@ -41,8 +41,7 @@ static void contains_nan(const double *f, const size_t N);
 static void contains_nanc(const complex *f, const size_t N);
 #endif
 
-struct evolution_flags evo_flags = {.filter = 0,
-                                    .output = 0};
+struct evolution_flags evo_flags = {.filter = 0, .output = 0};
 
 /**
  * @brief Compute the right hand side of the pde, i.e. all first order temporal
