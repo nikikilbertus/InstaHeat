@@ -49,9 +49,9 @@ struct evolution_flags evo_flags = {.filter = 0,
  * derivatives.
  *
  * @param[in] t The current time
- * @param[in] All necessary fields bundled in one array
- * @param[out] The right hand side of the partial differential equation, i.e.
- * the first temporal derivatives of the fields
+ * @param[in] f All necessary fields bundled in one array
+ * @param[out] result The right hand side of the partial differential equation,
+ * i.e. the first temporal derivatives of the fields
  *
  * We evolve $$\phi$$, $$\dot{\phi}$$, $$\psi$$, $$\dot{\psi}$$ and $$a$$
  * according to a hyperbolic constraint equation with the integration routine.
@@ -277,6 +277,17 @@ void mk_rho(const double *f)
     pressure_mean /= N;
 }
 
+/**
+ * @brief Compute the traceless transverse source terms of the tensor
+ * perturbations needed in gravitational wave extraction.
+ *
+ * @param[in] f An array containing the fields
+ * @param[in, out] fsij The traceless transverse part of the source terms in
+ * the equation of motion of the tensor perturbations. We only need the first
+ * two fields, because there are only two degrees of freedom.
+ *
+ * @see TODO[link thesis and papers]
+ */
 static void mk_sij(const double *f, complex **fsij)
 {
     const size_t N = pars.N;
