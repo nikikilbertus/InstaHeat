@@ -503,8 +503,8 @@ void save()
     #ifdef LARGE_OUTPUT
     const hsize_t N = pars.N;
     const hsize_t N2 = 2 * N;
-    const hsize_t N2p = N2 + 2;
-    const hsize_t N3p = 3 * N + 2;
+    const hsize_t N2p = pars.N2p;
+    const hsize_t N3p = pars.N3p;
     const hsize_t Nx = pars.x.N;
     const hsize_t Ny = pars.y.N;
     const hsize_t Nz = pars.z.N;
@@ -595,8 +595,8 @@ void h5_read_timeslice()
 {
     hid_t file, dset, dspace;
     size_t N = pars.N;
-    size_t N2p = 2 * N + 2;
-    size_t N3p = 3 * N + 2;
+    size_t N2p = pars.N2p;
+    size_t N3p = pars.N3p;
     double t = pars.t.ti;
 
     file = H5Fopen(INITIAL_DATAPATH, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -714,8 +714,8 @@ static void h5_read_and_fill(const hid_t file, const hsize_t index, const char *
 void read_initial_data()
 {
     size_t N = pars.N;
-    size_t N2p = 2 * N + 2;
-    size_t N3p = 3 * N + 2;
+    size_t N2p = pars.N2p;
+    size_t N3p = pars.N3p;
 
     FILE *file = fopen(INITIAL_DATAPATH, "r");
     if (!file) {

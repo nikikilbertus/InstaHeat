@@ -169,7 +169,7 @@ void run_dopri853()
     TIME(secs += get_wall_time());
     free_dopri853_values();
 
-    INFO(puts("Writing simulation meta data to disk\n"));
+    INFO(puts("Writing simulation meta data to disk.\n"));
     double val[1];
     val[0] = (double)dp.n_stp;
     h5_write_parameter(H5_STEPS_TOTAL_NAME, val, 1);
@@ -178,7 +178,7 @@ void run_dopri853()
     val[0] = (double)dp.n_bad;
     h5_write_parameter(H5_STEPS_BAD_NAME, val, 1);
 
-    INFO(puts("Finished dopri853"));
+    INFO(puts("Finished dopri853."));
     #ifdef SHOW_TIMING_INFO
     INFO(printf("time: %f seconds\n", secs));
     val[0] = secs;
