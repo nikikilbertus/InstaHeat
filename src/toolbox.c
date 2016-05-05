@@ -438,13 +438,16 @@ static double potential_prime(const double f)
 static void assemble_gw_spectrum()
 {
     const size_t N = pars.N;
+    const size_t Nx = pars.x.N;
+    const size_t Ny = pars.y.N;
+    const size_t Nz = pars.z.N;
     const size_t Next = pars.Next;
     const size_t Ndh1 = 4 * N + 2 * Next;
     const size_t Ndh2 = Ndh1 + Next;
     const size_t Mx = pars.x.M;
     const size_t My = pars.y.M;
     const size_t Mz = pars.z.M;
-    const size_t bins = out.dim;
+    const size_t bins = gw.dim;
     const double k2_max = pars.x.k2 * (Nx/2) * (Nx/2) +
                 pars.y.k2 * (Ny/2) * (Ny/2) + pars.z.k2 * (Nz/2) * (Nz/2);
 
