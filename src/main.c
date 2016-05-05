@@ -95,6 +95,8 @@ int main(int argc, const char * argv[])
             mon.filter_time, 100. * (mon.filter_time / secs)));
     INFO(printf("poisson equation took %f seconds (%.2f %%).\n",
             mon.poisson_time, 100. * (mon.poisson_time / secs)));
+    INFO(printf("S_{ij}^{TT} took %f seconds (%.2f %%).\n",
+            mon.stt_time, 100. * (mon.stt_time / secs)));
     INFO(printf("computing constraints took %f seconds (%.2f %%).\n",
             mon.cstr_time, 100. * (mon.cstr_time / secs)));
     INFO(printf("computing summaries took %f seconds (%.2f %%).\n",
@@ -110,6 +112,7 @@ int main(int argc, const char * argv[])
     h5_write_parameter(H5_RUNTIME_FFTWPLAN_NAME, &mon.fftw_time_plan, 1);
     h5_write_parameter(H5_RUNTIME_FILTER_NAME, &mon.filter_time, 1);
     h5_write_parameter(H5_RUNTIME_ELLIPTIC_NAME, &mon.poisson_time, 1);
+    h5_write_parameter(H5_RUNTIME_STT_NAME, &mon.stt_time, 1);
     h5_write_parameter(H5_RUNTIME_COPY_BUFFER_NAME, &mon.copy_buffer_time, 1);
     h5_write_parameter(H5_RUNTIME_CSTR_NAME, &mon.cstr_time, 1);
     h5_write_parameter(H5_RUNTIME_SMRY_NAME, &mon.smry_time, 1);
