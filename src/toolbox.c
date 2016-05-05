@@ -633,11 +633,9 @@ static void apply_filter_real(double *inout)
 static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
         fftw_complex *psi_io, fftw_complex *dpsi_io)
 {
-    const size_t M = pars.M;
-    double fil;
-    #pragma omp parallel for private(fil)
-    for (size_t i = 0; i < M; ++i) {
-        fil = filter[i];
+    #pragma omp parallel for
+    for (size_t i = 0; i < pars.M; ++i) {
+        double fil = filter[i];
         phi_io[i] *= fil;
         dphi_io[i] *= fil;
         psi_io[i] *= fil;
@@ -715,7 +713,7 @@ static double mean(const double *f, const size_t N)
     for (size_t i = 0; i < N; ++i) {
         mean += f[i];
     }
-    return mean / (double)N;
+    return mean / N;
 }
 
 /**
@@ -731,9 +729,7 @@ static double mean(const double *f, const size_t N)
 static void mean_var_min_max(const double *f, double *smry)
 {
     const size_t N = pars.N;
-    double mean = 0.0;
-    double min_val = f[0];
-    double max_val = f[0];
+    double mean = 0.0, min_val = f[0], max_val = f[0];
     #pragma omp parallel for reduction(+: mean) reduction(max: max_val) \
         reduction(min: min_val)
     for (size_t i = 0; i < N; ++i) {
@@ -741,7 +737,7 @@ static void mean_var_min_max(const double *f, double *smry)
         min_val = MIN(min_val, f[i]);
         max_val = MAX(max_val, f[i]);
     }
-    smry[0] = mean / (double)N;
+    smry[0] = mean / N;
     smry[1] = variance(smry[0], f, N);
     smry[2] = min_val;
     smry[3] = max_val;
@@ -757,16 +753,14 @@ static void mean_var_min_max(const double *f, double *smry)
  */
 static double variance(const double mean, const double *f, const size_t N)
 {
-    double sum1 = 0.0;
-    double sum2 = 0.0;
-    double tmp;
+    double sum1 = 0.0, sum2 = 0.0, tmp;
     #pragma omp parallel for private(tmp) reduction(+: sum1, sum2)
     for (size_t i = 0; i < N; ++i) {
         tmp = f[i] - mean;
         sum1 += tmp * tmp;
         sum2 += tmp;
     }
-    return (sum1 - sum2 * sum2 / (double)N) / (double)(N - 1);
+    return (sum1 - sum2 * sum2 / N) / (N - 1);
 }
 
 #ifdef CHECK_FOR_NAN
