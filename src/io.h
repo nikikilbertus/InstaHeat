@@ -47,6 +47,7 @@
 #define     H5_RUNTIME_FFTWPLAN_NAME        ("runtime_fftwplan")
 #define     H5_RUNTIME_FILTER_NAME          ("runtime_filter")
 #define     H5_RUNTIME_ELLIPTIC_NAME        ("runtime_elliptic")
+#define     H5_RUNTIME_STT_NAME             ("runtime_stt")
 #define     H5_RUNTIME_WRITEOUT_NAME        ("runtime_writeout")
 #define     H5_RUNTIME_COPY_BUFFER_NAME     ("runtime_copy_buffer")
 #define     H5_RUNTIME_STEPPER_NAME         ("runtime_stepper")
