@@ -115,14 +115,11 @@ void mk_rhs(const double t, double *f, double *result)
     }
     mk_stt(f, stt);
 
-    size_t i1, i2;
-    double t1, t2;
-    #pragma omp parallel for private(i1, i2, t1, t2)
+    #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
-        i1 = 2 * i;
-        i2 = i1 + 1;
-        t1 = - (2.0 * pressure_mean + kvec.sq[i] / a);
-        t2 = 2.0 / a;
+        size_t i1 = 2 * i, i2 = i1 + 1;
+        double t1 = - (2.0 * pressure_mean + kvec.sq[i] / a);
+        double t2 = 2.0 / a;
         result[Ndh1 + i1] = t1 * f[Nh1 + i1] - h3 * f[Ndh1 + i1] +
                             t2 * creal(stt[0][i]);
         result[Ndh1 + i2] = t1 * f[Nh1 + i2] - h3 * f[Ndh1 + i2] +
