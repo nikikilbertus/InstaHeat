@@ -211,6 +211,7 @@ static void initialize_parameters()
     mon.fftw_time_plan = 0.0;
     mon.filter_time = 0.0;
     mon.poisson_time = 0.0;
+    mon.stt_time = 0.0;
     mon.h5_time_write = 0.0;
     mon.copy_buffer_time = 0.0;
     mon.cstr_time = 0.0;
