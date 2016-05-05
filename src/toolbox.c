@@ -91,7 +91,6 @@ void mk_rhs(const double t, double *f, double *result)
         mk_gw_spectrum(f);
     }
 
-
     double p, dp;
     #pragma omp parallel for private(p, dp)
     for (size_t i = 0; i < N; ++i) {
@@ -342,7 +341,7 @@ static void mk_stt(const double *f, complex **fsij)
         s2 = t1 - t2;
 
         // use s11 and s12
-        if (kz > DBL_EPSILON) {
+        if (fabs(kz) > DBL_EPSILON) {
             k1 = kx * fsij[0][i] + ky * fsij[1][i] + kz * fsij[2][i];
             k2 = kx * fsij[1][i] + ky * fsij[3][i] + kz * fsij[4][i];
             fsij[0][i] = fsij[0][i] - 2.0 * fx * k1 +
@@ -350,7 +349,7 @@ static void mk_stt(const double *f, complex **fsij)
             fsij[1][i] = fsij[1][i] - fx * k2 - fy * k1 +
                 0.5 * fx * ky * s1;
         // use s11 and s13
-        } else if (ky > DBL_EPSILON) {
+        } else if (fabs(ky) > DBL_EPSILON) {
             k1 = kx * fsij[0][i] + ky * fsij[1][i] + kz * fsij[2][i];
             k3 = kx * fsij[2][i] + ky * fsij[4][i] + kz * fsij[5][i];
             fsij[0][i] = fsij[0][i] - 2.0 * fx * k1 +
@@ -435,68 +434,54 @@ static double potential_prime(const double f)
 static void mk_gw_spectrum(double *f)
 {
     const size_t N = pars.N;
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
     const size_t Next = pars.Next;
     const size_t Ndh1 = 4 * N + 2 * Next;
     const size_t Ndh2 = Ndh1 + Next;
-    const size_t Mx = pars.x.M;
-    const size_t My = pars.y.M;
-    const size_t Mz = pars.z.M;
     const size_t bins = gw.dim;
-    const double k2_max = pars.x.k2 * (Nx/2) * (Nx/2) +
-                pars.y.k2 * (Ny/2) * (Ny/2) + pars.z.k2 * (Nz/2) * (Nz/2);
+    const double k2_max = pars.x.k2 * (pars.x.N/2) * (pars.x.N/2) +
+                          pars.y.k2 * (pars.y.N/2) * (pars.y.N/2) +
+                          pars.z.k2 * (pars.z.N/2) * (pars.z.N/2);
 
-    //TODO: still need to create output gw
     #pragma omp parallel for
     for (size_t i = 0; i < bins; ++i) {
         gw.tmp[i] = 0.0;
     }
 
-    size_t osx, osy, id, idx;
+    size_t idx;
     double kx, ky, kz, k2, dh1r, dh1i, dh2r, dh2i, pow;
-    // TODO: are extra zeros in kx, ky, kz an issue here?
-    #pragma omp parallel for private(osx, osy, id, idx, kx, ky, kz, k2, \
+    #pragma omp parallel for private(idx, kx, ky, kz, k2, \
                                      dh1r, dh1i, dh2r, dh2i, pow)
-    for (size_t i = 0; i < Mx; ++i) {
-        osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j) {
-            osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k) {
-                id = osy + k;
-                kx = kvec.xf[id];
-                ky = kvec.yf[id];
-                kz = kvec.zf[id];
-                k2 = kvec.sq[id];
-                dh1r = f[Ndh1 + 2 * id];
-                dh2r = f[Ndh2 + 2 * id];
-                dh1i = f[Ndh1 + 2 * id + 1];
-                dh2i = f[Ndh2 + 2 * id + 1];
+    for (size_t i = 1; i < M; ++i) {
+        kx = kvec.xf[i];
+        ky = kvec.yf[i];
+        kz = kvec.zf[i];
+        k2 = kvec.sq[i];
+        dh1r = f[Ndh1 + 2 * i];
+        dh2r = f[Ndh2 + 2 * i];
+        dh1i = f[Ndh1 + 2 * i + 1];
+        dh2i = f[Ndh2 + 2 * i + 1];
 
-                // use h11 and h12
-                if (k != 0) {
-                    pow = 2.0 * k2 / (kz * kz * (ky * ky + kz * kz)) *
-                        ((kx * kx + kz * kz) * (dh1r * dh1r + dh1i * dh1i) +
-                        2.0 * kx * ky * (dh1r * dh2r + dh1i * dh2i) +
-                        (kx * kx + kz * kz) * (dh2r * dh2r + dh2i * dh2i));
-                // use h11 and h13
-                } else if (j != 0) {
-                    pow = 2.0 * (kx * kx + ky * ky) / (ky * ky * ky * ky) *
-                        ((kx * kx + ky * ky) * (dh1r * dh1r + dh1i * dh1i) +
-                        ky * ky * (dh2r * dh2r + dh2i * dh2i));
-                // use h22 and h23
-                } else {
-                    pow = 2.0 * (dh1r * dh1r + dh1i * dh1i +
-                                 dh2r * dh2r + dh2i * dh2i);
-                }
-                if (fabs(kvec.z[id]) > DBL_EPSILON) {
-                    pow *= 2.0;
-                }
-                idx = (int)trunc(bins * sqrt(k2 / k2_max) - 1.0e-14);
-                gw.tmp[idx] += pow / N;
-            }
+        // use h11 and h12
+        if (fabs(kz) > DBL_EPSILON) {
+            pow = 2.0 * k2 / (kz * kz * (ky * ky + kz * kz)) *
+                ((kx * kx + kz * kz) * (dh1r * dh1r + dh1i * dh1i) +
+                2.0 * kx * ky * (dh1r * dh2r + dh1i * dh2i) +
+                (kx * kx + kz * kz) * (dh2r * dh2r + dh2i * dh2i));
+        // use h11 and h13
+        } else if (fabs(ky) > DBL_EPSILON) {
+            pow = 2.0 * (kx * kx + ky * ky) / (ky * ky * ky * ky) *
+                ((kx * kx + ky * ky) * (dh1r * dh1r + dh1i * dh1i) +
+                ky * ky * (dh2r * dh2r + dh2i * dh2i));
+        // use h22 and h23
+        } else {
+            pow = 2.0 * (dh1r * dh1r + dh1i * dh1i +
+                         dh2r * dh2r + dh2i * dh2i);
         }
+        if (fabs(kvec.z[i]) > DBL_EPSILON) {
+            pow *= 2.0;
+        }
+        idx = (int)trunc(bins * sqrt(k2 / k2_max) - 1.0e-14);
+        gw.tmp[idx] += pow / N;
     }
 }
 
