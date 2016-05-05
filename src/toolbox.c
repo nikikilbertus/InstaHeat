@@ -89,11 +89,10 @@ void mk_rhs(const double t, double *f, double *result)
         mk_gw_spectrum(f);
     }
 
-    double p, dp;
-    #pragma omp parallel for private(p, dp)
+    #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
-        p = f[N2 + i];
-        dp = f[N3 + i];
+        double p = f[N2 + i];
+        double dp = f[N3 + i];
         result[i] = f[N + i]; // copy dphi
         result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / a2 -
             (h3 - 4.0 * dp) * f[N + i] -
