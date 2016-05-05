@@ -165,7 +165,6 @@ void mk_rhs(const double t, double *f, double *result)
 void mk_gradient_squared_and_laplacian(double *in)
 {
     const size_t N = pars.N;
-    const size_t M = pars.M;
 
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, in, tmp.phic);
@@ -184,10 +183,9 @@ void mk_gradient_squared_and_laplacian(double *in)
         #endif
     }
 
-    complex pre;
-    #pragma omp parallel for private(pre)
-    for (size_t i = 0; i < M; ++i) {
-        pre = tmp.phic[i] * I / N;
+    #pragma omp parallel for
+    for (size_t i = 0; i < pars.M; ++i) {
+        complex pre = tmp.phic[i] * I / N;
         tmp.xphic[i] = pre * kvec.x[i];
         tmp.yphic[i] = pre * kvec.y[i];
         tmp.zphic[i] = pre * kvec.z[i];
