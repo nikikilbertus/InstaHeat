@@ -41,8 +41,8 @@ static void free_dopri853_values();
  */
 struct dopri853_values
 {
-        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;
-        double *yerr, *yerr2;
+    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;
+    double *yerr, *yerr2;
 };
 
 /**
@@ -562,7 +562,6 @@ static void free_dopri853_values()
     fftw_free(dpv.k9);
     fftw_free(dpv.k10);
     fftw_free(dpv.k_tmp);
-
     fftw_free(dpv.yerr);
     fftw_free(dpv.yerr2);
     INFO(puts("Freed memory of dopri853 variables.\n"));
