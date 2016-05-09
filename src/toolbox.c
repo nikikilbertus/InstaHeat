@@ -79,9 +79,7 @@ void mk_rhs(const double t, double *f, double *result)
     if (evo_flags.output == 1) {
         // power spectrum of rho here, because need rho first
         #ifdef OUTPUT_RHO_PS
-        TIME(mon.fftw_time_exe -= get_wall_time());
-        fftw_execute_dft_r2c(p_fw, rho, tmp.phic);
-        TIME(mon.fftw_time_exe += get_wall_time());
+        fft(rho, tmp.phic);
         mk_power_spectrum(tmp.phic, rho_ps);
         #endif
         #ifdef OUTPUT_CONSTRAINTS
@@ -161,12 +159,10 @@ void mk_rhs(const double t, double *f, double *result)
 void mk_gradient_squared_and_laplacian(double *in)
 {
     const size_t N = pars.N;
-    TIME(mon.fftw_time_exe -= get_wall_time());
-    fftw_execute_dft_r2c(p_fw, in, tmp.phic);
+    fft(in, tmp.phic);
     #if defined(OUTPUT_CONSTRAINTS) || defined(OUTPUT_PSI_PS)
-    fftw_execute_dft_r2c(p_fw, in + 2 * N, tmp.psic);
+    fft(in + 2 * N, tmp.psic);
     #endif
-    TIME(mon.fftw_time_exe += get_wall_time());
 
     // good place for power spectrum of phi and psi, because fft exists
     if (evo_flags.output == 1) {
@@ -190,19 +186,17 @@ void mk_gradient_squared_and_laplacian(double *in)
         #endif
     }
 
-    TIME(mon.fftw_time_exe -= get_wall_time());
-    fftw_execute_dft_c2r(p_bw, tmp.xphic, tmp.xphi);
+    ifft(tmp.xphic, tmp.xphi);
     if (pars.dim > 1) {
-        fftw_execute_dft_c2r(p_bw, tmp.yphic, tmp.yphi);
+        ifft(tmp.yphic, tmp.yphi);
         if (pars.dim > 2) {
-            fftw_execute_dft_c2r(p_bw, tmp.zphic, tmp.zphi);
+            ifft(tmp.zphic, tmp.zphi);
         }
     }
-    fftw_execute_dft_c2r(p_bw, tmp.phic, tmp.lap);
+    ifft(tmp.phic, tmp.lap);
     #ifdef OUTPUT_CONSTRAINTS
-    fftw_execute_dft_c2r(p_bw, tmp.psic, tmp.f);
+    ifft(tmp.psic, tmp.f);
     #endif
-    TIME(mon.fftw_time_exe += get_wall_time());
     assemble_gradient_squared();
 }
 
@@ -295,12 +289,10 @@ static void mk_stt(const double *f, complex **fsij)
         sij[4][i] = tmp.yphi[i] * tmp.zphi[i];
         sij[5][i] = tmp.zphi[i] * tmp.zphi[i] + gphi;
     }
-    TIME(mon.fftw_time_exe -= get_wall_time());
     for (size_t i = 0; i < len; ++i) {
-        fftw_execute_dft_r2c(p_fw, sij[i], fsij[i]);
+        fft(sij[i], fsij[i]);
         fftw_free(sij[i]);
     }
-    TIME(mon.fftw_time_exe += get_wall_time());
     free(sij);
 
     #pragma omp parallel for
@@ -527,11 +519,8 @@ void mk_psi(double *f)
     }
     const double extra = 0.5 * (extra1 - extra2 / a2) / N;
 
-    TIME(mon.fftw_time_exe -= get_wall_time());
-    fftw_execute_dft_r2c(p_fw, tmp.deltarho, tmp.deltarhoc);
-    fftw_execute_dft_r2c(p_fw, tmp.f, tmp.fc);
-    TIME(mon.fftw_time_exe += get_wall_time());
-
+    fft(tmp.deltarho, tmp.deltarhoc);
+    fft(tmp.f, tmp.fc);
     #pragma omp parallel for
     for (size_t i = 1; i < pars.M; ++i) {
         tmp.phic[i] = 0.5 * (tmp.deltarhoc[i] +
@@ -539,10 +528,7 @@ void mk_psi(double *f)
     }
     tmp.phic[0] = 0.0;
 
-    TIME(mon.fftw_time_exe -= get_wall_time());
-    fftw_execute_dft_c2r(p_bw, tmp.phic, f + 2 * N);
-    TIME(mon.fftw_time_exe += get_wall_time());
-
+    ifft(tmp.phic, f + 2 * N);
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
         f[3 * N + i] = 0.5 * tmp.f[i] - hubble * f[2 * N + i];
@@ -598,21 +584,15 @@ static void apply_filter_real(double *inout)
 {
     TIME(mon.filter_time -= get_wall_time());
     const size_t N = pars.N;
-    TIME(mon.fftw_time_exe -= get_wall_time());
-    fftw_execute_dft_r2c(p_fw, inout, tmp.phic);
-    fftw_execute_dft_r2c(p_fw, inout + N, tmp.xphic);
-    fftw_execute_dft_r2c(p_fw, inout + 2 * N, tmp.yphic);
-    fftw_execute_dft_r2c(p_fw, inout + 3 * N, tmp.zphic);
-    TIME(mon.fftw_time_exe += get_wall_time());
-
+    fft(inout, tmp.phic);
+    fft(inout + N, tmp.xphic);
+    fft(inout + 2 * N, tmp.yphic);
+    fft(inout + 3 * N, tmp.zphic);
     apply_filter_fourier(tmp.phic, tmp.xphic, tmp.yphic, tmp.zphic);
-
-    TIME(mon.fftw_time_exe -= get_wall_time());
-    fftw_execute_dft_c2r(p_bw, tmp.phic, inout);
-    fftw_execute_dft_c2r(p_bw, tmp.xphic, inout + N);
-    fftw_execute_dft_c2r(p_bw, tmp.yphic, inout + 2 * N);
-    fftw_execute_dft_c2r(p_bw, tmp.zphic, inout + 3 * N);
-    TIME(mon.fftw_time_exe += get_wall_time());
+    ifft(tmp.phic, inout);
+    ifft(tmp.xphic, inout + N);
+    ifft(tmp.yphic, inout + 2 * N);
+    ifft(tmp.zphic, inout + 3 * N);
     TIME(mon.filter_time += get_wall_time());
 }
 
