@@ -152,7 +152,6 @@ OUTPUT_PHI_PS	main.h	/^#define OUTPUT_PHI_PS$/;"	d
 OUTPUT_PHI_SMRY	main.h	/^#define OUTPUT_PHI_SMRY$/;"	d
 OUTPUT_PS	main.h	/^    #define OUTPUT_PS$/;"	d
 OUTPUT_PS	main_template.h	/^    #define OUTPUT_PS$/;"	d
-OUTPUT_PSI_PS	main.h	/^#define OUTPUT_PSI_PS$/;"	d
 OUTPUT_PSI_SMRY	main.h	/^#define OUTPUT_PSI_SMRY$/;"	d
 OUTPUT_RHO_PS	main.h	/^#define OUTPUT_RHO_PS$/;"	d
 OUTPUT_RHO_SMRY	main.h	/^#define OUTPUT_RHO_SMRY$/;"	d
@@ -461,6 +460,7 @@ f	main.h	/^    double  *f; \/\/\/< Various purposes (real space)$/;"	m	struct:te
 f	main_template.h	/^    double  *f; \/\/\/< Various purposes (real space)$/;"	m	struct:temporary
 fc	main.h	/^    complex *fc; \/\/\/< Various purposes (Fourier space)$/;"	m	struct:temporary
 fc	main_template.h	/^    complex *fc; \/\/\/< Various purposes (Fourier space)$/;"	m	struct:temporary
+fft	toolbox.c	/^static void fft(double *in, complex *out)$/;"	f	file:
 fftw_time_exe	main.h	/^    double fftw_time_exe; \/\/\/< Total wall clock time for fft execution$/;"	m	struct:monitor
 fftw_time_exe	main_template.h	/^    double fftw_time_exe; \/\/\/< Total wall clock time for fft execution$/;"	m	struct:monitor
 fftw_time_plan	main.h	/^    double fftw_time_plan; \/\/\/< Total wall clock time for fftw planning$/;"	m	struct:monitor
@@ -502,6 +502,7 @@ id	main.h	/^    hsize_t id;        \/\/\/< h5 file id of the output file$/;"	m	s
 id	main.h	/^    hsize_t id;     \/\/\/< id for the dataset in the h5 file$/;"	m	struct:output
 id	main_template.h	/^    hsize_t id;        \/\/\/< h5 file id of the output file$/;"	m	struct:file_parameters
 id	main_template.h	/^    hsize_t id;     \/\/\/< id for the dataset in the h5 file$/;"	m	struct:output
+ifft	toolbox.c	/^static void ifft(complex *in, double *out)$/;"	f	file:
 index	main.h	/^    size_t index;      \/\/\/< current index within the buffers$/;"	m	struct:file_parameters
 index	main_template.h	/^    size_t index;      \/\/\/< current index within the buffers$/;"	m	struct:file_parameters
 init_output	setup.c	/^static void init_output(struct output *out, const size_t dim, const int mode)$/;"	f	file:
