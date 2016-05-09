@@ -36,6 +36,8 @@ static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
 static double mean(const double *f, const size_t N);
 static void mean_var_min_max(const double *f, double *smry);
 static double variance(const double mean, const double *f, const size_t N);
+static double fft(double *in, complex *out);
+static double ifft(complex *in, double *out);
 #ifdef CHECK_FOR_NAN
 static void contains_nan(const double *f, const size_t N);
 static void contains_nanc(const complex *f, const size_t N);
