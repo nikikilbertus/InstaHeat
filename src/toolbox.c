@@ -410,9 +410,8 @@ static void mk_gw_spectrum(double *f)
     }
     // start with 1 to exclude constant offset, no omp!
     for (size_t i = 1; i < pars.M; ++i) {
-        double kx = kvec.xf[i];
-        double ky = kvec.yf[i];
-        double kz = kvec.zf[i];
+        double kx = kvec.xf[i], ky = kvec.yf[i], kz = kvec.zf[i];
+        double kx2 = kx * kx, ky2 = ky * ky; kz2 = kz * kz;
         double k2 = kvec.sq[i];
         double dh1r = f[Ndh1 + 2 * i];
         double dh2r = f[Ndh2 + 2 * i];
@@ -421,15 +420,15 @@ static void mk_gw_spectrum(double *f)
         double pow;
         // use h11 and h12
         if (fabs(kz) > DBL_EPSILON) {
-            pow = 2.0 * k2 / (kz * kz * (ky * ky + kz * kz)) *
-                ((kx * kx + kz * kz) * (dh1r * dh1r + dh1i * dh1i) +
+            pow = 2.0 * k2 / (kz2 * (ky2 + kz2)) *
+                ((kx2 + kz2) * (dh1r * dh1r + dh1i * dh1i) +
                 2.0 * kx * ky * (dh1r * dh2r + dh1i * dh2i) +
-                (kx * kx + kz * kz) * (dh2r * dh2r + dh2i * dh2i));
+                (kx2 + kz2) * (dh2r * dh2r + dh2i * dh2i));
         // use h11 and h13
         } else if (fabs(ky) > DBL_EPSILON) {
-            pow = 2.0 * (kx * kx + ky * ky) / (ky * ky * ky * ky) *
-                ((kx * kx + ky * ky) * (dh1r * dh1r + dh1i * dh1i) +
-                ky * ky * (dh2r * dh2r + dh2i * dh2i));
+            pow = 2.0 * (kx2 + ky2) / (ky2 * ky2) *
+                ((kx2 + ky2) * (dh1r * dh1r + dh1i * dh1i) +
+                ky2 * (dh2r * dh2r + dh2i * dh2i));
         // use h22 and h23
         } else {
             pow = 2.0 * (dh1r * dh1r + dh1i * dh1i +
