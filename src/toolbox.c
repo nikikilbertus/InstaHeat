@@ -36,8 +36,8 @@ static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
 static double mean(const double *f, const size_t N);
 static void mean_var_min_max(const double *f, double *smry);
 static double variance(const double mean, const double *f, const size_t N);
-static double fft(double *in, complex *out);
-static double ifft(complex *in, double *out);
+static void fft(double *in, complex *out);
+static void ifft(complex *in, double *out);
 #ifdef CHECK_FOR_NAN
 static void contains_nan(const double *f, const size_t N);
 static void contains_nanc(const complex *f, const size_t N);
@@ -746,7 +746,7 @@ static double variance(const double mean, const double *f, const size_t N)
  * @param[in] in Pointer to the function in real space
  * @param[out] out Pointer to an array for the Fourier transform
  */
-static double fft(double *in, complex *out)
+static void fft(double *in, complex *out)
 {
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, in, out);
@@ -759,7 +759,7 @@ static double fft(double *in, complex *out)
  * @param[in] in Pointer to the function in Fourier space
  * @param[out] out Pointer to an array for the inverse Fourier transform
  */
-static double ifft(complex *in, double *out)
+static void ifft(complex *in, double *out)
 {
     TIME(mon.fftw_time_exe -= get_wall_time());
     fftw_execute_dft_c2r(p_bw, in, out);
