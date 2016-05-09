@@ -758,6 +758,32 @@ static double variance(const double mean, const double *f, const size_t N)
     return (sum1 - sum2 * sum2 / N) / (N - 1);
 }
 
+/*
+ * @brief Fourier transform
+ *
+ * @param[in] in Pointer to the function in real space
+ * @param[out] out Pointer to an array for the Fourier transform
+ */
+static double fft(double *in, complex *out)
+{
+    TIME(mon.fftw_time_exe -= get_wall_time());
+    fftw_execute_dft_r2c(p_fw, in, out);
+    TIME(mon.fftw_time_exe += get_wall_time());
+}
+
+/*
+ * @brief Inverse Fourier transform
+ *
+ * @param[in] in Pointer to the function in Fourier space
+ * @param[out] out Pointer to an array for the inverse Fourier transform
+ */
+static double ifft(complex *in, double *out)
+{
+    TIME(mon.fftw_time_exe -= get_wall_time());
+    fftw_execute_dft_c2r(p_bw, in, out);
+    TIME(mon.fftw_time_exe += get_wall_time());
+}
+
 #ifdef CHECK_FOR_NAN
 /**
  * @brief Check and print whether a vector contains NaNs __(debugging only)__
