@@ -1,8 +1,6 @@
 %% Laplacian
-N = 64;
-dim = 3;
-aa=-pi;
-bb=pi;
+N = 64; dim = 3;
+aa=-pi; bb=pi;
 dx = (bb-aa)/N;
 x = aa + (0:N-1)*dx;
 [xx,yy,zz] = meshgrid(x,x,x);
@@ -14,7 +12,6 @@ testl = -3 * sin(xx) .* sin(yy) .* sin(zz);
 testg = cos(xx).^2 .* sin(yy).^2 .* sin(zz).^2 + ... 
         sin(xx).^2 .* cos(yy).^2 .* sin(zz).^2 + ...
         sin(xx).^2 .* sin(yy).^2 .* cos(zz).^2;
-
 k = [0:N/2-1 0 -N/2+1:-1] * 2*pi/(bb-aa);
 k2 = [0:N/2 -N/2+1:-1] * 2*pi/(bb-aa);
 [X,Y,Z] = meshgrid(k2,k2,k2);
@@ -23,18 +20,14 @@ kk = X.^2 + Y.^2 + Z.^2;
 phix = ifftn(1i * kx .* fftn(test));
 phiy = ifftn(1i * ky .* fftn(test));
 phiz = ifftn(1i * kz .* fftn(test));
-
 testg1 = phix.^2 + phiy.^2 + phiz.^2;
 testl1 = ifftn(-kk.*fftn(test));
 testl2 = del2(test, dx) * 2 * dim;
 
 %% powerspectrum check bunch davies
-bins = 50;
-L=10;
-% n = size(phi,1);
+bins = 50; L = 10; match = 2;
 meff2 = mass^2 - 9 * H(1)^2 / 4;
-match = 2;
-
+% n = size(phi,1);
 % ps = mkPowerSpectrum(phi,bins,L);
 % dps = mkPowerSpectrum(dphi,bins,L);
 ps = phips(:,1);
@@ -61,10 +54,9 @@ ky = [0:Ny/2 -Ny/2+1:-1];
 kz = [0:Nz/2 -Nz/2+1:-1];
 [X,Y,Z] = meshgrid(kx,ky,kz);
 ks = sqrt(X.^2 + Y.^2 + Z.^2) * 2*pi/L;
-ps2full = ks .* (ks.^2+meff2).^(-.25);% .* exp(-ks.^2 / kcut2);
-dps2full = ks .* (ks.^2+meff2).^(.25);% .* exp(-ks.^2 / kcut2);
-ps2 = zeros(1, bins);
-dps2 = zeros(1, bins);
+ps2full = ks .* (ks.^2+meff2).^(-.25); % .* exp(-ks.^2 / kcut2);
+dps2full = ks .* (ks.^2+meff2).^(.25); % .* exp(-ks.^2 / kcut2);
+ps2 = zeros(1, bins); dps2 = zeros(1, bins);
 for i = 2:N
     idx = int64(fix(bins * (ks(i) / kmax) - 1e-10) + 1);
     if(idx > bins)
@@ -110,13 +102,11 @@ for i = 1:numel(phigen)
 end
 
 %% how far is rho0 from rho
-tmp = atol( rho0 - mean(rho0(:)) );
+tmp = abs( rho0 - mean(rho0(:)) );
 mean(tmp(:))
 
 %% construct karstens IC from fourier
-L=1;
-N=64;
-mass = 1e-2;
+L=1; N=64; mass = 1e-2;
 
 % read fourier karsten
 name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64fourier_3.dat';
@@ -140,7 +130,6 @@ nn = 16;
 indices = (0:16);
 [kx,ky,kz] = meshgrid(indices,indices,indices);
 ks1 = sqrt(kx.^2 + ky.^2 + kz.^2) * k;
-
 ks2 = zeros(nn,nn,nn);
 for i = 1:length(ks)
     ii = int64(xi(i));
@@ -158,9 +147,7 @@ spsi = raw(:,11);
 cdpsi = raw(:,12);
 sdpsi = raw(:,13);
 
-x = linspace(0,L-L/N,N);
-y = linspace(0,L-L/N,N);
-z = linspace(0,L-L/N,N);
+x = linspace(0,L-L/N,N); y = x; z = x;
 [x,y,z] = ndgrid(x,y,z);
 
 phi = zeros(N,N,N);
@@ -177,15 +164,14 @@ for i = 1:length(ks)
     dpsi = dpsi + cdpsi(i) *  ct - sdpsi(i) * st;
     disp(i);
 end
-fac = 6.193e-6;
+fac = 6.193e-6; % magic number from karste (see mail)
 phi = phi * fac + mean(phika(:));
 dphi = dphi * fac + mean(dphika(:));
 psi = psi * fac + mean(psika(:));
 dpsi = dpsi * fac + mean(dpsika(:));
 
 %% Hamiltonian and momentum karsten vs. code
-L=1;
-N=64;
+L=1; N=64;
 name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64psi_5.dat';
 raw = importdata(name);
 name = 'comp_karsten_5_simp2';
@@ -236,9 +222,7 @@ disp(' ')
 disp(['l2 and l\infty differences in \psi ' num2str(norm(psi(:)-psika(:))) ', ' prn(psi(:)-psika(:))])
 
 %% power spectrum check karsten
-L=1;
-N=64;
-bins = 50;
+L=1; N=64; bins = 50;
 name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64psi_5.dat';
 raw = importdata(name);
 name = 'comp_karsten_5_simp2';
@@ -256,7 +240,6 @@ phikaps = mkPowerSpectrum(phika,bins,L);
 rhormskaps = mkPowerSpectrum(rhormska,bins,L);
 loglog(1:bins,phikaps, 1:bins,rhormskaps); shg;
 
-
 %% Hamiltonian and momentum for bunch davies
 nums = [1 2 3 4 5 6 7 8];
 L = 10;
@@ -266,7 +249,7 @@ herrs = zeros(4, length(nums));
 mxerrs = zeros(3,length(nums));
 myerrs = zeros(3,length(nums));
 mzerrs = zeros(3,length(nums));
-for i=1:length(nums)
+for i = 1:length(nums)
     name = ['bunch' num2str(nums(i))];
     evaluate3D
     N = N(1);
@@ -304,8 +287,7 @@ myerr = myerrs(1,:) ./ max(myerrs(2:3,:));
 mzerr = mzerrs(1,:) ./ max(mzerrs(2:3,:));
 ms = 5 * 10.^(-nums);
 loglog(ms, ms.^2 / ms(end)^2 * herrs(1,end),'--', ms, herrs(1,:),'linewidth',2);
-xlabel('planck mass'); ylabel('max. abs error of hamiltonian');
-shg
+xlabel('planck mass'); ylabel('max. abs error of hamiltonian'); shg
 figure
 loglog(ms, ms.^2 / ms(end)^2 * mxerrs(1,end),'--', ms, mxerrs(1,:),'linewidth',2);
 hold on
@@ -316,37 +298,30 @@ xlabel('planck mass'); ylabel('max. abs error of momenutm');
 
 %% masses study for bunch davies
 figure
-ml = 3;
-m = 5;
+ml = 3; m = 5;
 % masses = 1./(2*10.^(-(ml:m)));
 masses = 5*10.^(-(ml:m));
 rhormsi = zeros(m-ml+1,4);
-as = zeros(m-ml+1,1);
 maxrhos = zeros(m-ml+1,1);
 for i = 1:m-ml+1
-name = ['resolutions9/96_5e-' num2str(i+ml-1) '_2e4'];
-evaluate3D
-maxrhos(i) = max(rhorms);
-loglog(a,rhorms/rhorms(1),'linewidth',2)
-legendinfo{i} = ['mass=' num2str(masses(i))];
-rhormsi(i,1) = rhorms(1);
-[~,idx] = min( (a - 1e2).^2);
-rhormsi(i,2) = rhorms(idx);
-[~,idx] = min( (a - 1e3).^2);
-rhormsi(i,3) = rhorms(idx);
-rhormsi(i,4) = rhorms(end);
-hold on
-% figure(2)
-% plot(diff(t)); title(['mass = ' num2str(masses(i))]); shg; pause;
-% figure(1)
+    name = ['resolutions9/96_5e-' num2str(i+ml-1) '_2e4'];
+    evaluate3D
+    maxrhos(i) = max(rhorms);
+    loglog(a,rhorms/rhorms(1),'linewidth',2); hold on
+    legendinfo{i} = ['mass=' num2str(masses(i))];
+    rhormsi(i,1) = rhorms(1);
+    [~,idx] = min((a - 1e2).^2);
+    rhormsi(i,2) = rhorms(idx);
+    [~,idx] = min((a - 1e3).^2);
+    rhormsi(i,3) = rhorms(idx);
+    rhormsi(i,4) = rhorms(end);
 end
-hold off
-xlabel('a'); ylabel('std(\rho) / |<\rho>|');
+hold off; xlabel('a'); ylabel('std(\rho) / |<\rho>|');
 legend(legendinfo,'location','southeast');
 figure
 loglog(masses, rhormsi, masses, masses/masses(1) * rhormsi(1,1) * 0.9,'--','linewidth',2);
 xlabel('mass'); ylabel('std(\rho) / |<\rho>|');
-legend('a=1', 'a=1e2', 'a=1e3', ['a=' num2str(a(end))], 'linear reference','location','northwest');
+legend('a=1', 'a=1e2', 'a=1e3', ['a=' num2str(a(end))],'linear reference','location','northwest');
 
 %% extrapolate to nonlinear regime
 tmp = 2;
@@ -364,10 +339,9 @@ loglog(a, rhorms, atmp, slope * atmp / (slope*atmp(1)) * rhorms(find(I,1))); shg
 estimatedruntime = h5read(name,'/runtime_total') / 3600 * tnonlin/t(end)
 
 %% playing with quantities in karstens paper
-L = 10;
-N = 32;
+L = 10; N = 32;
+mpl = 1;
 k = 2*pi/L;
-mpl = 1; % again compare to karstens paper
 alpha = 1;
 ms = mass;
 Hs = H;
@@ -403,8 +377,7 @@ loglog(exp(aext), exp(kmaxfit(aext)), exp(aext), exp(lcfit(aext)),'linewidth',0.
 %% power spectrum analysis
 L=10;
 k = 2*pi/L;
-
-name = 'resolutions7/96_5e-3_2e4';
+name = 'resolutions9/96_5e-3_2e4';
 evaluate3D
 N = N(1);
 % a = h5read(name, '/a');
@@ -424,8 +397,8 @@ for ii = [1 logspace(1,log10(length(phips(1,:))),300)]
     kmax = 1/H(i);
     lowb = min(phips(1:50,i));
     higb = max(phips(1:50,i));
-    plot([k k],[lowb higb]);
-    plot([kmax kmax],[lowb higb]);
+    loglog([k k],[lowb higb]);
+    loglog([kmax kmax],[lowb higb]);
     hold off;
     title(['\phi, a = ' num2str(a(i)) ' / ' num2str(a(end))]);
     subplot(2,2,2)
@@ -445,7 +418,7 @@ for ii = [1 logspace(1,log10(length(phips(1,:))),300)]
         subplot(2,2,4); hold on; plot([Hk Hk], [lowb higb]); hold off;
         pause;
     else
-        pause(0.1);
+        pause(0.05);
     end
 end
 
