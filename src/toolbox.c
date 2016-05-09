@@ -406,7 +406,7 @@ static void mk_gw_spectrum(double *f)
                           pars.z.k2 * (pars.z.N/2) * (pars.z.N/2);
     const double k_max = sqrt(k2_max);
     const double L = pars.x.b - pars.x.a;
-    const double fac = PI / (rho_mean * rho_mean * L * L)
+    const double fac = PI / (rho_mean * rho_mean * L * L);
     #pragma omp parallel for
     for (size_t i = 0; i < gw.dim; ++i) {
         gw.tmp[i] = 0.0;
@@ -414,7 +414,7 @@ static void mk_gw_spectrum(double *f)
     // start with 1 to exclude constant offset, no omp!
     for (size_t i = 1; i < pars.M; ++i) {
         double kx = kvec.xf[i], ky = kvec.yf[i], kz = kvec.zf[i];
-        double kx2 = kx * kx, ky2 = ky * ky; kz2 = kz * kz;
+        double kx2 = kx * kx, ky2 = ky * ky, kz2 = kz * kz;
         double k2 = kvec.sq[i];
         double k = sqrt(k2);
         double dh1r = f[Ndh1 + 2 * i];
