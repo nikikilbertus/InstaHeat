@@ -375,28 +375,25 @@ aext = linspace(log(a(1)),log(aint),100);
 loglog(exp(aext), exp(kmaxfit(aext)), exp(aext), exp(lcfit(aext)),'linewidth',0.8); hold off; shg;
 
 %% power spectrum analysis
-L=10;
+L=10; nbins = 60;
 k = 2*pi/L;
 name = 'resolutions9/96_5e-3_2e4';
 evaluate3D
 N = N(1);
-% a = h5read(name, '/a');
-% N = h5read(name, '/gridpoints_internal');
-% rhosmry = h5read(name, '/rho_summary');
-% rhomean = rhosmry(1,:);
-% rhops = h5read(name, '/rho_power_spectrum');
 lc = 1./sqrt(3*H*mass);
 kmin = k;
 kmax = sqrt(3) * N/2 * k;
-bins = (1:50)/50 * kmax;
+bins = (1:nbins)/nbins * kmax;
 for ii = [1 logspace(1,log10(length(phips(1,:))),300)]
     i = int64(floor(ii));
     subplot(2,2,1)
-    loglog(bins, phips(1:50,i)); xlabel('k'); ylabel('power'); hold on
-    k = lc(i);
-    kmax = 1/H(i);
-    lowb = min(phips(1:50,i));
-    higb = max(phips(1:50,i));
+    loglog(bins, phips(1:nbins,i)); xlabel('k'); ylabel('power'); hold on
+    k = lc(i)
+    kmax = 1/H(i)
+    [min(bins) max(bins)]
+    lowb = min(phips(1:nbins,i)) + 1e-13;
+    higb = max(phips(1:nbins,i));
+    [lowb higb]
     loglog([k k],[lowb higb]);
     loglog([kmax kmax],[lowb higb]);
     hold off;
@@ -405,16 +402,16 @@ for ii = [1 logspace(1,log10(length(phips(1,:))),300)]
     plot(a, rhorms, a(i), rhorms(i),'or'); xlabel('a'); ylabel('std \rho / <\rho>');
     shg;
     subplot(2,2,3)
-    loglog(bins, rhops(1:50,i)); xlabel('k'); ylabel('power'); title('\rho');
+    loglog(bins, rhops(1:nbins,i)); xlabel('k'); ylabel('power'); title('\rho');
     subplot(2,2,4)
-    loglog(bins, psips(1:50,i)); xlabel('k'); ylabel('power'); title('\psi');
+    loglog(bins, psips(1:nbins,i)); xlabel('k'); ylabel('power'); title('\psi');
     if i == 1
         Hk = H(i);
-        lowb = min(rhops(1:50,i));
-        higb = max(rhops(1:50,i));
+        lowb = min(rhops(1:nbins,i));
+        higb = max(rhops(1:nbins,i));
         subplot(2,2,3); hold on; plot([Hk Hk], [lowb higb]); hold off;
-        lowb = min(psips(1:50,i));
-        higb = max(psips(1:50,i));
+        lowb = min(psips(1:nbins,i));
+        higb = max(psips(1:nbins,i));
         subplot(2,2,4); hold on; plot([Hk Hk], [lowb higb]); hold off;
         pause;
     else
@@ -531,6 +528,7 @@ bar3(-log10(phistderrl2)); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',re
 xlabel('atol'); ylabel('rtol'); zlabel('-log10 std \phi error l_{2}');
 
 %% resolutions study
+close all
 res = [32 48 64 96];
 rhos = zeros(length(res),1);
 disp('         grid      steps')
@@ -546,17 +544,21 @@ for i = 1:length(res)
     loglog(a, rhorms); hold on
     figure(3)
     subplot(4,1,1)
-    semilogx(a,phimean); xlabel('a'); ylabel('<\phi>'); hold on
+    loglog(a,max(abs(phimin),abs(phimax)),a,abs(phimean)); xlabel('a'); ylabel('<\phi>'); hold on
     subplot(4,1,2)
     loglog(a,sqrt(phivar)); xlabel('a'); ylabel('std \phi'); hold on
     subplot(4,1,3)
-    semilogx(a,dphimean); xlabel('a'); ylabel('<d\phi>'); hold on
+    loglog(a,max(abs(dphimin),abs(dphimax)),a,dphimean); xlabel('a'); ylabel('<d\phi>'); hold on
     subplot(4,1,4)
     loglog(a,sqrt(dphivar)); xlabel('a'); ylabel('std d\phi'); hold on
     figure(4)
-    subplot(2,1,1)
+    subplot(4,1,1)
+    loglog(a,psimin,a,psimax); xlabel('a'); ylabel('min/max \psi'); hold on
+    subplot(4,1,2)
     loglog(a,sqrt(psivar)); xlabel('a'); ylabel('std \psi'); hold on
-    subplot(2,1,2)
+    subplot(4,1,3)
+    loglog(a,dpsimin,a,dpsimax); xlabel('a'); ylabel('min/max \psi'); hold on
+    subplot(4,1,4)
     loglog(a,sqrt(dpsivar)); xlabel('a'); ylabel('std d\psi'); hold on
     figure(5)
     loglog(a, hamcstrl2/res(i)^3); xlabel('a'); ylabel('ham cstr l2'); hold on
@@ -574,6 +576,28 @@ xlabel('a'); ylabel('std \rho / <|\rho|>'); legend(legendinfo); shg;
 inflmass
 figure
 plot(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('final rhorms'); shg;
+
+%% gw power spectrum
+close all
+num = 50; aup = 500; bins = 60;
+name = 'gw1/64_5e-3_2e4';
+evaluate3D
+gwps = h5read(name, '/gravitational_wave_spectrum');
+gwps(gwps < 0) = 0;
+imax = find(a>aup,1);
+skip = int64(floor(imax/num));
+c = 1;
+J = jet;
+subplot(1,2,2);
+loglog(a,rhorms); hold on;
+for i = 1:skip:imax
+    subplot(1,2,1)
+    semilogy(1:bins,gwps(:,i),'color',J(c,:)); hold on
+    linfo{c} = ['i = ' num2str(c)]; c=c+1;
+    subplot(1,2,2)
+    loglog(a(i),rhorms(i),'x','color',J(c,:));
+end
+hold off; shg;
 
 %% time scaling
 
