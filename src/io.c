@@ -283,7 +283,6 @@ void h5_write_parameter(const char *name, const double *val, const size_t N)
     hsize_t dim[1] = {N};
     hsize_t max[1] = {N};
     hid_t file = pars.file.id;
-
     hid_t dspace_par = H5Screate_simple(rank, dim, max);
     hid_t plist_par = H5Pcreate(H5P_DATASET_CREATE);
     H5Pset_layout(plist_par, H5D_COMPACT);
@@ -582,11 +581,10 @@ static void append_to_buffer(struct output f)
  */
 void h5_read_timeslice()
 {
-    hid_t file, dset, dspace;
     size_t N = pars.N;
     double t = pars.t.ti;
-
-    file = H5Fopen(INITIAL_DATAPATH, H5F_ACC_RDONLY, H5P_DEFAULT);
+    hid_t file = H5Fopen(INITIAL_DATAPATH, H5F_ACC_RDONLY, H5P_DEFAULT);
+    hid_t dset, dspace;
 
     // ---------------------------get time and find index-----------------------
     dset = H5Dopen(file, H5_TIME_NAME, H5P_DEFAULT);
