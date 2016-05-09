@@ -68,8 +68,7 @@ void mk_rhs(const double t, double *f, double *result)
     const size_t Nh2 = Nh1 + Next;
     const size_t Ndh1 = Nh2 + Next;
     const size_t Ndh2 = Ndh1 + Next;
-    const double a = f[pars.Ntot - 1];
-    const double a2 = a * a;
+    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
 
     mk_gradient_squared_and_laplacian(f);
     mk_rho(f);
@@ -116,8 +115,8 @@ void mk_rhs(const double t, double *f, double *result)
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
         size_t i1 = 2 * i, i2 = i1 + 1;
-        double t1 = - (2.0 * pressure_mean + kvec.sq[i] / a);
-        double t2 = 2.0 / a;
+        double t1 = - (2.0 * pressure_mean + kvec.sq[i] / a2);
+        double t2 = 2.0 / a2;
         result[Ndh1 + i1] = t1 * f[Nh1 + i1] - h3 * f[Ndh1 + i1] +
                             t2 * creal(stt[0][i]);
         result[Ndh1 + i2] = t1 * f[Nh1 + i2] - h3 * f[Ndh1 + i2] +
@@ -127,14 +126,13 @@ void mk_rhs(const double t, double *f, double *result)
         result[Ndh2 + i2] = t1 * f[Nh2 + i2] - h3 * f[Ndh2 + i2] +
                             t2 * cimag(stt[1][i]);
     }
-
     for (size_t i = 0; i < len; ++i) {
         fftw_free(stt[i]);
     }
     free(stt);
 
     // update da
-    result[pars.Ntot - 1] = a * hubble;
+    result[pars.Ntot - 1] = f[pars.Ntot - 1] * hubble;
 }
 
 /**
@@ -297,9 +295,7 @@ static void mk_stt(const double *f, complex **fsij)
 
     #pragma omp parallel for
     for (size_t i = 1; i < pars.M; ++i) {
-        double kx = kvec.xf[i];
-        double ky = kvec.yf[i];
-        double kz = kvec.zf[i];
+        double kx = kvec.xf[i], ky = kvec.yf[i], kz = kvec.zf[i];
         double fx = kx / kvec.sq[i];
         double fy = ky / kvec.sq[i];
         double fz = kz / kvec.sq[i];
