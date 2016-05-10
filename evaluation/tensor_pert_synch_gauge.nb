@@ -943,8 +943,8 @@ Cell[BoxData[
 }, Open  ]]
 }, Open  ]]
 },
-WindowSize->{1069, 855},
-WindowMargins->{{115, Automatic}, {Automatic, 0}},
+WindowSize->{1069, 851},
+WindowMargins->{{Automatic, 161}, {Automatic, 0}},
 ShowSelection->True,
 FrontEndVersion->"8.0 for Mac OS X x86 (32-bit, 64-bit Kernel) (February 23, \
 2011)",

@@ -377,23 +377,23 @@ loglog(exp(aext), exp(kmaxfit(aext)), exp(aext), exp(lcfit(aext)),'linewidth',0.
 %% power spectrum analysis
 L=10; nbins = 60;
 k = 2*pi/L;
-name = 'resolutions9/96_5e-3_2e4';
+name = 'resolutions9/64_5e-3_2e4';
 evaluate3D
 N = N(1);
 lc = 1./sqrt(3*H*mass);
 kmin = k;
 kmax = sqrt(3) * N/2 * k;
 bins = (1:nbins)/nbins * kmax;
-for ii = [1 logspace(1,log10(length(phips(1,:))),300)]
+% for ii = [1 logspace(1,log10(length(phips(1,:))),300)]
+for ii = length(a) - 200:length(a)
     i = int64(floor(ii));
     subplot(2,2,1)
     loglog(bins, phips(1:nbins,i)); xlabel('k'); ylabel('power'); hold on
-    k = lc(i)
-    kmax = 1/H(i)
-    [min(bins) max(bins)]
+    k = lc(i);
+    kmax = 1/H(i);
+    [min(bins) max(bins)];
     lowb = min(phips(1:nbins,i)) + 1e-13;
     higb = max(phips(1:nbins,i));
-    [lowb higb]
     loglog([k k],[lowb higb]);
     loglog([kmax kmax],[lowb higb]);
     hold off;

@@ -1,4 +1,4 @@
-name = 'testgwnew';
+% name = 'testgwnew';
 interp = true;
 newoutput = true;
 amax = -1;
