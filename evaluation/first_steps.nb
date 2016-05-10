@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[    289360,       8289]
-NotebookOptionsPosition[    269829,       7749]
-NotebookOutlinePosition[    270206,       7766]
-CellTagsIndexPosition[    270163,       7763]
+NotebookDataLength[    300707,       8604]
+NotebookOptionsPosition[    280804,       8054]
+NotebookOutlinePosition[    281181,       8071]
+CellTagsIndexPosition[    281138,       8068]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -7745,6 +7745,311 @@ Cell[BoxData[
     RowBox[{"y", " ", "\[Rule]", " ", "0.0"}], ",", " ", 
     RowBox[{"z", " ", "\[Rule]", " ", "0.0"}]}], "}"}]}]], "Input",
  CellChangeTimes->{{3.665333303279467*^9, 3.665333343256669*^9}}]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["stability of mathieus equation", "Section",
+ CellChangeTimes->{{3.671899540070209*^9, 3.671899544804367*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"p", "[", 
+   RowBox[{"a_", ",", "q_"}], "]"}], ":=", 
+  RowBox[{
+   RowBox[{"-", 
+    RowBox[{"MathieuC", "[", 
+     RowBox[{"a", ",", "q", ",", "0"}], "]"}]}], " ", 
+   RowBox[{"MathieuSPrime", "[", 
+    RowBox[{"a", ",", "q", ",", "0"}], "]"}]}]}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"ContourPlot", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"p", "[", 
+     RowBox[{"a", ",", "q"}], "]"}], " ", 
+    RowBox[{"p", "[", 
+     RowBox[{
+      RowBox[{"-", "a"}], ",", 
+      RowBox[{"-", "q"}]}], "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"q", ",", "0.05", ",", "0.95"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"a", ",", "0.00", ",", "0.25"}], "}"}], ",", 
+   RowBox[{"MaxRecursion", "\[Rule]", "3"}], ",", 
+   RowBox[{"RegionFunction", "\[Rule]", 
+    RowBox[{"Function", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"x", ",", "y", ",", "f"}], "}"}], ",", 
+      RowBox[{"f", ">", "0"}]}], "]"}]}], ",", 
+   RowBox[{"ColorFunction", "\[Rule]", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"ColorData", "[", "\"\<DarkRainbow\>\"", "]"}], "[", 
+       RowBox[{"1", "-", "#"}], "]"}], "&"}], ")"}]}], ",", 
+   RowBox[{"AspectRatio", "\[Rule]", 
+    RowBox[{"1", "/", "GoldenRatio"}]}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.6718995457983932`*^9, 3.6718995934412937`*^9}, {
+  3.671901645009227*^9, 3.671901652921011*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Plot", "[", 
+  RowBox[{
+   RowBox[{"Flatten", "@", 
+    RowBox[{"Table", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"MathieuCharacteristicA", "[", 
+         RowBox[{"r", ",", "q"}], "]"}], ",", " ", 
+        RowBox[{"MathieuCharacteristicB", "[", 
+         RowBox[{
+          RowBox[{"r", "+", "1"}], ",", "q"}], "]"}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"r", ",", "0", ",", "3"}], "}"}]}], "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"q", ",", "0", ",", "10"}], "}"}], ",", 
+   RowBox[{"Evaluated", "\[Rule]", " ", "True"}], ",", 
+   RowBox[{"PlotRange", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"All", ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "1"}], ",", "15"}], "}"}]}], "}"}]}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.67190020365452*^9, 3.6719002556183577`*^9}, {
+   3.671900288918049*^9, 3.671900312119351*^9}, {3.671900348498806*^9, 
+   3.671900365561453*^9}, {3.671900401974368*^9, 3.671900424925385*^9}, 
+   3.6719016166518373`*^9}],
+
+Cell[BoxData[
+ RowBox[{"Needs", "[", "\"\<PlotLegends`\>\"", "]"}]], "Input"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"ymax", " ", "=", " ", "10"}], ";", " ", 
+  RowBox[{"ymin", " ", "=", " ", 
+   RowBox[{"-", "1"}]}], ";", " ", 
+  RowBox[{"xmax", " ", "=", " ", "8"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Show", "[", 
+  RowBox[{"{", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Plot", "[", 
+     RowBox[{
+      RowBox[{"Flatten", "@", 
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"MathieuCharacteristicA", "[", 
+            RowBox[{"r", ",", "q"}], "]"}], ",", " ", 
+           RowBox[{"MathieuCharacteristicB", "[", 
+            RowBox[{
+             RowBox[{"r", "+", "1"}], ",", "q"}], "]"}]}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"r", ",", "0", ",", "3"}], "}"}]}], "]"}]}], ",", 
+      RowBox[{"{", 
+       RowBox[{"q", ",", "0", ",", "xmax"}], "}"}], ",", 
+      RowBox[{"PlotStyle", " ", "\[Rule]", " ", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"Black", ",", "Thick"}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"Black", ",", "Thick"}], "}"}]}], "}"}]}], ",", 
+      RowBox[{"Evaluated", "\[Rule]", " ", "True"}], ",", 
+      RowBox[{"PlotRange", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{"All", ",", 
+         RowBox[{"{", 
+          RowBox[{"ymin", ",", "ymax"}], "}"}]}], "}"}]}], ",", " ", 
+      RowBox[{"Filling", " ", "\[Rule]", " ", 
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"2", " ", "n"}], "\[Rule]", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"2", " ", "n"}], "+", "1"}], "}"}], ",", 
+             RowBox[{"Directive", "[", 
+              RowBox[{
+               RowBox[{"ColorData", "[", "\"\<DarkRainbow\>\"", "]"}], "[", 
+               "0", "]"}], "]"}]}], "}"}]}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"n", ",", "1", ",", "3"}], "}"}]}], "]"}]}], ",", 
+      RowBox[{"Frame", "\[Rule]", " ", "True"}]}], "]"}], ",", " ", 
+    "\[IndentingNewLine]", "\[IndentingNewLine]", 
+    RowBox[{"ContourPlot", "[", 
+     RowBox[{
+      RowBox[{"Im", "@", 
+       RowBox[{"MathieuCharacteristicExponent", "[", 
+        RowBox[{"r", ",", "q"}], "]"}]}], ",", 
+      RowBox[{"{", 
+       RowBox[{"q", ",", "0", ",", "xmax"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"r", ",", "ymin", ",", "ymax"}], "}"}], ",", " ", 
+      RowBox[{"MaxRecursion", "\[Rule]", "3"}], ",", 
+      RowBox[{"RegionFunction", "\[Rule]", 
+       RowBox[{"Function", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"x", ",", "y", ",", "f"}], "}"}], ",", 
+         RowBox[{"f", ">", "0.1"}]}], "]"}]}], ",", 
+      RowBox[{"ColorFunction", "\[Rule]", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"ColorData", "[", "\"\<DarkRainbow\>\"", "]"}], "[", "#", 
+          "]"}], "&"}], ")"}]}]}], "]"}], ",", "\[IndentingNewLine]", 
+    "\[IndentingNewLine]", 
+    RowBox[{"Plot", "[", 
+     RowBox[{
+      RowBox[{"Flatten", "@", 
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"MathieuCharacteristicA", "[", 
+            RowBox[{"r", ",", "q"}], "]"}], ",", " ", 
+           RowBox[{"MathieuCharacteristicB", "[", 
+            RowBox[{
+             RowBox[{"r", "+", "1"}], ",", "q"}], "]"}]}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"r", ",", "0", ",", "3"}], "}"}]}], "]"}]}], ",", 
+      RowBox[{"{", 
+       RowBox[{"q", ",", "0", ",", "xmax"}], "}"}], ",", 
+      RowBox[{"PlotStyle", " ", "\[Rule]", " ", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"Black", ",", "Thick"}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"Black", ",", "Thick"}], "}"}]}], "}"}]}], ",", 
+      RowBox[{"Evaluated", "\[Rule]", " ", "True"}], ",", 
+      RowBox[{"PlotRange", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{"All", ",", 
+         RowBox[{"{", 
+          RowBox[{"ymin", ",", "ymax"}], "}"}]}], "}"}]}]}], "]"}], ",", 
+    "\[IndentingNewLine]", "\[IndentingNewLine]", 
+    RowBox[{"Plot", "[", 
+     RowBox[{
+      RowBox[{"2", " ", "q"}], ",", " ", 
+      RowBox[{"{", 
+       RowBox[{"q", ",", "0", ",", "xmax"}], "}"}], ",", " ", 
+      RowBox[{"PlotStyle", "\[Rule]", " ", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"Darker", "[", "Red", "]"}], ",", 
+         RowBox[{"Thickness", "[", "0.005", "]"}]}], "}"}]}]}], "]"}]}], 
+   "\[IndentingNewLine]", "}"}], "]"}]}], "Input",
+ CellChangeTimes->CompressedData["
+1:eJwdzk0ow3EcBvDZwSab5mCaJmTkYt5lQ23yMgfUkmI1Nf+1kqEIpaZxoBQn
+2ZaXLK2Vy7JNs5SmLVkTB4nlZVtobdrBahdT/s/v8O1zeZ6nb4VmRqllMhiM
+UvpgzZO4xqRKyh//jmrh6V61DJbIrMSF42Q3NPwKe6BFEFHAi1dxP+lxxweg
+yCdRw8VV6wTJuRx6KC3jzsHp9e01yI+nN+CGd2cLtlhYJtibXTLD4HfACW94
+9S7yRyCUgDqLKgubItJcM23yJErky+0F8NJzSWQ8DxbBVHhCCFsT0UrY4WgU
+waKH/DZoMHIkUNN+fbdHaxVQ95Cz8qPcp41lMkRvKE1BVxlTCydNYj3s/Dic
+hVN5yXnoH9LswnAOzwaHP2/t8E3hc0Mjq9gDlezNK9IrfPND93JDkOzqwvfQ
+WTXyDs/Stih8UY58QXVdVxyWU+cpaGiOEdnU2OgBLdXnUcF/U1Dv8g==
+  "]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Export", "[", 
+   RowBox[{"\"\<mathieu_stability.pdf\>\"", ",", 
+    RowBox[{"Out", "[", "108", "]"}]}], "]"}], ";"}]], "Input",
+ CellChangeTimes->{{3.6719130252929068`*^9, 3.671913046451877*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Plot", "[", 
+  RowBox[{
+   RowBox[{"Flatten", "@", 
+    RowBox[{"Table", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"Tooltip", "[", 
+         RowBox[{
+          RowBox[{"MathieuCharacteristicA", "[", 
+           RowBox[{"r", ",", "q"}], "]"}], ",", 
+          RowBox[{"Subscript", "[", 
+           RowBox[{"ce", ",", "r"}], "]"}]}], "]"}], ",", 
+        RowBox[{"Tooltip", "[", 
+         RowBox[{
+          RowBox[{"MathieuCharacteristicB", "[", 
+           RowBox[{
+            RowBox[{"r", "+", "1"}], ",", "q"}], "]"}], ",", 
+          RowBox[{"Subscript", "[", 
+           RowBox[{"se", ",", 
+            RowBox[{"r", "+", "1"}]}], "]"}]}], "]"}], ",", 
+        RowBox[{"Tooltip", "[", 
+         RowBox[{
+          RowBox[{"-", 
+           RowBox[{"MathieuCharacteristicA", "[", 
+            RowBox[{"r", ",", "q"}], "]"}]}], ",", 
+          RowBox[{"-", 
+           RowBox[{"Subscript", "[", 
+            RowBox[{"ce", ",", "r"}], "]"}]}]}], "]"}], ",", 
+        RowBox[{"Tooltip", "[", 
+         RowBox[{
+          RowBox[{"-", 
+           RowBox[{"MathieuCharacteristicB", "[", 
+            RowBox[{
+             RowBox[{"r", "+", "1"}], ",", "q"}], "]"}]}], ",", 
+          RowBox[{"-", 
+           RowBox[{"Subscript", "[", 
+            RowBox[{"se", ",", 
+             RowBox[{"r", "+", "1"}]}], "]"}]}]}], "]"}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"r", ",", "0", ",", "4"}], "}"}]}], "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"q", ",", "0", ",", "8"}], "}"}], ",", 
+   RowBox[{"Evaluated", "\[Rule]", "True"}], ",", 
+   RowBox[{"PlotRange", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"All", ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "1"}], ",", "15"}], "}"}]}], "}"}]}], ",", 
+   RowBox[{"PlotStyle", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"Directive", "[", 
+       RowBox[{"Thick", ",", "Blue"}], "]"}], ",", 
+      RowBox[{"Directive", "[", 
+       RowBox[{"Thick", ",", "Red"}], "]"}], ",", 
+      RowBox[{"Directive", "[", 
+       RowBox[{"Thick", ",", "Dashed", ",", "Blue"}], "]"}], ",", 
+      RowBox[{"Directive", "[", 
+       RowBox[{"Thick", ",", "Dashed", ",", "Red"}], "]"}]}], "}"}]}], ",", 
+   RowBox[{"Filling", "\[Rule]", 
+    RowBox[{"Table", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"2", " ", "n"}], "+", "1"}], "\[Rule]", 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"2", " ", "n"}], "+", "2"}], "}"}], ",", 
+          RowBox[{"Directive", "[", 
+           RowBox[{
+            RowBox[{"Opacity", "[", 
+             RowBox[{"1", "/", "2"}], "]"}], ",", "Purple"}], "]"}]}], 
+         "}"}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"n", ",", "0", ",", "3"}], "}"}]}], "]"}]}]}], "]"}]], "Input",\
+
+ CellChangeTimes->{{3.6719000631903067`*^9, 3.6719000631912813`*^9}, {
+  3.671900099157598*^9, 3.6719001427390842`*^9}}]
 }, Open  ]]
 },
 WindowSize->{1440, 851},
@@ -8290,6 +8595,16 @@ Cell[265842, 7627, 455, 13, 58, "Input"],
 Cell[266300, 7642, 1509, 42, 33, "Input"],
 Cell[267812, 7686, 505, 14, 58, "Input"],
 Cell[268320, 7702, 1493, 44, 33, "Input"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[269850, 7751, 115, 1, 37, "Section"],
+Cell[269968, 7754, 295, 9, 27, "Input"],
+Cell[270266, 7765, 1087, 30, 43, "Input"],
+Cell[271356, 7797, 1034, 27, 27, "Input"],
+Cell[272393, 7826, 77, 1, 27, "Input"],
+Cell[272473, 7829, 5102, 130, 208, "Input"],
+Cell[277578, 7961, 231, 5, 27, "Input"],
+Cell[277812, 7968, 2976, 83, 88, "Input"]
 }, Open  ]]
 }
 ]
