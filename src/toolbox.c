@@ -28,7 +28,7 @@ static void mk_constraints(double *f);
 static void mk_power_spectrum(const fftw_complex *in, struct output out);
 #endif
 #ifdef ENABLE_FFT_FILTER
-static void apply_filter_real(double *inout);
+static void apply_filter(double *inout);
 #endif
 /* static void center(double *f, const size_t N); */
 static double mean(const double *f, const size_t N);
@@ -578,7 +578,7 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
  * The highest modes of each field are cut off according to `filter_window(const
  * double x)` in `setup.c`.
  */
-static void apply_filter_real(double *inout)
+static void apply_filter(double *inout)
 {
     TIME(mon.filter_time -= get_wall_time());
     const size_t N = pars.N;
