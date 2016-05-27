@@ -249,7 +249,7 @@ static int perform_step(const double dt_try)
         }
     }
     #ifdef ENABLE_FFT_FILTER
-    apply_filter_real(field_new);
+    apply_filter(field_new);
     #endif
     if ((dp.n_stp + 1) % pars.file.skip == 0) {
         evo_flags.output = 1;
