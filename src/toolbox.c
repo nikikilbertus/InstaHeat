@@ -293,16 +293,15 @@ static void mk_stt(const double *f, complex **fsij)
     }
     free(sij);
 
-    //TODO: there's room for optimization by combining terms differently
     //TODO: recheck for correctness
     #pragma omp parallel for
     for (size_t i = 1; i < pars.M; ++i) {
         double kx = kvec.xf[i], ky = kvec.yf[i], kz = kvec.zf[i];
         double ksq = kvec.sq[i];
         double fx = kx / ksq, fy = ky / ksq, fz = kz / ksq;
-        complex t1 = kx * fx * fsij[0][i] + 2.0 * kx * fy * fsij[1][i] +
-             2.0 * kx * fz * fsij[2][i] + ky * fy * fsij[3][i] +
-             2.0 * ky * fz * fsij[4][i] + kz * fz * fsij[5][i];
+        complex t1 = kx * fx * fsij[0][i] + ky * fy * fsij[3][i] +
+            kz * fz * fsij[5][i] + 2.0 * (kx * fy * fsij[1][i] +
+            kx * fz * fsij[2][i] + ky * fz * fsij[4][i]);
         complex t2 = fsij[0][i] + fsij[3][i] + fsij[5][i];
         complex s1 = t1 + t2;
         complex s2 = t1 - t2;
@@ -310,22 +309,19 @@ static void mk_stt(const double *f, complex **fsij)
         if (fabs(kz) > DBL_EPSILON) { // use s11 and s12
             complex k1 = kx * fsij[0][i] + ky * fsij[1][i] + kz * fsij[2][i];
             complex k2 = kx * fsij[1][i] + ky * fsij[3][i] + kz * fsij[4][i];
-            fsij[0][i] = fsij[0][i] - 2.0 * fx * k1 +
-                0.5 * (fx * kx * s1 + s2);
+            fsij[0][i] = fsij[0][i] - 2.0 * fx * k1 + 0.5 * (fx * kx * s1 + s2);
             fsij[1][i] = fsij[1][i] - fx * k2 - fy * k1 +
                 0.5 * fx * ky * s1;
         } else if (fabs(ky) > DBL_EPSILON) { // use s11 and s13
             complex k1 = kx * fsij[0][i] + ky * fsij[1][i] + kz * fsij[2][i];
             complex k3 = kx * fsij[2][i] + ky * fsij[4][i] + kz * fsij[5][i];
-            fsij[0][i] = fsij[0][i] - 2.0 * fx * k1 +
-                0.5 * (fx * kx * s1 + s2);
+            fsij[0][i] = fsij[0][i] - 2.0 * fx * k1 + 0.5 * (fx * kx * s1 + s2);
             fsij[1][i] = fsij[2][i] - fx * k3 - fz * k1 +
                 0.5 * fx * kz * s1;
         } else { // use s22 and s23
             complex k2 = kx * fsij[1][i] + ky * fsij[3][i] + kz * fsij[4][i];
             complex k3 = kx * fsij[2][i] + ky * fsij[4][i] + kz * fsij[5][i];
-            fsij[0][i] = fsij[3][i] - 2.0 * fy * k2 +
-                0.5 * (fy * ky * s1 + s2);
+            fsij[0][i] = fsij[3][i] - 2.0 * fy * k2 + 0.5 * (fy * ky * s1 + s2);
             fsij[1][i] = fsij[4][i] - fy * k3 - fz * k2 +
                 0.5 * fy * kz * s1;
         }
