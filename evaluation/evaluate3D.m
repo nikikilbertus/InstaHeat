@@ -1,7 +1,7 @@
-% name = 'testgwnew';
+% name = 'gw2/64_5e-3_2e4';
 interp = true;
 newoutput = true;
-amax = -1;
+amax = 610;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
