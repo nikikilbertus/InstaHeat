@@ -613,7 +613,7 @@ static void mk_initial_psi()
         field[i] = 0.0;
     }
     mk_gradient_squared_and_laplacian(field);
-    mk_rho(field);
+    mk_rho_and_p(field);
     mk_psi(field);
 }
 
