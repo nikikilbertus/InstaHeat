@@ -304,7 +304,7 @@ masses = 5*10.^(-(ml:m));
 rhormsi = zeros(m-ml+1,4);
 maxrhos = zeros(m-ml+1,1);
 for i = 1:m-ml+1
-    name = ['resolutions9/96_5e-' num2str(i+ml-1) '_2e4'];
+    name = ['resolutions9/64_5e-' num2str(i+ml-1) '_2e4'];
     evaluate3D
     maxrhos(i) = max(rhorms);
     loglog(a,rhorms/rhorms(1),'linewidth',2); hold on
@@ -339,7 +339,7 @@ loglog(a, rhorms, atmp, slope * atmp / (slope*atmp(1)) * rhorms(find(I,1))); shg
 estimatedruntime = h5read(name,'/runtime_total') / 3600 * tnonlin/t(end)
 
 %% playing with quantities in karstens paper
-L = 10; N = 32;
+L = 10; N = 64;
 mpl = 1;
 k = 2*pi/L;
 alpha = 1;
@@ -374,6 +374,18 @@ aint = exp(fminsearch(@(x) (kmaxfit(x) - lcfit(x)).^2, a(end)))
 aext = linspace(log(a(1)),log(aint),100);
 loglog(exp(aext), exp(kmaxfit(aext)), exp(aext), exp(lcfit(aext)),'linewidth',0.8); hold off; shg;
 
+%% generating data for talk (continue from above)
+I1 = (a<50);
+s = sum(I1) + 1;
+at = a;
+a = [at(I1); at(s:1000:end)];
+l_C = [lc(I1)'; lc(s:1000:end)'];
+l_H = [1./H(I1)'; 1./H(s:1000:end)'];
+k_min = [at(I1)./kmingrid; at(s:1000:end)/kmingrid];
+k_max = [at(I1)/kmaxgrid; at(s:1000:end)/kmaxgrid];
+T = table(a, l_H, l_C, k_min, k_max);
+writetable(T, '64_5e-3_2e4.csv');
+
 %% power spectrum analysis
 L=10; nbins = 60;
 k = 2*pi/L;
@@ -384,8 +396,8 @@ lc = 1./sqrt(3*H*mass);
 kmin = k;
 kmax = sqrt(3) * N/2 * k;
 bins = (1:nbins)/nbins * kmax;
-% for ii = [1 logspace(1,log10(length(phips(1,:))),300)]
-for ii = length(a) - 200:length(a)
+for ii = [1 logspace(1,log10(length(phips(1,:))),300)]
+% for ii = length(a) - 200:length(a)
     i = int64(floor(ii));
     subplot(2,2,1)
     loglog(bins, phips(1:nbins,i)); xlabel('k'); ylabel('power'); hold on
@@ -529,11 +541,13 @@ xlabel('atol'); ylabel('rtol'); zlabel('-log10 std \phi error l_{2}');
 
 %% resolutions study
 close all
-res = [32 48 64 96];
+% res = [32 48 64 96];
+res = [32 48 64];
 rhos = zeros(length(res),1);
 disp('         grid      steps')
 for i = 1:length(res)
-    name = ['resolutions9/' num2str(res(i)) '_5e-3_2e4'];
+%     name = ['resolutions9/' num2str(res(i)) '_5e-4_2e4'];
+    name = ['gw2/' num2str(res(i)) '_5e-5_2e4'];
     evaluate3D
     disp([N(1) steps])
     legendinfo{i} = num2str(res(i));
@@ -578,24 +592,33 @@ figure
 plot(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('final rhorms'); shg;
 
 %% gw power spectrum
-close all
-num = 50; aup = 500; bins = 60;
-name = 'gw1/64_5e-3_2e4';
+num = 11; aup = 600; nbins = 50;
+% prefactor = 1e-13;
+name = 'gw2/64_5e-3_2e4';
 evaluate3D
+N= N(1);
+L=10; k = 2*pi/L; kmax = sqrt(3) * N/2 * k;
+bins = (1:nbins)/nbins * kmax;
 gwps = h5read(name, '/gravitational_wave_spectrum');
 gwps(gwps < 0) = 0;
-imax = find(a>aup,1);
+imax = find(a>=aup,1);
 skip = int64(floor(imax/num));
 c = 1;
 J = jet;
-subplot(1,2,2);
+subplot(2,1,2);
+xs = zeros(length(1:skip:imax),2);
+gwpsexp = zeros(nbins,length(1:skip:imax)+1);
+gwpsexp(:,1) = bins;
 loglog(a,rhorms); hold on;
 for i = 1:skip:imax
-    subplot(1,2,1)
-    semilogy(1:bins,gwps(:,i),'color',J(c,:)); hold on
-    linfo{c} = ['i = ' num2str(c)]; c=c+1;
-    subplot(1,2,2)
-    loglog(a(i),rhorms(i),'x','color',J(c,:));
+    subplot(2,1,1)
+    gwpsexp(:,c+1) = gwps(:,i);
+    loglog(bins,gwps(:,i),'color',J(c,:)); xlabel('|k|'); ylabel('d \Omega_{gw} / d ln(k)'); hold on
+    linfo{c} = ['i = ' num2str(c)];
+    subplot(2,1,2)
+    loglog(a(i),rhorms(i),'x','color',J(c,:)); xlabel('a'); ylabel('std(\rho) / <\rho>');
+    xs(c,:) = [a(i), rhorms(i)];
+    c=c+1;
 end
 hold off; shg;
 
