@@ -114,17 +114,15 @@ void mk_rhs(const double t, double *f, double *result)
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
         size_t i1 = 2 * i, i2 = i1 + 1;
-        double t1 = - (2.0 * pressure_mean + kvec.sq[i] / a2);
-        //TODO: what's that supposed to be? pull out of loop
-        double t2 = 2.0 / a2;
-        result[Ndh1 + i1] = t1 * f[Nh1 + i1] - h3 * f[Ndh1 + i1] +
-                            t2 * creal(stt[0][i]);
-        result[Ndh1 + i2] = t1 * f[Nh1 + i2] - h3 * f[Ndh1 + i2] +
-                            t2 * cimag(stt[0][i]);
-        result[Ndh2 + i1] = t1 * f[Nh2 + i1] - h3 * f[Ndh2 + i1] +
-                            t2 * creal(stt[1][i]);
-        result[Ndh2 + i2] = t1 * f[Nh2 + i2] - h3 * f[Ndh2 + i2] +
-                            t2 * cimag(stt[1][i]);
+        double tmp = - (2.0 * pressure_mean + kvec.sq[i] / a2);
+        result[Ndh1 + i1] = tmp * f[Nh1 + i1] - h3 * f[Ndh1 + i1] +
+                            2.0 * creal(stt[0][i]) / a2;
+        result[Ndh1 + i2] = tmp * f[Nh1 + i2] - h3 * f[Ndh1 + i2] +
+                            2.0 * cimag(stt[0][i]) / a2;
+        result[Ndh2 + i1] = tmp * f[Nh2 + i1] - h3 * f[Ndh2 + i1] +
+                            2.0 * creal(stt[1][i]) / a2;
+        result[Ndh2 + i2] = tmp * f[Nh2 + i2] - h3 * f[Ndh2 + i2] +
+                            2.0 * cimag(stt[1][i]) / a2;
     }
 
     for (size_t i = 0; i < len; ++i) {
@@ -269,8 +267,6 @@ void mk_rho_and_p(const double *f)
 static void mk_stt(const double *f, complex **fsij)
 {
     TIME(mon.stt_time -= get_wall_time());
-    //TODO: change name to a3?
-    const double atmp = 3.0 * f[pars.Ntot - 1] * f[pars.Ntot - 1];
     const size_t len = 6;
 
     double **sij = malloc(len * sizeof *sij);
@@ -278,6 +274,7 @@ static void mk_stt(const double *f, complex **fsij)
         sij[i] = fftw_malloc(pars.N * sizeof *sij[i]);
     }
 
+    const double atmp = 3.0 * f[pars.Ntot - 1] * f[pars.Ntot - 1];
     #pragma omp parallel for
     for (size_t i = 0; i < pars.N; ++i) {
         // TODO: do i include metric here?
@@ -296,11 +293,13 @@ static void mk_stt(const double *f, complex **fsij)
     }
     free(sij);
 
+    //TODO: there's room for optimization by combining terms differently
+    //TODO: recheck for correctness
     #pragma omp parallel for
     for (size_t i = 1; i < pars.M; ++i) {
         double kx = kvec.xf[i], ky = kvec.yf[i], kz = kvec.zf[i];
-        double k2 = kvec.sq[i];
-        double fx = kx / k2, fy = ky / k2, fz = kz / k2;
+        double ksq = kvec.sq[i];
+        double fx = kx / ksq, fy = ky / ksq, fz = kz / ksq;
         complex t1 = kx * fx * fsij[0][i] + 2.0 * kx * fy * fsij[1][i] +
              2.0 * kx * fz * fsij[2][i] + ky * fy * fsij[3][i] +
              2.0 * ky * fz * fsij[4][i] + kz * fz * fsij[5][i];
@@ -567,6 +566,7 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
 }
 #endif
 
+//TODO: make use of filter flag again and filter whenever FT is available
 #ifdef ENABLE_FFT_FILTER
 /**
  * @brief Apply a Fourier filter to each field of a given input to cutoff high
