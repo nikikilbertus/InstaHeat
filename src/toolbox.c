@@ -71,7 +71,7 @@ void mk_rhs(const double t, double *f, double *result)
     const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
 
     mk_gradient_squared_and_laplacian(f);
-    mk_rho(f);
+    mk_rho_and_p(f);
     const double hubble = sqrt(rho_mean / 3.0);
     const double h3 = 3.0 * hubble;
 
@@ -88,6 +88,7 @@ void mk_rhs(const double t, double *f, double *result)
         mk_gw_spectrum(f);
     }
 
+    //TODO: use ph, dph, ps, dps for tmp values
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
         double df = f[N + i], p = f[N2 + i], dp = f[N3 + i];
@@ -116,6 +117,7 @@ void mk_rhs(const double t, double *f, double *result)
     for (size_t i = 0; i < pars.M; ++i) {
         size_t i1 = 2 * i, i2 = i1 + 1;
         double t1 = - (2.0 * pressure_mean + kvec.sq[i] / a2);
+        //TODO: what's that supposed to be? pull out of loop
         double t2 = 2.0 / a2;
         result[Ndh1 + i1] = t1 * f[Nh1 + i1] - h3 * f[Ndh1 + i1] +
                             t2 * creal(stt[0][i]);
@@ -126,13 +128,13 @@ void mk_rhs(const double t, double *f, double *result)
         result[Ndh2 + i2] = t1 * f[Nh2 + i2] - h3 * f[Ndh2 + i2] +
                             t2 * cimag(stt[1][i]);
     }
+
     for (size_t i = 0; i < len; ++i) {
         fftw_free(stt[i]);
     }
     free(stt);
 
-    // update da
-    result[pars.Ntot - 1] = f[pars.Ntot - 1] * hubble;
+    result[pars.Ntot - 1] = f[pars.Ntot - 1] * hubble; // update da
 }
 
 /**
@@ -235,7 +237,7 @@ static void assemble_gradient_squared()
  * All the above values persist until the next call of `mk_rhs(const double t,
  * double *f, double *result)`
  */
-void mk_rho(const double *f)
+void mk_rho_and_p(const double *f)
 {
     const size_t N = pars.N;
     const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
