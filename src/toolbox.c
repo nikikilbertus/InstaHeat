@@ -271,6 +271,7 @@ void mk_rho_and_p(const double *f)
 static void mk_stt(const double *f, complex **fsij)
 {
     TIME(mon.stt_time -= get_wall_time());
+    //TODO: change name to a3?
     const double atmp = 3.0 * f[pars.Ntot - 1] * f[pars.Ntot - 1];
     const size_t len = 6;
 
@@ -278,6 +279,7 @@ static void mk_stt(const double *f, complex **fsij)
     for (size_t i = 0; i < len; ++i) {
         sij[i] = fftw_malloc(pars.N * sizeof *sij[i]);
     }
+
     #pragma omp parallel for
     for (size_t i = 0; i < pars.N; ++i) {
         // TODO: do i include metric here?
