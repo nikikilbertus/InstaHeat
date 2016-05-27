@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[    300707,       8604]
-NotebookOptionsPosition[    280804,       8054]
-NotebookOutlinePosition[    281181,       8071]
-CellTagsIndexPosition[    281138,       8068]
+NotebookDataLength[    305807,       8736]
+NotebookOptionsPosition[    285781,       8183]
+NotebookOutlinePosition[    286158,       8200]
+CellTagsIndexPosition[    286115,       8197]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -7827,6 +7827,134 @@ Cell[BoxData[
 Cell[BoxData[
  RowBox[{"Needs", "[", "\"\<PlotLegends`\>\"", "]"}]], "Input"],
 
+Cell["without A=2q line", "Text",
+ CellChangeTimes->{{3.673285343135903*^9, 3.673285348551689*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"ymax", " ", "=", " ", "10"}], ";", " ", 
+  RowBox[{"ymin", " ", "=", " ", 
+   RowBox[{"-", "1"}]}], ";", " ", 
+  RowBox[{"xmax", " ", "=", " ", "8"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Show", "[", 
+  RowBox[{"{", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Plot", "[", 
+     RowBox[{
+      RowBox[{"Flatten", "@", 
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"MathieuCharacteristicA", "[", 
+            RowBox[{"r", ",", "q"}], "]"}], ",", " ", 
+           RowBox[{"MathieuCharacteristicB", "[", 
+            RowBox[{
+             RowBox[{"r", "+", "1"}], ",", "q"}], "]"}]}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"r", ",", "0", ",", "3"}], "}"}]}], "]"}]}], ",", 
+      RowBox[{"{", 
+       RowBox[{"q", ",", "0", ",", "xmax"}], "}"}], ",", 
+      RowBox[{"PlotStyle", " ", "\[Rule]", " ", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"Black", ",", "Thick"}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"Black", ",", "Thick"}], "}"}]}], "}"}]}], ",", 
+      RowBox[{"Evaluated", "\[Rule]", " ", "True"}], ",", 
+      RowBox[{"PlotRange", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{"All", ",", 
+         RowBox[{"{", 
+          RowBox[{"ymin", ",", "ymax"}], "}"}]}], "}"}]}], ",", " ", 
+      RowBox[{"Filling", " ", "\[Rule]", " ", 
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"2", " ", "n"}], "\[Rule]", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"2", " ", "n"}], "+", "1"}], "}"}], ",", 
+             RowBox[{"Directive", "[", 
+              RowBox[{
+               RowBox[{"ColorData", "[", "\"\<DarkRainbow\>\"", "]"}], "[", 
+               "0", "]"}], "]"}]}], "}"}]}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"n", ",", "1", ",", "3"}], "}"}]}], "]"}]}], ",", 
+      RowBox[{"Frame", "\[Rule]", " ", "True"}]}], "]"}], ",", " ", 
+    "\[IndentingNewLine]", "\[IndentingNewLine]", 
+    RowBox[{"ContourPlot", "[", 
+     RowBox[{
+      RowBox[{"Im", "@", 
+       RowBox[{"MathieuCharacteristicExponent", "[", 
+        RowBox[{"r", ",", "q"}], "]"}]}], ",", 
+      RowBox[{"{", 
+       RowBox[{"q", ",", "0", ",", "xmax"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"r", ",", "ymin", ",", "ymax"}], "}"}], ",", " ", 
+      RowBox[{"MaxRecursion", "\[Rule]", "3"}], ",", 
+      RowBox[{"RegionFunction", "\[Rule]", 
+       RowBox[{"Function", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"x", ",", "y", ",", "f"}], "}"}], ",", 
+         RowBox[{"f", ">", "0.1"}]}], "]"}]}], ",", 
+      RowBox[{"ColorFunction", "\[Rule]", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"ColorData", "[", "\"\<DarkRainbow\>\"", "]"}], "[", "#", 
+          "]"}], "&"}], ")"}]}]}], "]"}], ",", "\[IndentingNewLine]", 
+    "\[IndentingNewLine]", 
+    RowBox[{"Plot", "[", 
+     RowBox[{
+      RowBox[{"Flatten", "@", 
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"MathieuCharacteristicA", "[", 
+            RowBox[{"r", ",", "q"}], "]"}], ",", " ", 
+           RowBox[{"MathieuCharacteristicB", "[", 
+            RowBox[{
+             RowBox[{"r", "+", "1"}], ",", "q"}], "]"}]}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"r", ",", "0", ",", "3"}], "}"}]}], "]"}]}], ",", 
+      RowBox[{"{", 
+       RowBox[{"q", ",", "0", ",", "xmax"}], "}"}], ",", 
+      RowBox[{"PlotStyle", " ", "\[Rule]", " ", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"Black", ",", "Thick"}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"Black", ",", "Thick"}], "}"}]}], "}"}]}], ",", 
+      RowBox[{"Evaluated", "\[Rule]", " ", "True"}], ",", 
+      RowBox[{"PlotRange", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{"All", ",", 
+         RowBox[{"{", 
+          RowBox[{"ymin", ",", "ymax"}], "}"}]}], "}"}]}]}], "]"}]}], 
+   "\[IndentingNewLine]", "}"}], "]"}]}], "Input",
+ CellChangeTimes->CompressedData["
+1:eJwdzlsog3EYBvCPC+fDXIxIIYdWMmc5lvOhHGq0YpraPimZQ+QQTbighCv5
+tua0JOVm2Wik1kSyJlMSy2lCy6cl025Qvud/8fbrred5e+NkPaJ2b4qi4riB
+ghuhgJGwJdd/6ylwR5NUDKOKtcTBDbYcKn+iK6A68qkaHt4La0gvuK0OJpjz
+pHBoUisnOYNOAfNjgvth9/TCFAx3umfgzMHiPMxW+zKw8ndYBS0fJ3p4xksz
+kD9OrO+wQy35hZlP+T4qTnbbQQwv2QqBJqOJSN3W86HLLo+GOe+OeFioy0iA
+/KvAXKicCMqDsoLTCw2nNpK2waDxL9Ey57PHQzywumloiPFuh52MUAGLXlZ7
+YZc/OwCPG2RL0O7F24RNr+db8KHavAsnfCOMUOQ3e0R6YQ/HcHc03ULudtht
+UJ8ofoR77k0HvBOJ36A0tdQJY+l9F1RmPRP96JbmFU66yiiBAXMj8kIpt9fV
+0HAtuagPCi6HiaGNZaOwsVYxBr8/W22QYsYu4T+3owv+
+  "]],
+
+Cell["with A=2q line", "Text",
+ CellChangeTimes->{{3.673285351615452*^9, 3.673285354255445*^9}}],
+
 Cell[BoxData[{
  RowBox[{
   RowBox[{"ymax", " ", "=", " ", "10"}], ";", " ", 
@@ -7962,9 +8090,10 @@ WTXyDs/Stih8UY58QXVdVxyWU+cpaGiOEdnU2OgBLdXnUcF/U1Dv8g==
 Cell[BoxData[
  RowBox[{
   RowBox[{"Export", "[", 
-   RowBox[{"\"\<mathieu_stability.pdf\>\"", ",", 
-    RowBox[{"Out", "[", "108", "]"}]}], "]"}], ";"}]], "Input",
- CellChangeTimes->{{3.6719130252929068`*^9, 3.671913046451877*^9}}],
+   RowBox[{"\"\<mathieu_stability.eps\>\"", ",", 
+    RowBox[{"Out", "[", "5", "]"}]}], "]"}], ";"}]], "Input",
+ CellChangeTimes->{{3.6719130252929068`*^9, 3.671913046451877*^9}, {
+  3.673286407158597*^9, 3.6732864102053947`*^9}}],
 
 Cell[BoxData[
  RowBox[{"Plot", "[", 
@@ -8602,9 +8731,12 @@ Cell[269968, 7754, 295, 9, 27, "Input"],
 Cell[270266, 7765, 1087, 30, 43, "Input"],
 Cell[271356, 7797, 1034, 27, 27, "Input"],
 Cell[272393, 7826, 77, 1, 27, "Input"],
-Cell[272473, 7829, 5102, 130, 208, "Input"],
-Cell[277578, 7961, 231, 5, 27, "Input"],
-Cell[277812, 7968, 2976, 83, 88, "Input"]
+Cell[272473, 7829, 99, 1, 26, "Text"],
+Cell[272575, 7832, 4724, 120, 178, "Input"],
+Cell[277302, 7954, 96, 1, 26, "Text"],
+Cell[277401, 7957, 5102, 130, 208, "Input"],
+Cell[282506, 8089, 280, 6, 27, "Input"],
+Cell[282789, 8097, 2976, 83, 88, "Input"]
 }, Open  ]]
 }
 ]
