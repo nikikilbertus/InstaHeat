@@ -29,8 +29,6 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out);
 #endif
 #ifdef ENABLE_FFT_FILTER
 static void apply_filter_real(double *inout);
-static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
-        fftw_complex *psi_io, fftw_complex *dpsi_io);
 #endif
 /* static void center(double *f, const size_t N); */
 static double mean(const double *f, const size_t N);
@@ -291,6 +289,7 @@ static void mk_stt(const double *f, complex **fsij)
         sij[4][i] = tmp.yphi[i] * tmp.zphi[i];
         sij[5][i] = tmp.zphi[i] * tmp.zphi[i] + gphi;
     }
+
     for (size_t i = 0; i < len; ++i) {
         fft(sij[i], fsij[i]);
         fftw_free(sij[i]);
@@ -300,9 +299,8 @@ static void mk_stt(const double *f, complex **fsij)
     #pragma omp parallel for
     for (size_t i = 1; i < pars.M; ++i) {
         double kx = kvec.xf[i], ky = kvec.yf[i], kz = kvec.zf[i];
-        double fx = kx / kvec.sq[i];
-        double fy = ky / kvec.sq[i];
-        double fz = kz / kvec.sq[i];
+        double k2 = kvec.sq[i];
+        double fx = kx / k2, fy = ky / k2, fz = kz / k2;
         complex t1 = kx * fx * fsij[0][i] + 2.0 * kx * fy * fsij[1][i] +
              2.0 * kx * fz * fsij[2][i] + ky * fy * fsij[3][i] +
              2.0 * ky * fz * fsij[4][i] + kz * fz * fsij[5][i];
@@ -310,24 +308,21 @@ static void mk_stt(const double *f, complex **fsij)
         complex s1 = t1 + t2;
         complex s2 = t1 - t2;
 
-        // use s11 and s12
-        if (fabs(kz) > DBL_EPSILON) {
+        if (fabs(kz) > DBL_EPSILON) { // use s11 and s12
             complex k1 = kx * fsij[0][i] + ky * fsij[1][i] + kz * fsij[2][i];
             complex k2 = kx * fsij[1][i] + ky * fsij[3][i] + kz * fsij[4][i];
             fsij[0][i] = fsij[0][i] - 2.0 * fx * k1 +
                 0.5 * (fx * kx * s1 + s2);
             fsij[1][i] = fsij[1][i] - fx * k2 - fy * k1 +
                 0.5 * fx * ky * s1;
-        // use s11 and s13
-        } else if (fabs(ky) > DBL_EPSILON) {
+        } else if (fabs(ky) > DBL_EPSILON) { // use s11 and s13
             complex k1 = kx * fsij[0][i] + ky * fsij[1][i] + kz * fsij[2][i];
             complex k3 = kx * fsij[2][i] + ky * fsij[4][i] + kz * fsij[5][i];
             fsij[0][i] = fsij[0][i] - 2.0 * fx * k1 +
                 0.5 * (fx * kx * s1 + s2);
             fsij[1][i] = fsij[2][i] - fx * k3 - fz * k1 +
                 0.5 * fx * kz * s1;
-        // use s22 and s23
-        } else {
+        } else { // use s22 and s23
             complex k2 = kx * fsij[1][i] + ky * fsij[3][i] + kz * fsij[4][i];
             complex k3 = kx * fsij[2][i] + ky * fsij[4][i] + kz * fsij[5][i];
             fsij[0][i] = fsij[3][i] - 2.0 * fy * k2 +
@@ -578,8 +573,8 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
  * frequency modes
  *
  * @param[in, out] inout The field which we want to filter. Expect $$\phi$$ at
- * index 0, $$\dot{\phi}$ at index N, $$\psi$$ at index 2*N+2, $$\dot{\psi}$$
- * at index 3*N+2. All four are overwritten by their filtered results.
+ * index 0, $$\dot{\phi}$ at index N, $$\psi$$ at index 2*N, $$\dot{\psi}$$
+ * at index 3*N. All four are overwritten by their filtered results.
  * The highest modes of each field are cut off according to `filter_window(const
  * double x)` in `setup.c`.
  */
@@ -591,36 +586,19 @@ static void apply_filter_real(double *inout)
     fft(inout + N, tmp.xphic);
     fft(inout + 2 * N, tmp.yphic);
     fft(inout + 3 * N, tmp.zphic);
-    apply_filter_fourier(tmp.phic, tmp.xphic, tmp.yphic, tmp.zphic);
+    #pragma omp parallel for
+    for (size_t i = 0; i < pars.M; ++i) {
+        double fil = filter[i];
+        tmp.phic[i] *= fil;
+        tmp.xphic[i] *= fil;
+        tmp.yphic[i] *= fil;
+        tmp.zphic[i] *= fil;
+    }
     ifft(tmp.phic, inout);
     ifft(tmp.xphic, inout + N);
     ifft(tmp.yphic, inout + 2 * N);
     ifft(tmp.zphic, inout + 3 * N);
     TIME(mon.filter_time += get_wall_time());
-}
-
-/**
- * @brief Applying the filter mask to the complex fields
- *
- * @param[in, out] phi_io The field $$\phi$$ in Fourier space
- * @param[in, out] dphi_io The field $$\dot{\phi}$$ in Fourier space
- * @param[in, out] psi_io The field $$\psi$$ in Fourier space
- * @param[in, out] dpsi_io The field $$\dot{\psi}$$ in Fourier space
- *
- * The `filter` is constructed in `mk_filter_mask()` using the filter window
- * `filter_window(const double x)` in `setup.c`.
- */
-static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
-        fftw_complex *psi_io, fftw_complex *dpsi_io)
-{
-    #pragma omp parallel for
-    for (size_t i = 0; i < pars.M; ++i) {
-        double fil = filter[i];
-        phi_io[i] *= fil;
-        dphi_io[i] *= fil;
-        psi_io[i] *= fil;
-        dpsi_io[i] *= fil;
-    }
 }
 #endif
 
