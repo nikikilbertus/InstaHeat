@@ -54,7 +54,7 @@ void run_rk4()
 
     for (size_t nt = 0; t < pars.t.tf; ++nt) {
         #ifdef ENABLE_FFT_FILTER
-        apply_filter_real(field);
+        apply_filter(field);
         #endif
 
         // to precisely reach final time in the last step, change dt
