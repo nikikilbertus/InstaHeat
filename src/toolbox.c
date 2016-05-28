@@ -290,7 +290,6 @@ static void mk_stt(const double *f, complex **fsij)
     }
     free(sij);
 
-    //TODO: recheck for correctness
     #pragma omp parallel for
     for (size_t i = 1; i < pars.M; ++i) {
         double kx = kvec.xf[i], ky = kvec.yf[i], kz = kvec.zf[i];
@@ -406,19 +405,16 @@ static void mk_gw_spectrum(double *f)
     for (size_t i = 1; i < pars.M; ++i) {
         double kx = kvec.xf[i], ky = kvec.yf[i], kz = kvec.zf[i];
         double kx2 = kx * kx, ky2 = ky * ky, kz2 = kz * kz;
-        double k2 = kvec.sq[i];
-        double k = sqrt(k2);
-        double dh1r = f[Ndh1 + 2 * i];
-        double dh2r = f[Ndh2 + 2 * i];
-        double dh1i = f[Ndh1 + 2 * i + 1];
-        double dh2i = f[Ndh2 + 2 * i + 1];
+        double k2 = kvec.sq[i], k = sqrt(k2);
+        double dh1r = f[Ndh1 + 2 * i], dh2r = f[Ndh2 + 2 * i];
+        double dh1i = f[Ndh1 + 2 * i + 1], dh2i = f[Ndh2 + 2 * i + 1];
         double pow;
         // use h11 and h12
         if (fabs(kz) > DBL_EPSILON) {
             pow = 2.0 * k2 / (kz2 * (ky2 + kz2)) *
                 ((kx2 + kz2) * (dh1r * dh1r + dh1i * dh1i) +
                 2.0 * kx * ky * (dh1r * dh2r + dh1i * dh2i) +
-                (kx2 + kz2) * (dh2r * dh2r + dh2i * dh2i));
+                (ky2 + kz2) * (dh2r * dh2r + dh2i * dh2i));
         // use h11 and h13
         } else if (fabs(ky) > DBL_EPSILON) {
             pow = 2.0 * (kx2 + ky2) / (ky2 * ky2) *
@@ -433,7 +429,11 @@ static void mk_gw_spectrum(double *f)
             pow *= 2.0;
         }
         size_t idx = (int)trunc(gw.dim * k / k_max - 1.0e-14);
-        gw.tmp[idx] += fac * k2 * k * pow / pars.N;
+        gw.tmp[idx] += fac * k2 * k * pow;
+    }
+    #pragma omp parallel for
+    for (size_t i = 0; i < gw.dim; ++i) {
+        gw.tmp[i] /= pars.N;
     }
 }
 
