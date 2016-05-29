@@ -594,7 +594,7 @@ plot(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('final rhorms'); shg;
 %% gw power spectrum
 num = 11; aup = 600; nbins = 50;
 % prefactor = 1e-13;
-name = 'gw2/64_5e-3_2e4';
+name = 'gw3/48_5e-3_1e4';
 evaluate3D
 N= N(1);
 L=10; k = 2*pi/L; kmax = sqrt(3) * N/2 * k;

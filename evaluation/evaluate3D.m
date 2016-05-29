@@ -1,13 +1,12 @@
-% name = 'gw2/64_5e-3_2e4';
+name = 'gw3/48_5e-3_1e4';
 interp = true;
 newoutput = true;
-amax = 610;
+amax = -1;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
 name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/' name '.h5'];
 
-% built in functions for reading makes it easy
 dim = h5read(name, '/dimension');
 t = h5read(name, '/time');
 a = h5read(name, '/a');
