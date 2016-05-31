@@ -79,7 +79,6 @@ void mk_rhs(const double t, double *f, double *result)
         #ifdef OUTPUT_CONSTRAINTS
         mk_constraints(f);
         #endif
-        //TODO: is this correct use and position?
         mk_gw_spectrum(f);
     }
 
@@ -275,7 +274,10 @@ static void mk_stt(const double *f, complex **fsij)
     #pragma omp parallel for
     for (size_t i = 0; i < pars.N; ++i) {
         // TODO: do i include metric here?
+        // with metric
         double gphi = - tmp.grad[i] * (2.0 + 4.0 * f[2 * pars.N + i]) / atmp;
+        // without metric
+        /* double gphi = - tmp.grad[i] * 2.0 / atmp; */
         sij[0][i] = tmp.xphi[i] * tmp.xphi[i] + gphi;
         sij[1][i] = tmp.xphi[i] * tmp.yphi[i];
         sij[2][i] = tmp.xphi[i] * tmp.zphi[i];
