@@ -27,7 +27,6 @@ static void mk_constraints(double *f);
 #ifdef OUTPUT_PS
 static void mk_power_spectrum(const fftw_complex *in, struct output out);
 #endif
-/* static void center(double *f, const size_t N); */
 static double mean(const double *f, const size_t N);
 static void mean_var_min_max(const double *f, double *smry);
 static double variance(const double mean, const double *f, const size_t N);
@@ -608,23 +607,6 @@ void prepare_and_save_timeslice()
     mk_summary();
     save();
 }
-
-/**
- * @brief Center input vector around it's average.
- *
- * @param[in, out] f Any double vector of length @p N
- * @param[in] N The length of the vector @p f
- *
- * The vector @p f is overwritten by f - <f>
- */
-/* static void center(double *f, const size_t N) */
-/* { */
-/*     double avg = mean(f, N); */
-/*     #pragma omp parallel for */
-/*     for (size_t i = 0; i < N; ++i) { */
-/*         f[i] -= avg; */
-/*     } */
-/* } */
 
 /**
  * @brief Save the summaries of the fields (containing the mean, variance,
