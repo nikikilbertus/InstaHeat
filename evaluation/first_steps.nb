@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[    305807,       8736]
-NotebookOptionsPosition[    285781,       8183]
-NotebookOutlinePosition[    286158,       8200]
-CellTagsIndexPosition[    286115,       8197]
+NotebookDataLength[    310194,       8878]
+NotebookOptionsPosition[    289762,       8314]
+NotebookOutlinePosition[    290139,       8331]
+CellTagsIndexPosition[    290096,       8328]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -8179,6 +8179,137 @@ Cell[BoxData[
 
  CellChangeTimes->{{3.6719000631903067`*^9, 3.6719000631912813`*^9}, {
   3.671900099157598*^9, 3.6719001427390842`*^9}}]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "check equations of motion for ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["h", "ij"], TraditionalForm]],
+  FormatType->"TraditionalForm"]
+}], "Section",
+ CellChangeTimes->{{3.673642099575944*^9, 3.673642116267818*^9}}],
+
+Cell["first possibility", "Text",
+ CellChangeTimes->{{3.6736458691607447`*^9, 3.673645871256299*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"d", "[", "t", "]"}], " ", "=", " ", 
+  RowBox[{
+   SuperscriptBox[
+    RowBox[{"a", "[", "t", "]"}], "2"], " ", 
+   RowBox[{"h", "[", "t", "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.673642274142755*^9, 3.673642281914755*^9}, {
+  3.673645845637089*^9, 3.6736458629316463`*^9}, {3.6736488804920073`*^9, 
+  3.67364888944029*^9}}],
+
+Cell[BoxData[
+ RowBox[{"wb", " ", "=", " ", 
+  RowBox[{
+   RowBox[{"D", "[", 
+    RowBox[{
+     RowBox[{"d", "[", "t", "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"t", ",", "2"}], "}"}]}], "]"}], " ", "+", " ", 
+   RowBox[{"3", " ", "H", " ", 
+    RowBox[{"D", "[", 
+     RowBox[{
+      RowBox[{"d", "[", "t", "]"}], ",", "t"}], "]"}]}], " ", "-", " ", 
+   RowBox[{"lap", " ", 
+    RowBox[{
+     RowBox[{"d", "[", "t", "]"}], " ", "/", " ", 
+     SuperscriptBox[
+      RowBox[{"a", "[", "t", "]"}], "2"], " "}]}]}]}]], "Input",
+ CellChangeTimes->{{3.6736421223389597`*^9, 3.673642328378272*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"Expand", "[", 
+     RowBox[{"wb", " ", "/", " ", 
+      SuperscriptBox[
+       RowBox[{"a", "[", "t", "]"}], "2"]}], "]"}], " ", "/.", " ", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"a", "'"}], "[", "t", "]"}], " ", "/", " ", 
+         RowBox[{"a", "[", "t", "]"}]}], ")"}], " ", "\[Rule]", " ", "H"}], 
+      ",", " ", 
+      RowBox[{
+       RowBox[{
+        SuperscriptBox[
+         RowBox[{
+          RowBox[{"a", "'"}], "[", "t", "]"}], "2"], " ", "/", " ", 
+        SuperscriptBox[
+         RowBox[{"a", "[", "t", "]"}], "2"]}], " ", "\[Rule]", " ", 
+       SuperscriptBox["H", "2"]}]}], "}"}]}], " ", "//", " ", 
+   "FullSimplify"}], " ", "//", " ", "Expand"}]], "Input",
+ CellChangeTimes->{{3.673642330100095*^9, 3.673642433442954*^9}}],
+
+Cell["second possibility", "Text",
+ CellChangeTimes->{{3.673645875232093*^9, 3.673645877015839*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"d", "[", "t", "]"}], " ", "=", " ", 
+  RowBox[{
+   RowBox[{"h", "[", "t", "]"}], "/", 
+   SuperscriptBox[
+    RowBox[{"a", "[", "t", "]"}], "2"]}]}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"wb", " ", "=", " ", 
+  RowBox[{
+   RowBox[{"D", "[", 
+    RowBox[{
+     RowBox[{"d", "[", "t", "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"t", ",", "2"}], "}"}]}], "]"}], " ", "+", " ", 
+   RowBox[{"3", " ", "H", " ", 
+    RowBox[{"D", "[", 
+     RowBox[{
+      RowBox[{"d", "[", "t", "]"}], ",", "t"}], "]"}]}], " ", "-", " ", 
+   RowBox[{"lap", " ", 
+    RowBox[{
+     RowBox[{"d", "[", "t", "]"}], " ", "/", " ", 
+     SuperscriptBox[
+      RowBox[{"a", "[", "t", "]"}], "2"], " "}]}]}]}]], "Input",
+ CellChangeTimes->{{3.673645884218713*^9, 3.673645909222522*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"Expand", "[", 
+     RowBox[{"wb", "  ", 
+      SuperscriptBox[
+       RowBox[{"a", "[", "t", "]"}], "2"]}], "]"}], " ", "/.", " ", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"a", "'"}], "[", "t", "]"}], " ", "/", " ", 
+         RowBox[{"a", "[", "t", "]"}]}], ")"}], " ", "\[Rule]", " ", "H"}], 
+      ",", " ", 
+      RowBox[{
+       RowBox[{
+        SuperscriptBox[
+         RowBox[{
+          RowBox[{"a", "'"}], "[", "t", "]"}], "2"], " ", "/", " ", 
+        SuperscriptBox[
+         RowBox[{"a", "[", "t", "]"}], "2"]}], " ", "\[Rule]", " ", 
+       SuperscriptBox["H", "2"]}]}], "}"}]}], " ", "//", " ", 
+   "FullSimplify"}], " ", "//", " ", "Expand"}]], "Input",
+ CellChangeTimes->{3.6736459239021873`*^9}]
 }, Open  ]]
 },
 WindowSize->{1440, 851},
@@ -8737,6 +8868,17 @@ Cell[277302, 7954, 96, 1, 26, "Text"],
 Cell[277401, 7957, 5102, 130, 208, "Input"],
 Cell[282506, 8089, 280, 6, 27, "Input"],
 Cell[282789, 8097, 2976, 83, 88, "Input"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[285802, 8185, 237, 7, 40, "Section"],
+Cell[286042, 8194, 101, 1, 26, "Text"],
+Cell[286146, 8197, 361, 9, 30, "Input"],
+Cell[286510, 8208, 597, 17, 33, "Input"],
+Cell[287110, 8227, 883, 26, 33, "Input"],
+Cell[287996, 8255, 100, 1, 26, "Text"],
+Cell[288099, 8258, 194, 6, 33, "Input"],
+Cell[288296, 8266, 595, 17, 33, "Input"],
+Cell[288894, 8285, 852, 26, 33, "Input"]
 }, Open  ]]
 }
 ]
