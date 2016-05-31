@@ -318,8 +318,7 @@ allocate_dopri853_values	dopri853.c	/^static void allocate_dopri853_values()$/;"
 allocate_external	setup.c	/^static void allocate_external()$/;"	f	file:
 alpha	dopri853.c	/^    double alpha; \/\/\/< Internal parameter for the error estimates$/;"	m	struct:dopri853_control	file:
 append_to_buffer	io.c	/^static void append_to_buffer(struct output f)$/;"	f	file:
-apply_filter_fourier	toolbox.c	/^static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,$/;"	f	file:
-apply_filter_real	toolbox.c	/^static void apply_filter_real(double *inout)$/;"	f	file:
+apply_filter	toolbox.c	/^void apply_filter(double *inout)$/;"	f
 are_fields_equal	tests.c	/^static int are_fields_equal(const double *f, const double *g)$/;"	f	file:
 assemble_gradient_squared	toolbox.c	/^static void assemble_gradient_squared()$/;"	f	file:
 b	main.h	/^    double b; \/\/\/< upper bound of the interval$/;"	m	struct:grid_dimension
@@ -549,7 +548,7 @@ mk_initial_psi	setup.c	/^static void mk_initial_psi()$/;"	f	file:
 mk_k_grid	setup.c	/^static void mk_k_grid()$/;"	f	file:
 mk_power_spectrum	toolbox.c	/^static void mk_power_spectrum(const fftw_complex *in, struct output out)$/;"	f	file:
 mk_psi	toolbox.c	/^void mk_psi(double *f)$/;"	f
-mk_rho	toolbox.c	/^void mk_rho(const double *f)$/;"	f
+mk_rho_and_p	toolbox.c	/^void mk_rho_and_p(const double *f)$/;"	f
 mk_rhs	toolbox.c	/^void mk_rhs(const double t, double *f, double *result)$/;"	f
 mk_stt	toolbox.c	/^static void mk_stt(const double *f, complex **fsij)$/;"	f	file:
 mk_summary	toolbox.c	/^void mk_summary()$/;"	f
