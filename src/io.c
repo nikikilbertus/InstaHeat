@@ -413,7 +413,6 @@ static void h5_write_buffer(const hsize_t rank, const hsize_t Nt,
     hid_t mem_space = H5Screate_simple(rank, add, NULL);
     hid_t dspace = H5Dget_space(dset);
     H5Dset_extent(dset, new_dim);
-    //TODO: necessary to call this again?
     dspace = H5Dget_space(dset);
     H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start, NULL, add, NULL);
     H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, buf);
