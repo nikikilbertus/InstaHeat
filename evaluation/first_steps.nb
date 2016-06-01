@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[    389393,      11145]
-NotebookOptionsPosition[    364225,      10449]
-NotebookOutlinePosition[    364602,      10466]
-CellTagsIndexPosition[    364559,      10463]
+NotebookDataLength[    390895,      11186]
+NotebookOptionsPosition[    365561,      10485]
+NotebookOutlinePosition[    365938,      10502]
+CellTagsIndexPosition[    365895,      10499]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -10040,36 +10040,33 @@ Cell[BoxData[
   RowBox[{"delgUU", " ", "=", " ", 
    RowBox[{
     RowBox[{"-", " ", 
-     RowBox[{"Normal", "@", 
-      RowBox[{"Series", "[", 
-       RowBox[{
-        RowBox[{"Table", "[", 
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"Sum", "[", 
+        RowBox[{
          RowBox[{
-          RowBox[{"Sum", "[", 
-           RowBox[{
-            RowBox[{
-             RowBox[{"gUU", "[", 
-              RowBox[{"[", 
-               RowBox[{"i", ",", "j"}], "]"}], "]"}], " ", 
-             RowBox[{"gUU", "[", 
-              RowBox[{"[", 
-               RowBox[{"k", ",", "l"}], "]"}], "]"}], " ", 
-             RowBox[{"delgdd", "[", 
-              RowBox[{"[", 
-               RowBox[{"j", ",", "l"}], "]"}], "]"}]}], ",", 
-            RowBox[{"{", 
-             RowBox[{"j", ",", "1", ",", "4"}], "}"}], ",", 
-            RowBox[{"{", 
-             RowBox[{"l", ",", "1", ",", "4"}], "}"}]}], "]"}], ",", " ", 
-          RowBox[{"{", 
-           RowBox[{"i", ",", "1", ",", "4"}], "}"}], ",", 
-          RowBox[{"{", 
-           RowBox[{"k", ",", "1", ",", "4"}], "}"}]}], "]"}], ",", 
-        RowBox[{"{", 
-         RowBox[{"\[Psi]", ",", "0", ",", "1"}], "}"}]}], "]"}]}]}], " ", "//",
-     "Simplify"}]}], ";", " ", 
+          RowBox[{"gbUU", "[", 
+           RowBox[{"[", 
+            RowBox[{"i", ",", "j"}], "]"}], "]"}], " ", 
+          RowBox[{"gbUU", "[", 
+           RowBox[{"[", 
+            RowBox[{"k", ",", "l"}], "]"}], "]"}], " ", 
+          RowBox[{"delgdd", "[", 
+           RowBox[{"[", 
+            RowBox[{"j", ",", "l"}], "]"}], "]"}]}], ",", 
+         RowBox[{"{", 
+          RowBox[{"j", ",", "1", ",", "4"}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"l", ",", "1", ",", "4"}], "}"}]}], "]"}], ",", " ", 
+       RowBox[{"{", 
+        RowBox[{"i", ",", "1", ",", "4"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"k", ",", "1", ",", "4"}], "}"}]}], "]"}]}], "//", 
+    "Simplify"}]}], ";", " ", 
   RowBox[{"delgUU", " ", "//", "MatrixForm"}]}]], "Input",
- CellChangeTimes->{{3.673793088371325*^9, 3.673793241302326*^9}}],
+ CellChangeTimes->{{3.673793088371325*^9, 3.673793241302326*^9}, {
+  3.673812341842267*^9, 3.6738123432581053`*^9}, {3.6738123823292294`*^9, 
+  3.6738123876328497`*^9}}],
 
 Cell[BoxData[{
  RowBox[{"\[Phi]d", " ", "=", " ", 
@@ -10225,9 +10222,7 @@ Cell[BoxData[
 
 Cell[CellGroupData[{
 
-Cell["\<\
-with the perturbed stress energy\
-\>", "Subsection",
+Cell["with the perturbed stress energy", "Subsection",
  CellChangeTimes->{{3.6737953028609667`*^9, 3.6737953062769623`*^9}}],
 
 Cell[BoxData[
@@ -10407,10 +10402,46 @@ Cell[BoxData[
       SubscriptBox["\[Phi]", "3"]}]}], "}"}]}], " ", "//", " ", 
   "MatrixForm"}]], "Input",
  CellChangeTimes->{{3.673795508960752*^9, 3.673795537225665*^9}, {
-  3.673795580321636*^9, 3.673795605792858*^9}}],
+  3.673795580321636*^9, 3.673795605792858*^9}}]
+}, Open  ]],
 
-Cell["from 0712.2991", "Text",
- CellChangeTimes->{{3.673794888462407*^9, 3.673794898103718*^9}}],
+Cell[CellGroupData[{
+
+Cell["from 0712.2991", "Subsection",
+ CellChangeTimes->{3.6738043233703814`*^9}],
+
+Cell[BoxData[
+ RowBox[{"g07dd", " ", "=", " ", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"1", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"0", ",", " ", 
+      RowBox[{"-", 
+       SuperscriptBox["a", "2"]}], ",", "0", ",", "0"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"0", ",", "0", ",", 
+      RowBox[{"-", 
+       SuperscriptBox["a", "2"]}], ",", "0"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"0", ",", "0", ",", "0", ",", 
+      RowBox[{"-", 
+       SuperscriptBox["a", "2"]}]}], "}"}]}], "}"}]}]], "Input",
+ CellChangeTimes->{{3.673804344646421*^9, 3.673804379629547*^9}}],
+
+Cell[BoxData[
+ RowBox[{"g07UU", " ", "=", " ", 
+  RowBox[{"Inverse", "[", "g07dd", "]"}]}]], "Input",
+ CellChangeTimes->{{3.673812517033687*^9, 3.67381252387339*^9}}],
+
+Cell[BoxData[
+ RowBox[{"\[Phi]07U", " ", "=", " ", 
+  RowBox[{
+   RowBox[{"g07UU", " ", ".", " ", "\[Phi]d"}], " ", "//", " ", 
+   "Simplify"}]}]], "Input",
+ CellChangeTimes->{{3.673804458004095*^9, 3.6738044779206333`*^9}, {
+   3.6738125285375633`*^9, 3.673812530257279*^9}, 3.673812594811657*^9}],
 
 Cell[BoxData[
  RowBox[{
@@ -10433,7 +10464,7 @@ Cell[BoxData[
       RowBox[{"Sum", "[", 
        RowBox[{
         RowBox[{
-         RowBox[{"\[Phi]d", "[", 
+         RowBox[{"\[Phi]07U", "[", 
           RowBox[{"[", "i", "]"}], "]"}], " ", 
          RowBox[{"\[Phi]d", "[", 
           RowBox[{"[", "i", "]"}], "]"}]}], ",", " ", 
@@ -10443,7 +10474,12 @@ Cell[BoxData[
   RowBox[{"S", " ", "//", " ", "MatrixForm"}]}]], "Input",
  CellChangeTimes->{{3.673794900170871*^9, 3.6737949402642508`*^9}, 
    3.6737950431379004`*^9, {3.673795145213344*^9, 3.673795204032604*^9}, {
-   3.6737952495314913`*^9, 3.6737952531220207`*^9}}]
+   3.6737952495314913`*^9, 3.6737952531220207`*^9}, {3.6738044833139067`*^9, 
+   3.6738044852340508`*^9}, {3.673804689462798*^9, 3.673804692437989*^9}, {
+   3.673812573758624*^9, 3.673812575222301*^9}, {3.673812615919908*^9, 
+   3.673812617887246*^9}, {3.673812654972999*^9, 3.673812664116213*^9}, {
+   3.673812717779345*^9, 3.673812790829685*^9}, {3.673812852291766*^9, 
+   3.6738129374831657`*^9}}]
 }, Open  ]]
 }, Open  ]]
 },
@@ -11122,29 +11158,34 @@ Cell[348024, 9970, 268, 6, 27, "Input"],
 Cell[348295, 9978, 1149, 34, 33, "Input"],
 Cell[349447, 10014, 455, 12, 27, "Input"],
 Cell[349905, 10028, 283, 7, 27, "Input"],
-Cell[350191, 10037, 1283, 34, 27, "Input"],
-Cell[351477, 10073, 872, 23, 73, "Input"],
+Cell[350191, 10037, 1148, 31, 27, "Input"],
+Cell[351342, 10070, 872, 23, 73, "Input"],
 Cell[CellGroupData[{
-Cell[352374, 10100, 119, 1, 35, "Subsection"],
-Cell[352496, 10103, 1178, 32, 46, "Input"],
-Cell[353677, 10137, 391, 11, 27, "Input"],
-Cell[354071, 10150, 415, 12, 27, "Input"],
-Cell[354489, 10164, 564, 15, 50, "Input"],
-Cell[355056, 10181, 584, 17, 27, "Input"],
-Cell[355643, 10200, 128, 2, 27, "Input"],
-Cell[355774, 10204, 647, 18, 27, "Input"]
+Cell[352239, 10097, 119, 1, 34, "Subsection"],
+Cell[352361, 10100, 1178, 32, 46, "Input"],
+Cell[353542, 10134, 391, 11, 27, "Input"],
+Cell[353936, 10147, 415, 12, 27, "Input"],
+Cell[354354, 10161, 564, 15, 50, "Input"],
+Cell[354921, 10178, 584, 17, 27, "Input"],
+Cell[355508, 10197, 128, 2, 27, "Input"],
+Cell[355639, 10201, 647, 18, 27, "Input"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[356458, 10227, 132, 3, 35, "Subsection"],
-Cell[356593, 10232, 2726, 73, 82, "Input"],
-Cell[359322, 10307, 395, 11, 27, "Input"],
-Cell[359720, 10320, 517, 12, 27, "Input"],
-Cell[360240, 10334, 689, 16, 27, "Input"],
-Cell[360932, 10352, 609, 16, 50, "Input"],
-Cell[361544, 10370, 708, 18, 27, "Input"],
-Cell[362255, 10390, 700, 19, 27, "Input"],
-Cell[362958, 10411, 96, 1, 26, "Text"],
-Cell[363057, 10414, 1140, 31, 47, "Input"]
+Cell[356323, 10224, 124, 1, 34, "Subsection"],
+Cell[356450, 10227, 2726, 73, 82, "Input"],
+Cell[359179, 10302, 395, 11, 27, "Input"],
+Cell[359577, 10315, 517, 12, 27, "Input"],
+Cell[360097, 10329, 689, 16, 27, "Input"],
+Cell[360789, 10347, 609, 16, 50, "Input"],
+Cell[361401, 10365, 708, 18, 27, "Input"],
+Cell[362112, 10385, 700, 19, 27, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[362849, 10409, 80, 1, 34, "Subsection"],
+Cell[362932, 10412, 638, 18, 33, "Input"],
+Cell[363573, 10432, 166, 3, 27, "Input"],
+Cell[363742, 10437, 298, 6, 27, "Input"],
+Cell[364043, 10445, 1490, 36, 47, "Input"]
 }, Open  ]]
 }, Open  ]]
 }
