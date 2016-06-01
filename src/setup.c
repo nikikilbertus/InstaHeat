@@ -498,15 +498,19 @@ static void mk_k_grid()
 
 #ifdef ENABLE_FFT_FILTER
 /**
- * @brief Construct an arrray for filtering out high modes in Fourier space.
+ * @brief Construct an arrray for filtering out high wave number modes in
+ * Fourier space.
  *
- * Fills the global array `filter` with multiplicative factors that can be applied
- * pointwise to a field in Fourier space to cut off high frequency modes.
+ * Fills the global array `filter` with multiplicative factors that can be
+ * applied pointwise to a field in Fourier space to cut off high frequency
+ * modes. The normalizing factor 1/N for the Fourier transform with FFTW3 is
+ * already included in 'filter'.
  */
 static void mk_filter_mask()
 {
     const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
     const size_t Mx = pars.x.M, My = pars.y.M, Mz = pars.z.M;
+    //TODO recheck that construction
     #pragma omp parallel for
     for (size_t i = 0; i < Mx; ++i) {
         size_t osx = i * My * Mz;
