@@ -109,6 +109,7 @@ void run_dopri853()
     INFO(printf("initial time step dt: %.17g\n", dp.dt));
     INFO(printf("minimal time step dt: %.17g\n", dp.dt_min));
     INFO(printf("max number of steps: %zu\n", dp.max_steps));
+    // TODO: change this once I have more definitions
     INFO(printf("relative tolerance: %.17g\n", RELATIVE_TOLERANCE));
     INFO(printf("absolute tolerance: %.17g\n\n", ABSOLUTE_TOLERANCE));
 
