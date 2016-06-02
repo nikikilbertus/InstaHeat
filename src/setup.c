@@ -279,6 +279,12 @@ static void allocate_external()
     #ifdef OUTPUT_RHO_SMRY
     init_output(&rho_smry, SUMMARY_VALUES, 1);
     #endif
+    #ifdef OUTPUT_H1_SMRY
+    init_output(&h1_smry, SUMMARY_VALUES, 1);
+    #endif
+    #ifdef OUTPUT_H2_SMRY
+    init_output(&h2_smry, SUMMARY_VALUES, 1);
+    #endif
 
     // ---------------------------power spectra---------------------------------
     #ifdef OUTPUT_PHI_PS
@@ -1086,6 +1092,14 @@ static void free_external()
     #ifdef OUTPUT_RHO_SMRY
     free(rho_smry.tmp);
     free(rho_smry.buf);
+    #endif
+    #ifdef OUTPUT_H1_SMRY
+    free(h1_smry.tmp);
+    free(h1_smry.buf);
+    #endif
+    #ifdef OUTPUT_H2_SMRY
+    free(h2_smry.tmp);
+    free(h2_smry.buf);
     #endif
 
     #ifdef OUTPUT_PHI_PS
