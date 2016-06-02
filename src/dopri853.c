@@ -558,7 +558,11 @@ static void allocate_and_initialize_tolerances()
     dp.a_tol = fftw_malloc(Ntot * sizeof *dp.a_tol);
     dp.r_tol = fftw_malloc(Ntot * sizeof *dp.r_tol);
     // TODO: initialize values
-
+    #pragma omp parallel for
+    for (size_t i = 0; i < Ntot; ++i) {
+        dp.a_tol[i] = ABSOLUTE_TOLERANCE;
+        dp.r_tol[i] = RELATIVE_TOLERANCE;
+    }
 }
 
 /**
