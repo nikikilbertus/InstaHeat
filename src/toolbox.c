@@ -18,7 +18,7 @@
 
 static void assemble_gradient_squared();
 static void mk_stt(const double *f, complex **fsij);
-static void mk_gw_sources(complex **s);
+static void mk_gw_sources(const double *f, complex **s);
 static void mk_gw_spectrum(double *f);
 static double potential(const double f);
 static double potential_prime(const double f);
@@ -310,7 +310,7 @@ static void mk_stt(const double *f, complex **fsij)
  *
  * The source term is the right hand side of equation TODO[link] in the thesis.
  */
-static void mk_gw_sources(complex **s) {
+static void mk_gw_sources(const double *f, complex **s) {
     const size_t len = 6;
     double **s_tmp = malloc(len * sizeof *s_tmp);
     for (size_t i = 0; i < len; ++i) {
