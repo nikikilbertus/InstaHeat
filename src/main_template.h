@@ -84,6 +84,8 @@
 #define _OPSIS_
 #define _ODPSIS_
 #define _ORHOS_
+#define _OH1S_
+#define _OH2S_
 #define _OCSTR_
 
 #if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || defined(OUTPUT_PSI) \
