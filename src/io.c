@@ -326,8 +326,6 @@ static void h5_get_extent(hsize_t *cur)
  */
 static void h5_write_all_buffers(const hsize_t Nt)
 {
-    // TODO[performance] maybe use static variable to count dataset size
-    // instead of reading it from the file each time static hsize_t counter;
     TIME(mon.h5_time_write -= get_wall_time());
 
     hsize_t rank;
