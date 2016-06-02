@@ -28,6 +28,10 @@ static void mk_constraints(double *f);
 #ifdef OUTPUT_PS
 static void mk_power_spectrum(const fftw_complex *in, struct output out);
 #endif
+#ifdef ENABLE_FFT_FILTER
+static void apply_filter(double *f);
+static void capply_filter(complex *in, double *out);
+#endif
 static void mk_summary();
 static void mean_var_min_max(const double *f, double *smry);
 #if defined(OUTPUT_H1_SMRY) || defined(OUTPUT_H2_SMRY)
@@ -578,35 +582,43 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
 //TODO: make use of filter flag again and filter whenever FT is available
 #ifdef ENABLE_FFT_FILTER
 /**
- * @brief Apply a Fourier filter to each field of a given input to cutoff high
- * frequency modes
+ * @brief Apply a Fourier filter to the real space input to cutoff high
+ * frequency modes.
  *
- * @param[in, out] inout The field which we want to filter. Expect $$\phi$$ at
- * index 0, $$\dot{\phi}$ at index N, $$\psi$$ at index 2*N, $$\dot{\psi}$$
- * at index 3*N. All four are overwritten by their filtered results.
- * The highest modes of each field are cut off according to `filter_window(const
+ * @param[in, out] f The field which we want to filter. It is overwritten by
+ * the filtered results.
+ *
+ * The highest modes of the field are cut off according to `filter_window(const
  * double x)` in `setup.c`.
  */
-void apply_filter(double *inout)
+static void apply_filter(double *f)
 {
     TIME(mon.filter_time -= get_wall_time());
-    const size_t N = pars.N;
-    fft(inout, tmp.phic);
-    fft(inout + N, tmp.xphic);
-    fft(inout + 2 * N, tmp.yphic);
-    fft(inout + 3 * N, tmp.zphic);
+    fft(f, tmp.phic);
+    TIME(mon.filter_time += get_wall_time());
+    capply_filter(tmp.phic, f);
+}
+
+/**
+ * @brief Apply a Fourier filter to the Fourier space input to cutoff high
+ * frequency modes.
+ *
+ * @param[in, out] in The field in Fourier space which we want to filter. It is
+ * overwritten by the filtered version.
+ * @param[out] out The array that is populated by the filtered field in real
+ * space generated from @p in.
+ *
+ * The highest modes of the field are cut off according to `filter_window(const
+ * double x)` in `setup.c`.
+ */
+static void capply_filter(complex *in, double *out)
+{
+    TIME(mon.filter_time -= get_wall_time());
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
-        double fil = filter[i];
-        tmp.phic[i] *= fil;
-        tmp.xphic[i] *= fil;
-        tmp.yphic[i] *= fil;
-        tmp.zphic[i] *= fil;
+        in[i] *= filter[i];
     }
-    ifft(tmp.phic, inout);
-    ifft(tmp.xphic, inout + N);
-    ifft(tmp.yphic, inout + 2 * N);
-    ifft(tmp.zphic, inout + 3 * N);
+    ifft(in, out);
     TIME(mon.filter_time += get_wall_time());
 }
 #endif
