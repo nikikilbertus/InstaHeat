@@ -129,6 +129,18 @@ void mk_rhs(const double t, double *f, double *result)
 }
 
 /**
+ * @brief Recompute all desired output quantities and save the current
+ * timeslice to buffers
+ */
+void prepare_and_save_timeslice()
+{
+    evo_flags.output = 1;
+    mk_rhs(pars.t.t, field, dfield);
+    evo_flags.output = 0;
+    save();
+}
+
+/**
  * @brief Compute the Laplacian and the sqaure gradient.
  *
  * @param[in] in An array containing the fields, in particular $$\phi$$ and
@@ -577,18 +589,6 @@ void apply_filter(double *inout)
     TIME(mon.filter_time += get_wall_time());
 }
 #endif
-
-/**
- * @brief Recompute all desired output quantities and save the current
- * timeslice to buffers
- */
-void prepare_and_save_timeslice()
-{
-    evo_flags.output = 1;
-    mk_rhs(pars.t.t, field, dfield);
-    evo_flags.output = 0;
-    save();
-}
 
 /**
  * @brief Save the summaries of the fields (containing the mean, variance,
