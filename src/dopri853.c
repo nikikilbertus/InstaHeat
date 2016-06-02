@@ -245,13 +245,14 @@ static int perform_step(const double dt_try)
         }
     }
     #ifdef ENABLE_FFT_FILTER
-    apply_filter(field_new);
+    evo_flags.filter = 1;
     #endif
     if ((dp.n_stp + 1) % pars.file.skip == 0) {
         evo_flags.output = 1;
     }
     mk_rhs(dp.t + dt, field_new, dfield_new);
     evo_flags.output = 0;
+    evo_flags.filter = 0;
 
     #pragma omp parallel for
     for (size_t i = 0; i < pars.Ntot; ++i) {
