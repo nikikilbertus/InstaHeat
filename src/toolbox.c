@@ -17,7 +17,7 @@
  */
 
 static void assemble_gradient_squared();
-static void mk_stt(const double *f, complex **fsij);
+static void mk_stt(const double *f, complex **s);
 static void mk_gw_sources(const double *f, complex **s);
 static void mk_gw_spectrum(double *f);
 static double potential(const double f);
@@ -253,51 +253,47 @@ void mk_rho_and_p(const double *f)
  * perturbations needed in gravitational wave extraction.
  *
  * @param[in] f An array containing the fields
- * @param[in, out] fsij The traceless transverse part of the source terms in
+ * @param[in, out] s The traceless transverse part of the source terms in
  * the equation of motion of the tensor perturbations. We only need the first
  * two fields, because there are only two degrees of freedom.
  *
  * @see TODO[link thesis and papers]
  */
-static void mk_stt(const double *f, complex **fsij)
+static void mk_stt(const double *f, complex **s)
 {
     TIME(mon.stt_time -= get_wall_time());
-    mk_gw_sources(f, fsij);
+    mk_gw_sources(f, s);
 
     #pragma omp parallel for
     for (size_t i = 1; i < pars.M; ++i) {
         double kx = kvec.xf[i], ky = kvec.yf[i], kz = kvec.zf[i];
         double ksq = kvec.sq[i];
         double fx = kx / ksq, fy = ky / ksq, fz = kz / ksq;
-        complex t1 = kx * fx * fsij[0][i] + ky * fy * fsij[3][i] +
-            kz * fz * fsij[5][i] + 2.0 * (kx * fy * fsij[1][i] +
-            kx * fz * fsij[2][i] + ky * fz * fsij[4][i]);
-        complex t2 = fsij[0][i] + fsij[3][i] + fsij[5][i];
-        complex s1 = t1 + t2;
-        complex s2 = t1 - t2;
+        complex t1 = kx * fx * s[0][i] + ky * fy * s[3][i] +
+                     kz * fz * s[5][i] + 2.0 * (kx * fy * s[1][i] +
+                     kx * fz * s[2][i] + ky * fz * s[4][i]);
+        complex t2 = s[0][i] + s[3][i] + s[5][i];
+        complex s1 = t1 + t2, s2 = t1 - t2;
 
         if (fabs(kz) > DBL_EPSILON) { // use s11 and s12
-            complex k1 = kx * fsij[0][i] + ky * fsij[1][i] + kz * fsij[2][i];
-            complex k2 = kx * fsij[1][i] + ky * fsij[3][i] + kz * fsij[4][i];
-            fsij[0][i] = fsij[0][i] - 2.0 * fx * k1 + 0.5 * (fx * kx * s1 + s2);
-            fsij[1][i] = fsij[1][i] - fx * k2 - fy * k1 +
-                0.5 * fx * ky * s1;
+            complex k1 = kx * s[0][i] + ky * s[1][i] + kz * s[2][i];
+            complex k2 = kx * s[1][i] + ky * s[3][i] + kz * s[4][i];
+            s[0][i] = s[0][i] - 2.0 * fx * k1 + 0.5 * (fx * kx * s1 + s2);
+            s[1][i] = s[1][i] - fx * k2 - fy * k1 + 0.5 * fx * ky * s1;
         } else if (fabs(ky) > DBL_EPSILON) { // use s11 and s13
-            complex k1 = kx * fsij[0][i] + ky * fsij[1][i] + kz * fsij[2][i];
-            complex k3 = kx * fsij[2][i] + ky * fsij[4][i] + kz * fsij[5][i];
-            fsij[0][i] = fsij[0][i] - 2.0 * fx * k1 + 0.5 * (fx * kx * s1 + s2);
-            fsij[1][i] = fsij[2][i] - fx * k3 - fz * k1 +
-                0.5 * fx * kz * s1;
+            complex k1 = kx * s[0][i] + ky * s[1][i] + kz * s[2][i];
+            complex k3 = kx * s[2][i] + ky * s[4][i] + kz * s[5][i];
+            s[0][i] = s[0][i] - 2.0 * fx * k1 + 0.5 * (fx * kx * s1 + s2);
+            s[1][i] = s[2][i] - fx * k3 - fz * k1 + 0.5 * fx * kz * s1;
         } else { // use s22 and s23
-            complex k2 = kx * fsij[1][i] + ky * fsij[3][i] + kz * fsij[4][i];
-            complex k3 = kx * fsij[2][i] + ky * fsij[4][i] + kz * fsij[5][i];
-            fsij[0][i] = fsij[3][i] - 2.0 * fy * k2 + 0.5 * (fy * ky * s1 + s2);
-            fsij[1][i] = fsij[4][i] - fy * k3 - fz * k2 +
-                0.5 * fy * kz * s1;
+            complex k2 = kx * s[1][i] + ky * s[3][i] + kz * s[4][i];
+            complex k3 = kx * s[2][i] + ky * s[4][i] + kz * s[5][i];
+            s[0][i] = s[3][i] - 2.0 * fy * k2 + 0.5 * (fy * ky * s1 + s2);
+            s[1][i] = s[4][i] - fy * k3 - fz * k2 + 0.5 * fy * kz * s1;
         }
     }
-    fsij[0][0] = 0.0;
-    fsij[1][0] = 0.0;
+    s[0][0] = 0.0;
+    s[1][0] = 0.0;
     TIME(mon.stt_time += get_wall_time());
 }
 
