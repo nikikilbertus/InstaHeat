@@ -29,7 +29,7 @@ static double error(const double dt);
 static int success(const double err, double *dt);
 static void allocate_dopri853_values();
 static void allocate_and_initialize_tolerances();
-static void free_dopri853_values();
+static void free_dopri853();
 
 /**
  * @brief Holds intermediate evaluations of the right hand side and errors for
@@ -157,7 +157,7 @@ void run_dopri853()
     }
 
     TIME(secs += get_wall_time());
-    free_dopri853_values();
+    free_dopri853();
 
     INFO(puts("Writing simulation meta data to disk.\n"));
     double val[1];
@@ -567,7 +567,7 @@ static void allocate_and_initialize_tolerances()
  * Dormand Prince integration routine as well as temporary memory for the
  * errors.
  */
-static void free_dopri853_values()
+static void free_dopri853()
 {
     fftw_free(dpv.k2);
     fftw_free(dpv.k3);
