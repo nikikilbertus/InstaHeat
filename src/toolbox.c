@@ -55,14 +55,9 @@ struct evolution_flags evo_flags = {.filter = 0, .output = 0};
 void mk_rhs(const double t, double *f, double *result)
 {
     mon.calls_rhs += 1;
-    const size_t N = pars.N;
-    const size_t Next = pars.Next;
-    const size_t N2 = 2 * N;
-    const size_t N3 = 3 * N;
-    const size_t Nh1 = 4 * N;
-    const size_t Nh2 = Nh1 + Next;
-    const size_t Ndh1 = Nh2 + Next;
-    const size_t Ndh2 = Ndh1 + Next;
+    const size_t N = pars.N, N2 = 2 * N, N3 = 3 * N, Next = pars.Next;
+    const size_t Nh1 = 4 * N, Nh2 = Nh1 + Next;
+    const size_t Ndh1 = Nh2 + Next, Ndh2 = Ndh1 + Next;
     const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
 
     mk_gradient_squared_and_laplacian(f);
