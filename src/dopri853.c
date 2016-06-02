@@ -102,8 +102,6 @@ struct dopri853_values dpv;
 void run_dopri853()
 {
     initialize_dopri853();
-    allocate_dopri853_values();
-    allocate_and_initialize_tolerances();
     INFO(puts("Starting dopri853 integration with:"));
     INFO(printf("initial time: %.17g\n", dp.ti));
     INFO(printf("final time: %.17g\n", dp.tf));
@@ -183,7 +181,8 @@ void run_dopri853()
 
 /**
  * @brief Initializes parameters in the struct dopri853_control dp of the
- * Dormand Prince integrator.
+ * Dormand Prince integrator, and calls further allocation and initialization
+ * functions.
  *
  * All fields of the struct dopri853_control dp are set according either as
  * fixed initial values or according to parameters entered by the user. All
@@ -215,6 +214,8 @@ static void initialize_dopri853()
     dp.reject = 0;
     dp.eps = DBL_EPSILON;
     INFO(puts("Initialized dopri853 parameters.\n"));
+    allocate_dopri853_values();
+    allocate_and_initialize_tolerances();
 }
 
 /**
