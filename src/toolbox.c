@@ -262,7 +262,7 @@ void mk_rho_and_p(const double *f)
 static void mk_stt(const double *f, complex **fsij)
 {
     TIME(mon.stt_time -= get_wall_time());
-    mk_gw_sources(fsij);
+    mk_gw_sources(f, fsij);
 
     #pragma omp parallel for
     for (size_t i = 1; i < pars.M; ++i) {
