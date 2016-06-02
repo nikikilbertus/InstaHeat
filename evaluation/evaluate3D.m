@@ -1,4 +1,4 @@
-name = 'gw3/48_5e-3_1e4';
+name = 'gw5/64_5e-2_1e4';
 interp = true;
 newoutput = true;
 amax = -1;
@@ -20,10 +20,14 @@ tols = h5read(name, '/tolerances');
 if (newoutput)
     phips = h5read(name, '/phi_power_spectrum');
     try
-    psips = h5read(name, '/psi_power_spectrum');
-    rhops = h5read(name, '/rho_power_spectrum');
+        psips = h5read(name, '/psi_power_spectrum');
     catch me
-        %
+    end
+        disp 'couldnt load psips'
+    try
+        rhops = h5read(name, '/rho_power_spectrum');
+    catch me
+        disp 'couldnt load psips'
     end
     phismry  = h5read(name, '/phi_summary');
     dphismry = h5read(name, '/dphi_summary');

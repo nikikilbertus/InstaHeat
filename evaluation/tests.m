@@ -298,13 +298,13 @@ xlabel('planck mass'); ylabel('max. abs error of momenutm');
 
 %% masses study for bunch davies
 figure
-ml = 3; m = 5;
+ml = 2; m = 4;
 % masses = 1./(2*10.^(-(ml:m)));
 masses = 5*10.^(-(ml:m));
 rhormsi = zeros(m-ml+1,4);
 maxrhos = zeros(m-ml+1,1);
 for i = 1:m-ml+1
-    name = ['resolutions9/64_5e-' num2str(i+ml-1) '_2e4'];
+    name = ['gw5/64_5e-' num2str(i+ml-1) '_1e4'];
     evaluate3D
     maxrhos(i) = max(rhorms);
     loglog(a,rhorms/rhorms(1),'linewidth',2); hold on
@@ -387,9 +387,9 @@ T = table(a, l_H, l_C, k_min, k_max);
 writetable(T, '64_5e-3_2e4.csv');
 
 %% power spectrum analysis
-L=10; nbins = 60;
+L=10; nbins = 50;
 k = 2*pi/L;
-name = 'resolutions9/64_5e-3_2e4';
+name = 'gw5/64_5e-3_1e4';
 evaluate3D
 N = N(1);
 lc = 1./sqrt(3*H*mass);
@@ -416,15 +416,21 @@ for ii = [1 logspace(1,log10(length(phips(1,:))),300)]
     subplot(2,2,3)
     loglog(bins, rhops(1:nbins,i)); xlabel('k'); ylabel('power'); title('\rho');
     subplot(2,2,4)
+    try
     loglog(bins, psips(1:nbins,i)); xlabel('k'); ylabel('power'); title('\psi');
+    catch me
+    end
     if i == 1
         Hk = H(i);
         lowb = min(rhops(1:nbins,i));
         higb = max(rhops(1:nbins,i));
         subplot(2,2,3); hold on; plot([Hk Hk], [lowb higb]); hold off;
+        try
         lowb = min(psips(1:nbins,i));
         higb = max(psips(1:nbins,i));
         subplot(2,2,4); hold on; plot([Hk Hk], [lowb higb]); hold off;
+        catch me 
+        end
         pause;
     else
         pause(0.05);
@@ -542,12 +548,12 @@ xlabel('atol'); ylabel('rtol'); zlabel('-log10 std \phi error l_{2}');
 %% resolutions study
 close all
 % res = [32 48 64 96];
-res = [32 48 64];
+res = [48 64];
 rhos = zeros(length(res),1);
 disp('         grid      steps')
 for i = 1:length(res)
 %     name = ['resolutions9/' num2str(res(i)) '_5e-4_2e4'];
-    name = ['gw2/' num2str(res(i)) '_5e-5_2e4'];
+    name = ['gw5/' num2str(res(i)) '_5e-3_1e4'];
     evaluate3D
     disp([N(1) steps])
     legendinfo{i} = num2str(res(i));
@@ -592,9 +598,9 @@ figure
 plot(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('final rhorms'); shg;
 
 %% gw power spectrum
-num = 11; aup = 600; nbins = 50;
+num = 11; aup = max(a); nbins = 50;
 % prefactor = 1e-13;
-name = 'gw3/48_5e-3_1e4';
+name = 'gw5/64_5e-3_1e4';
 evaluate3D
 N= N(1);
 L=10; k = 2*pi/L; kmax = sqrt(3) * N/2 * k;
