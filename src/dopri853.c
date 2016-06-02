@@ -569,6 +569,8 @@ static void allocate_and_initialize_tolerances()
  */
 static void free_dopri853()
 {
+    fftw_free(dp.a_tol);
+    fftw_free(dp.r_tol);
     fftw_free(dpv.k2);
     fftw_free(dpv.k3);
     fftw_free(dpv.k4);
