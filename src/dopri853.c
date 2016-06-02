@@ -432,8 +432,8 @@ static double error(const double dt)
     double err = 0.0, err2 = 0.0;
     #pragma omp parallel for reduction(+: err, err2)
     for (size_t i = 0; i < pars.Ntot; ++i) {
-        double sk = dp.a_tol + dp.r_tol *
-            MAX(fabs(field[i]), fabs(field_new[i]));
+        double sk = dp.a_tol[i] +
+            dp.r_tol[i] * MAX(fabs(field[i]), fabs(field_new[i]));
         double tmp = dpv.yerr[i] / sk;
         err2 += tmp * tmp;
         tmp = dpv.yerr2[i] / sk;
