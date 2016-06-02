@@ -179,7 +179,7 @@ void mk_gradient_squared_and_laplacian(double *in)
     fft(in, tmp.phic);
     #if defined(OUTPUT_CONSTRAINTS) || defined(OUTPUT_PSI_PS)
     fft(in + 2 * N, tmp.psic);
-    #elif defined(ENABLE_FFT_FILTER
+    #elif defined(ENABLE_FFT_FILTER)
     if (evo_flags.filter == 1) {
         fft(in + 2 * N, tmp.psic);
     }
