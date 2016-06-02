@@ -386,6 +386,12 @@ static void h5_write_all_buffers(const hsize_t Nt)
     #ifdef OUTPUT_RHO_SMRY
     h5_write_buffer(rank, Nt, rho_smry.dim, os, rho_smry.id, rho_smry.buf);
     #endif
+    #ifdef OUTPUT_H1_SMRY
+    h5_write_buffer(rank, Nt, h1_smry.dim, os, h1_smry.id, h1_smry.buf);
+    #endif
+    #ifdef OUTPUT_H2_SMRY
+    h5_write_buffer(rank, Nt, h2_smry.dim, os, h2_smry.id, h2_smry.buf);
+    #endif
 
     rank = 1;
     // ---------------------------time and a-----------------------------------
