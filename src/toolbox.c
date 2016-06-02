@@ -165,6 +165,17 @@ void mk_gradient_squared_and_laplacian(double *in)
     fft(in, tmp.phic);
     #if defined(OUTPUT_CONSTRAINTS) || defined(OUTPUT_PSI_PS)
     fft(in + 2 * N, tmp.psic);
+    #elif defined(ENABLE_FFT_FILTER
+    if (evo_flags.filter == 1) {
+        fft(in + 2 * N, tmp.psic);
+    }
+    #endif
+    % filter phi and psi here, when dft available
+    #if defined(ENABLE_FFT_FILTER)
+    if (evo_flags.filter == 1) {
+        capply_filter(tmp.phic, in);
+        capply_filter(tmp.psic, in + 2 * N);
+    }
     #endif
 
     // good place for power spectrum of phi and psi, because fft exists
