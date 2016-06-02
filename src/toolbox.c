@@ -30,11 +30,11 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out);
 #endif
 static void mk_summary();
 static void mean_var_min_max(const double *f, double *smry);
-static double mean(const double *f, const size_t N);
-static double variance(const double mean, const double *f, const size_t N);
 #if defined(OUTPUT_H1_SMRY) || defined(OUTPUT_H2_SMRY)
 static void fmean_var_min_max(const double *f, double *smry);
 #endif
+static double mean(const double *f, const size_t N);
+static double variance(const double mean, const double *f, const size_t N);
 static void fft(double *in, complex *out);
 static void ifft(complex *in, double *out);
 #ifdef CHECK_FOR_NAN
@@ -623,23 +623,6 @@ static void mk_summary()
 }
 
 /**
- * @brief Compute the mean (or average) of a vector
- *
- * @param[in] f Any vector of length @p N
- * @param[in] N The length of the vector @p f
- * @return The mean value of @p f
- */
-static double mean(const double *f, const size_t N)
-{
-    double mean = 0.0;
-    #pragma omp parallel for reduction(+: mean)
-    for (size_t i = 0; i < N; ++i) {
-        mean += f[i];
-    }
-    return mean / N;
-}
-
-/**
  * @brief Compute the summary of a vector, i.e. the mean, variance, minimum and
  * maximum value
  *
@@ -692,6 +675,23 @@ static void fmean_var_min_max(const double *f, double *smry)
     smry[3] = 0.0;
 }
 #endif
+
+/**
+ * @brief Compute the mean (or average) of a vector
+ *
+ * @param[in] f Any vector of length @p N
+ * @param[in] N The length of the vector @p f
+ * @return The mean value of @p f
+ */
+static double mean(const double *f, const size_t N)
+{
+    double mean = 0.0;
+    #pragma omp parallel for reduction(+: mean)
+    for (size_t i = 0; i < N; ++i) {
+        mean += f[i];
+    }
+    return mean / N;
+}
 
 /**
  * @brief Compute the variance of a vector
