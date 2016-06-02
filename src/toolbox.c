@@ -18,9 +18,10 @@
 
 static void assemble_gradient_squared();
 static void mk_stt(const double *f, complex **fsij);
+static void mk_gw_source_term(double **pi);
+static void mk_gw_spectrum(double *f);
 static double potential(const double f);
 static double potential_prime(const double f);
-static void mk_gw_spectrum(double *f);
 #ifdef OUTPUT_CONSTRAINTS
 static void mk_constraints(double *f);
 #endif
@@ -327,28 +328,16 @@ static void mk_stt(const double *f, complex **fsij)
 }
 
 /**
- * @brief The potential of the scalar inflaton field $$\phi$$
+ * @brief Construct the source term, i.e. the right hand side of the equation
+ * of motion for the tensor metric perturbation $$h_{ij}$$
  *
- * @param[in] f The field value where to evaluate the potential
- * @return The potential value at the given input
+ * @param[in, out] pi An array of 6 arrays for the 6 components of the sources
+ * $$pi_{ij}$$ after imposing symmetry.
+ *
+ * The source term is the right hand side of equation TODO[link] in the thesis.
  */
-static double potential(const double f)
-{
-    // standard phi squared potential
-    return MASS * MASS * f * f / 2.0;
-}
+static void mk_gw_source_term(double **pi) {
 
-/**
- * @brief The derivative of the potential of the scalar inflaton field $$\phi$$
- *
- * @param[in] f The field value where to evaluate the derivative of the
- * potential
- * @return The value of the derivative of the potential at given input
- */
-static double potential_prime(const double f)
-{
-    // standard phi squared potential
-    return MASS * MASS * f;
 }
 
 /**
@@ -408,6 +397,31 @@ static void mk_gw_spectrum(double *f)
     for (size_t i = 0; i < gw.dim; ++i) {
         gw.tmp[i] /= pars.N;
     }
+}
+
+/**
+ * @brief The potential of the scalar inflaton field $$\phi$$
+ *
+ * @param[in] f The field value where to evaluate the potential
+ * @return The potential value at the given input
+ */
+static double potential(const double f)
+{
+    // standard phi squared potential
+    return MASS * MASS * f * f / 2.0;
+}
+
+/**
+ * @brief The derivative of the potential of the scalar inflaton field $$\phi$$
+ *
+ * @param[in] f The field value where to evaluate the derivative of the
+ * potential
+ * @return The value of the derivative of the potential at given input
+ */
+static double potential_prime(const double f)
+{
+    // standard phi squared potential
+    return MASS * MASS * f;
 }
 
 #ifdef OUTPUT_CONSTRAINTS
