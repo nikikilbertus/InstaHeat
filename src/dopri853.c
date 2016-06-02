@@ -464,7 +464,8 @@ static int success(const double err, double *dt)
     if (err <= 1.0) {
         if (err == 0.0) {
             scale = dp.maxscale;
-        } else {
+        }
+        else {
             scale = dp.safe * pow(err, - dp.alpha) * pow(dp.err_old, dp.beta);
             if (scale < dp.minscale) {
                 scale = dp.minscale;
@@ -475,7 +476,8 @@ static int success(const double err, double *dt)
         }
         if (dp.reject) {
             dp.dt_next = (*dt) * MIN(scale, 1.0);
-        } else {
+        }
+        else {
             dp.dt_next = (*dt) * scale;
         }
         #ifdef MAX_DT_HUBBLE_FRACTION
@@ -487,7 +489,8 @@ static int success(const double err, double *dt)
         dp.err_old = MAX(err, 1.0e-4);
         dp.reject = 0;
         return 1;
-    } else {
+    }
+    else {
         scale = MAX(dp.safe * pow(err, - dp.alpha), dp.minscale);
         (*dt) *= scale;
         dp.reject = 1;
