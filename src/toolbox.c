@@ -78,6 +78,7 @@ void mk_rhs(const double t, double *f, double *result)
         #ifdef OUTPUT_CONSTRAINTS
         mk_constraints(f);
         #endif
+        mk_summary();
         mk_gw_spectrum(f);
     }
 
@@ -586,7 +587,6 @@ void prepare_and_save_timeslice()
     evo_flags.output = 1;
     mk_rhs(pars.t.t, field, dfield);
     evo_flags.output = 0;
-    mk_summary();
     save();
 }
 
