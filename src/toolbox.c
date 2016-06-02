@@ -28,8 +28,9 @@ static void mk_constraints(double *f);
 #ifdef OUTPUT_PS
 static void mk_power_spectrum(const fftw_complex *in, struct output out);
 #endif
-static double mean(const double *f, const size_t N);
+static void mk_summary();
 static void mean_var_min_max(const double *f, double *smry);
+static double mean(const double *f, const size_t N);
 static double variance(const double mean, const double *f, const size_t N);
 #if defined(OUTPUT_H1_SMRY) || defined(OUTPUT_H2_SMRY)
 static void fmean_var_min_max(const double *f, double *smry);
@@ -593,7 +594,7 @@ void prepare_and_save_timeslice()
  * @brief Save the summaries of the fields (containing the mean, variance,
  * minimum and maximum value at the current time).
  */
-void mk_summary()
+static void mk_summary()
 {
     TIME(mon.smry_time -= get_wall_time());
     #ifdef OUTPUT_PHI_SMRY
