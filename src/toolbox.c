@@ -65,6 +65,12 @@ void mk_rhs(const double t, double *f, double *result)
     const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
 
     mk_gradient_squared_and_laplacian(f);
+    #ifdef ENABLE_FFT_FILTER
+    if (evo_flags.filter == 1) {
+        apply_filter(f + N);
+        apply_filter(f + 3 * N);
+    }
+    #endif
     mk_rho_and_p(f);
     const double hubble = sqrt(rho_mean / 3.0);
     const double h3 = 3.0 * hubble;
@@ -141,10 +147,11 @@ void prepare_and_save_timeslice()
 }
 
 /**
- * @brief Compute the Laplacian and the sqaure gradient.
+ * @brief Compute the Laplacian and the sqaure gradient. More computations
+ * might be performed depending on flags in `evo_flags`.
  *
- * @param[in] in An array containing the fields, in particular $$\phi$$ and
- * $$\dot{\phi}$$
+ * @param[in,out] in An array containing the fields, in particular $$\phi$$ and
+ * $$\psi}$$. Those two might be overwritten by their filtered versions.
  *
  * The Laplacian and the squared gradient as well as the partial derivatives of
  * $$\phi$$ are stored in global variables for reuse in other functions. When
@@ -158,6 +165,9 @@ void prepare_and_save_timeslice()
  * double *f, double *result)`
  * If `OUTPUT_CONSTRAINTS` is defined, additionally, `tmp.f` contains $$\Delta
  * \psi$$, the Lagrangian of $$\psi$$.
+ * If specified in `evo_flags.filter`, the fields $$\phi$$ and $$\psi$$ will be
+ * overwritten with their filtered version. Moreover the power spectra of phi
+ * and psi might be computed if as specified in `evo_flags.filter`.
  */
 void mk_gradient_squared_and_laplacian(double *in)
 {
@@ -170,7 +180,7 @@ void mk_gradient_squared_and_laplacian(double *in)
         fft(in + 2 * N, tmp.psic);
     }
     #endif
-    % filter phi and psi here, when dft available
+    // filter phi and psi here, when dft available
     #if defined(ENABLE_FFT_FILTER)
     if (evo_flags.filter == 1) {
         capply_filter(tmp.phic, in);
