@@ -71,7 +71,7 @@ void mk_rhs(const double t, double *f, double *result)
     const double h3 = 3.0 * hubble;
 
     if (evo_flags.output == 1) {
-        // power spectrum of rho here, because need rho first
+        // power spectrum of rho here, because only now is rho available
         #ifdef OUTPUT_RHO_PS
         fft(rho, tmp.phic);
         mk_power_spectrum(tmp.phic, rho_ps);
@@ -85,18 +85,18 @@ void mk_rhs(const double t, double *f, double *result)
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
         double dph = f[N + i], ps = f[N2 + i], dps = f[N3 + i];
-        result[i] = dph; // copy dphi
+        result[i] = dph; // update dphi
         result[N + i] = (1.0 + 4.0 * ps) * tmp.lap[i] / a2 -
             (h3 - 4.0 * dps) * dph -
-            (1.0 + 2.0 * ps) * potential_prime(f[i]); // eq. for ddphi
-        result[N2 + i] = dps; // copy dpsi
+            (1.0 + 2.0 * ps) * potential_prime(f[i]); // update ddphi
+        result[N2 + i] = dps; // update dpsi
         result[N3 + i] = 0.5 * pressure[i] + (ps - 0.5) * pressure_mean
-            - 4.0 * hubble * dps; // eq. for ddpsi
+            - 4.0 * hubble * dps; // update ddpsi
     }
 
     #pragma omp parallel for
     for (size_t i = 0; i < 2 * Next; ++i) {
-        result[Nh1 + i] = f[Ndh1 + i]; // copy dhijs
+        result[Nh1 + i] = f[Ndh1 + i]; // update dhijs
     }
 
     const size_t len = 6;
@@ -253,7 +253,7 @@ void mk_rho_and_p(const double *f)
  * perturbations needed in gravitational wave extraction.
  *
  * @param[in] f An array containing the fields
- * @param[in, out] s The traceless transverse part of the source terms in
+ * @param[out] s The traceless transverse part of the source terms in
  * the equation of motion of the tensor perturbations. We only need the first
  * two fields, because there are only two degrees of freedom.
  *
@@ -301,7 +301,7 @@ static void mk_stt(const double *f, complex **s)
  * @brief Construct the source term, i.e. the right hand side of the equation
  * of motion for the tensor metric perturbation $$h_{ij}$$
  *
- * @param[in, out] s An array of 6 arrays for the 6 components of the sources
+ * @param[out] s An array of 6 arrays for the 6 components of the sources
  * $$S_{ij}$$ in Fourier space after imposing symmetry.
  *
  * The source term is the right hand side of equation TODO[link] in the thesis.
