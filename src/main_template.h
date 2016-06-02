@@ -287,6 +287,8 @@ extern struct output phi_smry;
 extern struct output dphi_smry;
 extern struct output psi_smry;
 extern struct output dpsi_smry;
+extern struct output h1_smry;
+extern struct output h2_smry;
 extern struct output t_out;
 extern struct output a_out;
 extern double *rho;
