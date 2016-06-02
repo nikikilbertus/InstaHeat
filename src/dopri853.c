@@ -126,13 +126,13 @@ void run_dopri853()
         }
         if (dp.dt_did == dp.dt) {
             ++dp.n_ok;
-        } else {
+        }
+        else {
             ++dp.n_bad;
         }
         #ifdef DEBUG
         INFO(printf("did step: %d with dt: %f\n", dp.n_stp, dp.dt_did));
         #endif
-
         if ((dp.n_stp + 1) % pars.file.skip == 0) {
             save();
         }
@@ -419,8 +419,8 @@ static void try_step(const double dt)
  * @param[in] dt The previously tried stepsize.
  * @return The error of the previously tried stepsize.
  *
- * Computes the collective error of <b>all</b> the fields in the integration
- * routine normalized such that the threshold value is 1.
+ * Computes the collective error of all the fields in the integration routine
+ * normalized such that the threshold value is 1.
  */
 static double error(const double dt)
 {
