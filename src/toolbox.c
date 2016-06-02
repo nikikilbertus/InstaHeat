@@ -30,6 +30,7 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out);
 #endif
 static double mean(const double *f, const size_t N);
 static void mean_var_min_max(const double *f, double *smry);
+static void fmean_var_min_max(const double *f, double *smry);
 static double variance(const double mean, const double *f, const size_t N);
 static void fft(double *in, complex *out);
 static void ifft(complex *in, double *out);
@@ -609,10 +610,10 @@ void mk_summary()
     #endif
     // TODO: when to compute summary of h1 and h2, need it in real space
     #ifdef OUTPUT_H1_SMRY
-    /* mean_var_min_max(rho, h1_smry.tmp); */
+    fmean_var_min_max(field + 4 * pars.N, h1_smry.tmp);
     #endif
     #ifdef OUTPUT_H2_SMRY
-    /* mean_var_min_max(rho, h2_smry.tmp); */
+    fmean_var_min_max(field + 4 * pars.N + pars.Next, h2_smry.tmp);
     #endif
     TIME(mon.smry_time += get_wall_time());
 }
@@ -662,6 +663,31 @@ static void mean_var_min_max(const double *f, double *smry)
 }
 
 /**
+ * @brief Compute the summary of a vector, i.e. the mean, variance, minimum and
+ * maximum value given its Fourier transform
+ *
+ * @param[in] f The input vector in the Fourier domain
+ * @param[out] smry An array of size 4 which is filled with the summary: mean,
+ * variance, min, max (in this order)
+ *
+ * @note The vector is implicitly assumed to have length `pars.Next` and is
+ * given in the memory layout described in TODO[link]
+ */
+static void fmean_var_min_max(const double *f, double *smry)
+{
+    //TODO: this is still heavily flawed
+    double var = 0.0;
+    #pragma omp parallel for reduction(+: var)
+    for (size_t i = 1; i < pars.Next; ++i) {
+        var += f[i] * f[i];
+    }
+    smry[0] = f[0];
+    smry[1] = var / pars.N;
+    smry[2] = 0.0;
+    smry[3] = 0.0;
+}
+
+/**
  * @brief Compute the variance of a vector
  *
  * @param[in] mean The mean of the vector @p f
@@ -681,7 +707,7 @@ static double variance(const double mean, const double *f, const size_t N)
     return (sum1 - sum2 * sum2 / N) / (N - 1);
 }
 
-/*
+/**
  * @brief Fourier transform
  *
  * @param[in] in Pointer to the function in real space
@@ -694,7 +720,7 @@ static void fft(double *in, complex *out)
     TIME(mon.fftw_time_exe += get_wall_time());
 }
 
-/*
+/**
  * @brief Inverse Fourier transform
  *
  * @param[in] in Pointer to the function in Fourier space
