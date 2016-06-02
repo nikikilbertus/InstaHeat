@@ -262,33 +262,7 @@ void mk_rho_and_p(const double *f)
 static void mk_stt(const double *f, complex **fsij)
 {
     TIME(mon.stt_time -= get_wall_time());
-    const size_t len = 6;
-    double **sij = malloc(len * sizeof *sij);
-    for (size_t i = 0; i < len; ++i) {
-        sij[i] = fftw_malloc(pars.N * sizeof *sij[i]);
-    }
-
-    const double atmp = 3.0 * f[pars.Ntot - 1] * f[pars.Ntot - 1];
-    #pragma omp parallel for
-    for (size_t i = 0; i < pars.N; ++i) {
-        // TODO: not sure whether correct and do i include metric here?
-        // with metric
-        double gphi = - tmp.grad[i] * (2.0 + 4.0 * f[2 * pars.N + i]) / atmp;
-        // without metric
-        /* double gphi = - tmp.grad[i] * 2.0 / atmp; */
-        sij[0][i] = tmp.xphi[i] * tmp.xphi[i] + gphi;
-        sij[1][i] = tmp.xphi[i] * tmp.yphi[i];
-        sij[2][i] = tmp.xphi[i] * tmp.zphi[i];
-        sij[3][i] = tmp.yphi[i] * tmp.yphi[i] + gphi;
-        sij[4][i] = tmp.yphi[i] * tmp.zphi[i];
-        sij[5][i] = tmp.zphi[i] * tmp.zphi[i] + gphi;
-    }
-
-    for (size_t i = 0; i < len; ++i) {
-        fft(sij[i], fsij[i]);
-        fftw_free(sij[i]);
-    }
-    free(sij);
+    mk_gw_sources(fsij);
 
     #pragma omp parallel for
     for (size_t i = 1; i < pars.M; ++i) {
@@ -337,6 +311,33 @@ static void mk_stt(const double *f, complex **fsij)
  * The source term is the right hand side of equation TODO[link] in the thesis.
  */
 static void mk_gw_sources(complex **s) {
+    const size_t len = 6;
+    double **s_tmp = malloc(len * sizeof *s_tmp);
+    for (size_t i = 0; i < len; ++i) {
+        s_tmp[i] = fftw_malloc(pars.N * sizeof *s_tmp[i]);
+    }
+
+    const double atmp = 3.0 * f[pars.Ntot - 1] * f[pars.Ntot - 1];
+    #pragma omp parallel for
+    for (size_t i = 0; i < pars.N; ++i) {
+        // TODO: not sure whether correct and do i include metric here?
+        // with metric
+        double gphi = - tmp.grad[i] * (2.0 + 4.0 * f[2 * pars.N + i]) / atmp;
+        // without metric
+        /* double gphi = - tmp.grad[i] * 2.0 / atmp; */
+        s_tmp[0][i] = tmp.xphi[i] * tmp.xphi[i] + gphi;
+        s_tmp[1][i] = tmp.xphi[i] * tmp.yphi[i];
+        s_tmp[2][i] = tmp.xphi[i] * tmp.zphi[i];
+        s_tmp[3][i] = tmp.yphi[i] * tmp.yphi[i] + gphi;
+        s_tmp[4][i] = tmp.yphi[i] * tmp.zphi[i];
+        s_tmp[5][i] = tmp.zphi[i] * tmp.zphi[i] + gphi;
+    }
+
+    for (size_t i = 0; i < len; ++i) {
+        fft(s_tmp[i], s[i]);
+        fftw_free(s_tmp[i]);
+    }
+    free(s_tmp);
 
 }
 
