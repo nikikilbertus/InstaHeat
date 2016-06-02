@@ -134,7 +134,6 @@ void run_dopri853()
         #endif
 
         if ((dp.n_stp + 1) % pars.file.skip == 0) {
-            mk_summary();
             save();
         }
         if (dp.t >= dp.tf) {
