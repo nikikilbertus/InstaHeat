@@ -103,6 +103,7 @@ void run_dopri853()
 {
     initialize_dopri853();
     allocate_dopri853_values();
+    allocate_and_initialize_tolerances();
     INFO(puts("Starting dopri853 integration with:"));
     INFO(printf("initial time: %.17g\n", dp.ti));
     INFO(printf("final time: %.17g\n", dp.tf));
