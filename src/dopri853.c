@@ -28,6 +28,7 @@ static void try_step(const double dt);
 static double error(const double dt);
 static int success(const double err, double *dt);
 static void allocate_dopri853_values();
+static void allocate_and_initialize_tolerances();
 static void free_dopri853_values();
 
 /**
@@ -541,6 +542,19 @@ static void allocate_dopri853_values()
         dpv.k_tmp[i] = 0.0;
     }
     INFO(puts("Allocated memory for dopri853 variables.\n"));
+}
+
+/**
+ * @brief Initializes the vectorized absolute and relative tolerances.
+ *
+ * From the definitions in the parameter file initializes the absolute and
+ * relative tolerances used to compute the error. The error determines whether
+ * a step size is accepted or rejected and how to choose the next adaptive step
+ * size.
+ */
+static void allocate_and_initialize_tolerances()
+{
+
 }
 
 /**
