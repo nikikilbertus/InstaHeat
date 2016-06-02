@@ -104,13 +104,13 @@ void run_dopri853()
     initialize_dopri853();
     allocate_dopri853_values();
     INFO(puts("Starting dopri853 integration with:"));
-    INFO(printf("initial time: %f\n", dp.ti));
-    INFO(printf("final time: %f\n", dp.tf));
-    INFO(printf("initial time step dt: %f\n", dp.dt));
-    INFO(printf("minimal time step dt: %f\n", dp.dt_min));
+    INFO(printf("initial time: %.17g\n", dp.ti));
+    INFO(printf("final time: %.17g\n", dp.tf));
+    INFO(printf("initial time step dt: %.17g\n", dp.dt));
+    INFO(printf("minimal time step dt: %.17g\n", dp.dt_min));
     INFO(printf("max number of steps: %zu\n", dp.max_steps));
-    INFO(printf("relative tolerance: %.15f\n", dp.r_tol));
-    INFO(printf("absolute tolerance: %.15f\n\n", dp.a_tol));
+    INFO(printf("relative tolerance: %.17g\n", RELATIVE_TOLERANCE));
+    INFO(printf("absolute tolerance: %.17g\n\n", ABSOLUTE_TOLERANCE));
 
     evo_flags.output = 1;
     mk_rhs(dp.t, field, dfield);
