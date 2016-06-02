@@ -18,7 +18,7 @@
 
 static void assemble_gradient_squared();
 static void mk_stt(const double *f, complex **fsij);
-static void mk_gw_sources(double **pi);
+static void mk_gw_sources(complex **s);
 static void mk_gw_spectrum(double *f);
 static double potential(const double f);
 static double potential_prime(const double f);
@@ -331,12 +331,12 @@ static void mk_stt(const double *f, complex **fsij)
  * @brief Construct the source term, i.e. the right hand side of the equation
  * of motion for the tensor metric perturbation $$h_{ij}$$
  *
- * @param[in, out] pi An array of 6 arrays for the 6 components of the sources
- * $$pi_{ij}$$ after imposing symmetry.
+ * @param[in, out] s An array of 6 arrays for the 6 components of the sources
+ * $$S_{ij}$$ in Fourier space after imposing symmetry.
  *
  * The source term is the right hand side of equation TODO[link] in the thesis.
  */
-static void mk_gw_sources(double **pi) {
+static void mk_gw_sources(complex **s) {
 
 }
 
