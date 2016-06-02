@@ -555,8 +555,8 @@ static void allocate_dopri853_values()
  */
 static void allocate_and_initialize_tolerances()
 {
-    size_t Ntot = pars.Ntot;
-    size_t N = pars.N;
+    const size_t Ntot = pars.Ntot;
+    const size_t N = pars.N;
     dp.a_tol = fftw_malloc(Ntot * sizeof *dp.a_tol);
     dp.r_tol = fftw_malloc(Ntot * sizeof *dp.r_tol);
     // TODO: initialize values
