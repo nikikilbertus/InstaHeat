@@ -556,12 +556,27 @@ static void allocate_dopri853_values()
 static void allocate_and_initialize_tolerances()
 {
     size_t Ntot = pars.Ntot;
+    size_t N = pars.N, Next = pars.Next;
     dp.a_tol = fftw_malloc(Ntot * sizeof *dp.a_tol);
     dp.r_tol = fftw_malloc(Ntot * sizeof *dp.r_tol);
     // TODO: initialize values
     #pragma omp parallel for
     for (size_t i = 0; i < Ntot; ++i) {
         dp.a_tol[i] = ABSOLUTE_TOLERANCE;
+        dp.r_tol[i] = RELATIVE_TOLERANCE;
+    }
+    double rtol = RELATIVE_TOLERANCE;
+    #pragma omp parallel for
+    for (size_t i = 0; i < 2 * N; ++i) {
+        dp.r_tol[i] = rtol;
+    }
+    rtol = 1.0e4 * RELATIVE_TOLERANCE;
+    #pragma omp parallel for
+    for (size_t i = 2 * N; i < 4 * N; ++i) {
+        dp.r_tol[i] = rtol;
+    }
+    #pragma omp parallel for
+    for (size_t i = 4 * N; i < Ntot; ++i) {
         dp.r_tol[i] = RELATIVE_TOLERANCE;
     }
 }
