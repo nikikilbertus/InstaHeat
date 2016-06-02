@@ -211,8 +211,6 @@ static void initialize_dopri853()
     dp.safe = SAFE;
     dp.minscale = SMALLEST_SCALING;
     dp.maxscale = LARGEST_SCALING;
-    dp.a_tol = ABSOLUTE_TOLERANCE;
-    dp.r_tol = RELATIVE_TOLERANCE;
     dp.err_old = 1.0e-4;
     dp.reject = 0;
     dp.eps = DBL_EPSILON;
