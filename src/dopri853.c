@@ -565,20 +565,20 @@ static void allocate_and_initialize_tolerances()
         dp.a_tol[i] = ABSOLUTE_TOLERANCE;
         dp.r_tol[i] = RELATIVE_TOLERANCE;
     }
-    double rtol = RELATIVE_TOLERANCE;
-    #pragma omp parallel for
-    for (size_t i = 0; i < 2 * N; ++i) {
-        dp.r_tol[i] = rtol;
-    }
-    rtol = 1.0e4 * RELATIVE_TOLERANCE;
-    #pragma omp parallel for
-    for (size_t i = 2 * N; i < 4 * N; ++i) {
-        dp.r_tol[i] = rtol;
-    }
-    #pragma omp parallel for
-    for (size_t i = 4 * N; i < Ntot; ++i) {
-        dp.r_tol[i] = RELATIVE_TOLERANCE;
-    }
+    /* double rtol = RELATIVE_TOLERANCE; */
+    /* #pragma omp parallel for */
+    /* for (size_t i = 0; i < 2 * N; ++i) { */
+    /*     dp.r_tol[i] = rtol; */
+    /* } */
+    /* /1* rtol = 1.0e4 * RELATIVE_TOLERANCE; *1/ */
+    /* #pragma omp parallel for */
+    /* for (size_t i = 2 * N; i < 4 * N; ++i) { */
+    /*     dp.r_tol[i] = rtol; */
+    /* } */
+    /* #pragma omp parallel for */
+    /* for (size_t i = 4 * N; i < Ntot; ++i) { */
+    /*     dp.r_tol[i] = RELATIVE_TOLERANCE; */
+    /* } */
 }
 
 /**
