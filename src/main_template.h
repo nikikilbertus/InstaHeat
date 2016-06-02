@@ -88,14 +88,22 @@
 #define _OH2S_
 #define _OCSTR_
 
-#if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || defined(OUTPUT_PSI) \
-    || defined(OUTPUT_DPSI)|| defined(OUTPUT_RHO)
+#if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || \
+    defined(OUTPUT_PSI) || defined(OUTPUT_DPSI) || \
+    defined(OUTPUT_RHO)
     #define LARGE_OUTPUT
 #endif
 
-#if defined(OUTPUT_PHI_PS) || defined(OUTPUT_DPHI_PS) || defined(OUTPUT_PSI_PS) \
-    || defined(OUTPUT_DPSI_PS) || defined(OUTPUT_RHO_PS)
+#if defined(OUTPUT_PHI_PS) || defined(OUTPUT_DPHI_PS) || \
+    defined(OUTPUT_PSI_PS) || defined(OUTPUT_DPSI_PS) || \
+    defined(OUTPUT_RHO_PS)
     #define OUTPUT_PS
+#endif
+
+#if defined(OUTPUT_PHI_SMRY) || defined(OUTPUT_DPHI_SMRY) || \
+    defined(OUTPUT_PSI_SMRY) || defined(OUTPUT_DPSI_SMRY) || \
+    defined(OUTPUT_RHO_SMRY)
+    #define OUTPUT_SMRY
 #endif
 
 #define DATAPATH                ("_PATH_")

@@ -112,11 +112,7 @@ void run_dopri853()
     INFO(printf("relative tolerance: %.17g\n", RELATIVE_TOLERANCE));
     INFO(printf("absolute tolerance: %.17g\n\n", ABSOLUTE_TOLERANCE));
 
-    evo_flags.output = 1;
-    mk_rhs(dp.t, field, dfield);
-    evo_flags.output = 0;
-    mk_summary();
-    save();
+    prepare_and_save_timeslice();
     double secs = 0.0;
     TIME(secs = -get_wall_time());
 

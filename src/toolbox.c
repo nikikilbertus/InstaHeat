@@ -30,10 +30,10 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out);
 #endif
 static double mean(const double *f, const size_t N);
 static void mean_var_min_max(const double *f, double *smry);
+static double variance(const double mean, const double *f, const size_t N);
 #if defined(OUTPUT_H1_SMRY) || defined(OUTPUT_H2_SMRY)
 static void fmean_var_min_max(const double *f, double *smry);
 #endif
-static double variance(const double mean, const double *f, const size_t N);
 static void fft(double *in, complex *out);
 static void ifft(complex *in, double *out);
 #ifdef CHECK_FOR_NAN
@@ -304,7 +304,8 @@ static void mk_stt(const double *f, complex **s)
  *
  * The source term is the right hand side of equation TODO[link] in the thesis.
  */
-static void mk_gw_sources(const double *f, complex **s) {
+static void mk_gw_sources(const double *f, complex **s)
+{
     const size_t len = 6;
     double **s_tmp = malloc(len * sizeof *s_tmp);
     for (size_t i = 0; i < len; ++i) {
