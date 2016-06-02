@@ -28,6 +28,8 @@
 #define     H5_PSI_SMRY_NAME                ("psi_summary")
 #define     H5_DPSI_SMRY_NAME               ("dpsi_summary")
 #define     H5_RHO_SMRY_NAME                ("rho_summary")
+#define     H5_H1_SMRY_NAME                 ("h1_summary")
+#define     H5_H2_SMRY_NAME                 ("h2_summary")
 #define     H5_CONSTRAINTS_NAME             ("constraints")
 #define     H5_MASS_NAME                    ("mass")
 #define     H5_INFLATON_MASS_NAME           ("inflaton_mass")
