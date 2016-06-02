@@ -298,13 +298,13 @@ xlabel('planck mass'); ylabel('max. abs error of momenutm');
 
 %% masses study for bunch davies
 figure
-ml = 2; m = 4;
+ml = 3; m = 4;
 % masses = 1./(2*10.^(-(ml:m)));
 masses = 5*10.^(-(ml:m));
 rhormsi = zeros(m-ml+1,4);
 maxrhos = zeros(m-ml+1,1);
 for i = 1:m-ml+1
-    name = ['gw5/64_5e-' num2str(i+ml-1) '_1e4'];
+    name = ['gw4/64_5e-' num2str(i+ml-1) '_2e4'];
     evaluate3D
     maxrhos(i) = max(rhorms);
     loglog(a,rhorms/rhorms(1),'linewidth',2); hold on
@@ -548,12 +548,12 @@ xlabel('atol'); ylabel('rtol'); zlabel('-log10 std \phi error l_{2}');
 %% resolutions study
 close all
 % res = [32 48 64 96];
-res = [48 64];
+res = [48 64 96];
 rhos = zeros(length(res),1);
 disp('         grid      steps')
 for i = 1:length(res)
 %     name = ['resolutions9/' num2str(res(i)) '_5e-4_2e4'];
-    name = ['gw5/' num2str(res(i)) '_5e-3_1e4'];
+    name = ['gw4/' num2str(res(i)) '_5e-3_2e4'];
     evaluate3D
     disp([N(1) steps])
     legendinfo{i} = num2str(res(i));
@@ -598,9 +598,9 @@ figure
 plot(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('final rhorms'); shg;
 
 %% gw power spectrum
-num = 11; aup = max(a); nbins = 50;
+num = 50; aup = 600; nbins = 50;
 % prefactor = 1e-13;
-name = 'gw5/64_5e-3_1e4';
+name = 'gw4/64_5e-3_2e4';
 evaluate3D
 N= N(1);
 L=10; k = 2*pi/L; kmax = sqrt(3) * N/2 * k;
