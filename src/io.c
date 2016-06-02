@@ -84,6 +84,12 @@ void h5_create_empty_by_path()
     #ifdef OUTPUT_RHO_SMRY
     h5_create_dset(rank, rho_smry.dim, &(rho_smry.id), H5_RHO_SMRY_NAME);
     #endif
+    #ifdef OUTPUT_H1_SMRY
+    h5_create_dset(rank, h1_smry.dim, &(h1_smry.id), H5_H1_SMRY_NAME);
+    #endif
+    #ifdef OUTPUT_H2_SMRY
+    h5_create_dset(rank, h2_smry.dim, &(h2_smry.id), H5_H2_SMRY_NAME);
+    #endif
 
     // ---------------------------power spectra---------------------------------
     #ifdef OUTPUT_PHI_PS
