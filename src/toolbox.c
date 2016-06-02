@@ -262,7 +262,6 @@ static void mk_stt(const double *f, complex **fsij)
 {
     TIME(mon.stt_time -= get_wall_time());
     const size_t len = 6;
-
     double **sij = malloc(len * sizeof *sij);
     for (size_t i = 0; i < len; ++i) {
         sij[i] = fftw_malloc(pars.N * sizeof *sij[i]);
@@ -335,19 +334,7 @@ static void mk_stt(const double *f, complex **fsij)
  */
 static double potential(const double f)
 {
-    // higgs metastability potential
-    /* double l = LAMBDA / 1.0e-10; */
-    /* double a = 0.01 * l, b = 1.0 * l; */
-    /* return f == 0.0 ? LAMBDA : */
-    /*     (LAMBDA + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) + */
-    /*     b * pow(f, 6)); */
-
-    // notch or step potential
-    // LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
-    /* double lambda = 100.0; */
-    /* return LAMBDA / (1.0 + exp(-lambda * f)); */
-
-    // standard f squared potential
+    // standard phi squared potential
     return MASS * MASS * f * f / 2.0;
 }
 
@@ -360,21 +347,7 @@ static double potential(const double f)
  */
 static double potential_prime(const double f)
 {
-    // higgs metastability potential
-    /* double l = LAMBDA / 1.0e-10; */
-    /* double a = 0.01 * l, b = 1.0 * l; */
-    /* return f == 0.0 ? 0 : */
-    /*     (4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) - */
-    /*     (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0)) */
-    /*     + 6.0 * b * pow(f, 5)); */
-
-    // notch or step potential
-    // LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
-    /* double lambda = 100.0; */
-    /* double tmp = exp(lambda * f); */
-    /* return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp)); */
-
-    // standard f squared potential
+    // standard phi squared potential
     return MASS * MASS * f;
 }
 
