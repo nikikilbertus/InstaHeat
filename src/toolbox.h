@@ -32,7 +32,6 @@ void mk_psi(double *f);
 #ifdef ENABLE_FFT_FILTER
 void apply_filter(double *inout);
 #endif
-void mk_summary();
 void prepare_and_save_timeslice();
 
 #endif
