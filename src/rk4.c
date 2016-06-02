@@ -69,7 +69,6 @@ void run_rk4()
             evo_flags.output = 1;
             mk_rhs(t, field, k1);
             evo_flags.output = 0;
-            mk_summary();
             save();
         } else {
             mk_rhs(t, field, k1);
