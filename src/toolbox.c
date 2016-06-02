@@ -30,7 +30,9 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out);
 #endif
 static double mean(const double *f, const size_t N);
 static void mean_var_min_max(const double *f, double *smry);
+#if defined(OUTPUT_H1_SMRY) || defined(OUTPUT_H2_SMRY)
 static void fmean_var_min_max(const double *f, double *smry);
+#endif
 static double variance(const double mean, const double *f, const size_t N);
 static void fft(double *in, complex *out);
 static void ifft(complex *in, double *out);
@@ -662,6 +664,7 @@ static void mean_var_min_max(const double *f, double *smry)
     smry[3] = max_val;
 }
 
+#if defined(OUTPUT_H1_SMRY) || defined(OUTPUT_H2_SMRY)
 /**
  * @brief Compute the summary of a vector, i.e. the mean, variance, minimum and
  * maximum value given its Fourier transform
@@ -686,6 +689,7 @@ static void fmean_var_min_max(const double *f, double *smry)
     smry[2] = 0.0;
     smry[3] = 0.0;
 }
+#endif
 
 /**
  * @brief Compute the variance of a vector
