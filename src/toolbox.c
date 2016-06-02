@@ -630,6 +630,13 @@ void mk_summary()
     #ifdef OUTPUT_RHO_SMRY
     mean_var_min_max(rho, rho_smry.tmp);
     #endif
+    // TODO: when to compute summary of h1 and h2, need it in real space
+    #ifdef OUTPUT_H1_SMRY
+    /* mean_var_min_max(rho, h1_smry.tmp); */
+    #endif
+    #ifdef OUTPUT_H2_SMRY
+    /* mean_var_min_max(rho, h2_smry.tmp); */
+    #endif
     TIME(mon.smry_time += get_wall_time());
 }
 
