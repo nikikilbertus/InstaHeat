@@ -579,7 +579,6 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
 }
 #endif
 
-//TODO: make use of filter flag again and filter whenever FT is available
 #ifdef ENABLE_FFT_FILTER
 /**
  * @brief Apply a Fourier filter to the real space input to cutoff high
