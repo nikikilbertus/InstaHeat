@@ -338,7 +338,6 @@ static void mk_gw_sources(const double *f, complex **s) {
         fftw_free(s_tmp[i]);
     }
     free(s_tmp);
-
 }
 
 /**
@@ -485,8 +484,7 @@ void mk_psi(double *f)
     const double hubble = sqrt(rho_mean / 3.0);
     const double phi_mean = mean(f, N);
     const double dphi_mean = mean(f + N, N);
-    double extra1 = 0.0;
-    double extra2 = 0.0;
+    double extra1 = 0.0, extra2 = 0.0;
 
     #pragma omp parallel for reduction(+: extra1, extra2)
     for (size_t i = 0; i < N; ++i) {
