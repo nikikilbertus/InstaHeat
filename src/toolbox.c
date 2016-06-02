@@ -271,7 +271,7 @@ static void mk_stt(const double *f, complex **fsij)
     const double atmp = 3.0 * f[pars.Ntot - 1] * f[pars.Ntot - 1];
     #pragma omp parallel for
     for (size_t i = 0; i < pars.N; ++i) {
-        // TODO: do i include metric here?
+        // TODO: not sure whether correct and do i include metric here?
         // with metric
         double gphi = - tmp.grad[i] * (2.0 + 4.0 * f[2 * pars.N + i]) / atmp;
         // without metric
