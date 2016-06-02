@@ -33,6 +33,8 @@ struct output dphi_smry;
 struct output psi_smry;
 struct output dpsi_smry;
 struct output rho_smry;
+struct output h1_smry;
+struct output h2_smry;
 struct output a_out;
 struct output phi_ps;
 struct output psi_ps;
