@@ -53,10 +53,6 @@ void run_rk4()
     TIME(secs = -get_wall_time());
 
     for (size_t nt = 0; t < pars.t.tf; ++nt) {
-        #ifdef ENABLE_FFT_FILTER
-        apply_filter(field);
-        #endif
-
         // to precisely reach final time in the last step, change dt
         if (t + dt * 1.0001 > pars.t.tf) {
             dt = pars.t.tf - t;
@@ -64,6 +60,9 @@ void run_rk4()
             INFO(printf("overshoot, new dt = %f\n", dt));
         }
 
+        #ifdef ENABLE_FFT_FILTER
+        evo_flags.filter = 1;
+        #endif
         // step 1 (and write out data if required)
         if (nt % pars.file.skip == 0) {
             evo_flags.output = 1;
@@ -73,6 +72,7 @@ void run_rk4()
         } else {
             mk_rhs(t, field, k1);
         }
+        evo_flags.filter = 0;
 
         // step 2
         #pragma omp parallel for
