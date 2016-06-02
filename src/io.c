@@ -486,6 +486,14 @@ void save()
             #pragma omp section
             append_to_buffer(rho_smry);
         #endif
+        #ifdef OUTPUT_H1_SMRY
+            #pragma omp section
+            append_to_buffer(h1_smry);
+        #endif
+        #ifdef OUTPUT_H2_SMRY
+            #pragma omp section
+            append_to_buffer(h2_smry);
+        #endif
         #ifdef OUTPUT_PHI_PS
             #pragma omp section
             append_to_buffer(phi_ps);
