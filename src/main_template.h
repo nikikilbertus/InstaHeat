@@ -145,6 +145,12 @@
 #define RELATIVE_TOLERANCE      (_RELTOL_)
 #define ABSOLUTE_TOLERANCE      (_ABSTOL_)
 #define MAX_DT_HUBBLE_FRACTION  (_HFRAC_)
+#define _GW_
+
+#ifdef ENABLE_GW
+    #undef OUTPUT_H1_SMRY
+    #undef OUTPUT_H2_SMRY
+#endif
 
 /**
  * @brief Holds the values necessary to describe one dimension of the grid.
