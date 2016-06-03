@@ -567,8 +567,8 @@ static double filter_window(const double x)
  * parameter file.
  *
  * As a first step all fields are set to zero. Then the desired initialization
- * rountine is called. Once the function returns, $$\phi$$, $$\dot{\phi}$$,
- * $$\psi$$, $$\dot{\psi}$$, $$t$$ and $$a$$ have their initial values.
+ * rountine is called. Once the function returns, \f$\phi\f$, \f$\dot{\phi}\f$,
+ * \f$\psi\f$, \f$\dot{\psi}\f$, \f$t\f$ and \f$a\f$ have their initial values.
  */
 static void mk_initial_conditions()
 {
@@ -614,9 +614,9 @@ static void initialize_from_dat()
 #endif
 
 /**
- * @brief Given that the initial $$\phi$$, $$\dot{\phi}$$ and $$a$$ are already
- * provided in `field`, construct the corresponding $$\psi$$ and
- * $$\dot{\psi}$$.
+ * @brief Given that the initial \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$ are already
+ * provided in `field`, construct the corresponding \f$\psi\f$ and
+ * \f$\dot{\psi}\f$.
  */
 static void mk_initial_psi()
 {
@@ -632,15 +632,15 @@ static void mk_initial_psi()
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
 /**
  * @brief Construct a Bunch Davies vacuum as initial conditions if the
- * parameters satisfy the conditions and then construct corresponding $$\psi$$,
- * $$\dot{psi}$$.
+ * parameters satisfy the conditions and then construct corresponding \f$\psi\f$,
+ * \f$\dot{psi}\f$.
  *
  * We build upon the values in the DEFROST paper (in the references), hence we
  * need 3 dimensions with the same number of gridpoints and a box length of 10
  * in each direction. DEFROST uses `INFLATON_MASS=5e-6` and `MASS=1`. We can
  * freely adjust the `INFLATON_MASS` to change the amplitude of the initial
  * fluctuations. By scaling `MASS`, we can shift the initial Hubble length.
- * (Initial values for H and $$\dot{\phi}$$ are scaled automatically according
+ * (Initial values for H and \f$\dot{\phi}\f$ are scaled automatically according
  * to the value of `MASS`.) We recommend keeping the bos length fixed at 10 and
  * only rescaling `MASS`.
  *
@@ -678,7 +678,7 @@ static void initialize_from_bunch_davies()
 }
 
 /**
- * @brief Construct a Bunch Davies vacuum for $$\phi$$ and $$\dot{\phi}$$ as
+ * @brief Construct a Bunch Davies vacuum for \f$\phi\f$ and \f$\dot{\phi}\f$ as
  * initial conditions following the description in DEFROST.
  *
  * @see [DEFROST: A New Code for Simulating Preheating after
@@ -780,12 +780,12 @@ static complex box_muller()
  * @brief Construct initial conditions for phi from internally defined functions
  *
  * First the actual spatial grid values are computed by calling
- * `mk_x_grid(double *grid)` and then $$\phi$$ and $$\dot{\phi}$$ are computed
+ * `mk_x_grid(double *grid)` and then \f$\phi\f$ and \f$\dot{\phi}\f$ are computed
  * by `phi_init(const double x, const double y, const double z, const double
  * *ph)`, `dphi_init(const double x, const double y, const double z, const
  * double *ph)` potentially using some random phases `ph`. The initial scale
- * factor $$a$$ comes from the parameter file and $$\psi$$, $$\dot{\psi}$$ are
- * then computed from $$\phi$$ and $$\dot{\phi}$$.
+ * factor \f$a\f$ comes from the parameter file and \f$\psi\f$, \f$\dot{\psi}\f$ are
+ * then computed from \f$\phi\f$ and \f$\dot{\phi}\f$.
  */
 static void initialize_from_internal_function()
 {
@@ -849,9 +849,9 @@ static void mk_x_grid(double *grid)
 /**
  * @brief The initial value of phi.
  *
- * @param[in] x The x coordinate where we want to evaluate $$\phi$$.
- * @param[in] y The y coordinate where we want to evaluate $$\phi$$.
- * @param[in] z The z coordinate where we want to evaluate $$\phi$$.
+ * @param[in] x The x coordinate where we want to evaluate \f$\phi\f$.
+ * @param[in] y The y coordinate where we want to evaluate \f$\phi\f$.
+ * @param[in] z The z coordinate where we want to evaluate \f$\phi\f$.
  * @param[in] ph Random phases for various modes.
  *
  * @return The value of phi at the specified coordinates @p x, @p y, @p z.
@@ -929,11 +929,11 @@ static double phi_init(const double x, const double y, const double z,
 }
 
 /**
- * @brief The initial value of $$\dot{\phi}$$.
+ * @brief The initial value of \f$\dot{\phi}\f$.
  *
- * @param[in] x The x coordinate where we want to evaluate $$\dot{\phi}$$.
- * @param[in] y The y coordinate where we want to evaluate $$\dot{\phi}$$.
- * @param[in] z The z coordinate where we want to evaluate $$\dot{\phi}$$.
+ * @param[in] x The x coordinate where we want to evaluate \f$\dot{\phi}\f$.
+ * @param[in] y The y coordinate where we want to evaluate \f$\dot{\phi}\f$.
+ * @param[in] z The z coordinate where we want to evaluate \f$\dot{\phi}\f$.
  * @param[in] ph Random phases for various modes.
  *
  * @return The value of dphi at the specified coordinates @p x, @p y, @p z.
