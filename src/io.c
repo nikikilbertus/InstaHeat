@@ -171,6 +171,13 @@ void h5_create_empty_by_path()
     #endif
     h5_write_parameter(H5_MAX_DT_HUBBLE_FRACTION_NAME, val, 1);
 
+    #ifdef ENABLE_FFT_FILTER
+    val[0] = 1.0;
+    #else
+    val[0] = 0.0;
+    #endif
+    h5_write_parameter(H5_ENABLE_FILTER_NAME, val, 1);
+
     // ---------------------------commit hash-----------------------------------
     hid_t filetype, memtype, dspace_str, dset_str;
     hsize_t dim[1] = {1};
