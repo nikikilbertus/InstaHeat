@@ -117,7 +117,7 @@ void prepare_and_save_timeslice()
  * might be performed depending on flags in `evo_flags`.
  *
  * @param[in,out] in An array containing the fields, in particular \f$\phi\f$ and
- * \f$\psi}\f$. Those two might be overwritten by their filtered versions.
+ * \f$\psi\f$. Those two might be overwritten by their filtered versions.
  *
  * The Laplacian and the squared gradient as well as the partial derivatives of
  * \f$\phi\f$ are stored in global variables for reuse in other functions. When
