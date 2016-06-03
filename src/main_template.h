@@ -235,21 +235,21 @@ struct parameters
  */
 struct temporary
 {
-    double  *xphi; ///< The x derivative of $$\phi$$ in real space
-    double  *yphi; ///< The y derivative of $$\phi$$ in real space
-    double  *zphi; ///< The z derivative of $$\phi$$ in real space
-    complex *phic; ///< The inflaton field $$\phi$$ in real space
-    complex *xphic; ///< The x derivative of $$\phi$$ in Fourier space
-    complex *yphic; ///< The y derivative of $$\phi$$ in Fourier space
-    complex *zphic; ///< The z derivative of $$\phi$$ in Fourier space
-    double  *grad; ///< The _squared_ gradient of $$\phi$$ in real space
-    double  *lap; ///< The Laplacian of $$\phi$$ in real space
-    double  *deltarho; ///< $$\delta \rho = \rho - <\rho>$$ in real space
+    double  *xphi; ///< The x derivative of \f$\phi\f$ in real space
+    double  *yphi; ///< The y derivative of \f$\phi\f$ in real space
+    double  *zphi; ///< The z derivative of \f$\phi\f$ in real space
+    complex *phic; ///< The inflaton field \f$\phi\f$ in real space
+    complex *xphic; ///< The x derivative of \f$\phi\f$ in Fourier space
+    complex *yphic; ///< The y derivative of \f$\phi\f$ in Fourier space
+    complex *zphic; ///< The z derivative of \f$\phi\f$ in Fourier space
+    double  *grad; ///< The _squared_ gradient of \f$\phi\f$ in real space
+    double  *lap; ///< The Laplacian of \f$\phi\f$ in real space
+    double  *deltarho; ///< \f$\delta \rho = \rho - <\rho>\f$ in real space
     double  *f; ///< Various purposes (real space)
-    complex *deltarhoc; ///< $$\delta \rho = \rho - <\rho>$$ in Fourier space
+    complex *deltarhoc; ///< \f$\delta \rho = \rho - <\rho>\f$ in Fourier space
     complex *fc; ///< Various purposes (Fourier space)
-    complex *psic; ///< The metric perturbation $$\psi$$ in Fourier space
-    complex *dpsic; ///< The derivative $$\dot{\psi}$$ in Fourier space
+    complex *psic; ///< The metric perturbation \f$\psi\f$ in Fourier space
+    complex *dpsic; ///< The derivative \f$\dot{\psi}\f$ in Fourier space
 };
 
 /**
