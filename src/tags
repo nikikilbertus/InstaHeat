@@ -20,6 +20,7 @@ DELTA_T	main.h	/^#define DELTA_T /;"	d
 DELTA_T	main_template.h	/^#define DELTA_T /;"	d
 DOPRI853	main.h	/^#define DOPRI853 /;"	d
 DOPRI853	main_template.h	/^#define DOPRI853 /;"	d
+ENABLE_FFT_FILTER	main.h	/^#define ENABLE_FFT_FILTER$/;"	d
 FFTW_DEFAULT_FLAG	main.h	/^#define FFTW_DEFAULT_FLAG /;"	d
 FFTW_DEFAULT_FLAG	main_template.h	/^#define FFTW_DEFAULT_FLAG /;"	d
 FINAL_TIME	main.h	/^#define FINAL_TIME /;"	d
@@ -41,6 +42,7 @@ H5_DPHI_SMRY_NAME	io.h	/^#define     H5_DPHI_SMRY_NAME /;"	d
 H5_DPSI_NAME	io.h	/^#define     H5_DPSI_NAME /;"	d
 H5_DPSI_PS_NAME	io.h	/^#define     H5_DPSI_PS_NAME /;"	d
 H5_DPSI_SMRY_NAME	io.h	/^#define     H5_DPSI_SMRY_NAME /;"	d
+H5_ENABLE_FILTER_NAME	io.h	/^#define     H5_ENABLE_FILTER_NAME /;"	d
 H5_GRIDPOINTS_INTERNAL_NAME	io.h	/^#define     H5_GRIDPOINTS_INTERNAL_NAME /;"	d
 H5_GRIDPOINTS_OUTPUT_NAME	io.h	/^#define     H5_GRIDPOINTS_OUTPUT_NAME /;"	d
 H5_GW_PS_NAME	io.h	/^#define     H5_GW_PS_NAME /;"	d
@@ -147,11 +149,14 @@ Nt	main_template.h	/^    size_t Nt; \/\/\/< number of timesteps (only relevant f
 Ntot	main.h	/^    size_t Ntot; \/\/\/< number of scalar equations$/;"	m	struct:parameters
 Ntot	main_template.h	/^    size_t Ntot; \/\/\/< number of scalar equations$/;"	m	struct:parameters
 OBJECTS	Makefile	/^OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))$/;"	m
-OUTPUT_CONSTRAINTS	main.h	/^#define OUTPUT_CONSTRAINTS$/;"	d
 OUTPUT_DPHI_SMRY	main.h	/^#define OUTPUT_DPHI_SMRY$/;"	d
 OUTPUT_DPSI_SMRY	main.h	/^#define OUTPUT_DPSI_SMRY$/;"	d
+OUTPUT_H1_SMRY	main.h	/^    #undef OUTPUT_H1_SMRY$/;"	d
 OUTPUT_H1_SMRY	main.h	/^#define OUTPUT_H1_SMRY$/;"	d
+OUTPUT_H1_SMRY	main_template.h	/^    #undef OUTPUT_H1_SMRY$/;"	d
+OUTPUT_H2_SMRY	main.h	/^    #undef OUTPUT_H2_SMRY$/;"	d
 OUTPUT_H2_SMRY	main.h	/^#define OUTPUT_H2_SMRY$/;"	d
+OUTPUT_H2_SMRY	main_template.h	/^    #undef OUTPUT_H2_SMRY$/;"	d
 OUTPUT_PHI_PS	main.h	/^#define OUTPUT_PHI_PS$/;"	d
 OUTPUT_PHI_SMRY	main.h	/^#define OUTPUT_PHI_SMRY$/;"	d
 OUTPUT_PS	main.h	/^    #define OUTPUT_PS$/;"	d
@@ -159,6 +164,8 @@ OUTPUT_PS	main_template.h	/^    #define OUTPUT_PS$/;"	d
 OUTPUT_PSI_SMRY	main.h	/^#define OUTPUT_PSI_SMRY$/;"	d
 OUTPUT_RHO_PS	main.h	/^#define OUTPUT_RHO_PS$/;"	d
 OUTPUT_RHO_SMRY	main.h	/^#define OUTPUT_RHO_SMRY$/;"	d
+OUTPUT_SMRY	main.h	/^    #define OUTPUT_SMRY$/;"	d
+OUTPUT_SMRY	main_template.h	/^    #define OUTPUT_SMRY$/;"	d
 PI	main.h	/^#define PI /;"	d
 PI	main_template.h	/^#define PI /;"	d
 POWER_SPECTRUM_BINS	main.h	/^#define POWER_SPECTRUM_BINS /;"	d
@@ -217,6 +224,7 @@ VERSION_CONTROL_NONE	main_template.h	/^#define VERSION_CONTROL_NONE /;"	d
 WRITE_OUT_BUFFER_NUMBER	main.h	/^#define WRITE_OUT_BUFFER_NUMBER /;"	d
 WRITE_OUT_BUFFER_NUMBER	main_template.h	/^#define WRITE_OUT_BUFFER_NUMBER /;"	d
 _FILTER_	main_template.h	/^#define _FILTER_$/;"	d
+_GW_	main_template.h	/^#define _GW_$/;"	d
 _OCSTR_	main_template.h	/^#define _OCSTR_$/;"	d
 _ODPHIS_	main_template.h	/^#define _ODPHIS_$/;"	d
 _ODPHI_	main_template.h	/^#define _ODPHI_$/;"	d
@@ -325,7 +333,7 @@ allocate_dopri853_values	dopri853.c	/^static void allocate_dopri853_values()$/;"
 allocate_external	setup.c	/^static void allocate_external()$/;"	f	file:
 alpha	dopri853.c	/^    double alpha; \/\/\/< Internal parameter for the error estimates$/;"	m	struct:dopri853_control	file:
 append_to_buffer	io.c	/^static void append_to_buffer(struct output f)$/;"	f	file:
-apply_filter	toolbox.c	/^void apply_filter(double *inout)$/;"	f
+apply_filter	toolbox.c	/^static void apply_filter(double *f)$/;"	f	file:
 are_fields_equal	tests.c	/^static int are_fields_equal(const double *f, const double *g)$/;"	f	file:
 assemble_gradient_squared	toolbox.c	/^static void assemble_gradient_squared()$/;"	f	file:
 b	main.h	/^    double b; \/\/\/< upper bound of the interval$/;"	m	struct:grid_dimension
@@ -362,6 +370,7 @@ c8	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;
 c9	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
 calls_rhs	main.h	/^    size_t calls_rhs;$/;"	m	struct:monitor
 calls_rhs	main_template.h	/^    size_t calls_rhs;$/;"	m	struct:monitor
+capply_filter	toolbox.c	/^static void capply_filter(complex *in, double *out)$/;"	f	file:
 check_simd_alignment	setup.c	/^static void check_simd_alignment()$/;"	f	file:
 contains_nan	toolbox.c	/^static void contains_nan(const double *f, const size_t N)$/;"	f	file:
 contains_nanc	toolbox.c	/^static void contains_nanc(const complex *f, const size_t N)$/;"	f	file:
@@ -483,6 +492,7 @@ filter	toolbox.h	/^    uint8_t filter; \/\/\/< If set, apply filtering (unused)$
 filter_time	main.h	/^    double filter_time; \/\/\/< Total wall clock time for filtering$/;"	m	struct:monitor
 filter_time	main_template.h	/^    double filter_time; \/\/\/< Total wall clock time for filtering$/;"	m	struct:monitor
 filter_window	setup.c	/^static double filter_window(const double x)$/;"	f	file:
+fmean_var_min_max	toolbox.c	/^static void fmean_var_min_max(const double *f, double *smry)$/;"	f	file:
 free_and_destroy_all	setup.c	/^void free_and_destroy_all()$/;"	f
 free_dopri853	dopri853.c	/^static void free_dopri853()$/;"	f	file:
 free_external	setup.c	/^static void free_external()$/;"	f	file:
@@ -551,6 +561,8 @@ mk_constraints	toolbox.c	/^static void mk_constraints(double *f)$/;"	f	file:
 mk_fftw_plans	setup.c	/^static void mk_fftw_plans()$/;"	f	file:
 mk_filter_mask	setup.c	/^static void mk_filter_mask()$/;"	f	file:
 mk_gradient_squared_and_laplacian	toolbox.c	/^void mk_gradient_squared_and_laplacian(double *in)$/;"	f
+mk_gw_sources	toolbox.c	/^static void mk_gw_sources(const double *f, complex **s)$/;"	f	file:
+mk_gw_sources_tt	toolbox.c	/^static void mk_gw_sources_tt(const double *f, complex **s)$/;"	f	file:
 mk_gw_spectrum	toolbox.c	/^static void mk_gw_spectrum(double *f)$/;"	f	file:
 mk_initial_conditions	setup.c	/^static void mk_initial_conditions()$/;"	f	file:
 mk_initial_psi	setup.c	/^static void mk_initial_psi()$/;"	f	file:
@@ -559,8 +571,7 @@ mk_power_spectrum	toolbox.c	/^static void mk_power_spectrum(const fftw_complex *
 mk_psi	toolbox.c	/^void mk_psi(double *f)$/;"	f
 mk_rho_and_p	toolbox.c	/^void mk_rho_and_p(const double *f)$/;"	f
 mk_rhs	toolbox.c	/^void mk_rhs(const double t, double *f, double *result)$/;"	f
-mk_stt	toolbox.c	/^static void mk_stt(const double *f, complex **fsij)$/;"	f	file:
-mk_summary	toolbox.c	/^void mk_summary()$/;"	f
+mk_summary	toolbox.c	/^static void mk_summary()$/;"	f	file:
 mk_x_grid	setup.c	/^static void mk_x_grid(double *grid)$/;"	f	file:
 mon	main.c	/^struct monitor mon;$/;"	v	typeref:struct:monitor
 monitor	main.h	/^struct monitor$/;"	s
@@ -656,6 +667,8 @@ tmp	main.c	/^struct temporary tmp;$/;"	v	typeref:struct:temporary
 tmp	main.h	/^    double *tmp;    \/\/\/< the output values on the current time slice$/;"	m	struct:output
 tmp	main_template.h	/^    double *tmp;    \/\/\/< the output values on the current time slice$/;"	m	struct:output
 try_step	dopri853.c	/^static void try_step(const double dt)$/;"	f	file:
+update_h	toolbox.c	/^static void update_h(double *f, double *result)$/;"	f	file:
+update_phi_psi	toolbox.c	/^static void update_phi_psi(double *f, double *result)$/;"	f	file:
 variance	toolbox.c	/^static double variance(const double mean, const double *f, const size_t N)$/;"	f	file:
 wrapped_gaussian	setup.c	/^static double wrapped_gaussian(const double x, const double y, const double z)$/;"	f	file:
 x	main.h	/^    double *x; \/\/\/< The x direction of the k vector (with zeros at N\/2)$/;"	m	struct:k_grid
