@@ -1,4 +1,4 @@
-% name = 'resolutions9/64_5e-3_2e4';
+name = 'gw6/64_5e-3_2e4_fil';
 interp = true;
 newoutput = true;
 amax = -1;
@@ -22,12 +22,17 @@ if (newoutput)
     try
         psips = h5read(name, '/psi_power_spectrum');
     catch me
-    end
         disp 'couldnt load psips'
+    end
     try
         rhops = h5read(name, '/rho_power_spectrum');
     catch me
-        disp 'couldnt load psips'
+        disp 'couldnt load rhops'
+    end
+    try
+        gwps = h5read(name, '/gravitational_wave_spectrum');
+    catch me
+        disp 'couldnt load gwps'
     end
     phismry  = h5read(name, '/phi_summary');
     dphismry = h5read(name, '/dphi_summary');
@@ -63,7 +68,7 @@ if (newoutput)
        steps = h5read(name, '/steps_total');
        timetotal = h5read(name, '/runtime_total');
     catch me
-        %
+        disp 'couldnt load constraints'
     end
 else
     powspec = h5read(name, '/power_spectrum');
@@ -127,10 +132,10 @@ if amax > 1
     
     try
     phips = phips(:,I);
-    psips = psips(:,I);
     rhops = rhops(:,I);
+    psips = psips(:,I);
     catch m
-        %
+        disp 'some power spectra not available'
     end;
     
     hamcstrl2 = hamcstrl2(I);
