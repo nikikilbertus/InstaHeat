@@ -15,7 +15,7 @@
  */
 struct evolution_flags
 {
-    uint8_t filter; ///< If set, apply filtering (unused)
+    uint8_t filter; ///< If set, apply filtering
     /**
      * @brief Set if output at current timeslice is desired. This tells methods
      * in toolbox to compute additional quantities.
