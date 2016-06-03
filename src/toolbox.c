@@ -17,9 +17,13 @@
  */
 
 static void assemble_gradient_squared();
+static void update_phi_psi(double *f, double *result);
+#ifdef ENABLE_GW
+static void update_h(double *f, double *result);
 static void mk_gw_sources_tt(const double *f, complex **s);
 static void mk_gw_sources(const double *f, complex **s);
 static void mk_gw_spectrum(double *f);
+#endif
 static double potential(const double f);
 static double potential_prime(const double f);
 #ifdef OUTPUT_CONSTRAINTS
@@ -63,21 +67,16 @@ struct evolution_flags evo_flags = {.filter = 0, .output = 0};
 void mk_rhs(const double t, double *f, double *result)
 {
     mon.calls_rhs += 1;
-    const size_t N = pars.N, N2 = 2 * N, N3 = 3 * N, Next = pars.Next;
-    const size_t Nh1 = 4 * N, Nh2 = Nh1 + Next;
-    const size_t Ndh1 = Nh2 + Next, Ndh2 = Ndh1 + Next;
-    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
 
     mk_gradient_squared_and_laplacian(f);
     #ifdef ENABLE_FFT_FILTER
+    // filter dphi and dpsi here, their DFTs are never available elsewhere
     if (evo_flags.filter == 1) {
-        apply_filter(f + N);
-        apply_filter(f + 3 * N);
+        apply_filter(f + pars.N);
+        apply_filter(f + 3 * pars.N);
     }
     #endif
     mk_rho_and_p(f);
-    const double hubble = sqrt(rho_mean / 3.0);
-    const double h3 = 3.0 * hubble;
 
     if (evo_flags.output == 1) {
         // power spectrum of rho here, because only now is rho available
@@ -89,52 +88,16 @@ void mk_rhs(const double t, double *f, double *result)
         mk_constraints(f);
         #endif
         mk_summary();
+        #ifdef ENABLE_GW
         mk_gw_spectrum(f);
+        #endif
     }
 
-    #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i) {
-        double dph = f[N + i], ps = f[N2 + i], dps = f[N3 + i];
-        result[i] = dph; // update dphi
-        result[N + i] = (1.0 + 4.0 * ps) * tmp.lap[i] / a2 -
-            (h3 - 4.0 * dps) * dph -
-            (1.0 + 2.0 * ps) * potential_prime(f[i]); // update ddphi
-        result[N2 + i] = dps; // update dpsi
-        result[N3 + i] = 0.5 * pressure[i] + (ps - 0.5) * pressure_mean
-            - 4.0 * hubble * dps; // update ddpsi
-    }
-
-    #pragma omp parallel for
-    for (size_t i = 0; i < 2 * Next; ++i) {
-        result[Nh1 + i] = f[Ndh1 + i]; // update dhijs
-    }
-
-    const size_t len = 6;
-    complex **stt = malloc(len * sizeof *stt);
-    for (size_t i = 0; i < len; ++i) {
-        stt[i] = fftw_malloc(pars.M * sizeof *stt[i]);
-    }
-    mk_gw_sources_tt(f, stt);
-
-    #pragma omp parallel for
-    for (size_t i = 0; i < pars.M; ++i) {
-        size_t i1 = 2 * i, i2 = i1 + 1;
-        double tmp = - (2.0 * pressure_mean + kvec.sq[i] / a2);
-        result[Ndh1 + i1] = tmp * f[Nh1 + i1] - h3 * f[Ndh1 + i1] +
-                            2.0 * creal(stt[0][i]) / a2;
-        result[Ndh1 + i2] = tmp * f[Nh1 + i2] - h3 * f[Ndh1 + i2] +
-                            2.0 * cimag(stt[0][i]) / a2;
-        result[Ndh2 + i1] = tmp * f[Nh2 + i1] - h3 * f[Ndh2 + i1] +
-                            2.0 * creal(stt[1][i]) / a2;
-        result[Ndh2 + i2] = tmp * f[Nh2 + i2] - h3 * f[Ndh2 + i2] +
-                            2.0 * cimag(stt[1][i]) / a2;
-    }
-
-    for (size_t i = 0; i < len; ++i) {
-        fftw_free(stt[i]);
-    }
-    free(stt);
-
+    update_phi_psi(f, result);
+    #ifdef ENABLE_GW
+    update_h(f, result);
+    #endif
+    const double hubble = sqrt(rho_mean / 3.0);
     result[pars.Ntot - 1] = f[pars.Ntot - 1] * hubble; // update da
 }
 
@@ -285,6 +248,67 @@ void mk_rho_and_p(const double *f)
     pressure_mean /= N;
 }
 
+//TODO: documentation
+static void update_phi_psi(double *f, double *result)
+{
+    const size_t N = pars.N, N2 = 2 * N, N3 = 3 * N;
+    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
+    const double hubble = sqrt(rho_mean / 3.0);
+    const double h3 = 3.0 * hubble;
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < N; ++i) {
+        double dph = f[N + i], ps = f[N2 + i], dps = f[N3 + i];
+        result[i] = dph; // update dphi
+        result[N + i] = (1.0 + 4.0 * ps) * tmp.lap[i] / a2 -
+            (h3 - 4.0 * dps) * dph -
+            (1.0 + 2.0 * ps) * potential_prime(f[i]); // update ddphi
+        result[N2 + i] = dps; // update dpsi
+        result[N3 + i] = 0.5 * pressure[i] + (ps - 0.5) * pressure_mean
+            - 4.0 * hubble * dps; // update ddpsi
+    }
+}
+
+#ifdef ENABLE_GW
+//TODO: documentation
+static void update_h(double *f, double *result)
+{
+    const size_t N = pars.N, Next = pars.Next, Nh1 = 4 * N, Nh2 = Nh1 + Next;
+    const size_t Ndh1 = Nh2 + Next, Ndh2 = Ndh1 + Next;
+    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
+    const double hubble = sqrt(rho_mean / 3.0);
+    const double h3 = 3.0 * hubble;
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < 2 * Next; ++i) {
+        result[Nh1 + i] = f[Ndh1 + i]; // update dhijs
+    }
+    const size_t len = 6;
+    complex **stt = malloc(len * sizeof *stt);
+    for (size_t i = 0; i < len; ++i) {
+        stt[i] = fftw_malloc(pars.M * sizeof *stt[i]);
+    }
+    mk_gw_sources_tt(f, stt);
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < pars.M; ++i) {
+        size_t i1 = 2 * i, i2 = i1 + 1;
+        double tmp = - (2.0 * pressure_mean + kvec.sq[i] / a2);
+        result[Ndh1 + i1] = tmp * f[Nh1 + i1] - h3 * f[Ndh1 + i1] +
+                            2.0 * creal(stt[0][i]) / a2;
+        result[Ndh1 + i2] = tmp * f[Nh1 + i2] - h3 * f[Ndh1 + i2] +
+                            2.0 * cimag(stt[0][i]) / a2;
+        result[Ndh2 + i1] = tmp * f[Nh2 + i1] - h3 * f[Ndh2 + i1] +
+                            2.0 * creal(stt[1][i]) / a2;
+        result[Ndh2 + i2] = tmp * f[Nh2 + i2] - h3 * f[Ndh2 + i2] +
+                            2.0 * cimag(stt[1][i]) / a2;
+    }
+    for (size_t i = 0; i < len; ++i) {
+        fftw_free(stt[i]);
+    }
+    free(stt);
+}
+
 /**
  * @brief Compute the traceless transverse source terms of the tensor
  * perturbations needed in gravitational wave extraction.
@@ -432,6 +456,7 @@ static void mk_gw_spectrum(double *f)
         gw.tmp[i] /= pars.N;
     }
 }
+#endif
 
 /**
  * @brief The potential of the scalar inflaton field $$\phi$$
