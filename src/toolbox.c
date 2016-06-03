@@ -116,22 +116,22 @@ void prepare_and_save_timeslice()
  * @brief Compute the Laplacian and the sqaure gradient. More computations
  * might be performed depending on flags in `evo_flags`.
  *
- * @param[in,out] in An array containing the fields, in particular $$\phi$$ and
- * $$\psi}$$. Those two might be overwritten by their filtered versions.
+ * @param[in,out] in An array containing the fields, in particular \f$\phi\f$ and
+ * \f$\psi}\f$. Those two might be overwritten by their filtered versions.
  *
  * The Laplacian and the squared gradient as well as the partial derivatives of
- * $$\phi$$ are stored in global variables for reuse in other functions. When
+ * \f$\phi\f$ are stored in global variables for reuse in other functions. When
  * the function returns:
- * `tmp.xphi` contains $$\partial_x \phi$$
- * `tmp.yphi` contains $$\partial_y \phi$$
- * `tmp.zphi` contains $$\partial_z \phi$$
- * `tmp.lap` contains the Laplacian $$\sum_{i=1}^3 \partial_i^2 \phi$$
- * `tmp.grad` contains the _squared_ gradient $$(\nabla \phi)^2$$
+ * `tmp.xphi` contains \f$\partial_x \phi\f$
+ * `tmp.yphi` contains \f$\partial_y \phi\f$
+ * `tmp.zphi` contains \f$\partial_z \phi\f$
+ * `tmp.lap` contains the Laplacian \f$\sum_{i=1}^3 \partial_i^2 \phi\f$
+ * `tmp.grad` contains the _squared_ gradient \f$(\nabla \phi)^2\f$
  * All the above values persist until the next call of `mk_rhs(const double t,
  * double *f, double *result)`
- * If `OUTPUT_CONSTRAINTS` is defined, additionally, `tmp.f` contains $$\Delta
- * \psi$$, the Lagrangian of $$\psi$$.
- * If specified in `evo_flags.filter`, the fields $$\phi$$ and $$\psi$$ will be
+ * If `OUTPUT_CONSTRAINTS` is defined, additionally, `tmp.f` contains \f$\Delta
+ * \psi\f$, the Lagrangian of \f$\psi\f$.
+ * If specified in `evo_flags.filter`, the fields \f$\phi\f$ and \f$\psi\f$ will be
  * overwritten with their filtered version. Moreover the power spectra of phi
  * and psi might be computed if as specified in `evo_flags.filter`.
  */
@@ -194,7 +194,7 @@ void mk_gradient_squared_and_laplacian(double *in)
  * @brief Constructs the squared gradient from the (up to) three partial
  * spatial derivatives.
  *
- * The partial derivatives of $$\phi$$ computed in
+ * The partial derivatives of \f$\phi\f$ computed in
  * `mk_gradient_squared_and_laplacian(double *in)` are indiviually squared,
  * added up and the result is stored in `tmp.grad`
  */
@@ -213,17 +213,17 @@ static void assemble_gradient_squared()
 }
 
 /**
- * @brief Compute the energy density $$\rho$$ and its average value as well as
+ * @brief Compute the energy density \f$\rho\f$ and its average value as well as
  * the pressure and its average value.
  *
  * @param[in] f An array containing the fields
  *
  * Everything is stored in global variables for reuse in other functions. When
  * the function returns:
- * `rho` contains the energy density $$\rho$$
- * `rho_mean` contains the average energy density $$< \rho >$$
- * `pressure` contains the pressure $$p$$
- * `pressure_mean` contains the average pressure $$< p >$$
+ * `rho` contains the energy density \f$\rho\f$
+ * `rho_mean` contains the average energy density \f$< \rho >\f$
+ * `pressure` contains the pressure \f$p\f$
+ * `pressure_mean` contains the average pressure \f$< p >\f$
  * All the above values persist until the next call of `mk_rhs(const double t,
  * double *f, double *result)`
  */
@@ -249,7 +249,7 @@ void mk_rho_and_p(const double *f)
 
 /**
  * @brief Computes and updates the right hand side of the pde, i.e. the first
- * order temporal derivatives of $$\phi$$, $$\dot{phi}$$, $$\psi$$, $$\dot{psi}$$.
+ * order temporal derivatives of \f$\phi\f$, \f$\dot{phi}\f$, \f$\psi\f$, \f$\dot{psi}\f$.
  *
  * @param[in] f All necessary fields bundled in one array
  * @param[out] result The right hand side of the pde for the given fields
@@ -375,10 +375,10 @@ static void mk_gw_sources_tt(const double *f, complex **s)
 
 /**
  * @brief Construct the source term, i.e. the right hand side of the equation
- * of motion for the tensor metric perturbation $$h_{ij}$$
+ * of motion for the tensor metric perturbation \f$h_{ij}\f$
  *
  * @param[out] s An array of 6 arrays for the 6 components of the sources
- * $$S_{ij}$$ in Fourier space after imposing symmetry.
+ * \f$S_{ij}\f$ in Fourier space after imposing symmetry.
  *
  * The source term is the right hand side of equation TODO[link] in the thesis.
  */
@@ -473,7 +473,7 @@ static void mk_gw_spectrum(double *f)
 #endif
 
 /**
- * @brief The potential of the scalar inflaton field $$\phi$$
+ * @brief The potential of the scalar inflaton field \f$\phi\f$
  *
  * @param[in] f The field value where to evaluate the potential
  * @return The potential value at the given input
@@ -485,7 +485,7 @@ static double potential(const double f)
 }
 
 /**
- * @brief The derivative of the potential of the scalar inflaton field $$\phi$$
+ * @brief The derivative of the potential of the scalar inflaton field \f$\phi\f$
  *
  * @param[in] f The field value where to evaluate the derivative of the
  * potential
@@ -540,14 +540,14 @@ static void mk_constraints(double *f)
 #endif
 
 /**
- * @brief Compute $$\psi$$ and $$\dot{\psi}$$
+ * @brief Compute \f$\psi\f$ and \f$\dot{\psi}\f$
  *
- * @param[in] f An array containing the fields. Expects $$\phi$$,
- * $$\dot{\phi}$$ and $$a$$ right after each other in @p f.
+ * @param[in] f An array containing the fields. Expects \f$\phi\f$,
+ * \f$\dot{\phi}\f$ and \f$a\f$ right after each other in @p f.
  *
  * We use an elliptic equation from the Hamiltonian constraint combined with
- * the momentum contraint to compute $$\psi$$ and $$\dot{\psi}$$ from given
- * $$\phi$$, $$\dot{\phi}$$ and $$a$$.
+ * the momentum contraint to compute \f$\psi\f$ and \f$\dot{\psi}\f$ from given
+ * \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$.
  */
 void mk_psi(double *f)
 {
