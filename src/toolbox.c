@@ -59,10 +59,9 @@ struct evolution_flags evo_flags = {.filter = 0, .output = 0};
  * @param[in] t The current time
  * @param[in] f All necessary fields bundled in one array
  * @param[out] result The right hand side of the partial differential equation,
- * i.e. the first temporal derivatives of the fields
+ * i.e. the first temporal derivatives of the fields in @p f
  *
- * We evolve $$\phi$$, $$\dot{\phi}$$, $$\psi$$, $$\dot{\psi}$$ and $$a$$
- * according to a hyperbolic constraint equation with the integration routine.
+ * @see TODO[link] for more on the evolved fields and the equations of motion.
  */
 void mk_rhs(const double t, double *f, double *result)
 {
@@ -248,7 +247,15 @@ void mk_rho_and_p(const double *f)
     pressure_mean /= N;
 }
 
-//TODO: documentation
+/**
+ * @brief Computes and updates the right hand side of the pde, i.e. the first
+ * order temporal derivatives of $$\phi$$, $$\dot{phi}$$, $$\psi$$, $$\dot{psi}$$.
+ *
+ * @param[in] f All necessary fields bundled in one array
+ * @param[out] result The right hand side of the pde for the given fields
+ *
+ * @see TODO[link] for more on the evolved fields and the equations of motion.
+ */
 static void update_phi_psi(double *f, double *result)
 {
     const size_t N = pars.N, N2 = 2 * N, N3 = 3 * N;
@@ -270,7 +277,15 @@ static void update_phi_psi(double *f, double *result)
 }
 
 #ifdef ENABLE_GW
-//TODO: documentation
+/**
+ * @brief Computes and updates the right hand side of the pde, i.e. the first
+ * order temporal derivatives of the tensor perturbations, i.e. the h components.
+ *
+ * @param[in] f All necessary fields bundled in one array
+ * @param[out] result The right hand side of the pde for the given fields
+ *
+ * @see TODO[link] for more on the evolved fields and the equations of motion.
+ */
 static void update_h(double *f, double *result)
 {
     const size_t N = pars.N, Next = pars.Next, Nh1 = 4 * N, Nh2 = Nh1 + Next;
@@ -402,8 +417,7 @@ static void mk_gw_sources(const double *f, complex **s)
  * @brief Compute the power spectrum of the gravitational waves.
  *
  * Computes the power spectrum of the gravitational waves associated with the
- * tensor perturbations in @p f according to the prescription in TODO[link to
- * paper].
+ * tensor perturbations in @p f according to the prescription in TODO[link].
  *
  * @param[in] f An array with the current fields values
  */
