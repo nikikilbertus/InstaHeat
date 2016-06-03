@@ -132,8 +132,8 @@ void prepare_and_save_timeslice()
  * If `OUTPUT_CONSTRAINTS` is defined, additionally, `tmp.f` contains \f$\Delta
  * \psi\f$, the Lagrangian of \f$\psi\f$.
  * If specified in `evo_flags.filter`, the fields \f$\phi\f$ and \f$\psi\f$ will be
- * overwritten with their filtered version. Moreover the power spectra of phi
- * and psi might be computed if as specified in `evo_flags.filter`.
+ * overwritten with their filtered version. Moreover the power spectra of \f$phi\f$
+ * and \f$psi\f$ might be computed if as specified in `evo_flags.filter`.
  */
 void mk_gradient_squared_and_laplacian(double *in)
 {
@@ -249,7 +249,7 @@ void mk_rho_and_p(const double *f)
 
 /**
  * @brief Computes and updates the right hand side of the pde, i.e. the first
- * order temporal derivatives of \f$\phi\f$, \f$\dot{phi}\f$, \f$\psi\f$, \f$\dot{psi}\f$.
+ * order temporal derivatives of \f$\phi\f$, \f$\dot{phi}\f$, \f$\psi\f$, \f$\dot{\psi}\f$.
  *
  * @param[in] f All necessary fields bundled in one array
  * @param[out] result The right hand side of the pde for the given fields
