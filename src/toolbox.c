@@ -17,7 +17,7 @@
  */
 
 static void assemble_gradient_squared();
-static void mk_stt(const double *f, complex **s);
+static void mk_gw_sources_tt(const double *f, complex **s);
 static void mk_gw_sources(const double *f, complex **s);
 static void mk_gw_spectrum(double *f);
 static double potential(const double f);
@@ -114,7 +114,7 @@ void mk_rhs(const double t, double *f, double *result)
     for (size_t i = 0; i < len; ++i) {
         stt[i] = fftw_malloc(pars.M * sizeof *stt[i]);
     }
-    mk_stt(f, stt);
+    mk_gw_sources_tt(f, stt);
 
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
@@ -296,7 +296,7 @@ void mk_rho_and_p(const double *f)
  *
  * @see TODO[link thesis and papers]
  */
-static void mk_stt(const double *f, complex **s)
+static void mk_gw_sources_tt(const double *f, complex **s)
 {
     TIME(mon.stt_time -= get_wall_time());
     mk_gw_sources(f, s);
