@@ -58,6 +58,7 @@ sed -i.bak "s/_COUPLING_/${COUPLING}/g" main.h
 sed -i.bak "s/_LAMBDA_/${LAMBDA}/g" main.h
 
 setdef ${ENABLE_FFT_FILTER} "_FILTER_" "ENABLE_FFT_FILTER"
+setdef ${ENABLE_GW} "_GW_" "ENABLE_GW"
 
 setdef ${PHI} "_OPHI_" "OUTPUT_PHI"
 setdef ${DPHI} "_ODPHI_" "OUTPUT_DPHI"
