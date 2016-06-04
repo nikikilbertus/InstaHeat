@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[    397993,      11389]
-NotebookOptionsPosition[    372275,      10678]
-NotebookOutlinePosition[    372652,      10695]
-CellTagsIndexPosition[    372609,      10692]
+NotebookDataLength[    398183,      11395]
+NotebookOptionsPosition[    372423,      10683]
+NotebookOutlinePosition[    372800,      10700]
+CellTagsIndexPosition[    372757,      10697]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -10605,23 +10605,28 @@ Cell["from 0712.2991", "Subsection",
 
 Cell[BoxData[
  RowBox[{"g07dd", " ", "=", " ", 
-  RowBox[{"{", 
-   RowBox[{
-    RowBox[{"{", 
-     RowBox[{"1", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
-    RowBox[{"{", 
-     RowBox[{"0", ",", " ", 
-      RowBox[{"-", 
-       SuperscriptBox["a", "2"]}], ",", "0", ",", "0"}], "}"}], ",", 
-    RowBox[{"{", 
-     RowBox[{"0", ",", "0", ",", 
-      RowBox[{"-", 
-       SuperscriptBox["a", "2"]}], ",", "0"}], "}"}], ",", 
-    RowBox[{"{", 
-     RowBox[{"0", ",", "0", ",", "0", ",", 
-      RowBox[{"-", 
-       SuperscriptBox["a", "2"]}]}], "}"}]}], "}"}]}]], "Input",
- CellChangeTimes->{{3.673804344646421*^9, 3.673804379629547*^9}}],
+  RowBox[{"DiagonalMatrix", "[", 
+   RowBox[{"{", 
+    RowBox[{"1", ",", 
+     RowBox[{"-", 
+      SuperscriptBox["a", "2"]}], ",", 
+     RowBox[{"-", 
+      SuperscriptBox["a", "2"]}], ",", 
+     RowBox[{"-", 
+      SuperscriptBox["a", "2"]}]}], "}"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.673804344646421*^9, 3.673804379629547*^9}, 
+   3.6739801297418337`*^9}],
+
+Cell[BoxData[
+ RowBox[{"g07dd", " ", "=", " ", 
+  RowBox[{"DiagonalMatrix", "[", 
+   RowBox[{"{", 
+    RowBox[{"1", ",", 
+     RowBox[{"-", "1"}], ",", 
+     RowBox[{"-", "1"}], ",", 
+     RowBox[{"-", "1"}]}], "}"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.673980097309745*^9, 3.67398010323734*^9}, {
+  3.673980134203726*^9, 3.6739801401799707`*^9}}],
 
 Cell[BoxData[
  RowBox[{"g07UU", " ", "=", " ", 
@@ -10653,8 +10658,7 @@ Cell[BoxData[
          RowBox[{"2", ";;", "4"}], "]"}], "]"}], "}"}]}], " ", "-", " ", 
      RowBox[{
       FractionBox[
-       RowBox[{"2", " ", 
-        SuperscriptBox["a", "2"]}], "3"], " ", 
+       RowBox[{"2", " "}], "3"], " ", 
       RowBox[{"IdentityMatrix", "[", "3", "]"}], " ", 
       RowBox[{
        RowBox[{"\[Phi]07U", "[", 
@@ -10672,7 +10676,8 @@ Cell[BoxData[
    3.673812573758624*^9, 3.673812575222301*^9}, {3.673812615919908*^9, 
    3.673812617887246*^9}, {3.673812654972999*^9, 3.673812664116213*^9}, {
    3.673812717779345*^9, 3.673812790829685*^9}, {3.673812852291766*^9, 
-   3.6738129374831657`*^9}, {3.673896924607202*^9, 3.673896971048696*^9}}]
+   3.6738129374831657`*^9}, {3.673896924607202*^9, 3.673896971048696*^9}, {
+   3.6739800767261477`*^9, 3.673980077622878*^9}}]
 }, Open  ]]
 }, Open  ]]
 },
@@ -11385,10 +11390,11 @@ Cell[368806, 10578, 700, 19, 27, "Input"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[369543, 10602, 80, 1, 34, "Subsection"],
-Cell[369626, 10605, 638, 18, 33, "Input"],
-Cell[370267, 10625, 166, 3, 27, "Input"],
-Cell[370436, 10630, 298, 6, 27, "Input"],
-Cell[370737, 10638, 1510, 36, 50, "Input"]
+Cell[369626, 10605, 414, 12, 33, "Input"],
+Cell[370043, 10619, 352, 9, 27, "Input"],
+Cell[370398, 10630, 166, 3, 27, "Input"],
+Cell[370567, 10635, 298, 6, 27, "Input"],
+Cell[370868, 10643, 1527, 36, 47, "Input"]
 }, Open  ]]
 }, Open  ]]
 }
