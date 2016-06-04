@@ -221,9 +221,9 @@ static void assemble_gradient_squared()
  * Everything is stored in global variables for reuse in other functions. When
  * the function returns:
  * `rho` contains the energy density \f$\rho\f$
- * `rho_mean` contains the average energy density \f$< \rho >\f$
+ * `rho_mean` contains the average energy density \f$\langle \rho \rangle\f$
  * `pressure` contains the pressure \f$p\f$
- * `pressure_mean` contains the average pressure \f$< p >\f$
+ * `pressure_mean` contains the average pressure \f$\langle p \rangle\f$
  * All the above values persist until the next call of `mk_rhs(const double t,
  * double *f, double *result)`
  */
