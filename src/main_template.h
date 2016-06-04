@@ -287,11 +287,11 @@ struct monitor
     double stt_time; ///< Total wall clock time for computing S_{ij}^{TT}
 };
 
-extern struct parameters pars; ///< Only instance of the parameters_t struct
+extern struct parameters pars; ///< Only instance of the struct `parameters`
 
 // contain phi, dphi, psi, dpsi, h1, h2, a
-extern double *field;
-extern double *dfield;
+extern double *field; ///< A large array bundling all fields that are evolved
+extern double *dfield; ///< A large array bundling temporal derivatives of all fields
 extern double *field_new;
 extern double *dfield_new;
 extern struct output phi;
