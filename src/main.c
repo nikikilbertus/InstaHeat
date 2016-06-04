@@ -17,11 +17,11 @@
 
 /**
  * @file main.c
- * @brief Declaration of global variables, the main routine and one function for
- * wall clock time.
+ * @brief Declaration of global variables, the main routine and a function for
+ * timing purposes.
  */
 
-struct parameters pars;
+struct parameters pars; ///< The only instance of the struct `parameters`
 struct output t_out;
 struct output phi;
 struct output dphi;
