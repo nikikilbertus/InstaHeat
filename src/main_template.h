@@ -14,7 +14,7 @@
  *
  * The `main.h` file is created by a shell script that is called from the
  * Makefile __before__ compilation. There is a main_template.h file which
- * contains placeholder that are replaced according to the values in
+ * contains placeholders that are replaced according to the values in
  * `parameters.sh`. An extensive documentation of the `parameter.sh` file is
  * found in a separate documentation file `doc_parameters.md` in the root
  * directory. One should not look for documentation and explanation here.
@@ -163,14 +163,14 @@ struct grid_dimension
     size_t M; ///< number of gridpoints in Fourier space
     double a; ///< lower bound of the interval
     double b; ///< upper bound of the interval
-    double k; ///< used to compute k vectors: k = 2 pi I / (b - a)
+    double k; ///< used to compute k vectors: k = 2 pi / (b - a)
     double k2; ///< used to compute k^2: k2 = k*k = -4 pi^2 / L^2
     size_t stride; ///< strides for output
     size_t outN; ///< number of output points in this dimension
 };
 
 /**
- * @brief Parameters related to the time evolution.
+ * @brief Holds all parameters related to the time evolution.
  */
 struct timing
 {
@@ -188,23 +188,23 @@ struct output
 {
     size_t dim;     ///< length of output on a single time slice
     hsize_t id;     ///< id for the dataset in the h5 file
-    double *buf;    ///< buffer WRITE_OUT_BUFFER_NUMBER many time slices
+    double *buf;    ///< buffer for `WRITE_OUT_BUFFER_NUMBER` many time slices
     double *tmp;    ///< the output values on the current time slice
 };
 
 /**
- * @brief All parameters related to file IO operations
+ * @brief Holds all parameters related to file IO operations.
  */
 struct file_parameters
 {
     hsize_t id;        ///< h5 file id of the output file
-    size_t index;      ///< current index within the buffers
+    size_t index;      ///< current index within the buffers for time evolution
     size_t buf_size;   ///< size of the buffer
     size_t skip;       ///< timesteps to skip in between write outs
 };
 
 /**
- *  @brief Collection of all parameters.
+ *  @brief An overall collection of all simulation parameters.
  *
  *  @note Throughout the source code holds:
  *  Nx = number of grid points in the x direction
@@ -213,7 +213,9 @@ struct file_parameters
  *  N  = number of gridpoints for the whole spatial grid = Nx * Ny * Nz
  *  Next  = (extended) number of doubles in complex grid = Nx * Ny * (Nz + 2)
  *  Ntot = number of scalar equations in the integration: 4 * N + 4 * Next + 1
- *  (order: phi, dphi, psi, dpsi, h1, h2, dh1, dh2, a)
+ *  (order: \f$\phi\f$ (N), \f$\dot{\phi}\f$ (N), \f$\psi\f$ (N),
+ *  \f$\dot{psi}\f$ (N), \f$h_1\f$ (Next), \f$h_2\f$ (Next), \f$\dot{h}_1\f$
+ *  (Next), \f$\dot{h}_2\f$ (Next), \f$a\f$ (1))
  */
 struct parameters
 {
@@ -231,25 +233,25 @@ struct parameters
 };
 
 /**
- * @brief Temporal arrays used for computations of gradients, ffts and the like.
+ * @brief Memory for DFTs and temporary quantities.
  */
 struct temporary
 {
-    double  *xphi; ///< The x derivative of \f$\phi\f$ in real space
-    double  *yphi; ///< The y derivative of \f$\phi\f$ in real space
-    double  *zphi; ///< The z derivative of \f$\phi\f$ in real space
-    complex *phic; ///< The inflaton field \f$\phi\f$ in real space
-    complex *xphic; ///< The x derivative of \f$\phi\f$ in Fourier space
-    complex *yphic; ///< The y derivative of \f$\phi\f$ in Fourier space
-    complex *zphic; ///< The z derivative of \f$\phi\f$ in Fourier space
-    double  *grad; ///< The _squared_ gradient of \f$\phi\f$ in real space
-    double  *lap; ///< The Laplacian of \f$\phi\f$ in real space
+    double  *xphi; ///< the x derivative of \f$\phi\f$ in real space
+    double  *yphi; ///< the y derivative of \f$\phi\f$ in real space
+    double  *zphi; ///< the z derivative of \f$\phi\f$ in real space
+    complex *phic; ///< the inflaton field \f$\phi\f$ in real space
+    complex *xphic; ///< the x derivative of \f$\phi\f$ in Fourier space
+    complex *yphic; ///< the y derivative of \f$\phi\f$ in Fourier space
+    complex *zphic; ///< the z derivative of \f$\phi\f$ in Fourier space
+    double  *grad; ///< the _squared_ gradient of \f$\phi\f$ in real space
+    double  *lap; ///< the Laplacian of \f$\phi\f$ in real space
     double  *deltarho; ///< \f$\delta \rho = \rho - <\rho>\f$ in real space
-    double  *f; ///< Various purposes (real space)
+    double  *f; ///< various purposes (real space)
     complex *deltarhoc; ///< \f$\delta \rho = \rho - <\rho>\f$ in Fourier space
-    complex *fc; ///< Various purposes (Fourier space)
-    complex *psic; ///< The metric perturbation \f$\psi\f$ in Fourier space
-    complex *dpsic; ///< The derivative \f$\dot{\psi}\f$ in Fourier space
+    complex *fc; ///< various purposes (Fourier space)
+    complex *psic; ///< the metric perturbation \f$\psi\f$ in Fourier space
+    complex *dpsic; ///< the derivative \f$\dot{\psi}\f$ in Fourier space
 };
 
 /**
@@ -257,13 +259,13 @@ struct temporary
  */
 struct k_grid
 {
-    double *sq; ///< The sqaure of the k vector
-    double *x; ///< The x direction of the k vector (with zeros at N/2)
-    double *y; ///< The y direction of the k vector (with zeros at N/2)
-    double *z; ///< The z direction of the k vector (with zeros at N/2)
-    double *xf; ///< The x direction of the k vector
-    double *yf; ///< The y direction of the k vector
-    double *zf; ///< The z direction of the k vector
+    double *sq; ///< the sqaure of the k vector
+    double *x; ///< the x component of the k vector (with zeros at N/2)
+    double *y; ///< the y component of the k vector (with zeros at N/2)
+    double *z; ///< the z component of the k vector (with zeros at N/2)
+    double *xf; ///< the x component of the k vector
+    double *yf; ///< the y component of the k vector
+    double *zf; ///< the z component of the k vector
 };
 
 /**
@@ -273,58 +275,62 @@ struct monitor
 {
     /**
      * @brief Number of calls to `mk_rhs(const double t, double *f, double
-     * *result)`
+     * *result)` in `toolbox.c`
      */
     size_t calls_rhs;
     double fftw_time_exe; ///< Total wall clock time for fft execution
     double fftw_time_plan; ///< Total wall clock time for fftw planning
     double filter_time; ///< Total wall clock time for filtering
     double poisson_time; ///< Total wall clock time for `mk_psi(double *f)`
-    double h5_time_write; ///< Total wall clock time for write out
+    double h5_time_write; ///< Total wall clock time for write out to disk
     double copy_buffer_time; ///< Total wall clock time for copying buffers
     double cstr_time; ///< Total wall clock time for computing constraints
     double smry_time; ///< Total wall clock time for computing summaries
-    double stt_time; ///< Total wall clock time for computing S_{ij}^{TT}
+    double stt_time; ///< Total wall clock time for computing \f$S_{ij}^{TT}\f$
 };
 
 extern struct parameters pars; ///< Only instance of the struct `parameters`
 
 // contain phi, dphi, psi, dpsi, h1, h2, a
-extern double *field; ///< A large array bundling all fields that are evolved
-extern double *dfield; ///< A large array bundling temporal derivatives of all fields
-extern double *field_new;
-extern double *dfield_new;
-extern struct output phi;
-extern struct output dphi;
-extern struct output psi;
-extern struct output dpsi;
-#define SUMMARY_VALUES      (4) ///< mean, variance, minimum, maximum
-extern struct output phi_smry;
-extern struct output dphi_smry;
-extern struct output psi_smry;
-extern struct output dpsi_smry;
-extern struct output h1_smry;
-extern struct output h2_smry;
-extern struct output t_out;
-extern struct output a_out;
-extern double *rho;
-extern double rho_mean;
-extern struct output rho_out;
-extern struct output rho_smry;
-extern double *pressure;
-extern double pressure_mean;
-extern struct output phi_ps;
-extern struct output psi_ps;
-extern struct output rho_ps;
-#define NUMBER_CONSTRAINTS  (4) ///< Hamiltonian and momentum: l2 and l\infty
-extern struct output cstr;
-extern struct output gw;
-extern double *filter;
-extern struct k_grid kvec;
-extern struct temporary tmp;
-extern fftw_plan p_fw;
-extern fftw_plan p_bw;
-extern struct monitor mon;
+extern double *field; ///< An array bundling all fields that are evolved
+extern double *dfield; ///< An array bundling temporal derivatives of all fields
+extern double *field_new; ///< An array just like `field` for copying
+extern double *dfield_new; ///< An array just like 'dfield' for copying
+extern struct output phi; ///< The output struct for \f$\phi\f$
+extern struct output dphi; ///< The output struct for \f$\dot{\phi}\f$
+extern struct output psi; ///< The output struct for \f$\psi\f$
+extern struct output dpsi; ///< The output struct for \f$\dot{\psi}\f$
+#define SUMMARY_VALUES (4) ///< Summaries contain mean, variance, minimum, maximum
+extern struct output phi_smry; ///< The output struct for the summary of \f$\phi\f$
+extern struct output dphi_smry; ///< The output struct for the summary of \f$\dot{\phi}\f$
+extern struct output psi_smry; ///< The output struct for the summary of \f$\psi\f$
+extern struct output dpsi_smry; ///< The output struct for the summary of \f$\dot{\psi}\f$
+extern struct output h1_smry; ///< The output struct for the summary of \f$h_1\f$
+extern struct output h2_smry; ///< The output struct for the summary of \f$h_2\f$
+extern struct output t_out; ///< The output struct for the summary of \f$t\f$
+extern struct output a_out; ///< The output struct for the summary of \f$a\f$
+extern double *rho; ///< An array for the energy density \f$\rho\f$
+extern double rho_mean; ///< The mean value of the energy density \f$\rho\f$
+extern struct output rho_out; ///< The output struct for \f$\rho\f$
+extern struct output rho_smry; ///< The output struct for the summary of \f$\rho\f$
+extern double *pressure; ///< An array for the pressure \f$p\f$
+extern double pressure_mean; ///< The mean value of the pressure \f$p\f$
+extern struct output phi_ps; ///< The output struct for the power spectrum of \f$\phi\f$
+extern struct output psi_ps; ///< The output struct for the power spectrum of \f$\psi\f$
+extern struct output rho_ps; ///< The output struct for the power spectrum of \f$\rho\f$
+/**
+ * @brief We compute the Hamiltonian and the momentum constraint in \f$l_2\f$
+ * and \f$l_{\infty}\f$ norm
+ */
+#define NUMBER_CONSTRAINTS (4)
+extern struct output cstr; ///< The output struct for the constraints
+extern struct output gw; ///< The output struct for the gravitational wave power spectrum
+extern double *filter; ///< A grid with the filter values for frequency filtering
+extern struct k_grid kvec; ///< The only instance of the struct `k_grid`
+extern struct temporary tmp; ///< The only instance of the struct `temporary`
+extern fftw_plan p_fw; ///< FFTw3 plan for the Fourier transforms
+extern fftw_plan p_bw; ///< FFTw3 plan for the inverse Fourier transforms
+extern struct monitor mon; ///< The only instance of the struct `monitor`
 
 #ifdef SHOW_TIMING_INFO
 double get_wall_time();
