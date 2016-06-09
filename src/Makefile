@@ -21,7 +21,7 @@ $(TARGET): $(OBJECTS)
 	$(CC) $(OBJECTS) -Wall $(LIBS) -o $@
 
 config:
-	./configure
+	./configure $(parameters)
 
 clean:
 	-rm -f *.o
