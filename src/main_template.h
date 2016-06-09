@@ -266,6 +266,8 @@ struct k_grid
     double *xf; ///< the x component of the k vector
     double *yf; ///< the y component of the k vector
     double *zf; ///< the z component of the k vector
+    double k2_max; ///< The maximal square k vector on the grid.
+    double k_max; ///< The sqrt of the maximal square k vector on the grid.
 };
 
 /**
