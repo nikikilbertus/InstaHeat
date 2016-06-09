@@ -521,7 +521,7 @@ static void mk_k_grid()
 static void mk_filter_mask()
 {
     #pragma omp parallel for
-    for (size_t i = 0; i < M; ++i) {
+    for (size_t i = 0; i < pars.M; ++i) {
         filter[i] = filter_window(kvec.sq[i] / kvec.k2_max);
     }
     INFO(puts("Constructed filter mask.\n"));
