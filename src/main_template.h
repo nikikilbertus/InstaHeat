@@ -147,7 +147,7 @@
 #define MAX_DT_HUBBLE_FRACTION  (_HFRAC_)
 #define _GW_
 
-#ifdef ENABLE_GW
+#ifndef ENABLE_GW
     #undef OUTPUT_H1_SMRY
     #undef OUTPUT_H2_SMRY
 #endif
