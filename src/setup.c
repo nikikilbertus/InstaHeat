@@ -516,29 +516,22 @@ static void mk_k_grid()
  */
 static void mk_filter_mask()
 {
-    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
-    const size_t Mx = pars.x.M, My = pars.y.M, Mz = pars.z.M;
-    //TODO recheck that construction
+    const double k2_max = pars.x.k2 * (pars.x.N/2) * (pars.x.N/2) +
+                          pars.y.k2 * (pars.y.N/2) * (pars.y.N/2) +
+                          pars.z.k2 * (pars.z.N/2) * (pars.z.N/2);
     #pragma omp parallel for
-    for (size_t i = 0; i < Mx; ++i) {
-        size_t osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j) {
-            size_t osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k) {
-                double tmp = filter_window(2.0 *
-                    (i > Nx / 2 ? (int)Nx - (int)i : i) / (double)Nx);
-                tmp *= filter_window(2.0 *
-                    (j > Ny / 2 ? (int)Ny - (int)j : j) / (double)Ny);
-                tmp *= filter_window(2.0 * k / (double)Nz);
-                filter[osy + k] = tmp / pars.N;
-            }
-        }
+    for (size_t i = 0; i < M; ++i) {
+        filter[i] = filter_window(kvec.sq[i] / k2_max);
     }
     INFO(puts("Constructed filter mask.\n"));
 }
 
 /**
  * @brief The specific shape of the cutoff for high frequency modes.
+ *
+ * @param[in] xsq The squared ratio \f$k/k_{max}\f$, i.e. \f$(k/k_{max})^2/f$
+ * for a given mode \f$k\f$.
+ * @return The multiplier for the given mode @p xsq in the filtering process.
  *
  * We have found the exponential cutoff function described in the references to
  * work well for our purposes. It keeps more modes than the common two thirds
@@ -552,13 +545,13 @@ static void mk_filter_mask()
  * @see [On the stability of the unsmoothed Fourier method for hyperbolic
  * equations](http://link.springer.com/article/10.1007%2Fs002110050019)
  */
-static double filter_window(const double x)
+static double filter_window(const double xsq)
 {
     // exponential cutoff smoothing
-    return exp(-36.0 * pow(x, 36));
+    return exp(-36.0 * pow(xsq, 18));
 
     // two thirds rule
-    // return x < 2.0/3.0 ? x : 0.0;
+    // return xsq < 2.0/3.0 ? x : 0.0;
 }
 #endif
 
