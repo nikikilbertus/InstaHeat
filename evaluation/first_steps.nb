@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[    398883,      11409]
-NotebookOptionsPosition[    373038,      10695]
-NotebookOutlinePosition[    373419,      10712]
-CellTagsIndexPosition[    373376,      10709]
+NotebookDataLength[    400412,      11460]
+NotebookOptionsPosition[    374408,      10741]
+NotebookOutlinePosition[    374785,      10758]
+CellTagsIndexPosition[    374742,      10755]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -10691,10 +10691,56 @@ Cell[BoxData[
    3.6738129374831657`*^9}, {3.673896924607202*^9, 3.673896971048696*^9}, {
    3.6739800767261477`*^9, 3.673980077622878*^9}}]
 }, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["derive instability", "Section",
+ CellChangeTimes->{{3.674446197414871*^9, 3.674446200340077*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"phi", "[", "t", "]"}], " ", "=", " ", 
+  RowBox[{
+   SuperscriptBox[
+    RowBox[{"a", "[", "t", "]"}], 
+    RowBox[{
+     RowBox[{"-", "3"}], "/", "2"}]], " ", 
+   RowBox[{"Sin", "[", 
+    RowBox[{"m", " ", "t"}], "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.674446205378992*^9, 3.6744462235329742`*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"D", "[", 
+     RowBox[{
+      RowBox[{"phi", "[", "t", "]"}], ",", " ", 
+      RowBox[{"{", 
+       RowBox[{"t", ",", "2"}], "}"}]}], "]"}], " ", "-", " ", 
+    RowBox[{"3", " ", "H", " ", 
+     RowBox[{"D", "[", 
+      RowBox[{
+       RowBox[{"phi", "[", "t", "]"}], ",", "t"}], "]"}]}], " ", "+", " ", 
+    RowBox[{
+     SuperscriptBox["m", "2"], " ", 
+     FractionBox[
+      SuperscriptBox[
+       RowBox[{"phi", "[", "t", "]"}], "2"], "2"]}]}], " ", "\[Equal]", " ", 
+   "0"}], "//", " ", "FullSimplify"}], "\[IndentingNewLine]", 
+ RowBox[{"Series", "[", 
+  RowBox[{"%", ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"a", "[", "t", "]"}], ",", "Infinity", ",", "2"}], "}"}]}], 
+  "]"}]}], "Input",
+ CellChangeTimes->{{3.6744462304810953`*^9, 3.6744463224606533`*^9}, {
+  3.6744466739473677`*^9, 3.674446690500386*^9}}]
 }, Open  ]]
 },
 WindowSize->{837, 884},
-WindowMargins->{{Automatic, -1150}, {Automatic, 54}},
+WindowMargins->{{Automatic, 0}, {Automatic, 54}},
 ShowSelection->True,
 FrontEndVersion->"8.0 for Mac OS X x86 (32-bit, 64-bit Kernel) (February 23, \
 2011)",
@@ -11410,6 +11456,11 @@ Cell[371013, 10642, 166, 3, 27, "Input"],
 Cell[371182, 10647, 298, 6, 27, "Input"],
 Cell[371483, 10655, 1527, 36, 80, "Input"]
 }, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[373059, 10697, 103, 1, 67, "Section"],
+Cell[373165, 10700, 337, 10, 30, "Input"],
+Cell[373505, 10712, 887, 26, 67, "Input"]
 }, Open  ]]
 }
 ]
