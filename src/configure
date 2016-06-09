@@ -9,7 +9,13 @@ function setdef {
     fi
 }
 
-source parameters.sh
+PAR_FILE_NAME="parameters.sh"
+if [ "$#" -eq 1 ];
+then
+    PAR_FILE_NAME="$1"
+fi
+echo "loading parameter file ${PAR_FILE_NAME}"
+source ${PAR_FILE_NAME}
 
 cp main_template.h main.h
 
