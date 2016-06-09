@@ -501,6 +501,10 @@ static void mk_k_grid()
             }
         }
     }
+    kvec.k2_max = pars.x.k2 * (pars.x.N/2) * (pars.x.N/2) +
+                  pars.y.k2 * (pars.y.N/2) * (pars.y.N/2) +
+                  pars.z.k2 * (pars.z.N/2) * (pars.z.N/2);
+    kvec.k_max = sqrt(kvec.k2_max);
     INFO(puts("Constructed grids for wave vectors.\n"));
 }
 
@@ -516,12 +520,9 @@ static void mk_k_grid()
  */
 static void mk_filter_mask()
 {
-    const double k2_max = pars.x.k2 * (pars.x.N/2) * (pars.x.N/2) +
-                          pars.y.k2 * (pars.y.N/2) * (pars.y.N/2) +
-                          pars.z.k2 * (pars.z.N/2) * (pars.z.N/2);
     #pragma omp parallel for
     for (size_t i = 0; i < M; ++i) {
-        filter[i] = filter_window(kvec.sq[i] / k2_max);
+        filter[i] = filter_window(kvec.sq[i] / kvec.k2_max);
     }
     INFO(puts("Constructed filter mask.\n"));
 }
@@ -550,8 +551,8 @@ static double filter_window(const double xsq)
     // exponential cutoff smoothing
     return exp(-36.0 * pow(xsq, 18));
 
-    // two thirds rule
-    // return xsq < 2.0/3.0 ? x : 0.0;
+    // two thirds rule (due to square ratio as input we have 4/9)
+    // return xsq < 4.0/9.0 ? x : 0.0;
 }
 #endif
 
