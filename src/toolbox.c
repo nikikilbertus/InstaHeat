@@ -425,10 +425,6 @@ static void mk_gw_spectrum(double *f)
 {
     const size_t Ndh1 = 4 * pars.N + 2 * pars.Next;
     const size_t Ndh2 = Ndh1 + pars.Next;
-    const double k2_max = pars.x.k2 * (pars.x.N/2) * (pars.x.N/2) +
-                          pars.y.k2 * (pars.y.N/2) * (pars.y.N/2) +
-                          pars.z.k2 * (pars.z.N/2) * (pars.z.N/2);
-    const double k_max = sqrt(k2_max);
     const double L = pars.x.b - pars.x.a;
     const double fac = PI / (rho_mean * rho_mean * L * L);
     #pragma omp parallel for
@@ -462,7 +458,7 @@ static void mk_gw_spectrum(double *f)
         if (fabs(kvec.z[i]) > DBL_EPSILON) {
             pow *= 2.0;
         }
-        size_t idx = (int)trunc(gw.dim * k / k_max - 1.0e-14);
+        size_t idx = (int)trunc(gw.dim * k / kvec.k_max - 1.0e-14);
         gw.tmp[idx] += fac * k2 * k * pow;
     }
     #pragma omp parallel for
@@ -599,9 +595,6 @@ void mk_psi(double *f)
  */
 static void mk_power_spectrum(const fftw_complex *in, struct output out)
 {
-    const double k2_max = pars.x.k2 * (pars.x.N/2) * (pars.x.N/2) +
-                          pars.y.k2 * (pars.y.N/2) * (pars.y.N/2) +
-                          pars.z.k2 * (pars.z.N/2) * (pars.z.N/2);
     #pragma omp parallel for
     for (size_t i = 0; i < out.dim; ++i) {
         out.tmp[i] = 0.0;
@@ -612,7 +605,7 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
         if (fabs(kvec.z[i]) > DBL_EPSILON) {
             pow2_tmp *= 2.0;
         }
-        size_t idx = (int)trunc(out.dim * sqrt(kvec.sq[i] / k2_max) - 1.0e-14);
+        size_t idx = (int)trunc(out.dim * sqrt(kvec.sq[i]) / kvec.k_max - 1.0e-14);
         out.tmp[idx] += pow2_tmp / pars.N;
     }
 }
