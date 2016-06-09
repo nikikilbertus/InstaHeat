@@ -522,7 +522,7 @@ static void mk_filter_mask()
 {
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
-        filter[i] = filter_window(kvec.sq[i] / kvec.k2_max);
+        filter[i] = filter_window(kvec.sq[i] / kvec.k2_max) / pars.N;
     }
     INFO(puts("Constructed filter mask.\n"));
 }
