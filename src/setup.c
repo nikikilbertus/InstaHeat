@@ -87,6 +87,11 @@ void allocate_and_initialize_all()
     #else
     INFO(puts("Filtering disabled.\n"));
     #endif
+    #ifdef ENABLE_GW
+    INFO(puts("Gravitational wave extraction enabled.\n"));
+    #else
+    INFO(puts("FGravitational waves disabled.\n"));
+    #endif
     INFO(puts("Integrating psi using the hyperbolic constraint.\n"));
 }
 
