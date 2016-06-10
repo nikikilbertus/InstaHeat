@@ -66,22 +66,19 @@ struct evolution_flags evo_flags = {.filter = 0, .output = 0};
 void mk_rhs(const double t, double *f, double *result)
 {
     mon.calls_rhs += 1;
-
     mk_gradient_squared_and_laplacian(f);
-    #ifdef ENABLE_FFT_FILTER
-    // filter dphi and dpsi here, their DFTs are never available elsewhere
-    if (evo_flags.filter == 1) {
-        apply_filter(f + pars.N);
-        apply_filter(f + 3 * pars.N);
-    }
-    #endif
     mk_rho_and_p(f);
 
     if (evo_flags.output == 1) {
-        // power spectrum of rho here, because only now is rho available
+        #ifdef OUTPUT_PHI_PS
+        mk_power_spectrum(tmp.phic, phi_ps);
+        #endif
+        #ifdef OUTPUT_PSI_PS
+        mk_power_spectrum(tmp.psic, psi_ps);
+        #endif
         #ifdef OUTPUT_RHO_PS
-        fft(rho, tmp.phic);
-        mk_power_spectrum(tmp.phic, rho_ps);
+        fft(rho, tmp.fc);
+        mk_power_spectrum(tmp.fc, rho_ps);
         #endif
         #ifdef OUTPUT_CONSTRAINTS
         mk_constraints(f);
@@ -116,8 +113,9 @@ void prepare_and_save_timeslice()
  * @brief Compute the Laplacian and the sqaure gradient. More computations
  * might be performed depending on flags in `evo_flags`.
  *
- * @param[in,out] in An array containing the fields, in particular \f$\phi\f$ and
- * \f$\psi\f$. Those two might be overwritten by their filtered versions.
+ * @param[in,out] in An array containing the fields, in particular \f$\phi\f$
+ * and \f$\psi\f$. All fields in @p in might be overwritten by their filtered
+ * versions.
  *
  * The Laplacian and the squared gradient as well as the partial derivatives of
  * \f$\phi\f$ are stored in global variables for reuse in other functions. When
@@ -139,30 +137,19 @@ void mk_gradient_squared_and_laplacian(double *in)
 {
     const size_t N = pars.N;
     fft(in, tmp.phic);
-    #if defined(OUTPUT_CONSTRAINTS) || defined(OUTPUT_PSI_PS)
-    fft(in + 2 * N, tmp.psic);
-    #elif defined(ENABLE_FFT_FILTER)
-    if (evo_flags.filter == 1) {
+    #if defined(ENABLE_FFT_FILTER)
+    if (evo_flags.filter == 1) { // output == 1 => filter == 1
+        fft(in + 2 * N, tmp.psic);
+        capply_filter(tmp.phic, in); // fft already available
+        capply_filter(tmp.psic, in + 2 * N); // fft already available
+        apply_filter(f + pars.N); // fft not available
+        apply_filter(f + 3 * pars.N); // fft not available
+    }
+    #elif defined(OUTPUT_CONSTRAINTS) || defined(OUTPUT_PSI_PS)
+    if (evo_flags.output == 1) {
         fft(in + 2 * N, tmp.psic);
     }
     #endif
-    // filter phi and psi here, when dft available
-    #if defined(ENABLE_FFT_FILTER)
-    if (evo_flags.filter == 1) {
-        capply_filter(tmp.phic, in);
-        capply_filter(tmp.psic, in + 2 * N);
-    }
-    #endif
-
-    // good place for power spectrum of phi and psi, because fft exists
-    if (evo_flags.output == 1) {
-        #ifdef OUTPUT_PHI_PS
-        mk_power_spectrum(tmp.phic, phi_ps);
-        #endif
-        #ifdef OUTPUT_PSI_PS
-        mk_power_spectrum(tmp.psic, psi_ps);
-        #endif
-    }
 
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
@@ -184,10 +171,10 @@ void mk_gradient_squared_and_laplacian(double *in)
         }
     }
     ifft(tmp.phic, tmp.lap);
+    assemble_gradient_squared();
     #ifdef OUTPUT_CONSTRAINTS
     ifft(tmp.psic, tmp.f);
     #endif
-    assemble_gradient_squared();
 }
 
 /**
@@ -385,32 +372,17 @@ static void mk_gw_sources_tt(const double *f, complex **s)
 static void mk_gw_sources(const double *f, complex **s)
 {
     const size_t len = 6;
-    double **s_tmp = malloc(len * sizeof *s_tmp);
-    for (size_t i = 0; i < len; ++i) {
-        s_tmp[i] = fftw_malloc(pars.N * sizeof *s_tmp[i]);
+    double *t1[] = {tmp.xphi, tmp.xphi, tmp.xphi, tmp.yphi, tmp.yphi, tmp.zphi};
+    double *t2[] = {tmp.xphi, tmp.yphi, tmp.zphi, tmp.yphi, tmp.zphi, tmp.zphi};
+    double *s_tmp = fftw_malloc(pars.N * sizeof *s_tmp);
+    for (size_t j = 0; j < len; ++j) {
+        #pragma omp parallel for
+        for (size_t i = 0; i < pars.N; ++i) {
+            s_tmp[i] = t1[j][i] * t2[j][i];
+        }
+        fft(s_tmp, s[j]);
     }
-
-    const double atmp = 3.0 * f[pars.Ntot - 1] * f[pars.Ntot - 1];
-    #pragma omp parallel for
-    for (size_t i = 0; i < pars.N; ++i) {
-        // TODO: not sure whether correct and do i include metric here?
-        // with metric
-        double gphi = - tmp.grad[i] * (2.0 + 4.0 * f[2 * pars.N + i]) / atmp;
-        // without metric
-        /* double gphi = - tmp.grad[i] * 2.0 / atmp; */
-        s_tmp[0][i] = tmp.xphi[i] * tmp.xphi[i] + gphi;
-        s_tmp[1][i] = tmp.xphi[i] * tmp.yphi[i];
-        s_tmp[2][i] = tmp.xphi[i] * tmp.zphi[i];
-        s_tmp[3][i] = tmp.yphi[i] * tmp.yphi[i] + gphi;
-        s_tmp[4][i] = tmp.yphi[i] * tmp.zphi[i];
-        s_tmp[5][i] = tmp.zphi[i] * tmp.zphi[i] + gphi;
-    }
-
-    for (size_t i = 0; i < len; ++i) {
-        fft(s_tmp[i], s[i]);
-        fftw_free(s_tmp[i]);
-    }
-    free(s_tmp);
+    fftw_free(s_tmp);
 }
 
 /**
@@ -625,9 +597,9 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
 static void apply_filter(double *f)
 {
     TIME(mon.filter_time -= get_wall_time());
-    fft(f, tmp.phic);
+    fft(f, tmp.fc);
     TIME(mon.filter_time += get_wall_time());
-    capply_filter(tmp.phic, f);
+    capply_filter(tmp.fc, f);
 }
 
 /**
