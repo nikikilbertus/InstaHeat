@@ -151,8 +151,8 @@ static void mk_ffts_and_filter(double *in)
         fft(in + 2 * N, tmp.psic);
         capply_filter(tmp.phic, in); // fft already available
         capply_filter(tmp.psic, in + 2 * N); // fft already available
-        apply_filter(f + pars.N); // fft not available
-        apply_filter(f + 3 * pars.N); // fft not available
+        apply_filter(in + pars.N); // fft not available
+        apply_filter(in + 3 * pars.N); // fft not available
     }
     #elif defined(OUTPUT_CONSTRAINTS) || defined(OUTPUT_PSI_PS)
     if (evo_flags.output == 1) {
