@@ -16,7 +16,9 @@
  * well as the desired output.
  */
 
+static void mk_ffts_and_filter(double *in);
 static void assemble_gradient_squared();
+static void output_all(double *f);
 static void update_phi_psi(double *f, double *result);
 #ifdef ENABLE_GW
 static void update_h(double *f, double *result);
@@ -68,33 +70,14 @@ void mk_rhs(const double t, double *f, double *result)
     mon.calls_rhs += 1;
     mk_gradient_squared_and_laplacian(f);
     mk_rho_and_p(f);
-
     if (evo_flags.output == 1) {
-        #ifdef OUTPUT_PHI_PS
-        mk_power_spectrum(tmp.phic, phi_ps);
-        #endif
-        #ifdef OUTPUT_PSI_PS
-        mk_power_spectrum(tmp.psic, psi_ps);
-        #endif
-        #ifdef OUTPUT_RHO_PS
-        fft(rho, tmp.fc);
-        mk_power_spectrum(tmp.fc, rho_ps);
-        #endif
-        #ifdef OUTPUT_CONSTRAINTS
-        mk_constraints(f);
-        #endif
-        mk_summary();
-        #ifdef ENABLE_GW
-        mk_gw_spectrum(f);
-        #endif
+        output_all(f);
     }
-
     update_phi_psi(f, result);
     #ifdef ENABLE_GW
     update_h(f, result);
     #endif
-    const double hubble = sqrt(rho_mean / 3.0);
-    result[pars.Ntot - 1] = f[pars.Ntot - 1] * hubble; // update da
+    result[pars.Ntot - 1] = f[pars.Ntot - 1] * sqrt(rho_mean / 3.0); //update da
 }
 
 /**
@@ -129,11 +112,37 @@ void prepare_and_save_timeslice()
  * double *f, double *result)`
  * If `OUTPUT_CONSTRAINTS` is defined, additionally, `tmp.f` contains \f$\Delta
  * \psi\f$, the Lagrangian of \f$\psi\f$.
- * If specified in `evo_flags.filter`, the fields \f$\phi\f$ and \f$\psi\f$ will be
- * overwritten with their filtered version. Moreover the power spectra of \f$phi\f$
- * and \f$psi\f$ might be computed if as specified in `evo_flags.filter`.
+ * If specified in `evo_flags.filter`, the fields \f$\phi\f$ and \f$\psi\f$ will
+ * be overwritten with their filtered version. Moreover the power spectra of
+ * \f$phi\f$ and \f$psi\f$ might be computed if as specified in
+ * `evo_flags.filter`.
  */
 void mk_gradient_squared_and_laplacian(double *in)
+{
+    mk_ffts_and_filter(in);
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < pars.M; ++i) {
+        complex pre = tmp.phic[i] / pars.N;
+        tmp.xphic[i] = pre * I * kvec.x[i];
+        tmp.yphic[i] = pre * I * kvec.y[i];
+        tmp.zphic[i] = pre * I * kvec.z[i];
+        tmp.fc[i] = - pre * kvec.sq[i];
+    }
+
+    ifft(tmp.xphic, tmp.xphi);
+    if (pars.dim > 1) {
+        ifft(tmp.yphic, tmp.yphi);
+        if (pars.dim > 2) {
+            ifft(tmp.zphic, tmp.zphi);
+        }
+    }
+    ifft(tmp.fc, tmp.lap);
+    assemble_gradient_squared();
+}
+
+//TODO: doxydoc
+static void mk_ffts_and_filter(double *in)
 {
     const size_t N = pars.N;
     fft(in, tmp.phic);
@@ -150,30 +159,14 @@ void mk_gradient_squared_and_laplacian(double *in)
         fft(in + 2 * N, tmp.psic);
     }
     #endif
-
-    #pragma omp parallel for
-    for (size_t i = 0; i < pars.M; ++i) {
-        complex pre = tmp.phic[i] * I / N;
-        tmp.xphic[i] = pre * kvec.x[i];
-        tmp.yphic[i] = pre * kvec.y[i];
-        tmp.zphic[i] = pre * kvec.z[i];
-        tmp.phic[i] *= - kvec.sq[i] / N;
-        #ifdef OUTPUT_CONSTRAINTS
-        tmp.psic[i] *= - kvec.sq[i] / N;
-        #endif
-    }
-
-    ifft(tmp.xphic, tmp.xphi);
-    if (pars.dim > 1) {
-        ifft(tmp.yphic, tmp.yphi);
-        if (pars.dim > 2) {
-            ifft(tmp.zphic, tmp.zphi);
-        }
-    }
-    ifft(tmp.phic, tmp.lap);
-    assemble_gradient_squared();
     #ifdef OUTPUT_CONSTRAINTS
-    ifft(tmp.psic, tmp.f);
+    if (evo_flags.output == 1) {
+        #pragma omp parallel for
+        for (size_t i = 0; i < pars.M; ++i) {
+            tmp.fc[i] = - tmp.psic[i] * kvec.sq[i] / N;
+        }
+        ifft(tmp.fc, tmp.f);
+    }
     #endif
 }
 
@@ -232,6 +225,28 @@ void mk_rho_and_p(const double *f)
     }
     rho_mean /= N;
     pressure_mean /= N;
+}
+
+//TODO: doxydoc
+static void output_all(double *f)
+{
+    #ifdef OUTPUT_PHI_PS
+    mk_power_spectrum(tmp.phic, phi_ps);
+    #endif
+    #ifdef OUTPUT_PSI_PS
+    mk_power_spectrum(tmp.psic, psi_ps);
+    #endif
+    #ifdef OUTPUT_RHO_PS
+    fft(rho, tmp.fc);
+    mk_power_spectrum(tmp.fc, rho_ps);
+    #endif
+    #ifdef OUTPUT_CONSTRAINTS
+    mk_constraints(f);
+    #endif
+    mk_summary();
+    #ifdef ENABLE_GW
+    mk_gw_spectrum(f);
+    #endif
 }
 
 /**
