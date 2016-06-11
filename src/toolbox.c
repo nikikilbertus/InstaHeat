@@ -141,7 +141,16 @@ void mk_gradient_squared_and_laplacian(double *in)
     assemble_gradient_squared();
 }
 
-//TODO: doxydoc
+/**
+ * @brief Computes the DFTs which are necessary for the right hand side or any
+ * of the output. The fields are also filtered here if demanded.
+ *
+ * @param[in, out] in All necessary fields bundled in one array. The fields are
+ * changed if filtering is enabled for the current time slice.
+ *
+ * Additionally, if we want to output the constraints on the current time slice,
+ * the laplacian of \f$\psi\f$ is computed here for convenience.
+ */
 static void mk_ffts_and_filter(double *in)
 {
     const size_t N = pars.N;
@@ -227,7 +236,12 @@ void mk_rho_and_p(const double *f)
     pressure_mean /= N;
 }
 
-//TODO: doxydoc
+/**
+ * @brief Checks which outputs are enabled on the current time slice and fills
+ * the corresponding buffers.
+ *
+ * @param[in] f The necessary fields bundled into one array.
+ */
 static void output_all(double *f)
 {
     #ifdef OUTPUT_PHI_PS
