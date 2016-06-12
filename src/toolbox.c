@@ -16,7 +16,7 @@
  * well as the desired output.
  */
 
-static void mk_ffts_and_filter(double *in);
+static void mk_ffts_and_filter(double *f);
 static void assemble_gradient_squared();
 static void output_all(double *f);
 static void update_phi_psi(double *f, double *result);
@@ -145,27 +145,27 @@ void mk_gradient_squared_and_laplacian(double *in)
  * @brief Computes the DFTs which are necessary for the right hand side or any
  * of the output. The fields are also filtered here if demanded.
  *
- * @param[in, out] in All necessary fields bundled in one array. The fields are
+ * @param[in, out] f All necessary fields bundled in one array. The fields are
  * changed if filtering is enabled for the current time slice.
  *
  * Additionally, if we want to output the constraints on the current time slice,
  * the laplacian of \f$\psi\f$ is computed here for convenience.
  */
-static void mk_ffts_and_filter(double *in)
+static void mk_ffts_and_filter(double *f)
 {
     const size_t N = pars.N;
-    fft(in, tmp.phic);
+    fft(f, tmp.phic);
     #if defined(ENABLE_FFT_FILTER)
     if (evo_flags.filter == 1) { // output == 1 => filter == 1
-        fft(in + 2 * N, tmp.psic);
-        capply_filter(tmp.phic, in); // fft already available
-        capply_filter(tmp.psic, in + 2 * N); // fft already available
-        apply_filter(in + pars.N); // fft not available
-        apply_filter(in + 3 * pars.N); // fft not available
+        fft(f + 2 * N, tmp.psic);
+        capply_filter(tmp.phic, f); // fft already available
+        capply_filter(tmp.psic, f + 2 * N); // fft already available
+        apply_filter(f + pars.N); // fft not available
+        apply_filter(f + 3 * pars.N); // fft not available
     }
     #elif defined(OUTPUT_CONSTRAINTS) || defined(OUTPUT_PSI_PS)
     if (evo_flags.output == 1) {
-        fft(in + 2 * N, tmp.psic);
+        fft(f + 2 * N, tmp.psic);
     }
     #endif
     #ifdef OUTPUT_CONSTRAINTS
@@ -649,8 +649,9 @@ static void capply_filter(complex *in, double *out)
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
         in[i] *= filter[i];
+        tmp.deltarhoc[i] = in[i] / pars.N;
     }
-    ifft(in, out);
+    ifft(tmp.deltarhoc, out);
     TIME(mon.filter_time += get_wall_time());
 }
 #endif
