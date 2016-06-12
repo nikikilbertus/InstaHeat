@@ -520,14 +520,13 @@ static void mk_k_grid()
  *
  * Fills the global array `filter` with multiplicative factors that can be
  * applied pointwise to a field in Fourier space to cut off high frequency
- * modes. The normalizing factor 1/N for the Fourier transform with FFTW3 is
- * already included in 'filter'.
+ * modes.
  */
 static void mk_filter_mask()
 {
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
-        filter[i] = filter_window(kvec.sq[i] / kvec.k2_max) / pars.N;
+        filter[i] = filter_window(kvec.sq[i] / kvec.k2_max);
     }
     INFO(puts("Constructed filter mask.\n"));
 }
