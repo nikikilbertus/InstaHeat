@@ -40,6 +40,7 @@ static void initialize_from_dat();
 #endif
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
 static void initialize_from_bunch_davies();
+static void test_bunch_davies();
 static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma);
 static complex box_muller();
@@ -649,30 +650,39 @@ static void mk_initial_psi()
  */
 static void initialize_from_bunch_davies()
 {
-    size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
-    if (pars.dim != 3) {
-        fputs("Bunch Davies vacuum works only in three dimensions.\n", stderr);
-        exit(EXIT_FAILURE);
-    }
-    if (Nx != Ny || Nx != Nz || Ny != Nz) {
-        fputs("Bunch Davies vacuum works only for Nx = Ny = Nz.\n", stderr);
-        exit(EXIT_FAILURE);
-    }
-    double lx = fabs(pars.x.b - pars.x.a - 10.0);
-    double ly = fabs(pars.y.b - pars.y.a - 10.0);
-    double lz = fabs(pars.z.b - pars.z.a - 10.0);
-    if (lx > DBL_EPSILON || ly > DBL_EPSILON || lz > DBL_EPSILON) {
-        fputs("Bunch Davies vacuum works only for box size 10.0.\n", stderr);
-        exit(EXIT_FAILURE);
-    }
+    test_bunch_davies();
     // directly from DEFROST(v1.0), factor in dphi0 and H0 adjusts modes
     const double phi0 = 1.0093430384226378929425913902459;
-    const double dphi0 = -MASS * 0.7137133070120812430962278466136;
+    const double dphi0 = - MASS * 0.7137133070120812430962278466136;
     const double hubble = MASS * 0.5046715192113189464712956951230;
     mk_bunch_davies(field, hubble, phi0, -0.25);
     mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
     field[pars.Ntot - 1] = A_INITIAL;
     mk_initial_psi();
+}
+
+/**
+ * @brief Check that all conditions necessary to construct the Bunch Davies
+ * vacuum are fulfilled and exit the program if they are not.
+ */
+static void test_bunch_davies()
+{
+    if (pars.dim != 3) {
+        fputs("Bunch Davies vacuum works only in three dimensions.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
+    if (Nx != Ny || Nx != Nz) {
+        fputs("Bunch Davies vacuum works only for Nx = Ny = Nz.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    double lx = pars.x.b - pars.x.a;
+    double ly = pars.y.b - pars.y.a;
+    double lz = pars.z.b - pars.z.a;
+    if (fabs(lx - ly) > DBL_EPSILON || fabs(lx - lz) > DBL_EPSILON) {
+        fputs("Bunch Davies vacuum works only in a cubic domain.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
 }
 
 /**
