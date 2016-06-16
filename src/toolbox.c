@@ -45,8 +45,8 @@ static void fmean_var_min_max(const double *f, double *smry);
 #endif
 static double mean(const double *f, const size_t N);
 static double variance(const double mean, const double *f, const size_t N);
-static double real_to_complex(const double *in, complex *out);
-static double complex_to_real(const complex *in, double *out);
+static void real_to_complex(const double *in, complex *out);
+static void complex_to_real(const complex *in, double *out);
 static void fft(double *in, complex *out);
 static void ifft(complex *in, double *out);
 #ifdef CHECK_FOR_NAN
@@ -787,7 +787,7 @@ static double variance(const double mean, const double *f, const size_t N)
  * @param[in] in The double input array.
  * @param[out] out The complex output array.
  */
-static double real_to_complex(const double *in, complex *out)
+static void real_to_complex(const double *in, complex *out)
 {
     #pragma omp parallel for
     for (size_t i = 0; i < pars.Next; i += 2) {
@@ -801,7 +801,7 @@ static double real_to_complex(const double *in, complex *out)
  * @param[in] in The complex input array.
  * @param[out] out The double output array.
  */
-static double complex_to_real(const complex *in, double *out)
+static void complex_to_real(const complex *in, double *out)
 {
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
