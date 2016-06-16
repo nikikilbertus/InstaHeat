@@ -315,6 +315,7 @@ extern double *rho; ///< An array for the energy density \f$\rho\f$
 extern double rho_mean; ///< The mean value of the energy density \f$\rho\f$
 extern struct output rho_out; ///< The output struct for \f$\rho\f$
 extern struct output rho_smry; ///< The output struct for the summary of \f$\rho\f$
+extern struct output p_smry; ///< The output struct for the summary of \f$p\f$
 extern double *pressure; ///< An array for the pressure \f$p\f$
 extern double pressure_mean; ///< The mean value of the pressure \f$p\f$
 extern struct output phi_ps; ///< The output struct for the power spectrum of \f$\phi\f$
