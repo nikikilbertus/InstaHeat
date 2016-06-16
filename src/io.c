@@ -26,8 +26,8 @@ static void h5_write_buffer(const hsize_t rank, const hsize_t Nt,
         const double *buf);
 static void h5_write_all_buffers(const hsize_t Nt);
 static void append_to_buffer(struct output f);
-static void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
-        double *out);
+static void h5_read_and_fill(const hid_t file, const hsize_t index,
+        const char *name, double *out);
 
 /**
  * @brief Creates the initial hdf5 file and writes out most of the simulation
@@ -649,8 +649,8 @@ void h5_read_timeslice()
         }
     }
     if (index == Nt) {
-        INFO(puts("The initial time is larger than the maximal time in"
-                    " the h5 file. Starting at last existing timeslice."));
+        INFO(puts("The initial time is larger than the maximal time in the "
+                  "h5 file. Starting at last existing timeslice."));
         index = Nt - 1;
     }
     pars.t.ti = time_tmp[index];
@@ -700,8 +700,8 @@ void h5_read_timeslice()
  * @param[out] out Pointer to the memory where to store the time slice @p index
  * of the dataset @p name in file @p file.
  */
-static void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
-        double *out)
+static void h5_read_and_fill(const hid_t file, const hsize_t index,
+        const char *name, double *out)
 {
     size_t N = pars.N;
     hid_t dset = H5Dopen(file, name, H5P_DEFAULT);
