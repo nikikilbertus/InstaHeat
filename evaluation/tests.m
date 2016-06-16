@@ -401,9 +401,8 @@ for ii = [1 logspace(1,log10(length(phips(1,:))),300)]
     i = int64(floor(ii));
     subplot(2,2,1)
     loglog(bins, phips(1:nbins,i)); xlabel('k'); ylabel('power'); hold on
-    k = lc(i);
-    kmax = 1/H(i);
-    [min(bins) max(bins)];
+    k = (1/lc(i))*a(i);
+    kmax = H(i)*a(i);
     lowb = min(phips(1:nbins,i)) + 1e-13;
     higb = max(phips(1:nbins,i));
     loglog([k k],[lowb higb]);
@@ -415,6 +414,12 @@ for ii = [1 logspace(1,log10(length(phips(1,:))),300)]
     shg;
     subplot(2,2,3)
     loglog(bins, rhops(1:nbins,i)); xlabel('k'); ylabel('power'); title('\rho');
+    hold on
+    k = H(1);
+    lowb = min(rhops(1:nbins,i)) + 1e-10;
+    higb = max(rhops(1:nbins,i));
+    loglog([k k],[lowb higb]);
+    hold off
     subplot(2,2,4)
     try
     loglog(bins, psips(1:nbins,i)); xlabel('k'); ylabel('power'); title('\psi');
@@ -547,13 +552,11 @@ xlabel('atol'); ylabel('rtol'); zlabel('-log10 std \phi error l_{2}');
 
 %% resolutions study
 close all
-% res = [32 48 64 96];
 res = [48 64 96];
 rhos = zeros(length(res),1);
 disp('         grid      steps')
 for i = 1:length(res)
-%     name = ['resolutions9/' num2str(res(i)) '_5e-4_2e4'];
-    name = ['gw4/' num2str(res(i)) '_5e-3_2e4'];
+    name = ['cmpfilter/' num2str(res(i)) '_5e-3_1e4_16_1'];
     evaluate3D
     disp([N(1) steps])
     legendinfo{i} = num2str(res(i));
@@ -580,10 +583,10 @@ for i = 1:length(res)
     loglog(a,dpsimin,a,dpsimax); xlabel('a'); ylabel('min/max \psi'); hold on
     subplot(4,1,4)
     loglog(a,sqrt(dpsivar)); xlabel('a'); ylabel('std d\psi'); hold on
-    figure(5)
-    loglog(a, hamcstrl2/res(i)^3); xlabel('a'); ylabel('ham cstr l2'); hold on
-    figure(6)
-    loglog(a, hamcstrinf); xlabel('a'); ylabel('ham cstr \infty'); hold on
+%     figure(5)
+%     loglog(a, hamcstrl2/res(i)^3); xlabel('a'); ylabel('ham cstr l2'); hold on
+%     figure(6)
+%     loglog(a, hamcstrinf); xlabel('a'); ylabel('ham cstr \infty'); hold on
 %     figure(7)
 %     surf(a,1:50,log10(rhops)); xlabel('a'); ylabel('bins'); shading interp; view(2); title(num2str(res(i)));
 %     pause;
