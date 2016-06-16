@@ -84,6 +84,9 @@ void h5_create_empty_by_path()
     #ifdef OUTPUT_RHO_SMRY
     h5_create_dset(rank, rho_smry.dim, &(rho_smry.id), H5_RHO_SMRY_NAME);
     #endif
+    #ifdef OUTPUT_PRESSURE_SMRY
+    h5_create_dset(rank, p_smry.dim, &(p_smry.id), H5_PRESSURE_SMRY_NAME);
+    #endif
     #ifdef OUTPUT_H1_SMRY
     h5_create_dset(rank, h1_smry.dim, &(h1_smry.id), H5_H1_SMRY_NAME);
     #endif
@@ -395,6 +398,9 @@ static void h5_write_all_buffers(const hsize_t Nt)
     #ifdef OUTPUT_RHO_SMRY
     h5_write_buffer(rank, Nt, rho_smry.dim, os, rho_smry.id, rho_smry.buf);
     #endif
+    #ifdef OUTPUT_PRESSURE_SMRY
+    h5_write_buffer(rank, Nt, p_smry.dim, os, p_smry.id, p_smry.buf);
+    #endif
     #ifdef OUTPUT_H1_SMRY
     h5_write_buffer(rank, Nt, h1_smry.dim, os, h1_smry.id, h1_smry.buf);
     #endif
@@ -494,6 +500,10 @@ void save()
         #ifdef OUTPUT_RHO_SMRY
             #pragma omp section
             append_to_buffer(rho_smry);
+        #endif
+        #ifdef OUTPUT_PRESSURE_SMRY
+            #pragma omp section
+            append_to_buffer(p_smry);
         #endif
         #ifdef OUTPUT_H1_SMRY
             #pragma omp section
