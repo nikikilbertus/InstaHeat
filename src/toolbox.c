@@ -499,11 +499,10 @@ static double potential_prime(const double f)
  * @brief Monitor how well the Hamiltonian and momentum constraint are fulfilled.
  *
  * Computes the Hamiltonian and momentum constraint in a form such they should
- * give 0, if fulfilled exactly. Of these combinations save the l2 Norm as well
+ * give 0 if fulfilled exactly. Of these combinations save the l2 Norm as well
  * as the maximum asbolute value to `cstr.tmp` for output.
  *
  * @param[in] f An array containing the fields
- * @note So far only the Hamiltonian constraint is implemented! (4/14/2016)
  */
 static void mk_constraints(double *f)
 {
@@ -528,10 +527,10 @@ static void mk_constraints(double *f)
         ham_max = MAX(ham_max, fabs(ham));
         mom_max = MAX(mom_max, fabs(mom));
     }
-    cstr.tmp[0] = ham_l2;
-    cstr.tmp[1] = ham_max;
-    cstr.tmp[2] = mom_l2;
-    cstr.tmp[3] = mom_max;
+    cstr.tmp[0] = ham_l2 / N;
+    cstr.tmp[1] = ham_max / N;
+    cstr.tmp[2] = mom_l2 / N;
+    cstr.tmp[3] = mom_max / N;
     TIME(mon.cstr_time += get_wall_time());
 }
 #endif
