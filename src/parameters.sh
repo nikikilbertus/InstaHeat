@@ -2,8 +2,8 @@
 DATAPATH="../../data/test_mass.h5"
 INITIAL_DATAPATH="../../data/karsten/data_64psi_3.dat"
 INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"
-# MASS="4.0" # bunch davies
-MASS="9.990962364968714" # bunch davies
+MASS="4.0" # bunch davies
+# MASS="9.990962364968714" # bunch davies s.t. kmax,kmin in resonance at some a
 # MASS="0.002000003836216" # compare_2 compare_psi
 # MASS="1.0e-2" # data_64psi_{1,2,3}
 # MASS="1.0e-3" # data_64psi_4
@@ -30,8 +30,8 @@ SPATIAL_UPPER_BOUND_Z="10.0"
 # uncommon
 FFTW_DEFAULT_FLAG="FFTW_PATIENT"
 VERSION_CONTROL="VERSION_CONTROL_HG"
-ENABLE_FFT_FILTER="0"
-ENABLE_GW="0"
+ENABLE_FFT_FILTER="1"
+ENABLE_GW="1" # enable gravitational wave extraction
 WRITE_OUT_BUFFER_NUMBER="5"
 POWER_SPECTRUM_BINS="50"
 TIME_STEP_SKIPS="1"
@@ -44,6 +44,7 @@ RELATIVE_TOLERANCE="1.0e-10"
 ABSOLUTE_TOLERANCE="1.0e-13"
 MAX_DT_HUBBLE_FRACTION="1.0e-2"
 THREAD_NUMBER="0"
+BUNCH_DAVIES_CUTOFF="16"
 
 # rare
 INTEGRATION_METHOD="DOPRI853"
@@ -60,23 +61,26 @@ COUPLING="1.0"
 LAMBDA="1.876e-4"
 
 # outputs (0=no output, 1=output)
-PHI="0"
-DPHI="0"
-PSI="0"
-DPSI="0"
-RHO="0"
+# full fields
+OUTPUT_PHI="0"
+OUTPUT_DPHI="0"
+OUTPUT_PSI="0"
+OUTPUT_DPSI="0"
+OUTPUT_RHO="0"
 
-PHI_POWER_SPECTRUM="1"
-PSI_POWER_SPECTRUM="1"
-RHO_POWER_SPECTRUM="1"
+# power spectra
+OUTPUT_PHI_PS="1"
+OUTPUT_PSI_PS="1"
+OUTPUT_RHO_PS="1"
 
-PHI_SUMMARY="1"
-DPHI_SUMMARY="1"
-PSI_SUMMARY="1"
-DPSI_SUMMARY="1"
-RHO_SUMMARY="1"
-PRESSURE_SUMMARY="1"
-H1_SUMMARY="0" # not fully functional yet
-H2_SUMMARY="0" # not fully functional yet
+# summaries
+OUTPUT_PHI_SMRY="1"
+OUTPUT_DPHI_SMRY="1"
+OUTPUT_PSI_SMRY="1"
+OUTPUT_DPSI_SMRY="1"
+OUTPUT_RHO_SMRY="1"
+OUTPUT_PRESSURE_SMRY="1"
+OUTPUT_H1_SMRY="0" # not fully functional yet
+OUTPUT_H2_SMRY="0" # not fully functional yet
 
-CONSTRAINTS="0"
+OUTPUT_CONSTRAINTS="0"
