@@ -1,4 +1,4 @@
-name = 'gw6/64_5e-3_2e4_fil';
+name = 'cmpfilter/64_5e-3_1e4_16_0';
 interp = true;
 newoutput = true;
 amax = -1;
@@ -62,14 +62,14 @@ if (newoutput)
     try
        cstr = h5read(name, '/constraints');
        hamcstrl2 = cstr(1,:);
-       hamcstrinf = cstr(2,:);
-       hubblefrac = h5read(name, '/max_dt_hubble_fraction');
-       inflmass = h5read(name, '/inflaton_mass');
-       steps = h5read(name, '/steps_total');
-       timetotal = h5read(name, '/runtime_total');
+       hamcstrinf = cstr(2,:);   
     catch me
         disp 'couldnt load constraints'
     end
+    steps = h5read(name, '/steps_total');
+    timetotal = h5read(name, '/runtime_total');
+    hubblefrac = h5read(name, '/max_dt_hubble_fraction');
+    inflmass = h5read(name, '/inflaton_mass');
 else
     powspec = h5read(name, '/power_spectrum');
     phimean = h5read(name, '/phi_mean')';
