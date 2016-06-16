@@ -28,6 +28,7 @@
 #define     H5_PSI_SMRY_NAME                ("psi_summary")
 #define     H5_DPSI_SMRY_NAME               ("dpsi_summary")
 #define     H5_RHO_SMRY_NAME                ("rho_summary")
+#define     H5_PRESSURE_SMRY_NAME           ("pressure_summary")
 #define     H5_H1_SMRY_NAME                 ("h1_summary")
 #define     H5_H2_SMRY_NAME                 ("h2_summary")
 #define     H5_CONSTRAINTS_NAME             ("constraints")
