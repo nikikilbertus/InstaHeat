@@ -52,41 +52,42 @@
 
 #define RK4                 (0)
 #define DOPRI853            (1)
-#define INTEGRATION_METHOD  (_IM_)
+#define INTEGRATION_METHOD  (__INTEGRATION_METHOD__)
 
 #define VERSION_CONTROL_NONE    (0)
 #define VERSION_CONTROL_HG      (1)
 #define VERSION_CONTROL_GIT     (2)
-#define VERSION_CONTROL         (_VC_)
+#define VERSION_CONTROL         (__VERSION_CONTROL__)
 
 #define IC_FROM_INTERNAL_FUNCTION       (0)
 #define IC_FROM_H5_FILE                 (1)
 #define IC_FROM_DAT_FILE_WITH_PSI       (2)
 #define IC_FROM_DAT_FILE_WITHOUT_PSI    (3)
 #define IC_FROM_BUNCH_DAVIES            (4)
-#define INITIAL_CONDITIONS              (_IC_)
+#define INITIAL_CONDITIONS              (__INITIAL_CONDITIONS__)
 
 #if INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITH_PSI \
     || INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITHOUT_PSI
     #define IC_FROM_DAT_FILE
 #endif
 
-#define _OPHI_
-#define _ODPHI_
-#define _OPSI_
-#define _ODPSI_
-#define _ORHO_
-#define _OPHIPS_
-#define _OPSIPS_
-#define _ORHOPS_
-#define _OPHIS_
-#define _ODPHIS_
-#define _OPSIS_
-#define _ODPSIS_
-#define _ORHOS_
-#define _OH1S_
-#define _OH2S_
-#define _OCSTR_
+#define __OUTPUT_PHI__
+#define __OUTPUT_DPHI__
+#define __OUTPUT_PSI__
+#define __OUTPUT_DPSI__
+#define __OUTPUT_RHO__
+#define __OUTPUT_PHI_PS__
+#define __OUTPUT_PSI_PS__
+#define __OUTPUT_RHO_PS__
+#define __OUTPUT_PHI_SMRY__
+#define __OUTPUT_DPHI_SMRY__
+#define __OUTPUT_PSI_SMRY__
+#define __OUTPUT_DPSI_SMRY__
+#define __OUTPUT_RHO_SMRY__
+#define __OUTPUT_PRESSURE_SMRY__
+#define __OUTPUT_H1_SMRY__
+#define __OUTPUT_H2_SMRY__
+#define __OUTPUT_CONSTRAINTS__
 
 #if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || \
     defined(OUTPUT_PSI) || defined(OUTPUT_DPSI) || \
@@ -106,46 +107,47 @@
     #define OUTPUT_SMRY
 #endif
 
-#define DATAPATH                ("_PATH_")
-#define INITIAL_DATAPATH        ("_IPATH_")
-#define WRITE_OUT_BUFFER_NUMBER (_BUF_)
-#define POWER_SPECTRUM_BINS     (_BINS_)
-#define TIME_STEP_SKIPS         (_TSKIP_)
-#define STRIDE_X                (_XSKIP_)
-#define STRIDE_Y                (_YSKIP_)
-#define STRIDE_Z                (_ZSKIP_)
-#define THREAD_NUMBER           (_THREADS_)
-#define FFTW_DEFAULT_FLAG       (_FFTW_)
-#define _FILTER_
-#define GRIDPOINTS_X            (_GPX_)
-#define GRIDPOINTS_Y            (_GPY_)
-#define GRIDPOINTS_Z            (_GPZ_)
-#define SPATIAL_LOWER_BOUND_X   (_LX_)
-#define SPATIAL_UPPER_BOUND_X   (_UX_)
-#define SPATIAL_LOWER_BOUND_Y   (_LY_)
-#define SPATIAL_UPPER_BOUND_Y   (_UY_)
-#define SPATIAL_LOWER_BOUND_Z   (_LZ_)
-#define SPATIAL_UPPER_BOUND_Z   (_UZ_)
-#define DELTA_T                 (_DELT_)
-#define INITIAL_TIME            (_TI_)
-#define FINAL_TIME              (_TF_)
-#define MAX_STEPS               (_MAXSTEPS_)
-#define MINIMAL_DELTA_T         (_MINDELT_)
-#define SEED                    (_SEED_)
-#define MASS                    (_M_)
-#define MASS_KARSTEN            (_MKARSTEN_)
-#define INFLATON_MASS           (_MINFL_)
-#define COUPLING                (_COUPLING_)
-#define LAMBDA                  (_LAMBDA_)
-#define A_INITIAL               (_A_)
-#define SMALLEST_SCALING        (_MINSCAL_)
-#define LARGEST_SCALING         (_MAXSCAL_)
-#define BETA                    (_BETA_) // ALPHA = 1.0/8.0 - BETA * 0.2
-#define SAFE                    (_SAFE_)
-#define RELATIVE_TOLERANCE      (_RELTOL_)
-#define ABSOLUTE_TOLERANCE      (_ABSTOL_)
-#define MAX_DT_HUBBLE_FRACTION  (_HFRAC_)
-#define _GW_
+#define DATAPATH                ("__DATAPATH__")
+#define INITIAL_DATAPATH        ("__INITIAL_DATAPATH__")
+#define WRITE_OUT_BUFFER_NUMBER (__WRITE_OUT_BUFFER_NUMBER__)
+#define POWER_SPECTRUM_BINS     (__POWER_SPECTRUM_BINS__)
+#define TIME_STEP_SKIPS         (__TIME_STEP_SKIPS__)
+#define STRIDE_X                (__STRIDE_X__)
+#define STRIDE_Y                (__STRIDE_Y__)
+#define STRIDE_Z                (__STRIDE_Z__)
+#define THREAD_NUMBER           (__THREAD_NUMBER__)
+#define FFTW_DEFAULT_FLAG       (__FFTW_DEFAULT_FLAG__)
+#define GRIDPOINTS_X            (__GRIDPOINTS_X__)
+#define GRIDPOINTS_Y            (__GRIDPOINTS_Y__)
+#define GRIDPOINTS_Z            (__GRIDPOINTS_Z__)
+#define SPATIAL_LOWER_BOUND_X   (__SPATIAL_LOWER_BOUND_X__)
+#define SPATIAL_UPPER_BOUND_X   (__SPATIAL_UPPER_BOUND_X__)
+#define SPATIAL_LOWER_BOUND_Y   (__SPATIAL_LOWER_BOUND_Y__)
+#define SPATIAL_UPPER_BOUND_Y   (__SPATIAL_UPPER_BOUND_Y__)
+#define SPATIAL_LOWER_BOUND_Z   (__SPATIAL_LOWER_BOUND_Z__)
+#define SPATIAL_UPPER_BOUND_Z   (__SPATIAL_UPPER_BOUND_Z__)
+#define DELTA_T                 (__DELTA_T__)
+#define INITIAL_TIME            (__INITIAL_TIME__)
+#define FINAL_TIME              (__FINAL_TIME__)
+#define MAX_STEPS               (__MAX_STEPS__)
+#define MINIMAL_DELTA_T         (__MINIMAL_DELTA_T__)
+#define SEED                    (__SEED__)
+#define MASS                    (__MASS__)
+#define MASS_KARSTEN            (__MASS_KARSTEN__)
+#define INFLATON_MASS           (__INFLATON_MASS__)
+#define COUPLING                (__COUPLING__)
+#define LAMBDA                  (__LAMBDA__)
+#define A_INITIAL               (__A_INITIAL__)
+#define SMALLEST_SCALING        (__SMALLEST_SCALING__)
+#define LARGEST_SCALING         (__LARGEST_SCALING__)
+#define BETA                    (__BETA__) // ALPHA = 1.0/8.0 - BETA * 0.2
+#define SAFE                    (__SAFE__)
+#define RELATIVE_TOLERANCE      (__RELATIVE_TOLERANCE__)
+#define ABSOLUTE_TOLERANCE      (__ABSOLUTE_TOLERANCE__)
+#define MAX_DT_HUBBLE_FRACTION  (__MAX_DT_HUBBLE_FRACTION__)
+#define BUNCH_DAVIES_CUTOFF     (__BUNCH_DAVIES_CUTOFF__)
+#define __ENABLE_FFT_FILTER__
+#define __ENABLE_GW__
 
 #ifndef ENABLE_GW
     #undef OUTPUT_H1_SMRY
@@ -228,6 +230,7 @@ struct parameters
     size_t outN; ///< number of spatial gridpoints for output
     size_t M; ///< number of gridpoints in Fourier space
     size_t dim; ///< dimensions of the simulation (1, 2 or 3)
+    size_t bunch_davies_cutoff; ///< cutoff of the initial Bunch Davies spectrum
     struct timing t; ///< time evolution parameters
     struct file_parameters file; ///< file IO parameters
 };
