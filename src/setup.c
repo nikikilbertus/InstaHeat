@@ -285,6 +285,9 @@ static void allocate_external()
     #ifdef OUTPUT_RHO_SMRY
     init_output(&rho_smry, SUMMARY_VALUES, 1);
     #endif
+    #ifdef OUTPUT_PRESSURE_SMRY
+    init_output(&p_smry, SUMMARY_VALUES, 1);
+    #endif
     #ifdef OUTPUT_H1_SMRY
     init_output(&h1_smry, SUMMARY_VALUES, 1);
     #endif
@@ -1102,6 +1105,10 @@ static void free_external()
     #ifdef OUTPUT_RHO_SMRY
     free(rho_smry.tmp);
     free(rho_smry.buf);
+    #endif
+    #ifdef OUTPUT_PRESSURE_SMRY
+    free(p_smry.tmp);
+    free(p_smry.buf);
     #endif
     #ifdef OUTPUT_H1_SMRY
     free(h1_smry.tmp);
