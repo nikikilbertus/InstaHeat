@@ -197,6 +197,7 @@ static void initialize_parameters()
     pars.Next = 2 * pars.M;
     pars.Ntot = 4 * pars.N + 4 * pars.Next + 1;
 
+    pars.bunch_davies_cutoff = BUNCH_DAVIES_CUTOFF;
     pars.t.dt = DELTA_T;
     pars.t.t = INITIAL_TIME;
     pars.t.ti = INITIAL_TIME;
@@ -707,7 +708,11 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     const double dk = TWOPI / (pars.x.b - pars.x.a);
     const double dkos = 0.5 * dk / os;
     // pspectre uses kcutpspectre = 2 * kcutdefrost (without square!)
-    const double kcut2 = 0.25 * nn * nn * dk * dk;
+    size_t cutoff = pars.bunch_davies_cutoff;
+    if (cutoff < 1) {
+        cutoff = nn;
+    }
+    const double kcut2 = 0.25 * cutoff * cutoff * dk * dk;
     const double meff2 = MASS * MASS - 2.25 * H * H;
     const double norm = 0.5 * INFLATON_MASS /
         (pars.N * sqrt(TWOPI * pow(dk, 3))) * (dkos / dxos);
