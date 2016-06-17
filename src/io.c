@@ -782,5 +782,6 @@ void h5_write_followup()
     strcpy(DATAPATH, name);
     strcat(suffix, name);
     h5_write_compact(name, field, pars.Ntot);
+    free(name);
 }
 #endif
