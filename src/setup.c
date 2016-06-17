@@ -198,6 +198,8 @@ static void initialize_parameters()
     pars.Ntot = 4 * pars.N + 4 * pars.Next + 1;
 
     pars.bunch_davies_cutoff = BUNCH_DAVIES_CUTOFF;
+    pars.max_runtime = MAX_RUNTIME;
+
     pars.t.dt = DELTA_T;
     pars.t.t = INITIAL_TIME;
     pars.t.ti = INITIAL_TIME;
