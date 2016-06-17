@@ -1,11 +1,11 @@
-name = 'cmpfilter/64_5e-3_1e4_16_0';
+% name = 'cmpfilter/96_5e-3_1e4_16_1';
 interp = true;
 newoutput = true;
 amax = -1;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
-name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/' name '.h5'];
+name = ['~/Dropbox/Uni/Exercises/12Semester/MAPhysics/data/' name '.h5'];
 
 dim = h5read(name, '/dimension');
 t = h5read(name, '/time');
@@ -89,8 +89,6 @@ rhorms = sqrt(rhovar ./ rhomean.^2);
 if interp
 [phipks, phipkpos] = findpeaks(phimean);
 phienv = spline(a(phipkpos), phipks, a);
-end
-if interp
 [phipks, phipkpos] = findpeaks(phivar);
 phivarenv = spline(a(phipkpos), phipks, a);
 phirms = sqrt(phivarenv ./ phienv.^2);
@@ -99,8 +97,6 @@ end
 if interp
 [dphipks, dphipkpos] = findpeaks(dphimean);
 dphienv = spline(a(dphipkpos), dphipks, a);
-end
-if interp
 [dphipks, dphipkpos] = findpeaks(dphivar);
 dphivarenv = spline(a(dphipkpos), dphipks, a);
 dphirms = sqrt(dphivarenv ./ dphienv.^2);
@@ -138,8 +134,12 @@ if amax > 1
         disp 'some power spectra not available'
     end;
     
-    hamcstrl2 = hamcstrl2(I);
-    hamcstrinf = hamcstrinf(I);
+    try
+        hamcstrl2 = hamcstrl2(I);
+        hamcstrinf = hamcstrinf(I);
+    catch
+        
+    end
     
     phirms = phirms(I);
     phienv = phienv(I);

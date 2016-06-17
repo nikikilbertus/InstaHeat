@@ -556,7 +556,7 @@ res = [48 64 96];
 rhos = zeros(length(res),1);
 disp('         grid      steps')
 for i = 1:length(res)
-    name = ['cmpfilter/' num2str(res(i)) '_5e-3_1e4_16_1'];
+    name = ['cmpfilter/' num2str(res(i)) '_5e-3_1e4_16_0'];
     evaluate3D
     disp([N(1) steps])
     legendinfo{i} = num2str(res(i));
@@ -567,20 +567,20 @@ for i = 1:length(res)
     loglog(a, rhorms); hold on
     figure(3)
     subplot(4,1,1)
-    loglog(a,max(abs(phimin),abs(phimax)),a,abs(phimean)); xlabel('a'); ylabel('<\phi>'); hold on
+    loglog(a,abs(phimean)); xlabel('a'); ylabel('<\phi>'); hold on;
     subplot(4,1,2)
     loglog(a,sqrt(phivar)); xlabel('a'); ylabel('std \phi'); hold on
     subplot(4,1,3)
-    loglog(a,max(abs(dphimin),abs(dphimax)),a,dphimean); xlabel('a'); ylabel('<d\phi>'); hold on
+    loglog(a,dphimean); xlabel('a'); ylabel('<d\phi>'); hold on
     subplot(4,1,4)
     loglog(a,sqrt(dphivar)); xlabel('a'); ylabel('std d\phi'); hold on
     figure(4)
     subplot(4,1,1)
-    loglog(a,psimin,a,psimax); xlabel('a'); ylabel('min/max \psi'); hold on
+    loglog(a,max(abs(psimin),abs(psimax))); xlabel('a'); ylabel('absmax \psi'); hold on
     subplot(4,1,2)
     loglog(a,sqrt(psivar)); xlabel('a'); ylabel('std \psi'); hold on
     subplot(4,1,3)
-    loglog(a,dpsimin,a,dpsimax); xlabel('a'); ylabel('min/max \psi'); hold on
+    loglog(a,max(abs(dpsimin),abs(dpsimax))); xlabel('a'); ylabel('absmax d\psi'); hold on
     subplot(4,1,4)
     loglog(a,sqrt(dpsivar)); xlabel('a'); ylabel('std d\psi'); hold on
 %     figure(5)
@@ -594,6 +594,10 @@ end
 hold off
 figure(1)
 xlabel('steps'); ylabel('dt'); legend(legendinfo); shg;
+figure(3)
+legend(legendinfo);
+figure(4)
+legend(legendinfo);
 figure(2)
 xlabel('a'); ylabel('std \rho / <|\rho|>'); legend(legendinfo); shg;
 inflmass
