@@ -218,7 +218,7 @@ static void wrap_up_dopri853()
 
     INFO(puts("Finished dopri853."));
     #ifdef SHOW_TIMING_INFO
-    INFO(printf("time: %f seconds\n", secs));
+    INFO(printf("time: %f seconds\n", mon.integration));
     h5_write_parameter(H5_RUNTIME_STEPPER_NAME, &mon.integration, 1);
     #endif
     INFO(printf("steps: %d\n", dp.n_stp + 1));
