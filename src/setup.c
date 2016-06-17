@@ -24,6 +24,10 @@
 static void init_rng();
 static void init_threading();
 static void init_parameters();
+static void init_grid_pars();
+static void init_time_pars();
+static void init_file_pars();
+static void init_monitoring();
 static void allocate_external();
 static void init_output(struct output *out, const size_t dim, const int mode);
 static void mk_fftw_plans();
@@ -137,6 +141,21 @@ static void init_threading()
  */
 static void init_parameters()
 {
+    init_grid_pars();
+    init_time_pars();
+    init_file_pars();
+    init_monitoring();
+
+    // misc parameters
+    pars.bunch_davies_cutoff = BUNCH_DAVIES_CUTOFF;
+    pars.max_runtime = MAX_RUNTIME;
+}
+
+/**
+ * @brief Initialize grid related parameters.
+ */
+static void init_grid_pars()
+{
     pars.x.N = GRIDPOINTS_X;
     pars.x.a = SPATIAL_LOWER_BOUND_X;
     pars.x.b = SPATIAL_UPPER_BOUND_X;
@@ -197,9 +216,18 @@ static void init_parameters()
     pars.Next = 2 * pars.M;
     pars.Ntot = 4 * pars.N + 4 * pars.Next + 1;
 
-    pars.bunch_davies_cutoff = BUNCH_DAVIES_CUTOFF;
-    pars.max_runtime = MAX_RUNTIME;
+    INFO(printf("Initialized grid in %zu dimension(s).\n", pars.dim));
+    INFO(printf("Gridpoints: X: %zu, Y: %zu, Z: %zu.\n",
+                pars.x.N, pars.y.N, pars.z.N));
+    INFO(printf("N: %zu, Next: %zu, Ntot: %zu\n\n",
+                pars.N, pars.Next, pars.Ntot));
+}
 
+/**
+ * @brief Initialize time evolution related parameters.
+ */
+static void init_time_pars()
+{
     pars.t.dt = DELTA_T;
     pars.t.t = INITIAL_TIME;
     pars.t.ti = INITIAL_TIME;
@@ -209,12 +237,24 @@ static void init_parameters()
         fputs("Exeeding MAX_STEPS, decrease DELTA_T.\n", stderr);
         exit(EXIT_FAILURE);
     }
+    INFO(puts("Initialized time parameters.\n"));
+}
 
+/**
+ * @brief Initialize output related parameters.
+ */
+static void init_file_pars()
+{
     pars.file.index = 0;
     pars.file.buf_size = WRITE_OUT_BUFFER_NUMBER;
     pars.file.skip = TIME_STEP_SKIPS;
+}
 
-    // TODO outsource to extra function
+/**
+ * @brief Initialize monitoring and timing variables.
+ */
+static void init_monitoring()
+{
     mon.calls_rhs = 0;
     mon.all = 0.0;
     mon.fftw_time_exe = 0.0;
@@ -227,12 +267,7 @@ static void init_parameters()
     mon.copy_buffer_time = 0.0;
     mon.cstr_time = 0.0;
     mon.smry_time = 0.0;
-
-    INFO(printf("Initialized parameters for %zu dimension(s).\n", pars.dim));
-    INFO(printf("Gridpoints: X: %zu, Y: %zu, Z: %zu.\n",
-                pars.x.N, pars.y.N, pars.z.N));
-    INFO(printf("N: %zu, Next: %zu, Ntot: %zu\n\n",
-                pars.N, pars.Next, pars.Ntot));
+    INFO(puts("Initialized monitoring variables.\n"));
 }
 
 /**
