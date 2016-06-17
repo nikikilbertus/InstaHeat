@@ -767,3 +767,19 @@ void read_initial_data()
     }
     fclose(file);
 }
+
+#ifdef ENABLE_FOLLOWUP
+void h5_write_followup()
+{
+    INFO(puts("Writing snapshot of full fields for followup run to disk.\n"));
+    const char[] suffix = "_followup";
+    char *name = malloc(strlen(DATAPATH) + strlen(suffix) + 1);
+    if (!name) {
+        fputs("Abort followup! Allocating memory for string failed.\n", stderr);
+        return;
+    }
+    strcpy(DATAPATH, name);
+    strcat(suffix, name);
+    h5_write_parameter(name, field, Ntot);
+}
+#endif
