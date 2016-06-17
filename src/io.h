@@ -72,5 +72,8 @@ void save();
 void h5_close();
 void h5_read_timeslice();
 void read_initial_data();
+#ifdef ENABLE_FOLLOWUP
+void h5_write_followup();
+#endif
 
 #endif
