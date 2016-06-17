@@ -146,6 +146,7 @@
 #define ABSOLUTE_TOLERANCE      (__ABSOLUTE_TOLERANCE__)
 #define MAX_DT_HUBBLE_FRACTION  (__MAX_DT_HUBBLE_FRACTION__)
 #define BUNCH_DAVIES_CUTOFF     (__BUNCH_DAVIES_CUTOFF__)
+#define MAX_RUNTIME             (__MAX_RUNTIME__)
 #define __ENABLE_FFT_FILTER__
 #define __ENABLE_GW__
 
@@ -233,6 +234,7 @@ struct parameters
     size_t bunch_davies_cutoff; ///< cutoff of the initial Bunch Davies spectrum
     struct timing t; ///< time evolution parameters
     struct file_parameters file; ///< file IO parameters
+    size_t max_runtime; ///< The maximal overall runtime of the program
 };
 
 /**
@@ -283,6 +285,7 @@ struct monitor
      * *result)` in `toolbox.c`
      */
     size_t calls_rhs;
+    double all; ///< Total wall clock time for the overall program execution
     double fftw_time_exe; ///< Total wall clock time for fft execution
     double fftw_time_plan; ///< Total wall clock time for fftw planning
     double filter_time; ///< Total wall clock time for filtering
