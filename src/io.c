@@ -27,8 +27,10 @@ static void h5_write_buffer(const hsize_t rank, const hsize_t Nt,
         const double *buf);
 static void h5_write_all_buffers(const hsize_t Nt);
 static void append_to_buffer(struct output f);
+#if INITIAL_CONDITIONS == IC_FROM_H5_FILE
 static void h5_read_and_fill(const hid_t file, const hsize_t index,
         const char *name, double *out);
+#endif
 
 /**
  * @brief Creates the initial hdf5 file and writes out most of the simulation
@@ -624,6 +626,7 @@ static void append_to_buffer(struct output f)
     }
 }
 
+#if INITIAL_CONDITIONS == IC_FROM_H5_FILE
 /**
  * @brief Read one time slice of an extisting `.h5` file from a prior
  * simulation as initial data for the current simulation.
@@ -740,6 +743,49 @@ static void h5_read_and_fill(const hid_t file, const hsize_t index,
 }
 
 /**
+ * @brief Read the followup dataset, i.e. the full field array of the last
+ * snapshot from a previous simulation as initial conditions for the current
+ * one.
+ */
+void h5_read_followup()
+{
+    hid_t file = H5Fopen(INITIAL_DATAPATH, H5F_ACC_RDONLY, H5P_DEFAULT);
+    hid_t dset = H5Dopen(file, H5_FOLLOWUP_NAME, H5P_DEFAULT);
+    hid_t dspace = H5Dget_space(dset);
+    int ndims = H5Sget_simple_extent_ndims(dspace);
+    hsize_t dims[2];
+    H5Sget_simple_extent_dims(dspace, dims, NULL);
+    size_t Ntot = dims[0];
+    if (ndims != 1 || Ntot != pars.Ntot) {
+        INFO(fputs("Could not read followup data properly. "
+                   "Do all specifications match?\n", stderr));
+        exit(EXIT_FAILURE);
+    }
+    H5Dread(dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, field);
+    H5Dclose(dset);
+    H5Sclose(dspace);
+
+    dset = H5Dopen(file, H5_TIME_NAME, H5P_DEFAULT);
+    dspace = H5Dget_space(dset);
+    ndims = H5Sget_simple_extent_ndims(dspace);
+    if (ndims != 1) {
+        INFO(fputs("Could not read time properly.\n", stderr));
+        exit(EXIT_FAILURE);
+    }
+    H5Sget_simple_extent_dims(dspace, dims, NULL);
+    size_t Nt = dims[0];
+    double *time_tmp = calloc(Nt, sizeof *time_tmp);
+    H5Dread(dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, time_tmp);
+    pars.t.ti = time_tmp[Nt - 1];
+    pars.t.t = time_tmp[Nt - 1];
+    free(time_tmp);
+    H5Dclose(dset);
+    H5Sclose(dspace);
+}
+#endif
+
+#ifdef IC_FROM_DAT_FILE
+/**
  * @brief Read one time slice of an extisting `.dat` file.
  *
  * This mainly served debugging and comparison purposes. It might be a good
@@ -768,6 +814,7 @@ void read_initial_data()
     }
     fclose(file);
 }
+#endif
 
 #ifdef ENABLE_FOLLOWUP
 void h5_write_followup()

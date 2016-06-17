@@ -627,7 +627,7 @@ static void mk_initial_conditions()
         dfield_new[i] = 0.0;
     }
     #if INITIAL_CONDITIONS == IC_FROM_H5_FILE
-    h5_read_timeslice();
+    h5_read_followup();
     #elif defined(IC_FROM_DAT_FILE)
     init_from_dat();
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES

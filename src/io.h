@@ -71,8 +71,13 @@ void h5_create_empty_by_path();
 void h5_write_compact(const char *name, const double *val, const size_t N);
 void save();
 void h5_close();
+#if INITIAL_CONDITIONS == IC_FROM_H5_FILE
 void h5_read_timeslice();
+void h5_read_followup();
+#endif
+#ifdef IC_FROM_DAT_FILE
 void read_initial_data();
+#endif
 #ifdef ENABLE_FOLLOWUP
 void h5_write_followup();
 #endif
