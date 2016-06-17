@@ -121,78 +121,78 @@ void h5_create_empty_by_path()
 
     // ---------------------------parameters------------------------------------
     double val[3] = {MASS, 0.0, 0.0};
-    h5_write_parameter(H5_MASS_NAME, val, 1);
+    h5_write_compact(H5_MASS_NAME, val, 1);
 
     #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
     val[0] = INFLATON_MASS;
     #else
     val[0] = -1.0;
     #endif
-    h5_write_parameter(H5_INFLATON_MASS_NAME, val, 1);
+    h5_write_compact(H5_INFLATON_MASS_NAME, val, 1);
 
     val[0] = pars.dim;
-    h5_write_parameter(H5_DIMENSION_NAME, val, 1);
+    h5_write_compact(H5_DIMENSION_NAME, val, 1);
 
     val[0] = SEED;
-    h5_write_parameter(H5_SEED_NAME, val, 1);
+    h5_write_compact(H5_SEED_NAME, val, 1);
 
     val[0] = pars.file.skip;
-    h5_write_parameter(H5_STRIDES_TIME_NAME, val, 1);
+    h5_write_compact(H5_STRIDES_TIME_NAME, val, 1);
 
     val[0] = RELATIVE_TOLERANCE;
     val[1] = ABSOLUTE_TOLERANCE;
-    h5_write_parameter(H5_TOLERANCES_NAME, val, 2);
+    h5_write_compact(H5_TOLERANCES_NAME, val, 2);
 
     val[0] = pars.x.N;
     val[1] = pars.y.N;
     val[2] = pars.z.N;
-    h5_write_parameter(H5_GRIDPOINTS_INTERNAL_NAME, val, 3);
+    h5_write_compact(H5_GRIDPOINTS_INTERNAL_NAME, val, 3);
 
     val[0] = SPATIAL_LOWER_BOUND_X;
     val[1] = SPATIAL_UPPER_BOUND_X;
-    h5_write_parameter(H5_SPATIAL_BOUNDS_X_NAME, val, 2);
+    h5_write_compact(H5_SPATIAL_BOUNDS_X_NAME, val, 2);
 
     val[0] = SPATIAL_LOWER_BOUND_Y;
     val[1] = SPATIAL_UPPER_BOUND_Y;
-    h5_write_parameter(H5_SPATIAL_BOUNDS_Y_NAME, val, 2);
+    h5_write_compact(H5_SPATIAL_BOUNDS_Y_NAME, val, 2);
 
     val[0] = SPATIAL_LOWER_BOUND_Z;
     val[1] = SPATIAL_UPPER_BOUND_Z;
-    h5_write_parameter(H5_SPATIAL_BOUNDS_Z_NAME, val, 2);
+    h5_write_compact(H5_SPATIAL_BOUNDS_Z_NAME, val, 2);
 
     val[0] = pars.x.outN;
     val[1] = pars.y.outN;
     val[2] = pars.z.outN;
-    h5_write_parameter(H5_GRIDPOINTS_OUTPUT_NAME, val, 3);
+    h5_write_compact(H5_GRIDPOINTS_OUTPUT_NAME, val, 3);
 
     val[0] = pars.x.stride;
     val[1] = pars.y.stride;
     val[2] = pars.z.stride;
-    h5_write_parameter(H5_STRIDES_SPACE_NAME, val, 3);
+    h5_write_compact(H5_STRIDES_SPACE_NAME, val, 3);
 
     val[0] = pars.bunch_davies_cutoff;
-    h5_write_parameter(H5_BUNCH_DAVIES_CUTOFF_NAME, val, 1);
+    h5_write_compact(H5_BUNCH_DAVIES_CUTOFF_NAME, val, 1);
 
     #ifdef MAX_DT_HUBBLE_FRACTION
     val[0] = MAX_DT_HUBBLE_FRACTION;
     #else
     val[0] = -1.0;
     #endif
-    h5_write_parameter(H5_MAX_DT_HUBBLE_FRACTION_NAME, val, 1);
+    h5_write_compact(H5_MAX_DT_HUBBLE_FRACTION_NAME, val, 1);
 
     #ifdef ENABLE_FFT_FILTER
     val[0] = 1.0;
     #else
     val[0] = 0.0;
     #endif
-    h5_write_parameter(H5_ENABLE_FILTER_NAME, val, 1);
+    h5_write_compact(H5_ENABLE_FILTER_NAME, val, 1);
 
     #ifdef ENABLE_GW
     val[0] = 1.0;
     #else
     val[0] = 0.0;
     #endif
-    h5_write_parameter(H5_ENABLE_GW_NAME, val, 1);
+    h5_write_compact(H5_ENABLE_GW_NAME, val, 1);
 
     // ---------------------------commit hash-----------------------------------
     hid_t filetype, memtype, dspace_str, dset_str;
@@ -306,7 +306,7 @@ static void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,
  * @note We do not get back a handle to the dataset, i.e. the parameters are
  * written once and for all and not modified later.
  */
-void h5_write_parameter(const char *name, const double *val, const size_t N)
+void h5_write_compact(const char *name, const double *val, const size_t N)
 {
     hsize_t rank = 1;
     hsize_t dim[1] = {N};
@@ -781,6 +781,6 @@ void h5_write_followup()
     }
     strcpy(DATAPATH, name);
     strcat(suffix, name);
-    h5_write_parameter(name, field, pars.Ntot);
+    h5_write_compact(name, field, pars.Ntot);
 }
 #endif

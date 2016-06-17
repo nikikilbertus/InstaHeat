@@ -67,7 +67,7 @@
 #define     H5_ENABLE_GW_NAME               ("gravitational_waves")
 
 void h5_create_empty_by_path();
-void h5_write_parameter(const char *name, const double *val, const size_t N);
+void h5_write_compact(const char *name, const double *val, const size_t N);
 void save();
 void h5_close();
 void h5_read_timeslice();
