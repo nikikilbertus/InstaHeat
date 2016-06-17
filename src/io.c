@@ -169,6 +169,9 @@ void h5_create_empty_by_path()
     val[2] = pars.z.stride;
     h5_write_parameter(H5_STRIDES_SPACE_NAME, val, 3);
 
+    val[0] = pars.bunch_davies_cutoff;
+    h5_write_parameter(H5_BUNCH_DAVIES_CUTOFF_NAME, val, 1);
+
     #ifdef MAX_DT_HUBBLE_FRACTION
     val[0] = MAX_DT_HUBBLE_FRACTION;
     #else
@@ -182,6 +185,13 @@ void h5_create_empty_by_path()
     val[0] = 0.0;
     #endif
     h5_write_parameter(H5_ENABLE_FILTER_NAME, val, 1);
+
+    #ifdef ENABLE_GW
+    val[0] = 1.0;
+    #else
+    val[0] = 0.0;
+    #endif
+    h5_write_parameter(H5_ENABLE_GW_NAME, val, 1);
 
     // ---------------------------commit hash-----------------------------------
     hid_t filetype, memtype, dspace_str, dset_str;
