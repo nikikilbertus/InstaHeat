@@ -428,8 +428,12 @@ static void mk_gw_spectrum(double *f)
 {
     const size_t Ndh1 = 4 * pars.N + 2 * pars.Next;
     const size_t Ndh2 = Ndh1 + pars.Next;
-    const double L = pars.x.b - pars.x.a;
-    const double fac = PI / (rho_mean * rho_mean * L * L);
+    const double lx= pars.x.b - pars.x.a;
+    const double ly= pars.y.b - pars.y.a;
+    const double lz= pars.z.b - pars.z.a;
+    // ratio dof of today to mater-radiation-equality to the 1/3
+    const double rat = pow(0.01, 1.0/3.0);
+    const double fac = PI * rat / (3.0 * hubble * hubble * lx * ly * lz);
     #pragma omp parallel for
     for (size_t i = 0; i < gw.dim; ++i) {
         gw.tmp[i] = 0.0;
