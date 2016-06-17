@@ -59,6 +59,7 @@ SAFE="0.9"
 SEED="93"
 COUPLING="1.0"
 LAMBDA="1.876e-4"
+MAX_RUNTIME="172000" # slightly less than 48h
 
 # outputs (0=no output, 1=output)
 # full fields
