@@ -210,16 +210,16 @@ static void wrap_up_dopri853()
     INFO(puts("Writing simulation meta data to disk.\n"));
     double val[1];
     val[0] = (double)dp.n_stp;
-    h5_write_parameter(H5_STEPS_TOTAL_NAME, val, 1);
+    h5_write_compact(H5_STEPS_TOTAL_NAME, val, 1);
     val[0] = (double)dp.n_ok;
-    h5_write_parameter(H5_STEPS_OK_NAME, val, 1);
+    h5_write_compact(H5_STEPS_OK_NAME, val, 1);
     val[0] = (double)dp.n_bad;
-    h5_write_parameter(H5_STEPS_BAD_NAME, val, 1);
+    h5_write_compact(H5_STEPS_BAD_NAME, val, 1);
 
     INFO(puts("Finished dopri853."));
     #ifdef SHOW_TIMING_INFO
     INFO(printf("time: %f seconds\n", mon.integration));
-    h5_write_parameter(H5_RUNTIME_STEPPER_NAME, &mon.integration, 1);
+    h5_write_compact(H5_RUNTIME_STEPPER_NAME, &mon.integration, 1);
     #endif
     INFO(printf("steps: %d\n", dp.n_stp + 1));
     INFO(printf("good steps: %d\n", dp.n_ok));

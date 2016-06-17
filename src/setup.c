@@ -16,14 +16,14 @@
  * @brief One time call to setup/initialization destroy/cleanup before and after
  * the simulation respectively.
  *
- * Only the functions allocate_and_initialize_all() and free_and_destroy_all()
+ * Only the functions allocate_and_init_all() and free_and_destroy_all()
  * are called from outside this file. Each of them is called exactly once per
  * simulation. Therefore, performance is not an issue in this file.
  */
 
-static void initialize_rng();
-static void initialize_threading();
-static void initialize_parameters();
+static void init_rng();
+static void init_threading();
+static void init_parameters();
 static void allocate_external();
 static void init_output(struct output *out, const size_t dim, const int mode);
 static void mk_fftw_plans();
@@ -36,17 +36,17 @@ static double filter_window(const double x);
 #endif
 static void mk_initial_conditions();
 #ifdef IC_FROM_DAT_FILE
-static void initialize_from_dat();
+static void init_from_dat();
 #endif
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
-static void initialize_from_bunch_davies();
+static void init_from_bunch_davies();
 static void test_bunch_davies();
 static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma);
 static complex box_muller();
 #endif
 #if INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
-static void initialize_from_internal_function();
+static void init_from_internal_function();
 static void mk_x_grid(double *grid);
 static double phi_init(const double x, const double y, const double z,
         const double *ph);
@@ -68,11 +68,11 @@ static gsl_rng *rng;
  * this call, on of the available integration routines can be started. This
  * should be the first function called, see main.c.
  */
-void allocate_and_initialize_all()
+void allocate_and_init_all()
 {
-    initialize_rng();
-    initialize_threading();
-    initialize_parameters();
+    init_rng();
+    init_threading();
+    init_parameters();
     allocate_external();
     mk_fftw_plans();
     check_simd_alignment();
@@ -102,7 +102,7 @@ void allocate_and_initialize_all()
  * We use the _Mersenne Twister_, i.e. the MT19937 generator of Makoto
  * Matsumoto and Takuji Nishimura.
  */
-static void initialize_rng()
+static void init_rng()
 {
     rng = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rng, SEED);
@@ -114,7 +114,7 @@ static void initialize_rng()
  * If the parameter THREAD_NUMBER is 0, we initialize fftw3 with
  * omp_set_num_threads() threads.
  */
-static void initialize_threading()
+static void init_threading()
 {
     int threadinit = fftw_init_threads();
     if (threadinit == 0) {
@@ -135,7 +135,7 @@ static void initialize_threading()
  * parameters are computed from others in non trivial ways. The struct pars
  * provides a flexible way to access all parameters in a global scope.
  */
-static void initialize_parameters()
+static void init_parameters()
 {
     pars.x.N = GRIDPOINTS_X;
     pars.x.a = SPATIAL_LOWER_BOUND_X;
@@ -590,11 +590,11 @@ static void mk_initial_conditions()
     #if INITIAL_CONDITIONS == IC_FROM_H5_FILE
     h5_read_timeslice();
     #elif defined(IC_FROM_DAT_FILE)
-    initialize_from_dat();
+    init_from_dat();
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
-    initialize_from_bunch_davies();
+    init_from_bunch_davies();
     #elif INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
-    initialize_from_internal_function();
+    init_from_internal_function();
     #endif
     t_out.tmp[0] = pars.t.ti;
     a_out.tmp[0] = field[pars.Ntot - 1];
@@ -609,7 +609,7 @@ static void mk_initial_conditions()
  *
  * @see `read_initial_data()` in `io.c`
  */
-static void initialize_from_dat()
+static void init_from_dat()
 {
     read_initial_data();
     /* center(field + 2 * pars.N, pars.N); */
@@ -657,7 +657,7 @@ static void mk_initial_psi()
  * @see `mk_bunch_davies(double *f, const double H, const double homo, const
  * double gamma)`
  */
-static void initialize_from_bunch_davies()
+static void init_from_bunch_davies()
 {
     test_bunch_davies();
     // directly from DEFROST(v1.0), factor in dphi0 and H0 adjusts modes
@@ -808,7 +808,7 @@ static complex box_muller()
  * factor \f$a\f$ comes from the parameter file and \f$\psi\f$, \f$\dot{\psi}\f$ are
  * then computed from \f$\phi\f$ and \f$\dot{\phi}\f$.
  */
-static void initialize_from_internal_function()
+static void init_from_internal_function()
 {
     const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
     double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);

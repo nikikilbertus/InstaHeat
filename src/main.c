@@ -64,7 +64,7 @@ int main(int argc, const char * argv[])
 {
     TIME(mon.all = -get_wall_time());
 
-    allocate_and_initialize_all();
+    allocate_and_init_all();
 
     #ifdef RUN_TESTS_ONLY
     run_all_tests();
@@ -110,21 +110,21 @@ int main(int argc, const char * argv[])
             mon.h5_time_write, 100. * (mon.h5_time_write / mon.all)));
 
     INFO(puts("Writing runtimes to disk.\n"));
-    h5_write_parameter(H5_RUNTIME_TOTAL_NAME, &mon.all, 1);
-    h5_write_parameter(H5_RUNTIME_FFTW_NAME, &mon.fftw_time_exe, 1);
-    h5_write_parameter(H5_RUNTIME_FFTWPLAN_NAME, &mon.fftw_time_plan, 1);
-    h5_write_parameter(H5_RUNTIME_FILTER_NAME, &mon.filter_time, 1);
-    h5_write_parameter(H5_RUNTIME_ELLIPTIC_NAME, &mon.poisson_time, 1);
-    h5_write_parameter(H5_RUNTIME_STT_NAME, &mon.stt_time, 1);
-    h5_write_parameter(H5_RUNTIME_COPY_BUFFER_NAME, &mon.copy_buffer_time, 1);
-    h5_write_parameter(H5_RUNTIME_CSTR_NAME, &mon.cstr_time, 1);
-    h5_write_parameter(H5_RUNTIME_SMRY_NAME, &mon.smry_time, 1);
-    h5_write_parameter(H5_RUNTIME_WRITEOUT_NAME, &mon.h5_time_write, 1);
+    h5_write_compact(H5_RUNTIME_TOTAL_NAME, &mon.all, 1);
+    h5_write_compact(H5_RUNTIME_FFTW_NAME, &mon.fftw_time_exe, 1);
+    h5_write_compact(H5_RUNTIME_FFTWPLAN_NAME, &mon.fftw_time_plan, 1);
+    h5_write_compact(H5_RUNTIME_FILTER_NAME, &mon.filter_time, 1);
+    h5_write_compact(H5_RUNTIME_ELLIPTIC_NAME, &mon.poisson_time, 1);
+    h5_write_compact(H5_RUNTIME_STT_NAME, &mon.stt_time, 1);
+    h5_write_compact(H5_RUNTIME_COPY_BUFFER_NAME, &mon.copy_buffer_time, 1);
+    h5_write_compact(H5_RUNTIME_CSTR_NAME, &mon.cstr_time, 1);
+    h5_write_compact(H5_RUNTIME_SMRY_NAME, &mon.smry_time, 1);
+    h5_write_compact(H5_RUNTIME_WRITEOUT_NAME, &mon.h5_time_write, 1);
     #endif
 
     INFO(printf("rhs was called %zu times.\n\n", mon.calls_rhs));
     double tmp = (double) mon.calls_rhs;
-    h5_write_parameter(H5_COUNTER_RHS, &tmp, 1);
+    h5_write_compact(H5_COUNTER_RHS, &tmp, 1);
 
     free_and_destroy_all();
     return 0;
