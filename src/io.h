@@ -62,7 +62,9 @@
 #define     H5_STEPS_OK_NAME                ("steps_ok")
 #define     H5_STEPS_BAD_NAME               ("steps_bad")
 #define     H5_MAX_DT_HUBBLE_FRACTION_NAME  ("max_dt_hubble_fraction")
+#define     H5_BUNCH_DAVIES_CUTOFF_NAME     ("bunch_davies_cutoff")
 #define     H5_ENABLE_FILTER_NAME           ("filter")
+#define     H5_ENABLE_GW_NAME               ("gravitational_waves")
 
 void h5_create_empty_by_path();
 void h5_write_parameter(const char *name, const double *val, const size_t N);
