@@ -149,6 +149,7 @@
 #define MAX_RUNTIME             (__MAX_RUNTIME__)
 #define __ENABLE_FFT_FILTER__
 #define __ENABLE_GW__
+#define __ENABLE_FOLLOWUP__
 
 #ifndef ENABLE_GW
     #undef OUTPUT_H1_SMRY
@@ -290,6 +291,7 @@ struct monitor
     double fftw_time_plan; ///< Total wall clock time for fftw planning
     double filter_time; ///< Total wall clock time for filtering
     double poisson_time; ///< Total wall clock time for `mk_psi(double *f)`
+    double integration; ///< Total wall clock time for the integration
     double h5_time_write; ///< Total wall clock time for write out to disk
     double copy_buffer_time; ///< Total wall clock time for copying buffers
     double cstr_time; ///< Total wall clock time for computing constraints
