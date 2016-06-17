@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <float.h>
 #include <math.h>
 #include <omp.h>
@@ -772,7 +773,7 @@ void read_initial_data()
 void h5_write_followup()
 {
     INFO(puts("Writing snapshot of full fields for followup run to disk.\n"));
-    const char[] suffix = "_followup";
+    char suffix[] = "_followup";
     char *name = malloc(strlen(DATAPATH) + strlen(suffix) + 1);
     if (!name) {
         fputs("Abort followup! Allocating memory for string failed.\n", stderr);
@@ -780,6 +781,6 @@ void h5_write_followup()
     }
     strcpy(DATAPATH, name);
     strcat(suffix, name);
-    h5_write_parameter(name, field, Ntot);
+    h5_write_parameter(name, field, pars.Ntot);
 }
 #endif
