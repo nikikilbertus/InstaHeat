@@ -355,7 +355,7 @@ static void update_h(double *f, double *result)
  */
 static void mk_gw_sources_tt(const double *f, complex **s)
 {
-    TIME(mon.stt_time -= get_wall_time());
+    TIME(mon.gw_sources -= get_wall_time());
     mk_gw_sources(f, s);
 
     #pragma omp parallel for
@@ -388,7 +388,7 @@ static void mk_gw_sources_tt(const double *f, complex **s)
     }
     s[0][0] = 0.0;
     s[1][0] = 0.0;
-    TIME(mon.stt_time += get_wall_time());
+    TIME(mon.gw_sources += get_wall_time());
 }
 
 /**
@@ -508,7 +508,7 @@ static double potential_prime(const double f)
  */
 static void mk_constraints(double *f)
 {
-    TIME(mon.cstr_time -= get_wall_time());
+    TIME(mon.cstr -= get_wall_time());
     const size_t N = pars.N;
     const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
     const double hubble = sqrt(rho_mean / 3.0);
@@ -533,7 +533,7 @@ static void mk_constraints(double *f)
     cstr.tmp[1] = ham_max / N;
     cstr.tmp[2] = mom_l2 / N;
     cstr.tmp[3] = mom_max / N;
-    TIME(mon.cstr_time += get_wall_time());
+    TIME(mon.cstr += get_wall_time());
 }
 #endif
 
@@ -549,7 +549,7 @@ static void mk_constraints(double *f)
  */
 void mk_psi(double *f)
 {
-    TIME(mon.poisson_time -= get_wall_time());
+    TIME(mon.elliptic -= get_wall_time());
     const size_t N = pars.N;
     const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
     const double hubble = sqrt(rho_mean / 3.0);
@@ -580,7 +580,7 @@ void mk_psi(double *f)
     for (size_t i = 0; i < N; ++i) {
         f[3 * N + i] = 0.5 * tmp.f[i] - hubble * f[2 * N + i];
     }
-    TIME(mon.poisson_time += get_wall_time());
+    TIME(mon.elliptic += get_wall_time());
 }
 
 #ifdef OUTPUT_PS
@@ -626,9 +626,9 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
  */
 static void apply_filter(double *f)
 {
-    TIME(mon.filter_time -= get_wall_time());
+    TIME(mon.filter -= get_wall_time());
     fft(f, tmp.fc);
-    TIME(mon.filter_time += get_wall_time());
+    TIME(mon.filter += get_wall_time());
     capply_filter(tmp.fc, f);
 }
 
@@ -646,14 +646,14 @@ static void apply_filter(double *f)
  */
 static void capply_filter(complex *in, double *out)
 {
-    TIME(mon.filter_time -= get_wall_time());
+    TIME(mon.filter -= get_wall_time());
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
         in[i] *= filter[i];
         tmp.deltarhoc[i] = in[i] / pars.N;
     }
     ifft(tmp.deltarhoc, out);
-    TIME(mon.filter_time += get_wall_time());
+    TIME(mon.filter += get_wall_time());
 }
 #endif
 
@@ -663,7 +663,7 @@ static void capply_filter(complex *in, double *out)
  */
 static void mk_summary()
 {
-    TIME(mon.smry_time -= get_wall_time());
+    TIME(mon.smry -= get_wall_time());
     #ifdef OUTPUT_PHI_SMRY
     mean_var_min_max(field, phi_smry.tmp);
     #endif
@@ -686,7 +686,7 @@ static void mk_summary()
     #ifdef OUTPUT_H2_SMRY
     fmean_var_min_max(field + 4 * pars.N + pars.Next, h2_smry.tmp);
     #endif
-    TIME(mon.smry_time += get_wall_time());
+    TIME(mon.smry += get_wall_time());
 }
 
 /**
@@ -819,9 +819,9 @@ static void complex_to_real(const complex *in, double *out)
  */
 static void fft(double *in, complex *out)
 {
-    TIME(mon.fftw_time_exe -= get_wall_time());
+    TIME(mon.fftw_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, in, out);
-    TIME(mon.fftw_time_exe += get_wall_time());
+    TIME(mon.fftw_exe += get_wall_time());
 }
 
 /**
@@ -832,9 +832,9 @@ static void fft(double *in, complex *out)
  */
 static void ifft(complex *in, double *out)
 {
-    TIME(mon.fftw_time_exe -= get_wall_time());
+    TIME(mon.fftw_exe -= get_wall_time());
     fftw_execute_dft_c2r(p_bw, in, out);
-    TIME(mon.fftw_time_exe += get_wall_time());
+    TIME(mon.fftw_exe += get_wall_time());
 }
 
 #ifdef CHECK_FOR_NAN

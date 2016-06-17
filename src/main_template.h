@@ -287,16 +287,16 @@ struct monitor
      */
     size_t calls_rhs;
     double all; ///< Total wall clock time for the overall program execution
-    double fftw_time_exe; ///< Total wall clock time for fft execution
-    double fftw_time_plan; ///< Total wall clock time for fftw planning
-    double filter_time; ///< Total wall clock time for filtering
-    double poisson_time; ///< Total wall clock time for `mk_psi(double *f)`
+    double fftw_exe; ///< Total wall clock time for fft execution
+    double fftw_plan; ///< Total wall clock time for fftw planning
+    double filter; ///< Total wall clock time for filtering
+    double elliptic; ///< Total wall clock time for `mk_psi(double *f)`
     double integration; ///< Total wall clock time for the integration
-    double h5_time_write; ///< Total wall clock time for write out to disk
-    double copy_buffer_time; ///< Total wall clock time for copying buffers
-    double cstr_time; ///< Total wall clock time for computing constraints
-    double smry_time; ///< Total wall clock time for computing summaries
-    double stt_time; ///< Total wall clock time for computing \f$S_{ij}^{TT}\f$
+    double h5_write; ///< Total wall clock time for write out to disk
+    double cpy_buffers; ///< Total wall clock time for copying buffers
+    double cstr; ///< Total wall clock time for computing constraints
+    double smry; ///< Total wall clock time for computing summaries
+    double gw_sources; ///< Total wall clock time for computing \f$S_{ij}^{TT}\f$
 };
 
 extern struct parameters pars; ///< Only instance of the struct `parameters`

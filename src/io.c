@@ -349,7 +349,7 @@ static void h5_get_extent(hsize_t *cur)
  */
 static void h5_write_all_buffers(const hsize_t Nt)
 {
-    TIME(mon.h5_time_write -= get_wall_time());
+    TIME(mon.h5_write -= get_wall_time());
 
     hsize_t rank;
     hsize_t curr_dim[1];
@@ -424,7 +424,7 @@ static void h5_write_all_buffers(const hsize_t Nt)
     h5_write_buffer(rank, Nt, t_out.dim, os, t_out.id, t_out.buf);
     h5_write_buffer(rank, Nt, a_out.dim, os, a_out.id, a_out.buf);
 
-    TIME(mon.h5_time_write += get_wall_time());
+    TIME(mon.h5_write += get_wall_time());
     INFO(printf("Dumping to disk at t = %f\n", pars.t.t));
 }
 
@@ -482,7 +482,7 @@ void h5_close()
  */
 void save()
 {
-    TIME(mon.copy_buffer_time -= get_wall_time());
+    TIME(mon.cpy_buffers -= get_wall_time());
 
     const size_t index = pars.file.index;
     const hsize_t Nt = pars.file.buf_size;
@@ -593,7 +593,7 @@ void save()
     }
     #endif
 
-    TIME(mon.copy_buffer_time += get_wall_time());
+    TIME(mon.cpy_buffers += get_wall_time());
 
     if (index == Nt - 1) {
         h5_write_all_buffers(Nt);

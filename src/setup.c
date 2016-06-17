@@ -95,7 +95,11 @@ void allocate_and_init_all()
     #ifdef ENABLE_GW
     INFO(puts("Gravitational wave extraction enabled.\n"));
     #else
-    INFO(puts("FGravitational waves disabled.\n"));
+    INFO(puts("Gravitational waves disabled.\n"));
+    #endif
+    #ifdef IC_FROM_BUNCH_DAVIES
+    INFO(printf("Cutting off Bunch Davies spectrum at N = %zu.\n\n",
+                pars.bunch_davies_cutoff));
     #endif
     INFO(puts("Integrating psi using the hyperbolic constraint.\n"));
 }
@@ -257,16 +261,16 @@ static void init_monitoring()
 {
     mon.calls_rhs = 0;
     mon.all = 0.0;
-    mon.fftw_time_exe = 0.0;
-    mon.fftw_time_plan = 0.0;
-    mon.filter_time = 0.0;
-    mon.poisson_time = 0.0;
+    mon.fftw_exe = 0.0;
+    mon.fftw_plan = 0.0;
+    mon.filter = 0.0;
+    mon.elliptic = 0.0;
     mon.integration = 0.0;
-    mon.stt_time = 0.0;
-    mon.h5_time_write = 0.0;
-    mon.copy_buffer_time = 0.0;
-    mon.cstr_time = 0.0;
-    mon.smry_time = 0.0;
+    mon.gw_sources = 0.0;
+    mon.h5_write = 0.0;
+    mon.cpy_buffers = 0.0;
+    mon.cstr = 0.0;
+    mon.smry = 0.0;
     INFO(puts("Initialized monitoring variables.\n"));
 }
 
@@ -433,7 +437,7 @@ static void init_output(struct output *out, const size_t dim, const int mode)
 static void mk_fftw_plans()
 {
     const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
-    TIME(mon.fftw_time_plan -= get_wall_time());
+    TIME(mon.fftw_plan -= get_wall_time());
     switch (pars.dim) {
         case 1:
             p_fw = fftw_plan_dft_r2c_1d(Nx, field, tmp.phic,
@@ -454,7 +458,7 @@ static void mk_fftw_plans()
                     FFTW_DEFAULT_FLAG);
             break;
     }
-    TIME(mon.fftw_time_plan += get_wall_time());
+    TIME(mon.fftw_plan += get_wall_time());
     INFO(puts("Created fftw plans.\n"));
 }
 
@@ -770,11 +774,11 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
             exp(-kk * kk / kcut2);
     }
 
-    TIME(mon.fftw_time_exe -= get_wall_time());
+    TIME(mon.fftw_exe -= get_wall_time());
     fftw_plan p = fftw_plan_r2r_1d(nos, ker, ker, FFTW_RODFT10, FFTW_ESTIMATE);
     fftw_execute(p);
     fftw_destroy_plan(p);
-    TIME(mon.fftw_time_exe += get_wall_time());
+    TIME(mon.fftw_exe += get_wall_time());
 
     #pragma omp parallel for
     for (size_t i = 0; i < nos; ++i) {
@@ -799,18 +803,18 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
         }
     }
     fftw_free(ker);
-    TIME(mon.fftw_time_exe -= get_wall_time());
+    TIME(mon.fftw_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, f, tmp.phic);
-    TIME(mon.fftw_time_exe += get_wall_time());
+    TIME(mon.fftw_exe += get_wall_time());
 
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
         tmp.phic[i] *= box_muller();
     }
     tmp.phic[0] = homo;
-    TIME(mon.fftw_time_exe -= get_wall_time());
+    TIME(mon.fftw_exe -= get_wall_time());
     fftw_execute_dft_c2r(p_bw, tmp.phic, f);
-    TIME(mon.fftw_time_exe += get_wall_time());
+    TIME(mon.fftw_exe += get_wall_time());
 }
 
 /**
