@@ -65,6 +65,7 @@
 #define     H5_BUNCH_DAVIES_CUTOFF_NAME     ("bunch_davies_cutoff")
 #define     H5_ENABLE_FILTER_NAME           ("filter")
 #define     H5_ENABLE_GW_NAME               ("gravitational_waves")
+#define     H5_FOLLOWUP_NAME                ("followup")
 
 void h5_create_empty_by_path();
 void h5_write_compact(const char *name, const double *val, const size_t N);

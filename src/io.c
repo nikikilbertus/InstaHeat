@@ -773,15 +773,6 @@ void read_initial_data()
 void h5_write_followup()
 {
     INFO(puts("Writing snapshot of full fields for followup run to disk.\n"));
-    char suffix[] = "_followup";
-    char *name = malloc(strlen(DATAPATH) + strlen(suffix) + 1);
-    if (!name) {
-        fputs("Abort followup! Allocating memory for string failed.\n", stderr);
-        return;
-    }
-    strcpy(DATAPATH, name);
-    strcat(suffix, name);
-    h5_write_compact(name, field, pars.Ntot);
-    free(name);
+    h5_write_compact(H%_FOLLOWUP_NAME, field, pars.Ntot);
 }
 #endif
