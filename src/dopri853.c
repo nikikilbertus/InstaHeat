@@ -135,7 +135,9 @@ void run_dopri853()
         if ((dp.n_stp + 1) % pars.file.skip == 0) {
             save();
         }
-        if (dp.t >= dp.tf) {
+        double time = 0.0;
+        TIME(time = get_wall_time() - mon.all);
+        if (dp.t >= dp.tf || time > pars.max_runtime) {
             break;
         }
         if (fabs(dp.dt_next) <= dp.dt_min) {
