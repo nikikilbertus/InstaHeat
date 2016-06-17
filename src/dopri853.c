@@ -23,6 +23,7 @@
  */
 
 static void initialize_dopri853();
+static void wrap_up_dopri853();
 static int perform_step(const double dt_try);
 static void try_step(const double dt);
 static double error(const double dt);
@@ -102,20 +103,8 @@ struct dopri853_values dpv;
 void run_dopri853()
 {
     initialize_dopri853();
-    INFO(puts("Starting dopri853 integration with:"));
-    INFO(printf("initial time: %.17g\n", dp.ti));
-    INFO(printf("final time: %.17g\n", dp.tf));
-    INFO(printf("initial time step dt: %.17g\n", dp.dt));
-    INFO(printf("minimal time step dt: %.17g\n", dp.dt_min));
-    INFO(printf("max number of steps: %zu\n", dp.max_steps));
-    // TODO: change this once I have more definitions
-    INFO(printf("relative tolerance: %.17g\n", RELATIVE_TOLERANCE));
-    INFO(printf("absolute tolerance: %.17g\n\n", ABSOLUTE_TOLERANCE));
-
     prepare_and_save_timeslice();
-    double secs = 0.0;
-    TIME(secs = -get_wall_time());
-
+    TIME(mon.integration = -get_wall_time());
     for (dp.n_stp = 0; dp.n_stp < dp.max_steps; ++dp.n_stp) {
         if (dp.t + dp.dt * 1.0001 > dp.tf) {
             dp.dt = dp.tf - dp.t;
@@ -151,33 +140,8 @@ void run_dopri853()
         }
         dp.dt = dp.dt_next;
     }
-
-    size_t index = pars.file.index;
-    if (index != 0 && t_out.buf[index - 1] < dp.t) {
-        prepare_and_save_timeslice();
-    }
-
-    TIME(secs += get_wall_time());
-    free_dopri853();
-
-    INFO(puts("Writing simulation meta data to disk.\n"));
-    double val[1];
-    val[0] = (double)dp.n_stp;
-    h5_write_parameter(H5_STEPS_TOTAL_NAME, val, 1);
-    val[0] = (double)dp.n_ok;
-    h5_write_parameter(H5_STEPS_OK_NAME, val, 1);
-    val[0] = (double)dp.n_bad;
-    h5_write_parameter(H5_STEPS_BAD_NAME, val, 1);
-
-    INFO(puts("Finished dopri853."));
-    #ifdef SHOW_TIMING_INFO
-    INFO(printf("time: %f seconds\n", secs));
-    val[0] = secs;
-    h5_write_parameter(H5_RUNTIME_STEPPER_NAME, val, 1);
-    #endif
-    INFO(printf("steps: %d\n", dp.n_stp + 1));
-    INFO(printf("good steps: %d\n", dp.n_ok));
-    INFO(printf("bad steps: %d\n\n", dp.n_bad));
+    TIME(mon.integration += get_wall_time());
+    wrap_up_dopri853();
 }
 
 /**
@@ -217,6 +181,49 @@ static void initialize_dopri853()
     INFO(puts("Initialized dopri853 parameters.\n"));
     allocate_dopri853_values();
     allocate_and_initialize_tolerances();
+    INFO(puts("Starting dopri853 integration with:"));
+    INFO(printf("initial time: %.17g\n", dp.ti));
+    INFO(printf("final time: %.17g\n", dp.tf));
+    INFO(printf("initial time step dt: %.17g\n", dp.dt));
+    INFO(printf("minimal time step dt: %.17g\n", dp.dt_min));
+    INFO(printf("max number of steps: %zu\n", dp.max_steps));
+    // TODO: change this once I have more definitions
+    INFO(printf("relative tolerance: %.17g\n", RELATIVE_TOLERANCE));
+    INFO(printf("absolute tolerance: %.17g\n\n", ABSOLUTE_TOLERANCE));
+}
+
+/**
+ * @brief Wraps up the integration by writing meta data to disk, print
+ * information and free memory.
+ */
+static void wrap_up_dopri853()
+{
+    size_t index = pars.file.index;
+    if (index != 0 && t_out.buf[index - 1] < dp.t) {
+        prepare_and_save_timeslice();
+    }
+    #ifdef ENABLE_FOLLOWUP
+    h5_write_followup();
+    #endif
+    free_dopri853();
+
+    INFO(puts("Writing simulation meta data to disk.\n"));
+    double val[1];
+    val[0] = (double)dp.n_stp;
+    h5_write_parameter(H5_STEPS_TOTAL_NAME, val, 1);
+    val[0] = (double)dp.n_ok;
+    h5_write_parameter(H5_STEPS_OK_NAME, val, 1);
+    val[0] = (double)dp.n_bad;
+    h5_write_parameter(H5_STEPS_BAD_NAME, val, 1);
+
+    INFO(puts("Finished dopri853."));
+    #ifdef SHOW_TIMING_INFO
+    INFO(printf("time: %f seconds\n", secs));
+    h5_write_parameter(H5_RUNTIME_STEPPER_NAME, &mon.integration, 1);
+    #endif
+    INFO(printf("steps: %d\n", dp.n_stp + 1));
+    INFO(printf("good steps: %d\n", dp.n_ok));
+    INFO(printf("bad steps: %d\n\n", dp.n_bad));
 }
 
 /**
