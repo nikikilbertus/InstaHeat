@@ -214,11 +214,14 @@ static void initialize_parameters()
     pars.file.buf_size = WRITE_OUT_BUFFER_NUMBER;
     pars.file.skip = TIME_STEP_SKIPS;
 
+    // TODO outsource to extra function
     mon.calls_rhs = 0;
+    mon.all = 0.0;
     mon.fftw_time_exe = 0.0;
     mon.fftw_time_plan = 0.0;
     mon.filter_time = 0.0;
     mon.poisson_time = 0.0;
+    mon.integration = 0.0;
     mon.stt_time = 0.0;
     mon.h5_time_write = 0.0;
     mon.copy_buffer_time = 0.0;
