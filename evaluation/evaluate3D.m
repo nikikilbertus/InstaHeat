@@ -1,11 +1,12 @@
-% name = 'cmpfilter/96_5e-3_1e4_16_1';
+name = 'masses/48_32_0.0001';
 interp = true;
 newoutput = true;
 amax = -1;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
-name = ['~/Dropbox/Uni/Exercises/12Semester/MAPhysics/data/' name '.h5'];
+% name = ['~/Dropbox/Uni/Exercises/12Semester/MAPhysics/data/' name '.h5'];
+name = ['~/Data/' name '.h5'];
 
 dim = h5read(name, '/dimension');
 t = h5read(name, '/time');
@@ -108,7 +109,10 @@ if amax > 1
     t = t(I);
     H = H(I);
     rhorms   = rhorms(I);
-    
+    rhomin   = rhomin(I);
+    rhomax   = rhomax(I);
+    rhomean  = rhomean(I);
+    rhovar   = rhovar(I);
     phimean  = phimean(I);
     phivar   = phivar(I);
     phimin   = phimin(I);
