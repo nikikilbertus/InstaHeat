@@ -820,6 +820,6 @@ void read_initial_data()
 void h5_write_followup()
 {
     INFO(puts("Writing snapshot of full fields for followup run to disk.\n"));
-    h5_write_compact(H%_FOLLOWUP_NAME, field, pars.Ntot);
+    h5_write_compact(H5_FOLLOWUP_NAME, field, pars.Ntot);
 }
 #endif
