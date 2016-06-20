@@ -4,6 +4,7 @@ syntax: glob
 *.DS_Store
 
 # object files and executable
+run
 *.o
 
 # debug output
