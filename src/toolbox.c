@@ -431,6 +431,7 @@ static void mk_gw_spectrum(double *f)
     const double lx= pars.x.b - pars.x.a;
     const double ly= pars.y.b - pars.y.a;
     const double lz= pars.z.b - pars.z.a;
+    const double hubble = sqrt(rho_mean / 3.0);
     // ratio dof of today to mater-radiation-equality to the 1/3
     const double rat = pow(0.01, 1.0/3.0);
     const double fac = PI * rat / (3.0 * hubble * hubble * lx * ly * lz);
