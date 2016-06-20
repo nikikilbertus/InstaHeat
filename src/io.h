@@ -68,7 +68,7 @@
 #define     H5_FOLLOWUP_NAME                ("followup")
 
 void h5_create_empty_by_path();
-void h5_write_compact(const char *name, const double *val, const size_t N,
+void h5_write_simple(const char *name, const double *val, const size_t N,
         const H5D_layout_t layout);
 void save();
 void h5_close();
