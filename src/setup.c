@@ -260,7 +260,6 @@ static void init_file_pars()
 static void init_monitoring()
 {
     mon.calls_rhs = 0;
-    mon.all = 0.0;
     mon.fftw_exe = 0.0;
     mon.fftw_plan = 0.0;
     mon.filter = 0.0;
