@@ -683,6 +683,9 @@ static void mk_summary()
     #ifdef OUTPUT_RHO_SMRY
     mean_var_min_max(rho, rho_smry.tmp);
     #endif
+    #ifdef OUTPUT_PRESSURE_SMRY
+    mean_var_min_max(pressure, p_smry.tmp);
+    #endif
     // TODO: when to compute summary of h1 and h2, need it in real space
     #ifdef OUTPUT_H1_SMRY
     fmean_var_min_max(field + 4 * pars.N, h1_smry.tmp);
