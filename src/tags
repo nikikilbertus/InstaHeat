@@ -23,6 +23,7 @@ DELTA_T	main_template.h	/^#define DELTA_T /;"	d
 DOPRI853	main.h	/^#define DOPRI853 /;"	d
 DOPRI853	main_template.h	/^#define DOPRI853 /;"	d
 ENABLE_FFT_FILTER	main.h	/^#define ENABLE_FFT_FILTER$/;"	d
+ENABLE_FOLLOWUP	main.h	/^#define ENABLE_FOLLOWUP$/;"	d
 ENABLE_GW	main.h	/^#define ENABLE_GW$/;"	d
 FFTW_DEFAULT_FLAG	main.h	/^#define FFTW_DEFAULT_FLAG /;"	d
 FFTW_DEFAULT_FLAG	main_template.h	/^#define FFTW_DEFAULT_FLAG /;"	d
@@ -35,6 +36,7 @@ GRIDPOINTS_Y	main_template.h	/^#define GRIDPOINTS_Y /;"	d
 GRIDPOINTS_Z	main.h	/^#define GRIDPOINTS_Z /;"	d
 GRIDPOINTS_Z	main_template.h	/^#define GRIDPOINTS_Z /;"	d
 H5_A_NAME	io.h	/^#define     H5_A_NAME /;"	d
+H5_BUNCH_DAVIES_CUTOFF_NAME	io.h	/^#define     H5_BUNCH_DAVIES_CUTOFF_NAME /;"	d
 H5_COMMIT_HASH_NAME	io.h	/^#define     H5_COMMIT_HASH_NAME /;"	d
 H5_CONSTRAINTS_NAME	io.h	/^#define     H5_CONSTRAINTS_NAME /;"	d
 H5_COUNTER_RHS	io.h	/^#define     H5_COUNTER_RHS /;"	d
@@ -46,6 +48,8 @@ H5_DPSI_NAME	io.h	/^#define     H5_DPSI_NAME /;"	d
 H5_DPSI_PS_NAME	io.h	/^#define     H5_DPSI_PS_NAME /;"	d
 H5_DPSI_SMRY_NAME	io.h	/^#define     H5_DPSI_SMRY_NAME /;"	d
 H5_ENABLE_FILTER_NAME	io.h	/^#define     H5_ENABLE_FILTER_NAME /;"	d
+H5_ENABLE_GW_NAME	io.h	/^#define     H5_ENABLE_GW_NAME /;"	d
+H5_FOLLOWUP_NAME	io.h	/^#define     H5_FOLLOWUP_NAME /;"	d
 H5_GRIDPOINTS_INTERNAL_NAME	io.h	/^#define     H5_GRIDPOINTS_INTERNAL_NAME /;"	d
 H5_GRIDPOINTS_OUTPUT_NAME	io.h	/^#define     H5_GRIDPOINTS_OUTPUT_NAME /;"	d
 H5_GW_PS_NAME	io.h	/^#define     H5_GW_PS_NAME /;"	d
@@ -133,6 +137,8 @@ MAX	main.h	/^#define MAX(/;"	d
 MAX	main_template.h	/^#define MAX(/;"	d
 MAX_DT_HUBBLE_FRACTION	main.h	/^#define MAX_DT_HUBBLE_FRACTION /;"	d
 MAX_DT_HUBBLE_FRACTION	main_template.h	/^#define MAX_DT_HUBBLE_FRACTION /;"	d
+MAX_RUNTIME	main.h	/^#define MAX_RUNTIME /;"	d
+MAX_RUNTIME	main_template.h	/^#define MAX_RUNTIME /;"	d
 MAX_STEPS	main.h	/^#define MAX_STEPS /;"	d
 MAX_STEPS	main_template.h	/^#define MAX_STEPS /;"	d
 MIN	main.h	/^#define MIN(/;"	d
@@ -236,6 +242,7 @@ WRITE_OUT_BUFFER_NUMBER	main.h	/^#define WRITE_OUT_BUFFER_NUMBER /;"	d
 WRITE_OUT_BUFFER_NUMBER	main_template.h	/^#define WRITE_OUT_BUFFER_NUMBER /;"	d
 __DOPRI853_STEPPER__	dopri853.h	/^#define __DOPRI853_STEPPER__$/;"	d
 __ENABLE_FFT_FILTER__	main_template.h	/^#define __ENABLE_FFT_FILTER__$/;"	d
+__ENABLE_FOLLOWUP__	main_template.h	/^#define __ENABLE_FOLLOWUP__$/;"	d
 __ENABLE_GW__	main_template.h	/^#define __ENABLE_GW__$/;"	d
 __EVOLUTION_TOOLKIT__	toolbox.h	/^#define __EVOLUTION_TOOLKIT__$/;"	d
 __FILEHANDLING__	io.h	/^#define __FILEHANDLING__$/;"	d
@@ -339,7 +346,9 @@ a97	dopri853.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:dopri853_constants
 a98	dopri853.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:dopri853_constants
 a_out	main.c	/^struct output a_out;$/;"	v	typeref:struct:output
 a_tol	dopri853.c	/^    double *a_tol; \/\/\/< Absolute tolerances$/;"	m	struct:dopri853_control	file:
-allocate_and_initialize_all	setup.c	/^void allocate_and_initialize_all()$/;"	f
+all	main.h	/^    double all; \/\/\/< Total wall clock time for the overall program execution$/;"	m	struct:monitor
+all	main_template.h	/^    double all; \/\/\/< Total wall clock time for the overall program execution$/;"	m	struct:monitor
+allocate_and_init_all	setup.c	/^void allocate_and_init_all()$/;"	f
 allocate_and_initialize_tolerances	dopri853.c	/^static void allocate_and_initialize_tolerances()$/;"	f	file:
 allocate_dopri853_values	dopri853.c	/^static void allocate_dopri853_values()$/;"	f	file:
 allocate_external	setup.c	/^static void allocate_external()$/;"	f	file:
@@ -386,13 +395,14 @@ calls_rhs	main.h	/^    size_t calls_rhs;$/;"	m	struct:monitor
 calls_rhs	main_template.h	/^    size_t calls_rhs;$/;"	m	struct:monitor
 capply_filter	toolbox.c	/^static void capply_filter(complex *in, double *out)$/;"	f	file:
 check_simd_alignment	setup.c	/^static void check_simd_alignment()$/;"	f	file:
+complex_to_real	toolbox.c	/^static void complex_to_real(const complex *in, double *out)$/;"	f	file:
 contains_nan	toolbox.c	/^static void contains_nan(const double *f, const size_t N)$/;"	f	file:
 contains_nanc	toolbox.c	/^static void contains_nanc(const complex *f, const size_t N)$/;"	f	file:
-copy_buffer_time	main.h	/^    double copy_buffer_time; \/\/\/< Total wall clock time for copying buffers$/;"	m	struct:monitor
-copy_buffer_time	main_template.h	/^    double copy_buffer_time; \/\/\/< Total wall clock time for copying buffers$/;"	m	struct:monitor
+cpy_buffers	main.h	/^    double cpy_buffers; \/\/\/< Total wall clock time for copying buffers$/;"	m	struct:monitor
+cpy_buffers	main_template.h	/^    double cpy_buffers; \/\/\/< Total wall clock time for copying buffers$/;"	m	struct:monitor
 cstr	main.c	/^struct output cstr;$/;"	v	typeref:struct:output
-cstr_time	main.h	/^    double cstr_time; \/\/\/< Total wall clock time for computing constraints$/;"	m	struct:monitor
-cstr_time	main_template.h	/^    double cstr_time; \/\/\/< Total wall clock time for computing constraints$/;"	m	struct:monitor
+cstr	main.h	/^    double cstr; \/\/\/< Total wall clock time for computing constraints$/;"	m	struct:monitor
+cstr	main_template.h	/^    double cstr; \/\/\/< Total wall clock time for computing constraints$/;"	m	struct:monitor
 d41	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
 d410	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
 d411	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
@@ -471,6 +481,8 @@ dt	main_template.h	/^    double dt; \/\/\/< size of the (initial) timestep delta
 dt_did	dopri853.c	/^    double dt_did; \/\/\/< The previously used time step size$/;"	m	struct:dopri853_control	file:
 dt_min	dopri853.c	/^    double dt_min; \/\/\/< The minimal permissible time step size$/;"	m	struct:dopri853_control	file:
 dt_next	dopri853.c	/^    double dt_next; \/\/\/< The proposed next time step size$/;"	m	struct:dopri853_control	file:
+elliptic	main.h	/^    double elliptic; \/\/\/< Total wall clock time for `mk_psi(double *f)`$/;"	m	struct:monitor
+elliptic	main_template.h	/^    double elliptic; \/\/\/< Total wall clock time for `mk_psi(double *f)`$/;"	m	struct:monitor
 eps	dopri853.c	/^    double eps; \/\/\/< Epsilon value for comparisons$/;"	m	struct:dopri853_control	file:
 equal	tests.c	/^static int equal(const double a, const double b)$/;"	f	file:
 er1	dopri853.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
@@ -490,10 +502,10 @@ f	main_template.h	/^    double  *f; \/\/\/< various purposes (real space)$/;"	m	
 fc	main.h	/^    complex *fc; \/\/\/< various purposes (Fourier space)$/;"	m	struct:temporary
 fc	main_template.h	/^    complex *fc; \/\/\/< various purposes (Fourier space)$/;"	m	struct:temporary
 fft	toolbox.c	/^static void fft(double *in, complex *out)$/;"	f	file:
-fftw_time_exe	main.h	/^    double fftw_time_exe; \/\/\/< Total wall clock time for fft execution$/;"	m	struct:monitor
-fftw_time_exe	main_template.h	/^    double fftw_time_exe; \/\/\/< Total wall clock time for fft execution$/;"	m	struct:monitor
-fftw_time_plan	main.h	/^    double fftw_time_plan; \/\/\/< Total wall clock time for fftw planning$/;"	m	struct:monitor
-fftw_time_plan	main_template.h	/^    double fftw_time_plan; \/\/\/< Total wall clock time for fftw planning$/;"	m	struct:monitor
+fftw_exe	main.h	/^    double fftw_exe; \/\/\/< Total wall clock time for fft execution$/;"	m	struct:monitor
+fftw_exe	main_template.h	/^    double fftw_exe; \/\/\/< Total wall clock time for fft execution$/;"	m	struct:monitor
+fftw_plan	main.h	/^    double fftw_plan; \/\/\/< Total wall clock time for fftw planning$/;"	m	struct:monitor
+fftw_plan	main_template.h	/^    double fftw_plan; \/\/\/< Total wall clock time for fftw planning$/;"	m	struct:monitor
 field	main.c	/^double *field;$/;"	v
 field_new	main.c	/^double *field_new;$/;"	v
 file	main.h	/^    struct file_parameters file; \/\/\/< file IO parameters$/;"	m	struct:parameters	typeref:struct:parameters::file_parameters
@@ -502,9 +514,9 @@ file_parameters	main.h	/^struct file_parameters$/;"	s
 file_parameters	main_template.h	/^struct file_parameters$/;"	s
 fill_field	tests.c	/^static void fill_field(double *f, double (*func)(const double, const double,$/;"	f	file:
 filter	main.c	/^double *filter;$/;"	v
+filter	main.h	/^    double filter; \/\/\/< Total wall clock time for filtering$/;"	m	struct:monitor
+filter	main_template.h	/^    double filter; \/\/\/< Total wall clock time for filtering$/;"	m	struct:monitor
 filter	toolbox.h	/^    uint8_t filter; \/\/\/< If set, apply filtering$/;"	m	struct:evolution_flags
-filter_time	main.h	/^    double filter_time; \/\/\/< Total wall clock time for filtering$/;"	m	struct:monitor
-filter_time	main_template.h	/^    double filter_time; \/\/\/< Total wall clock time for filtering$/;"	m	struct:monitor
 filter_window	setup.c	/^static double filter_window(const double xsq)$/;"	f	file:
 fmean_var_min_max	toolbox.c	/^static void fmean_var_min_max(const double *f, double *smry)$/;"	f	file:
 free_and_destroy_all	setup.c	/^void free_and_destroy_all()$/;"	f
@@ -517,19 +529,23 @@ grad	main_template.h	/^    double  *grad; \/\/\/< the _squared_ gradient of \\f$
 grid_dimension	main.h	/^struct grid_dimension$/;"	s
 grid_dimension	main_template.h	/^struct grid_dimension$/;"	s
 gw	main.c	/^struct output gw;$/;"	v	typeref:struct:output
+gw_sources	main.h	/^    double gw_sources; \/\/\/< Total wall clock time for computing \\f$S_{ij}^{TT}\\f\$$/;"	m	struct:monitor
+gw_sources	main_template.h	/^    double gw_sources; \/\/\/< Total wall clock time for computing \\f$S_{ij}^{TT}\\f\$$/;"	m	struct:monitor
 h1_smry	main.c	/^struct output h1_smry;$/;"	v	typeref:struct:output
 h2_smry	main.c	/^struct output h2_smry;$/;"	v	typeref:struct:output
 h5_close	io.c	/^void h5_close()$/;"	f
 h5_create_dset	io.c	/^static void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,$/;"	f	file:
 h5_create_empty_by_path	io.c	/^void h5_create_empty_by_path()$/;"	f
 h5_get_extent	io.c	/^static void h5_get_extent(hsize_t *cur)$/;"	f	file:
-h5_read_and_fill	io.c	/^static void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,$/;"	f	file:
+h5_read_and_fill	io.c	/^static void h5_read_and_fill(const hid_t file, const hsize_t index,$/;"	f	file:
+h5_read_followup	io.c	/^void h5_read_followup()$/;"	f
 h5_read_timeslice	io.c	/^void h5_read_timeslice()$/;"	f
-h5_time_write	main.h	/^    double h5_time_write; \/\/\/< Total wall clock time for write out to disk$/;"	m	struct:monitor
-h5_time_write	main_template.h	/^    double h5_time_write; \/\/\/< Total wall clock time for write out to disk$/;"	m	struct:monitor
+h5_write	main.h	/^    double h5_write; \/\/\/< Total wall clock time for write out to disk$/;"	m	struct:monitor
+h5_write	main_template.h	/^    double h5_write; \/\/\/< Total wall clock time for write out to disk$/;"	m	struct:monitor
 h5_write_all_buffers	io.c	/^static void h5_write_all_buffers(const hsize_t Nt)$/;"	f	file:
 h5_write_buffer	io.c	/^static void h5_write_buffer(const hsize_t rank, const hsize_t Nt,$/;"	f	file:
-h5_write_parameter	io.c	/^void h5_write_parameter(const char *name, const double *val, const size_t N)$/;"	f
+h5_write_followup	io.c	/^void h5_write_followup()$/;"	f
+h5_write_simple	io.c	/^void h5_write_simple(const char *name, const double *val, const size_t N,$/;"	f
 id	main.h	/^    hsize_t id;        \/\/\/< h5 file id of the output file$/;"	m	struct:file_parameters
 id	main.h	/^    hsize_t id;     \/\/\/< id for the dataset in the h5 file$/;"	m	struct:output
 id	main_template.h	/^    hsize_t id;        \/\/\/< h5 file id of the output file$/;"	m	struct:file_parameters
@@ -537,14 +553,20 @@ id	main_template.h	/^    hsize_t id;     \/\/\/< id for the dataset in the h5 fi
 ifft	toolbox.c	/^static void ifft(complex *in, double *out)$/;"	f	file:
 index	main.h	/^    size_t index;      \/\/\/< current index within the buffers for time evolution$/;"	m	struct:file_parameters
 index	main_template.h	/^    size_t index;      \/\/\/< current index within the buffers for time evolution$/;"	m	struct:file_parameters
+init_file_pars	setup.c	/^static void init_file_pars()$/;"	f	file:
+init_from_bunch_davies	setup.c	/^static void init_from_bunch_davies()$/;"	f	file:
+init_from_dat	setup.c	/^static void init_from_dat()$/;"	f	file:
+init_from_internal_function	setup.c	/^static void init_from_internal_function()$/;"	f	file:
+init_grid_pars	setup.c	/^static void init_grid_pars()$/;"	f	file:
+init_monitoring	setup.c	/^static void init_monitoring()$/;"	f	file:
 init_output	setup.c	/^static void init_output(struct output *out, const size_t dim, const int mode)$/;"	f	file:
+init_parameters	setup.c	/^static void init_parameters()$/;"	f	file:
+init_rng	setup.c	/^static void init_rng()$/;"	f	file:
+init_threading	setup.c	/^static void init_threading()$/;"	f	file:
+init_time_pars	setup.c	/^static void init_time_pars()$/;"	f	file:
 initialize_dopri853	dopri853.c	/^static void initialize_dopri853()$/;"	f	file:
-initialize_from_bunch_davies	setup.c	/^static void initialize_from_bunch_davies()$/;"	f	file:
-initialize_from_dat	setup.c	/^static void initialize_from_dat()$/;"	f	file:
-initialize_from_internal_function	setup.c	/^static void initialize_from_internal_function()$/;"	f	file:
-initialize_parameters	setup.c	/^static void initialize_parameters()$/;"	f	file:
-initialize_rng	setup.c	/^static void initialize_rng()$/;"	f	file:
-initialize_threading	setup.c	/^static void initialize_threading()$/;"	f	file:
+integration	main.h	/^    double integration; \/\/\/< Total wall clock time for the integration$/;"	m	struct:monitor
+integration	main_template.h	/^    double integration; \/\/\/< Total wall clock time for the integration$/;"	m	struct:monitor
 k	main.h	/^    double k; \/\/\/< used to compute k vectors: k = 2 pi \/ (b - a)$/;"	m	struct:grid_dimension
 k	main_template.h	/^    double k; \/\/\/< used to compute k vectors: k = 2 pi \/ (b - a)$/;"	m	struct:grid_dimension
 k10	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
@@ -569,6 +591,8 @@ kvec	main.c	/^struct k_grid kvec;$/;"	v	typeref:struct:k_grid
 lap	main.h	/^    double  *lap; \/\/\/< the Laplacian of \\f$\\phi\\f$ in real space$/;"	m	struct:temporary
 lap	main_template.h	/^    double  *lap; \/\/\/< the Laplacian of \\f$\\phi\\f$ in real space$/;"	m	struct:temporary
 main	main.c	/^int main(int argc, const char * argv[])$/;"	f
+max_runtime	main.h	/^    size_t max_runtime; \/\/\/< The maximal overall runtime of the program$/;"	m	struct:parameters
+max_runtime	main_template.h	/^    size_t max_runtime; \/\/\/< The maximal overall runtime of the program$/;"	m	struct:parameters
 max_steps	dopri853.c	/^    size_t max_steps; \/\/\/< The maximal number of steps$/;"	m	struct:dopri853_control	file:
 maxscale	dopri853.c	/^    double maxscale; \/\/\/< Maximal permissible rescaling of the time step size$/;"	m	struct:dopri853_control	file:
 mean	toolbox.c	/^static double mean(const double *f, const size_t N)$/;"	f	file:
@@ -611,7 +635,7 @@ p_fw	main.c	/^fftw_plan p_fw;$/;"	v
 p_smry	main.c	/^struct output p_smry;$/;"	v	typeref:struct:output
 parameters	main.h	/^struct parameters$/;"	s
 parameters	main_template.h	/^struct parameters$/;"	s
-pars	main.c	/^struct parameters pars; \/\/\/< The only instance of the struct `parameters`$/;"	v	typeref:struct:parameters
+pars	main.c	/^struct parameters pars;$/;"	v	typeref:struct:parameters
 perform_step	dopri853.c	/^static int perform_step(const double dt_try)$/;"	f	file:
 phi	main.c	/^struct output phi;$/;"	v	typeref:struct:output
 phi_init	setup.c	/^static double phi_init(const double x, const double y, const double z,$/;"	f	file:
@@ -619,8 +643,6 @@ phi_ps	main.c	/^struct output phi_ps;$/;"	v	typeref:struct:output
 phi_smry	main.c	/^struct output phi_smry;$/;"	v	typeref:struct:output
 phic	main.h	/^    complex *phic; \/\/\/< the inflaton field \\f$\\phi\\f$ in real space$/;"	m	struct:temporary
 phic	main_template.h	/^    complex *phic; \/\/\/< the inflaton field \\f$\\phi\\f$ in real space$/;"	m	struct:temporary
-poisson_time	main.h	/^    double poisson_time; \/\/\/< Total wall clock time for `mk_psi(double *f)`$/;"	m	struct:monitor
-poisson_time	main_template.h	/^    double poisson_time; \/\/\/< Total wall clock time for `mk_psi(double *f)`$/;"	m	struct:monitor
 potential	toolbox.c	/^static double potential(const double f)$/;"	f	file:
 potential_prime	toolbox.c	/^static double potential_prime(const double f)$/;"	f	file:
 prepare_and_save_timeslice	toolbox.c	/^void prepare_and_save_timeslice()$/;"	f
@@ -633,6 +655,7 @@ psic	main.h	/^    complex *psic; \/\/\/< the metric perturbation \\f$\\psi\\f$ i
 psic	main_template.h	/^    complex *psic; \/\/\/< the metric perturbation \\f$\\psi\\f$ in Fourier space$/;"	m	struct:temporary
 r_tol	dopri853.c	/^    double *r_tol; \/\/\/< Relative tolerances$/;"	m	struct:dopri853_control	file:
 read_initial_data	io.c	/^void read_initial_data()$/;"	f
+real_to_complex	toolbox.c	/^static void real_to_complex(const double *in, complex *out)$/;"	f	file:
 reject	dopri853.c	/^    int reject; \/\/\/< Flag whether time step is rejected or accepted$/;"	m	struct:dopri853_control	file:
 rho	main.c	/^double *rho;$/;"	v
 rho_mean	main.c	/^double rho_mean;$/;"	v
@@ -648,14 +671,12 @@ save	io.c	/^void save()$/;"	f
 setdef	configure	/^function setdef {$/;"	f
 skip	main.h	/^    size_t skip;       \/\/\/< timesteps to skip in between write outs$/;"	m	struct:file_parameters
 skip	main_template.h	/^    size_t skip;       \/\/\/< timesteps to skip in between write outs$/;"	m	struct:file_parameters
-smry_time	main.h	/^    double smry_time; \/\/\/< Total wall clock time for computing summaries$/;"	m	struct:monitor
-smry_time	main_template.h	/^    double smry_time; \/\/\/< Total wall clock time for computing summaries$/;"	m	struct:monitor
+smry	main.h	/^    double smry; \/\/\/< Total wall clock time for computing summaries$/;"	m	struct:monitor
+smry	main_template.h	/^    double smry; \/\/\/< Total wall clock time for computing summaries$/;"	m	struct:monitor
 sq	main.h	/^    double *sq; \/\/\/< the sqaure of the k vector$/;"	m	struct:k_grid
 sq	main_template.h	/^    double *sq; \/\/\/< the sqaure of the k vector$/;"	m	struct:k_grid
 stride	main.h	/^    size_t stride; \/\/\/< strides for output$/;"	m	struct:grid_dimension
 stride	main_template.h	/^    size_t stride; \/\/\/< strides for output$/;"	m	struct:grid_dimension
-stt_time	main.h	/^    double stt_time; \/\/\/< Total wall clock time for computing \\f$S_{ij}^{TT}\\f\$$/;"	m	struct:monitor
-stt_time	main_template.h	/^    double stt_time; \/\/\/< Total wall clock time for computing \\f$S_{ij}^{TT}\\f\$$/;"	m	struct:monitor
 success	dopri853.c	/^static int success(const double err, double *dt)$/;"	f	file:
 t	dopri853.c	/^    double t; \/\/\/< The current time$/;"	m	struct:dopri853_control	file:
 t	main.h	/^    double t;  \/\/\/< current time (constantly updated during simulation)$/;"	m	struct:timing
@@ -692,7 +713,9 @@ try_step	dopri853.c	/^static void try_step(const double dt)$/;"	f	file:
 update_h	toolbox.c	/^static void update_h(double *f, double *result)$/;"	f	file:
 update_phi_psi	toolbox.c	/^static void update_phi_psi(double *f, double *result)$/;"	f	file:
 variance	toolbox.c	/^static double variance(const double mean, const double *f, const size_t N)$/;"	f	file:
+wrap_up_dopri853	dopri853.c	/^static void wrap_up_dopri853()$/;"	f	file:
 wrapped_gaussian	setup.c	/^static double wrapped_gaussian(const double x, const double y, const double z)$/;"	f	file:
+write_monitoring	main.c	/^static void write_monitoring()$/;"	f	file:
 x	main.h	/^    double *x; \/\/\/< the x component of the k vector (with zeros at N\/2)$/;"	m	struct:k_grid
 x	main.h	/^    struct grid_dimension x; \/\/\/< specification of the x direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
 x	main_template.h	/^    double *x; \/\/\/< the x component of the k vector (with zeros at N\/2)$/;"	m	struct:k_grid
