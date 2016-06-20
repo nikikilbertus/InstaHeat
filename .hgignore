@@ -5,7 +5,9 @@ syntax: glob
 
 # object files and executable
 *.o
-*prog
+
+# debug output
+*.dSYM/
 
 # actual main header file (is created from main_template.h)
 main.h
