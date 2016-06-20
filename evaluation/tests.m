@@ -339,7 +339,7 @@ loglog(a, rhorms, atmp, slope * atmp / (slope*atmp(1)) * rhorms(find(I,1))); shg
 estimatedruntime = h5read(name,'/runtime_total') / 3600 * tnonlin/t(end)
 
 %% playing with quantities in karstens paper
-L = 10; N = 64;
+L = 10; N = 96;
 mpl = 1;
 k = 2*pi/L;
 alpha = 1;
@@ -365,26 +365,40 @@ kmax = Hend * 1.37e3 * sqrt(ms / (1.4e-6 * mpl)) * (Trh/1e7)^(-1/3) * (Hend/1e13
 kmin = Hend * 2.74e-6 * (Trh/1e7)^(2/3) * (Hend/1e13)^(-1/3);
 
 deltak = 2/5 * (k^2 ./ (a'.^2 .* Hs.^2) + 3) .* sqrt(psivar);
-deltak = deltak / deltak(end) * rhorms(end);
+deltak = deltak / deltak(1) * rhorms(1);
 
 loglog(a, mpl*lc, a, mpl./Hs, a, mpl./kphys, a, rhorms, a, deltak, a, a/kmaxgrid, a, a/kmingrid); hold on; shg;
 legend('mpl/sqrt(3 H m)', 'mpl/H', 'mpl/k_{phys}', '\delta \rho / \rho', '\delta k (norm)', 'kmax', 'kmin');
-pause;
-aint = exp(fminsearch(@(x) (kmaxfit(x) - lcfit(x)).^2, a(end)))
-aext = linspace(log(a(1)),log(aint),100);
-loglog(exp(aext), exp(kmaxfit(aext)), exp(aext), exp(lcfit(aext)),'linewidth',0.8); hold off; shg;
+% pause;
+% aint = exp(fminsearch(@(x) (kmaxfit(x) - lcfit(x)).^2, a(end)))
+% aext = linspace(log(a(1)),log(aint),100);
+% loglog(exp(aext), exp(kmaxfit(aext)), exp(aext), exp(lcfit(aext)),'linewidth',0.8); hold off; shg;
 
 %% generating data for talk (continue from above)
 I1 = (a<50);
 s = sum(I1) + 1;
 at = a;
 a = [at(I1); at(s:1000:end)];
-l_C = [lc(I1)'; lc(s:1000:end)'];
-l_H = [1./H(I1)'; 1./H(s:1000:end)'];
-k_min = [at(I1)./kmingrid; at(s:1000:end)/kmingrid];
-k_max = [at(I1)/kmaxgrid; at(s:1000:end)/kmaxgrid];
-T = table(a, l_H, l_C, k_min, k_max);
-writetable(T, '64_5e-3_2e4.csv');
+
+% l_C = [lc(I1)'; lc(s:1000:end)'];
+% l_H = [1./H(I1)'; 1./H(s:1000:end)'];
+% k_min = [at(I1)./kmingrid; at(s:1000:end)/kmingrid];
+% k_max = [at(I1)/kmaxgrid; at(s:1000:end)/kmaxgrid];
+% T = table(a, l_H, l_C, k_min, k_max);
+% writetable(T, '64_5e-3_2e4.csv');
+
+% loglog(a,sqrt(psivar),a,max(-psimin,psimax),a,rhorms,a,rhomean.*a'.^(3), a, max(-rhomin,rhomax)./rhomean,a(((a>4) & (a<150))),0.004*a(((a>4) & (a<150))),'--')
+rhorms = [rhorms(I1)'; rhorms(s:1000:end)'];
+stdpsi = sqrt(psivar);
+stdpsi = [stdpsi(I1)'; stdpsi(s:1000:end)'];
+maxpsi = max(-psimin,psimax);
+maxpsi = [maxpsi(I1)'; maxpsi(s:1000:end)'];
+rhosca = rhomean.*at'.^3;
+rhosca = [rhosca(I1)'; rhosca(s:1000:end)'];
+maxrho = max(-rhomin,rhomax)./rhomean;
+maxrho = [maxrho(I1)'; maxrho(s:1000:end)'];
+T = table(a, rhorms, rhosca, maxrho, stdpsi, maxpsi);
+writetable(T, '64_5e-3_2e4_psi_rho.csv');
 
 %% power spectrum analysis
 L=10; nbins = 50;
@@ -551,12 +565,12 @@ bar3(-log10(phistderrl2)); set(gca,'XTickLabel',absval); set(gca,'YTickLabel',re
 xlabel('atol'); ylabel('rtol'); zlabel('-log10 std \phi error l_{2}');
 
 %% resolutions study
-close all
-res = [48 64 96];
+% close all
+res = [16 32 48 64 96];
 rhos = zeros(length(res),1);
 disp('         grid      steps')
 for i = 1:length(res)
-    name = ['cmpfilter/' num2str(res(i)) '_5e-3_1e4_16_0'];
+    name = ['cutoff/96_' num2str(res(i)) '_5e-3_fil'];
     evaluate3D
     disp([N(1) steps])
     legendinfo{i} = num2str(res(i));
