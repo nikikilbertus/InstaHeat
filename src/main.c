@@ -93,7 +93,7 @@ int main(int argc, const char * argv[])
 
     INFO(printf("rhs was called %zu times.\n\n", mon.calls_rhs));
     double tmp = (double) mon.calls_rhs;
-    h5_write_compact(H5_COUNTER_RHS, &tmp, 1);
+    h5_write_compact(H5_COUNTER_RHS, &tmp, 1, H5D_COMPACT);
 
     free_and_destroy_all();
     return 0;
@@ -128,16 +128,16 @@ static void write_monitoring()
             mon.h5_write, 100. * (mon.h5_write / mon.all)));
 
     INFO(puts("Writing runtimes to disk.\n"));
-    h5_write_compact(H5_RUNTIME_TOTAL_NAME, &mon.all, 1);
-    h5_write_compact(H5_RUNTIME_FFTW_NAME, &mon.fftw_exe, 1);
-    h5_write_compact(H5_RUNTIME_FFTWPLAN_NAME, &mon.fftw_plan, 1);
-    h5_write_compact(H5_RUNTIME_FILTER_NAME, &mon.filter, 1);
-    h5_write_compact(H5_RUNTIME_ELLIPTIC_NAME, &mon.elliptic, 1);
-    h5_write_compact(H5_RUNTIME_STT_NAME, &mon.gw_sources, 1);
-    h5_write_compact(H5_RUNTIME_COPY_BUFFER_NAME, &mon.cpy_buffers, 1);
-    h5_write_compact(H5_RUNTIME_CSTR_NAME, &mon.cstr, 1);
-    h5_write_compact(H5_RUNTIME_SMRY_NAME, &mon.smry, 1);
-    h5_write_compact(H5_RUNTIME_WRITEOUT_NAME, &mon.h5_write, 1);
+    h5_write_compact(H5_RUNTIME_TOTAL_NAME, &mon.all, 1, H5D_COMPACT);
+    h5_write_compact(H5_RUNTIME_FFTW_NAME, &mon.fftw_exe, 1, H5D_COMPACT);
+    h5_write_compact(H5_RUNTIME_FFTWPLAN_NAME, &mon.fftw_plan, 1, H5D_COMPACT);
+    h5_write_compact(H5_RUNTIME_FILTER_NAME, &mon.filter, 1, H5D_COMPACT);
+    h5_write_compact(H5_RUNTIME_ELLIPTIC_NAME, &mon.elliptic, 1, H5D_COMPACT);
+    h5_write_compact(H5_RUNTIME_STT_NAME, &mon.gw_sources, 1, H5D_COMPACT);
+    h5_write_compact(H5_RUNTIME_COPY_BUFFER_NAME, &mon.cpy_buffers, 1, H5D_COMPACT);
+    h5_write_compact(H5_RUNTIME_CSTR_NAME, &mon.cstr, 1, H5D_COMPACT);
+    h5_write_compact(H5_RUNTIME_SMRY_NAME, &mon.smry, 1, H5D_COMPACT);
+    h5_write_compact(H5_RUNTIME_WRITEOUT_NAME, &mon.h5_write, 1, H5D_COMPACT);
 }
 
 /**
