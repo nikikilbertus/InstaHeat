@@ -317,7 +317,7 @@ void h5_write_simple(const char *name, const double *val, const size_t N,
     hid_t file = pars.file.id;
     hid_t dspace_par = H5Screate_simple(rank, dim, max);
     hid_t plist_par = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_layout(plist_par, H5D_COMPACT);
+    H5Pset_layout(plist_par, layout);
     hid_t dset_par = H5Dcreate(file, name, H5T_NATIVE_DOUBLE,
                             dspace_par, H5P_DEFAULT, plist_par, H5P_DEFAULT);
     H5Dwrite(dset_par, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, val);
