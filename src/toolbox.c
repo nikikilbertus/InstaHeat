@@ -849,10 +849,13 @@ static void complex_to_real(const complex *in, double *out)
 }
 
 /**
- * @brief Fourier transform
+ * @brief Computes the discrete Fourier transform.
  *
- * @param[in] in Pointer to the function in real space
- * @param[out] out Pointer to an array for the Fourier transform
+ * @param[in] in The field in real space.
+ * @param[out] out The field in fourier space.
+ *
+ * @note The specifics of the transform (dimensions, gridpoints, etc.) are
+ * implicitly defined by the FFTW3 plan `p_fw`.
  */
 static void fft(double *in, complex *out)
 {
@@ -862,10 +865,13 @@ static void fft(double *in, complex *out)
 }
 
 /**
- * @brief Inverse Fourier transform
+ * @brief Computes the discrete Inverse Fourier transform.
  *
- * @param[in] in Pointer to the function in Fourier space
- * @param[out] out Pointer to an array for the inverse Fourier transform
+ * @param[in] in The field in Fourier space.
+ * @param[out] out The field in real space.
+ *
+ * @note The specifics of the inverse transform (dimensions, gridpoints, etc.)
+ * are implicitly defined by the FFTW3 plan `p_bw`.
  */
 static void ifft(complex *in, double *out)
 {
