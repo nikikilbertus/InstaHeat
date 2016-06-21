@@ -689,22 +689,22 @@ static void mk_summary()
 {
     TIME(mon.smry -= get_wall_time());
     #ifdef OUTPUT_PHI_SMRY
-    mean_var_min_max(field, phi_smry.tmp);
+    mean_var_min_max(field, phi_smry.tmp, pars.N);
     #endif
     #ifdef OUTPUT_DPHI_SMRY
-    mean_var_min_max(field + pars.N, dphi_smry.tmp);
+    mean_var_min_max(field + pars.N, dphi_smry.tmp, pars.N);
     #endif
     #ifdef OUTPUT_PSI_SMRY
-    mean_var_min_max(field + 2 * pars.N, psi_smry.tmp);
+    mean_var_min_max(field + 2 * pars.N, psi_smry.tmp, pars.N);
     #endif
     #ifdef OUTPUT_DPSI_SMRY
-    mean_var_min_max(field + 3 * pars.N, dpsi_smry.tmp);
+    mean_var_min_max(field + 3 * pars.N, dpsi_smry.tmp, pars.N);
     #endif
     #ifdef OUTPUT_RHO_SMRY
-    mean_var_min_max(rho, rho_smry.tmp);
+    mean_var_min_max(rho, rho_smry.tmp, pars.N);
     #endif
     #ifdef OUTPUT_PRESSURE_SMRY
-    mean_var_min_max(pressure, p_smry.tmp);
+    mean_var_min_max(pressure, p_smry.tmp, pars.N);
     #endif
     // TODO: when to compute summary of h1 and h2, need it in real space
     #ifdef OUTPUT_H1_SMRY
