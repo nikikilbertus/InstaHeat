@@ -1,5 +1,5 @@
 function [dset] = joinDsets(varargin)
-    narginchk(2,inf);
+    narginchk(1,inf);
     n = nargin;
     dset = cellify(varargin{n});
     n = n - 1;
