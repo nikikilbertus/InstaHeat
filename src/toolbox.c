@@ -54,6 +54,9 @@ static void contains_nan(const double *f, const size_t N);
 static void contains_nanc(const complex *f, const size_t N);
 #endif
 
+/**
+ * @brief THe only instance of the `evolution_flags` structure.
+ */
 struct evolution_flags evo_flags = {.filter = 0, .output = 0};
 
 /**
