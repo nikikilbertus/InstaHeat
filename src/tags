@@ -596,7 +596,7 @@ max_runtime	main_template.h	/^    size_t max_runtime; \/\/\/< The maximal overal
 max_steps	dopri853.c	/^    size_t max_steps; \/\/\/< The maximal number of steps$/;"	m	struct:dopri853_control	file:
 maxscale	dopri853.c	/^    double maxscale; \/\/\/< Maximal permissible rescaling of the time step size$/;"	m	struct:dopri853_control	file:
 mean	toolbox.c	/^static double mean(const double *f, const size_t N)$/;"	f	file:
-mean_var_min_max	toolbox.c	/^static void mean_var_min_max(const double *f, double *smry)$/;"	f	file:
+mean_var_min_max	toolbox.c	/^static void mean_var_min_max(const double *f, double *smry, const size_t N)$/;"	f	file:
 minscale	dopri853.c	/^    double minscale; \/\/\/< Minimal permissible rescaling of the time step size$/;"	m	struct:dopri853_control	file:
 mk_bunch_davies	setup.c	/^static void mk_bunch_davies(double *f, const double H, const double homo,$/;"	f	file:
 mk_constraints	toolbox.c	/^static void mk_constraints(double *f)$/;"	f	file:
