@@ -273,7 +273,7 @@ static void output_all(double *f)
 
 /**
  * @brief Computes and updates part of the right hand side of the pde, i.e. the
- * first order temporal derivatives of \f$\phi\f$, \f$\dot{phi}\f$, \f$\psi\f$,
+ * first order temporal derivatives of \f$\phi\f$, \f$\dot{\phi}\f$, \f$\psi\f$,
  * \f$\dot{\psi}\f$.
  *
  * @param[in] f The fields.
@@ -562,8 +562,9 @@ static void mk_constraints(double *f)
  * @brief Computes \f$\psi\f$ and \f$\dot{\psi}\f$ from \f$\phi\f$ and
  * \f$\dot{\phi}\f$ on the initial timeslice.
  *
- * @param[in, out] f The fields. Expects \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$
- * to be given in @p f. Fills in \f$\psi\f$ and \f$\dot{\psi}\f$ in @p f.
+ * @param[in, out] f The fields. Expects \f$\phi\f$, \f$\dot{\phi}\f$ and
+ * \f$a\f$ to be given in @p f. Fills in \f$\psi\f$ and \f$\dot{\psi}\f$ in @p
+ * f.
  *
  * We use an elliptic equation from the Hamiltonian constraint combined with
  * the momentum contraint to compute \f$\psi\f$ and \f$\dot{\psi}\f$ from given
