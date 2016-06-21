@@ -39,7 +39,7 @@ static void apply_filter(double *f);
 static void capply_filter(complex *in, double *out);
 #endif
 static void mk_summary();
-static void mean_var_min_max(const double *f, double *smry);
+static void mean_var_min_max(const double *f, double *smry, const size_t N);
 #if defined(OUTPUT_H1_SMRY) || defined(OUTPUT_H2_SMRY)
 static void fmean_var_min_max(const double *f, double *smry);
 #endif
@@ -726,9 +726,8 @@ static void mk_summary()
  *
  * @note The field is implicitly assumed to have length `pars.N`.
  */
-static void mean_var_min_max(const double *f, double *smry)
+static void mean_var_min_max(const double *f, double *smry, const size_t N)
 {
-    const size_t N = pars.N;
     double mean = 0.0, min_val = f[0], max_val = f[0];
     #pragma omp parallel for reduction(+: mean) reduction(max: max_val) \
         reduction(min: min_val)
