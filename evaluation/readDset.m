@@ -23,6 +23,8 @@ function data = readDset(dictNames, file, dset, I)
     end 
 end
 
+% TODO: check for constraints, compute rms for phi, psi, ...
+
 function [] = mkSummary(dictNames, dset, data)
     assignin('base', strrep(dictNames(dset),'S','mean'), data(:,1));
     assignin('base', strrep(dictNames(dset),'S','std'), sqrt(data(:,2)));
