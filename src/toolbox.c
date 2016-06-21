@@ -723,6 +723,7 @@ static void mk_summary()
  * @param[in] f The input field.
  * @param[out] smry An array of size 4 which is filled with the summary: mean,
  * variance, min, max (in this order).
+ * @param[in] N The length of the input field @p N.
  *
  * @note The field is implicitly assumed to have length `pars.N`.
  */
@@ -770,11 +771,11 @@ static void fmean_var_min_max(const double *f, double *smry)
 #endif
 
 /**
- * @brief Compute the mean (or average) of a vector
+ * @brief Compute the mean (or average) of a 1D array.
  *
- * @param[in] f Any vector of length @p N
- * @param[in] N The length of the vector @p f
- * @return The mean value of @p f
+ * @param[in] f Any 1D array of length @p N.
+ * @param[in] N The length of the 1D array @p f.
+ * @return The mean value (average) of @p f.
  */
 static double mean(const double *f, const size_t N)
 {
@@ -787,12 +788,12 @@ static double mean(const double *f, const size_t N)
 }
 
 /**
- * @brief Compute the variance of a vector
+ * @brief Compute the variance of a 1D array.
  *
- * @param[in] mean The mean of the vector @p f
- * @param[in] f Any vector of length @p N
- * @param[in] N The length of the vector @p f
- * @return The variance value of @p f
+ * @param[in] mean The mean of the 1D array @p f.
+ * @param[in] f The 1D array of length @p N.
+ * @param[in] N The length of the 1D array @p f.
+ * @return The variance of @p f.
  */
 static double variance(const double mean, const double *f, const size_t N)
 {
