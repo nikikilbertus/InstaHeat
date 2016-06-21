@@ -1,3 +1,4 @@
+%% DEPRECATED!
 tmpres1 = xxpsi ./ repmat(a.^2',N,1) - 3 * repmat(H.^2,N,1) .* psi - ...
     3 * repmat(H,N,1) .* dpsi - 0.5 * (rho - repmat(rhoAvg,N,1));
 
@@ -84,4 +85,3 @@ shg
 % end
 % hold off
 % shg
-
