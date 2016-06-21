@@ -745,7 +745,7 @@ static void mean_var_min_max(const double *f, double *smry, const size_t N)
 
 #if defined(OUTPUT_H1_SMRY) || defined(OUTPUT_H2_SMRY)
 /**
- * @brief Compute the summary of a vector, i.e. the mean, variance, minimum and
+ * @brief Computes the summary of a vector, i.e. the mean, variance, minimum and
  * maximum value given its Fourier transform
  *
  * @param[in] f The input vector in the Fourier domain
@@ -771,7 +771,7 @@ static void fmean_var_min_max(const double *f, double *smry)
 #endif
 
 /**
- * @brief Compute the mean (or average) of a 1D array.
+ * @brief Computes the mean (or average) of a 1D array.
  *
  * @param[in] f Any 1D array of length @p N.
  * @param[in] N The length of the 1D array @p f.
@@ -788,7 +788,7 @@ static double mean(const double *f, const size_t N)
 }
 
 /**
- * @brief Compute the variance of a 1D array.
+ * @brief Computes the variance of a 1D array.
  *
  * @param[in] mean The mean of the 1D array @p f.
  * @param[in] f The 1D array of length @p N.
@@ -808,11 +808,16 @@ static double variance(const double mean, const double *f, const size_t N)
 }
 
 /**
- * @brief Copy complex field saved in the custom double memory layout to a
- * complex array.
+ * @brief Copies a complex valued field saved in the custom double memory layout
+ * to a _natively_ complex field.
  *
  * @param[in] in The double input array.
  * @param[out] out The complex output array.
+ *
+ * @note The length of the complex array is assumed to be `pars.M` and the
+ * length of the double array is `pars.Next`.
+ *
+ * @see TODO[link] for the custom double layout of complex fields.
  */
 static void real_to_complex(const double *in, complex *out)
 {
@@ -823,10 +828,15 @@ static void real_to_complex(const double *in, complex *out)
 }
 
 /**
- * @brief Copy complex array to the custom memory layout in a double layout.
+ * @brief Copies a natively complex field to the custom double memory layout.
  *
  * @param[in] in The complex input array.
  * @param[out] out The double output array.
+ *
+ * @note The length of the complex array is assumed to be `pars.M` and the
+ * length of the double array is `pars.Next`.
+ *
+ * @see TODO[link] for the custom double layout of complex fields.
  */
 static void complex_to_real(const complex *in, double *out)
 {
