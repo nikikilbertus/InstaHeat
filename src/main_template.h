@@ -218,7 +218,7 @@ struct file_parameters
  *  Next  = (extended) number of doubles in complex grid = Nx * Ny * (Nz + 2)
  *  Ntot = number of scalar equations in the integration: 4 * N + 4 * Next + 1
  *  (order: \f$\phi\f$ (N), \f$\dot{\phi}\f$ (N), \f$\psi\f$ (N),
- *  \f$\dot{psi}\f$ (N), \f$h_1\f$ (Next), \f$h_2\f$ (Next), \f$\dot{h}_1\f$
+ *  \f$\dot{\psi}\f$ (N), \f$h_1\f$ (Next), \f$h_2\f$ (Next), \f$\dot{h}_1\f$
  *  (Next), \f$\dot{h}_2\f$ (Next), \f$a\f$ (1))
  */
 struct parameters
@@ -252,9 +252,9 @@ struct temporary
     complex *zphic; ///< the z derivative of \f$\phi\f$ in Fourier space
     double  *grad; ///< the _squared_ gradient of \f$\phi\f$ in real space
     double  *lap; ///< the Laplacian of \f$\phi\f$ in real space
-    double  *deltarho; ///< \f$\delta \rho = \rho - <\rho>\f$ in real space
+    double  *deltarho; ///< \f$\delta \rho = \rho - \langle \rho \rangle\f$ in real space
     double  *f; ///< various purposes (real space)
-    complex *deltarhoc; ///< \f$\delta \rho = \rho - <\rho>\f$ in Fourier space
+    complex *deltarhoc; ///< \f$\delta \rho = \rho - \langle \rho \rangle\f$ in Fourier space
     complex *fc; ///< various purposes (Fourier space)
     complex *psic; ///< the metric perturbation \f$\psi\f$ in Fourier space
     complex *dpsic; ///< the derivative \f$\dot{\psi}\f$ in Fourier space
