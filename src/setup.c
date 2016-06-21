@@ -582,7 +582,7 @@ static void mk_filter_mask()
 /**
  * @brief The specific shape of the cutoff for high frequency modes.
  *
- * @param[in] xsq The squared ratio \f$k/k_{max}\f$, i.e. \f$(k/k_{max})^2/f$
+ * @param[in] xsq The squared ratio \f$k/k_{\max}\f$, i.e. \f$(k/k_{\max})^2/f$
  * for a given mode \f$k\f$.
  * @return The multiplier for the given mode @p xsq in the filtering process.
  *
@@ -660,8 +660,8 @@ static void init_from_dat()
 #endif
 
 /**
- * @brief Given that the initial \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$ are already
- * provided in `field`, construct the corresponding \f$\psi\f$ and
+ * @brief Given that the initial \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$ are
+ * already provided in `field`, construct the corresponding \f$\psi\f$ and
  * \f$\dot{\psi}\f$.
  */
 static void mk_initial_psi()
@@ -678,8 +678,8 @@ static void mk_initial_psi()
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
 /**
  * @brief Construct a Bunch Davies vacuum as initial conditions if the
- * parameters satisfy the conditions and then construct corresponding \f$\psi\f$,
- * \f$\dot{psi}\f$.
+ * parameters satisfy the conditions and then construct corresponding
+ * \f$\psi\f$, \f$\dot{\psi}\f$.
  *
  * We build upon the values in the DEFROST paper (in the references), hence we
  * need 3 dimensions with the same number of gridpoints and a box length of 10
