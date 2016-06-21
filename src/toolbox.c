@@ -559,14 +559,15 @@ static void mk_constraints(double *f)
 #endif
 
 /**
- * @brief Compute \f$\psi\f$ and \f$\dot{\psi}\f$
+ * @brief Computes \f$\psi\f$ and \f$\dot{\psi}\f$ from \f$\phi\f$ and
+ * \f$\dot{\phi}\f$ on the initial timeslice.
  *
- * @param[in] f An array containing the fields. Expects \f$\phi\f$,
- * \f$\dot{\phi}\f$ and \f$a\f$ right after each other in @p f.
+ * @param[in,out] f The fields. Expects \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$
+ * to be given in @p f. Fills in \f$\psi\f$ and \f$\dot{\psi}\f$ in @p f.
  *
  * We use an elliptic equation from the Hamiltonian constraint combined with
  * the momentum contraint to compute \f$\psi\f$ and \f$\dot{\psi}\f$ from given
- * \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$.
+ * \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$. TODO[link]
  */
 void mk_psi(double *f)
 {
@@ -606,15 +607,16 @@ void mk_psi(double *f)
 
 #ifdef OUTPUT_PS
 /**
- * @brief Compute the power spectrum
+ * @brief Computes the power spectrum of a field.
  *
- * @param[in] in The Fourier amplitudes of the field
- * @param[in, out] out The output struct providing information about and memory
- * for the power spectrum of the field.
+ * @param[in] in The Fourier amplitudes of the field.
+ * @param[in, out] out The `output` structure providing information about and
+ * memory for the power spectrum of the field.
  *
  * The power spectrum is constructed by binning the Fourier modes according to
- * the size of their wave vectors. The number of bins is determined by
- * `POWER_SPECTRUM_BINS`
+ * the length of their wave vectors \f$k\f$. The bin size is uniform in \f$k\f$
+ * and the number of bins is determined by `POWER_SPECTRUM_BINS` in the
+ * parameters.
  */
 static void mk_power_spectrum(const fftw_complex *in, struct output out)
 {
