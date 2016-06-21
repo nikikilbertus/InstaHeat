@@ -681,8 +681,9 @@ static void capply_filter(complex *in, double *out)
 #endif
 
 /**
- * @brief Save the summaries of the fields (containing the mean, variance,
- * minimum and maximum value at the current time).
+ * @brief Constructs and saves summaries of the required fields (containing the
+ * mean, variance, minimum and maximum value at the current time) to the
+ * corresponding buffers.
  */
 static void mk_summary()
 {
@@ -716,14 +717,14 @@ static void mk_summary()
 }
 
 /**
- * @brief Compute the summary of a vector, i.e. the mean, variance, minimum and
- * maximum value
+ * @brief Computes the summary of a field, i.e. the mean, variance, minimum and
+ * maximum value.
  *
- * @param[in] f The input vector
+ * @param[in] f The input field.
  * @param[out] smry An array of size 4 which is filled with the summary: mean,
- * variance, min, max (in this order)
+ * variance, min, max (in this order).
  *
- * @note The vector is implicitly assumed to have length `pars.N`
+ * @note The field is implicitly assumed to have length `pars.N`.
  */
 static void mean_var_min_max(const double *f, double *smry)
 {
