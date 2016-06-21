@@ -68,7 +68,7 @@ struct evolution_flags evo_flags = {.filter = 0, .output = 0};
  * @param[out] result The right hand side of the partial differential equation,
  * i.e. the first temporal derivatives of the fields in @p f.
  *
- * @note This function has a whole lot of side effects. It will also trigger the
+ * This function has a whole lot of side effects. It will also trigger the
  * computation of all desired outputs. Depending on the simulation parameters
  * different functions will be called cascading from `mk_rhs(const double t,
  * double *f, double *result)`.
@@ -105,16 +105,16 @@ void prepare_and_save_timeslice()
 }
 
 /**
- * @brief Compute the Laplacian and the sqaure gradient. More computations
- * might be performed depending on flags in `evo_flags`.
+ * @brief Compute the Laplacian and the sqaured gradient. More computations
+ * might be performed depending on flags in the `evolution_flags` structure
+ * `evo_flags`.
  *
- * @param[in,out] in An array containing the fields, in particular \f$\phi\f$
- * and \f$\psi\f$. All fields in @p in might be overwritten by their filtered
- * versions.
+ * @param[in,out] in The fields, in particular \f$\phi\f$ and \f$\psi\f$. All
+ * fields in @p in might be overwritten by their filtered versions.
  *
  * The Laplacian and the squared gradient as well as the partial derivatives of
  * \f$\phi\f$ are stored in global variables for reuse in other functions. When
- * the function returns:
+ * `mk_gradient_squared_and_laplacian(double *in)` returns:
  * `tmp.xphi` contains \f$\partial_x \phi\f$
  * `tmp.yphi` contains \f$\partial_y \phi\f$
  * `tmp.zphi` contains \f$\partial_z \phi\f$
@@ -122,17 +122,14 @@ void prepare_and_save_timeslice()
  * `tmp.grad` contains the _squared_ gradient \f$(\nabla \phi)^2\f$
  * All the above values persist until the next call of `mk_rhs(const double t,
  * double *f, double *result)`
- * If `OUTPUT_CONSTRAINTS` is defined, additionally, `tmp.f` contains \f$\Delta
- * \psi\f$, the Lagrangian of \f$\psi\f$.
- * If specified in `evo_flags.filter`, the fields \f$\phi\f$ and \f$\psi\f$ will
- * be overwritten with their filtered version. Moreover the power spectra of
- * \f$phi\f$ and \f$psi\f$ might be computed if as specified in
- * `evo_flags.filter`.
+ * If required, the Fourier transform of \f$\psi\f$ is computed and `tmp.f`
+ * contains \f$\Delta \psi\f$, the Lagrangian of \f$\psi\f$.
+ * If required, the fields \f$\phi\f$, \f$\psi\f$, \f$\dot{\phi}\f$,
+ * \f$\dot{\psi}\f$ will be overwritten with their filtered versions.
  */
 void mk_gradient_squared_and_laplacian(double *in)
 {
     mk_ffts_and_filter(in);
-
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
         complex pre = tmp.phic[i] / pars.N;
@@ -154,14 +151,13 @@ void mk_gradient_squared_and_laplacian(double *in)
 }
 
 /**
- * @brief Computes the DFTs which are necessary for the right hand side or any
- * of the output. The fields are also filtered here if demanded.
+ * @brief Computes the DFTs which are necessary for the right hand side or the
+ * desired output. This will also trigger the filtering if required.
  *
- * @param[in, out] f All necessary fields bundled in one array. The fields are
- * changed if filtering is enabled for the current time slice.
+ * @param[in,out] f The fields. They might be overwritten by their filtered
+ * versions.
  *
- * Additionally, if we want to output the constraints on the current time slice,
- * the laplacian of \f$\psi\f$ is computed here for convenience.
+ * Additionally, if required, the Laplacian of \f$\psi\f$ is computed here.
  */
 static void mk_ffts_and_filter(double *f)
 {
