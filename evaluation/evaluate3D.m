@@ -1,12 +1,12 @@
-name = 'masses/48_32_0.0001';
+name = 'cutoff/96_16_5e-3_fil';
 interp = true;
 newoutput = true;
 amax = -1;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
-% name = ['~/Dropbox/Uni/Exercises/12Semester/MAPhysics/data/' name '.h5'];
-name = ['~/Data/' name '.h5'];
+name = ['~/Dropbox/Uni/Exercises/12Semester/MAPhysics/data/' name '.h5'];
+% name = ['~/Data/' name '.h5'];
 
 dim = h5read(name, '/dimension');
 t = h5read(name, '/time');
