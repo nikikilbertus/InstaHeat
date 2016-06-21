@@ -115,13 +115,13 @@ void prepare_and_save_timeslice()
  * The Laplacian and the squared gradient as well as the partial derivatives of
  * \f$\phi\f$ are stored in global variables for reuse in other functions. When
  * `mk_gradient_squared_and_laplacian(double *in)` returns:
- * `tmp.xphi` contains \f$\partial_x \phi\f$
- * `tmp.yphi` contains \f$\partial_y \phi\f$
- * `tmp.zphi` contains \f$\partial_z \phi\f$
+ * `tmp.xphi` contains \f$\partial_x \phi\f$.
+ * `tmp.yphi` contains \f$\partial_y \phi\f$.
+ * `tmp.zphi` contains \f$\partial_z \phi\f$.
  * `tmp.lap` contains the Laplacian \f$\sum_{i=1}^3 \partial_i^2 \phi\f$
  * `tmp.grad` contains the _squared_ gradient \f$(\nabla \phi)^2\f$
  * All the above values persist until the next call of `mk_rhs(const double t,
- * double *f, double *result)`
+ * double *f, double *result)`.
  * If required, the Fourier transform of \f$\psi\f$ is computed and `tmp.f`
  * contains \f$\Delta \psi\f$, the Lagrangian of \f$\psi\f$.
  * If required, the fields \f$\phi\f$, \f$\psi\f$, \f$\dot{\phi}\f$,
@@ -189,11 +189,11 @@ static void mk_ffts_and_filter(double *f)
 
 /**
  * @brief Constructs the squared gradient from the (up to) three partial
- * spatial derivatives.
+ * spatial derivatives (depending on the number of spatial dimensions).
  *
  * The partial derivatives of \f$\phi\f$ computed in
- * `mk_gradient_squared_and_laplacian(double *in)` are indiviually squared,
- * added up and the result is stored in `tmp.grad`
+ * `mk_gradient_squared_and_laplacian(double *in)` are used to compute the
+ * squared gradient of \f$\phi\f$, which is  stored in `tmp.grad`.
  */
 static void assemble_gradient_squared()
 {
@@ -210,19 +210,19 @@ static void assemble_gradient_squared()
 }
 
 /**
- * @brief Compute the energy density \f$\rho\f$ and its average value as well as
- * the pressure and its average value.
+ * @brief Compute the energy density \f$\rho\f$ and its spatial average as well
+ * as the pressure \f$p\f$ and its spatial average.
  *
- * @param[in] f An array containing the fields
+ * @param[in] f The fields.
  *
- * Everything is stored in global variables for reuse in other functions. When
- * the function returns:
- * `rho` contains the energy density \f$\rho\f$
- * `rho_mean` contains the average energy density \f$\langle \rho \rangle\f$
- * `pressure` contains the pressure \f$p\f$
- * `pressure_mean` contains the average pressure \f$\langle p \rangle\f$
- * All the above values persist until the next call of `mk_rhs(const double t,
- * double *f, double *result)`
+ * This function will populate the following global variables:
+ * `rho` contains the energy density \f$\rho\f$.
+ * `rho_mean` contains the average energy density \f$\langle \rho \rangle\f$.
+ * `pressure` contains the pressure \f$p\f$.
+ * `pressure_mean` contains the average pressure \f$\langle p \rangle\f$.
+ *
+ * @note All the above values persist until the next call of `mk_rhs(const
+ * double t, double *f, double *result)`.
  */
 void mk_rho_and_p(const double *f)
 {
