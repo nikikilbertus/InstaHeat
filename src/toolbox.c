@@ -109,7 +109,7 @@ void prepare_and_save_timeslice()
  * might be performed depending on flags in the `evolution_flags` structure
  * `evo_flags`.
  *
- * @param[in,out] in The fields, in particular \f$\phi\f$ and \f$\psi\f$. All
+ * @param[in, out] in The fields, in particular \f$\phi\f$ and \f$\psi\f$. All
  * fields in @p in might be overwritten by their filtered versions.
  *
  * The Laplacian and the squared gradient as well as the partial derivatives of
@@ -154,7 +154,7 @@ void mk_gradient_squared_and_laplacian(double *in)
  * @brief Computes the DFTs which are necessary for the right hand side or the
  * desired output. This will also trigger the filtering if required.
  *
- * @param[in,out] f The fields. They might be overwritten by their filtered
+ * @param[in, out] f The fields. They might be overwritten by their filtered
  * versions.
  *
  * Additionally, if required, the Laplacian of \f$\psi\f$ is computed here.
@@ -562,7 +562,7 @@ static void mk_constraints(double *f)
  * @brief Computes \f$\psi\f$ and \f$\dot{\psi}\f$ from \f$\phi\f$ and
  * \f$\dot{\phi}\f$ on the initial timeslice.
  *
- * @param[in,out] f The fields. Expects \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$
+ * @param[in, out] f The fields. Expects \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$
  * to be given in @p f. Fills in \f$\psi\f$ and \f$\dot{\psi}\f$ in @p f.
  *
  * We use an elliptic equation from the Hamiltonian constraint combined with
@@ -638,14 +638,14 @@ static void mk_power_spectrum(const fftw_complex *in, struct output out)
 
 #ifdef ENABLE_FFT_FILTER
 /**
- * @brief Apply a Fourier filter to the real space input to cutoff high
- * frequency modes.
+ * @brief Applies a filter to the Fourier modes of the real space input to
+ * cutoff high frequency modes.
  *
- * @param[in, out] f The field which we want to filter. It is overwritten by
- * the filtered results.
+ * @param[in, out] f The field which we want to filter. It is overwritten by the
+ * filtered version.
  *
- * The highest modes of the field are cut off according to `filter_window(const
- * double x)` in `setup.c`.
+ * @see The highest modes of the field are cut off according to
+ * `filter_window(const double x)` in `setup.c`.
  */
 static void apply_filter(double *f)
 {
@@ -656,16 +656,16 @@ static void apply_filter(double *f)
 }
 
 /**
- * @brief Apply a Fourier filter to the Fourier space input to cutoff high
- * frequency modes.
+ * @brief Applies a filter to the Fourier space input to cutoff high frequency
+ * modes.
  *
  * @param[in, out] in The field in Fourier space which we want to filter. It is
  * overwritten by the filtered version.
  * @param[out] out The array that is populated by the filtered field in real
  * space generated from @p in.
  *
- * The highest modes of the field are cut off according to `filter_window(const
- * double x)` in `setup.c`.
+ * @see The highest modes of the field are cut off according to
+ * `filter_window(const double x)` in `setup.c`.
  */
 static void capply_filter(complex *in, double *out)
 {
