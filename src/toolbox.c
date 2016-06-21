@@ -245,10 +245,10 @@ void mk_rho_and_p(const double *f)
 }
 
 /**
- * @brief Checks which outputs are enabled on the current time slice and fills
- * the corresponding buffers.
+ * @brief Checks which outputs are enabled on the current time slice, computes
+ * them and fills the corresponding buffers.
  *
- * @param[in] f The necessary fields bundled into one array.
+ * @param[in] f The fields.
  */
 static void output_all(double *f)
 {
@@ -272,13 +272,14 @@ static void output_all(double *f)
 }
 
 /**
- * @brief Computes and updates the right hand side of the pde, i.e. the first
- * order temporal derivatives of \f$\phi\f$, \f$\dot{phi}\f$, \f$\psi\f$, \f$\dot{\psi}\f$.
+ * @brief Computes and updates part of the right hand side of the pde, i.e. the
+ * first order temporal derivatives of \f$\phi\f$, \f$\dot{phi}\f$, \f$\psi\f$,
+ * \f$\dot{\psi}\f$.
  *
- * @param[in] f All necessary fields bundled in one array
- * @param[out] result The right hand side of the pde for the given fields
+ * @param[in] f The fields.
+ * @param[out] result The right hand side of the pde for the given fields.
  *
- * @see TODO[link] for more on the evolved fields and the equations of motion.
+ * @see TODO[link] for more on the evolved fields and their equations of motion.
  */
 static void update_phi_psi(double *f, double *result)
 {
@@ -302,13 +303,13 @@ static void update_phi_psi(double *f, double *result)
 
 #ifdef ENABLE_GW
 /**
- * @brief Computes and updates the right hand side of the pde, i.e. the first
- * order temporal derivatives of the tensor perturbations, i.e. the h components.
+ * @brief Computes and updates part of the right hand side of the pde, i.e. the
+ * first order temporal derivatives of the tensor perturbations \f$h\f$.
  *
- * @param[in] f All necessary fields bundled in one array
- * @param[out] result The right hand side of the pde for the given fields
+ * @param[in] f The fields.
+ * @param[out] result The right hand side of the pde for the given fields.
  *
- * @see TODO[link] for more on the evolved fields and the equations of motion.
+ * @see TODO[link] for more on the evolved fields and their equations of motion.
  */
 static void update_h(double *f, double *result)
 {
@@ -349,13 +350,16 @@ static void update_h(double *f, double *result)
 }
 
 /**
- * @brief Compute the traceless transverse source terms of the tensor
- * perturbations needed in gravitational wave extraction.
+ * @brief Compute the traceless transverse source terms for the equation of
+ * motion of the tensor perturbations \f$h\f$.
  *
- * @param[in] f An array containing the fields
+ * @param[in] f The fields.
  * @param[out] s The traceless transverse part of the source terms in
- * the equation of motion of the tensor perturbations. We only need the first
- * two fields, because there are only two degrees of freedom.
+ * the equation of motion of the tensor perturbations.
+ *
+ * @note From the nine components of \f$h_{ij}\f$ only two are independent once
+ * we impose symmetry, transversality and tracelessness. Thus we only keep two
+ * of the components.
  *
  * @see TODO[link thesis and papers]
  */
