@@ -517,13 +517,15 @@ static double potential_prime(const double f)
 
 #ifdef OUTPUT_CONSTRAINTS
 /**
- * @brief Monitor how well the Hamiltonian and momentum constraint are fulfilled.
+ * @brief Computes how well the Hamiltonian and momentum constraint are
+ * fulfilled for monitoring.
  *
- * Computes the Hamiltonian and momentum constraint in a form such they should
- * give 0 if fulfilled exactly. Of these combinations save the l2 Norm as well
- * as the maximum asbolute value to `cstr.tmp` for output.
+ * @param[in] f The fields.
  *
- * @param[in] f An array containing the fields
+ * Computes the Hamiltonian and momentum constraint as a sum of terms that
+ * should cancel each other if fulfilled exactly. Of these combinations the
+ * \f$\ell_2\f$ norm as well as the sup-norm, i.e. the maximum asbolute value,
+ * are copied to the corresponding output buffer.
  */
 static void mk_constraints(double *f)
 {
