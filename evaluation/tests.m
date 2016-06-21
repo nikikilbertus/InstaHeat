@@ -1,29 +1,3 @@
-%% Laplacian
-N = 64; dim = 3;
-aa=-pi; bb=pi;
-dx = (bb-aa)/N;
-x = aa + (0:N-1)*dx;
-[xx,yy,zz] = meshgrid(x,x,x);
-
-% test = exp(-(xx.^2 + yy.^2 + zz.^2));
-% testl = (4*(xx.^2+yy.^2+zz.^2)-6).*test;
-test = sin(xx) .* sin(yy) .* sin(zz);
-testl = -3 * sin(xx) .* sin(yy) .* sin(zz);
-testg = cos(xx).^2 .* sin(yy).^2 .* sin(zz).^2 + ... 
-        sin(xx).^2 .* cos(yy).^2 .* sin(zz).^2 + ...
-        sin(xx).^2 .* sin(yy).^2 .* cos(zz).^2;
-k = [0:N/2-1 0 -N/2+1:-1] * 2*pi/(bb-aa);
-k2 = [0:N/2 -N/2+1:-1] * 2*pi/(bb-aa);
-[X,Y,Z] = meshgrid(k2,k2,k2);
-kk = X.^2 + Y.^2 + Z.^2;
-[kx,ky,kz] = meshgrid(k,k,k);
-phix = ifftn(1i * kx .* fftn(test));
-phiy = ifftn(1i * ky .* fftn(test));
-phiz = ifftn(1i * kz .* fftn(test));
-testg1 = phix.^2 + phiy.^2 + phiz.^2;
-testl1 = ifftn(-kk.*fftn(test));
-testl2 = del2(test, dx) * 2 * dim;
-
 %% powerspectrum check bunch davies
 bins = 50; L = 10; match = 2;
 meff2 = mass^2 - 9 * H(1)^2 / 4;
@@ -104,71 +78,6 @@ end
 %% how far is rho0 from rho
 tmp = abs( rho0 - mean(rho0(:)) );
 mean(tmp(:))
-
-%% construct karstens IC from fourier
-L=1; N=64; mass = 1e-2;
-
-% read fourier karsten
-name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64fourier_3.dat';
-raw = importdata(name);
-k = 2*pi/L;
-ks = raw(:,1);
-xi = raw(:,2);
-yi = raw(:,3);
-zi = raw(:,4);
-ph = raw(:,5);
-
-% read real space karsten
-name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten/data_64psi_3.dat';
-raw2 = importdata(name);
-phika = reshape(raw2(:,4),N,N,N);
-dphika = reshape(raw2(:,5),N,N,N);
-psika = reshape(raw2(:,6),N,N,N);
-dpsika = reshape(raw2(:,7),N,N,N);
-
-nn = 16;
-indices = (0:16);
-[kx,ky,kz] = meshgrid(indices,indices,indices);
-ks1 = sqrt(kx.^2 + ky.^2 + kz.^2) * k;
-ks2 = zeros(nn,nn,nn);
-for i = 1:length(ks)
-    ii = int64(xi(i));
-    jj = int64(yi(i));
-    kk = int64(zi(i));
-    ks2(ii+1,jj+1,kk+1) = ks(i);
-end
-
-cphi = raw(:,6);
-sphi = raw(:,7);
-cdphi = raw(:,8);
-sdphi = raw(:,9);
-cpsi = raw(:,10);
-spsi = raw(:,11);
-cdpsi = raw(:,12);
-sdpsi = raw(:,13);
-
-x = linspace(0,L-L/N,N); y = x; z = x;
-[x,y,z] = ndgrid(x,y,z);
-
-phi = zeros(N,N,N);
-dphi = zeros(N,N,N);
-psi = zeros(N,N,N);
-dpsi = zeros(N,N,N);
-for i = 1:length(ks)
-    in = k * (xi(i) * x + yi(i) * y + zi(i) * z) + ph(i);
-    ct = cos(in);
-    st = sin(in);
-    phi = phi + cphi(i) *  ct - sphi(i) * st;
-    dphi = dphi + cdphi(i) *  ct - sdphi(i) * st;
-    psi = psi + cpsi(i) *  ct - spsi(i) * st;
-    dpsi = dpsi + cdpsi(i) *  ct - sdpsi(i) * st;
-    disp(i);
-end
-fac = 6.193e-6; % magic number from karste (see mail)
-phi = phi * fac + mean(phika(:));
-dphi = dphi * fac + mean(dphika(:));
-psi = psi * fac + mean(psika(:));
-dpsi = dpsi * fac + mean(dpsika(:));
 
 %% Hamiltonian and momentum karsten vs. code
 L=1; N=64;
@@ -295,33 +204,6 @@ loglog(ms, myerrs(1,:),'linewidth',2);
 loglog(ms, mzerrs(1,:),'linewidth',2);
 hold off
 xlabel('planck mass'); ylabel('max. abs error of momenutm');
-
-%% masses study for bunch davies
-figure
-ml = 3; m = 4;
-% masses = 1./(2*10.^(-(ml:m)));
-masses = 5*10.^(-(ml:m));
-rhormsi = zeros(m-ml+1,4);
-maxrhos = zeros(m-ml+1,1);
-for i = 1:m-ml+1
-    name = ['gw4/64_5e-' num2str(i+ml-1) '_2e4'];
-    evaluate3D
-    maxrhos(i) = max(rhorms);
-    loglog(a,rhorms/rhorms(1),'linewidth',2); hold on
-    legendinfo{i} = ['mass=' num2str(masses(i))];
-    rhormsi(i,1) = rhorms(1);
-    [~,idx] = min((a - 1e2).^2);
-    rhormsi(i,2) = rhorms(idx);
-    [~,idx] = min((a - 1e3).^2);
-    rhormsi(i,3) = rhorms(idx);
-    rhormsi(i,4) = rhorms(end);
-end
-hold off; xlabel('a'); ylabel('std(\rho) / |<\rho>|');
-legend(legendinfo,'location','southeast');
-figure
-loglog(masses, rhormsi, masses, masses/masses(1) * rhormsi(1,1) * 0.9,'--','linewidth',2);
-xlabel('mass'); ylabel('std(\rho) / |<\rho>|');
-legend('a=1', 'a=1e2', 'a=1e3', ['a=' num2str(a(end))],'linear reference','location','northwest');
 
 %% extrapolate to nonlinear regime
 tmp = 2;
@@ -648,7 +530,3 @@ for i = 1:skip:imax
     c=c+1;
 end
 hold off; shg;
-
-%% time scaling
-
-tfactor = @(Nold, Nnew) Nnew^3*log(Nnew^3) / (Nold^3*log(Nold^3));
