@@ -1,3 +1,4 @@
+%% DEPRECATED!
 function [err, energyloss, Tf] = analyzeResult(num, Nx, x, sol, tf, dtf, plotopt)
 
 prefix = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/';
