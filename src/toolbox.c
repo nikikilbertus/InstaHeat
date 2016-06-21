@@ -63,10 +63,10 @@ struct evolution_flags evo_flags = {.filter = 0, .output = 0};
  * @brief Compute the right hand side of the pde, i.e. all first order temporal
  * derivatives of the fields.
  *
- * @param[in] t The current time
- * @param[in] f The fields
+ * @param[in] t The current time.
+ * @param[in] f The fields.
  * @param[out] result The right hand side of the partial differential equation,
- * i.e. the first temporal derivatives of the fields in @p f
+ * i.e. the first temporal derivatives of the fields in @p f.
  *
  * @note This function has a whole lot of side effects. It will also trigger the
  * computation of all desired outputs. Depending on the simulation parameters
@@ -91,8 +91,10 @@ void mk_rhs(const double t, double *f, double *result)
 }
 
 /**
- * @brief Recompute all desired output quantities and save the current
- * timeslice to buffers
+ * @brief Recompute all desired output quantities and copy the current
+ * timeslice to buffers.
+ *
+ * @note This is only called once or twice throughout a whole simulation run.
  */
 void prepare_and_save_timeslice()
 {
