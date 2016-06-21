@@ -882,10 +882,10 @@ static void ifft(complex *in, double *out)
 
 #ifdef CHECK_FOR_NAN
 /**
- * @brief Check and print whether a vector contains NaNs __(debugging only)__
+ * @brief Checks and prints whether a vector contains NaNs. __(debugging only)__
  *
- * @param[in] f Any vector of length @p N
- * @param[in] N The length of the vector @p f
+ * @param[in] f An array of length @p N.
+ * @param[in] N The length of the array @p f.
  */
 static void contains_nan(const double *f, const size_t N)
 {
@@ -899,10 +899,10 @@ static void contains_nan(const double *f, const size_t N)
 }
 
 /**
- * @brief Check and print whether a vector contains NaNs __(debugging only)__
+ * @brief Checks and prints whether a vector contains NaNs. __(debugging only)__
  *
- * @param[in] f Any vector of length @p N
- * @param[in] N The length of the vector @p f
+ * @param[in] f An array of length @p N.
+ * @param[in] N The length of the array @p f.
  */
 static void contains_nanc(const complex *f, const size_t N)
 {
