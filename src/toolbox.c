@@ -361,7 +361,8 @@ static void update_h(double *f, double *result)
  * we impose symmetry, transversality and tracelessness. Thus we only keep two
  * of the components.
  *
- * @see TODO[link thesis and papers]
+ * @see The traceless transverse source term is the right hand side of equation
+ * TODO[link] in the thesis.
  */
 static void mk_gw_sources_tt(const double *f, complex **s)
 {
@@ -402,13 +403,15 @@ static void mk_gw_sources_tt(const double *f, complex **s)
 }
 
 /**
- * @brief Construct the source term, i.e. the right hand side of the equation
- * of motion for the tensor metric perturbation \f$h_{ij}\f$
+ * @brief Compute the source term, i.e. the right hand side, for the equation of
+ * motion of the tensor perturbations \f$h_{ij}\f$.
  *
- * @param[out] s An array of 6 arrays for the 6 components of the sources
- * \f$S_{ij}\f$ in Fourier space after imposing symmetry.
+ * @param[in] f The fields.
+ * @param[out] s Holds 6 arrays for the 6 components of the sources \f$S_{ij}\f$
+ * in Fourier space after imposing symmetry.
  *
- * The source term is the right hand side of equation TODO[link] in the thesis.
+ * @see The source term is the right hand side of equation TODO[link] in the
+ * thesis.
  */
 static void mk_gw_sources(const double *f, complex **s)
 {
@@ -427,12 +430,13 @@ static void mk_gw_sources(const double *f, complex **s)
 }
 
 /**
- * @brief Compute the power spectrum of the gravitational waves.
+ * @brief Computes the power spectrum of the gravitational waves.
+ *
+ * @param[in] f The fields.
  *
  * Computes the power spectrum of the gravitational waves associated with the
- * tensor perturbations in @p f according to the prescription in TODO[link].
- *
- * @param[in] f An array with the current fields values
+ * tensor perturbations in the fields @p f according to the prescription in
+ * TODO[link].
  */
 static void mk_gw_spectrum(double *f)
 {
@@ -487,10 +491,10 @@ static void mk_gw_spectrum(double *f)
 #endif
 
 /**
- * @brief The potential of the scalar inflaton field \f$\phi\f$
+ * @brief The potential \f$V\f$ of the scalar inflaton field \f$\phi\f$.
  *
- * @param[in] f The field value where to evaluate the potential
- * @return The potential value at the given input
+ * @param[in] f The inflaton field value where to evaluate the potential.
+ * @return The value of the potential at the given input @p f.
  */
 static double potential(const double f)
 {
@@ -499,11 +503,11 @@ static double potential(const double f)
 }
 
 /**
- * @brief The derivative of the potential of the scalar inflaton field \f$\phi\f$
+ * @brief The derivative of the potential \f$V'\f$ of the scalar inflaton field
+ * \f$\phi\f$.
  *
- * @param[in] f The field value where to evaluate the derivative of the
- * potential
- * @return The value of the derivative of the potential at given input
+ * @param[in] f The value at which to evaluate the derivative of the potential.
+ * @return The value of the derivative of the potential at given input @p f.
  */
 static double potential_prime(const double f)
 {
