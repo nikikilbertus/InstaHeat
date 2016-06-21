@@ -61,12 +61,17 @@ struct evolution_flags evo_flags = {.filter = 0, .output = 0};
 
 /**
  * @brief Compute the right hand side of the pde, i.e. all first order temporal
- * derivatives.
+ * derivatives of the fields.
  *
  * @param[in] t The current time
- * @param[in] f All necessary fields bundled in one array
+ * @param[in] f The fields
  * @param[out] result The right hand side of the partial differential equation,
  * i.e. the first temporal derivatives of the fields in @p f
+ *
+ * @note This function has a whole lot of side effects. It will also trigger the
+ * computation of all desired outputs. Depending on the simulation parameters
+ * different functions will be called cascading from `mk_rhs(const double t,
+ * double *f, double *result)`.
  *
  * @see TODO[link] for more on the evolved fields and the equations of motion.
  */
