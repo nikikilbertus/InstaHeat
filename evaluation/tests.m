@@ -282,19 +282,7 @@ maxrho = [maxrho(I1)'; maxrho(s:1000:end)'];
 T = table(a, rhorms, rhosca, maxrho, stdpsi, maxpsi);
 writetable(T, '64_5e-3_2e4_psi_rho.csv');
 
-%% plot long time bunch davies
-name = 'longruns/32_5e-4_1e6_beta_0';
-evaluate3D
-scal = ones(size(a))';
-% scal = a.^(3/2)';
-plot(a,phimax.*scal,a,phimin.*scal,a,phimean.*scal); xlabel('a'); ylabel('<\phi>'); shg; pause;
-plot(a,dphimax.*scal,a,dphimin.*scal,a,dphimean.*scal); xlabel('a'); ylabel('<d\phi>'); shg; pause;
-plot(a,psimax.*scal,a,psimin.*scal,a,psimean.*scal); xlabel('a'); ylabel('<\psi>'); shg; pause;
-plot(a,dpsimax.*scal,a,dpsimin.*scal,a,dpsimean.*scal); xlabel('a'); ylabel('<d\psi>'); shg; pause;
-plot(a,sqrt(phivar).*scal); xlabel('a'); ylabel('std \phi'); shg; pause;
-plot(a,sqrt(dphivar).*scal); xlabel('a'); ylabel('std d\phi'); shg; pause;
-plot(a,sqrt(psivar).*scal); xlabel('a'); ylabel('std \psi'); shg; pause;
-plot(a,sqrt(dpsivar).*scal); xlabel('a'); ylabel('std d\psi'); shg; pause;
+
 
 %% long runs
 name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/longruns/32_5e-4_1e6_beta_004.h5';
