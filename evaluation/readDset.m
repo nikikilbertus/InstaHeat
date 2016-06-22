@@ -8,10 +8,11 @@ function data = readDset(dictNames, file, dset, indices)
         display(['could not read ' dset])
         return;
     end
-    if exist('I','var')
+    if exist('indices','var')
         sizeData = size(data);
-        if sizeData(2) > 1
-            data = data(:, indices);
+        if all((sizeData > 1))
+            sizeData
+            data = data(indices,:);
         else
             data = data(indices);
         end
