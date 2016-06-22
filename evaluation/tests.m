@@ -282,62 +282,6 @@ maxrho = [maxrho(I1)'; maxrho(s:1000:end)'];
 T = table(a, rhorms, rhosca, maxrho, stdpsi, maxpsi);
 writetable(T, '64_5e-3_2e4_psi_rho.csv');
 
-%% power spectrum analysis
-L=10; nbins = 50;
-k = 2*pi/L;
-name = 'gw5/64_5e-3_1e4';
-evaluate3D
-N = N(1);
-lc = 1./sqrt(3*H*mass);
-kmin = k;
-kmax = sqrt(3) * N/2 * k;
-bins = (1:nbins)/nbins * kmax;
-for ii = [1 logspace(1,log10(length(phips(1,:))),300)]
-% for ii = length(a) - 200:length(a)
-    i = int64(floor(ii));
-    subplot(2,2,1)
-    loglog(bins, phips(1:nbins,i)); xlabel('k'); ylabel('power'); hold on
-    k = (1/lc(i))*a(i);
-    kmax = H(i)*a(i);
-    lowb = min(phips(1:nbins,i)) + 1e-13;
-    higb = max(phips(1:nbins,i));
-    loglog([k k],[lowb higb]);
-    loglog([kmax kmax],[lowb higb]);
-    hold off;
-    title(['\phi, a = ' num2str(a(i)) ' / ' num2str(a(end))]);
-    subplot(2,2,2)
-    plot(a, rhorms, a(i), rhorms(i),'or'); xlabel('a'); ylabel('std \rho / <\rho>');
-    shg;
-    subplot(2,2,3)
-    loglog(bins, rhops(1:nbins,i)); xlabel('k'); ylabel('power'); title('\rho');
-    hold on
-    k = H(1);
-    lowb = min(rhops(1:nbins,i)) + 1e-10;
-    higb = max(rhops(1:nbins,i));
-    loglog([k k],[lowb higb]);
-    hold off
-    subplot(2,2,4)
-    try
-    loglog(bins, psips(1:nbins,i)); xlabel('k'); ylabel('power'); title('\psi');
-    catch me
-    end
-    if i == 1
-        Hk = H(i);
-        lowb = min(rhops(1:nbins,i));
-        higb = max(rhops(1:nbins,i));
-        subplot(2,2,3); hold on; plot([Hk Hk], [lowb higb]); hold off;
-        try
-        lowb = min(psips(1:nbins,i));
-        higb = max(psips(1:nbins,i));
-        subplot(2,2,4); hold on; plot([Hk Hk], [lowb higb]); hold off;
-        catch me 
-        end
-        pause;
-    else
-        pause(0.05);
-    end
-end
-
 %% plot long time bunch davies
 name = 'longruns/32_5e-4_1e6_beta_0';
 evaluate3D
