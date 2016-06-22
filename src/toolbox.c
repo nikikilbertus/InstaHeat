@@ -524,7 +524,7 @@ static double potential_prime(const double f)
  *
  * Computes the Hamiltonian and momentum constraint as a sum of terms that
  * should cancel each other if fulfilled exactly. Of these combinations the
- * \f$\ell_2\f$ norm as well as the sup-norm, i.e. the maximum asbolute value,
+ * \f$l_2\f$ norm as well as the sup-norm, i.e. the maximum asbolute value,
  * are copied to the corresponding output buffer.
  */
 static void mk_constraints(double *f)
