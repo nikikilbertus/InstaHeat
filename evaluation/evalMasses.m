@@ -1,6 +1,6 @@
-%% evaluate runs with different masses
+%% evaluate multiple runs with different masses
 
-%% setup parameters
+%% setup (user input)
 % set up 'masses' array
 % ml = 3; mh = 4;
 masses = [0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001];
