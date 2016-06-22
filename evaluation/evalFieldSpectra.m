@@ -1,9 +1,9 @@
 %% evaluate the field power spectra from a single run
 
-%% setup
+%% setup (user input)
 % the filename
 name = 'cutoff/96_16_5e-3';
-% on how many time slices do we want to show the power spectra
+% on how many time slices do we want to show the power spectra in the video
 nslices = 300;
 
 %% run
