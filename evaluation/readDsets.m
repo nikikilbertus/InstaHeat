@@ -4,13 +4,14 @@ end
 fullname = ['~/Dropbox/Uni/Exercises/12Semester/MAPhysics/data/' name '.h5'];
 % fullname = ['~/Data/' name '.h5'];
 loadDsets;
-if ~exist('dsets', 'var')
-    dsets = dsetsAll;
-end
-require('a', 't', dsets);
+require('a', 't');
 % TODO decide whether I want certain indices for the datasets
 % create dsetsIndexed in loadDsets to indicate the ones I need to index
 
 for loopvar = 1:length(dsets)
-    readDset(dictNames, fullname, dsets{loopvar});
+    if exist('readI','var')
+        readDset(dictNames, fullname, dsets{loopvar}, readI);
+    else
+        readDset(dictNames, fullname, dsets{loopvar});
+    end
 end
