@@ -1,4 +1,4 @@
-function data = readDset(dictNames, file, dset, I)
+function data = readDset(dictNames, file, dset, indices)
     try
         data = h5read(file, ['/' dset]);
         if size(data,2) > 1
@@ -9,11 +9,11 @@ function data = readDset(dictNames, file, dset, I)
         return;
     end
     if exist('I','var')
-        s = size(data);
-        if s(2) > 1
-            data = data(:, I);
+        sizeData = size(data);
+        if sizeData(2) > 1
+            data = data(:, indices);
         else
-            data = data(I);
+            data = data(indices);
         end
     end
     if ~isempty(strfind(dset, 'summary'))
