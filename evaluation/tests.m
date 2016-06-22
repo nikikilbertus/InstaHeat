@@ -499,34 +499,3 @@ xlabel('a'); ylabel('std \rho / <|\rho|>'); legend(legendinfo); shg;
 inflmass
 figure
 plot(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('final rhorms'); shg;
-
-%% gw power spectrum
-num = 50; aup = 600; nbins = 50;
-% prefactor = 1e-13;
-name = 'gw4/64_5e-3_2e4';
-evaluate3D
-N= N(1);
-L=10; k = 2*pi/L; kmax = sqrt(3) * N/2 * k;
-bins = (1:nbins)/nbins * kmax;
-gwps = h5read(name, '/gravitational_wave_spectrum');
-gwps(gwps < 0) = 0;
-imax = find(a>=aup,1);
-skip = int64(floor(imax/num));
-c = 1;
-J = jet;
-subplot(2,1,2);
-xs = zeros(length(1:skip:imax),2);
-gwpsexp = zeros(nbins,length(1:skip:imax)+1);
-gwpsexp(:,1) = bins;
-loglog(a,rhorms); hold on;
-for i = 1:skip:imax
-    subplot(2,1,1)
-    gwpsexp(:,c+1) = gwps(:,i);
-    loglog(bins,gwps(:,i),'color',J(c,:)); xlabel('|k|'); ylabel('d \Omega_{gw} / d ln(k)'); hold on
-    linfo{c} = ['i = ' num2str(c)];
-    subplot(2,1,2)
-    loglog(a(i),rhorms(i),'x','color',J(c,:)); xlabel('a'); ylabel('std(\rho) / <\rho>');
-    xs(c,:) = [a(i), rhorms(i)];
-    c=c+1;
-end
-hold off; shg;
