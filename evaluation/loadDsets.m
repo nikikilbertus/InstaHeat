@@ -1,3 +1,4 @@
+if ~exist('dsetsAll','var')
 dsetsAll = {'a', 'bunch_davies_cutoff', 'calls_rhs', 'commit_hash', 'dimension', ...
 'dphi_summary', 'dpsi_summay', 'filter', 'followup', 'gravitational_wave_spectrum', ...
 'gravitational_waves', 'gridpoints_internal', 'gridpoints_output', 'inflaton_mass', ...
@@ -40,3 +41,4 @@ dsetsSpectra = {'phi_power_spectrum', 'psi_power_spectrum', 'rho_power_spectrum'
 
 dictNames = containers.Map(dsetsAll, dsetsNames);
 dictNamesInv = containers.Map(dsetsNames, dsetsAll);
+end
