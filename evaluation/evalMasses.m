@@ -33,13 +33,13 @@ for i = 1:nn
 end
 hold off; 
 subplot(1,2,1)
-xlabel('a'); ylabel('std(\rho)/|<\rho>|');
+xlabel('a'); ylabel('std(\rho) / |<\rho>|');
 legend(legendinfo,'location','southeast');
 subplot(1,2,2)
-xlabel('a'); ylabel('std(\rho)/|<\rho>| normalized');
+xlabel('a'); ylabel('std(\rho) / |<\rho>| normalized');
 legend(legendinfo,'location','southeast');
 figure
 loglog(masses,rhormsi, masses,masses/masses(1)*rhormsi(1,1)*0.9,'--','linewidth',2);
-xlabel('mass'); ylabel('std(\rho)/|<\rho>|');
+xlabel('mass'); ylabel('std(\rho) / |<\rho>|');
 legend('a=1', ['a=' num2str(a(end)/3)], ['a=' num2str(2*a(end)/3)], ...
     ['a=' num2str(a(end))],'linear reference','location','northwest');
