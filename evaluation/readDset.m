@@ -8,10 +8,10 @@ function data = readDset(dictNames, file, dset, indices)
         display(['could not read ' dset])
         return;
     end
-    if exist('indices','var')
+    loadDsets;
+    if exist('indices','var') && contains(dsetsTimeDep,dset)
         sizeData = size(data);
         if all((sizeData > 1))
-            sizeData
             data = data(indices,:);
         else
             data = data(indices);
@@ -35,4 +35,8 @@ function [] = mkSummary(dictNames, dset, data)
         assignin('base', 'H', sqrt(data(:,1) / 3));
         assignin('base', 'rhorms', sqrt(data(:,2)) ./ data(:,1));
     end
+end
+
+function [bool] = contains(dsetsTimeDep, string)
+    bool = any(cellfun(@(x) ~isempty(x),strfind(dsetsTimeDep,string)));
 end
