@@ -1,6 +1,6 @@
 %% evaluate gravitational power spectrum from single run
 
-%% setup
+%% setup (user input)
 % the filename
 name = 'cutoff/96_16_5e-3';
 % the number of timeslices for which to show the power spectrum
