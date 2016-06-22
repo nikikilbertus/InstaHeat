@@ -282,26 +282,6 @@ maxrho = [maxrho(I1)'; maxrho(s:1000:end)'];
 T = table(a, rhorms, rhosca, maxrho, stdpsi, maxpsi);
 writetable(T, '64_5e-3_2e4_psi_rho.csv');
 
-
-
-%% long runs
-name = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/longruns/32_5e-4_1e6_beta_004.h5';
-a = h5read(name, '/a');
-t = h5read(name, '/time');
-rhosmry = h5read(name, '/rho_summary');
-rhorms = sqrt(rhosmry(2,:) ./ rhosmry(1,:).^2);
-figure(1);
-semilogx(a,rhorms); xlabel('a'); ylabel('rhorms'); shg;
-rhops = h5read(name, '/rho_power_spectrum');
-I = (1:1000:length(a));
-figure(2);
-surf(a(I),1:50,log10(rhops(:,I))); xlabel('a'); ylabel('bins'); shading interp; view(2); title('ps rho');
-shg;
-figure(3);
-plot(diff(t)); hold on
-steps = h5read(name, '/steps_total')
-a(end)
-
 %% tolerances analysis
 base = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/tolerances2/64_5e-3_1e4_tol_';
 rtol = 4:2:10; atol = 6:2:16;
