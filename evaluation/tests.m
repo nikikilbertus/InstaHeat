@@ -256,32 +256,6 @@ legend('mpl/sqrt(3 H m)', 'mpl/H', 'mpl/k_{phys}', '\delta \rho / \rho', '\delta
 % aext = linspace(log(a(1)),log(aint),100);
 % loglog(exp(aext), exp(kmaxfit(aext)), exp(aext), exp(lcfit(aext)),'linewidth',0.8); hold off; shg;
 
-%% generating data for talk (continue from above)
-I1 = (a<50);
-s = sum(I1) + 1;
-at = a;
-a = [at(I1); at(s:1000:end)];
-
-% l_C = [lc(I1)'; lc(s:1000:end)'];
-% l_H = [1./H(I1)'; 1./H(s:1000:end)'];
-% k_min = [at(I1)./kmingrid; at(s:1000:end)/kmingrid];
-% k_max = [at(I1)/kmaxgrid; at(s:1000:end)/kmaxgrid];
-% T = table(a, l_H, l_C, k_min, k_max);
-% writetable(T, '64_5e-3_2e4.csv');
-
-% loglog(a,sqrt(psivar),a,max(-psimin,psimax),a,rhorms,a,rhomean.*a'.^(3), a, max(-rhomin,rhomax)./rhomean,a(((a>4) & (a<150))),0.004*a(((a>4) & (a<150))),'--')
-rhorms = [rhorms(I1)'; rhorms(s:1000:end)'];
-stdpsi = sqrt(psivar);
-stdpsi = [stdpsi(I1)'; stdpsi(s:1000:end)'];
-maxpsi = max(-psimin,psimax);
-maxpsi = [maxpsi(I1)'; maxpsi(s:1000:end)'];
-rhosca = rhomean.*at'.^3;
-rhosca = [rhosca(I1)'; rhosca(s:1000:end)'];
-maxrho = max(-rhomin,rhomax)./rhomean;
-maxrho = [maxrho(I1)'; maxrho(s:1000:end)'];
-T = table(a, rhorms, rhosca, maxrho, stdpsi, maxpsi);
-writetable(T, '64_5e-3_2e4_psi_rho.csv');
-
 %% tolerances analysis
 base = '~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/tolerances2/64_5e-3_1e4_tol_';
 rtol = 4:2:10; atol = 6:2:16;
