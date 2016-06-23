@@ -1,8 +1,9 @@
 %% evaluate fields by simply cycling through some plots for a first impression
 
 %% setup (user input)
-name = 'cutoff/96_32_5e-3_fil';
+name = 'cutoff/96_64_5e-3_fil';
 % one could scale all fields and/or the standard deviations by some function
+readDsets;
 scal = ones(size(a));
 % scal = a.^(3/2);
 scalstd = ones(size(a));
@@ -22,5 +23,6 @@ loglog(a,dpsimax.*scal,a,abs(dpsimin).*scal,a,abs(dpsimean).*scal); xlabel('a');
 loglog(a,dpsistd.*scalstd); xlabel('a'); ylabel('std d\psi'); shg; pause;
 loglog(a,rhomax.*scal,a,abs(rhomin).*scal,a,abs(rhomean).*scal); xlabel('a'); ylabel('\rho'); shg; pause;
 loglog(a,rhostd.*scalstd); xlabel('a'); ylabel('std \rho'); shg; pause;
+loglog(a,rhorms.*scalstd); xlabel('a'); ylabel('std \rho / |<\rho>|'); shg; pause;
 loglog(a,pressure.*scal,a,abs(pressuremin).*scal,a,abs(pressuremean).*scal); xlabel('a'); ylabel('p'); shg; pause;
 loglog(a,pressurestd.*scalstd); xlabel('a'); ylabel('std p'); shg; pause;
