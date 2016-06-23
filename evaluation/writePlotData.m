@@ -9,12 +9,7 @@ filename = 'evolution';
 
 %% init: get necessary indices (don't change)
 readDsets
-nouttmp = 0; i = 0;
-while (nouttmp < nout) 
-    readI = unique(round(logspace(0.1,log10(length(a)),nout+i)));
-    nouttmp = length(readI);
-    i = i+1;
-end
+readI = getLogIndices(length(a), nout);
 
 %% output for instability band
 require('rhoS','phiS','psiS','mass','spatial_bounds_x','N')
