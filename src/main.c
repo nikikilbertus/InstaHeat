@@ -17,9 +17,13 @@
 
 /**
  * @file main.c
- * @brief Declaration of global variables, the main routine and one function for
- * wall clock time.
+ * @brief Declaration of global variables, the main routine and a function for
+ * timing purposes.
  */
+
+#ifdef ENABLE_TIMING
+static void write_monitoring();
+#endif
 
 struct parameters pars;
 struct output t_out;
@@ -33,11 +37,15 @@ struct output dphi_smry;
 struct output psi_smry;
 struct output dpsi_smry;
 struct output rho_smry;
+struct output p_smry;
+struct output h1_smry;
+struct output h2_smry;
 struct output a_out;
 struct output phi_ps;
 struct output psi_ps;
 struct output rho_ps;
 struct output cstr;
+struct output gw;
 double *field;
 double *field_new;
 double *dfield;
@@ -52,16 +60,16 @@ struct temporary tmp;
 fftw_plan p_fw;
 fftw_plan p_bw;
 struct monitor mon;
+double runtime;
 
 /**
  * @brief Main routine: Calls setup, integration and cleanup routines.
  */
 int main(int argc, const char * argv[])
 {
-    double secs = 0.0;
-    TIME(secs = -get_wall_time());
+    runtime = -get_wall_time();
 
-    allocate_and_initialize_all();
+    allocate_and_init_all();
 
     #ifdef RUN_TESTS_ONLY
     run_all_tests();
@@ -83,48 +91,19 @@ int main(int argc, const char * argv[])
     ProfilerStop();
     #endif
 
-    #ifdef SHOW_TIMING_INFO
-    secs += get_wall_time();
-    INFO(printf("main took %f seconds.\n", secs));
-    INFO(puts("as percentage of total, not mutually disjoint:"));
-    INFO(printf("fftw execution took %f seconds (%.2f %%).\n",
-            mon.fftw_time_exe, 100. * (mon.fftw_time_exe / secs)));
-    INFO(printf("fftw planning took %f seconds (%.2f %%).\n",
-            mon.fftw_time_plan, 100. * (mon.fftw_time_plan / secs)));
-    INFO(printf("fft filtering took %f seconds (%.2f %%).\n",
-            mon.filter_time, 100. * (mon.filter_time / secs)));
-    INFO(printf("poisson equation took %f seconds (%.2f %%).\n",
-            mon.poisson_time, 100. * (mon.poisson_time / secs)));
-    INFO(printf("computing constraints took %f seconds (%.2f %%).\n",
-            mon.cstr_time, 100. * (mon.cstr_time / secs)));
-    INFO(printf("computing summaries took %f seconds (%.2f %%).\n",
-            mon.smry_time, 100. * (mon.smry_time / secs)));
-    INFO(printf("copying buffers took %f seconds (%.2f %%).\n",
-            mon.copy_buffer_time, 100. * (mon.copy_buffer_time / secs)));
-    INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
-            mon.h5_time_write, 100. * (mon.h5_time_write / secs)));
-
-    INFO(puts("Writing runtimes to disk.\n"));
-    h5_write_parameter(H5_RUNTIME_TOTAL_NAME, &secs, 1);
-    h5_write_parameter(H5_RUNTIME_FFTW_NAME, &mon.fftw_time_exe, 1);
-    h5_write_parameter(H5_RUNTIME_FFTWPLAN_NAME, &mon.fftw_time_plan, 1);
-    h5_write_parameter(H5_RUNTIME_FILTER_NAME, &mon.filter_time, 1);
-    h5_write_parameter(H5_RUNTIME_ELLIPTIC_NAME, &mon.poisson_time, 1);
-    h5_write_parameter(H5_RUNTIME_COPY_BUFFER_NAME, &mon.copy_buffer_time, 1);
-    h5_write_parameter(H5_RUNTIME_CSTR_NAME, &mon.cstr_time, 1);
-    h5_write_parameter(H5_RUNTIME_SMRY_NAME, &mon.smry_time, 1);
-    h5_write_parameter(H5_RUNTIME_WRITEOUT_NAME, &mon.h5_time_write, 1);
-    #endif
+    runtime += get_wall_time();
+    INFO(printf("main took %f seconds.\n", runtime));
+    h5_write_simple(H5_RUNTIME_TOTAL_NAME, &runtime, 1, H5D_COMPACT);
+    TIME(write_monitoring());
 
     INFO(printf("rhs was called %zu times.\n\n", mon.calls_rhs));
     double tmp = (double) mon.calls_rhs;
-    h5_write_parameter(H5_COUNTER_RHS, &tmp, 1);
+    h5_write_simple(H5_COUNTER_RHS, &tmp, 1, H5D_COMPACT);
 
     free_and_destroy_all();
     return 0;
 }
 
-#ifdef SHOW_TIMING_INFO
 /**
  * @brief Get wall clock time for timing analysis.
  *
@@ -140,5 +119,43 @@ double get_wall_time()
         return 0.0;
     }
     return (double)time.tv_sec + (double)time.tv_usec * 0.000001;
+}
+
+#ifdef ENABLE_TIMING
+/**
+ * @brief Write monitoring info to h5 file and print on screen.
+ */
+static void write_monitoring()
+{
+    INFO(puts("as percentage of total, not mutually disjoint:"));
+    INFO(printf("fftw execution took %f seconds (%.2f %%).\n",
+            mon.fftw_exe, 100. * (mon.fftw_exe / runtime)));
+    INFO(printf("fftw planning took %f seconds (%.2f %%).\n",
+            mon.fftw_plan, 100. * (mon.fftw_plan / runtime)));
+    INFO(printf("fft filtering took %f seconds (%.2f %%).\n",
+            mon.filter, 100. * (mon.filter / runtime)));
+    INFO(printf("poisson equation took %f seconds (%.2f %%).\n",
+            mon.elliptic, 100. * (mon.elliptic / runtime)));
+    INFO(printf("S_{ij}^{TT} took %f seconds (%.2f %%).\n",
+            mon.gw_sources, 100. * (mon.gw_sources / runtime)));
+    INFO(printf("computing constraints took %f seconds (%.2f %%).\n",
+            mon.cstr, 100. * (mon.cstr / runtime)));
+    INFO(printf("computing summaries took %f seconds (%.2f %%).\n",
+            mon.smry, 100. * (mon.smry / runtime)));
+    INFO(printf("copying buffers took %f seconds (%.2f %%).\n",
+            mon.cpy_buffers, 100. * (mon.cpy_buffers / runtime)));
+    INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
+            mon.h5_write, 100. * (mon.h5_write / runtime)));
+
+    INFO(puts("Writing runtimes to disk.\n"));
+    h5_write_simple(H5_RUNTIME_FFTW_NAME, &mon.fftw_exe, 1, H5D_COMPACT);
+    h5_write_simple(H5_RUNTIME_FFTWPLAN_NAME, &mon.fftw_plan, 1, H5D_COMPACT);
+    h5_write_simple(H5_RUNTIME_FILTER_NAME, &mon.filter, 1, H5D_COMPACT);
+    h5_write_simple(H5_RUNTIME_ELLIPTIC_NAME, &mon.elliptic, 1, H5D_COMPACT);
+    h5_write_simple(H5_RUNTIME_STT_NAME, &mon.gw_sources, 1, H5D_COMPACT);
+    h5_write_simple(H5_RUNTIME_COPY_BUFFER_NAME, &mon.cpy_buffers, 1, H5D_COMPACT);
+    h5_write_simple(H5_RUNTIME_CSTR_NAME, &mon.cstr, 1, H5D_COMPACT);
+    h5_write_simple(H5_RUNTIME_SMRY_NAME, &mon.smry, 1, H5D_COMPACT);
+    h5_write_simple(H5_RUNTIME_WRITEOUT_NAME, &mon.h5_write, 1, H5D_COMPACT);
 }
 #endif

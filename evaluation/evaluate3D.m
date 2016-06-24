@@ -1,13 +1,13 @@
-% name = 'scaledbunch/64_5e-3_2e5_m4';
-interp = false;
+name = 'cutoff/96_16_5e-3_fil';
+interp = true;
 newoutput = true;
 amax = -1;
 
 % loading the data, replace 'name' with the path where you stored the .h5
 % file from the simulation
-name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/' name '.h5'];
+name = ['~/Dropbox/Uni/Exercises/12Semester/MAPhysics/data/' name '.h5'];
+% name = ['~/Data/' name '.h5'];
 
-% built in functions for reading makes it easy
 dim = h5read(name, '/dimension');
 t = h5read(name, '/time');
 a = h5read(name, '/a');
@@ -21,10 +21,19 @@ tols = h5read(name, '/tolerances');
 if (newoutput)
     phips = h5read(name, '/phi_power_spectrum');
     try
-    psips = h5read(name, '/psi_power_spectrum');
-    rhops = h5read(name, '/rho_power_spectrum');
+        psips = h5read(name, '/psi_power_spectrum');
     catch me
-        %
+        disp 'couldnt load psips'
+    end
+    try
+        rhops = h5read(name, '/rho_power_spectrum');
+    catch me
+        disp 'couldnt load rhops'
+    end
+    try
+        gwps = h5read(name, '/gravitational_wave_spectrum');
+    catch me
+        disp 'couldnt load gwps'
     end
     phismry  = h5read(name, '/phi_summary');
     dphismry = h5read(name, '/dphi_summary');
@@ -54,14 +63,14 @@ if (newoutput)
     try
        cstr = h5read(name, '/constraints');
        hamcstrl2 = cstr(1,:);
-       hamcstrinf = cstr(2,:);
-       hubblefrac = h5read(name, '/max_dt_hubble_fraction');
-       inflmass = h5read(name, '/inflaton_mass');
-       steps = h5read(name, '/steps_total');
-       timetotal = h5read(name, '/runtime_total');
+       hamcstrinf = cstr(2,:);   
     catch me
-        %
+        disp 'couldnt load constraints'
     end
+    steps = h5read(name, '/steps_total');
+    timetotal = h5read(name, '/runtime_total');
+    hubblefrac = h5read(name, '/max_dt_hubble_fraction');
+    inflmass = h5read(name, '/inflaton_mass');
 else
     powspec = h5read(name, '/power_spectrum');
     phimean = h5read(name, '/phi_mean')';
@@ -81,8 +90,6 @@ rhorms = sqrt(rhovar ./ rhomean.^2);
 if interp
 [phipks, phipkpos] = findpeaks(phimean);
 phienv = spline(a(phipkpos), phipks, a);
-end
-if interp
 [phipks, phipkpos] = findpeaks(phivar);
 phivarenv = spline(a(phipkpos), phipks, a);
 phirms = sqrt(phivarenv ./ phienv.^2);
@@ -91,8 +98,6 @@ end
 if interp
 [dphipks, dphipkpos] = findpeaks(dphimean);
 dphienv = spline(a(dphipkpos), dphipks, a);
-end
-if interp
 [dphipks, dphipkpos] = findpeaks(dphivar);
 dphivarenv = spline(a(dphipkpos), dphipks, a);
 dphirms = sqrt(dphivarenv ./ dphienv.^2);
@@ -104,7 +109,10 @@ if amax > 1
     t = t(I);
     H = H(I);
     rhorms   = rhorms(I);
-    
+    rhomin   = rhomin(I);
+    rhomax   = rhomax(I);
+    rhomean  = rhomean(I);
+    rhovar   = rhovar(I);
     phimean  = phimean(I);
     phivar   = phivar(I);
     phimin   = phimin(I);
@@ -124,14 +132,18 @@ if amax > 1
     
     try
     phips = phips(:,I);
-    psips = psips(:,I);
     rhops = rhops(:,I);
+    psips = psips(:,I);
     catch m
-        %
+        disp 'some power spectra not available'
     end;
     
-    hamcstrl2 = hamcstrl2(I);
-    hamcstrinf = hamcstrinf(I);
+    try
+        hamcstrl2 = hamcstrl2(I);
+        hamcstrinf = hamcstrinf(I);
+    catch
+        
+    end
     
     phirms = phirms(I);
     phienv = phienv(I);

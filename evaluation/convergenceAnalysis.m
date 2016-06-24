@@ -1,3 +1,4 @@
+%% DEPRECATED!
 close all
 dim = 2;
 dpprefix = 'dp_';

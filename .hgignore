@@ -4,8 +4,11 @@ syntax: glob
 *.DS_Store
 
 # object files and executable
+run
 *.o
-*prog
+
+# debug output
+*.dSYM/
 
 # actual main header file (is created from main_template.h)
 main.h

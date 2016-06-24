@@ -1,9 +1,10 @@
 dim = 1;
-namepre = 'compare_psi';
 scaleamp = 1e0;
 massk = 1e-2;
-
-name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten_compare/' namepre '.dat'];
+mkPlots = false;
+namepre = 'compare_psi';
+name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten_compare/'...
+    namepre '.dat'];
 
 raw = importdata(name);
 if strcmp(namepre, 'compare')
@@ -27,35 +28,21 @@ else
 end
 
 clear raw
-return
 
-figure
-plot(ak, phi0k.*ak.^(3/2))
-xlabel('a');
-ylabel('a^{3/2} * phi_0');
-shg;
-pause;
+if mkPlots
+    figure
+    plot(ak, phi0k.*ak.^(3/2)); xlabel('a'); ylabel('a^{3/2} * phi_0');
+    shg; pause;
 
-plot(ak, phi1k.*ak.^(3/2))
-xlabel('a');
-ylabel('a^{3/2} * phi_1');
-shg;
-pause;
+    plot(ak, phi1k.*ak.^(3/2)); xlabel('a'); ylabel('a^{3/2} * phi_1');
+    shg; pause;
 
-plot(ak, psi1k.*ak.^(3/2))
-xlabel('a');
-ylabel('a^{3/2} * psi');
-shg;
-pause;
+    plot(ak, psi1k.*ak.^(3/2)); xlabel('a'); ylabel('a^{3/2} * psi');
+    shg; pause;
 
-plot(ak, dpsi1k.*ak.^(3/2))
-xlabel('a');
-ylabel('a^{3/2} * dpsi');
-shg;
-pause;
+    plot(ak, dpsi1k.*ak.^(3/2)); xlabel('a'); ylabel('a^{3/2} * dpsi');
+    shg; pause;
 
-% plot(ak, delrhok)
-% xlabel('a');
-% ylabel('delta rho');
-% shg;
-% pause;
+    % plot(ak, delrhok); xlabel('a'); ylabel('delta rho');
+    % shg; pause;
+end

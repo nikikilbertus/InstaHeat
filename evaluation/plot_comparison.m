@@ -1,3 +1,4 @@
+%% DEPRECATED!
 st = 800;
 s = 1;
 

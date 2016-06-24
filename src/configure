@@ -1,83 +1,32 @@
 #!/bin/bash
 
 function setdef {
-    if [ "$1" -eq "1" ]
+    if [ "$2" -eq "1" ]
     then
-        sed -i.bak "s/$2/$3/g" main.h
+        sed -i.bak "s/__${1}__/${1}/g" main.h
     else
-        sed -i.bak "s/$2/MISSING_INPUT/g" main.h
+        sed -i.bak "s/__${1}__/NOT_${1}/g" main.h
     fi
 }
 
-source parameters.sh
+PAR_FILE_NAME="parameters.sh"
+if [ "$#" -eq 1 ];
+then
+    PAR_FILE_NAME="$1"
+fi
+echo "using parameter file ${PAR_FILE_NAME}"
 
 cp main_template.h main.h
 
-sed -i.bak "s;_PATH_;${DATAPATH};g" main.h
-sed -i.bak "s;_IPATH_;${INITIAL_DATAPATH};g" main.h
-sed -i.bak "s/_IC_/${INITIAL_CONDITIONS}/g" main.h
-sed -i.bak "s/_PM_/${PSI_METHOD}/g" main.h
-sed -i.bak "s/_M_/${MASS}/g" main.h
-sed -i.bak "s/_A_/${A_INITIAL}/g" main.h
-sed -i.bak "s/_TF_/${FINAL_TIME}/g" main.h
-sed -i.bak "s/_GPX_/${GRIDPOINTS_X}/g" main.h
-sed -i.bak "s/_GPY_/${GRIDPOINTS_Y}/g" main.h
-sed -i.bak "s/_GPZ_/${GRIDPOINTS_Z}/g" main.h
-sed -i.bak "s/_LX_/${SPATIAL_LOWER_BOUND_X}/g" main.h
-sed -i.bak "s/_LY_/${SPATIAL_LOWER_BOUND_Y}/g" main.h
-sed -i.bak "s/_LZ_/${SPATIAL_LOWER_BOUND_Z}/g" main.h
-sed -i.bak "s/_UX_/${SPATIAL_UPPER_BOUND_X}/g" main.h
-sed -i.bak "s/_UY_/${SPATIAL_UPPER_BOUND_Y}/g" main.h
-sed -i.bak "s/_UZ_/${SPATIAL_UPPER_BOUND_Z}/g" main.h
-
-sed -i.bak "s/_MINFL_/${INFLATON_MASS}/g" main.h
-sed -i.bak "s/_MKARSTEN_/${MASS_KARSTEN}/g" main.h
-sed -i.bak "s/_BUF_/${WRITE_OUT_BUFFER_NUMBER}/g" main.h
-sed -i.bak "s/_BINS_/${POWER_SPECTRUM_BINS}/g" main.h
-sed -i.bak "s/_TSKIP_/${TIME_STEP_SKIPS}/g" main.h
-sed -i.bak "s/_XSKIP_/${STRIDE_X}/g" main.h
-sed -i.bak "s/_YSKIP_/${STRIDE_Y}/g" main.h
-sed -i.bak "s/_ZSKIP_/${STRIDE_Z}/g" main.h
-sed -i.bak "s/_RELTOL_/${RELATIVE_TOLERANCE}/g" main.h
-sed -i.bak "s/_ABSTOL_/${ABSOLUTE_TOLERANCE}/g" main.h
-sed -i.bak "s/_HFRAC_/${MAX_DT_HUBBLE_FRACTION}/g" main.h
-sed -i.bak "s/_THREADS_/${THREAD_NUMBER}/g" main.h
-sed -i.bak "s/_FFTW_/${FFTW_DEFAULT_FLAG}/g" main.h
-sed -i.bak "s/_FFTWSS_/${FFTW_SIMD_STRIDE}/g" main.h
-sed -i.bak "s/_VC_/${VERSION_CONTROL}/g" main.h
-
-sed -i.bak "s/_IM_/${INTEGRATION_METHOD}/g" main.h
-sed -i.bak "s/_TI_/${INITIAL_TIME}/g" main.h
-sed -i.bak "s/_DELT_/${DELTA_T}/g" main.h
-sed -i.bak "s/_MINDELT_/${MINIMAL_DELTA_T}/g" main.h
-sed -i.bak "s/_MAXSTEPS_/${MAX_STEPS}/g" main.h
-sed -i.bak "s/_MINSCAL_/${SMALLEST_SCALING}/g" main.h
-sed -i.bak "s/_MAXSCAL_/${LARGEST_SCALING}/g" main.h
-sed -i.bak "s/_BETA_/${BETA}/g" main.h
-sed -i.bak "s/_SAFE_/${SAFE}/g" main.h
-sed -i.bak "s/_SEED_/${SEED}/g" main.h
-sed -i.bak "s/_COUPLING_/${COUPLING}/g" main.h
-sed -i.bak "s/_LAMBDA_/${LAMBDA}/g" main.h
-
-setdef ${ENABLE_FFT_FILTER} "_FILTER_" "ENABLE_FFT_FILTER"
-setdef ${EVOLVE_WITHOUT_PSI} "_WOPSI_" "EVOLVE_WITHOUT_PSI"
-
-setdef ${PHI} "_OPHI_" "OUTPUT_PHI"
-setdef ${DPHI} "_ODPHI_" "OUTPUT_DPHI"
-setdef ${PSI} "_OPSI_" "OUTPUT_PSI"
-setdef ${DPSI} "_ODPSI_" "OUTPUT_DPSI"
-setdef ${RHO} "_ORHO_" "OUTPUT_RHO"
-
-setdef ${PHI_SUMMARY} "_OPHIS_" "OUTPUT_PHI_SMRY"
-setdef ${DPHI_SUMMARY} "_ODPHIS_" "OUTPUT_DPHI_SMRY"
-setdef ${PSI_SUMMARY} "_OPSIS_" "OUTPUT_PSI_SMRY"
-setdef ${DPSI_SUMMARY} "_ODPSIS_" "OUTPUT_DPSI_SMRY"
-setdef ${RHO_SUMMARY} "_ORHOS_" "OUTPUT_RHO_SMRY"
-
-setdef ${PHI_POWER_SPECTRUM} "_OPHIPS_" "OUTPUT_PHI_PS"
-setdef ${PSI_POWER_SPECTRUM} "_OPSIPS_" "OUTPUT_PSI_PS"
-setdef ${RHO_POWER_SPECTRUM} "_ORHOPS_" "OUTPUT_RHO_PS"
-
-setdef ${CONSTRAINTS} "_OCSTR_" "OUTPUT_CONSTRAINTS"
-
+sed 's/[[:space:]]*#.*//;/^[[:space:]]*$/d' ${PAR_FILE_NAME} | \
+awk -F\= '{gsub(/"/,"",$2); print $1 " " $2}' |
+    while read NAME VALUE;
+    do
+        if [[ "${NAME}" == "ENABLE"* ]] || [[ "${NAME}" == "OUTPUT"* ]]
+        then
+            setdef $NAME $VALUE
+        else
+            sed -i.bak "s;__"${NAME}"__;"${VALUE}";g" main.h
+        fi
+    done
 rm *.bak

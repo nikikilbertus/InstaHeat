@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <float.h>
 #include <math.h>
 #include <omp.h>
@@ -26,8 +27,10 @@ static void h5_write_buffer(const hsize_t rank, const hsize_t Nt,
         const double *buf);
 static void h5_write_all_buffers(const hsize_t Nt);
 static void append_to_buffer(struct output f);
-static void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
-        double *out);
+#if INITIAL_CONDITIONS == IC_FROM_H5_FILE
+static void h5_read_and_fill(const hid_t file, const hsize_t index,
+        const char *name, double *out);
+#endif
 
 /**
  * @brief Creates the initial hdf5 file and writes out most of the simulation
@@ -84,6 +87,15 @@ void h5_create_empty_by_path()
     #ifdef OUTPUT_RHO_SMRY
     h5_create_dset(rank, rho_smry.dim, &(rho_smry.id), H5_RHO_SMRY_NAME);
     #endif
+    #ifdef OUTPUT_PRESSURE_SMRY
+    h5_create_dset(rank, p_smry.dim, &(p_smry.id), H5_PRESSURE_SMRY_NAME);
+    #endif
+    #ifdef OUTPUT_H1_SMRY
+    h5_create_dset(rank, h1_smry.dim, &(h1_smry.id), H5_H1_SMRY_NAME);
+    #endif
+    #ifdef OUTPUT_H2_SMRY
+    h5_create_dset(rank, h2_smry.dim, &(h2_smry.id), H5_H2_SMRY_NAME);
+    #endif
 
     // ---------------------------power spectra---------------------------------
     #ifdef OUTPUT_PHI_PS
@@ -94,6 +106,9 @@ void h5_create_empty_by_path()
     #endif
     #ifdef OUTPUT_RHO_PS
     h5_create_dset(rank, rho_ps.dim, &(rho_ps.id), H5_RHO_PS_NAME);
+    #endif
+    #ifdef ENABLE_GW
+    h5_create_dset(rank, gw.dim, &(gw.id), H5_GW_PS_NAME);
     #endif
 
     // ---------------------------constraints-----------------------------------
@@ -108,61 +123,81 @@ void h5_create_empty_by_path()
 
     // ---------------------------parameters------------------------------------
     double val[3] = {MASS, 0.0, 0.0};
-    h5_write_parameter(H5_MASS_NAME, val, 1);
+    h5_write_simple(H5_MASS_NAME, val, 1, H5D_COMPACT);
 
     #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
     val[0] = INFLATON_MASS;
     #else
     val[0] = -1.0;
     #endif
-    h5_write_parameter(H5_INFLATON_MASS_NAME, val, 1);
+    h5_write_simple(H5_INFLATON_MASS_NAME, val, 1, H5D_COMPACT);
 
     val[0] = pars.dim;
-    h5_write_parameter(H5_DIMENSION_NAME, val, 1);
+    h5_write_simple(H5_DIMENSION_NAME, val, 1, H5D_COMPACT);
 
     val[0] = SEED;
-    h5_write_parameter(H5_SEED_NAME, val, 1);
+    h5_write_simple(H5_SEED_NAME, val, 1, H5D_COMPACT);
+
+    val[0] = THREAD_NUMBER <= 0 ? omp_get_max_threads() : THREAD_NUMBER;
+    h5_write_simple(H5_THREAD_NUMBER_NAME, val, 1, H5D_COMPACT);
 
     val[0] = pars.file.skip;
-    h5_write_parameter(H5_STRIDES_TIME_NAME, val, 1);
+    h5_write_simple(H5_STRIDES_TIME_NAME, val, 1, H5D_COMPACT);
 
     val[0] = RELATIVE_TOLERANCE;
     val[1] = ABSOLUTE_TOLERANCE;
-    h5_write_parameter(H5_TOLERANCES_NAME, val, 2);
+    h5_write_simple(H5_TOLERANCES_NAME, val, 2, H5D_COMPACT);
 
     val[0] = pars.x.N;
     val[1] = pars.y.N;
     val[2] = pars.z.N;
-    h5_write_parameter(H5_GRIDPOINTS_INTERNAL_NAME, val, 3);
+    h5_write_simple(H5_GRIDPOINTS_INTERNAL_NAME, val, 3, H5D_COMPACT);
 
     val[0] = SPATIAL_LOWER_BOUND_X;
     val[1] = SPATIAL_UPPER_BOUND_X;
-    h5_write_parameter(H5_SPATIAL_BOUNDS_X_NAME, val, 2);
+    h5_write_simple(H5_SPATIAL_BOUNDS_X_NAME, val, 2, H5D_COMPACT);
 
     val[0] = SPATIAL_LOWER_BOUND_Y;
     val[1] = SPATIAL_UPPER_BOUND_Y;
-    h5_write_parameter(H5_SPATIAL_BOUNDS_Y_NAME, val, 2);
+    h5_write_simple(H5_SPATIAL_BOUNDS_Y_NAME, val, 2, H5D_COMPACT);
 
     val[0] = SPATIAL_LOWER_BOUND_Z;
     val[1] = SPATIAL_UPPER_BOUND_Z;
-    h5_write_parameter(H5_SPATIAL_BOUNDS_Z_NAME, val, 2);
+    h5_write_simple(H5_SPATIAL_BOUNDS_Z_NAME, val, 2, H5D_COMPACT);
 
     val[0] = pars.x.outN;
     val[1] = pars.y.outN;
     val[2] = pars.z.outN;
-    h5_write_parameter(H5_GRIDPOINTS_OUTPUT_NAME, val, 3);
+    h5_write_simple(H5_GRIDPOINTS_OUTPUT_NAME, val, 3, H5D_COMPACT);
 
     val[0] = pars.x.stride;
     val[1] = pars.y.stride;
     val[2] = pars.z.stride;
-    h5_write_parameter(H5_STRIDES_SPACE_NAME, val, 3);
+    h5_write_simple(H5_STRIDES_SPACE_NAME, val, 3, H5D_COMPACT);
+
+    val[0] = pars.bunch_davies_cutoff;
+    h5_write_simple(H5_BUNCH_DAVIES_CUTOFF_NAME, val, 1, H5D_COMPACT);
 
     #ifdef MAX_DT_HUBBLE_FRACTION
     val[0] = MAX_DT_HUBBLE_FRACTION;
     #else
     val[0] = -1.0;
     #endif
-    h5_write_parameter(H5_MAX_DT_HUBBLE_FRACTION_NAME, val, 1);
+    h5_write_simple(H5_MAX_DT_HUBBLE_FRACTION_NAME, val, 1, H5D_COMPACT);
+
+    #ifdef ENABLE_FFT_FILTER
+    val[0] = 1.0;
+    #else
+    val[0] = 0.0;
+    #endif
+    h5_write_simple(H5_ENABLE_FILTER_NAME, val, 1, H5D_COMPACT);
+
+    #ifdef ENABLE_GW
+    val[0] = 1.0;
+    #else
+    val[0] = 0.0;
+    #endif
+    h5_write_simple(H5_ENABLE_GW_NAME, val, 1, H5D_COMPACT);
 
     // ---------------------------commit hash-----------------------------------
     hid_t filetype, memtype, dspace_str, dset_str;
@@ -209,16 +244,8 @@ void h5_create_empty_by_path()
     #endif
 
     //-----------------write out psi method-------------------------------------
-    #if PSI_METHOD == PSI_ELLIPTIC
-    len = 9;
-    const char *method = "elliptic";
-    #elif PSI_METHOD == PSI_PARABOLIC
-    len = 10;
-    const char *method = "parabolic";
-    #elif PSI_METHOD == PSI_HYPERBOLIC
     len = 11;
     const char *method = "hyperbolic";
-    #endif
     filetype = H5Tcopy(H5T_FORTRAN_S1);
     H5Tset_size(filetype, len - 1);
     memtype = H5Tcopy(H5T_C_S1);
@@ -284,16 +311,16 @@ static void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,
  * @note We do not get back a handle to the dataset, i.e. the parameters are
  * written once and for all and not modified later.
  */
-void h5_write_parameter(const char *name, const double *val, const size_t N)
+void h5_write_simple(const char *name, const double *val, const size_t N,
+        const H5D_layout_t layout)
 {
     hsize_t rank = 1;
     hsize_t dim[1] = {N};
     hsize_t max[1] = {N};
     hid_t file = pars.file.id;
-
     hid_t dspace_par = H5Screate_simple(rank, dim, max);
     hid_t plist_par = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_layout(plist_par, H5D_COMPACT);
+    H5Pset_layout(plist_par, layout);
     hid_t dset_par = H5Dcreate(file, name, H5T_NATIVE_DOUBLE,
                             dspace_par, H5P_DEFAULT, plist_par, H5P_DEFAULT);
     H5Dwrite(dset_par, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, val);
@@ -328,9 +355,7 @@ static void h5_get_extent(hsize_t *cur)
  */
 static void h5_write_all_buffers(const hsize_t Nt)
 {
-    // TODO[performance] maybe use static variable to count dataset size
-    // instead of reading it from the file each time static hsize_t counter;
-    TIME(mon.h5_time_write -= get_wall_time());
+    TIME(mon.h5_write -= get_wall_time());
 
     hsize_t rank;
     hsize_t curr_dim[1];
@@ -365,6 +390,9 @@ static void h5_write_all_buffers(const hsize_t Nt)
     #ifdef OUTPUT_RHO_PS
     h5_write_buffer(rank, Nt, rho_ps.dim, os, rho_ps.id, rho_ps.buf);
     #endif
+    #ifdef ENABLE_GW
+    h5_write_buffer(rank, Nt, gw.dim, os, gw.id, gw.buf);
+    #endif
 
     // --------------------------constraints------------------------------------
     #ifdef OUTPUT_CONSTRAINTS
@@ -387,13 +415,22 @@ static void h5_write_all_buffers(const hsize_t Nt)
     #ifdef OUTPUT_RHO_SMRY
     h5_write_buffer(rank, Nt, rho_smry.dim, os, rho_smry.id, rho_smry.buf);
     #endif
+    #ifdef OUTPUT_PRESSURE_SMRY
+    h5_write_buffer(rank, Nt, p_smry.dim, os, p_smry.id, p_smry.buf);
+    #endif
+    #ifdef OUTPUT_H1_SMRY
+    h5_write_buffer(rank, Nt, h1_smry.dim, os, h1_smry.id, h1_smry.buf);
+    #endif
+    #ifdef OUTPUT_H2_SMRY
+    h5_write_buffer(rank, Nt, h2_smry.dim, os, h2_smry.id, h2_smry.buf);
+    #endif
 
     rank = 1;
     // ---------------------------time and a-----------------------------------
     h5_write_buffer(rank, Nt, t_out.dim, os, t_out.id, t_out.buf);
     h5_write_buffer(rank, Nt, a_out.dim, os, a_out.id, a_out.buf);
 
-    TIME(mon.h5_time_write += get_wall_time());
+    TIME(mon.h5_write += get_wall_time());
     INFO(printf("Dumping to disk at t = %f\n", pars.t.t));
 }
 
@@ -420,7 +457,6 @@ static void h5_write_buffer(const hsize_t rank, const hsize_t Nt,
     hid_t mem_space = H5Screate_simple(rank, add, NULL);
     hid_t dspace = H5Dget_space(dset);
     H5Dset_extent(dset, new_dim);
-    //TODO: necessary to call this again?
     dspace = H5Dget_space(dset);
     H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start, NULL, add, NULL);
     H5Dwrite(dset, H5T_NATIVE_DOUBLE, mem_space, dspace, H5P_DEFAULT, buf);
@@ -452,11 +488,11 @@ void h5_close()
  */
 void save()
 {
-    TIME(mon.copy_buffer_time -= get_wall_time());
+    TIME(mon.cpy_buffers -= get_wall_time());
 
     const size_t index = pars.file.index;
     const hsize_t Nt = pars.file.buf_size;
-    a_out.tmp[0] = field[2 * pars.N];
+    a_out.tmp[0] = field[pars.Ntot - 1];
     append_to_buffer(a_out);
     append_to_buffer(t_out);
 
@@ -482,6 +518,18 @@ void save()
             #pragma omp section
             append_to_buffer(rho_smry);
         #endif
+        #ifdef OUTPUT_PRESSURE_SMRY
+            #pragma omp section
+            append_to_buffer(p_smry);
+        #endif
+        #ifdef OUTPUT_H1_SMRY
+            #pragma omp section
+            append_to_buffer(h1_smry);
+        #endif
+        #ifdef OUTPUT_H2_SMRY
+            #pragma omp section
+            append_to_buffer(h2_smry);
+        #endif
         #ifdef OUTPUT_PHI_PS
             #pragma omp section
             append_to_buffer(phi_ps);
@@ -498,13 +546,14 @@ void save()
             #pragma omp section
             append_to_buffer(cstr);
         #endif
+        #ifdef ENABLE_GW
+            #pragma omp section
+            append_to_buffer(gw);
+        #endif
     }
 
     #ifdef LARGE_OUTPUT
     const hsize_t N = pars.N;
-    const hsize_t N2 = 2 * N;
-    const hsize_t N2p = pars.N2p;
-    const hsize_t N3p = pars.N3p;
     const hsize_t Nx = pars.x.N;
     const hsize_t Ny = pars.y.N;
     const hsize_t Nz = pars.z.N;
@@ -531,14 +580,10 @@ void save()
                 dphi.buf[os + idb] = field[N + id];
                 #endif
                 #ifdef OUTPUT_PSI
-                psi.buf[os + idb] = field[N2p + id];
+                psi.buf[os + idb] = field[2 * N + id];
                 #endif
                 #ifdef OUTPUT_DPSI
-                    #if PSI_METHOD == PSI_PARABOLIC
-                    dpsi.buf[os + idb] = dfield[N2p + id];
-                    #else
-                    dpsi.buf[os + idb] = field[N3p + id];
-                    #endif
+                dpsi.buf[os + idb] = field[3 * N + id];
                 #endif
                 #ifdef OUTPUT_RHO
                 rho_out.buf[os + idb] = rho[id];
@@ -554,7 +599,7 @@ void save()
     }
     #endif
 
-    TIME(mon.copy_buffer_time += get_wall_time());
+    TIME(mon.cpy_buffers += get_wall_time());
 
     if (index == Nt - 1) {
         h5_write_all_buffers(Nt);
@@ -585,6 +630,7 @@ static void append_to_buffer(struct output f)
     }
 }
 
+#if INITIAL_CONDITIONS == IC_FROM_H5_FILE
 /**
  * @brief Read one time slice of an extisting `.h5` file from a prior
  * simulation as initial data for the current simulation.
@@ -593,13 +639,10 @@ static void append_to_buffer(struct output f)
  */
 void h5_read_timeslice()
 {
-    hid_t file, dset, dspace;
     size_t N = pars.N;
-    size_t N2p = pars.N2p;
-    size_t N3p = pars.N3p;
     double t = pars.t.ti;
-
-    file = H5Fopen(INITIAL_DATAPATH, H5F_ACC_RDONLY, H5P_DEFAULT);
+    hid_t file = H5Fopen(INITIAL_DATAPATH, H5F_ACC_RDONLY, H5P_DEFAULT);
+    hid_t dset, dspace;
 
     // ---------------------------get time and find index-----------------------
     dset = H5Dopen(file, H5_TIME_NAME, H5P_DEFAULT);
@@ -624,8 +667,8 @@ void h5_read_timeslice()
         }
     }
     if (index == Nt) {
-        INFO(puts("The initial time is larger than the maximal time in"
-                    " the h5 file. Starting at last existing timeslice."));
+        INFO(puts("The initial time is larger than the maximal time in the "
+                  "h5 file. Starting at last existing timeslice."));
         index = Nt - 1;
     }
     pars.t.ti = time_tmp[index];
@@ -638,8 +681,8 @@ void h5_read_timeslice()
     // ---------------------------read fields at index--------------------------
     h5_read_and_fill(file, index, H5_PHI_NAME, field);
     h5_read_and_fill(file, index, H5_DPHI_NAME, field + N);
-    h5_read_and_fill(file, index, H5_PSI_NAME, field + N2p);
-    h5_read_and_fill(file, index, H5_DPSI_NAME, field + N3p);
+    h5_read_and_fill(file, index, H5_PSI_NAME, field + 2 * N);
+    h5_read_and_fill(file, index, H5_DPSI_NAME, field + 3 * N);
 
     // ---------------------------read a at index-------------------------------
     dset = H5Dopen(file, H5_A_NAME, H5P_DEFAULT);
@@ -659,7 +702,8 @@ void h5_read_timeslice()
     hsize_t start[1] = {index};
     hsize_t count[1] = {1};
     H5Sselect_hyperslab(dspace, H5S_SELECT_SET, start, NULL, count, NULL);
-    H5Dread(dset, H5T_NATIVE_DOUBLE, mspace, dspace, H5P_DEFAULT, field + 2 * N);
+    H5Dread(dset, H5T_NATIVE_DOUBLE, mspace, dspace, H5P_DEFAULT,
+            field + pars.Ntot - 1);
     H5Dclose(dset);
     H5Sclose(dspace);
     H5Fclose(file);
@@ -674,8 +718,8 @@ void h5_read_timeslice()
  * @param[out] out Pointer to the memory where to store the time slice @p index
  * of the dataset @p name in file @p file.
  */
-static void h5_read_and_fill(const hid_t file, const hsize_t index, const char *name,
-        double *out)
+static void h5_read_and_fill(const hid_t file, const hsize_t index,
+        const char *name, double *out)
 {
     size_t N = pars.N;
     hid_t dset = H5Dopen(file, name, H5P_DEFAULT);
@@ -703,6 +747,49 @@ static void h5_read_and_fill(const hid_t file, const hsize_t index, const char *
 }
 
 /**
+ * @brief Read the followup dataset, i.e. the full field array of the last
+ * snapshot from a previous simulation as initial conditions for the current
+ * one.
+ */
+void h5_read_followup()
+{
+    hid_t file = H5Fopen(INITIAL_DATAPATH, H5F_ACC_RDONLY, H5P_DEFAULT);
+    hid_t dset = H5Dopen(file, H5_FOLLOWUP_NAME, H5P_DEFAULT);
+    hid_t dspace = H5Dget_space(dset);
+    int ndims = H5Sget_simple_extent_ndims(dspace);
+    hsize_t dims[2];
+    H5Sget_simple_extent_dims(dspace, dims, NULL);
+    size_t Ntot = dims[0];
+    if (ndims != 1 || Ntot != pars.Ntot) {
+        INFO(fputs("Could not read followup data properly. "
+                   "Do all specifications match?\n", stderr));
+        exit(EXIT_FAILURE);
+    }
+    H5Dread(dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, field);
+    H5Dclose(dset);
+    H5Sclose(dspace);
+
+    dset = H5Dopen(file, H5_TIME_NAME, H5P_DEFAULT);
+    dspace = H5Dget_space(dset);
+    ndims = H5Sget_simple_extent_ndims(dspace);
+    if (ndims != 1) {
+        INFO(fputs("Could not read time properly.\n", stderr));
+        exit(EXIT_FAILURE);
+    }
+    H5Sget_simple_extent_dims(dspace, dims, NULL);
+    size_t Nt = dims[0];
+    double *time_tmp = calloc(Nt, sizeof *time_tmp);
+    H5Dread(dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, time_tmp);
+    pars.t.ti = time_tmp[Nt - 1];
+    pars.t.t = time_tmp[Nt - 1];
+    free(time_tmp);
+    H5Dclose(dset);
+    H5Sclose(dspace);
+}
+#endif
+
+#ifdef IC_FROM_DAT_FILE
+/**
  * @brief Read one time slice of an extisting `.dat` file.
  *
  * This mainly served debugging and comparison purposes. It might be a good
@@ -714,9 +801,6 @@ static void h5_read_and_fill(const hid_t file, const hsize_t index, const char *
 void read_initial_data()
 {
     size_t N = pars.N;
-    size_t N2p = pars.N2p;
-    size_t N3p = pars.N3p;
-
     FILE *file = fopen(INITIAL_DATAPATH, "r");
     if (!file) {
         fputs("Could not read initial data file.\n", stderr);
@@ -726,11 +810,20 @@ void read_initial_data()
     int ii, jj, kk;
     for (size_t i = 0; i < N; ++i) {
         if(!fscanf(file, " %d %d %d %lf %lf %lf %lf\n",
-                    &ii, &jj, &kk, &field[i], &field[i + N], &field[i + N2p],
-                    &field[i + N3p])) {
+                    &ii, &jj, &kk, &field[i], &field[i + N], &field[i + 2 * N],
+                    &field[i + 3 * N])) {
             fputs("Could not read initial data file.\n", stderr);
             exit(EXIT_FAILURE);
         }
     }
     fclose(file);
 }
+#endif
+
+#ifdef ENABLE_FOLLOWUP
+void h5_write_followup()
+{
+    INFO(puts("Writing snapshot of full fields for followup run to disk.\n"));
+    h5_write_simple(H5_FOLLOWUP_NAME, field, pars.Ntot, H5D_CONTIGUOUS);
+}
+#endif

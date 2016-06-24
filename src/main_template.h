@@ -14,7 +14,7 @@
  *
  * The `main.h` file is created by a shell script that is called from the
  * Makefile __before__ compilation. There is a main_template.h file which
- * contains placeholder that are replaced according to the values in
+ * contains placeholders that are replaced according to the values in
  * `parameters.sh`. An extensive documentation of the `parameter.sh` file is
  * found in a separate documentation file `doc_parameters.md` in the root
  * directory. One should not look for documentation and explanation here.
@@ -28,7 +28,6 @@
 #define MIN(x, y)               (((x) > (y)) ? (y) : (x))
 
 #define SHOW_RUNTIME_INFO // recommended
-#define SHOW_TIMING_INFO // recommended
 /* #define CHECK_FOR_NAN // not recommended (performance) */
 /* #define ENABLE_PROFILER // only recommended for debugging */
 /* #define DEBUG // only recommended for debugging (huge output!) */
@@ -42,7 +41,7 @@
 #define INFO(f)
 #endif
 
-#ifdef SHOW_TIMING_INFO
+#ifdef ENABLE_TIMING
 #define TIME(f) do {\
         (f); \
     } while (0)
@@ -52,96 +51,110 @@
 
 #define RK4                 (0)
 #define DOPRI853            (1)
-#define INTEGRATION_METHOD  (_IM_)
+#define INTEGRATION_METHOD  (__INTEGRATION_METHOD__)
 
 #define VERSION_CONTROL_NONE    (0)
 #define VERSION_CONTROL_HG      (1)
 #define VERSION_CONTROL_GIT     (2)
-#define VERSION_CONTROL         (_VC_)
-
-#define PSI_ELLIPTIC            (0)
-#define PSI_HYPERBOLIC          (1)
-#define PSI_PARABOLIC           (2)
-#define PSI_METHOD              (_PM_)
+#define VERSION_CONTROL         (__VERSION_CONTROL__)
 
 #define IC_FROM_INTERNAL_FUNCTION       (0)
 #define IC_FROM_H5_FILE                 (1)
 #define IC_FROM_DAT_FILE_WITH_PSI       (2)
 #define IC_FROM_DAT_FILE_WITHOUT_PSI    (3)
 #define IC_FROM_BUNCH_DAVIES            (4)
-#define INITIAL_CONDITIONS              (_IC_)
+#define INITIAL_CONDITIONS              (__INITIAL_CONDITIONS__)
 
 #if INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITH_PSI \
     || INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITHOUT_PSI
     #define IC_FROM_DAT_FILE
 #endif
 
-#define _WOPSI_
-#define _OPHI_
-#define _ODPHI_
-#define _OPSI_
-#define _ODPSI_
-#define _ORHO_
-#define _OPHIPS_
-#define _OPSIPS_
-#define _ORHOPS_
-#define _OPHIS_
-#define _ODPHIS_
-#define _OPSIS_
-#define _ODPSIS_
-#define _ORHOS_
-#define _OCSTR_
+#define __OUTPUT_PHI__
+#define __OUTPUT_DPHI__
+#define __OUTPUT_PSI__
+#define __OUTPUT_DPSI__
+#define __OUTPUT_RHO__
+#define __OUTPUT_PHI_PS__
+#define __OUTPUT_PSI_PS__
+#define __OUTPUT_RHO_PS__
+#define __OUTPUT_PHI_SMRY__
+#define __OUTPUT_DPHI_SMRY__
+#define __OUTPUT_PSI_SMRY__
+#define __OUTPUT_DPSI_SMRY__
+#define __OUTPUT_RHO_SMRY__
+#define __OUTPUT_PRESSURE_SMRY__
+#define __OUTPUT_H1_SMRY__
+#define __OUTPUT_H2_SMRY__
+#define __OUTPUT_CONSTRAINTS__
 
-#if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || defined(OUTPUT_PSI) \
-    || defined(OUTPUT_DPSI)|| defined(OUTPUT_RHO)
+#if defined(OUTPUT_PHI) || defined(OUTPUT_DPHI) || \
+    defined(OUTPUT_PSI) || defined(OUTPUT_DPSI) || \
+    defined(OUTPUT_RHO)
     #define LARGE_OUTPUT
 #endif
 
-#if defined(OUTPUT_PHI_PS) || defined(OUTPUT_DPHI_PS) || defined(OUTPUT_PSI_PS) \
-    || defined(OUTPUT_DPSI_PS) || defined(OUTPUT_RHO_PS)
+#if defined(OUTPUT_PHI_PS) || defined(OUTPUT_DPHI_PS) || \
+    defined(OUTPUT_PSI_PS) || defined(OUTPUT_DPSI_PS) || \
+    defined(OUTPUT_RHO_PS)
     #define OUTPUT_PS
 #endif
 
-#define DATAPATH                ("_PATH_")
-#define INITIAL_DATAPATH        ("_IPATH_")
-#define WRITE_OUT_BUFFER_NUMBER (_BUF_)
-#define POWER_SPECTRUM_BINS     (_BINS_)
-#define TIME_STEP_SKIPS         (_TSKIP_)
-#define STRIDE_X                (_XSKIP_)
-#define STRIDE_Y                (_YSKIP_)
-#define STRIDE_Z                (_ZSKIP_)
-#define THREAD_NUMBER           (_THREADS_)
-#define FFTW_DEFAULT_FLAG       (_FFTW_)
-#define FFTW_SIMD_STRIDE        (_FFTWSS_)
-#define _FILTER_
-#define GRIDPOINTS_X            (_GPX_)
-#define GRIDPOINTS_Y            (_GPY_)
-#define GRIDPOINTS_Z            (_GPZ_)
-#define SPATIAL_LOWER_BOUND_X   (_LX_)
-#define SPATIAL_UPPER_BOUND_X   (_UX_)
-#define SPATIAL_LOWER_BOUND_Y   (_LY_)
-#define SPATIAL_UPPER_BOUND_Y   (_UY_)
-#define SPATIAL_LOWER_BOUND_Z   (_LZ_)
-#define SPATIAL_UPPER_BOUND_Z   (_UZ_)
-#define DELTA_T                 (_DELT_)
-#define INITIAL_TIME            (_TI_)
-#define FINAL_TIME              (_TF_)
-#define MAX_STEPS               (_MAXSTEPS_)
-#define MINIMAL_DELTA_T         (_MINDELT_)
-#define SEED                    (_SEED_)
-#define MASS                    (_M_)
-#define MASS_KARSTEN            (_MKARSTEN_)
-#define INFLATON_MASS           (_MINFL_)
-#define COUPLING                (_COUPLING_)
-#define LAMBDA                  (_LAMBDA_)
-#define A_INITIAL               (_A_)
-#define SMALLEST_SCALING        (_MINSCAL_)
-#define LARGEST_SCALING         (_MAXSCAL_)
-#define BETA                    (_BETA_) // ALPHA = 1.0/8.0 - BETA * 0.2
-#define SAFE                    (_SAFE_)
-#define RELATIVE_TOLERANCE      (_RELTOL_)
-#define ABSOLUTE_TOLERANCE      (_ABSTOL_)
-#define MAX_DT_HUBBLE_FRACTION  (_HFRAC_)
+#if defined(OUTPUT_PHI_SMRY) || defined(OUTPUT_DPHI_SMRY) || \
+    defined(OUTPUT_PSI_SMRY) || defined(OUTPUT_DPSI_SMRY) || \
+    defined(OUTPUT_RHO_SMRY)
+    #define OUTPUT_SMRY
+#endif
+
+#define DATAPATH                ("__DATAPATH__")
+#define INITIAL_DATAPATH        ("__INITIAL_DATAPATH__")
+#define WRITE_OUT_BUFFER_NUMBER (__WRITE_OUT_BUFFER_NUMBER__)
+#define POWER_SPECTRUM_BINS     (__POWER_SPECTRUM_BINS__)
+#define TIME_STEP_SKIPS         (__TIME_STEP_SKIPS__)
+#define STRIDE_X                (__STRIDE_X__)
+#define STRIDE_Y                (__STRIDE_Y__)
+#define STRIDE_Z                (__STRIDE_Z__)
+#define THREAD_NUMBER           (__THREAD_NUMBER__)
+#define FFTW_DEFAULT_FLAG       (__FFTW_DEFAULT_FLAG__)
+#define GRIDPOINTS_X            (__GRIDPOINTS_X__)
+#define GRIDPOINTS_Y            (__GRIDPOINTS_Y__)
+#define GRIDPOINTS_Z            (__GRIDPOINTS_Z__)
+#define SPATIAL_LOWER_BOUND_X   (__SPATIAL_LOWER_BOUND_X__)
+#define SPATIAL_UPPER_BOUND_X   (__SPATIAL_UPPER_BOUND_X__)
+#define SPATIAL_LOWER_BOUND_Y   (__SPATIAL_LOWER_BOUND_Y__)
+#define SPATIAL_UPPER_BOUND_Y   (__SPATIAL_UPPER_BOUND_Y__)
+#define SPATIAL_LOWER_BOUND_Z   (__SPATIAL_LOWER_BOUND_Z__)
+#define SPATIAL_UPPER_BOUND_Z   (__SPATIAL_UPPER_BOUND_Z__)
+#define DELTA_T                 (__DELTA_T__)
+#define INITIAL_TIME            (__INITIAL_TIME__)
+#define FINAL_TIME              (__FINAL_TIME__)
+#define MAX_STEPS               (__MAX_STEPS__)
+#define MINIMAL_DELTA_T         (__MINIMAL_DELTA_T__)
+#define SEED                    (__SEED__)
+#define MASS                    (__MASS__)
+#define MASS_KARSTEN            (__MASS_KARSTEN__)
+#define INFLATON_MASS           (__INFLATON_MASS__)
+#define COUPLING                (__COUPLING__)
+#define LAMBDA                  (__LAMBDA__)
+#define A_INITIAL               (__A_INITIAL__)
+#define SMALLEST_SCALING        (__SMALLEST_SCALING__)
+#define LARGEST_SCALING         (__LARGEST_SCALING__)
+#define BETA                    (__BETA__) // ALPHA = 1.0/8.0 - BETA * 0.2
+#define SAFE                    (__SAFE__)
+#define RELATIVE_TOLERANCE      (__RELATIVE_TOLERANCE__)
+#define ABSOLUTE_TOLERANCE      (__ABSOLUTE_TOLERANCE__)
+#define MAX_DT_HUBBLE_FRACTION  (__MAX_DT_HUBBLE_FRACTION__)
+#define BUNCH_DAVIES_CUTOFF     (__BUNCH_DAVIES_CUTOFF__)
+#define MAX_RUNTIME             (__MAX_RUNTIME__)
+#define __ENABLE_FFT_FILTER__
+#define __ENABLE_GW__
+#define __ENABLE_FOLLOWUP__
+#define __ENABLE_TIMING__
+
+#ifndef ENABLE_GW
+    #undef OUTPUT_H1_SMRY
+    #undef OUTPUT_H2_SMRY
+#endif
 
 /**
  * @brief Holds the values necessary to describe one dimension of the grid.
@@ -154,14 +167,14 @@ struct grid_dimension
     size_t M; ///< number of gridpoints in Fourier space
     double a; ///< lower bound of the interval
     double b; ///< upper bound of the interval
-    double k; ///< used to compute k vectors: k = 2 pi I / (b - a)
+    double k; ///< used to compute k vectors: k = 2 pi / (b - a)
     double k2; ///< used to compute k^2: k2 = k*k = -4 pi^2 / L^2
     size_t stride; ///< strides for output
     size_t outN; ///< number of output points in this dimension
 };
 
 /**
- * @brief Parameters related to the time evolution.
+ * @brief Holds all parameters related to the time evolution.
  */
 struct timing
 {
@@ -179,35 +192,34 @@ struct output
 {
     size_t dim;     ///< length of output on a single time slice
     hsize_t id;     ///< id for the dataset in the h5 file
-    double *buf;    ///< buffer WRITE_OUT_BUFFER_NUMBER many time slices
+    double *buf;    ///< buffer for `WRITE_OUT_BUFFER_NUMBER` many time slices
     double *tmp;    ///< the output values on the current time slice
 };
 
 /**
- * @brief All parameters related to file IO operations
+ * @brief Holds all parameters related to file IO operations.
  */
 struct file_parameters
 {
     hsize_t id;        ///< h5 file id of the output file
-    size_t index;      ///< current index within the buffers
+    size_t index;      ///< current index within the buffers for time evolution
     size_t buf_size;   ///< size of the buffer
     size_t skip;       ///< timesteps to skip in between write outs
 };
 
 /**
- *  @brief Collection of all parameters.
+ *  @brief An overall collection of all simulation parameters.
  *
  *  @note Throughout the source code holds:
  *  Nx = number of grid points in the x direction
  *  Ny = number of grid points in the y direction
  *  Nz = number of grid points in the z direction
  *  N  = number of gridpoints for the whole spatial grid = Nx * Ny * Nz
- *  N2 = 2 * N, N3 = 3 * N, N2p = 2 * N + 2, N3p = 3 * N + 2
- *  Nall = size of `field`, `dfield`, `field_new`, `dfield_new`, = 4 * N + 2
- *  Ntot = number of scalar equations in the integration; depends on method:
- *  elliptic: Ntot = 2 * N + 1 (order: phi, dphi, a)
- *  parabolic: Ntot = 3 * N + 1 (oder: phi, dphi, psi, a)
- *  hyperbolic: Ntot = 4 * N + 1 (oder: phi, dphi, psi, dpsi, a)
+ *  Next  = (extended) number of doubles in complex grid = Nx * Ny * (Nz + 2)
+ *  Ntot = number of scalar equations in the integration: 4 * N + 4 * Next + 1
+ *  (order: \f$\phi\f$ (N), \f$\dot{\phi}\f$ (N), \f$\psi\f$ (N),
+ *  \f$\dot{\psi}\f$ (N), \f$h_1\f$ (Next), \f$h_2\f$ (Next), \f$\dot{h}_1\f$
+ *  (Next), \f$\dot{h}_2\f$ (Next), \f$a\f$ (1))
  */
 struct parameters
 {
@@ -215,38 +227,37 @@ struct parameters
     struct grid_dimension y; ///< specification of the y direction
     struct grid_dimension z; ///< specification of the z direction
     size_t N; ///< number of spatial gridpoints: N=Nx*Ny*Nz
-    size_t Ntot; ///< number of scalar equations evolved depending on PSI_METHOD
-    size_t Nall; ///< size of field: Nall=4*N+2
-    size_t Nsimd; ///< used to guarantee correct SIMD alignment for FFTW3
-    size_t N2p; ///< index of $$\psi$$ in the the field arrays
-    size_t N3p; ///< index of $$\dot{\psi}$$ in the the field arrays
+    size_t Next; ///< number of doubles in complex grid: N=Nx*Ny*(Nz+2)
+    size_t Ntot; ///< number of scalar equations
     size_t outN; ///< number of spatial gridpoints for output
     size_t M; ///< number of gridpoints in Fourier space
     size_t dim; ///< dimensions of the simulation (1, 2 or 3)
+    size_t bunch_davies_cutoff; ///< cutoff of the initial Bunch Davies spectrum
     struct timing t; ///< time evolution parameters
     struct file_parameters file; ///< file IO parameters
+    size_t max_runtime; ///< The maximal overall runtime of the program
 };
 
 /**
- * @brief Temporal arrays used for computations of gradients, ffts and the like.
+ * @brief Memory for DFTs and temporary quantities.
  */
 struct temporary
 {
-    double  *xphi; ///< The x derivative of $$\phi$$ in real space
-    double  *yphi; ///< The y derivative of $$\phi$$ in real space
-    double  *zphi; ///< The z derivative of $$\phi$$ in real space
-    complex *phic; ///< The inflaton field $$\phi$$ in real space
-    complex *xphic; ///< The x derivative of $$\phi$$ in Fourier space
-    complex *yphic; ///< The y derivative of $$\phi$$ in Fourier space
-    complex *zphic; ///< The z derivative of $$\phi$$ in Fourier space
-    double  *grad; ///< The _squared_ gradient of $$\phi$$ in real space
-    double  *lap; ///< The Laplacian of $$\phi$$ in real space
-    double  *deltarho; ///< $$\delta \rho = \rho - <\rho>$$ in real space
-    double  *f; ///< Various purposes (real space)
-    complex *deltarhoc; ///< $$\delta \rho = \rho - <\rho>$$ in Fourier space
-    complex *fc; ///< Various purposes (Fourier space)
-    complex *psic; ///< The metric perturbation $$\psi$$ in Fourier space
-    complex *dpsic; ///< The derivative $$\dot{\psi}$$ in Fourier space
+    double  *xphi; ///< the x derivative of \f$\phi\f$ in real space
+    double  *yphi; ///< the y derivative of \f$\phi\f$ in real space
+    double  *zphi; ///< the z derivative of \f$\phi\f$ in real space
+    complex *phic; ///< the inflaton field \f$\phi\f$ in real space
+    complex *xphic; ///< the x derivative of \f$\phi\f$ in Fourier space
+    complex *yphic; ///< the y derivative of \f$\phi\f$ in Fourier space
+    complex *zphic; ///< the z derivative of \f$\phi\f$ in Fourier space
+    double  *grad; ///< the _squared_ gradient of \f$\phi\f$ in real space
+    double  *lap; ///< the Laplacian of \f$\phi\f$ in real space
+    double  *deltarho; ///< \f$\delta \rho = \rho - \langle \rho \rangle\f$ in real space
+    double  *f; ///< various purposes (real space)
+    complex *deltarhoc; ///< \f$\delta \rho = \rho - \langle \rho \rangle\f$ in Fourier space
+    complex *fc; ///< various purposes (Fourier space)
+    complex *psic; ///< the metric perturbation \f$\psi\f$ in Fourier space
+    complex *dpsic; ///< the derivative \f$\dot{\psi}\f$ in Fourier space
 };
 
 /**
@@ -254,10 +265,15 @@ struct temporary
  */
 struct k_grid
 {
-    double *sq; ///< The sqaure of the k vector (of all modes)
-    double *x; ///< The x direction of the k vector (of al modes)
-    double *y; ///< The y direction of the k vector (of al modes)
-    double *z; ///< The z direction of the k vector (of al modes)
+    double *sq; ///< the sqaure of the k vector
+    double *x; ///< the x component of the k vector (with zeros at N/2)
+    double *y; ///< the y component of the k vector (with zeros at N/2)
+    double *z; ///< the z component of the k vector (with zeros at N/2)
+    double *xf; ///< the x component of the k vector
+    double *yf; ///< the y component of the k vector
+    double *zf; ///< the z component of the k vector
+    double k2_max; ///< The maximal square k vector on the grid.
+    double k_max; ///< The sqrt of the maximal square k vector on the grid.
 };
 
 /**
@@ -267,58 +283,66 @@ struct monitor
 {
     /**
      * @brief Number of calls to `mk_rhs(const double t, double *f, double
-     * *result)`
+     * *result)` in `toolbox.c`
      */
     size_t calls_rhs;
-    double fftw_time_exe; ///< Total wall clock time for fft execution
-    double fftw_time_plan; ///< Total wall clock time for fftw planning
-    double filter_time; ///< Total wall clock time for filtering
-    double poisson_time; ///< Total wall clock time for `mk_psi(double *f)`
-    double h5_time_write; ///< Total wall clock time for write out
-    double copy_buffer_time; ///< Total wall clock time for copying buffers
-    double cstr_time; ///< Total wall clock time for computing constraints
-    double smry_time; ///< Total wall clock time for computing summaries
+    double fftw_exe; ///< Total wall clock time for fft execution
+    double fftw_plan; ///< Total wall clock time for fftw planning
+    double filter; ///< Total wall clock time for filtering
+    double elliptic; ///< Total wall clock time for `mk_psi(double *f)`
+    double integration; ///< Total wall clock time for the integration
+    double h5_write; ///< Total wall clock time for write out to disk
+    double cpy_buffers; ///< Total wall clock time for copying buffers
+    double cstr; ///< Total wall clock time for computing constraints
+    double smry; ///< Total wall clock time for computing summaries
+    double gw_sources; ///< Total wall clock time for computing \f$S_{ij}^{TT}\f$
 };
 
-extern struct parameters pars; ///< Only instance of the parameters_t struct
+extern struct parameters pars; ///< Only instance of the struct `parameters`
 
-// contain phi, dphi, a, psi, dpsi (only first Ntot entries are integrated)
-extern double *field;
-extern double *dfield;
-extern double *field_new;
-extern double *dfield_new;
-extern struct output phi;
-extern struct output dphi;
-extern struct output psi;
-extern struct output dpsi;
-#define SUMMARY_VALUES      (4) ///< mean, variance, minimum, maximum
-extern struct output phi_smry;
-extern struct output dphi_smry;
-extern struct output psi_smry;
-extern struct output dpsi_smry;
-extern struct output t_out;
-extern struct output a_out;
-extern double *rho;
-extern double rho_mean;
-extern struct output rho_out;
-extern struct output rho_smry;
-// only needed for PSI_METHOD == PSI_HYPERBOLIC, but always defined
-extern double *pressure;
-extern double pressure_mean;
-extern struct output phi_ps;
-extern struct output psi_ps;
-extern struct output rho_ps;
-#define NUMBER_CONSTRAINTS  (4) ///< Hamiltonian and momentum: l2 and l\infty
-extern struct output cstr;
-extern double *filter;
-extern struct k_grid kvec;
-extern struct temporary tmp;
-extern fftw_plan p_fw;
-extern fftw_plan p_bw;
-extern struct monitor mon;
+// contain phi, dphi, psi, dpsi, h1, h2, a
+extern double *field; ///< An array bundling all fields that are evolved
+extern double *dfield; ///< An array bundling temporal derivatives of all fields
+extern double *field_new; ///< An array just like `field` for copying
+extern double *dfield_new; ///< An array just like 'dfield' for copying
+extern struct output phi; ///< The output struct for \f$\phi\f$
+extern struct output dphi; ///< The output struct for \f$\dot{\phi}\f$
+extern struct output psi; ///< The output struct for \f$\psi\f$
+extern struct output dpsi; ///< The output struct for \f$\dot{\psi}\f$
+#define SUMMARY_VALUES (4) ///< Summaries contain mean, variance, minimum, maximum
+extern struct output phi_smry; ///< The output struct for the summary of \f$\phi\f$
+extern struct output dphi_smry; ///< The output struct for the summary of \f$\dot{\phi}\f$
+extern struct output psi_smry; ///< The output struct for the summary of \f$\psi\f$
+extern struct output dpsi_smry; ///< The output struct for the summary of \f$\dot{\psi}\f$
+extern struct output h1_smry; ///< The output struct for the summary of \f$h_1\f$
+extern struct output h2_smry; ///< The output struct for the summary of \f$h_2\f$
+extern struct output t_out; ///< The output struct for the summary of \f$t\f$
+extern struct output a_out; ///< The output struct for the summary of \f$a\f$
+extern double *rho; ///< An array for the energy density \f$\rho\f$
+extern double rho_mean; ///< The mean value of the energy density \f$\rho\f$
+extern struct output rho_out; ///< The output struct for \f$\rho\f$
+extern struct output rho_smry; ///< The output struct for the summary of \f$\rho\f$
+extern double *pressure; ///< An array for the pressure \f$p\f$
+extern double pressure_mean; ///< The mean value of the pressure \f$p\f$
+extern struct output p_smry; ///< The output struct for the summary of \f$p\f$
+extern struct output phi_ps; ///< The output struct for the power spectrum of \f$\phi\f$
+extern struct output psi_ps; ///< The output struct for the power spectrum of \f$\psi\f$
+extern struct output rho_ps; ///< The output struct for the power spectrum of \f$\rho\f$
+/**
+ * @brief We compute the Hamiltonian and the momentum constraint in \f$l_2\f$
+ * and \f$l_{\infty}\f$ norm
+ */
+#define NUMBER_CONSTRAINTS (4)
+extern struct output cstr; ///< The output struct for the constraints
+extern struct output gw; ///< The output struct for the gravitational wave power spectrum
+extern double *filter; ///< A grid with the filter values for frequency filtering
+extern struct k_grid kvec; ///< The only instance of the struct `k_grid`
+extern struct temporary tmp; ///< The only instance of the struct `temporary`
+extern fftw_plan p_fw; ///< FFTw3 plan for the Fourier transforms
+extern fftw_plan p_bw; ///< FFTw3 plan for the inverse Fourier transforms
+extern struct monitor mon; ///< The only instance of the struct `monitor`
+extern double runtime; ///< Total wall clock time for the overall program execution
 
-#ifdef SHOW_TIMING_INFO
 double get_wall_time();
-#endif
 
 #endif

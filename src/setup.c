@@ -16,14 +16,18 @@
  * @brief One time call to setup/initialization destroy/cleanup before and after
  * the simulation respectively.
  *
- * Only the functions allocate_and_initialize_all() and free_and_destroy_all()
+ * Only the functions allocate_and_init_all() and free_and_destroy_all()
  * are called from outside this file. Each of them is called exactly once per
  * simulation. Therefore, performance is not an issue in this file.
  */
 
-static void initialize_rng();
-static void initialize_threading();
-static void initialize_parameters();
+static void init_rng();
+static void init_threading();
+static void init_parameters();
+static void init_grid_pars();
+static void init_time_pars();
+static void init_file_pars();
+static void init_monitoring();
 static void allocate_external();
 static void init_output(struct output *out, const size_t dim, const int mode);
 static void mk_fftw_plans();
@@ -36,16 +40,17 @@ static double filter_window(const double x);
 #endif
 static void mk_initial_conditions();
 #ifdef IC_FROM_DAT_FILE
-static void initialize_from_dat();
+static void init_from_dat();
 #endif
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
-static void initialize_from_bunch_davies();
+static void init_from_bunch_davies();
+static void test_bunch_davies();
 static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma);
 static complex box_muller();
 #endif
 #if INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
-static void initialize_from_internal_function();
+static void init_from_internal_function();
 static void mk_x_grid(double *grid);
 static double phi_init(const double x, const double y, const double z,
         const double *ph);
@@ -53,9 +58,7 @@ static double dphi_init(const double x, const double y, const double z,
         const double *ph);
 static double wrapped_gaussian(const double x, const double y, const double z);
 #endif
-#if PSI_METHOD != PSI_ELLIPTIC
 static void mk_initial_psi();
-#endif
 static void destroy_and_cleanup_fftw();
 static void free_external();
 
@@ -69,11 +72,11 @@ static gsl_rng *rng;
  * this call, on of the available integration routines can be started. This
  * should be the first function called, see main.c.
  */
-void allocate_and_initialize_all()
+void allocate_and_init_all()
 {
-    initialize_rng();
-    initialize_threading();
-    initialize_parameters();
+    init_rng();
+    init_threading();
+    init_parameters();
     allocate_external();
     mk_fftw_plans();
     check_simd_alignment();
@@ -89,13 +92,16 @@ void allocate_and_initialize_all()
     #else
     INFO(puts("Filtering disabled.\n"));
     #endif
-    #if PSI_METHOD == PSI_ELLIPTIC
-    INFO(puts("Solving elliptic equation for psi at each timesetp.\n"));
-    #elif PSI_METHOD == PSI_PARABOLIC
-    INFO(puts("Integrating psi using the parabolic constraint.\n"));
-    #elif PSI_METHOD == PSI_HYPERBOLIC
-    INFO(puts("Integrating psi using the hyperbolic constraint.\n"));
+    #ifdef ENABLE_GW
+    INFO(puts("Gravitational wave extraction enabled.\n"));
+    #else
+    INFO(puts("Gravitational waves disabled.\n"));
     #endif
+    #ifdef IC_FROM_BUNCH_DAVIES
+    INFO(printf("Cutting off Bunch Davies spectrum at N = %zu.\n\n",
+                pars.bunch_davies_cutoff));
+    #endif
+    INFO(puts("Integrating psi using the hyperbolic constraint.\n"));
 }
 
 /**
@@ -104,7 +110,7 @@ void allocate_and_initialize_all()
  * We use the _Mersenne Twister_, i.e. the MT19937 generator of Makoto
  * Matsumoto and Takuji Nishimura.
  */
-static void initialize_rng()
+static void init_rng()
 {
     rng = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rng, SEED);
@@ -116,15 +122,14 @@ static void initialize_rng()
  * If the parameter THREAD_NUMBER is 0, we initialize fftw3 with
  * omp_set_num_threads() threads.
  */
-static void initialize_threading()
+static void init_threading()
 {
-    int threadnum, threadinit;
-    threadinit = fftw_init_threads();
+    int threadinit = fftw_init_threads();
     if (threadinit == 0) {
         fputs("\n\nCould not initialize fftw threads.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    threadnum = THREAD_NUMBER <= 0 ? omp_get_max_threads() : THREAD_NUMBER;
+    int threadnum = THREAD_NUMBER <= 0 ? omp_get_max_threads() : THREAD_NUMBER;
     omp_set_num_threads(threadnum);
     fftw_plan_with_nthreads(threadnum);
     INFO(printf("\n\nRunning omp & fftw with %d thread(s).\n\n", threadnum));
@@ -138,34 +143,45 @@ static void initialize_threading()
  * parameters are computed from others in non trivial ways. The struct pars
  * provides a flexible way to access all parameters in a global scope.
  */
-static void initialize_parameters()
+static void init_parameters()
+{
+    init_grid_pars();
+    init_time_pars();
+    init_file_pars();
+    init_monitoring();
+
+    // misc parameters
+    pars.bunch_davies_cutoff = BUNCH_DAVIES_CUTOFF;
+    pars.max_runtime = MAX_RUNTIME;
+}
+
+/**
+ * @brief Initialize grid related parameters.
+ */
+static void init_grid_pars()
 {
     pars.x.N = GRIDPOINTS_X;
     pars.x.a = SPATIAL_LOWER_BOUND_X;
     pars.x.b = SPATIAL_UPPER_BOUND_X;
     pars.x.k = TWOPI / (pars.x.b - pars.x.a);
-    pars.x.k2 = -TWOPI * TWOPI / ((pars.x.b - pars.x.a) * (pars.x.b - pars.x.a));
+    pars.x.k2 = TWOPI * TWOPI / ((pars.x.b - pars.x.a) * (pars.x.b - pars.x.a));
     pars.x.stride = STRIDE_X;
 
     pars.y.N = GRIDPOINTS_Y;
     pars.y.a = SPATIAL_LOWER_BOUND_Y;
     pars.y.b = SPATIAL_UPPER_BOUND_Y;
     pars.y.k = TWOPI / (pars.y.b - pars.y.a);
-    pars.y.k2 = -TWOPI * TWOPI / ((pars.y.b - pars.y.a) * (pars.y.b - pars.y.a));
+    pars.y.k2 = TWOPI * TWOPI / ((pars.y.b - pars.y.a) * (pars.y.b - pars.y.a));
     pars.y.stride = STRIDE_Y;
 
     pars.z.N = GRIDPOINTS_Z;
     pars.z.a = SPATIAL_LOWER_BOUND_Z;
     pars.z.b = SPATIAL_UPPER_BOUND_Z;
     pars.z.k = TWOPI / (pars.z.b - pars.z.a);
-    pars.z.k2 = -TWOPI * TWOPI / ((pars.z.b - pars.z.a) * (pars.z.b - pars.z.a));
+    pars.z.k2 = TWOPI * TWOPI / ((pars.z.b - pars.z.a) * (pars.z.b - pars.z.a));
     pars.z.stride = STRIDE_Z;
 
     pars.N = pars.x.N * pars.y.N * pars.z.N;
-    pars.Nall = 4 * pars.N + pars.Nsimd;
-    pars.Nsimd = FFTW_SIMD_STRIDE;
-    pars.N2p = 2 * pars.N + pars.Nsimd;
-    pars.N3p = 3 * pars.N + pars.Nsimd;
 
     pars.x.outN = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
     pars.y.outN = (pars.y.N + pars.y.stride - 1) / pars.y.stride;
@@ -201,16 +217,21 @@ static void initialize_parameters()
             break;
     }
     pars.M = pars.x.M * pars.y.M * pars.z.M;
+    pars.Next = 2 * pars.M;
+    pars.Ntot = 4 * pars.N + 4 * pars.Next + 1;
 
-    // the evolution scheme for psi dictates which fields are evolved
-    #if PSI_METHOD == PSI_ELLIPTIC
-    pars.Ntot = 2 * pars.N + 1;
-    #elif PSI_METHOD == PSI_PARABOLIC
-    pars.Ntot = pars.N2p + pars.N;
-    #elif PSI_METHOD == PSI_HYPERBOLIC
-    pars.Ntot = pars.N3p + pars.N;
-    #endif
+    INFO(printf("Initialized grid in %zu dimension(s).\n", pars.dim));
+    INFO(printf("Gridpoints: X: %zu, Y: %zu, Z: %zu.\n",
+                pars.x.N, pars.y.N, pars.z.N));
+    INFO(printf("N: %zu, Next: %zu, Ntot: %zu\n\n",
+                pars.N, pars.Next, pars.Ntot));
+}
 
+/**
+ * @brief Initialize time evolution related parameters.
+ */
+static void init_time_pars()
+{
     pars.t.dt = DELTA_T;
     pars.t.t = INITIAL_TIME;
     pars.t.ti = INITIAL_TIME;
@@ -220,22 +241,36 @@ static void initialize_parameters()
         fputs("Exeeding MAX_STEPS, decrease DELTA_T.\n", stderr);
         exit(EXIT_FAILURE);
     }
+    INFO(puts("Initialized time parameters.\n"));
+}
 
+/**
+ * @brief Initialize output related parameters.
+ */
+static void init_file_pars()
+{
     pars.file.index = 0;
     pars.file.buf_size = WRITE_OUT_BUFFER_NUMBER;
     pars.file.skip = TIME_STEP_SKIPS;
+}
 
+/**
+ * @brief Initialize monitoring and timing variables.
+ */
+static void init_monitoring()
+{
     mon.calls_rhs = 0;
-    mon.fftw_time_exe = 0.0;
-    mon.fftw_time_plan = 0.0;
-    mon.filter_time = 0.0;
-    mon.poisson_time = 0.0;
-    mon.h5_time_write = 0.0;
-    mon.copy_buffer_time = 0.0;
-    mon.cstr_time = 0.0;
-    mon.smry_time = 0.0;
-
-    INFO(printf("Initialized parameters for %zu dimension(s).\n\n", pars.dim));
+    mon.fftw_exe = 0.0;
+    mon.fftw_plan = 0.0;
+    mon.filter = 0.0;
+    mon.elliptic = 0.0;
+    mon.integration = 0.0;
+    mon.gw_sources = 0.0;
+    mon.h5_write = 0.0;
+    mon.cpy_buffers = 0.0;
+    mon.cstr = 0.0;
+    mon.smry = 0.0;
+    INFO(puts("Initialized monitoring variables.\n"));
 }
 
 /**
@@ -244,7 +279,7 @@ static void initialize_parameters()
 static void allocate_external()
 {
     const size_t N = pars.N;
-    const size_t Nall = pars.Nall;
+    const size_t Ntot = pars.Ntot;
     const size_t M = pars.M;
     #ifdef LARGE_OUTPUT
     const size_t outN = pars.outN;
@@ -255,14 +290,12 @@ static void allocate_external()
     init_output(&a_out, 1, 1);
 
     // ---------------------------full fields: phi, dphi, psi, dpsi, rho--------
-    field = fftw_malloc(Nall * sizeof *field);
-    field_new = fftw_malloc(Nall * sizeof *field_new);
-    dfield = fftw_malloc(Nall * sizeof *dfield);
-    dfield_new = fftw_malloc(Nall * sizeof *dfield_new);
+    field = fftw_malloc(Ntot * sizeof *field);
+    field_new = fftw_malloc(Ntot * sizeof *field_new);
+    dfield = fftw_malloc(Ntot * sizeof *dfield);
+    dfield_new = fftw_malloc(Ntot * sizeof *dfield_new);
     rho = fftw_malloc(N * sizeof *rho);
-    #if PSI_METHOD == PSI_HYPERBOLIC
     pressure = fftw_malloc(N * sizeof *pressure);
-    #endif
 
     #ifdef OUTPUT_PHI
     init_output(&phi, outN, 0);
@@ -296,6 +329,15 @@ static void allocate_external()
     #ifdef OUTPUT_RHO_SMRY
     init_output(&rho_smry, SUMMARY_VALUES, 1);
     #endif
+    #ifdef OUTPUT_PRESSURE_SMRY
+    init_output(&p_smry, SUMMARY_VALUES, 1);
+    #endif
+    #ifdef OUTPUT_H1_SMRY
+    init_output(&h1_smry, SUMMARY_VALUES, 1);
+    #endif
+    #ifdef OUTPUT_H2_SMRY
+    init_output(&h2_smry, SUMMARY_VALUES, 1);
+    #endif
 
     // ---------------------------power spectra---------------------------------
     #ifdef OUTPUT_PHI_PS
@@ -306,6 +348,9 @@ static void allocate_external()
     #endif
     #ifdef OUTPUT_RHO_PS
     init_output(&rho_ps, POWER_SPECTRUM_BINS, 1);
+    #endif
+    #ifdef ENABLE_GW
+    init_output(&gw, POWER_SPECTRUM_BINS, 1);
     #endif
 
     // ---------------------------constraints-----------------------------------
@@ -318,6 +363,9 @@ static void allocate_external()
     kvec.x = fftw_malloc(M * sizeof *kvec.x);
     kvec.y = fftw_malloc(M * sizeof *kvec.y);
     kvec.z = fftw_malloc(M * sizeof *kvec.z);
+    kvec.xf = fftw_malloc(M * sizeof *kvec.xf);
+    kvec.yf = fftw_malloc(M * sizeof *kvec.yf);
+    kvec.zf = fftw_malloc(M * sizeof *kvec.zf);
     #ifdef ENABLE_FFT_FILTER
     filter = fftw_malloc(M * sizeof *filter);
     #endif
@@ -341,10 +389,12 @@ static void allocate_external()
     tmp.f = fftw_malloc(N * sizeof *tmp.f);
     tmp.deltarho = fftw_malloc(N * sizeof *tmp.deltarho);
 
-    if (!(field && field_new && dfield && dfield_new &&
+    if (!(field && field_new && dfield && dfield_new && rho && pressure &&
         tmp.phic && tmp.xphic && tmp.yphic && tmp.zphic &&
         tmp.xphi && tmp.yphi && tmp.zphi && tmp.grad && tmp.lap && tmp.psic &&
-        tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f && tmp.deltarho)) {
+        tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f && tmp.deltarho &&
+        kvec.sq && kvec.x && kvec.y && kvec.z && kvec.xf && kvec.yf &&
+        kvec.zf)) {
         fputs("Allocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
     }
@@ -368,6 +418,10 @@ static void init_output(struct output *out, const size_t dim, const int mode)
         out->tmp = calloc(out->dim, sizeof *out->tmp);
     }
     out->buf = calloc(Nbuf * out->dim, sizeof *out->buf);
+    if (!out->buf || (mode != 0 && !out->tmp)) {
+        fputs("Allocating memory failed.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
 }
 
 /**
@@ -378,17 +432,11 @@ static void init_output(struct output *out, const size_t dim, const int mode)
  * are destroyed during planning. We create the plans for fixed global arrays
  * and reuse them for various different arrays. One has to be careful that later
  * arrays fulfil the memory alignment.
- *
- * @see FFTW3 documentation for more information on memory alignment (for SIMD
- * operations).
  */
 static void mk_fftw_plans()
 {
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-
-    TIME(mon.fftw_time_plan -= get_wall_time());
+    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
+    TIME(mon.fftw_plan -= get_wall_time());
     switch (pars.dim) {
         case 1:
             p_fw = fftw_plan_dft_r2c_1d(Nx, field, tmp.phic,
@@ -409,7 +457,7 @@ static void mk_fftw_plans()
                     FFTW_DEFAULT_FLAG);
             break;
     }
-    TIME(mon.fftw_time_plan += get_wall_time());
+    TIME(mon.fftw_plan += get_wall_time());
     INFO(puts("Created fftw plans.\n"));
 }
 
@@ -420,7 +468,7 @@ static void check_simd_alignment()
     int a2 = get_simd_alignment_of(field_new);
     int a3 = get_simd_alignment_of(dfield_new);
     if (ref != a1 || ref != a2 || ref != a3) {
-        fputs("Alignment error! Try to double FFTW_SIMD_STRIDE\n", stderr);
+        fputs("Alignment error!\n", stderr);
         exit(EXIT_FAILURE);
     }
     INFO(puts("All field arrays are correctly aligned.\n"));
@@ -428,25 +476,17 @@ static void check_simd_alignment()
 
 static int get_simd_alignment_of(double *f)
 {
-    int fail = 0;
-    const size_t N = pars.N;
     const int ref = fftw_alignment_of(f);
-    const int a1 = fftw_alignment_of(f + N);
-    if (ref != a1) {
-        fail = 1;
-    }
-    const size_t N2p = pars.N2p;
-    const int a2 = fftw_alignment_of(f + N2p);
-    if (ref != a2) {
-        fail = 1;
-    }
-    const size_t N3p = pars.N3p;
-    const int a3 = fftw_alignment_of(f + N3p);
-    if (ref != a3) {
-        fail = 1;
+    int fail = 0;
+    for (size_t i = 1; i < 4; ++i) {
+        int test = fftw_alignment_of(f + i * pars.N);
+        if (test != ref) {
+            fail = 1;
+            break;
+        }
     }
     if (fail == 1) {
-        fputs("Alignment error! Try to double FFTW_SIMD_STRIDE\n", stderr);
+        fputs("Alignment error!\n", stderr);
         exit(EXIT_FAILURE);
     }
     return ref;
@@ -464,97 +504,87 @@ static int get_simd_alignment_of(double *f)
  */
 static void mk_k_grid()
 {
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const size_t Mx = pars.x.M;
-    const size_t My = pars.y.M;
-    const size_t Mz = pars.z.M;
-
-    double k2;
-    size_t osx, osy, id;
-    #pragma omp parallel for private(osx, osy, id, k2)
+    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
+    const size_t Mx = pars.x.M, My = pars.y.M, Mz = pars.z.M;
+    #pragma omp parallel for
     for (size_t i = 0; i < Mx; ++i) {
-        osx = i * My * Mz;
+        size_t osx = i * My * Mz;
         for (size_t j = 0; j < My; ++j) {
-            osy = osx + j * Mz;
+            size_t osy = osx + j * Mz;
             for (size_t k = 0; k < Mz; ++k) {
-                id = osy + k;
-                k2 = pars.z.k2 * k * k;
+                size_t id = osy + k;
+                double k2 = pars.z.k2 * k * k;
 
                 if (i > Nx / 2) {
                     kvec.x[id] = pars.x.k * ((int)i - (int)Nx);
+                    kvec.xf[id] = kvec.x[id];
                     k2 += pars.x.k2 * (Nx - i) * (Nx - i);
                 } else if (2 * i == Nx) {
                     kvec.x[id] = 0.0;
+                    kvec.xf[id] = pars.x.k * i;
                     k2 += pars.x.k2 * i * i;
                 } else {
                     kvec.x[id] = pars.x.k * i;
+                    kvec.xf[id] = kvec.x[id];
                     k2 += pars.x.k2 * i * i;
                 }
 
                 if (j > Ny / 2) {
                     kvec.y[id] = pars.y.k * ((int)j - (int)Ny);
+                    kvec.yf[id] = kvec.y[id];
                     k2 += pars.y.k2 * (Ny - j) * (Ny - j);
                 } else if (2 * j == Ny) {
                     kvec.y[id] = 0.0;
+                    kvec.yf[id] = pars.y.k * j;
                     k2 += pars.y.k2 * j * j;
                 } else {
                     kvec.y[id] = pars.y.k * j;
+                    kvec.yf[id] = kvec.y[id];
                     k2 += pars.y.k2 * j * j;
                 }
 
                 if (2 * k == Nz) {
                     kvec.z[id] = 0.0;
+                    kvec.zf[id] = pars.z.k * k;
                 } else {
                     kvec.z[id] = pars.z.k * k;
+                    kvec.zf[id] = kvec.z[id];
                 }
                 kvec.sq[id] = k2;
             }
         }
     }
+    kvec.k2_max = pars.x.k2 * (pars.x.N/2) * (pars.x.N/2) +
+                  pars.y.k2 * (pars.y.N/2) * (pars.y.N/2) +
+                  pars.z.k2 * (pars.z.N/2) * (pars.z.N/2);
+    kvec.k_max = sqrt(kvec.k2_max);
     INFO(puts("Constructed grids for wave vectors.\n"));
 }
 
 #ifdef ENABLE_FFT_FILTER
 /**
- * @brief Construct an arrray for filtering out high modes in Fourier space.
+ * @brief Construct an arrray for filtering out high wave number modes in
+ * Fourier space.
  *
- * Fills the global array `filter` with multiplicative factors that can be applied
- * pointwise to a field in Fourier space to cut off high frequency modes.
+ * Fills the global array `filter` with multiplicative factors that can be
+ * applied pointwise to a field in Fourier space to cut off high frequency
+ * modes.
  */
 static void mk_filter_mask()
 {
-    const size_t N = pars.N;
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const size_t Mx = pars.x.M;
-    const size_t My = pars.y.M;
-    const size_t Mz = pars.z.M;
-
-    double tmp;
-    size_t osx, osy;
-    #pragma omp parallel for private(osx, osy, tmp)
-    for (size_t i = 0; i < Mx; ++i) {
-        osx = i * My * Mz;
-        for (size_t j = 0; j < My; ++j) {
-            osy = osx + j * Mz;
-            for (size_t k = 0; k < Mz; ++k) {
-                tmp = filter_window(2.0 *
-                    (i > Nx / 2 ? (int)Nx - (int)i : i) / (double) Nx);
-                tmp *= filter_window(2.0 *
-                    (j > Ny / 2 ? (int)Ny - (int)j : j) / (double) Ny);
-                tmp *= filter_window(2.0 * k / (double) Nz);
-                filter[osy + k] = tmp / (double) N;
-            }
-        }
+    #pragma omp parallel for
+    for (size_t i = 0; i < pars.M; ++i) {
+        filter[i] = filter_window(kvec.sq[i] / kvec.k2_max);
     }
     INFO(puts("Constructed filter mask.\n"));
 }
 
 /**
  * @brief The specific shape of the cutoff for high frequency modes.
+ *
+ * @param[in] xsq The squared ratio \f$k/k_{\max}\f$, i.e. \f$(k/k_{\max})^2/f$
+ * for a given mode \f$k\f$.
+ * @return The multiplier for the given mode @p xsq in the filtering process.
  *
  * We have found the exponential cutoff function described in the references to
  * work well for our purposes. It keeps more modes than the common two thirds
@@ -568,13 +598,13 @@ static void mk_filter_mask()
  * @see [On the stability of the unsmoothed Fourier method for hyperbolic
  * equations](http://link.springer.com/article/10.1007%2Fs002110050019)
  */
-static double filter_window(const double x)
+static double filter_window(const double xsq)
 {
     // exponential cutoff smoothing
-    return exp(-36.0 * pow(x, 36));
+    return exp(-36.0 * pow(xsq, 18));
 
-    // two thirds rule
-    // return x < 2.0/3.0 ? x : 0.0;
+    // two thirds rule (due to square ratio as input we have 4/9)
+    // return xsq < 4.0/9.0 ? x : 0.0;
 }
 #endif
 
@@ -583,39 +613,29 @@ static double filter_window(const double x)
  * parameter file.
  *
  * As a first step all fields are set to zero. Then the desired initialization
- * rountine is called. Once the function returns, $$\phi$$, $$\dot{\phi}$$,
- * $$\psi$$, $$\dot{\psi}$$, $$t$$ and $$a$$ have their initial values.
+ * rountine is called. Once the function returns, \f$\phi\f$, \f$\dot{\phi}\f$,
+ * \f$\psi\f$, \f$\dot{\psi}\f$, \f$t\f$ and \f$a\f$ have their initial values.
  */
 static void mk_initial_conditions()
 {
-    const size_t Nall = pars.Nall;
     #pragma omp parallel for
-    for (size_t i = 0; i < Nall; ++i) {
+    for (size_t i = 0; i < pars.Ntot; ++i) {
         field[i] = 0.0;
         dfield[i] = 0.0;
         field_new[i] = 0.0;
         dfield_new[i] = 0.0;
     }
-
     #if INITIAL_CONDITIONS == IC_FROM_H5_FILE
-    h5_read_timeslice();
+    h5_read_followup();
     #elif defined(IC_FROM_DAT_FILE)
-    initialize_from_dat();
+    init_from_dat();
     #elif INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
-    initialize_from_bunch_davies();
+    init_from_bunch_davies();
     #elif INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
-    initialize_from_internal_function();
-    #endif
-
-    #ifdef EVOLVE_WITHOUT_PSI
-    const size_t N2p = pars.N2p;
-    #pragma omp parallel for
-    for (size_t i = N2p; i < Nall; ++i) {
-        field[i] = 0.0;
-    }
+    init_from_internal_function();
     #endif
     t_out.tmp[0] = pars.t.ti;
-    a_out.tmp[0] = field[2 * pars.N];
+    a_out.tmp[0] = field[pars.Ntot - 1];
     INFO(puts("Initialized fields on first time slice.\n"));
 }
 
@@ -627,51 +647,46 @@ static void mk_initial_conditions()
  *
  * @see `read_initial_data()` in `io.c`
  */
-static void initialize_from_dat()
+static void init_from_dat()
 {
     read_initial_data();
-    /* center(field + pars.N2p, pars.N); */
-    /* center(field + pars.N3p, pars.N); */
-    field[2 * pars.N] = A_INITIAL;
-    #if PSI_METHOD != PSI_ELLIPTIC && \
-        INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITHOUT_PSI
+    /* center(field + 2 * pars.N, pars.N); */
+    /* center(field + 3 * pars.N, pars.N); */
+    field[pars.Ntot - 1] = A_INITIAL;
+    #if INITIAL_CONDITIONS == IC_FROM_DAT_FILE_WITHOUT_PSI
     mk_initial_psi();
     #endif
 }
 #endif
 
-#if PSI_METHOD != PSI_ELLIPTIC
 /**
- * @brief Given that the initial $$\phi$$, $$\dot{\phi}$$ and $$a$$ are already
- * provided in `field`, construct the corresponding $$\psi$$ and
- * $$\dot{\psi}$$.
+ * @brief Given that the initial \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$ are
+ * already provided in `field`, construct the corresponding \f$\psi\f$ and
+ * \f$\dot{\psi}\f$.
  */
 static void mk_initial_psi()
 {
-    const size_t N2p = pars.N2p;
-    const size_t Nall = pars.Nall;
     #pragma omp parallel for
-    for (size_t i = N2p; i < Nall; ++i) {
+    for (size_t i = 2 * pars.N; i < 4 * pars.N; ++i) {
         field[i] = 0.0;
     }
     mk_gradient_squared_and_laplacian(field);
-    mk_rho(field);
+    mk_rho_and_p(field);
     mk_psi(field);
 }
-#endif
 
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
 /**
  * @brief Construct a Bunch Davies vacuum as initial conditions if the
- * parameters satisfy the conditions and then construct corresponding $$\psi$$,
- * $$\dot{psi}$$.
+ * parameters satisfy the conditions and then construct corresponding
+ * \f$\psi\f$, \f$\dot{\psi}\f$.
  *
  * We build upon the values in the DEFROST paper (in the references), hence we
  * need 3 dimensions with the same number of gridpoints and a box length of 10
  * in each direction. DEFROST uses `INFLATON_MASS=5e-6` and `MASS=1`. We can
  * freely adjust the `INFLATON_MASS` to change the amplitude of the initial
  * fluctuations. By scaling `MASS`, we can shift the initial Hubble length.
- * (Initial values for H and $$\dot{\phi}$$ are scaled automatically according
+ * (Initial values for H and \f$\dot{\phi}\f$ are scaled automatically according
  * to the value of `MASS`.) We recommend keeping the bos length fixed at 10 and
  * only rescaling `MASS`.
  *
@@ -680,40 +695,45 @@ static void mk_initial_psi()
  * @see `mk_bunch_davies(double *f, const double H, const double homo, const
  * double gamma)`
  */
-static void initialize_from_bunch_davies()
+static void init_from_bunch_davies()
 {
-    size_t Nx = pars.x.N;
-    size_t Ny = pars.y.N;
-    size_t Nz = pars.z.N;
+    test_bunch_davies();
+    // directly from DEFROST(v1.0), factor in dphi0 and H0 adjusts modes
+    const double phi0 = 1.0093430384226378929425913902459;
+    const double dphi0 = - MASS * 0.7137133070120812430962278466136;
+    const double hubble = MASS * 0.5046715192113189464712956951230;
+    mk_bunch_davies(field, hubble, phi0, -0.25);
+    mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
+    field[pars.Ntot - 1] = A_INITIAL;
+    mk_initial_psi();
+}
+
+/**
+ * @brief Check that all conditions necessary to construct the Bunch Davies
+ * vacuum are fulfilled and exit the program if they are not.
+ */
+static void test_bunch_davies()
+{
     if (pars.dim != 3) {
         fputs("Bunch Davies vacuum works only in three dimensions.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    if (Nx != Ny || Nx != Nz || Ny != Nz) {
+    size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
+    if (Nx != Ny || Nx != Nz) {
         fputs("Bunch Davies vacuum works only for Nx = Ny = Nz.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    double lx = fabs(pars.x.b - pars.x.a - 10.0);
-    double ly = fabs(pars.y.b - pars.y.a - 10.0);
-    double lz = fabs(pars.z.b - pars.z.a - 10.0);
-    if (lx > DBL_EPSILON || ly > DBL_EPSILON || lz > DBL_EPSILON) {
-        fputs("Bunch Davies vacuum works only for box size 10.0.\n", stderr);
+    double lx = pars.x.b - pars.x.a;
+    double ly = pars.y.b - pars.y.a;
+    double lz = pars.z.b - pars.z.a;
+    if (fabs(lx - ly) > DBL_EPSILON || fabs(lx - lz) > DBL_EPSILON) {
+        fputs("Bunch Davies vacuum works only in a cubic domain.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    // directly form DEFROST(v1.0), factor in dphi0 and H0 adjusts modes
-    const double phi0 = 1.0093430384226378929425913902459;
-    const double dphi0 = -MASS * 0.7137133070120812430962278466136;
-    const double hubble = MASS * 0.5046715192113189464712956951230;
-    mk_bunch_davies(field, hubble, phi0, -0.25);
-    mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
-    field[2 * pars.N] = A_INITIAL;
-    #if PSI_METHOD != PSI_ELLIPTIC
-    mk_initial_psi();
-    #endif
 }
 
 /**
- * @brief Construct a Bunch Davies vacuum for $$\phi$$ and $$\dot{\phi}$$ as
+ * @brief Construct a Bunch Davies vacuum for \f$\phi\f$ and \f$\dot{\phi}\f$ as
  * initial conditions following the description in DEFROST.
  *
  * @see [DEFROST: A New Code for Simulating Preheating after
@@ -722,11 +742,7 @@ static void initialize_from_bunch_davies()
 static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma)
 {
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const size_t N = pars.N;
-    const size_t M = pars.M;
+    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
     const size_t nn = Nx / 2 + 1;
     const size_t os = 16;
     const size_t nos = Nx * os * os;
@@ -735,10 +751,14 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     const double dk = TWOPI / (pars.x.b - pars.x.a);
     const double dkos = 0.5 * dk / os;
     // pspectre uses kcutpspectre = 2 * kcutdefrost (without square!)
-    const double kcut2 = 0.25 * nn * nn * dk * dk;
+    size_t cutoff = pars.bunch_davies_cutoff;
+    if (cutoff < 1) {
+        cutoff = nn;
+    }
+    const double kcut2 = 0.25 * cutoff * cutoff * dk * dk;
     const double meff2 = MASS * MASS - 2.25 * H * H;
-    const double norm = 0.5 * INFLATON_MASS / (N * sqrt(TWOPI * pow(dk, 3))) *
-        (dkos / dxos);
+    const double norm = 0.5 * INFLATON_MASS /
+        (pars.N * sqrt(TWOPI * pow(dk, 3))) * (dkos / dxos);
 
     if (meff2 <= 0.0) {
         fputs("The effective mass turned out to be negative.\n", stderr);
@@ -746,35 +766,33 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     }
 
     double *ker = fftw_malloc(nos * sizeof *ker);
-    double kk;
-    #pragma omp parallel for private(kk)
+    #pragma omp parallel for
     for (size_t i = 0; i < nos; ++i) {
-        kk = (i + 0.5) * dkos;
+        double kk = (i + 0.5) * dkos;
         ker[i] = kk * pow(kk * kk + meff2, gamma) *
             exp(-kk * kk / kcut2);
     }
 
+    TIME(mon.fftw_exe -= get_wall_time());
     fftw_plan p = fftw_plan_r2r_1d(nos, ker, ker, FFTW_RODFT10, FFTW_ESTIMATE);
     fftw_execute(p);
     fftw_destroy_plan(p);
+    TIME(mon.fftw_exe += get_wall_time());
 
     #pragma omp parallel for
     for (size_t i = 0; i < nos; ++i) {
         ker[i] *= norm / (i + 1);
     }
-
-    size_t osx, osy, l;
-    #pragma omp parallel for private(osx, osy, kk, l)
+    #pragma omp parallel for
     for (int i = 0; i < Nx; ++i) {
-        osx = i * Ny * Nz;
+        size_t osx = i * Ny * Nz;
         for (int j = 0; j < Ny; ++j) {
-            osy = osx + j * Nz;
+            size_t osy = osx + j * Nz;
             for (int k = 0; k < Nz; ++k) {
-                kk = sqrt((double)((i + 1 - nn) * (i + 1 - nn) +
-                                   (j + 1 - nn) * (j + 1 - nn) +
-                                   (k + 1 - nn) * (k + 1 - nn))) * os;
-                l = (size_t) floor(kk);
-
+                double kk = sqrt((double)((i + 1 - nn) * (i + 1 - nn) +
+                                          (j + 1 - nn) * (j + 1 - nn) +
+                                          (k + 1 - nn) * (k + 1 - nn))) * os;
+                size_t l = (size_t) floor(kk);
                 if (l > 0) {
                     f[osy + k] = ker[l - 1] + (kk - l) * (ker[l] - ker[l - 1]);
                 } else {
@@ -783,17 +801,19 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
             }
         }
     }
-
     fftw_free(ker);
+    TIME(mon.fftw_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, f, tmp.phic);
+    TIME(mon.fftw_exe += get_wall_time());
 
     #pragma omp parallel for
-    for (size_t i = 0; i < M; ++i) {
+    for (size_t i = 0; i < pars.M; ++i) {
         tmp.phic[i] *= box_muller();
     }
-
     tmp.phic[0] = homo;
+    TIME(mon.fftw_exe -= get_wall_time());
     fftw_execute_dft_c2r(p_bw, tmp.phic, f);
+    TIME(mon.fftw_exe += get_wall_time());
 }
 
 /**
@@ -809,8 +829,7 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
  */
 static complex box_muller()
 {
-    const double u1 = gsl_rng_uniform(rng);
-    const double u2 = gsl_rng_uniform(rng);
+    const double u1 = gsl_rng_uniform(rng), u2 = gsl_rng_uniform(rng);
     return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * I);
 }
 #endif
@@ -820,50 +839,41 @@ static complex box_muller()
  * @brief Construct initial conditions for phi from internally defined functions
  *
  * First the actual spatial grid values are computed by calling
- * `mk_x_grid(double *grid)` and then $$\phi$$ and $$\dot{\phi}$$ are computed
+ * `mk_x_grid(double *grid)` and then \f$\phi\f$ and \f$\dot{\phi}\f$ are computed
  * by `phi_init(const double x, const double y, const double z, const double
  * *ph)`, `dphi_init(const double x, const double y, const double z, const
  * double *ph)` potentially using some random phases `ph`. The initial scale
- * factor $$a$$ comes from the parameter file and $$\psi$$, $$\dot{\psi}$$ are
- * then computed from $$\phi$$ and $$\dot{\phi}$$.
+ * factor \f$a\f$ comes from the parameter file and \f$\psi\f$, \f$\dot{\psi}\f$ are
+ * then computed from \f$\phi\f$ and \f$\dot{\phi}\f$.
  */
-static void initialize_from_internal_function()
+static void init_from_internal_function()
 {
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const size_t N = pars.N;
-    size_t osx, osy;
-    double x, y, z;
+    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
     double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
     mk_x_grid(grid);
     const size_t Nmodes = 16;
-    double *theta = calloc(Nmodes, sizeof *theta);
-
     // random phases
+    double *theta = calloc(Nmodes, sizeof *theta);
     for (size_t i = 0; i < Nmodes; ++i) {
         theta[i] = TWOPI * gsl_rng_uniform(rng);
     }
-
     for (size_t i = 0; i < Nx; ++i) {
-        x = grid[i];
-        osx = i * Ny * Nz;
+        double x = grid[i];
+        size_t osx = i * Ny * Nz;
         for (size_t j = 0; j < Ny; ++j) {
-            y = grid[Nx + j];
-            osy = osx + j * Nz;
+            double y = grid[Nx + j];
+            size_t osy = osx + j * Nz;
             for (size_t k = 0; k < Nz; ++k) {
-                z = grid[Nx + Ny + k];
+                double z = grid[Nx + Ny + k];
                 field[osy + k] = phi_init(x, y, z, theta);
-                field[N + osy + k] = dphi_init(x, y, z, theta);
+                field[pars.N + osy + k] = dphi_init(x, y, z, theta);
             }
         }
     }
     free(grid);
     free(theta);
-    field[2 * N] = A_INITIAL;
-    #if PSI_METHOD != PSI_ELLIPTIC
+    field[pars.Ntot - 1] = A_INITIAL;
     mk_initial_psi();
-    #endif
 }
 
 /**
@@ -877,16 +887,9 @@ static void initialize_from_internal_function()
  */
 static void mk_x_grid(double *grid)
 {
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const double ax = pars.x.a;
-    const double bx = pars.x.b;
-    const double ay = pars.y.a;
-    const double by = pars.y.b;
-    const double az = pars.z.a;
-    const double bz = pars.z.b;
-
+    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
+    const double ax = pars.x.a, ay = pars.y.a, az = pars.z.a;
+    const double bx = pars.x.b, by = pars.y.b, bz = pars.z.b;
     #pragma omp parallel for
     for (size_t i = 0; i < Nx; ++i) {
         grid[i] = ax + (bx - ax) * i / Nx;
@@ -905,9 +908,9 @@ static void mk_x_grid(double *grid)
 /**
  * @brief The initial value of phi.
  *
- * @param[in] x The x coordinate where we want to evaluate $$\phi$$.
- * @param[in] y The y coordinate where we want to evaluate $$\phi$$.
- * @param[in] z The z coordinate where we want to evaluate $$\phi$$.
+ * @param[in] x The x coordinate where we want to evaluate \f$\phi\f$.
+ * @param[in] y The y coordinate where we want to evaluate \f$\phi\f$.
+ * @param[in] z The z coordinate where we want to evaluate \f$\phi\f$.
  * @param[in] ph Random phases for various modes.
  *
  * @return The value of phi at the specified coordinates @p x, @p y, @p z.
@@ -985,11 +988,11 @@ static double phi_init(const double x, const double y, const double z,
 }
 
 /**
- * @brief The initial value of $$\dot{\phi}$$.
+ * @brief The initial value of \f$\dot{\phi}\f$.
  *
- * @param[in] x The x coordinate where we want to evaluate $$\dot{\phi}$$.
- * @param[in] y The y coordinate where we want to evaluate $$\dot{\phi}$$.
- * @param[in] z The z coordinate where we want to evaluate $$\dot{\phi}$$.
+ * @param[in] x The x coordinate where we want to evaluate \f$\dot{\phi}\f$.
+ * @param[in] y The y coordinate where we want to evaluate \f$\dot{\phi}\f$.
+ * @param[in] z The z coordinate where we want to evaluate \f$\dot{\phi}\f$.
  * @param[in] ph Random phases for various modes.
  *
  * @return The value of dphi at the specified coordinates @p x, @p y, @p z.
@@ -1110,9 +1113,7 @@ static void free_external()
     fftw_free(dfield);
     fftw_free(dfield_new);
     fftw_free(rho);
-    #if PSI_METHOD == PSI_HYPERBOLIC
     fftw_free(pressure);
-    #endif
     free(t_out.tmp);
     free(t_out.buf);
     free(a_out.tmp);
@@ -1153,6 +1154,18 @@ static void free_external()
     free(rho_smry.tmp);
     free(rho_smry.buf);
     #endif
+    #ifdef OUTPUT_PRESSURE_SMRY
+    free(p_smry.tmp);
+    free(p_smry.buf);
+    #endif
+    #ifdef OUTPUT_H1_SMRY
+    free(h1_smry.tmp);
+    free(h1_smry.buf);
+    #endif
+    #ifdef OUTPUT_H2_SMRY
+    free(h2_smry.tmp);
+    free(h2_smry.buf);
+    #endif
 
     #ifdef OUTPUT_PHI_PS
     free(phi_ps.tmp);
@@ -1165,6 +1178,10 @@ static void free_external()
     #ifdef OUTPUT_RHO_PS
     free(rho_ps.tmp);
     free(rho_ps.buf);
+    #endif
+    #ifdef ENABLE_GW
+    free(gw.tmp);
+    free(gw.buf);
     #endif
 
     #ifdef OUTPUT_CONSTRAINTS
@@ -1179,6 +1196,9 @@ static void free_external()
     fftw_free(kvec.x);
     fftw_free(kvec.y);
     fftw_free(kvec.z);
+    fftw_free(kvec.xf);
+    fftw_free(kvec.yf);
+    fftw_free(kvec.zf);
     fftw_free(tmp.phic);
     fftw_free(tmp.xphic);
     fftw_free(tmp.yphic);

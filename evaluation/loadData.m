@@ -1,4 +1,5 @@
-name = 'comp_ell_6000_soph3';
+%% DEPRECATED!
+name = 'comp_hyp_6000_soph3';
 comp = true;
 karstenpsi = true;
 loadtimes = true;

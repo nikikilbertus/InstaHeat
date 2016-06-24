@@ -1,3 +1,4 @@
+%% DEPRECATED!
 function varargout = mkSpectralOperators(varargin)
 
 %computes [D_i,D^2_i,x_i,Int_i].  The D's and Int's are matricies formed from

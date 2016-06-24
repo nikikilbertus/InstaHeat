@@ -16,214 +16,189 @@
  * well as the desired output.
  */
 
+static void mk_ffts_and_filter(double *f);
 static void assemble_gradient_squared();
+static void output_all(double *f);
+static void update_phi_psi(double *f, double *result);
+#ifdef ENABLE_GW
+static void update_h(double *f, double *result);
+static void mk_gw_sources_tt(const double *f, complex **s);
+static void mk_gw_sources(const double *f, complex **s);
+static void mk_gw_spectrum(double *f);
+#endif
 static double potential(const double f);
 static double potential_prime(const double f);
 #ifdef OUTPUT_CONSTRAINTS
-static void mk_constraints();
+static void mk_constraints(double *f);
 #endif
 #ifdef OUTPUT_PS
 static void mk_power_spectrum(const fftw_complex *in, struct output out);
 #endif
 #ifdef ENABLE_FFT_FILTER
-static void apply_filter_real(double *inout);
-static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
-        fftw_complex *psi_io, fftw_complex *dpsi_io);
+static void apply_filter(double *f);
+static void capply_filter(complex *in, double *out);
 #endif
-/* static void center(double *f, const size_t N); */
+static void mk_summary();
+static void mean_var_min_max(const double *f, double *smry, const size_t N);
+#if defined(OUTPUT_H1_SMRY) || defined(OUTPUT_H2_SMRY)
+static void fmean_var_min_max(const double *f, double *smry);
+#endif
 static double mean(const double *f, const size_t N);
-static void mean_var_min_max(const double *f, double *smry);
 static double variance(const double mean, const double *f, const size_t N);
+static void real_to_complex(const double *in, complex *out);
+static void complex_to_real(const complex *in, double *out);
+static void fft(double *in, complex *out);
+static void ifft(complex *in, double *out);
 #ifdef CHECK_FOR_NAN
 static void contains_nan(const double *f, const size_t N);
 static void contains_nanc(const complex *f, const size_t N);
 #endif
 
-struct evolution_flags evo_flags = {.filter = 0,
-                                    .compute_pow_spec = 0,
-                                    .compute_cstr = 0};
+/**
+ * @brief THe only instance of the `evolution_flags` structure.
+ */
+struct evolution_flags evo_flags = {.filter = 0, .output = 0};
 
 /**
  * @brief Compute the right hand side of the pde, i.e. all first order temporal
- * derivatives.
+ * derivatives of the fields.
  *
- * Depending on `PSI_METHOD` we are computing the temporal derivatives of different fields, and hence also evovle different fields in the integration routine:
+ * @param[in] t The current time.
+ * @param[in] f The fields.
+ * @param[out] result The right hand side of the partial differential equation,
+ * i.e. the first temporal derivatives of the fields in @p f.
  *
- * @param[in] t The current time
- * @param[in] All necessary fields bundled in one array
- * @param[out] The right hand side of the partial differential equation, i.e.
- * the first temporal derivatives of the fields
+ * This function has a whole lot of side effects. It will also trigger the
+ * computation of all desired outputs. Depending on the simulation parameters
+ * different functions will be called cascading from `mk_rhs(const double t,
+ * double *f, double *result)`.
  *
- * - For `PSI_METHOD=PSI_ELLIPTIC` we are only evolving $$\phi$$,
- *   $$\dot{\phi}$$ and $$a$$ withthe integration routine and use an elliptic
- *   constraint equation to compute $$\psi$$ and $$\dot{\psi}$$ separately on
- *   each timeslice.
- * - For 'PSI_METHOD=PSI_PARABOLIC` we are evolving $$\phi$$, $$\dot{\phi}$$,
- *   $$\psi$$ and $$a$$ according to a parabolic constraint equation with the
- *   integration routine. $$\dot{\psi}$$ is computed separately on each
- *   timeslice.
- * - For 'PSI_METHOD=PSI_HYPERBOLIC` we are evolving $$\phi$$, $$\dot{\phi}$$,
- *   $$\psi$$, $$\dot{\psi}$$ and $$a$$ according to a hyperbolic constraint
- *   equation with the integration routine.
+ * @see TODO[link] for more on the evolved fields and the equations of motion.
  */
 void mk_rhs(const double t, double *f, double *result)
 {
     mon.calls_rhs += 1;
-    const size_t N = pars.N;
-    const size_t N2 = 2 * N;
-    const size_t N2p = pars.N2p;
-    const size_t N3p = pars.N3p;
-    const double a = f[N2];
-    const double a2 = a * a;
-
     mk_gradient_squared_and_laplacian(f);
-    mk_rho(f);
-
-    // power spectrum of rho here, because need rho first
-    if (evo_flags.compute_pow_spec == 1) {
-        #ifdef OUTPUT_RHO_PS
-        TIME(mon.fftw_time_exe -= get_wall_time());
-        fftw_execute_dft_r2c(p_fw, rho, tmp.phic);
-        TIME(mon.fftw_time_exe += get_wall_time());
-        mk_power_spectrum(tmp.phic, rho_ps);
-        #endif
+    mk_rho_and_p(f);
+    if (evo_flags.output == 1) {
+        output_all(f);
     }
-
-    #ifdef OUTPUT_CONSTRAINTS
-    mk_constraints();
+    update_phi_psi(f, result);
+    #ifdef ENABLE_GW
+    update_h(f, result);
     #endif
-    const double hubble = sqrt(rho_mean / 3.0);
-    const double h3 = 3.0 * hubble;
-
-    // copy dphi in all cases
-    #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i) {
-        result[i] = f[N + i];
-    }
-
-    #ifndef EVOLVE_WITHOUT_PSI
-    // parabolic: equation for dpsi; hyperbolic: copy dpsi and equation for ddpsi
-    #if PSI_METHOD != PSI_ELLIPTIC
-    #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i) {
-        #if PSI_METHOD == PSI_PARABOLIC
-        result[N2p + i] = -hubble * f[N2p + i] - 0.5 * (rho[i] - rho_mean) / h3
-            + tmp.f[i] / (h3 * a2);
-        #elif PSI_METHOD == PSI_HYPERBOLIC
-        result[N2p + i] = f[N3p + i];
-        result[N3p + i] = 0.5 * pressure[i] + (f[N2p + i] - 0.5) * pressure_mean
-            - 4.0 * hubble * f[N3p + i];
-        #endif
-    }
-    #else
-    mk_psi(f);
-    #endif
-    #endif
-
-    // equation for ddphi in all cases (psi & dpsi have to be provided first)
-    double df, p, dp;
-    #pragma omp parallel for private(df, p, dp)
-    for (size_t i = 0; i < N; ++i) {
-        df = f[N + i];
-        p = f[N2p + i];
-        #if PSI_METHOD != PSI_PARABOLIC
-        dp = f[N3p + i];
-        #else
-        dp = result[N2p + i];
-        #endif
-        result[N + i] = (1.0 + 4.0 * p) * tmp.lap[i] / a2 -
-            (h3 - 4.0 * dp) * df - (1.0 + 2.0 * p) * potential_prime(f[i]);
-    }
-
-    // update da
-    result[N2] = a * hubble;
+    result[pars.Ntot - 1] = f[pars.Ntot - 1] * sqrt(rho_mean / 3.0); //update da
 }
 
 /**
- * @brief Compute the Laplacian and the sqaure gradient.
+ * @brief Recompute all desired output quantities and copy the current
+ * timeslice to buffers.
  *
- * @param[in] in An array containing the fields, in particular $$\phi$$ and
- * $$\dot{\phi}$$
+ * @note This is only called once or twice throughout a whole simulation run.
+ */
+void prepare_and_save_timeslice()
+{
+    evo_flags.output = 1;
+    mk_rhs(pars.t.t, field, dfield);
+    evo_flags.output = 0;
+    save();
+}
+
+/**
+ * @brief Compute the Laplacian and the sqaured gradient. More computations
+ * might be performed depending on flags in the `evolution_flags` structure
+ * `evo_flags`.
+ *
+ * @param[in, out] in The fields, in particular \f$\phi\f$ and \f$\psi\f$. All
+ * fields in @p in might be overwritten by their filtered versions.
  *
  * The Laplacian and the squared gradient as well as the partial derivatives of
- * $$\phi$$ are stored in global variables for reuse in other functions. When
- * the function returns:
- * `tmp.xphi` contains $$\partial_x \phi$$
- * `tmp.yphi` contains $$\partial_y \phi$$
- * `tmp.zphi` contains $$\partial_z \phi$$
- * `tmp.lap` contains the Laplacian $$\sum_{i=1}^3 \partial_i^2 \phi$$
- * `tmp.grad` contains the _squared_ gradient $$(\nabla \phi)^2$$
+ * \f$\phi\f$ are stored in global variables for reuse in other functions. When
+ * `mk_gradient_squared_and_laplacian(double *in)` returns:
+ * `tmp.xphi` contains \f$\partial_x \phi\f$.
+ * `tmp.yphi` contains \f$\partial_y \phi\f$.
+ * `tmp.zphi` contains \f$\partial_z \phi\f$.
+ * `tmp.lap` contains the Laplacian \f$\sum_{i=1}^3 \partial_i^2 \phi\f$
+ * `tmp.grad` contains the _squared_ gradient \f$(\nabla \phi)^2\f$
  * All the above values persist until the next call of `mk_rhs(const double t,
- * double *f, double *result)`
- * If `PSI_METHOD=PSI_PARABOLIC` or `OUTPUT_CONSTRAINTS` is defined,
- * additionally, `tmp.f` contains $$\Delta \psi$$, the Lagrangian of $$\psi$$.
+ * double *f, double *result)`.
+ * If required, the Fourier transform of \f$\psi\f$ is computed and `tmp.f`
+ * contains \f$\Delta \psi\f$, the Lagrangian of \f$\psi\f$.
+ * If required, the fields \f$\phi\f$, \f$\psi\f$, \f$\dot{\phi}\f$,
+ * \f$\dot{\psi}\f$ will be overwritten with their filtered versions.
  */
 void mk_gradient_squared_and_laplacian(double *in)
 {
-    const size_t N = pars.N;
-    const size_t M = pars.M;
-
-    TIME(mon.fftw_time_exe -= get_wall_time());
-    fftw_execute_dft_r2c(p_fw, in, tmp.phic);
-        #if PSI_METHOD == PSI_PARABOLIC || defined(OUTPUT_CONSTRAINTS) \
-            || defined(OUTPUT_PSI_PS)
-        const size_t N2p = pars.N2p;
-        fftw_execute_dft_r2c(p_fw, in + N2p, tmp.psic);
-        #endif
-    TIME(mon.fftw_time_exe += get_wall_time());
-
-    // good place for power spectrum of phi and psi, because fft exists
-    if (evo_flags.compute_pow_spec == 1) {
-        #ifdef OUTPUT_PHI_PS
-        mk_power_spectrum(tmp.phic, phi_ps);
-        #endif
-        #ifdef OUTPUT_PSI_PS
-        mk_power_spectrum(tmp.psic, psi_ps);
-        #endif
+    mk_ffts_and_filter(in);
+    #pragma omp parallel for
+    for (size_t i = 0; i < pars.M; ++i) {
+        complex pre = tmp.phic[i] / pars.N;
+        tmp.xphic[i] = pre * I * kvec.x[i];
+        tmp.yphic[i] = pre * I * kvec.y[i];
+        tmp.zphic[i] = pre * I * kvec.z[i];
+        tmp.fc[i] = - pre * kvec.sq[i];
     }
 
-    complex pre;
-    #pragma omp parallel for private(pre)
-    for (size_t i = 0; i < M; ++i) {
-        pre = tmp.phic[i] * I / N;
-        tmp.xphic[i] = pre * kvec.x[i];
-        tmp.yphic[i] = pre * kvec.y[i];
-        tmp.zphic[i] = pre * kvec.z[i];
-        tmp.phic[i] *= kvec.sq[i] / N;
-        #if PSI_METHOD == PSI_PARABOLIC || defined(OUTPUT_CONSTRAINTS)
-        tmp.psic[i] *= kvec.sq[i] / N;
-        #endif
-    }
-
-    TIME(mon.fftw_time_exe -= get_wall_time());
-    fftw_execute_dft_c2r(p_bw, tmp.xphic, tmp.xphi);
+    ifft(tmp.xphic, tmp.xphi);
     if (pars.dim > 1) {
-        fftw_execute_dft_c2r(p_bw, tmp.yphic, tmp.yphi);
+        ifft(tmp.yphic, tmp.yphi);
         if (pars.dim > 2) {
-            fftw_execute_dft_c2r(p_bw, tmp.zphic, tmp.zphi);
+            ifft(tmp.zphic, tmp.zphi);
         }
     }
-    fftw_execute_dft_c2r(p_bw, tmp.phic, tmp.lap);
-    #if PSI_METHOD == PSI_PARABOLIC || defined(OUTPUT_CONSTRAINTS)
-    fftw_execute_dft_c2r(p_bw, tmp.psic, tmp.f);
-    #endif
-    TIME(mon.fftw_time_exe += get_wall_time());
+    ifft(tmp.fc, tmp.lap);
     assemble_gradient_squared();
 }
 
 /**
- * @brief Constructs the squared gradient from the (up to) three partial
- * spatial derivatives.
+ * @brief Computes the DFTs which are necessary for the right hand side or the
+ * desired output. This will also trigger the filtering if required.
  *
- * The partial derivatives of $$\phi$$ computed in
- * `mk_gradient_squared_and_laplacian(double *in)` are indiviually squared,
- * added up and the result is stored in `tmp.grad`
+ * @param[in, out] f The fields. They might be overwritten by their filtered
+ * versions.
+ *
+ * Additionally, if required, the Laplacian of \f$\psi\f$ is computed here.
+ */
+static void mk_ffts_and_filter(double *f)
+{
+    const size_t N = pars.N;
+    fft(f, tmp.phic);
+    #if defined(ENABLE_FFT_FILTER)
+    if (evo_flags.filter == 1) { // output == 1 => filter == 1
+        fft(f + 2 * N, tmp.psic);
+        capply_filter(tmp.phic, f); // fft already available
+        capply_filter(tmp.psic, f + 2 * N); // fft already available
+        apply_filter(f + pars.N); // fft not available
+        apply_filter(f + 3 * pars.N); // fft not available
+    }
+    #elif defined(OUTPUT_CONSTRAINTS) || defined(OUTPUT_PSI_PS)
+    if (evo_flags.output == 1) {
+        fft(f + 2 * N, tmp.psic);
+    }
+    #endif
+    #ifdef OUTPUT_CONSTRAINTS
+    if (evo_flags.output == 1) {
+        #pragma omp parallel for
+        for (size_t i = 0; i < pars.M; ++i) {
+            tmp.fc[i] = - tmp.psic[i] * kvec.sq[i] / N;
+        }
+        ifft(tmp.fc, tmp.f);
+    }
+    #endif
+}
+
+/**
+ * @brief Constructs the squared gradient from the (up to) three partial
+ * spatial derivatives (depending on the number of spatial dimensions).
+ *
+ * The partial derivatives of \f$\phi\f$ computed in
+ * `mk_gradient_squared_and_laplacian(double *in)` are used to compute the
+ * squared gradient of \f$\phi\f$, which is  stored in `tmp.grad`.
  */
 static void assemble_gradient_squared()
 {
-    const size_t N = pars.N;
     #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i) {
+    for (size_t i = 0; i < pars.N; ++i) {
         tmp.grad[i] = tmp.xphi[i] * tmp.xphi[i];
         if (pars.dim > 1) {
             tmp.grad[i] += tmp.yphi[i] * tmp.yphi[i];
@@ -235,182 +210,376 @@ static void assemble_gradient_squared()
 }
 
 /**
- * @brief Compute the energy density $$\rho$$ and its average value. For
- * `PSI_METHOD=PSI_HYPERBOLIC` also compute the pressure and its average
- * value.
+ * @brief Compute the energy density \f$\rho\f$ and its spatial average as well
+ * as the pressure \f$p\f$ and its spatial average.
  *
- * @param[in] f An array containing the fields
+ * @param[in] f The fields.
  *
- * Everything is stored in global variables for reuse in other functions. When
- * the function returns:
- * `rho` contains the energy density $$\rho$$
- * `rho_mean` contains the average energy density $$< \rho >$$
- * If `PSI_METHOD=PSI_HYPERBOLIC`
- * `pressure` contains the pressure $$p$$
- * `pressure_mean` contains the average pressure $$< p >$$
- * All the above values persist until the next call of `mk_rhs(const double t,
- * double *f, double *result)`
+ * This function will populate the following global variables:
+ * `rho` contains the energy density \f$\rho\f$.
+ * `rho_mean` contains the average energy density \f$\langle \rho \rangle\f$.
+ * `pressure` contains the pressure \f$p\f$.
+ * `pressure_mean` contains the average pressure \f$\langle p \rangle\f$.
+ *
+ * @note All the above values persist until the next call of `mk_rhs(const
+ * double t, double *f, double *result)`.
  */
-void mk_rho(const double *f)
+void mk_rho_and_p(const double *f)
 {
     const size_t N = pars.N;
-    const size_t N2 = 2 * N;
-    const size_t N2p = pars.N2p;
-    const double a = f[N2];
-    const double a2 = a * a;
+    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
     rho_mean = 0.0;
-    #if PSI_METHOD == PSI_HYPERBOLIC
     pressure_mean = 0.0;
-    #endif
-
-    double df, p, t1, t2;
-    #pragma omp parallel for private(df, p, t1, t2) \
-                                reduction(+: rho_mean, pressure_mean)
+    #pragma omp parallel for reduction(+: rho_mean, pressure_mean)
     for (size_t i = 0; i < N; ++i) {
-        df = f[N + i];
-        #if PSI_METHOD != PSI_ELLIPTIC
-        p = f[N2p + i];
-        t1 = (0.5 - p) * df * df;
-        t2 = (0.5 + p) * tmp.grad[i] / a2;
+        double dph = f[N + i], ps = f[2 * N + i];
+        double t1 = (0.5 - ps) * dph * dph;
+        double t2 = (0.5 + ps) * tmp.grad[i] / a2;
         rho[i] = t1 + t2 + potential(f[i]);
-            #if PSI_METHOD == PSI_HYPERBOLIC
-            pressure[i] = t1 - t2 / 3.0 - potential(f[i]);
-            pressure_mean += pressure[i];
-            #endif
-        #else
-        rho[i] = (df * df + tmp.grad[i] / a2) / 2.0 + potential(f[i]);
-        #endif
+        pressure[i] = t1 - t2 / 3.0 - potential(f[i]);
+        pressure_mean += pressure[i];
         rho_mean += rho[i];
     }
     rho_mean /= N;
-    #if PSI_METHOD == PSI_HYPERBOLIC
     pressure_mean /= N;
+}
+
+/**
+ * @brief Checks which outputs are enabled on the current time slice, computes
+ * them and fills the corresponding buffers.
+ *
+ * @param[in] f The fields.
+ */
+static void output_all(double *f)
+{
+    #ifdef OUTPUT_PHI_PS
+    mk_power_spectrum(tmp.phic, phi_ps);
+    #endif
+    #ifdef OUTPUT_PSI_PS
+    mk_power_spectrum(tmp.psic, psi_ps);
+    #endif
+    #ifdef OUTPUT_RHO_PS
+    fft(rho, tmp.fc);
+    mk_power_spectrum(tmp.fc, rho_ps);
+    #endif
+    #ifdef OUTPUT_CONSTRAINTS
+    mk_constraints(f);
+    #endif
+    mk_summary();
+    #ifdef ENABLE_GW
+    mk_gw_spectrum(f);
     #endif
 }
 
 /**
- * @brief The potential of the scalar inflaton field $$\phi$$
+ * @brief Computes and updates part of the right hand side of the pde, i.e. the
+ * first order temporal derivatives of \f$\phi\f$, \f$\dot{\phi}\f$, \f$\psi\f$,
+ * \f$\dot{\psi}\f$.
  *
- * @param[in] f The field value where to evaluate the potential
- * @return The potential value at the given input
+ * @param[in] f The fields.
+ * @param[out] result The right hand side of the pde for the given fields.
+ *
+ * @see TODO[link] for more on the evolved fields and their equations of motion.
+ */
+static void update_phi_psi(double *f, double *result)
+{
+    const size_t N = pars.N, N2 = 2 * N, N3 = 3 * N;
+    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
+    const double hubble = sqrt(rho_mean / 3.0);
+    const double h3 = 3.0 * hubble;
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < N; ++i) {
+        double dph = f[N + i], ps = f[N2 + i], dps = f[N3 + i];
+        result[i] = dph; // update dphi
+        result[N + i] = (1.0 + 4.0 * ps) * tmp.lap[i] / a2 -
+            (h3 - 4.0 * dps) * dph -
+            (1.0 + 2.0 * ps) * potential_prime(f[i]); // update ddphi
+        result[N2 + i] = dps; // update dpsi
+        result[N3 + i] = 0.5 * pressure[i] + (ps - 0.5) * pressure_mean
+            - 4.0 * hubble * dps; // update ddpsi
+    }
+}
+
+#ifdef ENABLE_GW
+/**
+ * @brief Computes and updates part of the right hand side of the pde, i.e. the
+ * first order temporal derivatives of the tensor perturbations \f$h\f$.
+ *
+ * @param[in] f The fields.
+ * @param[out] result The right hand side of the pde for the given fields.
+ *
+ * @see TODO[link] for more on the evolved fields and their equations of motion.
+ */
+static void update_h(double *f, double *result)
+{
+    const size_t N = pars.N, Next = pars.Next, Nh1 = 4 * N, Nh2 = Nh1 + Next;
+    const size_t Ndh1 = Nh2 + Next, Ndh2 = Ndh1 + Next;
+    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
+    const double hubble = sqrt(rho_mean / 3.0);
+    const double h3 = 3.0 * hubble;
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < 2 * Next; ++i) {
+        result[Nh1 + i] = f[Ndh1 + i]; // update dhijs
+    }
+    const size_t len = 6;
+    complex **stt = malloc(len * sizeof *stt);
+    for (size_t i = 0; i < len; ++i) {
+        stt[i] = fftw_malloc(pars.M * sizeof *stt[i]);
+    }
+    mk_gw_sources_tt(f, stt);
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < pars.M; ++i) {
+        size_t i1 = 2 * i, i2 = i1 + 1;
+        double tmp = - (2.0 * pressure_mean + kvec.sq[i] / a2);
+        result[Ndh1 + i1] = tmp * f[Nh1 + i1] - h3 * f[Ndh1 + i1] +
+                            2.0 * creal(stt[0][i]) / a2;
+        result[Ndh1 + i2] = tmp * f[Nh1 + i2] - h3 * f[Ndh1 + i2] +
+                            2.0 * cimag(stt[0][i]) / a2;
+        result[Ndh2 + i1] = tmp * f[Nh2 + i1] - h3 * f[Ndh2 + i1] +
+                            2.0 * creal(stt[1][i]) / a2;
+        result[Ndh2 + i2] = tmp * f[Nh2 + i2] - h3 * f[Ndh2 + i2] +
+                            2.0 * cimag(stt[1][i]) / a2;
+    }
+    for (size_t i = 0; i < len; ++i) {
+        fftw_free(stt[i]);
+    }
+    free(stt);
+}
+
+/**
+ * @brief Compute the traceless transverse source terms for the equation of
+ * motion of the tensor perturbations \f$h\f$.
+ *
+ * @param[in] f The fields.
+ * @param[out] s The traceless transverse part of the source terms in
+ * the equation of motion of the tensor perturbations.
+ *
+ * @note From the nine components of \f$h_{ij}\f$ only two are independent once
+ * we impose symmetry, transversality and tracelessness. Thus we only keep two
+ * of the components.
+ *
+ * @see The traceless transverse source term is the right hand side of equation
+ * TODO[link] in the thesis.
+ */
+static void mk_gw_sources_tt(const double *f, complex **s)
+{
+    TIME(mon.gw_sources -= get_wall_time());
+    mk_gw_sources(f, s);
+
+    #pragma omp parallel for
+    for (size_t i = 1; i < pars.M; ++i) {
+        double kx = kvec.xf[i], ky = kvec.yf[i], kz = kvec.zf[i];
+        double ksq = kvec.sq[i];
+        double fx = kx / ksq, fy = ky / ksq, fz = kz / ksq;
+        complex t1 = kx * fx * s[0][i] + ky * fy * s[3][i] +
+                     kz * fz * s[5][i] + 2.0 * (kx * fy * s[1][i] +
+                     kx * fz * s[2][i] + ky * fz * s[4][i]);
+        complex t2 = s[0][i] + s[3][i] + s[5][i];
+        complex s1 = t1 + t2, s2 = t1 - t2;
+
+        if (fabs(kz) > DBL_EPSILON) { // use s11 and s12
+            complex k1 = kx * s[0][i] + ky * s[1][i] + kz * s[2][i];
+            complex k2 = kx * s[1][i] + ky * s[3][i] + kz * s[4][i];
+            s[0][i] = s[0][i] - 2.0 * fx * k1 + 0.5 * (fx * kx * s1 + s2);
+            s[1][i] = s[1][i] - fx * k2 - fy * k1 + 0.5 * fx * ky * s1;
+        } else if (fabs(ky) > DBL_EPSILON) { // use s11 and s13
+            complex k1 = kx * s[0][i] + ky * s[1][i] + kz * s[2][i];
+            complex k3 = kx * s[2][i] + ky * s[4][i] + kz * s[5][i];
+            s[0][i] = s[0][i] - 2.0 * fx * k1 + 0.5 * (fx * kx * s1 + s2);
+            s[1][i] = s[2][i] - fx * k3 - fz * k1 + 0.5 * fx * kz * s1;
+        } else { // use s22 and s23
+            complex k2 = kx * s[1][i] + ky * s[3][i] + kz * s[4][i];
+            complex k3 = kx * s[2][i] + ky * s[4][i] + kz * s[5][i];
+            s[0][i] = s[3][i] - 2.0 * fy * k2 + 0.5 * (fy * ky * s1 + s2);
+            s[1][i] = s[4][i] - fy * k3 - fz * k2 + 0.5 * fy * kz * s1;
+        }
+    }
+    s[0][0] = 0.0;
+    s[1][0] = 0.0;
+    TIME(mon.gw_sources += get_wall_time());
+}
+
+/**
+ * @brief Compute the source term, i.e. the right hand side, for the equation of
+ * motion of the tensor perturbations \f$h_{ij}\f$.
+ *
+ * @param[in] f The fields.
+ * @param[out] s Holds 6 arrays for the 6 components of the sources \f$S_{ij}\f$
+ * in Fourier space after imposing symmetry.
+ *
+ * @see The source term is the right hand side of equation TODO[link] in the
+ * thesis.
+ */
+static void mk_gw_sources(const double *f, complex **s)
+{
+    const size_t len = 6;
+    double *t1[] = {tmp.xphi, tmp.xphi, tmp.xphi, tmp.yphi, tmp.yphi, tmp.zphi};
+    double *t2[] = {tmp.xphi, tmp.yphi, tmp.zphi, tmp.yphi, tmp.zphi, tmp.zphi};
+    double *s_tmp = fftw_malloc(pars.N * sizeof *s_tmp);
+    for (size_t j = 0; j < len; ++j) {
+        #pragma omp parallel for
+        for (size_t i = 0; i < pars.N; ++i) {
+            s_tmp[i] = t1[j][i] * t2[j][i];
+        }
+        fft(s_tmp, s[j]);
+    }
+    fftw_free(s_tmp);
+}
+
+/**
+ * @brief Computes the power spectrum of the gravitational waves.
+ *
+ * @param[in] f The fields.
+ *
+ * Computes the power spectrum of the gravitational waves associated with the
+ * tensor perturbations in the fields @p f according to the prescription in
+ * TODO[link].
+ */
+static void mk_gw_spectrum(double *f)
+{
+    const size_t Ndh1 = 4 * pars.N + 2 * pars.Next;
+    const size_t Ndh2 = Ndh1 + pars.Next;
+    const double lx= pars.x.b - pars.x.a;
+    const double ly= pars.y.b - pars.y.a;
+    const double lz= pars.z.b - pars.z.a;
+    const double hubble = sqrt(rho_mean / 3.0);
+    // ratio dof of today to mater-radiation-equality to the 1/3
+    const double rat = pow(0.01, 1.0/3.0);
+    const double fac = PI * rat / (3.0 * hubble * hubble * lx * ly * lz);
+    #pragma omp parallel for
+    for (size_t i = 0; i < gw.dim; ++i) {
+        gw.tmp[i] = 0.0;
+    }
+    // start with 1 to exclude constant offset, no omp!
+    for (size_t i = 1; i < pars.M; ++i) {
+        double kx = kvec.xf[i], ky = kvec.yf[i], kz = kvec.zf[i];
+        double kx2 = kx * kx, ky2 = ky * ky, kz2 = kz * kz;
+        double k2 = kvec.sq[i], k = sqrt(k2);
+        double dh1r = f[Ndh1 + 2 * i], dh2r = f[Ndh2 + 2 * i];
+        double dh1i = f[Ndh1 + 2 * i + 1], dh2i = f[Ndh2 + 2 * i + 1];
+        double pow;
+        // use h11 and h12
+        if (fabs(kz) > DBL_EPSILON) {
+            pow = 2.0 * k2 / (kz2 * (ky2 + kz2)) *
+                ((kx2 + kz2) * (dh1r * dh1r + dh1i * dh1i) +
+                2.0 * kx * ky * (dh1r * dh2r + dh1i * dh2i) +
+                (ky2 + kz2) * (dh2r * dh2r + dh2i * dh2i));
+        // use h11 and h13
+        } else if (fabs(ky) > DBL_EPSILON) {
+            pow = 2.0 * (kx2 + ky2) / (ky2 * ky2) *
+                ((kx2 + ky2) * (dh1r * dh1r + dh1i * dh1i) +
+                ky2 * (dh2r * dh2r + dh2i * dh2i));
+        // use h22 and h23
+        } else {
+            pow = 2.0 * (dh1r * dh1r + dh1i * dh1i +
+                         dh2r * dh2r + dh2i * dh2i);
+        }
+        if (fabs(kvec.z[i]) > DBL_EPSILON) {
+            pow *= 2.0;
+        }
+        size_t idx = (int)trunc(gw.dim * k / kvec.k_max - 1.0e-14);
+        gw.tmp[idx] += fac * k2 * k * pow;
+    }
+    #pragma omp parallel for
+    for (size_t i = 0; i < gw.dim; ++i) {
+        gw.tmp[i] /= pars.N;
+    }
+}
+#endif
+
+/**
+ * @brief The potential \f$V\f$ of the scalar inflaton field \f$\phi\f$.
+ *
+ * @param[in] f The inflaton field value where to evaluate the potential.
+ * @return The value of the potential at the given input @p f.
  */
 static double potential(const double f)
 {
-    // higgs metastability potential
-    /* double l = LAMBDA / 1.0e-10; */
-    /* double a = 0.01 * l, b = 1.0 * l; */
-    /* return f == 0.0 ? LAMBDA : */
-    /*     (LAMBDA + a * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) * pow(f, 4) + */
-    /*     b * pow(f, 6)); */
-
-    // notch or step potential
-    // LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
-    /* double lambda = 100.0; */
-    /* return LAMBDA / (1.0 + exp(-lambda * f)); */
-
-    // standard f squared potential
+    // standard phi squared potential
     return MASS * MASS * f * f / 2.0;
 }
 
 /**
- * @brief The derivative of the potential of the scalar inflaton field $$\phi$$
+ * @brief The derivative of the potential \f$V'\f$ of the scalar inflaton field
+ * \f$\phi\f$.
  *
- * @param[in] f The field value where to evaluate the derivative of the
- * potential
- * @return The value of the derivative of the potential at given input
+ * @param[in] f The value at which to evaluate the derivative of the potential.
+ * @return The value of the derivative of the potential at given input @p f.
  */
 static double potential_prime(const double f)
 {
-    // higgs metastability potential
-    /* double l = LAMBDA / 1.0e-10; */
-    /* double a = 0.01 * l, b = 1.0 * l; */
-    /* return f == 0.0 ? 0 : */
-    /*     (4.0 * a * pow(f, 3) * (1.0 - 0.1 * log10(fabs(f) * 1.0e19)) - */
-    /*     (0.1 * a * pow(f, 4) * ((f > 0.0) - (f < 0.0))) / (fabs(f) * log(10.0)) */
-    /*     + 6.0 * b * pow(f, 5)); */
-
-    // notch or step potential
-    // LAMBDA = 3d: 1.876e-4, 2d: 4.721e-5, 1d: 4.1269e-5
-    /* double lambda = 100.0; */
-    /* double tmp = exp(lambda * f); */
-    /* return LAMBDA * lambda * tmp / ((1.0 + tmp) * (1.0 + tmp)); */
-
-    // standard f squared potential
+    // standard phi squared potential
     return MASS * MASS * f;
 }
 
 #ifdef OUTPUT_CONSTRAINTS
 /**
- * @brief Monitor how well the Hamiltonian and momentum constraint are fulfilled.
+ * @brief Computes how well the Hamiltonian and momentum constraint are
+ * fulfilled for monitoring.
  *
- * Computes the Hamiltonian and momentum constraint in a form such they should
- * give 0, if fulfilled exactly. Of these combinations save the l2 Norm as well
- * as the maximum asbolute value to `cstr.tmp` for output.
+ * @param[in] f The fields.
  *
- * @note So far only the Hamiltonian constraint is implemented! (4/14/2016)
+ * Computes the Hamiltonian and momentum constraint as a sum of terms that
+ * should cancel each other if fulfilled exactly. Of these combinations the
+ * \f$l_2\f$ norm as well as the sup-norm, i.e. the maximum asbolute value,
+ * are copied to the corresponding output buffer.
  */
-static void mk_constraints()
+static void mk_constraints(double *f)
 {
-    TIME(mon.cstr_time -= get_wall_time());
+    TIME(mon.cstr -= get_wall_time());
     const size_t N = pars.N;
-    const size_t N2 = 2 * N;
-    const size_t N2p = pars.N2p;
-    const size_t N3p = pars.N3p;
-    const double a = field[N2];
-    const double a2 = a * a;
+    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
     const double hubble = sqrt(rho_mean / 3.0);
     const double h3 = 3.0 * hubble;
-    const double phi_mean = mean(field, N);
-    const double dphi_mean = mean(field + N, N);
-    double ham, ham_l2 = 0.0, ham_max = 0.0;
-    double mom, mom_l2 = 0.0, mom_max = 0.0;
-    double tmp1;
+    const double phi_mean = mean(f, N);
+    const double dphi_mean = mean(f + N, N);
+    double ham_l2 = 0.0, ham_max = 0.0;
+    double mom_l2 = 0.0, mom_max = 0.0;
 
-    #pragma omp parallel for private(tmp1, ham, mom) \
-        reduction(max: ham_max, mom_max) reduction(+: ham_l2, mom_l2)
+    #pragma omp parallel for reduction(max: ham_max, mom_max) \
+                             reduction(+: ham_l2, mom_l2)
     for (size_t i = 0; i < N; ++i) {
-        tmp1 = hubble * field[N2p + i] + field[N3p + i];
-        ham = tmp.f[i] / a2 - h3 * tmp1 - 0.5 * (rho[i] - rho_mean);
-        mom = tmp1 - 0.5 * dphi_mean * (field[i] - phi_mean);
+        double tmp1 = hubble * f[2 * N + i] + f[3 * N + i];
+        double ham = tmp.f[i] / a2 - h3 * tmp1 - 0.5 * (rho[i] - rho_mean);
+        double mom = tmp1 - 0.5 * dphi_mean * (f[i] - phi_mean);
         ham_l2 += ham * ham;
         mom_l2 += mom * mom;
         ham_max = MAX(ham_max, fabs(ham));
         mom_max = MAX(mom_max, fabs(mom));
     }
-    cstr.tmp[0] = ham_l2;
-    cstr.tmp[1] = ham_max;
-    cstr.tmp[2] = mom_l2;
-    cstr.tmp[3] = mom_max;
-    TIME(mon.cstr_time += get_wall_time());
+    cstr.tmp[0] = ham_l2 / N;
+    cstr.tmp[1] = ham_max / N;
+    cstr.tmp[2] = mom_l2 / N;
+    cstr.tmp[3] = mom_max / N;
+    TIME(mon.cstr += get_wall_time());
 }
 #endif
 
 /**
- * @brief Compute $$\psi$$ and $$\dot{\psi}$$
+ * @brief Computes \f$\psi\f$ and \f$\dot{\psi}\f$ from \f$\phi\f$ and
+ * \f$\dot{\phi}\f$ on the initial timeslice.
  *
- * @param[in] f An array containing the fields. Expects $$\phi$$,
- * $$\dot{\phi}$$ and $$a$$ right after each other in @p f.
+ * @param[in, out] f The fields. Expects \f$\phi\f$, \f$\dot{\phi}\f$ and
+ * \f$a\f$ to be given in @p f. Fills in \f$\psi\f$ and \f$\dot{\psi}\f$ in @p
+ * f.
  *
  * We use an elliptic equation from the Hamiltonian constraint combined with
- * the momentum contraint to compute $$\psi$$ and $$\dot{\psi}$$ from given
- * $$\phi$$, $$\dot{\phi}$$ and $$a$$.
+ * the momentum contraint to compute \f$\psi\f$ and \f$\dot{\psi}\f$ from given
+ * \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$. TODO[link]
  */
 void mk_psi(double *f)
 {
-    //TODO[performance]: optimize by saving often used values (h3, dphiextra...)
-    TIME(mon.poisson_time -= get_wall_time());
+    TIME(mon.elliptic -= get_wall_time());
     const size_t N = pars.N;
-    const size_t M = pars.M;
-    const size_t N2p = pars.N2p;
-    const size_t N3p = pars.N3p;
-    const double a = f[2 * N];
-    const double a2 = a * a;
+    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
     const double hubble = sqrt(rho_mean / 3.0);
-
     const double phi_mean = mean(f, N);
     const double dphi_mean = mean(f + N, N);
-    double extra1 = 0.0;
-    double extra2 = 0.0;
+    double extra1 = 0.0, extra2 = 0.0;
+
     #pragma omp parallel for reduction(+: extra1, extra2)
     for (size_t i = 0; i < N; ++i) {
         tmp.deltarho[i] = rho[i] - rho_mean;
@@ -420,217 +589,194 @@ void mk_psi(double *f)
     }
     const double extra = 0.5 * (extra1 - extra2 / a2) / N;
 
-    TIME(mon.fftw_time_exe -= get_wall_time());
-    fftw_execute_dft_r2c(p_fw, tmp.deltarho, tmp.deltarhoc);
-    fftw_execute_dft_r2c(p_fw, tmp.f, tmp.fc);
-    TIME(mon.fftw_time_exe += get_wall_time());
-
-    for (size_t i = 1; i < M; ++i) {
+    fft(tmp.deltarho, tmp.deltarhoc);
+    fft(tmp.f, tmp.fc);
+    #pragma omp parallel for
+    for (size_t i = 1; i < pars.M; ++i) {
         tmp.phic[i] = 0.5 * (tmp.deltarhoc[i] +
-                3 * hubble * tmp.fc[i]) / ((kvec.sq[i] / a2 + extra) * N);
+            3.0 * hubble * tmp.fc[i]) / ((- kvec.sq[i] / a2 + extra) * N);
     }
     tmp.phic[0] = 0.0;
 
-    TIME(mon.fftw_time_exe -= get_wall_time());
-    fftw_execute_dft_c2r(p_bw, tmp.phic, f + N2p);
-    TIME(mon.fftw_time_exe += get_wall_time());
-
+    ifft(tmp.phic, f + 2 * N);
+    #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
-        f[N3p + i] = 0.5 * tmp.f[i] - hubble * f[N2p + i];
+        f[3 * N + i] = 0.5 * tmp.f[i] - hubble * f[2 * N + i];
     }
-    TIME(mon.poisson_time += get_wall_time());
+    TIME(mon.elliptic += get_wall_time());
 }
 
 #ifdef OUTPUT_PS
 /**
- * @brief Compute the power spectrum
+ * @brief Computes the power spectrum of a field.
  *
- * @param[in] in The Fourier amplitudes of the field
- * @param[in, out] out The output struct providing information about and memory
- * for the power spectrum of the field.
+ * @param[in] in The Fourier amplitudes of the field.
+ * @param[in, out] out The `output` structure providing information about and
+ * memory for the power spectrum of the field.
  *
  * The power spectrum is constructed by binning the Fourier modes according to
- * the size of their wave vectors. The number of bins is determined by
- * `POWER_SPECTRUM_BINS`
+ * the length of their wave vectors \f$k\f$. The bin size is uniform in \f$k\f$
+ * and the number of bins is determined by `POWER_SPECTRUM_BINS` in the
+ * parameters.
  */
 static void mk_power_spectrum(const fftw_complex *in, struct output out)
 {
-    const size_t Nx = pars.x.N;
-    const size_t Ny = pars.y.N;
-    const size_t Nz = pars.z.N;
-    const size_t N = pars.N;
-    const size_t M = pars.M;
-    const size_t bins = out.dim;
-
-    const double k2_max = pars.x.k2 * (Nx/2) * (Nx/2) +
-                pars.y.k2 * (Ny/2) * (Ny/2) + pars.z.k2 * (Nz/2) * (Nz/2);
-
     #pragma omp parallel for
-    for (size_t i = 0; i < bins; ++i) {
+    for (size_t i = 0; i < out.dim; ++i) {
         out.tmp[i] = 0.0;
     }
-
-    double pow2_tmp = 0.0;
-    size_t idx;
-    // starting with 1 to explicitly exclude constant average
-    for (size_t i = 1; i < M; ++i) {
-        if (fabs(kvec.z[i]) < DBL_EPSILON) {
-            pow2_tmp = in[i] * conj(in[i]);
-        } else {
-            pow2_tmp = 2.0 * in[i] * conj(in[i]);
+    // starting with 1 to explicitly exclude constant average, no omp!
+    for (size_t i = 1; i < pars.M; ++i) {
+        double pow2_tmp = in[i] * conj(in[i]);
+        if (fabs(kvec.z[i]) > DBL_EPSILON) {
+            pow2_tmp *= 2.0;
         }
-        idx = (int)trunc(bins * sqrt(kvec.sq[i] / k2_max) - 1.0e-14);
-        out.tmp[idx] += pow2_tmp / N;
+        size_t idx = (int)trunc(out.dim * sqrt(kvec.sq[i]) / kvec.k_max - 1.0e-14);
+        out.tmp[idx] += pow2_tmp / pars.N;
     }
 }
 #endif
 
 #ifdef ENABLE_FFT_FILTER
 /**
- * @brief Apply a Fourier filter to each field of a given input to cutoff high
- * frequency modes
+ * @brief Applies a filter to the Fourier modes of the real space input to
+ * cutoff high frequency modes.
  *
- * @param[in, out] inout The field which we want to filter. Expect $$\phi$$ at
- * index 0, $$\dot{\phi}$ at index N, $$\psi$$ at index 2*N+2, $$\dot{\psi}$$
- * at index 3*N+2. All four are overwritten by their filtered results.
- * The highest modes of each field are cut off according to `filter_window(const
- * double x)` in `setup.c`.
+ * @param[in, out] f The field which we want to filter. It is overwritten by the
+ * filtered version.
+ *
+ * @see The highest modes of the field are cut off according to
+ * `filter_window(const double x)` in `setup.c`.
  */
-static void apply_filter_real(double *inout)
+static void apply_filter(double *f)
 {
-    const size_t N = pars.N;
-    const size_t N2p = pars.N2p;
-    const size_t N3p = pars.N3p;
-
-    TIME(mon.filter_time -= get_wall_time());
-    TIME(mon.fftw_time_exe -= get_wall_time());
-    fftw_execute_dft_r2c(p_fw, inout, tmp.phic);
-    fftw_execute_dft_r2c(p_fw, inout + N, tmp.xphic);
-    #if PSI_METHOD != PSI_ELLIPTIC
-    fftw_execute_dft_r2c(p_fw, inout + N2p, tmp.yphic);
-        #if PSI_METHOD == PSI_HYPERBOLIC
-        fftw_execute_dft_r2c(p_fw, inout + N3p, tmp.zphic);
-        #endif
-    #endif
-    TIME(mon.fftw_time_exe += get_wall_time());
-
-    apply_filter_fourier(tmp.phic, tmp.xphic, tmp.yphic, tmp.zphic);
-
-    TIME(mon.fftw_time_exe -= get_wall_time());
-    fftw_execute_dft_c2r(p_bw, tmp.phic, inout);
-    fftw_execute_dft_c2r(p_bw, tmp.xphic, inout + N);
-    #if PSI_METHOD != PSI_ELLIPTIC
-    fftw_execute_dft_c2r(p_bw, tmp.yphic, inout + N2p);
-        #if PSI_METHOD == PSI_HYPERBOLIC
-        fftw_execute_dft_c2r(p_bw, tmp.zphic, inout + N3p);
-        #endif
-    #endif
-    TIME(mon.fftw_time_exe += get_wall_time());
-    TIME(mon.filter_time += get_wall_time());
+    TIME(mon.filter -= get_wall_time());
+    fft(f, tmp.fc);
+    TIME(mon.filter += get_wall_time());
+    capply_filter(tmp.fc, f);
 }
 
 /**
- * @brief Applying the filter mask to the complex fields
+ * @brief Applies a filter to the Fourier space input to cutoff high frequency
+ * modes.
  *
- * @param[in, out] phi_io The field $$\phi$$ in Fourier space
- * @param[in, out] dphi_io The field $$\dot{\phi}$$ in Fourier space
- * @param[in, out] psi_io The field $$\psi$$ in Fourier space
- * @param[in, out] dpsi_io The field $$\dot{\psi}$$ in Fourier space
+ * @param[in, out] in The field in Fourier space which we want to filter. It is
+ * overwritten by the filtered version.
+ * @param[out] out The array that is populated by the filtered field in real
+ * space generated from @p in.
  *
- * The `filter` is constructed in `mk_filter_mask()` using the filter window
+ * @see The highest modes of the field are cut off according to
  * `filter_window(const double x)` in `setup.c`.
  */
-static void apply_filter_fourier(fftw_complex *phi_io, fftw_complex *dphi_io,
-        fftw_complex *psi_io, fftw_complex *dpsi_io)
+static void capply_filter(complex *in, double *out)
 {
-    const size_t M = pars.M;
-    double fil;
-    #pragma omp parallel for private(fil)
-    for (size_t i = 0; i < M; ++i) {
-        fil = filter[i];
-        phi_io[i] *= fil;
-        dphi_io[i] *= fil;
-        #if PSI_METHOD != PSI_ELLIPTIC
-        psi_io[i] *= fil;
-            #if PSI_METHOD == PSI_HYPERBOLIC
-            dpsi_io[i] *= fil;
-            #endif
-        #endif
+    TIME(mon.filter -= get_wall_time());
+    #pragma omp parallel for
+    for (size_t i = 0; i < pars.M; ++i) {
+        in[i] *= filter[i];
+        tmp.deltarhoc[i] = in[i] / pars.N;
     }
+    ifft(tmp.deltarhoc, out);
+    TIME(mon.filter += get_wall_time());
 }
 #endif
 
 /**
- * @brief Recompute all desired output quantities and save the current
- * timeslice to buffers
+ * @brief Constructs and saves summaries of the required fields (containing the
+ * mean, variance, minimum and maximum value at the current time) to the
+ * corresponding buffers.
  */
-void prepare_and_save_timeslice()
+static void mk_summary()
 {
-    #ifdef OUTPUT_PS
-    evo_flags.compute_pow_spec = 1;
-    #endif
-    #ifdef OUTPUT_CONSTRAINTS
-    evo_flags.compute_cstr = 1;
-    #endif
-    mk_rhs(pars.t.t, field, dfield);
-    evo_flags.compute_pow_spec = 0;
-    evo_flags.compute_cstr = 0;
-    mk_summary();
-    save();
-}
-
-/**
- * @brief Center input vector around it's average.
- *
- * @param[in, out] f Any double vector of length @p N
- * @param[in] N The length of the vector @p f
- *
- * The vector @p f is overwritten by f - <f>
- */
-/* static void center(double *f, const size_t N) */
-/* { */
-/*     double avg = mean(f, N); */
-/*     #pragma omp parallel for */
-/*     for (size_t i = 0; i < N; ++i) { */
-/*         f[i] -= avg; */
-/*     } */
-/* } */
-
-/**
- * @brief Save the summaries of the fields (containing the mean, variance,
- * minimum and maximum value at the current time).
- */
-void mk_summary()
-{
-    TIME(mon.smry_time -= get_wall_time());
+    TIME(mon.smry -= get_wall_time());
     #ifdef OUTPUT_PHI_SMRY
-    mean_var_min_max(field, phi_smry.tmp);
+    mean_var_min_max(field, phi_smry.tmp, pars.N);
     #endif
     #ifdef OUTPUT_DPHI_SMRY
-    mean_var_min_max(field + pars.N, dphi_smry.tmp);
+    mean_var_min_max(field + pars.N, dphi_smry.tmp, pars.N);
     #endif
     #ifdef OUTPUT_PSI_SMRY
-    mean_var_min_max(field + pars.N2p, psi_smry.tmp);
+    mean_var_min_max(field + 2 * pars.N, psi_smry.tmp, pars.N);
     #endif
     #ifdef OUTPUT_DPSI_SMRY
-        #if PSI_METHOD == PSI_PARABOLIC
-        mean_var_min_max(dfield + pars.N2p, dpsi_smry.tmp);
-        #else
-        mean_var_min_max(field + pars.N3p, dpsi_smry.tmp);
-        #endif
+    mean_var_min_max(field + 3 * pars.N, dpsi_smry.tmp, pars.N);
     #endif
     #ifdef OUTPUT_RHO_SMRY
-    mean_var_min_max(rho, rho_smry.tmp);
+    mean_var_min_max(rho, rho_smry.tmp, pars.N);
     #endif
-    TIME(mon.smry_time += get_wall_time());
+    #ifdef OUTPUT_PRESSURE_SMRY
+    mean_var_min_max(pressure, p_smry.tmp, pars.N);
+    #endif
+    // TODO: when to compute summary of h1 and h2, need it in real space
+    #ifdef OUTPUT_H1_SMRY
+    fmean_var_min_max(field + 4 * pars.N, h1_smry.tmp);
+    #endif
+    #ifdef OUTPUT_H2_SMRY
+    fmean_var_min_max(field + 4 * pars.N + pars.Next, h2_smry.tmp);
+    #endif
+    TIME(mon.smry += get_wall_time());
 }
 
 /**
- * @brief Compute the mean (or average) of a vector
+ * @brief Computes the summary of a field, i.e. the mean, variance, minimum and
+ * maximum value.
  *
- * @param[in] f Any vector of length @p N
- * @param[in] N The length of the vector @p f
- * @return The mean value of @p f
+ * @param[in] f The input field.
+ * @param[out] smry An array of size 4 which is filled with the summary: mean,
+ * variance, min, max (in this order).
+ * @param[in] N The length of the input field @p N.
+ *
+ * @note The field is implicitly assumed to have length `pars.N`.
+ */
+static void mean_var_min_max(const double *f, double *smry, const size_t N)
+{
+    double mean = 0.0, min_val = f[0], max_val = f[0];
+    #pragma omp parallel for reduction(+: mean) reduction(max: max_val) \
+        reduction(min: min_val)
+    for (size_t i = 0; i < N; ++i) {
+        mean += f[i];
+        min_val = MIN(min_val, f[i]);
+        max_val = MAX(max_val, f[i]);
+    }
+    smry[0] = mean / N;
+    smry[1] = variance(smry[0], f, N);
+    smry[2] = min_val;
+    smry[3] = max_val;
+}
+
+#if defined(OUTPUT_H1_SMRY) || defined(OUTPUT_H2_SMRY)
+/**
+ * @brief Computes the summary of a vector, i.e. the mean, variance, minimum and
+ * maximum value given its Fourier transform
+ *
+ * @param[in] f The input vector in the Fourier domain
+ * @param[out] smry An array of size 4 which is filled with the summary: mean,
+ * variance, min, max (in this order)
+ *
+ * @note The vector is implicitly assumed to have length `pars.Next` and is
+ * given in the memory layout described in TODO[link]
+ */
+static void fmean_var_min_max(const double *f, double *smry)
+{
+    //TODO: this is still heavily flawed
+    double var = 0.0;
+    #pragma omp parallel for reduction(+: var)
+    for (size_t i = 1; i < pars.Next; ++i) {
+        var += f[i] * f[i];
+    }
+    smry[0] = f[0];
+    smry[1] = var / pars.N;
+    smry[2] = 0.0;
+    smry[3] = 0.0;
+}
+#endif
+
+/**
+ * @brief Computes the mean (or average) of a 1D array.
+ *
+ * @param[in] f Any 1D array of length @p N.
+ * @param[in] N The length of the 1D array @p f.
+ * @return The mean value (average) of @p f.
  */
 static double mean(const double *f, const size_t N)
 {
@@ -639,66 +785,108 @@ static double mean(const double *f, const size_t N)
     for (size_t i = 0; i < N; ++i) {
         mean += f[i];
     }
-    return mean / (double)N;
+    return mean / N;
 }
 
 /**
- * @brief Compute the summary of a vector, i.e. the mean, variance, minimum and
- * maximum value
+ * @brief Computes the variance of a 1D array.
  *
- * @param[in] f The input vector
- * @param[out] smry An array of size 4 which is filled with the summary: mean,
- * variance, min, max (in this order)
- *
- * @note The vector is implicitly assumed to have length `pars.N`
- */
-static void mean_var_min_max(const double *f, double *smry)
-{
-    const size_t N = pars.N;
-    double mean = 0.0;
-    double min_val = f[0];
-    double max_val = f[0];
-    #pragma omp parallel for reduction(+: mean) reduction(max: max_val) \
-        reduction(min: min_val)
-    for (size_t i = 0; i < N; ++i) {
-        mean += f[i];
-        min_val = MIN(min_val, f[i]);
-        max_val = MAX(max_val, f[i]);
-    }
-    smry[0] = mean / (double)N;
-    smry[1] = variance(smry[0], f, N);
-    smry[2] = min_val;
-    smry[3] = max_val;
-}
-
-/**
- * @brief Compute the variance of a vector
- *
- * @param[in] mean The mean of the vector @p f
- * @param[in] f Any vector of length @p N
- * @param[in] N The length of the vector @p f
- * @return The variance value of @p f
+ * @param[in] mean The mean of the 1D array @p f.
+ * @param[in] f The 1D array of length @p N.
+ * @param[in] N The length of the 1D array @p f.
+ * @return The variance of @p f.
  */
 static double variance(const double mean, const double *f, const size_t N)
 {
-    double sum1 = 0.0;
-    double sum2 = 0.0;
-    double tmp;
+    double sum1 = 0.0, sum2 = 0.0, tmp;
     #pragma omp parallel for private(tmp) reduction(+: sum1, sum2)
     for (size_t i = 0; i < N; ++i) {
         tmp = f[i] - mean;
         sum1 += tmp * tmp;
         sum2 += tmp;
     }
-    return (sum1 - sum2 * sum2 / (double)N) / (double)(N - 1);
+    return (sum1 - sum2 * sum2 / N) / (N - 1);
 }
 
-#ifdef ENABLE_FFT_FILTER
 /**
- * @brief Check and print whether a vector contains NaNs __(debugging only)__
+ * @brief Copies a complex valued field saved in the custom double memory layout
+ * to a _natively_ complex field.
  *
- * @param[in] f Any vector of length @p N
- * @param[in] N The length of the vector @p f
+ * @param[in] in The double input array.
+ * @param[out] out The complex output array.
+ *
+ * @note The length of the complex array is assumed to be `pars.M` and the
+ * length of the double array is `pars.Next`.
+ *
+ * @see TODO[link] for the custom double layout of complex fields.
+ */
+static void real_to_complex(const double *in, complex *out)
+{
+    #pragma omp parallel for
+    for (size_t i = 0; i < pars.Next; i += 2) {
+        out[i] = in[i] + I * in[i + 1];
+    }
+}
+
+/**
+ * @brief Copies a natively complex field to the custom double memory layout.
+ *
+ * @param[in] in The complex input array.
+ * @param[out] out The double output array.
+ *
+ * @note The length of the complex array is assumed to be `pars.M` and the
+ * length of the double array is `pars.Next`.
+ *
+ * @see TODO[link] for the custom double layout of complex fields.
+ */
+static void complex_to_real(const complex *in, double *out)
+{
+    #pragma omp parallel for
+    for (size_t i = 0; i < pars.M; ++i) {
+        size_t ii = 2 * i;
+        out[ii] = creal(in[i]);
+        out[ii + 1] = cimag(in[i]);
+    }
+}
+
+/**
+ * @brief Computes the discrete Fourier transform.
+ *
+ * @param[in] in The field in real space.
+ * @param[out] out The field in fourier space.
+ *
+ * @note The specifics of the transform (dimensions, gridpoints, etc.) are
+ * implicitly defined by the FFTW3 plan `p_fw`.
+ */
+static void fft(double *in, complex *out)
+{
+    TIME(mon.fftw_exe -= get_wall_time());
+    fftw_execute_dft_r2c(p_fw, in, out);
+    TIME(mon.fftw_exe += get_wall_time());
+}
+
+/**
+ * @brief Computes the discrete Inverse Fourier transform.
+ *
+ * @param[in] in The field in Fourier space.
+ * @param[out] out The field in real space.
+ *
+ * @note The specifics of the inverse transform (dimensions, gridpoints, etc.)
+ * are implicitly defined by the FFTW3 plan `p_bw`.
+ */
+static void ifft(complex *in, double *out)
+{
+    TIME(mon.fftw_exe -= get_wall_time());
+    fftw_execute_dft_c2r(p_bw, in, out);
+    TIME(mon.fftw_exe += get_wall_time());
+}
+
+#ifdef CHECK_FOR_NAN
+/**
+ * @brief Checks and prints whether a vector contains NaNs. __(debugging only)__
+ *
+ * @param[in] f An array of length @p N.
+ * @param[in] N The length of the array @p f.
  */
 static void contains_nan(const double *f, const size_t N)
 {
@@ -712,10 +900,10 @@ static void contains_nan(const double *f, const size_t N)
 }
 
 /**
- * @brief Check and print whether a vector contains NaNs __(debugging only)__
+ * @brief Checks and prints whether a vector contains NaNs. __(debugging only)__
  *
- * @param[in] f Any vector of length @p N
- * @param[in] N The length of the vector @p f
+ * @param[in] f An array of length @p N.
+ * @param[in] N The length of the array @p f.
  */
 static void contains_nanc(const complex *f, const size_t N)
 {

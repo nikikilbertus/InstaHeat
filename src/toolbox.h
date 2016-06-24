@@ -15,27 +15,20 @@
  */
 struct evolution_flags
 {
-    uint8_t filter; ///< If set, apply filtering (unused)
+    uint8_t filter; ///< If set, apply filtering
     /**
-     * @brief If set, compute power spectra via `mk_power_spectrum(const
-     * fftw_complex *in, struct output out)` when calling
-     * `mk_gradient_squared_and_laplacian(double *in)`
+     * @brief Set if output at current timeslice is desired. This tells methods
+     * in toolbox to compute additional quantities.
      */
-    uint8_t compute_pow_spec;
-    /**
-     * @brief If set, compute the constraints via `mk_constraints()` when
-     * calling `mk_rhs(const double t, double *f, double *result)`
-     */
-    uint8_t compute_cstr;
+    uint8_t output;
 };
 
 extern struct evolution_flags evo_flags; ///< Instance of `evolution_flags`
 
 void mk_rhs(const double t, double *f, double *result);
-void mk_gradient_squared_and_laplacian(double *in);
-void mk_rho(const double *f);
-void mk_psi(double *f);
-void mk_summary();
 void prepare_and_save_timeslice();
+void mk_gradient_squared_and_laplacian(double *in);
+void mk_rho_and_p(const double *f);
+void mk_psi(double *f);
 
 #endif

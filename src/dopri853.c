@@ -23,12 +23,14 @@
  */
 
 static void initialize_dopri853();
+static void wrap_up_dopri853();
 static int perform_step(const double dt_try);
 static void try_step(const double dt);
 static double error(const double dt);
 static int success(const double err, double *dt);
 static void allocate_dopri853_values();
-static void free_dopri853_values();
+static void allocate_and_initialize_tolerances();
+static void free_dopri853();
 
 /**
  * @brief Holds intermediate evaluations of the right hand side and errors for
@@ -41,8 +43,8 @@ static void free_dopri853_values();
  */
 struct dopri853_values
 {
-        double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;
-        double *yerr, *yerr2;
+    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;
+    double *yerr, *yerr2;
 };
 
 /**
@@ -70,8 +72,8 @@ struct dopri853_control
     double safe; ///< Internal parameter for the error estimates
     double minscale; ///< Minimal permissible rescaling of the time step size
     double maxscale; ///< Maximal permissible rescaling of the time step size
-    double a_tol; ///< Absolute tolerance
-    double r_tol; ///< Relative tolerance
+    double *a_tol; ///< Absolute tolerances
+    double *r_tol; ///< Relative tolerances
     double err_old; ///< The previous error (on the last time slice)
     int reject; ///< Flag whether time step is rejected or accepted
     double eps; ///< Epsilon value for comparisons
@@ -101,30 +103,8 @@ struct dopri853_values dpv;
 void run_dopri853()
 {
     initialize_dopri853();
-    allocate_dopri853_values();
-    INFO(puts("Starting dopri853 integration with:"));
-    INFO(printf("initial time: %f\n", dp.ti));
-    INFO(printf("final time: %f\n", dp.tf));
-    INFO(printf("initial time step dt: %f\n", dp.dt));
-    INFO(printf("minimal time step dt: %f\n", dp.dt_min));
-    INFO(printf("max number of steps: %zu\n", dp.max_steps));
-    INFO(printf("relative tolerance: %.15f\n", dp.r_tol));
-    INFO(printf("absolute tolerance: %.15f\n\n", dp.a_tol));
-
-    #ifdef OUTPUT_PS
-    evo_flags.compute_pow_spec = 1;
-    #endif
-    #ifdef OUTPUT_CONSTRAINTS
-    evo_flags.compute_cstr = 1;
-    #endif
-    mk_rhs(dp.t, field, dfield);
-    evo_flags.compute_pow_spec = 0;
-    evo_flags.compute_cstr = 0;
-    mk_summary();
-    save();
-    double secs = 0.0;
-    TIME(secs = -get_wall_time());
-
+    prepare_and_save_timeslice();
+    TIME(mon.integration = -get_wall_time());
     for (dp.n_stp = 0; dp.n_stp < dp.max_steps; ++dp.n_stp) {
         if (dp.t + dp.dt * 1.0001 > dp.tf) {
             dp.dt = dp.tf - dp.t;
@@ -141,52 +121,32 @@ void run_dopri853()
         #ifdef DEBUG
         INFO(printf("did step: %d with dt: %f\n", dp.n_stp, dp.dt_did));
         #endif
-
         if ((dp.n_stp + 1) % pars.file.skip == 0) {
-            mk_summary();
             save();
         }
-        if (dp.t >= dp.tf) {
+        if (dp.t > dp.tf) {
+            fputs("\nReached specified final time.\n\n", stderr);
+            break;
+        }
+        double time = get_wall_time() + runtime;
+        if (time > pars.max_runtime) {
+            fputs("\nReached specified maximal runtime.\n\n", stderr);
             break;
         }
         if (fabs(dp.dt_next) <= dp.dt_min) {
-            fputs("!!! Stepsize underflow.\n", stderr);
+            fputs("\n!!! Stepsize underflow.\n\n", stderr);
             break;
         }
         dp.dt = dp.dt_next;
     }
-
-    size_t index = pars.file.index;
-    if (index != 0 && t_out.buf[index - 1] < dp.t) {
-        prepare_and_save_timeslice();
-    }
-
-    TIME(secs += get_wall_time());
-    free_dopri853_values();
-
-    INFO(puts("Writing simulation meta data to disk.\n"));
-    double val[1];
-    val[0] = (double)dp.n_stp;
-    h5_write_parameter(H5_STEPS_TOTAL_NAME, val, 1);
-    val[0] = (double)dp.n_ok;
-    h5_write_parameter(H5_STEPS_OK_NAME, val, 1);
-    val[0] = (double)dp.n_bad;
-    h5_write_parameter(H5_STEPS_BAD_NAME, val, 1);
-
-    INFO(puts("Finished dopri853."));
-    #ifdef SHOW_TIMING_INFO
-    INFO(printf("time: %f seconds\n", secs));
-    val[0] = secs;
-    h5_write_parameter(H5_RUNTIME_STEPPER_NAME, val, 1);
-    #endif
-    INFO(printf("steps: %d\n", dp.n_stp + 1));
-    INFO(printf("good steps: %d\n", dp.n_ok));
-    INFO(printf("bad steps: %d\n\n", dp.n_bad));
+    TIME(mon.integration += get_wall_time());
+    wrap_up_dopri853();
 }
 
 /**
  * @brief Initializes parameters in the struct dopri853_control dp of the
- * Dormand Prince integrator.
+ * Dormand Prince integrator, and calls further allocation and initialization
+ * functions.
  *
  * All fields of the struct dopri853_control dp are set according either as
  * fixed initial values or according to parameters entered by the user. All
@@ -214,12 +174,55 @@ static void initialize_dopri853()
     dp.safe = SAFE;
     dp.minscale = SMALLEST_SCALING;
     dp.maxscale = LARGEST_SCALING;
-    dp.a_tol = ABSOLUTE_TOLERANCE;
-    dp.r_tol = RELATIVE_TOLERANCE;
     dp.err_old = 1.0e-4;
     dp.reject = 0;
     dp.eps = DBL_EPSILON;
     INFO(puts("Initialized dopri853 parameters.\n"));
+    allocate_dopri853_values();
+    allocate_and_initialize_tolerances();
+    INFO(puts("Starting dopri853 integration with:"));
+    INFO(printf("initial time: %.17g\n", dp.ti));
+    INFO(printf("final time: %.17g\n", dp.tf));
+    INFO(printf("initial time step dt: %.17g\n", dp.dt));
+    INFO(printf("minimal time step dt: %.17g\n", dp.dt_min));
+    INFO(printf("max number of steps: %zu\n", dp.max_steps));
+    // TODO: change this once I have more definitions
+    INFO(printf("relative tolerance: %.17g\n", RELATIVE_TOLERANCE));
+    INFO(printf("absolute tolerance: %.17g\n\n", ABSOLUTE_TOLERANCE));
+}
+
+/**
+ * @brief Wraps up the integration by writing meta data to disk, print
+ * information and free memory.
+ */
+static void wrap_up_dopri853()
+{
+    size_t index = pars.file.index;
+    if (index != 0 && t_out.buf[index - 1] < dp.t) {
+        prepare_and_save_timeslice();
+    }
+    #ifdef ENABLE_FOLLOWUP
+    h5_write_followup();
+    #endif
+    free_dopri853();
+
+    INFO(puts("Writing simulation meta data to disk.\n"));
+    double val[1];
+    val[0] = (double)dp.n_stp;
+    h5_write_simple(H5_STEPS_TOTAL_NAME, val, 1, H5D_COMPACT);
+    val[0] = (double)dp.n_ok;
+    h5_write_simple(H5_STEPS_OK_NAME, val, 1, H5D_COMPACT);
+    val[0] = (double)dp.n_bad;
+    h5_write_simple(H5_STEPS_BAD_NAME, val, 1, H5D_COMPACT);
+
+    INFO(puts("Finished dopri853."));
+    #ifdef ENABLE_TIMING
+    INFO(printf("time: %f seconds\n", mon.integration));
+    h5_write_simple(H5_RUNTIME_STEPPER_NAME, &mon.integration, 1, H5D_COMPACT);
+    #endif
+    INFO(printf("steps: %d\n", dp.n_stp + 1));
+    INFO(printf("good steps: %d\n", dp.n_ok));
+    INFO(printf("bad steps: %d\n\n", dp.n_bad));
 }
 
 /**
@@ -242,7 +245,6 @@ static void initialize_dopri853()
  */
 static int perform_step(const double dt_try)
 {
-    const size_t Ntot = pars.Ntot;
     double dt = dt_try;
     for ( ; ; ) {
         try_step(dt);
@@ -256,24 +258,17 @@ static int perform_step(const double dt_try)
         }
     }
     #ifdef ENABLE_FFT_FILTER
-    apply_filter_real(field_new);
+    evo_flags.filter = 1;
     #endif
-    #ifdef OUTPUT_PS
     if ((dp.n_stp + 1) % pars.file.skip == 0) {
-        evo_flags.compute_pow_spec = 1;
+        evo_flags.output = 1;
     }
-    #endif
-    #ifdef OUTPUT_CONSTRAINTS
-    if ((dp.n_stp + 1) % pars.file.skip == 0) {
-        evo_flags.compute_cstr = 1;
-    }
-    #endif
     mk_rhs(dp.t + dt, field_new, dfield_new);
-    evo_flags.compute_pow_spec = 0;
-    evo_flags.compute_cstr = 0;
+    evo_flags.output = 0;
+    evo_flags.filter = 0;
 
     #pragma omp parallel for
-    for (size_t i = 0; i < Ntot; ++i) {
+    for (size_t i = 0; i < pars.Ntot; ++i) {
         field[i] = field_new[i];
         dfield[i] = dfield_new[i];
     }
@@ -423,7 +418,7 @@ static void try_step(const double dt)
     #pragma omp parallel for
     for (i = 0; i < Ntot; ++i) {
         dpv.yerr[i] = dpv.k4[i] - dpc.bhh1 * dfield[i] - dpc.bhh2 * dpv.k9[i] -
-                        dpc.bhh3 * dpv.k3[i];
+                      dpc.bhh3 * dpv.k3[i];
         dpv.yerr2[i] = dpc.er1 * dfield[i] + dpc.er6 * dpv.k6[i] +
                        dpc.er7 * dpv.k7[i] + dpc.er8 * dpv.k8[i] +
                        dpc.er9 * dpv.k9[i] + dpc.er10 * dpv.k10[i] +
@@ -437,28 +432,26 @@ static void try_step(const double dt)
  * @param[in] dt The previously tried stepsize.
  * @return The error of the previously tried stepsize.
  *
- * Computes the collective error of <b>all</b> the fields in the integration
- * routine normalized such that the threshold value is 1.
+ * Computes the collective error of all the fields in the integration routine
+ * normalized such that the threshold value is 1.
  */
 static double error(const double dt)
 {
-    const size_t Ntot = pars.Ntot;
-    double err = 0.0, err2 = 0.0, sk, deno;
-
-    double tmp;
-    #pragma omp parallel for private(sk, tmp) reduction(+: err, err2)
-    for (size_t i = 0; i < Ntot; ++i) {
-        sk = dp.a_tol + dp.r_tol * MAX(fabs(field[i]), fabs(field_new[i]));
-        tmp = dpv.yerr[i] / sk;
+    double err = 0.0, err2 = 0.0;
+    #pragma omp parallel for reduction(+: err, err2)
+    for (size_t i = 0; i < pars.Ntot; ++i) {
+        double sk = dp.a_tol[i] +
+            dp.r_tol[i] * MAX(fabs(field[i]), fabs(field_new[i]));
+        double tmp = dpv.yerr[i] / sk;
         err2 += tmp * tmp;
         tmp = dpv.yerr2[i] / sk;
         err += tmp * tmp;
     }
-    deno = err + 0.01 * err2;
+    double deno = err + 0.01 * err2;
     if (deno <= 0.0) {
         deno = 1.0;
     }
-    return dt * err * sqrt(1.0 / (Ntot * deno));
+    return dt * err * sqrt(1.0 / (pars.Ntot * deno));
 }
 
 /**
@@ -480,23 +473,17 @@ static double error(const double dt)
  */
 static int success(const double err, double *dt)
 {
-    const double beta = dp.beta;
-    const double alpha = dp.alpha;
-    const double safe = dp.safe;
-    const double minscale = dp.minscale;
-    const double maxscale = dp.maxscale;
     double scale;
-
     if (err <= 1.0) {
         if (err == 0.0) {
-            scale = maxscale;
+            scale = dp.maxscale;
         } else {
-            scale = safe * pow(err, -alpha) * pow(dp.err_old, beta);
-            if (scale < minscale) {
-                scale = minscale;
+            scale = dp.safe * pow(err, - dp.alpha) * pow(dp.err_old, dp.beta);
+            if (scale < dp.minscale) {
+                scale = dp.minscale;
             }
-            if (scale > maxscale) {
-                scale = maxscale;
+            if (scale > dp.maxscale) {
+                scale = dp.maxscale;
             }
         }
         if (dp.reject) {
@@ -510,12 +497,11 @@ static int success(const double err, double *dt)
             dp.dt_next = minstep;
         }
         #endif
-
         dp.err_old = MAX(err, 1.0e-4);
         dp.reject = 0;
         return 1;
     } else {
-        scale = MAX(safe * pow(err, -alpha), minscale);
+        scale = MAX(dp.safe * pow(err, - dp.alpha), dp.minscale);
         (*dt) *= scale;
         dp.reject = 1;
         return 0;
@@ -531,8 +517,6 @@ static int success(const double err, double *dt)
 static void allocate_dopri853_values()
 {
     const size_t Ntot = pars.Ntot;
-    const size_t Nall = pars.Nall;
-
     dpv.k2 = fftw_malloc(Ntot * sizeof *dpv.k2);
     dpv.k3 = fftw_malloc(Ntot * sizeof *dpv.k3);
     dpv.k4 = fftw_malloc(Ntot * sizeof *dpv.k4);
@@ -542,11 +526,9 @@ static void allocate_dopri853_values()
     dpv.k8 = fftw_malloc(Ntot * sizeof *dpv.k8);
     dpv.k9 = fftw_malloc(Ntot * sizeof *dpv.k9);
     dpv.k10 = fftw_malloc(Ntot * sizeof *dpv.k10);
-    dpv.k_tmp = fftw_malloc(Nall * sizeof *dpv.k_tmp);
-
+    dpv.k_tmp = fftw_malloc(Ntot * sizeof *dpv.k_tmp);
     dpv.yerr = fftw_malloc(Ntot * sizeof *dpv.yerr);
     dpv.yerr2 = fftw_malloc(Ntot * sizeof *dpv.yerr2);
-
     if (!(dpv.k2 && dpv.k3 && dpv.k4 && dpv.k5 && dpv.k6 && dpv.k7 && dpv.k8 &&
           dpv.k9 && dpv.k10 && dpv.k_tmp && dpv.yerr && dpv.yerr2)) {
         fputs("Allocating memory failed.\n", stderr);
@@ -566,12 +548,45 @@ static void allocate_dopri853_values()
         dpv.k10[i] = 0.0;
         dpv.yerr[i] = 0.0;
         dpv.yerr2[i] = 0.0;
-    }
-    #pragma omp parallel for
-    for (size_t i = 0; i < Nall; ++i) {
         dpv.k_tmp[i] = 0.0;
     }
     INFO(puts("Allocated memory for dopri853 variables.\n"));
+}
+
+/**
+ * @brief Initializes the vectorized absolute and relative tolerances.
+ *
+ * From the definitions in the parameter file initializes the absolute and
+ * relative tolerances used to compute the error. The error determines whether
+ * a step size is accepted or rejected and how to choose the next adaptive step
+ * size.
+ */
+static void allocate_and_initialize_tolerances()
+{
+    const size_t Ntot = pars.Ntot;
+    /* const size_t N = pars.N; */
+    dp.a_tol = fftw_malloc(Ntot * sizeof *dp.a_tol);
+    dp.r_tol = fftw_malloc(Ntot * sizeof *dp.r_tol);
+    // TODO: initialize values
+    #pragma omp parallel for
+    for (size_t i = 0; i < Ntot; ++i) {
+        dp.a_tol[i] = ABSOLUTE_TOLERANCE;
+        dp.r_tol[i] = RELATIVE_TOLERANCE;
+    }
+    /* double rtol = RELATIVE_TOLERANCE; */
+    /* #pragma omp parallel for */
+    /* for (size_t i = 0; i < 2 * N; ++i) { */
+    /*     dp.r_tol[i] = rtol; */
+    /* } */
+    /* /1* rtol = 1.0e4 * RELATIVE_TOLERANCE; *1/ */
+    /* #pragma omp parallel for */
+    /* for (size_t i = 2 * N; i < 4 * N; ++i) { */
+    /*     dp.r_tol[i] = rtol; */
+    /* } */
+    /* #pragma omp parallel for */
+    /* for (size_t i = 4 * N; i < Ntot; ++i) { */
+    /*     dp.r_tol[i] = RELATIVE_TOLERANCE; */
+    /* } */
 }
 
 /**
@@ -581,8 +596,10 @@ static void allocate_dopri853_values()
  * Dormand Prince integration routine as well as temporary memory for the
  * errors.
  */
-static void free_dopri853_values()
+static void free_dopri853()
 {
+    fftw_free(dp.a_tol);
+    fftw_free(dp.r_tol);
     fftw_free(dpv.k2);
     fftw_free(dpv.k3);
     fftw_free(dpv.k4);
@@ -593,7 +610,6 @@ static void free_dopri853_values()
     fftw_free(dpv.k9);
     fftw_free(dpv.k10);
     fftw_free(dpv.k_tmp);
-
     fftw_free(dpv.yerr);
     fftw_free(dpv.yerr2);
     INFO(puts("Freed memory of dopri853 variables.\n"));

@@ -1,3 +1,4 @@
+%% DEPRECATED!
 plot(t, phiAvg'.*a.^(3/2), tk, phi0k.*ak.^(3/2))
 xlabel('t');
 ylabel('a^{3/2} * phi_0');
