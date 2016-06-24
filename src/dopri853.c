@@ -124,12 +124,11 @@ void run_dopri853()
         if ((dp.n_stp + 1) % pars.file.skip == 0) {
             save();
         }
-        double time = 0.0;
-        TIME(time = get_wall_time() + mon.all);
         if (dp.t > dp.tf) {
             fputs("\nReached specified final time.\n\n", stderr);
             break;
         }
+        double time = get_wall_time() + runtime;
         if (time > pars.max_runtime) {
             fputs("\nReached specified maximal runtime.\n\n", stderr);
             break;
