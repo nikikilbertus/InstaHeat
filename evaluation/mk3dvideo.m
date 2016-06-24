@@ -1,6 +1,10 @@
-%% volume visualization video
-loadDsets;
-dsets = {'a', 'rho', 'N'};
+%% create 3D volume visualization video
+
+%% setup (user input)
+name = 'cutoff/96_64_5e-3_fil';
+
+%% run
+require('a','rho','N');
 readDsets;
 field = rho;
 fieldname = 'rho'; filename = 'rho3d';
