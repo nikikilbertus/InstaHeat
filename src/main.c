@@ -140,7 +140,9 @@ static void write_monitoring()
     h5_write_simple(H5_RUNTIME_SMRY_NAME, &mon.smry, 1, H5D_COMPACT);
     h5_write_simple(H5_RUNTIME_WRITEOUT_NAME, &mon.h5_write, 1, H5D_COMPACT);
 }
+#endif
 
+#if defined(SHOW_TIMING_INFO) || defined(MAX_RUNTIME)
 /**
  * @brief Get wall clock time for timing analysis.
  *
