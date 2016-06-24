@@ -116,7 +116,7 @@ void run_rk4()
     }
 
     INFO(puts("Finished rk4"));
-    #ifdef SHOW_TIMING_INFO
+    #ifdef ENABLE_TIMING
     secs += get_wall_time();
     INFO(printf("time: %f seconds\n\n", secs));
     INFO(puts("Writing simulation meta data to disk\n"));
