@@ -28,7 +28,6 @@
 #define MIN(x, y)               (((x) > (y)) ? (y) : (x))
 
 #define SHOW_RUNTIME_INFO // recommended
-#define SHOW_TIMING_INFO // recommended
 /* #define CHECK_FOR_NAN // not recommended (performance) */
 /* #define ENABLE_PROFILER // only recommended for debugging */
 /* #define DEBUG // only recommended for debugging (huge output!) */
@@ -42,7 +41,7 @@
 #define INFO(f)
 #endif
 
-#ifdef SHOW_TIMING_INFO
+#ifdef ENABLE_TIMING
 #define TIME(f) do {\
         (f); \
     } while (0)
@@ -150,6 +149,7 @@
 #define __ENABLE_FFT_FILTER__
 #define __ENABLE_GW__
 #define __ENABLE_FOLLOWUP__
+#define __ENABLE_TIMING__
 
 #ifndef ENABLE_GW
     #undef OUTPUT_H1_SMRY
