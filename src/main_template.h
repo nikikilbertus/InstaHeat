@@ -286,7 +286,6 @@ struct monitor
      * *result)` in `toolbox.c`
      */
     size_t calls_rhs;
-    double all; ///< Total wall clock time for the overall program execution
     double fftw_exe; ///< Total wall clock time for fft execution
     double fftw_plan; ///< Total wall clock time for fftw planning
     double filter; ///< Total wall clock time for filtering
@@ -342,9 +341,8 @@ extern struct temporary tmp; ///< The only instance of the struct `temporary`
 extern fftw_plan p_fw; ///< FFTw3 plan for the Fourier transforms
 extern fftw_plan p_bw; ///< FFTw3 plan for the inverse Fourier transforms
 extern struct monitor mon; ///< The only instance of the struct `monitor`
+extern double runtime; ///< Total wall clock time for the overall program execution
 
-#ifdef SHOW_TIMING_INFO
 double get_wall_time();
-#endif
 
 #endif
