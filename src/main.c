@@ -21,7 +21,7 @@
  * timing purposes.
  */
 
-#ifdef SHOW_TIMING_INFO
+#ifdef ENABLE_TIMING
 static void write_monitoring();
 #endif
 
@@ -121,7 +121,7 @@ double get_wall_time()
     return (double)time.tv_sec + (double)time.tv_usec * 0.000001;
 }
 
-#ifdef SHOW_TIMING_INFO
+#ifdef ENABLE_TIMING
 /**
  * @brief Write monitoring info to h5 file and print on screen.
  */
