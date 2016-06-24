@@ -1,0 +1,568 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ABSOLUTE_TOLERANCE	main_template.h	/^#define ABSOLUTE_TOLERANCE /;"	d
+A_INITIAL	main_template.h	/^#define A_INITIAL /;"	d
+BETA	main_template.h	/^#define BETA /;"	d
+BUNCH_DAVIES_CUTOFF	main_template.h	/^#define BUNCH_DAVIES_CUTOFF /;"	d
+CC	Makefile	/^CC = h5cc$/;"	m
+CFLAGS	Makefile	/^CFLAGS = -std=c99 -g -Wall -fopenmp -O2 -march=native -I \/usr\/local\/include$/;"	m
+COUPLING	main_template.h	/^#define COUPLING /;"	d
+DATAPATH	main_template.h	/^#define DATAPATH /;"	d
+DELTA_T	main_template.h	/^#define DELTA_T /;"	d
+DOPRI853	main_template.h	/^#define DOPRI853 /;"	d
+FFTW_DEFAULT_FLAG	main_template.h	/^#define FFTW_DEFAULT_FLAG /;"	d
+FINAL_TIME	main_template.h	/^#define FINAL_TIME /;"	d
+GRIDPOINTS_X	main_template.h	/^#define GRIDPOINTS_X /;"	d
+GRIDPOINTS_Y	main_template.h	/^#define GRIDPOINTS_Y /;"	d
+GRIDPOINTS_Z	main_template.h	/^#define GRIDPOINTS_Z /;"	d
+H5_A_NAME	io.h	/^#define     H5_A_NAME /;"	d
+H5_BUNCH_DAVIES_CUTOFF_NAME	io.h	/^#define     H5_BUNCH_DAVIES_CUTOFF_NAME /;"	d
+H5_COMMIT_HASH_NAME	io.h	/^#define     H5_COMMIT_HASH_NAME /;"	d
+H5_CONSTRAINTS_NAME	io.h	/^#define     H5_CONSTRAINTS_NAME /;"	d
+H5_COUNTER_RHS	io.h	/^#define     H5_COUNTER_RHS /;"	d
+H5_DIMENSION_NAME	io.h	/^#define     H5_DIMENSION_NAME /;"	d
+H5_DPHI_NAME	io.h	/^#define     H5_DPHI_NAME /;"	d
+H5_DPHI_PS_NAME	io.h	/^#define     H5_DPHI_PS_NAME /;"	d
+H5_DPHI_SMRY_NAME	io.h	/^#define     H5_DPHI_SMRY_NAME /;"	d
+H5_DPSI_NAME	io.h	/^#define     H5_DPSI_NAME /;"	d
+H5_DPSI_PS_NAME	io.h	/^#define     H5_DPSI_PS_NAME /;"	d
+H5_DPSI_SMRY_NAME	io.h	/^#define     H5_DPSI_SMRY_NAME /;"	d
+H5_ENABLE_FILTER_NAME	io.h	/^#define     H5_ENABLE_FILTER_NAME /;"	d
+H5_ENABLE_GW_NAME	io.h	/^#define     H5_ENABLE_GW_NAME /;"	d
+H5_FOLLOWUP_NAME	io.h	/^#define     H5_FOLLOWUP_NAME /;"	d
+H5_GRIDPOINTS_INTERNAL_NAME	io.h	/^#define     H5_GRIDPOINTS_INTERNAL_NAME /;"	d
+H5_GRIDPOINTS_OUTPUT_NAME	io.h	/^#define     H5_GRIDPOINTS_OUTPUT_NAME /;"	d
+H5_GW_PS_NAME	io.h	/^#define     H5_GW_PS_NAME /;"	d
+H5_H1_SMRY_NAME	io.h	/^#define     H5_H1_SMRY_NAME /;"	d
+H5_H2_SMRY_NAME	io.h	/^#define     H5_H2_SMRY_NAME /;"	d
+H5_INFLATON_MASS_NAME	io.h	/^#define     H5_INFLATON_MASS_NAME /;"	d
+H5_MASS_NAME	io.h	/^#define     H5_MASS_NAME /;"	d
+H5_MAX_DT_HUBBLE_FRACTION_NAME	io.h	/^#define     H5_MAX_DT_HUBBLE_FRACTION_NAME /;"	d
+H5_METHOD_NAME	io.h	/^#define     H5_METHOD_NAME /;"	d
+H5_PHI_NAME	io.h	/^#define     H5_PHI_NAME /;"	d
+H5_PHI_PS_NAME	io.h	/^#define     H5_PHI_PS_NAME /;"	d
+H5_PHI_SMRY_NAME	io.h	/^#define     H5_PHI_SMRY_NAME /;"	d
+H5_PRESSURE_SMRY_NAME	io.h	/^#define     H5_PRESSURE_SMRY_NAME /;"	d
+H5_PSI_NAME	io.h	/^#define     H5_PSI_NAME /;"	d
+H5_PSI_PS_NAME	io.h	/^#define     H5_PSI_PS_NAME /;"	d
+H5_PSI_SMRY_NAME	io.h	/^#define     H5_PSI_SMRY_NAME /;"	d
+H5_RHO_NAME	io.h	/^#define     H5_RHO_NAME /;"	d
+H5_RHO_PS_NAME	io.h	/^#define     H5_RHO_PS_NAME /;"	d
+H5_RHO_SMRY_NAME	io.h	/^#define     H5_RHO_SMRY_NAME /;"	d
+H5_RUNTIME_COPY_BUFFER_NAME	io.h	/^#define     H5_RUNTIME_COPY_BUFFER_NAME /;"	d
+H5_RUNTIME_CSTR_NAME	io.h	/^#define     H5_RUNTIME_CSTR_NAME /;"	d
+H5_RUNTIME_ELLIPTIC_NAME	io.h	/^#define     H5_RUNTIME_ELLIPTIC_NAME /;"	d
+H5_RUNTIME_FFTWPLAN_NAME	io.h	/^#define     H5_RUNTIME_FFTWPLAN_NAME /;"	d
+H5_RUNTIME_FFTW_NAME	io.h	/^#define     H5_RUNTIME_FFTW_NAME /;"	d
+H5_RUNTIME_FILTER_NAME	io.h	/^#define     H5_RUNTIME_FILTER_NAME /;"	d
+H5_RUNTIME_SMRY_NAME	io.h	/^#define     H5_RUNTIME_SMRY_NAME /;"	d
+H5_RUNTIME_STEPPER_NAME	io.h	/^#define     H5_RUNTIME_STEPPER_NAME /;"	d
+H5_RUNTIME_STT_NAME	io.h	/^#define     H5_RUNTIME_STT_NAME /;"	d
+H5_RUNTIME_TOTAL_NAME	io.h	/^#define     H5_RUNTIME_TOTAL_NAME /;"	d
+H5_RUNTIME_WRITEOUT_NAME	io.h	/^#define     H5_RUNTIME_WRITEOUT_NAME /;"	d
+H5_SEED_NAME	io.h	/^#define     H5_SEED_NAME /;"	d
+H5_SPATIAL_BOUNDS_X_NAME	io.h	/^#define     H5_SPATIAL_BOUNDS_X_NAME /;"	d
+H5_SPATIAL_BOUNDS_Y_NAME	io.h	/^#define     H5_SPATIAL_BOUNDS_Y_NAME /;"	d
+H5_SPATIAL_BOUNDS_Z_NAME	io.h	/^#define     H5_SPATIAL_BOUNDS_Z_NAME /;"	d
+H5_STEPS_BAD_NAME	io.h	/^#define     H5_STEPS_BAD_NAME /;"	d
+H5_STEPS_OK_NAME	io.h	/^#define     H5_STEPS_OK_NAME /;"	d
+H5_STEPS_TOTAL_NAME	io.h	/^#define     H5_STEPS_TOTAL_NAME /;"	d
+H5_STRIDES_SPACE_NAME	io.h	/^#define     H5_STRIDES_SPACE_NAME /;"	d
+H5_STRIDES_TIME_NAME	io.h	/^#define     H5_STRIDES_TIME_NAME /;"	d
+H5_THREAD_NUMBER_NAME	io.h	/^#define     H5_THREAD_NUMBER_NAME /;"	d
+H5_TIME_NAME	io.h	/^#define     H5_TIME_NAME /;"	d
+H5_TOLERANCES_NAME	io.h	/^#define     H5_TOLERANCES_NAME /;"	d
+HDF5_CC	Makefile	/^export HDF5_CC = gcc-6$/;"	m
+HDF5_CLINKER	Makefile	/^export HDF5_CLINKER = gcc-6$/;"	m
+HEADERS	Makefile	/^HEADERS = $(wildcard *.h)$/;"	m
+IC_FROM_BUNCH_DAVIES	main_template.h	/^#define IC_FROM_BUNCH_DAVIES /;"	d
+IC_FROM_DAT_FILE	main_template.h	/^    #define IC_FROM_DAT_FILE$/;"	d
+IC_FROM_DAT_FILE_WITHOUT_PSI	main_template.h	/^#define IC_FROM_DAT_FILE_WITHOUT_PSI /;"	d
+IC_FROM_DAT_FILE_WITH_PSI	main_template.h	/^#define IC_FROM_DAT_FILE_WITH_PSI /;"	d
+IC_FROM_H5_FILE	main_template.h	/^#define IC_FROM_H5_FILE /;"	d
+IC_FROM_INTERNAL_FUNCTION	main_template.h	/^#define IC_FROM_INTERNAL_FUNCTION /;"	d
+INFLATON_MASS	main_template.h	/^#define INFLATON_MASS /;"	d
+INFO	main_template.h	/^#define INFO(/;"	d
+INITIAL_CONDITIONS	main_template.h	/^#define INITIAL_CONDITIONS /;"	d
+INITIAL_DATAPATH	main_template.h	/^#define INITIAL_DATAPATH /;"	d
+INITIAL_TIME	main_template.h	/^#define INITIAL_TIME /;"	d
+INTEGRATION_METHOD	main_template.h	/^#define INTEGRATION_METHOD /;"	d
+LAMBDA	main_template.h	/^#define LAMBDA /;"	d
+LARGEST_SCALING	main_template.h	/^#define LARGEST_SCALING /;"	d
+LARGE_OUTPUT	main_template.h	/^    #define LARGE_OUTPUT$/;"	d
+LIBS	Makefile	/^LIBS = -L \/usr\/local\/lib -g -lfftw3_omp -lfftw3 -lgsl -lgslcblas -lm -fopenmp$/;"	m
+M	main_template.h	/^    size_t M; \/\/\/< number of gridpoints in Fourier space$/;"	m	struct:grid_dimension
+M	main_template.h	/^    size_t M; \/\/\/< number of gridpoints in Fourier space$/;"	m	struct:parameters
+MASS	main_template.h	/^#define MASS /;"	d
+MASS_KARSTEN	main_template.h	/^#define MASS_KARSTEN /;"	d
+MAX	main_template.h	/^#define MAX(/;"	d
+MAX_DT_HUBBLE_FRACTION	main_template.h	/^#define MAX_DT_HUBBLE_FRACTION /;"	d
+MAX_RUNTIME	main_template.h	/^#define MAX_RUNTIME /;"	d
+MAX_STEPS	main_template.h	/^#define MAX_STEPS /;"	d
+MIN	main_template.h	/^#define MIN(/;"	d
+MINIMAL_DELTA_T	main_template.h	/^#define MINIMAL_DELTA_T /;"	d
+N	main_template.h	/^    size_t N; \/\/\/< number of gridpoints in real space$/;"	m	struct:grid_dimension
+N	main_template.h	/^    size_t N; \/\/\/< number of spatial gridpoints: N=Nx*Ny*Nz$/;"	m	struct:parameters
+NUMBER_CONSTRAINTS	main_template.h	/^#define NUMBER_CONSTRAINTS /;"	d
+Next	main_template.h	/^    size_t Next; \/\/\/< number of doubles in complex grid: N=Nx*Ny*(Nz+2)$/;"	m	struct:parameters
+Nt	main_template.h	/^    size_t Nt; \/\/\/< number of timesteps (only relevant for fixed step size)$/;"	m	struct:timing
+Ntot	main_template.h	/^    size_t Ntot; \/\/\/< number of scalar equations$/;"	m	struct:parameters
+OBJECTS	Makefile	/^OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))$/;"	m
+OUTPUT_H1_SMRY	main_template.h	/^    #undef OUTPUT_H1_SMRY$/;"	d
+OUTPUT_H2_SMRY	main_template.h	/^    #undef OUTPUT_H2_SMRY$/;"	d
+OUTPUT_PS	main_template.h	/^    #define OUTPUT_PS$/;"	d
+OUTPUT_SMRY	main_template.h	/^    #define OUTPUT_SMRY$/;"	d
+PI	main_template.h	/^#define PI /;"	d
+POWER_SPECTRUM_BINS	main_template.h	/^#define POWER_SPECTRUM_BINS /;"	d
+RELATIVE_TOLERANCE	main_template.h	/^#define RELATIVE_TOLERANCE /;"	d
+RK4	main_template.h	/^#define RK4 /;"	d
+SAFE	main_template.h	/^#define SAFE /;"	d
+SEED	main_template.h	/^#define SEED /;"	d
+SHOW_RUNTIME_INFO	main_template.h	/^#define SHOW_RUNTIME_INFO /;"	d
+SMALLEST_SCALING	main_template.h	/^#define SMALLEST_SCALING /;"	d
+SPATIAL_LOWER_BOUND_X	main_template.h	/^#define SPATIAL_LOWER_BOUND_X /;"	d
+SPATIAL_LOWER_BOUND_Y	main_template.h	/^#define SPATIAL_LOWER_BOUND_Y /;"	d
+SPATIAL_LOWER_BOUND_Z	main_template.h	/^#define SPATIAL_LOWER_BOUND_Z /;"	d
+SPATIAL_UPPER_BOUND_X	main_template.h	/^#define SPATIAL_UPPER_BOUND_X /;"	d
+SPATIAL_UPPER_BOUND_Y	main_template.h	/^#define SPATIAL_UPPER_BOUND_Y /;"	d
+SPATIAL_UPPER_BOUND_Z	main_template.h	/^#define SPATIAL_UPPER_BOUND_Z /;"	d
+STRIDE_X	main_template.h	/^#define STRIDE_X /;"	d
+STRIDE_Y	main_template.h	/^#define STRIDE_Y /;"	d
+STRIDE_Z	main_template.h	/^#define STRIDE_Z /;"	d
+SUMMARY_VALUES	main_template.h	/^#define SUMMARY_VALUES /;"	d
+TARGET	Makefile	/^TARGET = run$/;"	m
+THREAD_NUMBER	main_template.h	/^#define THREAD_NUMBER /;"	d
+TIME	main_template.h	/^#define TIME(/;"	d
+TIME_STEP_SKIPS	main_template.h	/^#define TIME_STEP_SKIPS /;"	d
+TWOPI	main_template.h	/^#define TWOPI /;"	d
+VERSION_CONTROL	main_template.h	/^#define VERSION_CONTROL /;"	d
+VERSION_CONTROL_GIT	main_template.h	/^#define VERSION_CONTROL_GIT /;"	d
+VERSION_CONTROL_HG	main_template.h	/^#define VERSION_CONTROL_HG /;"	d
+VERSION_CONTROL_NONE	main_template.h	/^#define VERSION_CONTROL_NONE /;"	d
+WRITE_OUT_BUFFER_NUMBER	main_template.h	/^#define WRITE_OUT_BUFFER_NUMBER /;"	d
+__DOPRI853_STEPPER__	dopri853.h	/^#define __DOPRI853_STEPPER__$/;"	d
+__ENABLE_FFT_FILTER__	main_template.h	/^#define __ENABLE_FFT_FILTER__$/;"	d
+__ENABLE_FOLLOWUP__	main_template.h	/^#define __ENABLE_FOLLOWUP__$/;"	d
+__ENABLE_GW__	main_template.h	/^#define __ENABLE_GW__$/;"	d
+__ENABLE_TIMING__	main_template.h	/^#define __ENABLE_TIMING__$/;"	d
+__EVOLUTION_TOOLKIT__	toolbox.h	/^#define __EVOLUTION_TOOLKIT__$/;"	d
+__FILEHANDLING__	io.h	/^#define __FILEHANDLING__$/;"	d
+__MAIN__	main_template.h	/^#define __MAIN__$/;"	d
+__OUTPUT_CONSTRAINTS__	main_template.h	/^#define __OUTPUT_CONSTRAINTS__$/;"	d
+__OUTPUT_DPHI_SMRY__	main_template.h	/^#define __OUTPUT_DPHI_SMRY__$/;"	d
+__OUTPUT_DPHI__	main_template.h	/^#define __OUTPUT_DPHI__$/;"	d
+__OUTPUT_DPSI_SMRY__	main_template.h	/^#define __OUTPUT_DPSI_SMRY__$/;"	d
+__OUTPUT_DPSI__	main_template.h	/^#define __OUTPUT_DPSI__$/;"	d
+__OUTPUT_H1_SMRY__	main_template.h	/^#define __OUTPUT_H1_SMRY__$/;"	d
+__OUTPUT_H2_SMRY__	main_template.h	/^#define __OUTPUT_H2_SMRY__$/;"	d
+__OUTPUT_PHI_PS__	main_template.h	/^#define __OUTPUT_PHI_PS__$/;"	d
+__OUTPUT_PHI_SMRY__	main_template.h	/^#define __OUTPUT_PHI_SMRY__$/;"	d
+__OUTPUT_PHI__	main_template.h	/^#define __OUTPUT_PHI__$/;"	d
+__OUTPUT_PRESSURE_SMRY__	main_template.h	/^#define __OUTPUT_PRESSURE_SMRY__$/;"	d
+__OUTPUT_PSI_PS__	main_template.h	/^#define __OUTPUT_PSI_PS__$/;"	d
+__OUTPUT_PSI_SMRY__	main_template.h	/^#define __OUTPUT_PSI_SMRY__$/;"	d
+__OUTPUT_PSI__	main_template.h	/^#define __OUTPUT_PSI__$/;"	d
+__OUTPUT_RHO_PS__	main_template.h	/^#define __OUTPUT_RHO_PS__$/;"	d
+__OUTPUT_RHO_SMRY__	main_template.h	/^#define __OUTPUT_RHO_SMRY__$/;"	d
+__OUTPUT_RHO__	main_template.h	/^#define __OUTPUT_RHO__$/;"	d
+__RK4_STEPPER__	rk4.h	/^#define __RK4_STEPPER__$/;"	d
+__SETUP__	setup.h	/^#define __SETUP__$/;"	d
+a	main_template.h	/^    double a; \/\/\/< lower bound of the interval$/;"	m	struct:grid_dimension
+a101	dopri853.h	/^    a101,a104,a105,a106,a107,a108,a109,$/;"	m	struct:dopri853_constants
+a104	dopri853.h	/^    a101,a104,a105,a106,a107,a108,a109,$/;"	m	struct:dopri853_constants
+a105	dopri853.h	/^    a101,a104,a105,a106,a107,a108,a109,$/;"	m	struct:dopri853_constants
+a106	dopri853.h	/^    a101,a104,a105,a106,a107,a108,a109,$/;"	m	struct:dopri853_constants
+a107	dopri853.h	/^    a101,a104,a105,a106,a107,a108,a109,$/;"	m	struct:dopri853_constants
+a108	dopri853.h	/^    a101,a104,a105,a106,a107,a108,a109,$/;"	m	struct:dopri853_constants
+a109	dopri853.h	/^    a101,a104,a105,a106,a107,a108,a109,$/;"	m	struct:dopri853_constants
+a111	dopri853.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:dopri853_constants
+a1110	dopri853.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:dopri853_constants
+a114	dopri853.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:dopri853_constants
+a115	dopri853.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:dopri853_constants
+a116	dopri853.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:dopri853_constants
+a117	dopri853.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:dopri853_constants
+a118	dopri853.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:dopri853_constants
+a119	dopri853.h	/^    a111,a114,a115,a116,a117,a118,a119,a1110,$/;"	m	struct:dopri853_constants
+a121	dopri853.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:dopri853_constants
+a1210	dopri853.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:dopri853_constants
+a1211	dopri853.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:dopri853_constants
+a124	dopri853.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:dopri853_constants
+a125	dopri853.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:dopri853_constants
+a126	dopri853.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:dopri853_constants
+a127	dopri853.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:dopri853_constants
+a128	dopri853.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:dopri853_constants
+a129	dopri853.h	/^    a121,a124,a125,a126,a127,a128,a129,a1210,a1211,$/;"	m	struct:dopri853_constants
+a141	dopri853.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:dopri853_constants
+a1410	dopri853.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:dopri853_constants
+a1411	dopri853.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:dopri853_constants
+a1412	dopri853.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:dopri853_constants
+a1413	dopri853.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:dopri853_constants
+a147	dopri853.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:dopri853_constants
+a148	dopri853.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:dopri853_constants
+a149	dopri853.h	/^    a141,a147,a148,a149,a1410,a1411,a1412,a1413,$/;"	m	struct:dopri853_constants
+a151	dopri853.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:dopri853_constants
+a1511	dopri853.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:dopri853_constants
+a1512	dopri853.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:dopri853_constants
+a1513	dopri853.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:dopri853_constants
+a1514	dopri853.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:dopri853_constants
+a156	dopri853.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:dopri853_constants
+a157	dopri853.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:dopri853_constants
+a158	dopri853.h	/^    a151,a156,a157,a158,a1511,a1512,a1513,a1514,$/;"	m	struct:dopri853_constants
+a161	dopri853.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:dopri853_constants
+a1613	dopri853.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:dopri853_constants
+a1614	dopri853.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:dopri853_constants
+a1615	dopri853.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:dopri853_constants
+a166	dopri853.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:dopri853_constants
+a167	dopri853.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:dopri853_constants
+a168	dopri853.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:dopri853_constants
+a169	dopri853.h	/^    a161,a166,a167,a168,a169,a1613,a1614,a1615,$/;"	m	struct:dopri853_constants
+a21	dopri853.h	/^    a21,$/;"	m	struct:dopri853_constants
+a31	dopri853.h	/^    a31,a32,$/;"	m	struct:dopri853_constants
+a32	dopri853.h	/^    a31,a32,$/;"	m	struct:dopri853_constants
+a41	dopri853.h	/^    a41,a43,$/;"	m	struct:dopri853_constants
+a43	dopri853.h	/^    a41,a43,$/;"	m	struct:dopri853_constants
+a51	dopri853.h	/^    a51,a53,a54,$/;"	m	struct:dopri853_constants
+a53	dopri853.h	/^    a51,a53,a54,$/;"	m	struct:dopri853_constants
+a54	dopri853.h	/^    a51,a53,a54,$/;"	m	struct:dopri853_constants
+a61	dopri853.h	/^    a61,a64,a65,$/;"	m	struct:dopri853_constants
+a64	dopri853.h	/^    a61,a64,a65,$/;"	m	struct:dopri853_constants
+a65	dopri853.h	/^    a61,a64,a65,$/;"	m	struct:dopri853_constants
+a71	dopri853.h	/^    a71,a74,a75,a76,$/;"	m	struct:dopri853_constants
+a74	dopri853.h	/^    a71,a74,a75,a76,$/;"	m	struct:dopri853_constants
+a75	dopri853.h	/^    a71,a74,a75,a76,$/;"	m	struct:dopri853_constants
+a76	dopri853.h	/^    a71,a74,a75,a76,$/;"	m	struct:dopri853_constants
+a81	dopri853.h	/^    a81,a84,a85,a86,a87,$/;"	m	struct:dopri853_constants
+a84	dopri853.h	/^    a81,a84,a85,a86,a87,$/;"	m	struct:dopri853_constants
+a85	dopri853.h	/^    a81,a84,a85,a86,a87,$/;"	m	struct:dopri853_constants
+a86	dopri853.h	/^    a81,a84,a85,a86,a87,$/;"	m	struct:dopri853_constants
+a87	dopri853.h	/^    a81,a84,a85,a86,a87,$/;"	m	struct:dopri853_constants
+a91	dopri853.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:dopri853_constants
+a94	dopri853.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:dopri853_constants
+a95	dopri853.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:dopri853_constants
+a96	dopri853.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:dopri853_constants
+a97	dopri853.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:dopri853_constants
+a98	dopri853.h	/^    a91,a94,a95,a96,a97,a98,$/;"	m	struct:dopri853_constants
+a_out	main.c	/^struct output a_out;$/;"	v	typeref:struct:output
+a_tol	dopri853.c	/^    double *a_tol; \/\/\/< Absolute tolerances$/;"	m	struct:dopri853_control	file:
+allocate_and_init_all	setup.c	/^void allocate_and_init_all()$/;"	f
+allocate_and_initialize_tolerances	dopri853.c	/^static void allocate_and_initialize_tolerances()$/;"	f	file:
+allocate_dopri853_values	dopri853.c	/^static void allocate_dopri853_values()$/;"	f	file:
+allocate_external	setup.c	/^static void allocate_external()$/;"	f	file:
+alpha	dopri853.c	/^    double alpha; \/\/\/< Internal parameter for the error estimates$/;"	m	struct:dopri853_control	file:
+append_to_buffer	io.c	/^static void append_to_buffer(struct output f)$/;"	f	file:
+apply_filter	toolbox.c	/^static void apply_filter(double *f)$/;"	f	file:
+assemble_gradient_squared	toolbox.c	/^static void assemble_gradient_squared()$/;"	f	file:
+b	main_template.h	/^    double b; \/\/\/< upper bound of the interval$/;"	m	struct:grid_dimension
+b1	dopri853.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:dopri853_constants
+b10	dopri853.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:dopri853_constants
+b11	dopri853.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:dopri853_constants
+b12	dopri853.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:dopri853_constants
+b6	dopri853.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:dopri853_constants
+b7	dopri853.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:dopri853_constants
+b8	dopri853.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:dopri853_constants
+b9	dopri853.h	/^    b1,b6,b7,b8,b9,b10,b11,b12,$/;"	m	struct:dopri853_constants
+beta	dopri853.c	/^    double beta; \/\/\/< Internal parameter for the error estimates$/;"	m	struct:dopri853_control	file:
+bhh1	dopri853.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:dopri853_constants
+bhh2	dopri853.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:dopri853_constants
+bhh3	dopri853.h	/^    bhh1,bhh2,bhh3,$/;"	m	struct:dopri853_constants
+box_muller	setup.c	/^static complex box_muller()$/;"	f	file:
+buf	main_template.h	/^    double *buf;    \/\/\/< buffer for `WRITE_OUT_BUFFER_NUMBER` many time slices$/;"	m	struct:output
+buf_size	main_template.h	/^    size_t buf_size;   \/\/\/< size of the buffer$/;"	m	struct:file_parameters
+bunch_davies_cutoff	main_template.h	/^    size_t bunch_davies_cutoff; \/\/\/< cutoff of the initial Bunch Davies spectrum$/;"	m	struct:parameters
+c10	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
+c11	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
+c14	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
+c15	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
+c16	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
+c2	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
+c3	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
+c4	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
+c5	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
+c6	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
+c7	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
+c8	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
+c9	dopri853.h	/^    const double c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c14,c15,c16,$/;"	m	struct:dopri853_constants
+calls_rhs	main_template.h	/^    size_t calls_rhs;$/;"	m	struct:monitor
+capply_filter	toolbox.c	/^static void capply_filter(complex *in, double *out)$/;"	f	file:
+check_simd_alignment	setup.c	/^static void check_simd_alignment()$/;"	f	file:
+complex_to_real	toolbox.c	/^static void complex_to_real(const complex *in, double *out)$/;"	f	file:
+contains_nan	toolbox.c	/^static void contains_nan(const double *f, const size_t N)$/;"	f	file:
+contains_nanc	toolbox.c	/^static void contains_nanc(const complex *f, const size_t N)$/;"	f	file:
+cpy_buffers	main_template.h	/^    double cpy_buffers; \/\/\/< Total wall clock time for copying buffers$/;"	m	struct:monitor
+cstr	main.c	/^struct output cstr;$/;"	v	typeref:struct:output
+cstr	main_template.h	/^    double cstr; \/\/\/< Total wall clock time for computing constraints$/;"	m	struct:monitor
+d41	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
+d410	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
+d411	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
+d412	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
+d413	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
+d414	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
+d415	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
+d416	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
+d46	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
+d47	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
+d48	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
+d49	dopri853.h	/^    d41,d46,d47,d48,d49,d410,d411,d412,d413,d414,d415,d416,$/;"	m	struct:dopri853_constants
+d51	dopri853.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:dopri853_constants
+d510	dopri853.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:dopri853_constants
+d511	dopri853.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:dopri853_constants
+d512	dopri853.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:dopri853_constants
+d513	dopri853.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:dopri853_constants
+d514	dopri853.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:dopri853_constants
+d515	dopri853.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:dopri853_constants
+d516	dopri853.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:dopri853_constants
+d56	dopri853.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:dopri853_constants
+d57	dopri853.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:dopri853_constants
+d58	dopri853.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:dopri853_constants
+d59	dopri853.h	/^    d51,d56,d57,d58,d59,d510,d511,d512,d513,d514,d515,d516,$/;"	m	struct:dopri853_constants
+d61	dopri853.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:dopri853_constants
+d610	dopri853.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:dopri853_constants
+d611	dopri853.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:dopri853_constants
+d612	dopri853.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:dopri853_constants
+d613	dopri853.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:dopri853_constants
+d614	dopri853.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:dopri853_constants
+d615	dopri853.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:dopri853_constants
+d616	dopri853.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:dopri853_constants
+d66	dopri853.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:dopri853_constants
+d67	dopri853.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:dopri853_constants
+d68	dopri853.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:dopri853_constants
+d69	dopri853.h	/^    d61,d66,d67,d68,d69,d610,d611,d612,d613,d614,d615,d616,$/;"	m	struct:dopri853_constants
+d71	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
+d710	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
+d711	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
+d712	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
+d713	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
+d714	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
+d715	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
+d716	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
+d76	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
+d77	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
+d78	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
+d79	dopri853.h	/^    d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;$/;"	m	struct:dopri853_constants
+deltarho	main_template.h	/^    double  *deltarho; \/\/\/< \\f$\\delta \\rho = \\rho - \\langle \\rho \\rangle\\f$ in real space$/;"	m	struct:temporary
+deltarhoc	main_template.h	/^    complex *deltarhoc; \/\/\/< \\f$\\delta \\rho = \\rho - \\langle \\rho \\rangle\\f$ in Fourier space$/;"	m	struct:temporary
+destroy_and_cleanup_fftw	setup.c	/^static void destroy_and_cleanup_fftw()$/;"	f	file:
+dfield	main.c	/^double *dfield;$/;"	v
+dfield_new	main.c	/^double *dfield_new;$/;"	v
+dim	main_template.h	/^    size_t dim;     \/\/\/< length of output on a single time slice$/;"	m	struct:output
+dim	main_template.h	/^    size_t dim; \/\/\/< dimensions of the simulation (1, 2 or 3)$/;"	m	struct:parameters
+dopri853_constants	dopri853.h	/^struct dopri853_constants$/;"	s
+dopri853_control	dopri853.c	/^struct dopri853_control$/;"	s	file:
+dopri853_values	dopri853.c	/^struct dopri853_values$/;"	s	file:
+dp	dopri853.c	/^struct dopri853_control dp;$/;"	v	typeref:struct:dopri853_control
+dpc	dopri853_constants.c	/^struct dopri853_constants dpc =$/;"	v	typeref:struct:dopri853_constants
+dphi	main.c	/^struct output dphi;$/;"	v	typeref:struct:output
+dphi_init	setup.c	/^static double dphi_init(const double x, const double y, const double z,$/;"	f	file:
+dphi_smry	main.c	/^struct output dphi_smry;$/;"	v	typeref:struct:output
+dpsi	main.c	/^struct output dpsi;$/;"	v	typeref:struct:output
+dpsi_smry	main.c	/^struct output dpsi_smry;$/;"	v	typeref:struct:output
+dpsic	main_template.h	/^    complex *dpsic; \/\/\/< the derivative \\f$\\dot{\\psi}\\f$ in Fourier space$/;"	m	struct:temporary
+dpv	dopri853.c	/^struct dopri853_values dpv;$/;"	v	typeref:struct:dopri853_values
+dt	dopri853.c	/^    double dt; \/\/\/< The time step size$/;"	m	struct:dopri853_control	file:
+dt	main_template.h	/^    double dt; \/\/\/< size of the (initial) timestep delta t$/;"	m	struct:timing
+dt_did	dopri853.c	/^    double dt_did; \/\/\/< The previously used time step size$/;"	m	struct:dopri853_control	file:
+dt_min	dopri853.c	/^    double dt_min; \/\/\/< The minimal permissible time step size$/;"	m	struct:dopri853_control	file:
+dt_next	dopri853.c	/^    double dt_next; \/\/\/< The proposed next time step size$/;"	m	struct:dopri853_control	file:
+elliptic	main_template.h	/^    double elliptic; \/\/\/< Total wall clock time for `mk_psi(double *f)`$/;"	m	struct:monitor
+eps	dopri853.c	/^    double eps; \/\/\/< Epsilon value for comparisons$/;"	m	struct:dopri853_control	file:
+er1	dopri853.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
+er10	dopri853.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
+er11	dopri853.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
+er12	dopri853.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
+er6	dopri853.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
+er7	dopri853.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
+er8	dopri853.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
+er9	dopri853.h	/^    er1,er6,er7,er8,er9,er10,er11,er12,$/;"	m	struct:dopri853_constants
+err_old	dopri853.c	/^    double err_old; \/\/\/< The previous error (on the last time slice)$/;"	m	struct:dopri853_control	file:
+error	dopri853.c	/^static double error(const double dt)$/;"	f	file:
+evo_flags	toolbox.c	/^struct evolution_flags evo_flags = {.filter = 0, .output = 0};$/;"	v	typeref:struct:evolution_flags
+evolution_flags	toolbox.h	/^struct evolution_flags$/;"	s
+f	main_template.h	/^    double  *f; \/\/\/< various purposes (real space)$/;"	m	struct:temporary
+fc	main_template.h	/^    complex *fc; \/\/\/< various purposes (Fourier space)$/;"	m	struct:temporary
+fft	toolbox.c	/^static void fft(double *in, complex *out)$/;"	f	file:
+fftw_exe	main_template.h	/^    double fftw_exe; \/\/\/< Total wall clock time for fft execution$/;"	m	struct:monitor
+fftw_plan	main_template.h	/^    double fftw_plan; \/\/\/< Total wall clock time for fftw planning$/;"	m	struct:monitor
+field	main.c	/^double *field;$/;"	v
+field_new	main.c	/^double *field_new;$/;"	v
+file	main_template.h	/^    struct file_parameters file; \/\/\/< file IO parameters$/;"	m	struct:parameters	typeref:struct:parameters::file_parameters
+file_parameters	main_template.h	/^struct file_parameters$/;"	s
+filter	main.c	/^double *filter;$/;"	v
+filter	main_template.h	/^    double filter; \/\/\/< Total wall clock time for filtering$/;"	m	struct:monitor
+filter	toolbox.h	/^    uint8_t filter; \/\/\/< If set, apply filtering$/;"	m	struct:evolution_flags
+filter_window	setup.c	/^static double filter_window(const double xsq)$/;"	f	file:
+fmean_var_min_max	toolbox.c	/^static void fmean_var_min_max(const double *f, double *smry)$/;"	f	file:
+free_and_destroy_all	setup.c	/^void free_and_destroy_all()$/;"	f
+free_dopri853	dopri853.c	/^static void free_dopri853()$/;"	f	file:
+free_external	setup.c	/^static void free_external()$/;"	f	file:
+get_simd_alignment_of	setup.c	/^static int get_simd_alignment_of(double *f)$/;"	f	file:
+get_wall_time	main.c	/^double get_wall_time()$/;"	f
+grad	main_template.h	/^    double  *grad; \/\/\/< the _squared_ gradient of \\f$\\phi\\f$ in real space$/;"	m	struct:temporary
+grid_dimension	main_template.h	/^struct grid_dimension$/;"	s
+gw	main.c	/^struct output gw;$/;"	v	typeref:struct:output
+gw_sources	main_template.h	/^    double gw_sources; \/\/\/< Total wall clock time for computing \\f$S_{ij}^{TT}\\f\$$/;"	m	struct:monitor
+h1_smry	main.c	/^struct output h1_smry;$/;"	v	typeref:struct:output
+h2_smry	main.c	/^struct output h2_smry;$/;"	v	typeref:struct:output
+h5_close	io.c	/^void h5_close()$/;"	f
+h5_create_dset	io.c	/^static void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,$/;"	f	file:
+h5_create_empty_by_path	io.c	/^void h5_create_empty_by_path()$/;"	f
+h5_get_extent	io.c	/^static void h5_get_extent(hsize_t *cur)$/;"	f	file:
+h5_read_and_fill	io.c	/^static void h5_read_and_fill(const hid_t file, const hsize_t index,$/;"	f	file:
+h5_read_followup	io.c	/^void h5_read_followup()$/;"	f
+h5_read_timeslice	io.c	/^void h5_read_timeslice()$/;"	f
+h5_write	main_template.h	/^    double h5_write; \/\/\/< Total wall clock time for write out to disk$/;"	m	struct:monitor
+h5_write_all_buffers	io.c	/^static void h5_write_all_buffers(const hsize_t Nt)$/;"	f	file:
+h5_write_buffer	io.c	/^static void h5_write_buffer(const hsize_t rank, const hsize_t Nt,$/;"	f	file:
+h5_write_followup	io.c	/^void h5_write_followup()$/;"	f
+h5_write_simple	io.c	/^void h5_write_simple(const char *name, const double *val, const size_t N,$/;"	f
+id	main_template.h	/^    hsize_t id;        \/\/\/< h5 file id of the output file$/;"	m	struct:file_parameters
+id	main_template.h	/^    hsize_t id;     \/\/\/< id for the dataset in the h5 file$/;"	m	struct:output
+ifft	toolbox.c	/^static void ifft(complex *in, double *out)$/;"	f	file:
+index	main_template.h	/^    size_t index;      \/\/\/< current index within the buffers for time evolution$/;"	m	struct:file_parameters
+init_file_pars	setup.c	/^static void init_file_pars()$/;"	f	file:
+init_from_bunch_davies	setup.c	/^static void init_from_bunch_davies()$/;"	f	file:
+init_from_dat	setup.c	/^static void init_from_dat()$/;"	f	file:
+init_from_internal_function	setup.c	/^static void init_from_internal_function()$/;"	f	file:
+init_grid_pars	setup.c	/^static void init_grid_pars()$/;"	f	file:
+init_monitoring	setup.c	/^static void init_monitoring()$/;"	f	file:
+init_output	setup.c	/^static void init_output(struct output *out, const size_t dim, const int mode)$/;"	f	file:
+init_parameters	setup.c	/^static void init_parameters()$/;"	f	file:
+init_rng	setup.c	/^static void init_rng()$/;"	f	file:
+init_threading	setup.c	/^static void init_threading()$/;"	f	file:
+init_time_pars	setup.c	/^static void init_time_pars()$/;"	f	file:
+initialize_dopri853	dopri853.c	/^static void initialize_dopri853()$/;"	f	file:
+integration	main_template.h	/^    double integration; \/\/\/< Total wall clock time for the integration$/;"	m	struct:monitor
+k	main_template.h	/^    double k; \/\/\/< used to compute k vectors: k = 2 pi \/ (b - a)$/;"	m	struct:grid_dimension
+k10	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k2	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k2	main_template.h	/^    double k2; \/\/\/< used to compute k^2: k2 = k*k = -4 pi^2 \/ L^2$/;"	m	struct:grid_dimension
+k2_max	main_template.h	/^    double k2_max; \/\/\/< The maximal square k vector on the grid.$/;"	m	struct:k_grid
+k3	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k4	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k5	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k6	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k7	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k8	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k9	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+k_grid	main_template.h	/^struct k_grid$/;"	s
+k_max	main_template.h	/^    double k_max; \/\/\/< The sqrt of the maximal square k vector on the grid.$/;"	m	struct:k_grid
+k_tmp	dopri853.c	/^    double *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k_tmp;$/;"	m	struct:dopri853_values	file:
+kvec	main.c	/^struct k_grid kvec;$/;"	v	typeref:struct:k_grid
+lap	main_template.h	/^    double  *lap; \/\/\/< the Laplacian of \\f$\\phi\\f$ in real space$/;"	m	struct:temporary
+main	main.c	/^int main(int argc, const char * argv[])$/;"	f
+max_runtime	main_template.h	/^    size_t max_runtime; \/\/\/< The maximal overall runtime of the program$/;"	m	struct:parameters
+max_steps	dopri853.c	/^    size_t max_steps; \/\/\/< The maximal number of steps$/;"	m	struct:dopri853_control	file:
+maxscale	dopri853.c	/^    double maxscale; \/\/\/< Maximal permissible rescaling of the time step size$/;"	m	struct:dopri853_control	file:
+mean	toolbox.c	/^static double mean(const double *f, const size_t N)$/;"	f	file:
+mean_var_min_max	toolbox.c	/^static void mean_var_min_max(const double *f, double *smry, const size_t N)$/;"	f	file:
+minscale	dopri853.c	/^    double minscale; \/\/\/< Minimal permissible rescaling of the time step size$/;"	m	struct:dopri853_control	file:
+mk_bunch_davies	setup.c	/^static void mk_bunch_davies(double *f, const double H, const double homo,$/;"	f	file:
+mk_constraints	toolbox.c	/^static void mk_constraints(double *f)$/;"	f	file:
+mk_ffts_and_filter	toolbox.c	/^static void mk_ffts_and_filter(double *f)$/;"	f	file:
+mk_fftw_plans	setup.c	/^static void mk_fftw_plans()$/;"	f	file:
+mk_filter_mask	setup.c	/^static void mk_filter_mask()$/;"	f	file:
+mk_gradient_squared_and_laplacian	toolbox.c	/^void mk_gradient_squared_and_laplacian(double *in)$/;"	f
+mk_gw_sources	toolbox.c	/^static void mk_gw_sources(const double *f, complex **s)$/;"	f	file:
+mk_gw_sources_tt	toolbox.c	/^static void mk_gw_sources_tt(const double *f, complex **s)$/;"	f	file:
+mk_gw_spectrum	toolbox.c	/^static void mk_gw_spectrum(double *f)$/;"	f	file:
+mk_initial_conditions	setup.c	/^static void mk_initial_conditions()$/;"	f	file:
+mk_initial_psi	setup.c	/^static void mk_initial_psi()$/;"	f	file:
+mk_k_grid	setup.c	/^static void mk_k_grid()$/;"	f	file:
+mk_power_spectrum	toolbox.c	/^static void mk_power_spectrum(const fftw_complex *in, struct output out)$/;"	f	file:
+mk_psi	toolbox.c	/^void mk_psi(double *f)$/;"	f
+mk_rho_and_p	toolbox.c	/^void mk_rho_and_p(const double *f)$/;"	f
+mk_rhs	toolbox.c	/^void mk_rhs(const double t, double *f, double *result)$/;"	f
+mk_summary	toolbox.c	/^static void mk_summary()$/;"	f	file:
+mk_x_grid	setup.c	/^static void mk_x_grid(double *grid)$/;"	f	file:
+mon	main.c	/^struct monitor mon;$/;"	v	typeref:struct:monitor
+monitor	main_template.h	/^struct monitor$/;"	s
+n_bad	dopri853.c	/^    int n_bad; \/\/\/< The number of unsuccessful steps$/;"	m	struct:dopri853_control	file:
+n_ok	dopri853.c	/^    int n_ok; \/\/\/< The number of successful steps$/;"	m	struct:dopri853_control	file:
+n_stp	dopri853.c	/^    int n_stp; \/\/\/< The number of performed steps$/;"	m	struct:dopri853_control	file:
+outN	main_template.h	/^    size_t outN; \/\/\/< number of output points in this dimension$/;"	m	struct:grid_dimension
+outN	main_template.h	/^    size_t outN; \/\/\/< number of spatial gridpoints for output$/;"	m	struct:parameters
+output	main_template.h	/^struct output$/;"	s
+output	toolbox.h	/^    uint8_t output;$/;"	m	struct:evolution_flags
+output_all	toolbox.c	/^static void output_all(double *f)$/;"	f	file:
+p_bw	main.c	/^fftw_plan p_bw;$/;"	v
+p_fw	main.c	/^fftw_plan p_fw;$/;"	v
+p_smry	main.c	/^struct output p_smry;$/;"	v	typeref:struct:output
+parameters	main_template.h	/^struct parameters$/;"	s
+pars	main.c	/^struct parameters pars;$/;"	v	typeref:struct:parameters
+perform_step	dopri853.c	/^static int perform_step(const double dt_try)$/;"	f	file:
+phi	main.c	/^struct output phi;$/;"	v	typeref:struct:output
+phi_init	setup.c	/^static double phi_init(const double x, const double y, const double z,$/;"	f	file:
+phi_ps	main.c	/^struct output phi_ps;$/;"	v	typeref:struct:output
+phi_smry	main.c	/^struct output phi_smry;$/;"	v	typeref:struct:output
+phic	main_template.h	/^    complex *phic; \/\/\/< the inflaton field \\f$\\phi\\f$ in real space$/;"	m	struct:temporary
+potential	toolbox.c	/^static double potential(const double f)$/;"	f	file:
+potential_prime	toolbox.c	/^static double potential_prime(const double f)$/;"	f	file:
+prepare_and_save_timeslice	toolbox.c	/^void prepare_and_save_timeslice()$/;"	f
+pressure	main.c	/^double *pressure;$/;"	v
+pressure_mean	main.c	/^double pressure_mean;$/;"	v
+psi	main.c	/^struct output psi;$/;"	v	typeref:struct:output
+psi_ps	main.c	/^struct output psi_ps;$/;"	v	typeref:struct:output
+psi_smry	main.c	/^struct output psi_smry;$/;"	v	typeref:struct:output
+psic	main_template.h	/^    complex *psic; \/\/\/< the metric perturbation \\f$\\psi\\f$ in Fourier space$/;"	m	struct:temporary
+r_tol	dopri853.c	/^    double *r_tol; \/\/\/< Relative tolerances$/;"	m	struct:dopri853_control	file:
+read_initial_data	io.c	/^void read_initial_data()$/;"	f
+real_to_complex	toolbox.c	/^static void real_to_complex(const double *in, complex *out)$/;"	f	file:
+reject	dopri853.c	/^    int reject; \/\/\/< Flag whether time step is rejected or accepted$/;"	m	struct:dopri853_control	file:
+rho	main.c	/^double *rho;$/;"	v
+rho_mean	main.c	/^double rho_mean;$/;"	v
+rho_out	main.c	/^struct output rho_out;$/;"	v	typeref:struct:output
+rho_ps	main.c	/^struct output rho_ps;$/;"	v	typeref:struct:output
+rho_smry	main.c	/^struct output rho_smry;$/;"	v	typeref:struct:output
+rng	setup.c	/^static gsl_rng *rng;$/;"	v	file:
+run_dopri853	dopri853.c	/^void run_dopri853()$/;"	f
+run_rk4	rk4.c	/^void run_rk4()$/;"	f
+runtime	main.c	/^double runtime;$/;"	v
+safe	dopri853.c	/^    double safe; \/\/\/< Internal parameter for the error estimates$/;"	m	struct:dopri853_control	file:
+save	io.c	/^void save()$/;"	f
+setdef	configure	/^function setdef {$/;"	f
+skip	main_template.h	/^    size_t skip;       \/\/\/< timesteps to skip in between write outs$/;"	m	struct:file_parameters
+smry	main_template.h	/^    double smry; \/\/\/< Total wall clock time for computing summaries$/;"	m	struct:monitor
+sq	main_template.h	/^    double *sq; \/\/\/< the sqaure of the k vector$/;"	m	struct:k_grid
+stride	main_template.h	/^    size_t stride; \/\/\/< strides for output$/;"	m	struct:grid_dimension
+success	dopri853.c	/^static int success(const double err, double *dt)$/;"	f	file:
+t	dopri853.c	/^    double t; \/\/\/< The current time$/;"	m	struct:dopri853_control	file:
+t	main_template.h	/^    double t;  \/\/\/< current time (constantly updated during simulation)$/;"	m	struct:timing
+t	main_template.h	/^    struct timing t; \/\/\/< time evolution parameters$/;"	m	struct:parameters	typeref:struct:parameters::timing
+t_old	dopri853.c	/^    double t_old; \/\/\/< The previous time (on last time slice)$/;"	m	struct:dopri853_control	file:
+t_out	main.c	/^struct output t_out;$/;"	v	typeref:struct:output
+temporary	main_template.h	/^struct temporary$/;"	s
+test_bunch_davies	setup.c	/^static void test_bunch_davies()$/;"	f	file:
+tf	dopri853.c	/^    double tf; \/\/\/< The final time$/;"	m	struct:dopri853_control	file:
+tf	main_template.h	/^    double tf; \/\/\/< final time$/;"	m	struct:timing
+ti	dopri853.c	/^    double ti; \/\/\/< The initial time$/;"	m	struct:dopri853_control	file:
+ti	main_template.h	/^    double ti; \/\/\/< initial time$/;"	m	struct:timing
+timing	main_template.h	/^struct timing$/;"	s
+tmp	main.c	/^struct temporary tmp;$/;"	v	typeref:struct:temporary
+tmp	main_template.h	/^    double *tmp;    \/\/\/< the output values on the current time slice$/;"	m	struct:output
+try_step	dopri853.c	/^static void try_step(const double dt)$/;"	f	file:
+update_h	toolbox.c	/^static void update_h(double *f, double *result)$/;"	f	file:
+update_phi_psi	toolbox.c	/^static void update_phi_psi(double *f, double *result)$/;"	f	file:
+variance	toolbox.c	/^static double variance(const double mean, const double *f, const size_t N)$/;"	f	file:
+wrap_up_dopri853	dopri853.c	/^static void wrap_up_dopri853()$/;"	f	file:
+wrapped_gaussian	setup.c	/^static double wrapped_gaussian(const double x, const double y, const double z)$/;"	f	file:
+write_monitoring	main.c	/^static void write_monitoring()$/;"	f	file:
+x	main_template.h	/^    double *x; \/\/\/< the x component of the k vector (with zeros at N\/2)$/;"	m	struct:k_grid
+x	main_template.h	/^    struct grid_dimension x; \/\/\/< specification of the x direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
+xf	main_template.h	/^    double *xf; \/\/\/< the x component of the k vector$/;"	m	struct:k_grid
+xphi	main_template.h	/^    double  *xphi; \/\/\/< the x derivative of \\f$\\phi\\f$ in real space$/;"	m	struct:temporary
+xphic	main_template.h	/^    complex *xphic; \/\/\/< the x derivative of \\f$\\phi\\f$ in Fourier space$/;"	m	struct:temporary
+y	main_template.h	/^    double *y; \/\/\/< the y component of the k vector (with zeros at N\/2)$/;"	m	struct:k_grid
+y	main_template.h	/^    struct grid_dimension y; \/\/\/< specification of the y direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
+yerr	dopri853.c	/^    double *yerr, *yerr2;$/;"	m	struct:dopri853_values	file:
+yerr2	dopri853.c	/^    double *yerr, *yerr2;$/;"	m	struct:dopri853_values	file:
+yf	main_template.h	/^    double *yf; \/\/\/< the y component of the k vector$/;"	m	struct:k_grid
+yphi	main_template.h	/^    double  *yphi; \/\/\/< the y derivative of \\f$\\phi\\f$ in real space$/;"	m	struct:temporary
+yphic	main_template.h	/^    complex *yphic; \/\/\/< the y derivative of \\f$\\phi\\f$ in Fourier space$/;"	m	struct:temporary
+z	main_template.h	/^    double *z; \/\/\/< the z component of the k vector (with zeros at N\/2)$/;"	m	struct:k_grid
+z	main_template.h	/^    struct grid_dimension z; \/\/\/< specification of the z direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
+zf	main_template.h	/^    double *zf; \/\/\/< the z component of the k vector$/;"	m	struct:k_grid
+zphi	main_template.h	/^    double  *zphi; \/\/\/< the z derivative of \\f$\\phi\\f$ in real space$/;"	m	struct:temporary
+zphic	main_template.h	/^    complex *zphic; \/\/\/< the z derivative of \\f$\\phi\\f$ in Fourier space$/;"	m	struct:temporary

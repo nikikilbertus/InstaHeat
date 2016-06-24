@@ -1,0 +1,32 @@
+#!/bin/bash
+
+function setdef {
+    if [ "$2" -eq "1" ]
+    then
+        sed -i.bak "s/__${1}__/${1}/g" main.h
+    else
+        sed -i.bak "s/__${1}__/NOT_${1}/g" main.h
+    fi
+}
+
+PAR_FILE_NAME="parameters.sh"
+if [ "$#" -eq 1 ];
+then
+    PAR_FILE_NAME="$1"
+fi
+echo "using parameter file ${PAR_FILE_NAME}"
+
+cp main_template.h main.h
+
+sed 's/[[:space:]]*#.*//;/^[[:space:]]*$/d' ${PAR_FILE_NAME} | \
+awk -F\= '{gsub(/"/,"",$2); print $1 " " $2}' |
+    while read NAME VALUE;
+    do
+        if [[ "${NAME}" == "ENABLE"* ]] || [[ "${NAME}" == "OUTPUT"* ]]
+        then
+            setdef $NAME $VALUE
+        else
+            sed -i.bak "s;__"${NAME}"__;"${VALUE}";g" main.h
+        fi
+    done
+rm *.bak

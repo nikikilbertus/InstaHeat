@@ -1,0 +1,22 @@
+syntax: glob
+
+# annyoing Desktop Services Store files from Mac OS
+*.DS_Store
+
+# object files and executable
+run
+*.o
+
+# debug output
+*.dSYM/
+
+# actual main header file (is created from main_template.h)
+main.h
+
+# any data and input files (might allow .txt input files later)
+*.txt
+*.h5
+
+# temporary files such as vim undo and vim swap files
+*~
+*.swp
