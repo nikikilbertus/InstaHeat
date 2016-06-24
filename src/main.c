@@ -13,7 +13,6 @@
 #include "rk4.h"
 #include "dopri853.h"
 #include "io.h"
-#include "tests.h"
 
 /**
  * @file main.c
@@ -68,14 +67,7 @@ double runtime;
 int main(int argc, const char * argv[])
 {
     runtime = -get_wall_time();
-
     allocate_and_init_all();
-
-    #ifdef RUN_TESTS_ONLY
-    run_all_tests();
-    free_and_destroy_all();
-    return 0;
-    #endif
 
     #ifdef ENABLE_PROFILER
     ProfilerStart("testprofile.prof");
