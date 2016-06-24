@@ -343,7 +343,7 @@ extern fftw_plan p_fw; ///< FFTw3 plan for the Fourier transforms
 extern fftw_plan p_bw; ///< FFTw3 plan for the inverse Fourier transforms
 extern struct monitor mon; ///< The only instance of the struct `monitor`
 
-#ifdef SHOW_TIMING_INFO
+#if defined(SHOW_TIMING_INFO) || defined(MAX_RUNTIME)
 double get_wall_time();
 #endif
 
