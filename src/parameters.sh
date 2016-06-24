@@ -60,6 +60,7 @@ SAFE="0.9"
 SEED="93"
 COUPLING="1.0"
 LAMBDA="1.876e-4"
+ENABLE_TIMING="0"
 MAX_RUNTIME="172500" # slightly less than 48h: 172500
 
 # outputs (0=no output, 1=output)
