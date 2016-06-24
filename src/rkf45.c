@@ -23,24 +23,14 @@ void run_rkf45()
     INFO(printf("relative tolerance: %.15f\n", RELATIVE_TOLERANCE));
     INFO(printf("absolute tolerance: %.15f\n\n", ABSOLUTE_TOLERANCE));
 
-    #ifdef OUTPUT_PHI_PS
-    evo_flags.compute_pow_spec = 1;
-    #endif
-    #ifdef OUTPUT_CONSTRAINTS
-    evo_flags.compute_cstr = 1;
-    #endif
-    mk_rhs(pars.t.t, field, dfield);
-    evo_flags.compute_pow_spec = 0;
-    evo_flags.compute_cstr = 0;
-    mk_summary();
-    save();
+    prepare_and_save_timeslice();
 
-    gsl_odeiv2_system sys = {mk_rhs_wrapper, NULL, pars.Nall, NULL};
+    gsl_odeiv2_system sys = {mk_rhs_wrapper, NULL, pars.Ntot, NULL};
 
     //TODO: use gsl_odeiv2_driver_alloc_scaled_new for abs err vector
     gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(&sys,
-            gsl_odeiv2_step_rkf45, pars.t.dt, ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE);
-
+            gsl_odeiv2_step_rkf45, pars.t.dt,
+            ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE);
     gsl_odeiv2_driver_set_hmin(d, MINIMAL_DELTA_T);
 
     for (size_t i = 1; i <= OUTPUT_NUMBER; i++) {
@@ -50,9 +40,7 @@ void run_rkf45()
           printf ("error, return value=%d\n", status);
           break;
         }
-        mk_summary();
-        mk_constraints();
-        save();
+        prepare_and_save_timeslice();
     }
     gsl_odeiv2_driver_free(d);
 }
