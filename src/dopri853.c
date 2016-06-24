@@ -126,7 +126,7 @@ void run_dopri853()
         }
         double time = 0.0;
         TIME(time = get_wall_time() + mon.all);
-        if (time > pars.max_runtime) {
+        if (dp.t > dp.tf) {
             fputs("\nReached specified final time.\n\n", stderr);
             break;
         }
