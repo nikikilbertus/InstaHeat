@@ -21,7 +21,9 @@
  * timing purposes.
  */
 
+#ifdef SHOW_TIMING_INFO
 static void write_monitoring();
+#endif
 
 struct parameters pars;
 struct output t_out;
@@ -100,7 +102,6 @@ int main(int argc, const char * argv[])
 }
 
 #ifdef SHOW_TIMING_INFO
-
 /**
  * @brief Write monitoring info to h5 file and print on screen.
  */
