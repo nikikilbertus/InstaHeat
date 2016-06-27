@@ -1,7 +1,7 @@
 %% evaluate fields by simply cycling through some plots for a first impression
 
 %% setup (user input)
-name = 'cutoff/96_64_5e-3_fil';
+name = 'masses96/96_0.005';
 % one could scale all fields and/or the standard deviations by some function
 readDsets;
 scal = ones(size(a));
@@ -13,7 +13,6 @@ loadDsets;
 require(dsetsSummary);
 readDsets;
 loglog(a,phimax.*scal,a,abs(phimin).*scal,a,abs(phimean).*scal); xlabel('a'); ylabel('\phi'); shg; pause;
-loglog(a,phimax.*scal,a,abs(phimin).*scal,a,abs(phimean).*scal); xlabel('a'); ylabel('\phi'); shg; pause;
 loglog(a,phistd.*scalstd); xlabel('a'); ylabel('std \phi'); shg; pause;
 loglog(a,dphimax.*scal,a,abs(dphimin).*scal,a,abs(dphimean).*scal); xlabel('a'); ylabel('d\phi'); shg; pause;
 loglog(a,dphistd.*scalstd); xlabel('a'); ylabel('std d\phi'); shg; pause;
@@ -24,5 +23,5 @@ loglog(a,dpsistd.*scalstd); xlabel('a'); ylabel('std d\psi'); shg; pause;
 loglog(a,rhomax.*scal,a,abs(rhomin).*scal,a,abs(rhomean).*scal); xlabel('a'); ylabel('\rho'); shg; pause;
 loglog(a,rhostd.*scalstd); xlabel('a'); ylabel('std \rho'); shg; pause;
 loglog(a,rhorms.*scalstd); xlabel('a'); ylabel('std \rho / |<\rho>|'); shg; pause;
-loglog(a,pressure.*scal,a,abs(pressuremin).*scal,a,abs(pressuremean).*scal); xlabel('a'); ylabel('p'); shg; pause;
+loglog(a,abs(pressuremean).*scal,a,abs(pressuremin).*scal,a,abs(pressuremean).*scal); xlabel('a'); ylabel('p'); shg; pause;
 loglog(a,pressurestd.*scalstd); xlabel('a'); ylabel('std p'); shg; pause;
