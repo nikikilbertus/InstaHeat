@@ -6,11 +6,11 @@ masses = [0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001];
 % if those are long runs: how many time slices do we want (<0 for all)
 nout = 3000;
 % construct the input file names: prefix, suffix, indexset
-pre = 'masses/48_32_';
+pre = 'masses96/96_';
 suf = '';
 ind = masses;
 % construct the output file names
-preout = '48_32_';
+preout = '96_';
 sufout = '';
 indout = masses;
 
@@ -42,8 +42,9 @@ for i = 1:nn
     subplot(1,3,2); loglog(a,rhorms/rhorms(1)); hold on;
     subplot(1,3,3); loglog(a,rhoscal); hold on;
     figure(2);
-    subplot(1,2,1); loglog(a,psiabsstd,a,psiabsmax); hold on;
-    subplot(1,2,2); loglog(a,psiabsstd/psiabsstd(1)); hold on;
+    subplot(1,3,1); loglog(a,psiabsstd); hold on;
+    subplot(1,3,2); loglog(a,psiabsstd/psiabsstd(1)); hold on;
+    subplot(1,3,3); loglog(a,psiabsmax); hold on;
      % in the beginning
     rhormsi(i,1) = rhorms(1);
     rhoscali(i,1) = rhoscal(1);
@@ -81,15 +82,17 @@ xlabel('a'); ylabel('std(\rho) / |<\rho>|'); legend(legendinfo,'location','south
 subplot(1,3,2);
 xlabel('a'); ylabel('std(\rho) / |<\rho>| normalized'); legend(legendinfo,'location','southeast');
 subplot(1,3,3);
-xlabel('a'); ylabel('max(|\rho|)'); legend(legendinfo,'location','southeast');
+xlabel('a'); ylabel('max(|\rho|)'); legend(legendinfo,'location','northwest');
 figure(2);
-subplot(1,2,1);
+subplot(1,3,1);
 for i = 1:4
     loglog([as(i) as(i)], [1e-4 1e-2],'--black');
 end
 xlabel('a'); ylabel('std(\psi)'); legend(legendinfo,'location','southeast');
-subplot(1,2,2);
-xlabel('a'); ylabel('std(\psi) normalized'); legend(legendinfo,'location','southeast');
+subplot(1,3,2);
+xlabel('a'); ylabel('std(\psi) normalized'); legend(legendinfo);
+subplot(1,3,3);
+xlabel('a'); ylabel('max(|\psi|)'); legend(legendinfo,'location','southeast');
 % various intermediate rohrms values as function of masses
 figure
 loglog(masses,rhormsi, masses,masses/masses(1)*rhormsi(1,1)*0.9,'--','linewidth',2);
