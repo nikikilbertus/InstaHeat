@@ -4,7 +4,7 @@ end
 % fullname = ['~/Dropbox/Uni/Exercises/12Semester/MAPhysics/data/' name '.h5'];
 fullname = ['~/Data/' name '.h5'];
 loadDsets;
-require('a', 't');
+require('a');
 % TODO decide whether I want certain indices for the datasets
 % create dsetsIndexed in loadDsets to indicate the ones I need to index
 
