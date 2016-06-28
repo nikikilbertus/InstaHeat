@@ -124,7 +124,7 @@ void run_dopri853()
         if ((dp.n_stp + 1) % pars.file.skip == 0) {
             save();
         }
-        if (dp.t > dp.tf) {
+        if (dp.t >= dp.tf) {
             fputs("\nReached specified final time.\n\n", stderr);
             break;
         }
