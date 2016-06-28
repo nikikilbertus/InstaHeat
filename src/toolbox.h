@@ -29,6 +29,5 @@ void mk_rhs(const double t, double *f, double *result);
 void prepare_and_save_timeslice();
 void mk_gradient_squared_and_laplacian(double *in);
 void mk_rho_and_p(const double *f);
-void mk_psi(double *f);
 
 #endif
