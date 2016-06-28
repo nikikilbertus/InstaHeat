@@ -558,54 +558,6 @@ static void mk_constraints(double *f)
 }
 #endif
 
-/**
- * @brief Computes \f$\psi\f$ and \f$\dot{\psi}\f$ from \f$\phi\f$ and
- * \f$\dot{\phi}\f$ on the initial timeslice.
- *
- * @param[in, out] f The fields. Expects \f$\phi\f$, \f$\dot{\phi}\f$ and
- * \f$a\f$ to be given in @p f. Fills in \f$\psi\f$ and \f$\dot{\psi}\f$ in @p
- * f.
- *
- * We use an elliptic equation from the Hamiltonian constraint combined with
- * the momentum contraint to compute \f$\psi\f$ and \f$\dot{\psi}\f$ from given
- * \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$. TODO[link]
- */
-void mk_psi(double *f)
-{
-    TIME(mon.elliptic -= get_wall_time());
-    const size_t N = pars.N;
-    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
-    const double hubble = sqrt(rho_mean / 3.0);
-    const double phi_mean = mean(f, N);
-    const double dphi_mean = mean(f + N, N);
-    double extra1 = 0.0, extra2 = 0.0;
-
-    #pragma omp parallel for reduction(+: extra1, extra2)
-    for (size_t i = 0; i < N; ++i) {
-        tmp.deltarho[i] = rho[i] - rho_mean;
-        tmp.f[i] = dphi_mean * (f[i] - phi_mean);
-        extra1 += f[N + i] * f[N + i];
-        extra2 += tmp.grad[i];
-    }
-    const double extra = 0.5 * (extra1 - extra2 / a2) / N;
-
-    fft(tmp.deltarho, tmp.deltarhoc);
-    fft(tmp.f, tmp.fc);
-    #pragma omp parallel for
-    for (size_t i = 1; i < pars.M; ++i) {
-        tmp.phic[i] = 0.5 * (tmp.deltarhoc[i] +
-            3.0 * hubble * tmp.fc[i]) / ((- kvec.sq[i] / a2 + extra) * N);
-    }
-    tmp.phic[0] = 0.0;
-
-    ifft(tmp.phic, f + 2 * N);
-    #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i) {
-        f[3 * N + i] = 0.5 * tmp.f[i] - hubble * f[2 * N + i];
-    }
-    TIME(mon.elliptic += get_wall_time());
-}
-
 #ifdef OUTPUT_PS
 /**
  * @brief Computes the power spectrum of a field.
