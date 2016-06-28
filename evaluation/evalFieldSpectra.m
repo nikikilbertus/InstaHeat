@@ -2,7 +2,7 @@
 
 %% setup (user input)
 % the filename
-name = 'cutoff/96_16_5e-3';
+name = 'masses96/96_0.005';
 % on how many time slices do we want to show the power spectra in the video
 nslices = 300;
 

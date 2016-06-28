@@ -47,8 +47,6 @@ static double mean(const double *f, const size_t N);
 static double variance(const double mean, const double *f, const size_t N);
 static void real_to_complex(const double *in, complex *out);
 static void complex_to_real(const complex *in, double *out);
-static void fft(double *in, complex *out);
-static void ifft(complex *in, double *out);
 #ifdef CHECK_FOR_NAN
 static void contains_nan(const double *f, const size_t N);
 static void contains_nanc(const complex *f, const size_t N);
@@ -99,7 +97,9 @@ void mk_rhs(const double t, double *f, double *result)
 void prepare_and_save_timeslice()
 {
     evo_flags.output = 1;
+    evo_flags.filter = 1;
     mk_rhs(pars.t.t, field, dfield);
+    evo_flags.filter = 0;
     evo_flags.output = 0;
     save();
 }
@@ -810,7 +810,7 @@ static void complex_to_real(const complex *in, double *out)
  * @note The specifics of the transform (dimensions, gridpoints, etc.) are
  * implicitly defined by the FFTW3 plan `p_fw`.
  */
-static void fft(double *in, complex *out)
+void fft(double *in, complex *out)
 {
     TIME(mon.fftw_exe -= get_wall_time());
     fftw_execute_dft_r2c(p_fw, in, out);
@@ -826,7 +826,7 @@ static void fft(double *in, complex *out)
  * @note The specifics of the inverse transform (dimensions, gridpoints, etc.)
  * are implicitly defined by the FFTW3 plan `p_bw`.
  */
-static void ifft(complex *in, double *out)
+void ifft(complex *in, double *out)
 {
     TIME(mon.fftw_exe -= get_wall_time());
     fftw_execute_dft_c2r(p_bw, in, out);

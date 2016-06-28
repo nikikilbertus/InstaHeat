@@ -2,7 +2,7 @@
 
 %% setup (user input)
 % the filename
-name = 'cutoff/96_16_5e-3';
+name = 'masses96/96_0.0005';
 % the number of timeslices for which to show the power spectrum
 nslices = 60;
 
@@ -31,7 +31,10 @@ skip = int64(floor(length(a)/nslices));
 J = jet; % colormap
 subplot(1,2,2);
 loglog(a,rhorms); hold on;
-range = 1:skip:length(a);
+% range = 1:skip:length(a);
+I = getLogIndices(length(a),nslices);
+range = 1:length(a);
+range = range(I);
 for i = [range; 1:length(range)]
     subplot(1,2,1)
     loglog(k,gwps(i(1),:),'color',J(i(2),:));
