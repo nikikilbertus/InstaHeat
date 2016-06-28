@@ -59,6 +59,7 @@ static double dphi_init(const double x, const double y, const double z,
 static double wrapped_gaussian(const double x, const double y, const double z);
 #endif
 static void mk_initial_psi();
+static void mk_psi(double *f);
 static void destroy_and_cleanup_fftw();
 static void free_external();
 
@@ -101,7 +102,6 @@ void allocate_and_init_all()
     INFO(printf("Cutting off Bunch Davies spectrum at N = %zu.\n\n",
                 pars.bunch_davies_cutoff));
     #endif
-    INFO(puts("Integrating psi using the hyperbolic constraint.\n"));
 }
 
 /**
@@ -114,6 +114,7 @@ static void init_rng()
 {
     rng = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rng, SEED);
+    INFO(puts("Initialized random number generator.\n"));
 }
 
 /**
@@ -461,6 +462,10 @@ static void mk_fftw_plans()
     INFO(puts("Created fftw plans.\n"));
 }
 
+/**
+ * @brief Checks that the different fields that are bundled in the larger field
+ * array are correctly aligned for reusing FFTW plans on different fields.
+ */
 static void check_simd_alignment()
 {
     int ref = get_simd_alignment_of(field);
@@ -474,6 +479,11 @@ static void check_simd_alignment()
     INFO(puts("All field arrays are correctly aligned.\n"));
 }
 
+/**
+ * @brief Gets the alignment of a single field.
+ *
+ * @return An integer encoding the alignment..
+ */
 static int get_simd_alignment_of(double *f)
 {
     const int ref = fftw_alignment_of(f);
@@ -650,6 +660,7 @@ static void mk_initial_conditions()
 static void init_from_dat()
 {
     read_initial_data();
+    INFO(puts("Read initial data from file."));
     /* center(field + 2 * pars.N, pars.N); */
     /* center(field + 3 * pars.N, pars.N); */
     field[pars.Ntot - 1] = A_INITIAL;
@@ -670,9 +681,60 @@ static void mk_initial_psi()
     for (size_t i = 2 * pars.N; i < 4 * pars.N; ++i) {
         field[i] = 0.0;
     }
+    evo_flags.output = 0;
+    evo_flags.filter = 0;
     mk_gradient_squared_and_laplacian(field);
     mk_rho_and_p(field);
     mk_psi(field);
+    INFO(puts("Constructed psi and dot{psi} from existing phi and dot{phi}."));
+}
+
+/**
+ * @brief Computes \f$\psi\f$ and \f$\dot{\psi}\f$ from \f$\phi\f$ and
+ * \f$\dot{\phi}\f$ on the initial timeslice.
+ *
+ * @param[in, out] f The fields. Expects \f$\phi\f$, \f$\dot{\phi}\f$ and
+ * \f$a\f$ to be given in @p f. Fills in \f$\psi\f$ and \f$\dot{\psi}\f$ in @p
+ * f.
+ *
+ * We use an elliptic equation from the Hamiltonian constraint combined with
+ * the momentum contraint to compute \f$\psi\f$ and \f$\dot{\psi}\f$ from given
+ * \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$. TODO[link]
+ */
+static void mk_psi(double *f)
+{
+    TIME(mon.elliptic -= get_wall_time());
+    const size_t N = pars.N;
+    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
+    const double hubble = sqrt(rho_mean / 3.0);
+    const double phi_mean = mean(f, N);
+    const double dphi_mean = mean(f + N, N);
+    double extra1 = 0.0, extra2 = 0.0;
+
+    #pragma omp parallel for reduction(+: extra1, extra2)
+    for (size_t i = 0; i < N; ++i) {
+        tmp.deltarho[i] = rho[i] - rho_mean;
+        tmp.f[i] = dphi_mean * (f[i] - phi_mean);
+        extra1 += f[N + i] * f[N + i];
+        extra2 += tmp.grad[i];
+    }
+    const double extra = 0.5 * (extra1 - extra2 / a2) / N;
+
+    fft(tmp.deltarho, tmp.deltarhoc);
+    fft(tmp.f, tmp.fc);
+    #pragma omp parallel for
+    for (size_t i = 1; i < pars.M; ++i) {
+        tmp.phic[i] = 0.5 * (tmp.deltarhoc[i] +
+            3.0 * hubble * tmp.fc[i]) / ((- kvec.sq[i] / a2 + extra) * N);
+    }
+    tmp.phic[0] = 0.0;
+
+    ifft(tmp.phic, f + 2 * N);
+    #pragma omp parallel for
+    for (size_t i = 0; i < N; ++i) {
+        f[3 * N + i] = 0.5 * tmp.f[i] - hubble * f[2 * N + i];
+    }
+    TIME(mon.elliptic += get_wall_time());
 }
 
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
