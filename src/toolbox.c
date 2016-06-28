@@ -43,8 +43,6 @@ static void mean_var_min_max(const double *f, double *smry, const size_t N);
 #if defined(OUTPUT_H1_SMRY) || defined(OUTPUT_H2_SMRY)
 static void fmean_var_min_max(const double *f, double *smry);
 #endif
-static double mean(const double *f, const size_t N);
-static double variance(const double mean, const double *f, const size_t N);
 static void real_to_complex(const double *in, complex *out);
 static void complex_to_real(const complex *in, double *out);
 #ifdef CHECK_FOR_NAN
@@ -730,7 +728,7 @@ static void fmean_var_min_max(const double *f, double *smry)
  * @param[in] N The length of the 1D array @p f.
  * @return The mean value (average) of @p f.
  */
-static double mean(const double *f, const size_t N)
+double mean(const double *f, const size_t N)
 {
     double mean = 0.0;
     #pragma omp parallel for reduction(+: mean)
@@ -748,7 +746,7 @@ static double mean(const double *f, const size_t N)
  * @param[in] N The length of the 1D array @p f.
  * @return The variance of @p f.
  */
-static double variance(const double mean, const double *f, const size_t N)
+double variance(const double mean, const double *f, const size_t N)
 {
     double sum1 = 0.0, sum2 = 0.0, tmp;
     #pragma omp parallel for private(tmp) reduction(+: sum1, sum2)

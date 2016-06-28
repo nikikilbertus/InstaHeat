@@ -31,5 +31,7 @@ void mk_gradient_squared_and_laplacian(double *in);
 void mk_rho_and_p(const double *f);
 void fft(double *in, complex *out);
 void ifft(complex *in, double *out);
+double mean(const double *f, const size_t N);
+double variance(const double mean, const double *f, const size_t N);
 
 #endif
