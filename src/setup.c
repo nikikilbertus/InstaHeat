@@ -102,6 +102,11 @@ void allocate_and_init_all()
     INFO(printf("Cutting off Bunch Davies spectrum at N = %zu.\n\n",
                 pars.bunch_davies_cutoff));
     #endif
+    #ifdef ENABLE_FOLLOWUP
+    INFO(puts("Output for followup simulation enabled.\n"));
+    #else
+    INFO(puts("Output for followup simulation disabled.\n"));
+    #endif
 }
 
 /**
