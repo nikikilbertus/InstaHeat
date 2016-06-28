@@ -767,6 +767,8 @@ static void init_from_bunch_davies()
     mk_bunch_davies(field, hubble, phi0, -0.25);
     mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
     field[pars.Ntot - 1] = A_INITIAL;
+    evo_flags.output = 0;
+    evo_flags.filter = 0;
     mk_initial_psi();
 }
 
@@ -864,18 +866,14 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
         }
     }
     fftw_free(ker);
-    TIME(mon.fftw_exe -= get_wall_time());
-    fftw_execute_dft_r2c(p_fw, f, tmp.phic);
-    TIME(mon.fftw_exe += get_wall_time());
+    fft(f, tmp.phic);
 
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
         tmp.phic[i] *= box_muller();
     }
     tmp.phic[0] = homo;
-    TIME(mon.fftw_exe -= get_wall_time());
-    fftw_execute_dft_c2r(p_bw, tmp.phic, f);
-    TIME(mon.fftw_exe += get_wall_time());
+    ifft(tmp.phic, f);
 }
 
 /**
@@ -935,6 +933,8 @@ static void init_from_internal_function()
     free(grid);
     free(theta);
     field[pars.Ntot - 1] = A_INITIAL;
+    evo_flags.output = 0;
+    evo_flags.filter = 0;
     mk_initial_psi();
 }
 
