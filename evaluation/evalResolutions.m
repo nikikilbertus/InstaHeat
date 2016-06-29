@@ -4,13 +4,13 @@
 % setup different gridpoints or cutoffs in an array
 res = [16 32 48 64 96];
 % construct the file names: prefix, suffix, indexset
-pre = 'cutoff/96_';
-suf = '_5e-3_fil';
+pre = 'resolution1e-3/';
+suf = '_16_1e-3';
 ind = res;
 
 %% run
 loadDsets;
-require(dsetsSummary,'steps_total');
+require(dsetsSummary,'steps_total','t');
 nn = length(res);
 rhos = zeros(nn,2); % rhorms values at beginning and end
 steps = zeros(nn,1);
@@ -41,6 +41,7 @@ for i = 1:nn
     if exist('hamcstrinf','var')
         figure(8); loglog(a, abs(hamcstrinf)); hold on;
     end
+    display(sprintf('processed %i of %i', i, nn));
 end
 for i = 1:6
     figure(i); hold off;
