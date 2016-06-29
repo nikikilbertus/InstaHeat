@@ -13,6 +13,7 @@ ind = masses;
 preout = '96_';
 sufout = '';
 indout = masses;
+writeFiles = false;
 
 %% run
 nn = length(masses);
@@ -45,6 +46,8 @@ for i = 1:nn
     subplot(1,3,1); loglog(a,psiabsstd); hold on;
     subplot(1,3,2); loglog(a,psiabsstd/psiabsstd(1)); hold on;
     subplot(1,3,3); loglog(a,psiabsmax); hold on;
+    figure(3)
+    loglog(a,rhomean.*a.^3); hold on;
      % in the beginning
     rhormsi(i,1) = rhorms(1);
     rhoscali(i,1) = rhoscal(1);
@@ -69,9 +72,11 @@ for i = 1:nn
     psimaxi(i,4) = psiabsmax(end);
     display(sprintf('processed %i of %i', i, nn));
     % output
-    nameout = [preout num2str(indout(i)) sufout '.csv'];
-    T = table(a,rhomean,rhorms,rhoscal,psiabsstd,psiabsmax);
-    writetable(T,nameout);
+    if writeFiles
+        nameout = [preout num2str(indout(i)) sufout '.csv'];
+        T = table(a,rhomean,rhorms,rhoscal,psiabsstd,psiabsmax);
+        writetable(T,nameout);
+    end
 end
 figure(1);
 subplot(1,3,1);
@@ -93,6 +98,8 @@ subplot(1,3,2);
 xlabel('a'); ylabel('std(\psi) normalized'); legend(legendinfo);
 subplot(1,3,3);
 xlabel('a'); ylabel('max(|\psi|)'); legend(legendinfo,'location','southeast');
+figure(3)
+xlabel('a'); ylabel('<\rho> a^3'); legend(legendinfo,'location','southeast');
 % various intermediate rohrms values as function of masses
 figure
 loglog(masses,rhormsi, masses,masses/masses(1)*rhormsi(1,1)*0.9,'--','linewidth',2);
@@ -105,7 +112,8 @@ loglog(masses,psimaxi);
 xlabel('mass'); ylabel('max(|\psi|)');
 legend('a=1', ['a=' num2str(as(2))], ['a=' num2str(as(3))], ...
     ['a=' num2str(a(end))],'location','northwest');
-return
 
-T = table(masses',rhormsi,rhoscali,psistdi,psimaxi);
-writetable(T,'intermediate.csv');
+if writeFiles
+    T = table(masses',rhormsi,rhoscali,psistdi,psimaxi);
+    writetable(T,'intermediate.csv');
+end
