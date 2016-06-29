@@ -2,9 +2,9 @@
 
 %% setup (user input)
 % construct the input file names: prefix, suffix, indexset
-pre = 'benchmarks/threads/96_threads_';
+pre = 'benchmarks/threads/96_';
 suf = '';
-ind = [1,2,4,8,12,16];
+ind = [1,2,4,6,8,10,12,14,16];
 % what are we looking at
 feat = '#threads';
 
