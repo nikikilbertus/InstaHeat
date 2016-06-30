@@ -844,7 +844,7 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
         /*     exp(-kk * kk / kcut2); */
 
         // hard cutoff
-        if (kk * kk < kcut2) {
+        if (kk * kk > kcut2) {
             ker[i] = 0;
         } else {
             ker[i] = kk * pow(kk * kk + meff2, gamma);
