@@ -838,8 +838,17 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     #pragma omp parallel for
     for (size_t i = 0; i < nos; ++i) {
         double kk = (i + 0.5) * dkos;
-        ker[i] = kk * pow(kk * kk + meff2, gamma) *
-            exp(-kk * kk / kcut2);
+
+        // soft cutoff
+        /* ker[i] = kk * pow(kk * kk + meff2, gamma) * */
+        /*     exp(-kk * kk / kcut2); */
+
+        // hard cutoff
+        if (kk * kk < kcut2) {
+            ker[i] = 0;
+        } else {
+            ker[i] = kk * pow(kk * kk + meff2, gamma);
+        }
     }
 
     TIME(mon.fftw_exe -= get_wall_time());
