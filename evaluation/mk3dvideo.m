@@ -1,7 +1,7 @@
 %% create 3D volume visualization video
 
 %% setup (user input)
-name = 'fullout/96_96_5e-3_1_reduced';
+name = 'fullout/96_16_2e-3_1_reduced';
 fieldname = 'rho'; filename = 'rho3d';
 
 %% run
@@ -28,7 +28,7 @@ zz = z(m3-pad:m3+pad);
 [XX,YY,ZZ] = meshgrid(xx,yy,zz);
 
 figure('Position',[1,1,2048,1152]);
-writerObj = VideoWriter([filename '.avi']);
+writerObj = VideoWriter([filename '.mp4']);
 open(writerObj);
 set(gcf,'Renderer','zbuffer');
 % Create a sequence of frames and write each frame to the file
@@ -77,7 +77,7 @@ for i = 1:length(a)
 end
 close(writerObj);
 
-system(['ffmpeg -i rho3d.avi -vcodec libx264 -filter:v "setpts=15.0*PTS" ' filename '.mp4'])
+% system(['ffmpeg -i rho3d.avi -vcodec libx264 -filter:v "setpts=15.0*PTS" ' filename '.mp4'])
 
 return
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
