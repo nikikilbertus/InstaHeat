@@ -2,16 +2,16 @@
 
 %% setup (user input)
 % the filename
-name = 'masses96/96_0.005';
+name = 'resolution_short_hardcut/64_16_5e-3';
 % the number of timeslices for which to show the power spectrum
 nslices = 60;
-fieldname = 'psi';
+fieldname = 'phi';
 
 %% run
 % initialization
 require([fieldname 'ps'],'rhoS','N','spatial_bounds_x');
 readDsets;
-field = psips;
+field = eval([fieldname 'ps']);
 nbins = size(field,2);
 N = N(1);
 L = spatial_bounds_x(2)-spatial_bounds_x(1);
