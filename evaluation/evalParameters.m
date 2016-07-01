@@ -2,7 +2,7 @@
 
 %% setup (user input)
 % the filename
-name = 'resolution/64_16_5e-3';
+name = 'resolution/96_16_5e-3';
 
 %% run
 loadDsets;

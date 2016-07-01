@@ -2,7 +2,7 @@
 
 %% setup (user input)
 % the filename
-name = 'resolution_short_hardcut/64_16_5e-3';
+name = 'masses96/96_0.005';
 % the number of timeslices for which to show the power spectrum
 nslices = 60;
 fieldname = 'phi';

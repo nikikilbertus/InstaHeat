@@ -1,7 +1,7 @@
 %% evaluate fields by simply cycling through some plots for a first impression
 
 %% setup (user input)
-name = 'masses96/96_0.005';
+name = 'resolution_short_hardcut/96_16_5e-3';
 % one could scale all fields and/or the standard deviations by some function
 readDsets;
 scal = ones(size(a));
