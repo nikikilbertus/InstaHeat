@@ -884,7 +884,7 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
                     ftmp[osy + k] = ker[l - 1] +
                                     (kk - l) * (ker[l] - ker[l - 1]);
                 } else {
-                    ftmo[osy + k] = (4.0 * ker[0] - ker[1]) / 3.0;
+                    ftmp[osy + k] = (4.0 * ker[0] - ker[1]) / 3.0;
                 }
             }
         }
