@@ -2,15 +2,19 @@
 
 %% setup (user input)
 % setup different gridpoints or cutoffs in an array
-res = [16 32 48 64 96];
+res = [16 24 32 40 48 56 64 72 80 88 96];
 % construct the file names: prefix, suffix, indexset
-pre = 'resolution1e-3/';
-suf = '_16_1e-3';
+pre = 'resolution_short_nofil/';
+suf = '_16_5e-3';
 ind = res;
+%figure offset
+os = 0;
 
 %% run
+colors = jet;
+set(0,'DefaultAxesColorOrder',colors(1:6:end,:))
 loadDsets;
-require(dsetsSummary,'steps_total','t');
+require(dsetsSummary,'constraints','steps_total','t');
 nn = length(res);
 rhos = zeros(nn,2); % rhorms values at beginning and end
 steps = zeros(nn,1);
@@ -20,51 +24,57 @@ for i = 1:nn
     steps(i) = steps_total;
     rhos(i,:) = [rhorms(1); rhorms(end)];
     legendinfo{i} = ['N=' num2str(res(i))];
-    figure(1); plot(diff(t)); hold on;
-    figure(2); loglog(a,rhorms); hold on;
-    figure(3);
+    figure(os+1); plot(diff(t)); hold on;
+    figure(os+2); loglog(a,rhorms); hold on;
+    figure(os+3);
     subplot(1,2,1); loglog(a,abs(phimean)); hold on;
     subplot(1,2,2); loglog(a,phistd); hold on;
-    figure(4);
+    figure(os+4);
     subplot(1,2,1); loglog(a,abs(dphimean)); hold on;
     subplot(1,2,2); loglog(a,dphistd); hold on;
-    figure(5);
+    figure(os+5);
     subplot(1,2,1); loglog(a,max(abs(psimin),abs(psimax))); hold on;
     subplot(1,2,2); loglog(a,psistd); hold on;
-    figure(6);
+    figure(os+6);
     subplot(1,2,1); loglog(a,max(abs(dpsimin),abs(dpsimax))); hold on;
     subplot(1,2,2); loglog(a,dpsistd); hold on;
+    figure(os+7);
+    subplot(1,2,1); loglog(a,rhomean); hold on;
+    subplot(1,2,2); loglog(t,a); hold on;
     
-    if exist('hamcstrl2','var')
-        figure(7); loglog(a, abs(hamcstrl2)/res(i)^3); hold on;
+    if exist('constraints','var')
+        figure(os+7); loglog(a, abs(hamcstrl2)/res(i)^3); hold on;
     end
     if exist('hamcstrinf','var')
-        figure(8); loglog(a, abs(hamcstrinf)); hold on;
+        figure(os+8); loglog(a, abs(hamcstrinf)); hold on;
     end
     display(sprintf('processed %i of %i', i, nn));
 end
-for i = 1:6
-    figure(i); hold off;
+for i = (1:6)+os
+    figure(os+i); hold off;
 end
-figure(1); xlabel('#step'); ylabel('\Delta t'); legend(legendinfo); shg;
-figure(2); xlabel('a'); ylabel('std(\rho) / |<\rho>|'); legend(legendinfo); shg;
-figure(3);
+figure(os+1); xlabel('#step'); ylabel('\Delta t'); legend(legendinfo); shg;
+figure(os+2); xlabel('a'); ylabel('std(\rho) / |<\rho>|'); legend(legendinfo); shg;
+figure(os+3);
 subplot(1,2,1); xlabel('a'); ylabel('|<\phi>|'); legend(legendinfo); shg;
 subplot(1,2,2); xlabel('a'); ylabel('std(\phi)'); legend(legendinfo); shg;
-figure(4);
+figure(os+4);
 subplot(1,2,1); xlabel('a'); ylabel('|<d\phi>|'); legend(legendinfo); shg;
 subplot(1,2,2); xlabel('a'); ylabel('std(d\phi)'); legend(legendinfo); shg;
-figure(5);
+figure(os+5);
 subplot(1,2,1); xlabel('a'); ylabel('absmax \psi'); legend(legendinfo); shg;
 subplot(1,2,2); xlabel('a'); ylabel('std(\psi)'); legend(legendinfo); shg;
-figure(6);
+figure(os+6);
 subplot(1,2,1); xlabel('a'); ylabel('absmax d\psi'); legend(legendinfo); shg;
 subplot(1,2,2); xlabel('a'); ylabel('std d\psi'); legend(legendinfo); shg;
+figure(os+7);
+subplot(1,2,1); xlabel('a'); ylabel('rhomean'); legend(legendinfo); shg;
+subplot(1,2,2); xlabel('t'); ylabel('a'); legend(legendinfo,'location','southeast'); shg;
 if exist('hamcstrl2','var')
-    figure(7); hold off; xlabel('a'); ylabel('ham cstr l2'); legend(legendinfo); shg;
+    figure(os+7); hold off; xlabel('a'); ylabel('ham cstr l2'); legend(legendinfo); shg; hold off;
 end
 if exist('hamcstrinf','var')
-    figure(8); hold off; xlabel('a'); ylabel('ham cstr \infty'); legend(legendinfo); shg;
+    figure(os+8); hold off; xlabel('a'); ylabel('ham cstr \infty'); legend(legendinfo); shg; hold off;
 end
 figure
 loglog(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('std(\rho) / |<\rho>|'); shg;
