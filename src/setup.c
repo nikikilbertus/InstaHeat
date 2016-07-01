@@ -819,15 +819,15 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     const double dxos = dx / os;
     const double dk = TWOPI / (pars.x.b - pars.x.a);
     const double dkos = 0.5 * dk / os;
-    // pspectre uses kcutpspectre = 2 * kcutdefrost (without square!)
     size_t cutoff = pars.bunch_davies_cutoff;
     if (cutoff < 1) {
         cutoff = nn;
     }
-    const double kcut2 = 0.25 * cutoff * cutoff * dk * dk;
+    // pspectre uses kcutpspectre = 2 * kcutdefrost
+    const double kcut = 0.5 * cutoff * dk;
     const double meff2 = MASS * MASS - 2.25 * H * H;
-    const double norm = 0.5 * INFLATON_MASS /
-        (pars.N * sqrt(TWOPI * pow(dk, 3))) * (dkos / dxos);
+    const double norm = 0.5 * INFLATON_MASS * (dkos / dxos) /
+        (pars.N * sqrt(TWOPI * pow(dk, 3)));
 
     if (meff2 <= 0.0) {
         fputs("The effective mass turned out to be negative.\n", stderr);
@@ -840,15 +840,15 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
         double kk = (i + 0.5) * dkos;
 
         // soft cutoff
-        /* ker[i] = kk * pow(kk * kk + meff2, gamma) * */
-        /*     exp(-kk * kk / kcut2); */
+        ker[i] = kk * pow(kk * kk + meff2, gamma) *
+            exp(- pow(kk / kcut, 2));
 
         // hard cutoff
-        if (kk * kk > kcut2) {
-            ker[i] = 0;
-        } else {
-            ker[i] = kk * pow(kk * kk + meff2, gamma);
-        }
+        /* if (kk * kk > kcut2) { */
+        /*     ker[i] = 0.0; */
+        /* } else { */
+        /*     ker[i] = kk * pow(kk * kk + meff2, gamma); */
+        /* } */
     }
 
     TIME(mon.fftw_exe -= get_wall_time());
