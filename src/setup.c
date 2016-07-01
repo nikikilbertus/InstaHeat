@@ -835,7 +835,7 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     const double kcut = 0.5 * cutoff * dk;
     const double meff2 = MASS * MASS - 2.25 * H * H;
     const double norm = 0.5 * INFLATON_MASS * (dkos / dxos) /
-        (sqrt(TWOPI * pow(N * dk, 3)));
+        (N * N * N * sqrt(TWOPI * dk * dk * dk));
     if (meff2 <= 0.0) {
         fputs("The effective mass turned out to be negative.\n", stderr);
         exit(EXIT_FAILURE);
@@ -909,13 +909,13 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
         tmp.phic[i] = 0.0;
     }
     #pragma omp parallel for
-    for (int i = 0; i < N; ++i) {
+    for (size_t i = 0; i < N; ++i) {
         size_t osx1 = i * N * nn;
         size_t osx2 = i * pars.y.M * pars.z.M;
-        for (int j = 0; j < N; ++j) {
+        for (size_t j = 0; j < N; ++j) {
             size_t osy1 = osx1 + j * nn;
             size_t osy2 = osx2 + j * pars.z.M;
-            for (int k = 0; k < nn; ++k) {
+            for (size_t k = 0; k < nn; ++k) {
                 tmp.phic[osy2 + k] = fctmp[osy1 + k];
             }
         }
