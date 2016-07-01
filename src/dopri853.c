@@ -125,16 +125,16 @@ void run_dopri853()
             save();
         }
         if (dp.t >= dp.tf) {
-            fputs("\nReached specified final time.\n\n", stderr);
+            puts("\nReached specified final time.\n\n");
             break;
         }
         double time = get_wall_time() + mon.total;
         if (time > pars.max_runtime) {
-            fputs("\nReached specified maximal runtime.\n\n", stderr);
+            puts("\nReached specified maximal runtime.\n\n");
             break;
         }
         if (fabs(dp.dt_next) <= dp.dt_min) {
-            fputs("\n!!! Stepsize underflow.\n\n", stderr);
+            puts("\n!!! Stepsize underflow.\n\n");
             break;
         }
         dp.dt = dp.dt_next;
