@@ -805,6 +805,11 @@ static void test_bunch_davies()
  * @brief Construct a Bunch Davies vacuum for \f$\phi\f$ and \f$\dot{\phi}\f$ as
  * initial conditions following the description in DEFROST.
  *
+ * @param[out] f The field to initialize with a Bunch Davies spectrum.
+ * @param[in] H The initial Hubble parameter.
+ * @param[in] homo The homogeneous offset of the initial field (background).
+ * @param[in] gamma The exponent in equation TODO{link] of the initial spectrum.
+ *
  * @see [DEFROST: A New Code for Simulating Preheating after
  * Inflation](http://arxiv.org/abs/0809.4904)
  */
