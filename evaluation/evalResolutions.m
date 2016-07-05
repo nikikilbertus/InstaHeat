@@ -2,9 +2,9 @@
 
 %% setup (user input)
 % setup different gridpoints or cutoffs in an array
-res = [16 24 32 40 48 56 64 72 80 88 96];
+res = [32 40 48 56 64 72 80 88 96 104 112 120 128];
 % construct the file names: prefix, suffix, indexset
-pre = 'resolution_short_nofil/';
+pre = 'resolution_fix_ic/';
 suf = '_16_5e-3';
 ind = res;
 %figure offset
@@ -12,7 +12,7 @@ os = 0;
 
 %% run
 colors = jet;
-set(0,'DefaultAxesColorOrder',colors(1:6:end,:))
+set(0,'DefaultAxesColorOrder',colors(1:4:end,:))
 loadDsets;
 require(dsetsSummary,'constraints','steps_total','t');
 nn = length(res);
@@ -43,10 +43,10 @@ for i = 1:nn
     subplot(1,2,2); loglog(t,a); hold on;
     
     if exist('constraints','var')
-        figure(os+7); loglog(a, abs(hamcstrl2)/res(i)^3); hold on;
+        figure(os+7); loglog(a, abs(constraints(:,1))/res(i)^3); hold on;
     end
     if exist('hamcstrinf','var')
-        figure(os+8); loglog(a, abs(hamcstrinf)); hold on;
+        figure(os+8); loglog(a, abs(constraints(:,2))/res(i)^3); hold on;
     end
     display(sprintf('processed %i of %i', i, nn));
 end

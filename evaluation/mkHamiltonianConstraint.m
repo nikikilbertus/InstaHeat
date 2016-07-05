@@ -1,5 +1,8 @@
 function [check, t1, t2, t3] = mkHamiltonianConstraint(psi, dpsi, a, rho, L)
-    if ndims(phi) ~= 3
+    psi = squeeze(psi);
+    dpsi = squeeze(dpsi);
+    rho = squeeze(rho);
+    if ndims(psi) ~= 3
        error('''mkHamiltonianConstraint'' only works in three dimensions'); 
     end
     N = size(psi,1);
