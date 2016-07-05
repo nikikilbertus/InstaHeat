@@ -6,6 +6,7 @@
 #include <omp.h>
 #include <fftw3.h>
 #include <gsl/gsl_rng.h>
+#include <gsl/gsl_integration.h>
 #include "setup.h"
 #include "toolbox.h"
 #include "io.h"
@@ -47,6 +48,8 @@ static void init_from_bunch_davies();
 static void test_bunch_davies();
 static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma);
+static double kernel(const double r, gsl_function *f);
+static double kernel_integrand(double k, void *params);
 static complex box_muller();
 #endif
 #if INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
@@ -576,6 +579,35 @@ static void mk_k_grid()
     INFO(puts("Constructed grids for wave vectors.\n"));
 }
 
+/**
+ * @brief Constructs the spatial grid.
+ *
+ * @param[out] grid A double array of size `Nx + Ny + Nz` that is filled up
+ * with the grid values in each direction.
+ *
+ * Since the grid is rectangular with uniform spacing in each direction, only
+ * the x, y and z values are computed.
+ */
+static void mk_x_grid(double *grid)
+{
+    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
+    const double ax = pars.x.a, ay = pars.y.a, az = pars.z.a;
+    const double bx = pars.x.b, by = pars.y.b, bz = pars.z.b;
+    #pragma omp parallel for
+    for (size_t i = 0; i < Nx; ++i) {
+        grid[i] = ax + (bx - ax) * i / Nx;
+    }
+    #pragma omp parallel for
+    for (size_t j = Nx; j < Nx + Ny; ++j) {
+        grid[j] = ay + (by - ay) * (j - Nx) / Ny;
+    }
+    #pragma omp parallel for
+    for (size_t k = Nx + Ny; k < Nx + Ny + Nz; ++k) {
+        grid[k] = az + (bz - az) * (k - Nx - Ny) / Nz;
+    }
+    INFO(puts("Constructed spatial grid.\n"));
+}
+
 #ifdef ENABLE_FFT_FILTER
 /**
  * @brief Construct an arrray for filtering out high wave number modes in
@@ -813,120 +845,98 @@ static void test_bunch_davies()
  * @see [DEFROST: A New Code for Simulating Preheating after
  * Inflation](http://arxiv.org/abs/0809.4904)
  */
+
+/**
+ * @brief Construct a Bunch Davies vacuum for \f$\phi\f$ and \f$\dot{\phi}\f$ as
+ * initial conditions following the description in DEFROST.
+ *
+ * @param[out] f The field to initialize with a Bunch Davies spectrum.
+ * @param[in] H The initial Hubble parameter.
+ * @param[in] homo The homogeneous offset of the initial field (background).
+ * @param[in] gamma The exponent in equation TODO{link] of the initial spectrum.
+ *
+ * @see [DEFROST: A New Code for Simulating Preheating after
+ * Inflation](http://arxiv.org/abs/0809.4904)
+ */
 static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma)
 {
-    const size_t Nx = pars.x.N;
-    size_t nn = Nx / 2 + 1, N;
-    size_t cutoff = pars.bunch_davies_cutoff;
-    if (cutoff < 1) {
-        N = Nx;
-        cutoff = nn;
-    } else {
-        N = 2 * cutoff;
-        nn = N / 2 + 1;
-    }
-    if (Nx < N) {
-        fputs("The chosen cutoff is too large for the gridsize.\n", stderr);
-        exit(EXIT_FAILURE);
-    }
-    const size_t os = 16;
-    const size_t nos = N * os * os;
-    const double dx = (pars.x.b - pars.x.a) / N;
-    const double dxos = dx / os;
-    const double dk = TWOPI / (pars.x.b - pars.x.a);
-    const double dkos = 0.5 * dk / os;
-    // pspectre uses kcutpspectre = 2 * kcutdefrost
-    const double kcut = 0.5 * cutoff * dk;
     const double meff2 = MASS * MASS - 2.25 * H * H;
-    const double norm = 0.5 * INFLATON_MASS * (dkos / dxos) /
-        (N * N * N * sqrt(TWOPI * dk * dk * dk));
     if (meff2 <= 0.0) {
         fputs("The effective mass turned out to be negative.\n", stderr);
         exit(EXIT_FAILURE);
     }
+    const size_t cutoff = pars.bunch_davies_cutoff;
+    const double dk = TWOPI / (pars.x.b - pars.x.a);
+    const double kcut = 0.5 * cutoff * dk;
+    double params[] = {meff2, gamma, kcut};
+    gsl_function func;
+    func.function = &kernel_integrand;
+    func.params = params;
 
-    double *ker = fftw_malloc(nos * sizeof *ker);
+    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
+    double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
+    mk_x_grid(grid);
+
+    double *ftmp = fftw_malloc(Nx * Ny * Nz * sizeof *ftmp);
     #pragma omp parallel for
-    for (size_t i = 0; i < nos; ++i) {
-        double kk = (i + 0.5) * dkos;
-
-        // soft cutoff
-        ker[i] = kk * pow(kk * kk + meff2, gamma) *
-            exp(- pow(kk / kcut, 2));
-
-        // hard cutoff
-        /* if (kk * kk > kcut2) { */
-        /*     ker[i] = 0.0; */
-        /* } else { */
-        /*     ker[i] = kk * pow(kk * kk + meff2, gamma); */
-        /* } */
-    }
-
-    TIME(mon.fftw_exe -= get_wall_time());
-    fftw_plan p = fftw_plan_r2r_1d(nos, ker, ker, FFTW_RODFT10, FFTW_ESTIMATE);
-    fftw_execute(p);
-    fftw_destroy_plan(p);
-    TIME(mon.fftw_exe += get_wall_time());
-
-    #pragma omp parallel for
-    for (size_t i = 0; i < nos; ++i) {
-        ker[i] *= norm / (i + 1);
-    }
-
-    double *ftmp = fftw_malloc(N * N * N * sizeof *ftmp);
-    #pragma omp parallel for
-    for (int i = 0; i < N; ++i) {
-        size_t osx = i * N * N;
-        for (int j = 0; j < N; ++j) {
-            size_t osy = osx + j * N;
-            for (int k = 0; k < N; ++k) {
-                double kk = sqrt((double)((i + 1 - nn) * (i + 1 - nn) +
-                                          (j + 1 - nn) * (j + 1 - nn) +
-                                          (k + 1 - nn) * (k + 1 - nn))) * os;
-                size_t l = (size_t) floor(kk);
-                if (l > 0) {
-                    ftmp[osy + k] = ker[l - 1] +
-                                    (kk - l) * (ker[l] - ker[l - 1]);
-                } else {
-                    ftmp[osy + k] = (4.0 * ker[0] - ker[1]) / 3.0;
-                }
+    for (size_t i = 0; i < Nx; ++i) {
+        size_t osx = i * Ny * Nz;
+        for (size_t j = 0; j < Ny; ++j) {
+            size_t osy = osx + j * Nz;
+            for (size_t k = 0; k < Nz; ++k) {
+                const double r = sqrt(grid[i] * grid[i] +
+                                      grid[Nx + j] * grid[Nx + j] +
+                                      grid[Nx + Ny + k] * grid[Nx + Ny + k]);
+                ftmp[osy + k] = kernel(r, &func);
             }
         }
     }
-    fftw_free(ker);
-    const size_t M = N * N * nn;
-    complex *fctmp = fftw_malloc(M * sizeof *fctmp);
-    TIME(mon.fftw_exe -= get_wall_time());
-    p = fftw_plan_dft_r2c_3d(N, N, N, ftmp, fctmp, FFTW_ESTIMATE);
-    fftw_execute(p);
-    fftw_destroy_plan(p);
-    TIME(mon.fftw_exe += get_wall_time());
+    free(grid);
+    fft(ftmp, tmp.phic);
     fftw_free(ftmp);
 
     #pragma omp parallel for
-    for (size_t i = 0; i < M; ++i) {
-        fctmp[i] *= box_muller();
-    }
-    fctmp[0] = homo;
-    #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
-        tmp.phic[i] = 0.0;
+        tmp.phic[i] *= box_muller();
     }
-    #pragma omp parallel for
-    for (size_t i = 0; i < N; ++i) {
-        size_t osx1 = i * N * nn;
-        size_t osx2 = i * pars.y.M * pars.z.M;
-        for (size_t j = 0; j < N; ++j) {
-            size_t osy1 = osx1 + j * nn;
-            size_t osy2 = osx2 + j * pars.z.M;
-            for (size_t k = 0; k < nn; ++k) {
-                tmp.phic[osy2 + k] = fctmp[osy1 + k];
-            }
-        }
-    }
-    fftw_free(fctmp);
+    tmp.phic[0] = homo;
     ifft(tmp.phic, f);
+}
+
+static double kernel(const double r, gsl_function *f)
+{
+    const double a = 0.0;
+    const double eps = 1.0e-10;
+    const size_t limit = 1e5;
+    double L = 0.0;
+    size_t trig_levels = 1e5;
+
+    gsl_integration_workspace *ws = gsl_integration_workspace_alloc(limit);
+    gsl_integration_workspace *c_ws = gsl_integration_workspace_alloc(limit);
+    gsl_integration_qawo_table *wf =
+        gsl_integration_qawo_table_alloc(r, L, GSL_INTEG_SINE, trig_levels);
+
+    double res, err;
+    int s = gsl_integration_qawf(f, a, eps, limit, ws, c_ws, wf, &res, &err);
+    if (s != GSL_SUCCESS) {
+        fputs("\n\nIntegration for Bunch Davies failed.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+
+    gsl_integration_qawo_table_free(wf);
+    gsl_integration_workspace_free(c_ws);
+    gsl_integration_workspace_free(ws);
+
+    return res / (sqrt(PI) * r);
+}
+
+static double kernel_integrand(double k, void *params)
+{
+    const double meff2 = *(double *) params;
+    const double gamma = *(((double *) params) + 1);
+    const double kcut = *(((double *) params) + 2);
+    return k / pow(meff2 + k * k, gamma) * exp(- k * k / (kcut * kcut));
 }
 
 /**
@@ -989,35 +999,6 @@ static void init_from_internal_function()
     evo_flags.output = 0;
     evo_flags.filter = 0;
     mk_initial_psi();
-}
-
-/**
- * @brief Constructs the spatial grid.
- *
- * @param[out] grid A double array of size `Nx + Ny + Nz` that is filled up
- * with the grid values in each direction.
- *
- * Since the grid is rectangular with uniform spacing in each direction, only
- * the x, y and z values are computed.
- */
-static void mk_x_grid(double *grid)
-{
-    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
-    const double ax = pars.x.a, ay = pars.y.a, az = pars.z.a;
-    const double bx = pars.x.b, by = pars.y.b, bz = pars.z.b;
-    #pragma omp parallel for
-    for (size_t i = 0; i < Nx; ++i) {
-        grid[i] = ax + (bx - ax) * i / Nx;
-    }
-    #pragma omp parallel for
-    for (size_t j = Nx; j < Nx + Ny; ++j) {
-        grid[j] = ay + (by - ay) * (j - Nx) / Ny;
-    }
-    #pragma omp parallel for
-    for (size_t k = Nx + Ny; k < Nx + Ny + Nz; ++k) {
-        grid[k] = az + (bz - az) * (k - Nx - Ny) / Nz;
-    }
-    INFO(puts("Constructed spatial grid.\n"));
 }
 
 /**
