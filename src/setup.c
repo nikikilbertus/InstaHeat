@@ -50,6 +50,7 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma);
 static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f);
 static double kernel_integrand(double k, void *params);
+static double kernel_integrand_origin(double k, void *params);
 static complex box_muller();
 #endif
 #if INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
@@ -862,7 +863,7 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     gsl_function func;
     func.function = &kernel_integrand;
     func.params = params;
-    const size_t Nker = 1e4;
+    const size_t Nker = 1e3;
     double *rr = malloc(Nker * sizeof *rr);
     double *ker = malloc(Nker * sizeof *ker);
     mk_kernel(ker, rr, Nker, &func);
@@ -924,8 +925,8 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
 static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)
 {
     const double a = 0.0;
-    const double abs = 1.0e-9;
-    const double rel = 1.0e-6;
+    const double abs = 1.0e-10;
+    const double rel = 1.0e-8;
     const size_t limit = 1e3;
     double L = 0.0;
     size_t trig_levels = 1e3;
@@ -943,14 +944,16 @@ static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)
 
     int s;
     double res, err;
+    f->function = &kernel_integrand_origin;
     s = gsl_integration_qagiu(f, a, abs, rel, limit, ws, &res, &err);
     if (s != GSL_SUCCESS) {
         fputs("\n\nIntegration for Bunch Davies failed.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    ker[0] = res;
     rr[0] = 0.0;
+    ker[0] = res;
 
+    f->function = &kernel_integrand;
     for (size_t i = 1; i < N; ++i, r += dr) {
         rr[i] = r;
         gsl_integration_qawo_table_set(wf, r, L, GSL_INTEG_SINE);
@@ -985,6 +988,14 @@ static double kernel_integrand(double k, void *params)
     const double gamma = *(((double *) params) + 1);
     const double kcut = *(((double *) params) + 2);
     return k * pow(meff2 + k * k, gamma) * exp(- pow(k / kcut, 8));
+}
+
+static double kernel_integrand_origin(double k, void *params)
+{
+    const double meff2 = *(double *) params;
+    const double gamma = *(((double *) params) + 1);
+    const double kcut = *(((double *) params) + 2);
+    return k * k * pow(meff2 + k * k, gamma) * exp(- pow(k / kcut, 8));
 }
 
 /**
