@@ -200,8 +200,14 @@ static void init_grid_pars()
     pars.dim = 3;
     if (pars.z.N == 1) {
         pars.dim = 2;
+        pars.z.a = 0.0; pars.z.b = 0.0; pars.z.k = 0.0; pars.z.k2 = 0.0;
         if (pars.y.N == 1) {
             pars.dim = 1;
+            pars.y.a = 0.0; pars.y.b = 0.0; pars.y.k = 0.0; pars.y.k2 = 0.0;
+            if (pars.x.N == 1) {
+                fputs("Need at least two grid points.\n", stderr);
+                exit(EXIT_FAILURE);
+            }
         }
     }
 
@@ -840,8 +846,18 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     if (cutoff < 1) {
         cutoff = MIN(MIN(Nx, Ny), Nz) / 2 + 1;
     }
-    const double dk = TWOPI / (pars.x.b - pars.x.a);
-    const double kcut = 0.5 * cutoff * dk;
+    const double dkx = TWOPI / (pars.x.b - pars.x.a);
+    double dky = dkx, dkz = dkx, dk = dkx;
+    if (pars.dim > 1) {
+        dky = TWOPI / (pars.y.b - pars.y.a);
+        dk *= dky;
+        if (pars.dim > 2) {
+            dk *= dkz;
+            dkz = TWOPI / (pars.z.b - pars.z.a);
+        }
+    }
+
+    const double kcut = 0.5 * cutoff * MIN(MIN(dkx, dky), dkz);
     double params[] = {meff2, gamma, kcut};
     gsl_function func;
     func.function = &kernel_integrand;
@@ -860,7 +876,7 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     }
     INFO(puts("Initialized spline interpolation for Bunch Davies kernel."));
 
-    const double fac = INFLATON_MASS / (pars.N * sqrt(TWOPI * dk * dk *dk));
+    const double fac = INFLATON_MASS / (pars.N * sqrt(TWOPI * dk));
     double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
     mk_x_grid(grid);
 
