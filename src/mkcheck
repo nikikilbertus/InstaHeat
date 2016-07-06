@@ -1,18 +1,11 @@
 #!/bin/bash
-cp main.h main.h.keep
-for num in 32 64 96 128 192 256
+for var1 in 32 40 48 56 64
 do
-    cp main.h.keep main.h.tmp
-    sed -i.bak "s/=GRIDNUM=/${num}/g" main.h.tmp
-    for tol in {3..13}
-    do
-        cp main.h.tmp main.h
-        sed -i.bak "s/=TOLNUM=/${tol}/g" main.h
-        make
-        ./first_steps
-    done
+    cp parameters.sh parameters_tmp.sh
+    sed -i.bak "s/XXX/${var1}/g" parameters_tmp.sh
+    make parameters=parameters_tmp.sh
+    ./run
+    make clean
 done
-rm main.h.tmp
 rm *.bak
-mv main.h.keep main.h
-make clean
+rm parameters_tmp.sh
