@@ -46,7 +46,6 @@ static void init_from_dat();
 #endif
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
 static void init_from_bunch_davies();
-static void test_bunch_davies();
 static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma);
 static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f);
