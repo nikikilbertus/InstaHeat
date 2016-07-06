@@ -48,7 +48,7 @@ static void init_from_bunch_davies();
 static void test_bunch_davies();
 static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma);
-static double kernel(const double r, gsl_function *f);
+static double kernel(const double r, gsl_function *f, const int origin);
 static double kernel_integrand(double k, void *params);
 static complex box_muller();
 #endif
@@ -845,19 +845,6 @@ static void test_bunch_davies()
  * @see [DEFROST: A New Code for Simulating Preheating after
  * Inflation](http://arxiv.org/abs/0809.4904)
  */
-
-/**
- * @brief Construct a Bunch Davies vacuum for \f$\phi\f$ and \f$\dot{\phi}\f$ as
- * initial conditions following the description in DEFROST.
- *
- * @param[out] f The field to initialize with a Bunch Davies spectrum.
- * @param[in] H The initial Hubble parameter.
- * @param[in] homo The homogeneous offset of the initial field (background).
- * @param[in] gamma The exponent in equation TODO{link] of the initial spectrum.
- *
- * @see [DEFROST: A New Code for Simulating Preheating after
- * Inflation](http://arxiv.org/abs/0809.4904)
- */
 static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma)
 {
@@ -866,7 +853,11 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
         fputs("The effective mass turned out to be negative.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    const size_t cutoff = pars.bunch_davies_cutoff;
+    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
+    size_t cutoff = pars.bunch_davies_cutoff;
+    if (cutoff < 1) {
+        cutoff = MIN(MIN(Nx, Ny), Nz) / 2 + 1;
+    }
     const double dk = TWOPI / (pars.x.b - pars.x.a);
     const double kcut = 0.5 * cutoff * dk;
     double params[] = {meff2, gamma, kcut};
@@ -874,12 +865,12 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     func.function = &kernel_integrand;
     func.params = params;
 
-    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
+    const double fac = INFLATON_MASS / (pars.N * sqrt(TWOPI * dk * dk *dk));
     double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
     mk_x_grid(grid);
 
     double *ftmp = fftw_malloc(Nx * Ny * Nz * sizeof *ftmp);
-    #pragma omp parallel for
+    /* #pragma omp parallel for */
     for (size_t i = 0; i < Nx; ++i) {
         size_t osx = i * Ny * Nz;
         for (size_t j = 0; j < Ny; ++j) {
@@ -888,9 +879,14 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
                 const double r = sqrt(grid[i] * grid[i] +
                                       grid[Nx + j] * grid[Nx + j] +
                                       grid[Nx + Ny + k] * grid[Nx + Ny + k]);
-                ftmp[osy + k] = kernel(r, &func);
+                if (r > DBL_EPSILON) {
+                    ftmp[osy + k] = fac * kernel(r, &func, 0);
+                } else {
+                    ftmp[osy + k] = fac * kernel(r, &func, 1);
+                }
             }
         }
+        INFO(printf("initial data: %.2f%%\n", 100.0 * i / Nx));
     }
     free(grid);
     fft(ftmp, tmp.phic);
@@ -904,21 +900,27 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     ifft(tmp.phic, f);
 }
 
-static double kernel(const double r, gsl_function *f)
+static double kernel(const double r, gsl_function *f, const int origin)
 {
     const double a = 0.0;
-    const double eps = 1.0e-10;
-    const size_t limit = 1e5;
+    const double abs = 1.0e-7;
+    const double rel = 1.0e-5;
+    const size_t limit = 1e2;
     double L = 0.0;
-    size_t trig_levels = 1e5;
+    size_t trig_levels = 1e2;
 
     gsl_integration_workspace *ws = gsl_integration_workspace_alloc(limit);
     gsl_integration_workspace *c_ws = gsl_integration_workspace_alloc(limit);
     gsl_integration_qawo_table *wf =
         gsl_integration_qawo_table_alloc(r, L, GSL_INTEG_SINE, trig_levels);
 
+    int s;
     double res, err;
-    int s = gsl_integration_qawf(f, a, eps, limit, ws, c_ws, wf, &res, &err);
+    if (origin) {
+        s = gsl_integration_qagiu(f, a, abs, rel, limit, ws, &res, &err);
+    } else {
+        s = gsl_integration_qawf(f, a, abs, limit, ws, c_ws, wf, &res, &err);
+    }
     if (s != GSL_SUCCESS) {
         fputs("\n\nIntegration for Bunch Davies failed.\n", stderr);
         exit(EXIT_FAILURE);
@@ -928,7 +930,11 @@ static double kernel(const double r, gsl_function *f)
     gsl_integration_workspace_free(c_ws);
     gsl_integration_workspace_free(ws);
 
-    return res / (sqrt(PI) * r);
+    if (origin) {
+        return res;
+    } else {
+        return res / r;
+    }
 }
 
 static double kernel_integrand(double k, void *params)
@@ -936,7 +942,7 @@ static double kernel_integrand(double k, void *params)
     const double meff2 = *(double *) params;
     const double gamma = *(((double *) params) + 1);
     const double kcut = *(((double *) params) + 2);
-    return k / pow(meff2 + k * k, gamma) * exp(- k * k / (kcut * kcut));
+    return k * pow(meff2 + k * k, gamma) * exp(- pow(k / kcut, 8));
 }
 
 /**
