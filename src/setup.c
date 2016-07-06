@@ -987,15 +987,12 @@ static double kernel_integrand(double k, void *params)
     const double meff2 = *(double *) params;
     const double gamma = *(((double *) params) + 1);
     const double kcut = *(((double *) params) + 2);
-    return k * pow(meff2 + k * k, gamma) * exp(- pow(k / kcut, 8));
+    return k * pow(meff2 + k * k, gamma) * exp(- pow(k / kcut, 36));
 }
 
 static double kernel_integrand_origin(double k, void *params)
 {
-    const double meff2 = *(double *) params;
-    const double gamma = *(((double *) params) + 1);
-    const double kcut = *(((double *) params) + 2);
-    return k * k * pow(meff2 + k * k, gamma) * exp(- pow(k / kcut, 8));
+    return k * kernel_integrand(k, params);
 }
 
 /**
