@@ -865,7 +865,6 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     mk_x_grid(grid);
 
     double *ftmp = fftw_malloc(Nx * Ny * Nz * sizeof *ftmp);
-    /* #pragma omp parallel for */
     for (size_t i = 0; i < Nx; ++i) {
         size_t osx = i * Ny * Nz;
         for (size_t j = 0; j < Ny; ++j) {
@@ -886,7 +885,6 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     fft(ftmp, tmp.phic);
     fftw_free(ftmp);
 
-    #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
         tmp.phic[i] *= box_muller();
     }
