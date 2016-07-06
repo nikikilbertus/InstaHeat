@@ -52,10 +52,14 @@ static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f);
 static double kernel_integrand(double k, void *params);
 static double kernel_integrand_origin(double k, void *params);
 static complex box_muller();
+static void embed_grid(const complex *s, complex *d,
+        const size_t nx, const size_t ny, const size_t nz,
+        const size_t mx, const size_t my, const size_t mz);
 #endif
 #if INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
 static void init_from_internal_function();
-static void mk_x_grid(double *grid);
+static void mk_x_grid(double *grid, const size_t Nx, const size_t Ny,
+        const size_t Nz);
 static double phi_init(const double x, const double y, const double z,
         const double *ph);
 static double dphi_init(const double x, const double y, const double z,
@@ -633,9 +637,9 @@ static void mk_k_grid()
  * Since the grid is rectangular with uniform spacing in each direction, only
  * the x, y and z values are computed.
  */
-static void mk_x_grid(double *grid)
+static void mk_x_grid(double *grid, const size_t Nx, const size_t Ny,
+        const size_t Nz)
 {
-    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
     const double ax = pars.x.a, ay = pars.y.a, az = pars.z.a;
     const double bx = pars.x.b, by = pars.y.b, bz = pars.z.b;
     #pragma omp parallel for
@@ -880,37 +884,38 @@ static void init_from_bunch_davies()
 static void mk_bunch_davies(double *f, const double meff2, const double homo,
         const double gamma)
 {
-    size_t Nx = 1, Ny = 1, Nz = 1, Mx = 1, My = 1, Mz = 1;
+    size_t Nx, Ny, Nz, Mx, My, Mz;
     size_t cutoff = pars.bunch_davies_cutoff;
+    double dk, dkx, dky, dkz, kcut;
     if (cutoff < 1) {
         Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
-        cutoff = Nx / 2 + 1;
     } else {
         Nx = 2 * cutoff;
-        if (pars.dim > 1) {
-            Ny = Nx;
-            if (pars.dim > 2) {
-                Nz = Nx;
-            }
-        }
-        if (pars.x.N <= Nx || pars.y.N <= Ny || pars.z.N <= Nz) {
+        Ny = pars.y.N > 1 ? Nx : 1;
+        Nz = pars.z.N > 1 ? Nx : 1;
+        if (pars.x.N < Nx || pars.y.N < Ny || pars.z.N < Nz) {
             fputs("\n\nCutoff too large for the grid size.\n", stderr);
             exit(EXIT_FAILURE);
         }
-        Mx = My = Mz = Nx / 2 + 1;
     }
-    const double dkx = TWOPI / (pars.x.b - pars.x.a);
-    double dky = dkx, dkz = dkx, dk = dkx;
+    Mx = (pars.y.N == 1 && pars.z.N == 1) ? Nx / 2 + 1 : Nx;
+    My = pars.z.N == 1 ? Ny / 2 + 1 : Ny;
+    Mz = Nz / 2 + 1;
+
+    dkx = TWOPI / (pars.x.b - pars.x.a);
+    dk = dkx;
+    kcut = (Nx / 2 + 1) * dkx;
     if (pars.dim > 1) {
         dky = TWOPI / (pars.y.b - pars.y.a);
         dk *= dky;
+        kcut = MIN(kcut, (Ny / 2 + 1) * dky);
         if (pars.dim > 2) {
-            dk *= dkz;
             dkz = TWOPI / (pars.z.b - pars.z.a);
+            dk *= dkz;
+            kcut = MIN(kcut, (Nz / 2 + 1) * dkz);
         }
     }
 
-    const double kcut = cutoff * MIN(MIN(dkx, dky), dkz);
     double params[] = {meff2, gamma, kcut};
     gsl_function func;
     func.function = &kernel_integrand;
@@ -929,9 +934,9 @@ static void mk_bunch_davies(double *f, const double meff2, const double homo,
     }
     INFO(puts("Initialized spline interpolation for Bunch Davies kernel."));
 
-    const double fac = INFLATON_MASS / (pars.N * sqrt(TWOPI * dk));
+    const double fac = INFLATON_MASS / (Nx * Ny * Nz * sqrt(TWOPI * dk));
     double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
-    mk_x_grid(grid);
+    mk_x_grid(grid, Nx, Ny, Nz);
 
     double *ftmp = fftw_malloc(Nx * Ny * Nz * sizeof *ftmp);
     for (size_t i = 0; i < Nx; ++i) {
@@ -951,13 +956,17 @@ static void mk_bunch_davies(double *f, const double meff2, const double homo,
     gsl_interp_accel_free(acc);
     free(rr);
     free(ker);
-    fft(ftmp, tmp.phic);
+    complex *ftmpc = fftw_malloc(Mx * My * Mz * sizeof *ftmpc);
+    fft(ftmp, ftmpc);
     fftw_free(ftmp);
 
-    for (size_t i = 0; i < pars.M; ++i) {
-        tmp.phic[i] *= box_muller();
+    for (size_t i = 0; i < Mx * My * Mz; ++i) {
+        ftmpc[i] *= box_muller();
     }
-    tmp.phic[0] = homo;
+    ftmpc[0] = homo;
+
+    embed_grid(ftmpc, tmp.phic, Mx, My, Mz, pars.x.M, pars.y.M, pars.z.M);
+    fftw_free(ftmpc);
     ifft(tmp.phic, f);
     INFO(puts("Constructed field.\n"));
 }
@@ -1093,18 +1102,19 @@ static void embed_grid(const complex *s, complex *d,
  * @brief Construct initial conditions for phi from internally defined functions
  *
  * First the actual spatial grid values are computed by calling
- * `mk_x_grid(double *grid)` and then \f$\phi\f$ and \f$\dot{\phi}\f$ are computed
- * by `phi_init(const double x, const double y, const double z, const double
- * *ph)`, `dphi_init(const double x, const double y, const double z, const
- * double *ph)` potentially using some random phases `ph`. The initial scale
- * factor \f$a\f$ comes from the parameter file and \f$\psi\f$, \f$\dot{\psi}\f$ are
- * then computed from \f$\phi\f$ and \f$\dot{\phi}\f$.
+ * `mk_x_grid(double *grid, const size_t Nx, const size_t Ny, const size_t Nz)`
+ * and then \f$\phi\f$ and \f$\dot{\phi}\f$ are computed by `phi_init(const
+ * double x, const double y, const double z, const double *ph)`,
+ * `dphi_init(const double x, const double y, const double z, const double *ph)`
+ * potentially using some random phases `ph`. The initial scale factor \f$a\f$
+ * comes from the parameter file and \f$\psi\f$, \f$\dot{\psi}\f$ are then
+ * computed from \f$\phi\f$ and \f$\dot{\phi}\f$.
  */
 static void init_from_internal_function()
 {
     const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
     double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
-    mk_x_grid(grid);
+    mk_x_grid(grid, Nx, Ny, Nz);
     const size_t Nmodes = 16;
     // random phases
     double *theta = calloc(Nmodes, sizeof *theta);
