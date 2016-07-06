@@ -122,6 +122,10 @@ void allocate_and_init_all()
 static void init_rng()
 {
     rng = gsl_rng_alloc(gsl_rng_mt19937);
+    if (SEED < 1) {
+        fputs("\n\nNeed positive seed.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
     gsl_rng_set(rng, SEED);
     INFO(puts("Initialized random number generator.\n"));
 }
@@ -160,8 +164,15 @@ static void init_parameters()
     init_file_pars();
     init_monitoring();
 
-    // misc parameters
+    if (BUNCH_DAVIES_CUTOFF < 0) {
+        fputs("\n\nNeed positive cutoff for bunch davies vacuum.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
     pars.bunch_davies_cutoff = BUNCH_DAVIES_CUTOFF;
+    if (MAX_RUNTIME < 0) {
+        fputs("\n\nNeed positive maximal runtime.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
     pars.max_runtime = MAX_RUNTIME;
 }
 
@@ -266,10 +277,16 @@ static void init_time_pars()
     pars.t.ti = INITIAL_TIME;
     pars.t.tf = FINAL_TIME;
     pars.t.Nt = ceil((pars.t.tf - pars.t.ti) / pars.t.dt) + 1;
-    if (pars.t.Nt > MAX_STEPS) {
-        fputs("Exeeding MAX_STEPS, decrease DELTA_T.\n", stderr);
+    if (pars.t.dt <= 0.0 || pars.t.ti > pars.t.tf) {
+        fputs("\n\nNeed positive delta t and initial < final time.\n", stderr);
         exit(EXIT_FAILURE);
     }
+    #if INTEGRATION_METHOD == RK4
+    if (pars.t.Nt > MAX_STEPS) {
+        fputs("\n\nExeeding MAX_STEPS, decrease DELTA_T.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    #endif
     INFO(puts("Initialized time parameters.\n"));
 }
 
@@ -279,7 +296,15 @@ static void init_time_pars()
 static void init_file_pars()
 {
     pars.file.index = 0;
+    if (WRITE_OUT_BUFFER_NUMBER < 1) {
+        fputs("\n\nNeed positive number for buffer size.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
     pars.file.buf_size = WRITE_OUT_BUFFER_NUMBER;
+    if (TIME_STEP_SKIPS < 1) {
+        fputs("\n\nNeed positive number for time step skips.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
     pars.file.skip = TIME_STEP_SKIPS;
 }
 
@@ -743,7 +768,7 @@ static void mk_initial_psi()
     mk_gradient_squared_and_laplacian(field);
     mk_rho_and_p(field);
     mk_psi(field);
-    INFO(puts("Constructed psi and dot{psi} from existing phi and dot{phi}."));
+    INFO(puts("Constructed psi and dot psi from existing phi and dot phi."));
 }
 
 /**
