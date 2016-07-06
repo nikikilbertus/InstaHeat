@@ -191,6 +191,19 @@ static void init_grid_pars()
     pars.z.k2 = TWOPI * TWOPI / ((pars.z.b - pars.z.a) * (pars.z.b - pars.z.a));
     pars.z.stride = STRIDE_Z;
 
+    if (pars.x.N < 1 || pars.y.N < 1 || pars.z.N < 1) {
+        fputs("\n\nNeed positive number of gridpoints.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    if (pars.x.N < pars.y.N || pars.y.N < pars.z.N) {
+        fputs("\n\nOrder number of gridpoints Nx >= Ny >= Nz.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    if (pars.x.a >= pars.x.b || pars.y.a > pars.y.b || pars.z.a > pars.z.b) {
+        fputs("\n\nInvalid spatial bounds, need a <= b.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+
     pars.N = pars.x.N * pars.y.N * pars.z.N;
 
     pars.x.outN = (pars.x.N + pars.x.stride - 1) / pars.x.stride;
@@ -807,10 +820,15 @@ static void init_from_bunch_davies()
     const double phi0 = 1.0093430384226378929425913902459;
     const double dphi0 = - MASS * 0.7137133070120812430962278466136;
     const double hubble = MASS * 0.5046715192113189464712956951230;
+    const double meff2 = MASS * MASS - 2.25 * hubble * hubble;
+    if (meff2 <= 0.0) {
+        fputs("\n\nThe effective mass squared is negative.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
     INFO(puts("Initializing phi."));
-    mk_bunch_davies(field, hubble, phi0, -0.25);
+    mk_bunch_davies(field, meff2, phi0, -0.25);
     INFO(puts("Initializing dot{phi}."));
-    mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
+    mk_bunch_davies(field + pars.N, meff2, dphi0, 0.25);
     field[pars.Ntot - 1] = A_INITIAL;
     evo_flags.output = 0;
     evo_flags.filter = 0;
@@ -834,18 +852,27 @@ static void init_from_bunch_davies()
  * @see [DEFROST: A New Code for Simulating Preheating after
  * Inflation](http://arxiv.org/abs/0809.4904)
  */
-static void mk_bunch_davies(double *f, const double H, const double homo,
+static void mk_bunch_davies(double *f, const double meff2, const double homo,
         const double gamma)
 {
-    const double meff2 = MASS * MASS - 2.25 * H * H;
-    if (meff2 <= 0.0) {
-        fputs("\n\nThe effective mass turned out to be negative.\n", stderr);
-        exit(EXIT_FAILURE);
-    }
-    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
+    size_t Nx = 1, Ny = 1, Nz = 1, Mx = 1, My = 1, Mz = 1;
     size_t cutoff = pars.bunch_davies_cutoff;
     if (cutoff < 1) {
-        cutoff = MIN(MIN(Nx, Ny), Nz) / 2 + 1;
+        Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
+        cutoff = Nx / 2 + 1;
+    } else {
+        Nx = 2 * cutoff;
+        if (pars.dim > 1) {
+            Ny = Nx;
+            if (pars.dim > 2) {
+                Nz = Nx;
+            }
+        }
+        if (pars.x.N <= Nx || pars.y.N <= Ny || pars.z.N <= Nz) {
+            fputs("\n\nCutoff too large for the grid size.\n", stderr);
+            exit(EXIT_FAILURE);
+        }
+        Mx = My = Mz = Nx / 2 + 1;
     }
     const double dkx = TWOPI / (pars.x.b - pars.x.a);
     double dky = dkx, dkz = dkx, dk = dkx;
@@ -858,7 +885,7 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
         }
     }
 
-    const double kcut = 0.5 * cutoff * MIN(MIN(dkx, dky), dkz);
+    const double kcut = cutoff * MIN(MIN(dkx, dky), dkz);
     double params[] = {meff2, gamma, kcut};
     gsl_function func;
     func.function = &kernel_integrand;
@@ -1011,6 +1038,29 @@ static complex box_muller()
     const double u1 = gsl_rng_uniform(rng), u2 = gsl_rng_uniform(rng);
     return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * I);
 }
+
+static void embed_grid(const complex *s, complex *d,
+        const size_t nx, const size_t ny, const size_t nz,
+        const size_t mx, const size_t my, const size_t mz)
+{
+    #pragma omp parallel for
+    for (size_t i = 0; i < mx * my * mz; ++i) {
+        d[i] = 0.0;
+    }
+    #pragma omp parallel for
+    for (size_t i = 0; i < nx; ++i) {
+        size_t osx1 = i * ny * nz;
+        size_t osx2 = i * my * mz;
+        for (size_t j = 0; j < ny; ++j) {
+            size_t osy1 = osx1 + j * nz;
+            size_t osy2 = osx2 + j * mz;
+            for (size_t k = 0; k < nz; ++k) {
+                d[osy2 + k] = s[osy1 + k];
+            }
+        }
+    }
+}
+
 #endif
 
 #if INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
