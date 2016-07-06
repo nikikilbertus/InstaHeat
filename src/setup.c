@@ -7,6 +7,7 @@
 #include <fftw3.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_spline.h>
 #include "setup.h"
 #include "toolbox.h"
 #include "io.h"
@@ -48,7 +49,7 @@ static void init_from_bunch_davies();
 static void test_bunch_davies();
 static void mk_bunch_davies(double *f, const double H, const double homo,
         const double gamma);
-static double kernel(const double r, gsl_function *f, const int origin);
+static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f);
 static double kernel_integrand(double k, void *params);
 static complex box_muller();
 #endif
@@ -801,7 +802,9 @@ static void init_from_bunch_davies()
     const double phi0 = 1.0093430384226378929425913902459;
     const double dphi0 = - MASS * 0.7137133070120812430962278466136;
     const double hubble = MASS * 0.5046715192113189464712956951230;
+    INFO(puts("Initializing phi."));
     mk_bunch_davies(field, hubble, phi0, -0.25);
+    INFO(puts("Initializing dot{phi}."));
     mk_bunch_davies(field + pars.N, hubble, dphi0, 0.25);
     field[pars.Ntot - 1] = A_INITIAL;
     evo_flags.output = 0;
@@ -850,7 +853,7 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
 {
     const double meff2 = MASS * MASS - 2.25 * H * H;
     if (meff2 <= 0.0) {
-        fputs("The effective mass turned out to be negative.\n", stderr);
+        fputs("\n\nThe effective mass turned out to be negative.\n", stderr);
         exit(EXIT_FAILURE);
     }
     const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
@@ -864,6 +867,19 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     gsl_function func;
     func.function = &kernel_integrand;
     func.params = params;
+    const size_t Nker = 1e4;
+    double *rr = malloc(Nker * sizeof *rr);
+    double *ker = malloc(Nker * sizeof *ker);
+    mk_kernel(ker, rr, Nker, &func);
+
+    gsl_interp_accel *acc = gsl_interp_accel_alloc();
+    gsl_spline *fker = gsl_spline_alloc(gsl_interp_cspline, Nker);
+    int s = gsl_spline_init(fker, rr, ker, Nker);
+    if (s != GSL_SUCCESS) {
+        fputs("\n\nInterpolation for Bunch Davies failed.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    INFO(puts("Initialized spline interpolation for Bunch Davies kernel."));
 
     const double fac = INFLATON_MASS / (pars.N * sqrt(TWOPI * dk * dk *dk));
     double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
@@ -879,16 +895,15 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
                 const double r = sqrt(grid[i] * grid[i] +
                                       grid[Nx + j] * grid[Nx + j] +
                                       grid[Nx + Ny + k] * grid[Nx + Ny + k]);
-                if (r > DBL_EPSILON) {
-                    ftmp[osy + k] = fac * kernel(r, &func, 0);
-                } else {
-                    ftmp[osy + k] = fac * kernel(r, &func, 1);
-                }
+                ftmp[osy + k] = fac * gsl_spline_eval(fker, r, acc);
             }
         }
-        INFO(printf("initial data: %.2f%%\n", 100.0 * i / Nx));
     }
     free(grid);
+    gsl_spline_free(fker);
+    gsl_interp_accel_free(acc);
+    free(rr);
+    free(ker);
     fft(ftmp, tmp.phic);
     fftw_free(ftmp);
 
@@ -898,43 +913,53 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     }
     tmp.phic[0] = homo;
     ifft(tmp.phic, f);
+    INFO(puts("Constructed field.\n"));
 }
 
-static double kernel(const double r, gsl_function *f, const int origin)
+static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)
 {
     const double a = 0.0;
-    const double abs = 1.0e-7;
-    const double rel = 1.0e-5;
-    const size_t limit = 1e2;
+    const double abs = 1.0e-9;
+    const double rel = 1.0e-6;
+    const size_t limit = 1e3;
     double L = 0.0;
-    size_t trig_levels = 1e2;
+    size_t trig_levels = 1e3;
+    const double rx = MAX(fabs(pars.x.a), fabs(pars.x.b));
+    const double ry = MAX(fabs(pars.y.a), fabs(pars.y.b));
+    const double rz = MAX(fabs(pars.z.a), fabs(pars.z.b));
+    const double rmax = sqrt(rx * rx + ry * ry + rz * rz);
+    const double dr = rmax / (N - 2);
+    double r = dr;
 
     gsl_integration_workspace *ws = gsl_integration_workspace_alloc(limit);
     gsl_integration_workspace *c_ws = gsl_integration_workspace_alloc(limit);
     gsl_integration_qawo_table *wf =
-        gsl_integration_qawo_table_alloc(r, L, GSL_INTEG_SINE, trig_levels);
+        gsl_integration_qawo_table_alloc(1.0, L, GSL_INTEG_SINE, trig_levels);
 
     int s;
     double res, err;
-    if (origin) {
-        s = gsl_integration_qagiu(f, a, abs, rel, limit, ws, &res, &err);
-    } else {
-        s = gsl_integration_qawf(f, a, abs, limit, ws, c_ws, wf, &res, &err);
-    }
+    s = gsl_integration_qagiu(f, a, abs, rel, limit, ws, &res, &err);
     if (s != GSL_SUCCESS) {
         fputs("\n\nIntegration for Bunch Davies failed.\n", stderr);
         exit(EXIT_FAILURE);
     }
+    ker[0] = res;
+    rr[0] = 0.0;
 
+    for (size_t i = 1; i < N; ++i, r += dr) {
+        rr[i] = r;
+        gsl_integration_qawo_table_set(wf, r, L, GSL_INTEG_SINE);
+        s = gsl_integration_qawf(f, a, abs, limit, ws, c_ws, wf, &res, &err);
+        if (s != GSL_SUCCESS) {
+            fputs("\n\nIntegration for Bunch Davies failed.\n", stderr);
+            exit(EXIT_FAILURE);
+        }
+        ker[i] = res / r;
+    }
     gsl_integration_qawo_table_free(wf);
     gsl_integration_workspace_free(c_ws);
     gsl_integration_workspace_free(ws);
-
-    if (origin) {
-        return res;
-    } else {
-        return res / r;
-    }
+    INFO(puts("Integrated Bunch Davies kernel on support points."));
 }
 
 static double kernel_integrand(double k, void *params)
