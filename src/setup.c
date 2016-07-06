@@ -819,6 +819,11 @@ static void init_from_bunch_davies()
  * @param[in] homo The homogeneous offset of the initial field (background).
  * @param[in] gamma The exponent in equation TODO{link] of the initial spectrum.
  *
+ * While mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)
+ * computes the kernel on some support points, we use natural cubic splines to
+ * interpolate the kernel to specific grid points. The interpolation is
+ * implemented by GNU GSL.
+ *
  * @see [DEFROST: A New Code for Simulating Preheating after
  * Inflation](http://arxiv.org/abs/0809.4904)
  */
@@ -899,8 +904,8 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
  * @param[in] f The kernel integrand as a gsl_function structure.
  *
  * The kernel is given in TODO[link] and contains itself an integration over
- * wave vectors k. We use an adaptive integration routine for oscillatory
- * integrands from GNU GSL for the integration.
+ * wave vectors k. This integration is performed We use an adaptive integration
+ * routine for oscillatory integrands from GNU GSL for the integration.
  */
 static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)
 {
@@ -948,6 +953,18 @@ static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)
     INFO(puts("Integrated Bunch Davies kernel on support points."));
 }
 
+/**
+ * @brief The integrand of the kernel for the Bunch Davies spectrum.
+ *
+ * @param[in] k The wave number k at which to compute the kernel.
+ * @param[in] params The optional parameters in a gsl_function structure.
+ * @return The kernel value at @p k.
+ *
+ * The parameter strucutre @p params contains the effective mass squared, the
+ * exponent gamma and the cutoff wave number (in this order).
+ *
+ * @see TODO[link]
+ */
 static double kernel_integrand(double k, void *params)
 {
     const double meff2 = *(double *) params;
