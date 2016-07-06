@@ -890,6 +890,18 @@ static void mk_bunch_davies(double *f, const double H, const double homo,
     INFO(puts("Constructed field.\n"));
 }
 
+/**
+ * @brief Construct the kernel for the Bunch Davies spectrum.
+ *
+ * @param[out] ker The kernel at @p N support points.
+ * @param[out] rr The @p N support points for the kernel @p ker.
+ * @param[in] N The Number of support points on which to compute the kernel.
+ * @param[in] f The kernel integrand as a gsl_function structure.
+ *
+ * The kernel is given in TODO[link] and contains itself an integration over
+ * wave vectors k. We use an adaptive integration routine for oscillatory
+ * integrands from GNU GSL for the integration.
+ */
 static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)
 {
     const double a = 0.0;
