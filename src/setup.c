@@ -797,7 +797,6 @@ static void mk_psi(double *f)
  */
 static void init_from_bunch_davies()
 {
-    test_bunch_davies();
     // directly from DEFROST(v1.0), factor in dphi0 and H0 adjusts modes
     const double phi0 = 1.0093430384226378929425913902459;
     const double dphi0 = - MASS * 0.7137133070120812430962278466136;
@@ -810,30 +809,6 @@ static void init_from_bunch_davies()
     evo_flags.output = 0;
     evo_flags.filter = 0;
     mk_initial_psi();
-}
-
-/**
- * @brief Check that all conditions necessary to construct the Bunch Davies
- * vacuum are fulfilled and exit the program if they are not.
- */
-static void test_bunch_davies()
-{
-    if (pars.dim != 3) {
-        fputs("Bunch Davies vacuum works only in three dimensions.\n", stderr);
-        exit(EXIT_FAILURE);
-    }
-    size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
-    if (Nx != Ny || Nx != Nz) {
-        fputs("Bunch Davies vacuum works only for Nx = Ny = Nz.\n", stderr);
-        exit(EXIT_FAILURE);
-    }
-    double lx = pars.x.b - pars.x.a;
-    double ly = pars.y.b - pars.y.a;
-    double lz = pars.z.b - pars.z.a;
-    if (fabs(lx - ly) > DBL_EPSILON || fabs(lx - lz) > DBL_EPSILON) {
-        fputs("Bunch Davies vacuum works only in a cubic domain.\n", stderr);
-        exit(EXIT_FAILURE);
-    }
 }
 
 /**
