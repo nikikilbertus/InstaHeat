@@ -1102,22 +1102,23 @@ static void embed_grid(const complex *s, complex *d,
             size_t y2a = (2 * j <= ny ? j : my - ny + j) * mz;
             size_t y2b = (2 * j == ny ? my - ny + j : 0) * mz;
             for (size_t k = 0; k < nz; ++k) {
+                complex val = s[x1 + y1 + k];
                 if (x2b) {
-                    d[x2a + y2a + k] = 0.5 * s[x1 + y1 + k];
-                    d[x2b + y2a + k] = 0.5 * s[x1 + y1 + k];
+                    d[x2a + y2a + k] = 0.5 * val;
+                    d[x2b + y2a + k] = 0.5 * val;
                 }
                 if (y2b) {
-                    d[x2a + y2a + k] = 0.5 * s[x1 + y1 + k];
-                    d[x2a + y2b + k] = 0.5 * s[x1 + y1 + k];
+                    d[x2a + y2a + k] = 0.5 * val;
+                    d[x2a + y2b + k] = 0.5 * val;
                 }
                 if (x2b && y2b) {
-                    d[x2a + y2a + k] = 0.25 * s[x1 + y1 + k];
-                    d[x2b + y2a + k] = 0.25 * s[x1 + y1 + k];
-                    d[x2a + y2a + k] = 0.25 * s[x1 + y1 + k];
-                    d[x2a + y2b + k] = 0.25 * s[x1 + y1 + k];
+                    d[x2a + y2a + k] = 0.25 * val;
+                    d[x2a + y2b + k] = 0.25 * val;
+                    d[x2b + y2a + k] = 0.25 * val;
+                    d[x2b + y2b + k] = 0.25 * val;
                 }
                 if (!x2b && !y2b) {
-                    d[x2a + y2a + k] = s[x1 + y1 + k];
+                    d[x2a + y2a + k] = val;
                 }
             }
         }
@@ -1479,5 +1480,5 @@ static void free_external()
     fftw_free(tmp.deltarhoc);
     fftw_free(tmp.f);
     fftw_free(tmp.deltarho);
-    INFO(puts("Freed external variables.\n"));
+    INFO(puts("Freed memory of external variables.\n"));
 }
