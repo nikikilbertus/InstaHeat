@@ -1088,11 +1088,6 @@ static void embed_grid(const complex *s, complex *d,
         fputs("\n\nCan't embed larger grid into smaller one.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    if (nx % 2 != 0 || ny % 2 != 0 || nz % 2 != 0 ||
-        mx % 2 != 0 || my % 2 != 0 || mz % 2 != 0) {
-        fputs("\n\nGrid embedding only for even grids.\n", stderr);
-        exit(EXIT_FAILURE);
-    }
     #pragma omp parallel for
     for (size_t i = 0; i < mx * my * mz; ++i) {
         d[i] = 0.0;
@@ -1114,6 +1109,12 @@ static void embed_grid(const complex *s, complex *d,
                 if (y2b) {
                     d[x2a + y2a + k] = 0.5 * s[x1 + y1 + k];
                     d[x2a + y2b + k] = 0.5 * s[x1 + y1 + k];
+                }
+                if (x2b && y2b) {
+                    d[x2a + y2a + k] = 0.25 * s[x1 + y1 + k];
+                    d[x2b + y2a + k] = 0.25 * s[x1 + y1 + k];
+                    d[x2a + y2a + k] = 0.25 * s[x1 + y1 + k];
+                    d[x2a + y2b + k] = 0.25 * s[x1 + y1 + k];
                 }
                 if (!x2b && !y2b) {
                     d[x2a + y2a + k] = s[x1 + y1 + k];

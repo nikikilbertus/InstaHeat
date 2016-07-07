@@ -2,9 +2,9 @@
 
 %% setup (user input)
 % the filename
-name = 'masses96/96_0.005';
+name = 'res2d_long/128_32_3e-5';
 % on how many time slices do we want to show the power spectra in the video
-nslices = 300;
+nslices = 30;
 
 %% run
 % initialization

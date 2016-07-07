@@ -2,7 +2,7 @@
 
 %% setup (user input)
 % setup different gridpoints or cutoffs in an array
-res = [32 40 48 56 64]% 72 80 88 96 104 112 120 128];
+res = [32 40 48 56 64];
 % construct the file names: prefix, suffix, indexset
 pre = 'test';
 suf = '';
@@ -12,7 +12,7 @@ os = 0;
 
 %% run
 colors = jet;
-set(0,'DefaultAxesColorOrder',colors(1:4:end,:))
+set(0,'DefaultAxesColorOrder',colors(1:6:end,:))
 loadDsets;
 require(dsetsSummary,'constraints','steps_total','t');
 nn = length(res);
