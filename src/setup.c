@@ -32,7 +32,8 @@ static void init_file_pars();
 static void init_monitoring();
 static void allocate_external();
 static void init_output(struct output *out, const size_t dim, const int mode);
-static void mk_fftw_plans();
+static fftw_plan mk_fftw_plan(double *r, complex *c,
+        const size_t Nx, const size_t Ny, const size_t Nz, const int dir);
 static void check_simd_alignment();
 static int get_simd_alignment_of(double *f);
 static void mk_k_grid();
@@ -87,7 +88,10 @@ void allocate_and_init_all()
     init_threading();
     init_parameters();
     allocate_external();
-    mk_fftw_plans();
+    p_fw = mk_fftw_plan(field, tmp.phic, pars.x.N, pars.y.N, pars.z.N,
+            FFTW_FORWARD);
+    p_bw = mk_fftw_plan(field, tmp.phic, pars.x.N, pars.y.N, pars.z.N,
+            FFTW_BACKWARD);
     check_simd_alignment();
     mk_k_grid();
     #ifdef ENABLE_FFT_FILTER
@@ -150,7 +154,7 @@ static void init_threading()
     int threadnum = THREAD_NUMBER <= 0 ? omp_get_max_threads() : THREAD_NUMBER;
     omp_set_num_threads(threadnum);
     fftw_plan_with_nthreads(threadnum);
-    INFO(printf("\n\nRunning omp & fftw with %d thread(s).\n\n", threadnum));
+    INFO(printf("Running omp & fftw with %d thread(s).\n\n", threadnum));
 }
 
 /**
@@ -234,7 +238,7 @@ static void init_grid_pars()
             pars.dim = 1;
             pars.y.a = 0.0; pars.y.b = 0.0; pars.y.k = 0.0; pars.y.k2 = 0.0;
             if (pars.x.N == 1) {
-                fputs("Need at least two grid points.\n", stderr);
+                fputs("\n\nNeed at least two grid points.\n", stderr);
                 exit(EXIT_FAILURE);
             }
         }
@@ -265,9 +269,9 @@ static void init_grid_pars()
     pars.Ntot = 4 * pars.N + 4 * pars.Next + 1;
 
     INFO(printf("Initialized grid in %zu dimension(s).\n", pars.dim));
-    INFO(printf("Gridpoints: X: %zu, Y: %zu, Z: %zu.\n",
+    INFO(printf("  Gridpoints: X: %zu, Y: %zu, Z: %zu.\n",
                 pars.x.N, pars.y.N, pars.z.N));
-    INFO(printf("N: %zu, Next: %zu, Ntot: %zu\n\n",
+    INFO(printf("  N: %zu, Next: %zu, Ntot: %zu\n\n",
                 pars.N, pars.Next, pars.Ntot));
 }
 
@@ -453,7 +457,7 @@ static void allocate_external()
         tmp.fc && tmp.deltarhoc && tmp.dpsic && tmp.f && tmp.deltarho &&
         kvec.sq && kvec.x && kvec.y && kvec.z && kvec.xf && kvec.yf &&
         kvec.zf)) {
-        fputs("Allocating memory failed.\n", stderr);
+        fputs("\n\nAllocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
     }
     INFO(puts("Allocated memory for external variables.\n"));
@@ -477,7 +481,7 @@ static void init_output(struct output *out, const size_t dim, const int mode)
     }
     out->buf = calloc(Nbuf * out->dim, sizeof *out->buf);
     if (!out->buf || (mode != 0 && !out->tmp)) {
-        fputs("Allocating memory failed.\n", stderr);
+        fputs("\n\nAllocating memory failed.\n", stderr);
         exit(EXIT_FAILURE);
     }
 }
@@ -491,32 +495,35 @@ static void init_output(struct output *out, const size_t dim, const int mode)
  * and reuse them for various different arrays. One has to be careful that later
  * arrays fulfil the memory alignment.
  */
-static void mk_fftw_plans()
+static fftw_plan mk_fftw_plan(double *r, complex *c,
+        const size_t Nx, const size_t Ny, const size_t Nz, const int dir)
 {
-    const size_t Nx = pars.x.N, Ny = pars.y.N, Nz = pars.z.N;
     TIME(mon.fftw_plan -= get_wall_time());
-    switch (pars.dim) {
-        case 1:
-            p_fw = fftw_plan_dft_r2c_1d(Nx, field, tmp.phic,
-                    FFTW_DEFAULT_FLAG);
-            p_bw = fftw_plan_dft_c2r_1d(Nx, tmp.phic, field,
-                    FFTW_DEFAULT_FLAG);
-            break;
-        case 2:
-            p_fw = fftw_plan_dft_r2c_2d(Nx, Ny, field, tmp.phic,
-                    FFTW_DEFAULT_FLAG);
-            p_bw = fftw_plan_dft_c2r_2d(Nx, Ny, tmp.phic, field,
-                    FFTW_DEFAULT_FLAG);
-            break;
-        case 3:
-            p_fw = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, field, tmp.phic,
-                    FFTW_DEFAULT_FLAG);
-            p_bw = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, tmp.phic, field,
-                    FFTW_DEFAULT_FLAG);
-            break;
+    fftw_plan plan;
+    if (pars.dim == 1) {
+        if (dir == FFTW_FORWARD) {
+            plan = fftw_plan_dft_r2c_1d(Nx, r, c, FFTW_DEFAULT_FLAG);
+        } else {
+            plan = fftw_plan_dft_c2r_1d(Nx, c, r, FFTW_DEFAULT_FLAG);
+        }
+    } else if (pars.dim == 2) {
+        if (dir == FFTW_FORWARD) {
+            plan = fftw_plan_dft_r2c_2d(Nx, Ny, r, c, FFTW_DEFAULT_FLAG);
+        } else {
+            plan = fftw_plan_dft_c2r_2d(Nx, Ny, c, r, FFTW_DEFAULT_FLAG);
+        }
+    } else if (pars.dim == 3) {
+        if (dir == FFTW_FORWARD) {
+            plan = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, r, c, FFTW_DEFAULT_FLAG);
+        } else {
+            plan = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, c, r, FFTW_DEFAULT_FLAG);
+        }
+    } else {
+        fputs("\n\nBUG: Dimension must be 1, 2 or 3.\n", stderr);
+        exit(EXIT_FAILURE);
     }
     TIME(mon.fftw_plan += get_wall_time());
-    INFO(puts("Created fftw plans.\n"));
+    return plan;
 }
 
 /**
@@ -530,7 +537,7 @@ static void check_simd_alignment()
     int a2 = get_simd_alignment_of(field_new);
     int a3 = get_simd_alignment_of(dfield_new);
     if (ref != a1 || ref != a2 || ref != a3) {
-        fputs("Alignment error!\n", stderr);
+        fputs("\n\nAlignment error!\n", stderr);
         exit(EXIT_FAILURE);
     }
     INFO(puts("All field arrays are correctly aligned.\n"));
@@ -553,7 +560,7 @@ static int get_simd_alignment_of(double *f)
         }
     }
     if (fail == 1) {
-        fputs("Alignment error!\n", stderr);
+        fputs("\n\nAlignment error!\n", stderr);
         exit(EXIT_FAILURE);
     }
     return ref;
@@ -654,7 +661,6 @@ static void mk_x_grid(double *grid, const size_t Nx, const size_t Ny,
     for (size_t k = Nx + Ny; k < Nx + Ny + Nz; ++k) {
         grid[k] = az + (bz - az) * (k - Nx - Ny) / Nz;
     }
-    INFO(puts("Constructed spatial grid.\n"));
 }
 
 #ifdef ENABLE_FFT_FILTER
@@ -732,7 +738,7 @@ static void mk_initial_conditions()
     #endif
     t_out.tmp[0] = pars.t.ti;
     a_out.tmp[0] = field[pars.Ntot - 1];
-    INFO(puts("Initialized fields on first time slice.\n"));
+    INFO(puts("Initialized all fields on first time slice.\n"));
 }
 
 #ifdef IC_FROM_DAT_FILE
@@ -746,7 +752,7 @@ static void mk_initial_conditions()
 static void init_from_dat()
 {
     read_initial_data();
-    INFO(puts("Read initial data from file."));
+    INFO(puts("Read initial data from file.\n"));
     /* center(field + 2 * pars.N, pars.N); */
     /* center(field + 3 * pars.N, pars.N); */
     field[pars.Ntot - 1] = A_INITIAL;
@@ -772,7 +778,7 @@ static void mk_initial_psi()
     mk_gradient_squared_and_laplacian(field);
     mk_rho_and_p(field);
     mk_psi(field);
-    INFO(puts("Constructed psi and dot psi from existing phi and dot phi."));
+    INFO(puts("Constructed psi and dot psi from existing phi and dot phi.\n"));
 }
 
 /**
@@ -856,7 +862,7 @@ static void init_from_bunch_davies()
     }
     INFO(puts("Initializing phi."));
     mk_bunch_davies(field, meff2, phi0, -0.25);
-    INFO(puts("Initializing dot{phi}."));
+    INFO(puts("Initializing dot phi."));
     mk_bunch_davies(field + pars.N, meff2, dphi0, 0.25);
     field[pars.Ntot - 1] = A_INITIAL;
     evo_flags.output = 0;
@@ -915,7 +921,6 @@ static void mk_bunch_davies(double *f, const double meff2, const double homo,
             kcut = MIN(kcut, (Nz / 2 + 1) * dkz);
         }
     }
-
     double params[] = {meff2, gamma, kcut};
     gsl_function func;
     func.function = &kernel_integrand;
@@ -932,7 +937,7 @@ static void mk_bunch_davies(double *f, const double meff2, const double homo,
         fputs("\n\nInterpolation for Bunch Davies failed.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    INFO(puts("Initialized spline interpolation for Bunch Davies kernel."));
+    INFO(puts("  Initialized spline interpolation for Bunch Davies kernel."));
 
     const double fac = INFLATON_MASS / (Nx * Ny * Nz * sqrt(TWOPI * dk));
     double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
@@ -957,7 +962,9 @@ static void mk_bunch_davies(double *f, const double meff2, const double homo,
     free(rr);
     free(ker);
     complex *ftmpc = fftw_malloc(Mx * My * Mz * sizeof *ftmpc);
-    fft(ftmp, ftmpc);
+    fftw_plan p = mk_fftw_plan(ftmp, ftmpc, Nx, Ny, Nz, FFTW_FORWARD);
+    fftw_execute(p);
+    fftw_destroy_plan(p);
     fftw_free(ftmp);
 
     for (size_t i = 0; i < Mx * My * Mz; ++i) {
@@ -968,7 +975,7 @@ static void mk_bunch_davies(double *f, const double meff2, const double homo,
     embed_grid(ftmpc, tmp.phic, Mx, My, Mz, pars.x.M, pars.y.M, pars.z.M);
     fftw_free(ftmpc);
     ifft(tmp.phic, f);
-    INFO(puts("Constructed field.\n"));
+    INFO(puts("  Done with this field.\n"));
 }
 
 /**
@@ -1028,7 +1035,7 @@ static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)
     gsl_integration_qawo_table_free(wf);
     gsl_integration_workspace_free(c_ws);
     gsl_integration_workspace_free(ws);
-    INFO(puts("Integrated Bunch Davies kernel on support points."));
+    INFO(puts("  Integrated Bunch Davies kernel on support points."));
 }
 
 /**
@@ -1077,24 +1084,45 @@ static void embed_grid(const complex *s, complex *d,
         const size_t nx, const size_t ny, const size_t nz,
         const size_t mx, const size_t my, const size_t mz)
 {
+    if (nx > mx || ny > my || nz > mz) {
+        fputs("\n\nCan't embed larger grid into smaller one.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    if (nx % 2 != 0 || ny % 2 != 0 || nz % 2 != 0 ||
+        mx % 2 != 0 || my % 2 != 0 || mz % 2 != 0) {
+        fputs("\n\nGrid embedding only for even grids.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
     #pragma omp parallel for
     for (size_t i = 0; i < mx * my * mz; ++i) {
         d[i] = 0.0;
     }
-    #pragma omp parallel for
+    size_t ii, jj, kk;
+    #pragma omp parallel for private(ii, jj, kk)
     for (size_t i = 0; i < nx; ++i) {
-        size_t osx1 = i * ny * nz;
-        size_t osx2 = i * my * mz;
+        size_t x1 = i * ny * nz;
+        size_t x2a = (2 * i <= nx ? i : mx - nx + i) * my * mz;
+        size_t x2b = (2 * i == nx ? mx - nx + i : 0) * my * mz;
         for (size_t j = 0; j < ny; ++j) {
-            size_t osy1 = osx1 + j * nz;
-            size_t osy2 = osx2 + j * mz;
+            size_t y1 = j * nz;
+            size_t y2a = (2 * j <= ny ? j : my - ny + j) * mz;
+            size_t y2b = (2 * j == ny ? my - ny + j : 0) * mz;
             for (size_t k = 0; k < nz; ++k) {
-                d[osy2 + k] = s[osy1 + k];
+                if (x2b) {
+                    d[x2a + y2a + k] = 0.5 * s[x1 + y1 + k];
+                    d[x2b + y2a + k] = 0.5 * s[x1 + y1 + k];
+                }
+                if (y2b) {
+                    d[x2a + y2a + k] = 0.5 * s[x1 + y1 + k];
+                    d[x2a + y2b + k] = 0.5 * s[x1 + y1 + k];
+                }
+                if (!x2b && !y2b) {
+                    d[x2a + y2a + k] = s[x1 + y1 + k];
+                }
             }
         }
     }
 }
-
 #endif
 
 #if INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
