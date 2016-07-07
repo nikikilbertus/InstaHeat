@@ -921,6 +921,7 @@ static void mk_bunch_davies(double *f, const double meff2, const double homo,
             kcut = MIN(kcut, (Nz / 2 + 1) * dkz);
         }
     }
+
     double params[] = {meff2, gamma, kcut};
     gsl_function func;
     func.function = &kernel_integrand;
@@ -1088,8 +1089,8 @@ static void embed_grid(const complex *s, complex *d,
         fputs("\n\nCan't embed larger grid into smaller one.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    if (Nx % 2 != 0 || Ny % 2 != 0 || Nz % 2 != 0 ||
-        Mx % 2 != 0 || My % 2 != 0 || Mz % 2 != 0) {
+    if (Nx % 2 != 0 || (Ny % 2 != 0 && Ny > 1) || (Nz % 2 != 0 && Nz > 1) ||
+        Mx % 2 != 0 || (My % 2 != 0 && My > 1) || (Mz % 2 != 0 && Mz > 1)) {
         fputs("\n\nGrid embedding works only for even grids.\n", stderr);
         exit(EXIT_FAILURE);
     }
