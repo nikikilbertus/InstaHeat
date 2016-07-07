@@ -972,7 +972,7 @@ static void mk_bunch_davies(double *f, const double meff2, const double homo,
     }
     ftmpc[0] = homo;
 
-    embed_grid(ftmpc, tmp.phic, Mx, My, Mz, pars.x.M, pars.y.M, pars.z.M);
+    embed_grid(ftmpc, tmp.phic, Nx, Ny, Nz, pars.x.N, pars.y.N, pars.z.N);
     fftw_free(ftmpc);
     ifft(tmp.phic, f);
     INFO(puts("  Done with this field.\n"));
@@ -1081,26 +1081,43 @@ static complex box_muller()
 }
 
 static void embed_grid(const complex *s, complex *d,
-        const size_t nx, const size_t ny, const size_t nz,
-        const size_t mx, const size_t my, const size_t mz)
+        const size_t Nx, const size_t Ny, const size_t Nz,
+        const size_t Mx, const size_t My, const size_t Mz)
 {
-    if (nx > mx || ny > my || nz > mz) {
+    if (Nx > Mx || Ny > My || Nz > Mz) {
         fputs("\n\nCan't embed larger grid into smaller one.\n", stderr);
         exit(EXIT_FAILURE);
     }
+    if (Nx % 2 != 0 || Ny % 2 != 0 || Nz % 2 != 0 ||
+        Mx % 2 != 0 || My % 2 != 0 || Mz % 2 != 0) {
+        fputs("\n\nGrid embedding works only for even grids.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    if (((Ny == 1 || My == 1) && Ny != My) ||
+        ((Nz == 1 || Mz == 1) && Nz != Mz)) {
+        fputs("\n\nGrid embedding needs grids with equal dimension.\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    const size_t nx = (Ny == 1 && Nz == 1) ? Nx / 2 + 1 : Nx;
+    const size_t ny = Nz == 1 ? Ny / 2 + 1 : Ny;
+    const size_t nz = Nz / 2 + 1;
+    const size_t mx = (My == 1 && Mz == 1) ? Mx / 2 + 1 : Mx;
+    const size_t my = Mz == 1 ? My / 2 + 1 : My;
+    const size_t mz = Mz / 2 + 1;
     #pragma omp parallel for
     for (size_t i = 0; i < mx * my * mz; ++i) {
         d[i] = 0.0;
     }
+    // TODO: check that this works for all dimensions
     #pragma omp parallel for
     for (size_t i = 0; i < nx; ++i) {
         size_t x1 = i * ny * nz;
-        size_t x2a = (2 * i <= nx ? i : mx - nx + i) * my * mz;
-        size_t x2b = (2 * i == nx ? mx - nx + i : 0) * my * mz;
+        size_t x2a = (2 * i <= Nx ? i : mx - nx + i) * my * mz;
+        size_t x2b = (2 * i == Nx && my != 1 ? mx - nx + i : 0) * my * mz;
         for (size_t j = 0; j < ny; ++j) {
             size_t y1 = j * nz;
-            size_t y2a = (2 * j <= ny ? j : my - ny + j) * mz;
-            size_t y2b = (2 * j == ny ? my - ny + j : 0) * mz;
+            size_t y2a = (2 * j <= Ny ? j : my - ny + j) * mz;
+            size_t y2b = (2 * j == Ny && mz != 1 ? my - ny + j : 0) * mz;
             for (size_t k = 0; k < nz; ++k) {
                 complex val = s[x1 + y1 + k];
                 if (x2b) {
