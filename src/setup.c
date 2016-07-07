@@ -1097,8 +1097,7 @@ static void embed_grid(const complex *s, complex *d,
     for (size_t i = 0; i < mx * my * mz; ++i) {
         d[i] = 0.0;
     }
-    size_t ii, jj, kk;
-    #pragma omp parallel for private(ii, jj, kk)
+    #pragma omp parallel for
     for (size_t i = 0; i < nx; ++i) {
         size_t x1 = i * ny * nz;
         size_t x2a = (2 * i <= nx ? i : mx - nx + i) * my * mz;
