@@ -479,6 +479,7 @@ void h5_close()
         H5Dclose(obj_ids[i]);
     }
     H5Fclose(file);
+    INFO(puts("Flushed and closed the hdf5 datasets and file.\n"));
 }
 
 /**
