@@ -674,9 +674,19 @@ static void mk_x_grid(double *grid, const size_t Nx, const size_t Ny,
  */
 static void mk_filter_mask()
 {
+    const double kxmax = (pars.x.N / 2 + 1) * pars.x.k;
+    const double kymax = (pars.y.N / 2 + 1) * pars.y.k;
+    const double kzmax = (pars.z.N / 2 + 1) * pars.z.k;
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
-        filter[i] = filter_window(kvec.sq[i] / kvec.k2_max);
+        double frac = fabs(kvec.xf[i]) / kxmax;
+        if (pars.dim > 1) {
+            frac = MAX(frac, fabs(kvec.yf[i]) / kymax);
+            if (pars.dim > 2) {
+                frac = MAX(frac, fabs(kvec.zf[i]) / kzmax);
+            }
+        }
+        filter[i] = filter_window(frac);
     }
     INFO(puts("Constructed filter mask.\n"));
 }
@@ -700,13 +710,13 @@ static void mk_filter_mask()
  * @see [On the stability of the unsmoothed Fourier method for hyperbolic
  * equations](http://link.springer.com/article/10.1007%2Fs002110050019)
  */
-static double filter_window(const double xsq)
+static double filter_window(const double x)
 {
     // exponential cutoff smoothing
-    return exp(-36.0 * pow(xsq, 18));
+    return exp(-36.0 * pow(x/0.9, 36));
 
-    // two thirds rule (due to square ratio as input we have 4/9)
-    // return xsq < 4.0/9.0 ? x : 0.0;
+    // two thirds rule
+    /* return x < 2.0 / 3.0 ? 1.0 : 0.0; */
 }
 #endif
 
