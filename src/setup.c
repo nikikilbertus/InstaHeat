@@ -674,9 +674,9 @@ static void mk_x_grid(double *grid, const size_t Nx, const size_t Ny,
  */
 static void mk_filter_mask()
 {
-    const double kxmax = (pars.x.N / 2 + 1) * pars.x.k;
-    const double kymax = (pars.y.N / 2 + 1) * pars.y.k;
-    const double kzmax = (pars.z.N / 2 + 1) * pars.z.k;
+    const double kxmax = (pars.x.N / 2) * pars.x.k;
+    const double kymax = (pars.y.N / 2) * pars.y.k;
+    const double kzmax = (pars.z.N / 2) * pars.z.k;
     #pragma omp parallel for
     for (size_t i = 0; i < pars.M; ++i) {
         double frac = fabs(kvec.xf[i]) / kxmax;
