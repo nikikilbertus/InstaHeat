@@ -713,7 +713,7 @@ static void mk_filter_mask()
 static double filter_window(const double x)
 {
     // exponential cutoff smoothing
-    return exp(-36.0 * pow(x/0.9, 36));
+    return exp(-36.0 * pow(x/0.666, 36));
 
     // two thirds rule
     /* return x < 2.0 / 3.0 ? 1.0 : 0.0; */
