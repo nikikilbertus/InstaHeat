@@ -479,6 +479,7 @@ void h5_close()
         H5Dclose(obj_ids[i]);
     }
     H5Fclose(file);
+    INFO(puts("Flushed and closed the hdf5 datasets and file.\n"));
 }
 
 /**
@@ -551,18 +552,14 @@ void save()
     }
 
     #ifdef LARGE_OUTPUT
-    const hsize_t N = pars.N;
-    const hsize_t Nx = pars.x.N;
-    const hsize_t Ny = pars.y.N;
-    const hsize_t Nz = pars.z.N;
+    const hsize_t Ny = pars.y.N, Nz = pars.z.N;
     const hsize_t outy = pars.y.outN;
     const hsize_t outz = pars.z.outN;
-    const hsize_t outN = pars.outN;
-    const hsize_t os = index * outN;
+    const hsize_t os = index * pars.outN;
     size_t osx, osy, id;
     size_t osxb, osyb, idb;
     #pragma omp parallel for private(osx, osxb, osy, osyb, id, idb)
-    for (size_t i = 0; i < Nx; i += pars.x.stride) {
+    for (size_t i = 0; i < pars.x.N; i += pars.x.stride) {
         osx = i * Ny * Nz;
         osxb = i * outy * outz / pars.x.stride;
         for (size_t j = 0; j < Ny; j += pars.y.stride) {
@@ -575,13 +572,13 @@ void save()
                 phi.buf[os + idb] = field[id];
                 #endif
                 #ifdef OUTPUT_DPHI
-                dphi.buf[os + idb] = field[N + id];
+                dphi.buf[os + idb] = field[pars.N + id];
                 #endif
                 #ifdef OUTPUT_PSI
-                psi.buf[os + idb] = field[2 * N + id];
+                psi.buf[os + idb] = field[2 * pars.N + id];
                 #endif
                 #ifdef OUTPUT_DPSI
-                dpsi.buf[os + idb] = field[3 * N + id];
+                dpsi.buf[os + idb] = field[3 * pars.N + id];
                 #endif
                 #ifdef OUTPUT_RHO
                 rho_out.buf[os + idb] = rho[id];

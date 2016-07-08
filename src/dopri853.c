@@ -105,10 +105,10 @@ void run_dopri853()
     initialize_dopri853();
     prepare_and_save_timeslice();
     TIME(mon.integration = -get_wall_time());
-    for (dp.n_stp = 0; dp.n_stp < dp.max_steps; ++dp.n_stp) {
+    for (dp.n_stp = 0; ; ++dp.n_stp) {
         if (dp.t + dp.dt * 1.0001 > dp.tf) {
             dp.dt = dp.tf - dp.t;
-            INFO(printf("overshoot, new dt = %f\n", dp.dt));
+            INFO(printf("\nOvershoot, new dt = %f\n", dp.dt));
         }
         if (perform_step(dp.dt)) {
             break;
@@ -125,16 +125,20 @@ void run_dopri853()
             save();
         }
         if (dp.t >= dp.tf) {
-            puts("\nReached specified final time.\n\n");
+            puts("\nReached specified final time.\n");
+            break;
+        }
+        if (dp.n_stp >= dp.max_steps) {
+            puts("\nReached maximal number of steps.\n");
             break;
         }
         double time = get_wall_time() + mon.total;
         if (time > pars.max_runtime) {
-            puts("\nReached specified maximal runtime.\n\n");
+            puts("\nReached specified maximal runtime.\n");
             break;
         }
         if (fabs(dp.dt_next) <= dp.dt_min) {
-            puts("\n!!! Stepsize underflow.\n\n");
+            puts("\n!!! Stepsize underflow.\n");
             break;
         }
         dp.dt = dp.dt_next;
@@ -181,14 +185,14 @@ static void initialize_dopri853()
     allocate_dopri853_values();
     allocate_and_initialize_tolerances();
     INFO(puts("Starting dopri853 integration with:"));
-    INFO(printf("initial time: %.17g\n", dp.ti));
-    INFO(printf("final time: %.17g\n", dp.tf));
-    INFO(printf("initial time step dt: %.17g\n", dp.dt));
-    INFO(printf("minimal time step dt: %.17g\n", dp.dt_min));
-    INFO(printf("max number of steps: %zu\n", dp.max_steps));
+    INFO(printf("  Initial time: %.17g\n", dp.ti));
+    INFO(printf("  Final time: %.17g\n", dp.tf));
+    INFO(printf("  Initial time step dt: %.17g\n", dp.dt));
+    INFO(printf("  Minimal time step dt: %.17g\n", dp.dt_min));
+    INFO(printf("  Max number of steps: %zu\n", dp.max_steps));
     // TODO: change this once I have more definitions
-    INFO(printf("relative tolerance: %.17g\n", RELATIVE_TOLERANCE));
-    INFO(printf("absolute tolerance: %.17g\n\n", ABSOLUTE_TOLERANCE));
+    INFO(printf("  Relative tolerance: %.17g\n", RELATIVE_TOLERANCE));
+    INFO(printf("  Absolute tolerance: %.17g\n\n", ABSOLUTE_TOLERANCE));
 }
 
 /**
@@ -215,14 +219,14 @@ static void wrap_up_dopri853()
     val[0] = (double)dp.n_bad;
     h5_write_simple(H5_STEPS_BAD_NAME, val, 1, H5D_COMPACT);
 
-    INFO(puts("Finished dopri853."));
+    INFO(puts("Finished dopri853:"));
     #ifdef ENABLE_TIMING
-    INFO(printf("time: %f seconds\n", mon.integration));
+    INFO(printf("  Time: %f seconds\n", mon.integration));
     h5_write_simple(H5_RUNTIME_STEPPER_NAME, &mon.integration, 1, H5D_COMPACT);
     #endif
-    INFO(printf("steps: %d\n", dp.n_stp + 1));
-    INFO(printf("good steps: %d\n", dp.n_ok));
-    INFO(printf("bad steps: %d\n\n", dp.n_bad));
+    INFO(printf("  Total steps: %d\n", dp.n_stp + 1));
+    INFO(printf("  Good steps:  %d\n", dp.n_ok));
+    INFO(printf("  Bad steps:   %d\n\n", dp.n_bad));
 }
 
 /**

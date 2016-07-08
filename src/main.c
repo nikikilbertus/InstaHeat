@@ -24,6 +24,16 @@
 static void write_monitoring();
 #endif
 
+#define LOGO ("********************************************************\n" \
+      "      _____           _                         _       \n" \
+      "      \\_   \\_ __  ___| |_ __ _  /\\  /\\___  __ _| |_     \n" \
+      "       / /\\/ '_ \\/ __| __/ _` |/ /_/ / _ \\/ _` | __|    \n" \
+      "    /\\/ /_ | | | \\__ \\ || (_| / __  /  __/ (_| | |_     \n" \
+      "    \\____/ |_| |_|___/\\__\\__,_\\/ /_/ \\___|\\__,_|\\__|    \n" \
+      "                                                        \n" \
+      "                    Heating up...                       \n" \
+      "********************************************************\n")
+
 struct parameters pars;
 struct output t_out;
 struct output phi;
@@ -66,6 +76,7 @@ struct monitor mon;
 int main(int argc, const char * argv[])
 {
     mon.total = -get_wall_time();
+    INFO(printf("%s", LOGO));
     allocate_and_init_all();
 
     #ifdef ENABLE_PROFILER
@@ -83,15 +94,15 @@ int main(int argc, const char * argv[])
     #endif
 
     mon.total += get_wall_time();
-    INFO(printf("main took %f seconds.\n", mon.total));
+    INFO(printf("InstaHeat took %f seconds.\n\n", mon.total));
     h5_write_simple(H5_RUNTIME_TOTAL_NAME, &mon.total, 1, H5D_COMPACT);
     TIME(write_monitoring());
-
-    INFO(printf("rhs was called %zu times.\n\n", mon.calls_rhs));
+    INFO(printf("The rhs was evaluated %zu times.\n\n", mon.calls_rhs));
     double tmp = (double) mon.calls_rhs;
+    INFO(puts("Final write to disk.\n"));
     h5_write_simple(H5_COUNTER_RHS, &tmp, 1, H5D_COMPACT);
-
     free_and_destroy_all();
+    INFO(puts("Heat off...\n"));
     return 0;
 }
 

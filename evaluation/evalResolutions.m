@@ -2,17 +2,18 @@
 
 %% setup (user input)
 % setup different gridpoints or cutoffs in an array
-res = [32 40 48 56 64 72 80 88 96 104 112 120 128];
+% res = [64 128 192 256 384 512];
+res = [32 40 48 56 64 80 96];
 % construct the file names: prefix, suffix, indexset
-pre = 'resolution_fix_ic/';
-suf = '_16_5e-3';
+pre = 'res/';
+suf = '_8';
 ind = res;
 %figure offset
 os = 0;
 
 %% run
-colors = jet;
-set(0,'DefaultAxesColorOrder',colors(1:4:end,:))
+% colors = jet;
+% set(0,'DefaultAxesColorOrder',colors(1:4:end,:))
 loadDsets;
 require(dsetsSummary,'constraints','steps_total','t');
 nn = length(res);
@@ -43,14 +44,14 @@ for i = 1:nn
     subplot(1,2,2); loglog(t,a); hold on;
     
     if exist('constraints','var')
-        figure(os+7); loglog(a, abs(constraints(:,1))/res(i)^3); hold on;
+        figure(os+8); loglog(a, abs(constraints(:,1))); hold on;
     end
-    if exist('hamcstrinf','var')
-        figure(os+8); loglog(a, abs(constraints(:,2))/res(i)^3); hold on;
+    if exist('constraints','var')
+        figure(os+9); loglog(a, abs(constraints(:,2))); hold on;
     end
     display(sprintf('processed %i of %i', i, nn));
 end
-for i = (1:6)+os
+for i = (1:7)+os
     figure(os+i); hold off;
 end
 figure(os+1); xlabel('#step'); ylabel('\Delta t'); legend(legendinfo); shg;
@@ -71,10 +72,10 @@ figure(os+7);
 subplot(1,2,1); xlabel('a'); ylabel('rhomean'); legend(legendinfo); shg;
 subplot(1,2,2); xlabel('t'); ylabel('a'); legend(legendinfo,'location','southeast'); shg;
 if exist('hamcstrl2','var')
-    figure(os+7); hold off; xlabel('a'); ylabel('ham cstr l2'); legend(legendinfo); shg; hold off;
+    figure(os+8); hold off; xlabel('a'); ylabel('ham cstr l2'); legend(legendinfo); shg; hold off;
 end
 if exist('hamcstrinf','var')
-    figure(os+8); hold off; xlabel('a'); ylabel('ham cstr \infty'); legend(legendinfo); shg; hold off;
+    figure(os+9); hold off; xlabel('a'); ylabel('ham cstr \infty'); legend(legendinfo); shg; hold off;
 end
 figure
 loglog(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('std(\rho) / |<\rho>|'); shg;
