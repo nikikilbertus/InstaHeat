@@ -2,7 +2,7 @@
 
 %% setup (user input)
 % setup different gridpoints or cutoffs in an array
-% res = [64 128 192 256 384 512];
+% res = [32 40 48 56 64 80 96 112 128 144 160 176 192];
 res = [32 40 48 56 64 80 96];
 % construct the file names: prefix, suffix, indexset
 pre = 'res/';
@@ -12,11 +12,13 @@ ind = res;
 os = 0;
 
 %% run
-% colors = jet;
-% set(0,'DefaultAxesColorOrder',colors(1:4:end,:))
+
 loadDsets;
 require(dsetsSummary,'constraints','steps_total','t');
 nn = length(res);
+colors = jet;
+ncol = size(colors,1);
+set(0,'DefaultAxesColorOrder',colors(1:int64(floor(ncol/nn)):end,:))
 rhos = zeros(nn,2); % rhorms values at beginning and end
 steps = zeros(nn,1);
 for i = 1:nn
@@ -44,10 +46,12 @@ for i = 1:nn
     subplot(1,2,2); loglog(t,a); hold on;
     
     if exist('constraints','var')
-        figure(os+8); loglog(a, abs(constraints(:,1))); hold on;
-    end
-    if exist('constraints','var')
-        figure(os+9); loglog(a, abs(constraints(:,2))); hold on;
+        figure(os+8);
+        subplot(1,2,1); loglog(a, abs(constraints(:,1))); hold on;
+        subplot(1,2,2); loglog(a, abs(constraints(:,2))); hold on;
+        figure(os+9);
+        subplot(1,2,1); loglog(a, abs(constraints(:,3))); hold on;
+        subplot(1,2,2); loglog(a, abs(constraints(:,4))); hold on;
     end
     display(sprintf('processed %i of %i', i, nn));
 end
@@ -71,11 +75,13 @@ subplot(1,2,2); xlabel('a'); ylabel('std d\psi'); legend(legendinfo); shg;
 figure(os+7);
 subplot(1,2,1); xlabel('a'); ylabel('rhomean'); legend(legendinfo); shg;
 subplot(1,2,2); xlabel('t'); ylabel('a'); legend(legendinfo,'location','southeast'); shg;
-if exist('hamcstrl2','var')
-    figure(os+8); hold off; xlabel('a'); ylabel('ham cstr l2'); legend(legendinfo); shg; hold off;
-end
-if exist('hamcstrinf','var')
-    figure(os+9); hold off; xlabel('a'); ylabel('ham cstr \infty'); legend(legendinfo); shg; hold off;
+if exist('constraints','var')
+    figure(os+8);
+    subplot(1,2,1); xlabel('a'); ylabel('ham cstr l2'); legend(legendinfo); shg; hold off;
+    subplot(1,2,2); xlabel('a'); ylabel('ham cstr \infty'); legend(legendinfo); shg; hold off;
+    figure(os+9);
+    subplot(1,2,1); xlabel('a'); ylabel('mom cstr l2'); legend(legendinfo); shg; hold off;
+    subplot(1,2,2); xlabel('a'); ylabel('mom cstr \infty'); legend(legendinfo); shg; hold off;
 end
 figure
 loglog(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('std(\rho) / |<\rho>|'); shg;
