@@ -549,9 +549,9 @@ static void mk_constraints(double *f)
         mom_max = MAX(mom_max, fabs(mom));
     }
     cstr.tmp[0] = ham_l2 / N;
-    cstr.tmp[1] = ham_max / N;
+    cstr.tmp[1] = ham_max;
     cstr.tmp[2] = mom_l2 / N;
-    cstr.tmp[3] = mom_max / N;
+    cstr.tmp[3] = mom_max;
     TIME(mon.cstr += get_wall_time());
 }
 #endif
