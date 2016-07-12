@@ -148,6 +148,8 @@ static void write_monitoring()
             mon.cpy_buffers, 100. * (mon.cpy_buffers / mon.total)));
     INFO(printf("h5 write to disk took %f seconds (%.2f %%).\n",
             mon.h5_write, 100. * (mon.h5_write / mon.total)));
+    INFO(printf("stiffness check took %f seconds (%.2f %%).\n",
+            mon.stiffcheck, 100. * (mon.stiffcheck / mon.total)));
 
     INFO(puts("Writing runtimes to disk.\n"));
     h5_write_simple(H5_RUNTIME_FFTW_NAME, &mon.fftw_exe, 1, H5D_COMPACT);
@@ -158,6 +160,7 @@ static void write_monitoring()
     h5_write_simple(H5_RUNTIME_COPY_BUFFER_NAME, &mon.cpy_buffers, 1, H5D_COMPACT);
     h5_write_simple(H5_RUNTIME_CSTR_NAME, &mon.cstr, 1, H5D_COMPACT);
     h5_write_simple(H5_RUNTIME_SMRY_NAME, &mon.smry, 1, H5D_COMPACT);
+    h5_write_simple(H5_RUNTIME_STIFFCHECK_NAME, &mon.stiffcheck, 1, H5D_COMPACT);
     h5_write_simple(H5_RUNTIME_WRITEOUT_NAME, &mon.h5_write, 1, H5D_COMPACT);
 }
 #endif
