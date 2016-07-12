@@ -890,8 +890,6 @@ static void init_from_bunch_davies()
     INFO(puts("Initializing dot phi."));
     mk_bunch_davies(field + pars.N, meff2, dphi0, 0.25);
     field[pars.Ntot - 1] = A_INITIAL;
-    evo_flags.output = 0;
-    evo_flags.filter = 0;
     mk_initial_psi();
 }
 
@@ -1244,8 +1242,6 @@ static void init_from_internal_function()
     free(grid);
     free(theta);
     field[pars.Ntot - 1] = A_INITIAL;
-    evo_flags.output = 0;
-    evo_flags.filter = 0;
     mk_initial_psi();
 }
 
