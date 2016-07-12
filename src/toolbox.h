@@ -1,5 +1,5 @@
-#ifndef __EVOLUTION_TOOLKIT__
-#define __EVOLUTION_TOOLKIT__
+#ifndef __TOOLBOX__
+#define __TOOLBOX__
 
 #include "main.h"
 
