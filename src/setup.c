@@ -137,13 +137,13 @@ static void init_threading()
 {
     int threadinit = fftw_init_threads();
     if (threadinit == 0) {
-        fputs("\n\nCould not initialize fftw threads.\n", stderr);
+        fputs("\n\nCould not initialize FFTW3 threads.\n", stderr);
         exit(EXIT_FAILURE);
     }
     int threadnum = THREAD_NUMBER <= 0 ? omp_get_max_threads() : THREAD_NUMBER;
     omp_set_num_threads(threadnum);
     fftw_plan_with_nthreads(threadnum);
-    INFO(printf("Running omp & fftw with %d thread(s).\n\n", threadnum));
+    INFO(printf("Running omp & FFTW3 with %d thread(s).\n\n", threadnum));
 }
 
 /**
@@ -857,14 +857,12 @@ static void mk_initial_psi()
 
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
 /**
- * @brief Construct a Bunch Davies vacuum as initial conditions if the
- * parameters satisfy the conditions and then construct corresponding
- * \f$\psi\f$, \f$\dot{\psi}\f$.
+ * @brief Construct a Bunch Davies vacuum as initial conditions and then call
+ * `mk_initial_psi()` for the corresponding \f$\psi\f$, \f$\dot{\psi}\f$.
  *
- * We build upon the values in the DEFROST paper (in the references), hence we
- * need 3 dimensions with the same number of gridpoints and a box length of 10
- * in each direction. DEFROST uses `INFLATON_MASS=5e-6` and `MASS=1`. We can
- * freely adjust the `INFLATON_MASS` to change the amplitude of the initial
+ * We build upon the values in the DEFROST paper (in the references) for the end
+ * of inflation. DEFROST uses `INFLATON_MASS=5e-6` and `MASS=1`. We can freely
+ * adjust the `INFLATON_MASS` to change the amplitude of the initial
  * fluctuations. By scaling `MASS`, we can shift the initial Hubble length.
  * (Initial values for H and \f$\dot{\phi}\f$ are scaled automatically according
  * to the value of `MASS`.) We recommend keeping the bos length fixed at 10 and
@@ -874,6 +872,7 @@ static void mk_initial_psi()
  * Inflation](http://arxiv.org/abs/0809.4904)
  * @see `mk_bunch_davies(double *f, const double H, const double homo, const
  * double gamma)`
+ * @see `mk_initial_psi()`
  */
 static void init_from_bunch_davies()
 {
@@ -901,17 +900,21 @@ static void init_from_bunch_davies()
  * initial conditions following the description in DEFROST.
  *
  * @param[out] f The field to initialize with a Bunch Davies spectrum.
- * @param[in] H The initial Hubble parameter.
- * @param[in] homo The homogeneous offset of the initial field (background).
- * @param[in] gamma The exponent in equation TODO{link] of the initial spectrum.
+ * @param[in] meff2 The effective mass.
+ * @param[in] homo The homogeneous part of the initial field (background).
+ * @param[in] gamma The exponent in equation TODO[link] of the initial spectrum.
  *
- * While mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)
+ * While `mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)`
  * computes the kernel on some support points, we use natural cubic splines to
  * interpolate the kernel to specific grid points. The interpolation is
  * implemented by GNU GSL.
  *
  * @see [DEFROST: A New Code for Simulating Preheating after
  * Inflation](http://arxiv.org/abs/0809.4904)
+ * @see `mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)`
+ * @see `box_muller()`
+ * @see `embed_grid(const complex *s, complex *d, const size_t Nx, const size_t
+ * Ny, const size_t Nz, const size_t Mx, const size_t My, const size_t Mz)`
  */
 static void mk_bunch_davies(double *f, const double meff2, const double homo,
         const double gamma)
@@ -1016,6 +1019,9 @@ static void mk_bunch_davies(double *f, const double meff2, const double homo,
  * The kernel is given in TODO[link] and contains itself an integration over
  * wave vectors k. This integration is performed We use an adaptive integration
  * routine for oscillatory integrands from GNU GSL for the integration.
+ *
+ * @see `kernel_integrand(double k, void *params)`
+ * @see `kernel_integrand_origin(double k, void *params)`
  */
 static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)
 {
@@ -1076,6 +1082,7 @@ static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)
  * exponent gamma and the cutoff wave number (in this order).
  *
  * @see TODO[link]
+ * @see `mk_kernel()`
  */
 static double kernel_integrand(double k, void *params)
 {
@@ -1085,6 +1092,20 @@ static double kernel_integrand(double k, void *params)
     return k * pow(meff2 + k * k, gamma) * exp(- pow(k / kcut, 36));
 }
 
+/**
+ * @brief The integrand of the kernel for the Bunch Davies spectrum at the
+ * origin.
+ *
+ * @param[in] k The wave number k at which to compute the kernel.
+ * @param[in] params The optional parameters in a gsl_function structure.
+ * @return The kernel value at @p k.
+ *
+ * The parameter strucutre @p params contains the effective mass squared, the
+ * exponent gamma and the cutoff wave number (in this order).
+ *
+ * @see TODO[link]
+ * @see `kernel_integrand(double k, void *params)`
+ */
 static double kernel_integrand_origin(double k, void *params)
 {
     return k * kernel_integrand(k, params);
@@ -1107,6 +1128,19 @@ static complex box_muller()
     return sqrt(-2 * log(u1)) * cexp(TWOPI * u2 * I);
 }
 
+/**
+ * @brief Embed a smaller grid in the Fourier domain into a larger grid in the
+ * Fourier domain.
+ *
+ * @param[in] s The smaller complex source grid in the Fourier domain.
+ * @param[in] d The larger complex destination grid in the Fourier domain.
+ * @param[in] Nx Number of gridpoints in the x direction of the smaller grid.
+ * @param[in] Ny Number of gridpoints in the y direction of the smaller grid.
+ * @param[in] Nz Number of gridpoints in the z direction of the smaller grid.
+ * @param[in] Mx Number of gridpoints in the x direction of the larger grid.
+ * @param[in] My Number of gridpoints in the y direction of the larger grid.
+ * @param[in] Mz Number of gridpoints in the z direction of the larger grid.
+ */
 static void embed_grid(const complex *s, complex *d,
         const size_t Nx, const size_t Ny, const size_t Nz,
         const size_t Mx, const size_t My, const size_t Mz)
@@ -1172,7 +1206,7 @@ static void embed_grid(const complex *s, complex *d,
 
 #if INITIAL_CONDITIONS == IC_FROM_INTERNAL_FUNCTION
 /**
- * @brief Construct initial conditions for phi from internally defined functions
+ * @brief Construct initial conditions from internally defined functions.
  *
  * First the actual spatial grid values are computed by calling
  * `mk_x_grid(double *grid, const size_t Nx, const size_t Ny, const size_t Nz)`
@@ -1216,7 +1250,7 @@ static void init_from_internal_function()
 }
 
 /**
- * @brief The initial value of phi.
+ * @brief The initial value of \f$phi\f$.
  *
  * @param[in] x The x coordinate where we want to evaluate \f$\phi\f$.
  * @param[in] y The y coordinate where we want to evaluate \f$\phi\f$.
@@ -1384,6 +1418,10 @@ static double wrapped_gaussian(const double x, const double y, const double z)
 #endif
 
 #ifdef SHOW_RUNTIME_INFO
+/**
+ * @brief Print status of simulation parameters defined via compiler macros to
+ * stdout.
+ */
 static void print_flag_status()
 {
     #ifdef ENABLE_FFT_FILTER
@@ -1414,7 +1452,7 @@ static void print_flag_status()
  *
  * A single call to this function cleans up everything after the simulation.
  * After this function returns, the program can exit. It should be the last
- * function called,
+ * function called.
  *
  * @see `main.c`.
  */
@@ -1426,14 +1464,14 @@ void free_and_destroy_all()
 }
 
 /**
- * @brief Destroy fftw plans and clean up fftw threads.
+ * @brief Destroy FFTW3 plans and clean up FFTW3 threads.
  */
 static void destroy_and_cleanup_fftw()
 {
     fftw_destroy_plan(p_fw);
     fftw_destroy_plan(p_bw);
     fftw_cleanup_threads();
-    INFO(puts("Destroyed fftw plans.\n"));
+    INFO(puts("Destroyed FFTW3 plans.\n"));
 }
 
 /**
