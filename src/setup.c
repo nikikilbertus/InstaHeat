@@ -20,7 +20,7 @@
  *
  * Only the functions allocate_and_init_all() and free_and_destroy_all()
  * are called from outside this file. Each of them is called exactly once per
- * simulation. Therefore, performance is not an issue in this file.
+ * simulation. Therefore, performance is not a priority in this file.
  */
 
 static void init_rng();
@@ -67,6 +67,9 @@ static double dphi_init(const double x, const double y, const double z,
         const double *ph);
 static double wrapped_gaussian(const double x, const double y, const double z);
 #endif
+#ifdef SHOW_RUNTIME_INFO
+static void print_flag_status();
+#endif
 static void mk_initial_psi();
 static void mk_psi(double *f);
 static void destroy_and_cleanup_fftw();
@@ -79,8 +82,10 @@ static gsl_rng *rng;
  * everything for the simulation.
  *
  * A single call to this function sets up everything for the simulation. After
- * this call, on of the available integration routines can be started. This
+ * this call, on of the available integration routines can be called. This
  * should be the first function called, see main.c.
+ *
+ * @see main.c
  */
 void allocate_and_init_all()
 {
@@ -100,32 +105,15 @@ void allocate_and_init_all()
     mk_initial_conditions();
     h5_create_empty_by_path();
     gsl_rng_free(rng);
-    #ifdef ENABLE_FFT_FILTER
-    INFO(puts("Frequency cutoff filtering enabled.\n"));
-    #else
-    INFO(puts("Filtering disabled.\n"));
-    #endif
-    #ifdef ENABLE_GW
-    INFO(puts("Gravitational wave extraction enabled.\n"));
-    #else
-    INFO(puts("Gravitational waves disabled.\n"));
-    #endif
-    #ifdef IC_FROM_BUNCH_DAVIES
-    INFO(printf("Cutting off Bunch Davies spectrum at N = %zu.\n\n",
-                pars.bunch_davies_cutoff));
-    #endif
-    #ifdef ENABLE_FOLLOWUP
-    INFO(puts("Output for followup simulation enabled.\n"));
-    #else
-    INFO(puts("Output for followup simulation disabled.\n"));
-    #endif
+    INFO(print_flag_status());
 }
 
 /**
- * @brief Allocate and set the seed of the gsl pseudo random number generator.
+ * @brief Allocate memory for and set the seed of the GSL pseudo random number
+ * generator.
  *
  * We use the _Mersenne Twister_, i.e. the MT19937 generator of Makoto
- * Matsumoto and Takuji Nishimura.
+ * Matsumoto and Takuji Nishimura as implemented by GNU GSL.
  */
 static void init_rng()
 {
@@ -139,10 +127,12 @@ static void init_rng()
 }
 
 /**
- * @brief Initialize fftw3 with the specified numbers of threads.
+ * @brief Initialize FFTW3 with the specified numbers of threads.
  *
- * If the parameter THREAD_NUMBER is 0, we initialize fftw3 with
- * omp_set_num_threads() threads.
+ * If the parameter `THREAD_NUMBER` is `0`, FFTW3 is initialized with the return
+ * value of `omp_set_num_threads()` threads. Note that this might not be the
+ * optimal number. It is worthwhile to empirically find the optimal number of
+ * threads.
  */
 static void init_threading()
 {
@@ -158,7 +148,8 @@ static void init_threading()
 }
 
 /**
- * @brief Initialize the values in the struct parameters pars.
+ * @brief Initialize values in the struct parameters pars defined in
+ * `main_template.h`.
  *
  * Most of the values come from preprocessor defines, which in turn are filled
  * from the external `parameters.sh` file before compilation. However, some
@@ -171,7 +162,6 @@ static void init_parameters()
     init_time_pars();
     init_file_pars();
     init_monitoring();
-
     if (BUNCH_DAVIES_CUTOFF < 0) {
         fputs("\n\nNeed positive cutoff for bunch davies vacuum.\n", stderr);
         exit(EXIT_FAILURE);
@@ -186,6 +176,15 @@ static void init_parameters()
 
 /**
  * @brief Initialize grid related parameters.
+ *
+ * The simulation volume is specified by a number of parameters for each
+ * dimension. One can adjust the box size in each dimension as well as the
+ * number of gridpoints and the strides for the output. From those values some
+ * more parameters are derived like the wave number (squared). For each
+ * dimension we bunlde the values into a grid_dimension struct. Moreover we
+ * check the effictive dimension of the problem and several output parameters.
+ *
+ * @see `parameters` and `grid_dimension` in `main_template.h`
  */
 static void init_grid_pars()
 {
@@ -277,6 +276,8 @@ static void init_grid_pars()
 
 /**
  * @brief Initialize time evolution related parameters.
+ *
+ * @see `timing` in `main_template.h`
  */
 static void init_time_pars()
 {
@@ -300,6 +301,8 @@ static void init_time_pars()
 
 /**
  * @brief Initialize output related parameters.
+ *
+ * @see `file_parameters` in `main_template.h`
  */
 static void init_file_pars()
 {
@@ -318,6 +321,8 @@ static void init_file_pars()
 
 /**
  * @brief Initialize monitoring and timing variables.
+ *
+ * @see `monitor` in `main_template.h`
  */
 static void init_monitoring()
 {
@@ -464,13 +469,13 @@ static void allocate_external()
 }
 
 /**
- * @brief Allocate and initialize a `struct output`
+ * @brief Allocate and initialize a `output` struct.
  *
- * @param[out] out The struct output for which to set the dimension and
+ * @param[out] out The `output` struct for which to set the dimension and
  * allocate memory.
- * @param[in] dim The dimension of the output structure
+ * @param[in] dim The dimension of the `output` structure
  * @param[in] mode If @p mode == 0, the field `out.tmp` of @p out is not
- * allocated. For @p mode != 0 memory for `out.tmp` will be allocated.
+ * allocated. For @p mode != 0, memory for `out.tmp` will be allocated.
  */
 static void init_output(struct output *out, const size_t dim, const int mode)
 {
@@ -487,13 +492,24 @@ static void init_output(struct output *out, const size_t dim, const int mode)
 }
 
 /**
- * @brief Setup the fftw plans for discrete fourier transforms.
+ * @brief Setup an FFTW3 plan for discrete Fourier transforms.
+ *
+ * @param[in] r A pointer to the real array used to setup the plan.
+ * @param[in] c A pointer to the complex array used to setup the plan.
+ * @param[in] Nx The number of gridpoints in the x direction.
+ * @param[in] Ny The number of gridpoints in the y direction.
+ * @param[in] Nz The number of gridpoints in the z direction.
+ * @param[in] dir The direction of the Fourier transform, i.e. `FFTW_FORWARD` or
+ * `FFTW_BACKWARD`.
+ * @return The created FFTW3 plan.
  *
  * The plans have to be created __before__ the arrays involved in the planning
  * procedure are initialized. In some planning modes, the values of the arrays
  * are destroyed during planning. We create the plans for fixed global arrays
  * and reuse them for various different arrays. One has to be careful that later
  * arrays fulfil the memory alignment.
+ *
+ * @see `check_simd_alignment()`
  */
 static fftw_plan mk_fftw_plan(double *r, complex *c,
         const size_t Nx, const size_t Ny, const size_t Nz, const int dir)
@@ -528,7 +544,7 @@ static fftw_plan mk_fftw_plan(double *r, complex *c,
 
 /**
  * @brief Checks that the different fields that are bundled in the larger field
- * array are correctly aligned for reusing FFTW plans on different fields.
+ * array are correctly aligned for reusing FFTW3 plans on different fields.
  */
 static void check_simd_alignment()
 {
@@ -546,7 +562,7 @@ static void check_simd_alignment()
 /**
  * @brief Gets the alignment of a single field.
  *
- * @return An integer encoding the alignment..
+ * @return An integer encoding the memory alignment.
  */
 static int get_simd_alignment_of(double *f)
 {
@@ -567,14 +583,17 @@ static int get_simd_alignment_of(double *f)
 }
 
 /**
- * @brief Construct grids for the k vector and its square.
+ * @brief Construct grids for the k vectors and its square.
  *
- * Fills the global arrays kvec.x, kvec.y, kvec.z and kvec.sq with the
- * corresponding components of the k vector and its square respectively.
+ * Fills the members of the global `k_grid` struct `kvec` defined in
+ * `main_template.h`.
  *
- * @note The Nx/2, Ny/2, Nz/2 entries of k_x, k_y, k_z are set to zero for
- * differentiation via discrete fourier transforms. However, those entries are
- * used normally for k^2.
+ * @note The Nx/2, Ny/2, Nz/2 entries of kvec.x, kvec.y, kvec.z are set to zero
+ * for differentiation via discrete Fourier transforms. The structure members
+ * kvec.xf, kvec.yf, kvec.zf contain those entries. They are also used normally
+ * for k^2.
+ *
+ * @see `k_grid` in `main_template.h`
  */
 static void mk_k_grid()
 {
@@ -713,7 +732,7 @@ static void mk_filter_mask()
 static double filter_window(const double x)
 {
     // exponential cutoff smoothing
-    return exp(-36.0 * pow(x/0.666, 36));
+    return exp(-36.0 * pow(x/0.333, 36));
 
     // two thirds rule
     /* return x < 2.0 / 3.0 ? 1.0 : 0.0; */
@@ -1364,6 +1383,31 @@ static double wrapped_gaussian(const double x, const double y, const double z)
         }
     }
     return res / TWOPI;
+}
+#endif
+
+#ifdef SHOW_RUNTIME_INFO
+static void print_flag_status()
+{
+    #ifdef ENABLE_FFT_FILTER
+    INFO(puts("Frequency cutoff filtering enabled.\n"));
+    #else
+    INFO(puts("Filtering disabled.\n"));
+    #endif
+    #ifdef ENABLE_GW
+    INFO(puts("Gravitational wave extraction enabled.\n"));
+    #else
+    INFO(puts("Gravitational waves disabled.\n"));
+    #endif
+    #ifdef IC_FROM_BUNCH_DAVIES
+    INFO(printf("Cutting off Bunch Davies spectrum at N = %zu.\n\n",
+                pars.bunch_davies_cutoff));
+    #endif
+    #ifdef ENABLE_FOLLOWUP
+    INFO(puts("Output for followup simulation enabled.\n"));
+    #else
+    INFO(puts("Output for followup simulation disabled.\n"));
+    #endif
 }
 #endif
 
