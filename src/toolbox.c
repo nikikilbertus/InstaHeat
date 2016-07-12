@@ -47,7 +47,7 @@ static void real_to_complex(const double *in, complex *out);
 static void complex_to_real(const complex *in, double *out);
 #ifdef CHECK_FOR_NAN
 static void contains_nan(const double *f, const size_t N);
-static void contains_nanc(const complex *f, const size_t N);
+static void ccontains_nan(const complex *f, const size_t N);
 #endif
 
 /**
@@ -855,7 +855,7 @@ static void contains_nan(const double *f, const size_t N)
  * @param[in] f An array of length @p N.
  * @param[in] N The length of the array @p f.
  */
-static void contains_nanc(const complex *f, const size_t N)
+static void ccontains_nan(const complex *f, const size_t N)
 {
     size_t count = 0;
     for (size_t i = 0; i < N; ++i) {
