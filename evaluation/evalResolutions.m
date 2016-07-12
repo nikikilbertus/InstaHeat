@@ -2,11 +2,11 @@
 
 %% setup (user input)
 % setup different gridpoints or cutoffs in an array
-% res = [32 40 48 56 64 80 96 112 128 144 160 176 192];
-res = [32 40 48 56 64 80 96];
+res = [32 40 48 56 64 80 96 112 128 144 160 192 224 256];
+% res = [32 40 48 56 64 80 96];
 % construct the file names: prefix, suffix, indexset
-pre = 'res/';
-suf = '_8';
+pre = 'res2daggr/';
+suf = '_1e-4_8';
 ind = res;
 %figure offset
 os = 0;
@@ -58,8 +58,8 @@ end
 for i = (1:7)+os
     figure(os+i); hold off;
 end
-figure(os+1); xlabel('#step'); ylabel('\Delta t'); legend(legendinfo); shg;
-figure(os+2); xlabel('a'); ylabel('std(\rho) / |<\rho>|'); legend(legendinfo); shg;
+figure(os+1); xlabel('#step'); ylabel('\Delta t'); legend(legendinfo,'location','southeast'); shg;
+figure(os+2); xlabel('a'); ylabel('std(\rho) / |<\rho>|'); legend(legendinfo,'location','northwest'); shg;
 figure(os+3);
 subplot(1,2,1); xlabel('a'); ylabel('|<\phi>|'); legend(legendinfo); shg;
 subplot(1,2,2); xlabel('a'); ylabel('std(\phi)'); legend(legendinfo); shg;
@@ -74,7 +74,7 @@ subplot(1,2,1); xlabel('a'); ylabel('absmax d\psi'); legend(legendinfo); shg;
 subplot(1,2,2); xlabel('a'); ylabel('std d\psi'); legend(legendinfo); shg;
 figure(os+7);
 subplot(1,2,1); xlabel('a'); ylabel('rhomean'); legend(legendinfo); shg;
-subplot(1,2,2); xlabel('t'); ylabel('a'); legend(legendinfo,'location','southeast'); shg;
+subplot(1,2,2); xlabel('t'); ylabel('a'); legend(legendinfo,'location','northwest'); shg;
 if exist('constraints','var')
     figure(os+8);
     subplot(1,2,1); xlabel('a'); ylabel('ham cstr l2'); legend(legendinfo); shg; hold off;
@@ -88,3 +88,4 @@ loglog(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('std(\rho) / |<\rho>|'); shg;
 legend('initial','final');
 figure
 loglog(res.^3, steps, '-o'); xlabel('N^3'); ylabel('steps'); shg;
+set(0,'DefaultAxesColorOrder','remove')
