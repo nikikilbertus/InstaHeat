@@ -71,7 +71,6 @@ static double wrapped_gaussian(const double x, const double y, const double z);
 static void print_flag_status();
 #endif
 static void mk_initial_psi();
-static void mk_psi(double *f);
 static void destroy_and_cleanup_fftw();
 static void free_external();
 
@@ -476,6 +475,8 @@ static void allocate_external()
  * @param[in] dim The dimension of the `output` structure
  * @param[in] mode If @p mode == 0, the field `out.tmp` of @p out is not
  * allocated. For @p mode != 0, memory for `out.tmp` will be allocated.
+ *
+ * @see `output` struct in `main_template.h`
  */
 static void init_output(struct output *out, const size_t dim, const int mode)
 {
@@ -661,7 +662,7 @@ static void mk_k_grid()
  * with the grid values in each direction.
  *
  * Since the grid is rectangular with uniform spacing in each direction, only
- * the x, y and z values are computed.
+ * the discrete x, y and z values are computed.
  */
 static void mk_x_grid(double *grid, const size_t Nx, const size_t Ny,
         const size_t Nz)
@@ -684,12 +685,14 @@ static void mk_x_grid(double *grid, const size_t Nx, const size_t Ny,
 
 #ifdef ENABLE_FFT_FILTER
 /**
- * @brief Construct an arrray for filtering out high wave number modes in
+ * @brief Construct an array for filtering out high wave number modes in
  * Fourier space.
  *
  * Fills the global array `filter` with multiplicative factors that can be
  * applied pointwise to a field in Fourier space to cut off high frequency
  * modes.
+ *
+ * @see `filter_window(const double x)`
  */
 static void mk_filter_mask()
 {
@@ -713,9 +716,8 @@ static void mk_filter_mask()
 /**
  * @brief The specific shape of the cutoff for high frequency modes.
  *
- * @param[in] xsq The squared ratio \f$k/k_{\max}\f$, i.e. \f$(k/k_{\max})^2/f$
- * for a given mode \f$k\f$.
- * @return The multiplier for the given mode @p xsq in the filtering process.
+ * @param[in] x A ratio \f$k/k_{\max}\f$ for a given mode \f$k\f$.
+ * @return The multiplier for the given mode @p x in the filtering process.
  *
  * We have found the exponential cutoff function described in the references to
  * work well for our purposes. It keeps more modes than the common two thirds
@@ -740,12 +742,18 @@ static double filter_window(const double x)
 #endif
 
 /**
- * @brief Initializes the fields based on preprocessor defines given in the
+ * @brief Initialize the fields based on preprocessor defines given in the
  * parameter file.
  *
- * As a first step all fields are set to zero. Then the desired initialization
- * rountine is called. Once the function returns, \f$\phi\f$, \f$\dot{\phi}\f$,
- * \f$\psi\f$, \f$\dot{\psi}\f$, \f$t\f$ and \f$a\f$ have their initial values.
+ * Depending on the chosen initial conditions from `parameter.sh` the
+ * corresponding functions are called. Once the function returns, \f$\phi\f$,
+ * \f$\dot{\phi}\f$, \f$\psi\f$, \f$\dot{\psi}\f$ and \f$a\f$ (bundled in
+ * `field`) have been assigned their initial values.
+ *
+ * @see `h5_read_followup()`
+ * @see `init_from_dat()`
+ * @see `init_from_bunch_davies()`
+ * @see `init_from_internal_function()`
  */
 static void mk_initial_conditions()
 {
@@ -774,9 +782,10 @@ static void mk_initial_conditions()
 /**
  * @brief Read initial conditions from a .dat file.
  *
- * This is currently for internal use only. TODO[fill]
+ * Currently for internal use only. TODO[fill]
  *
  * @see `read_initial_data()` in `io.c`
+ * @see `mk_initial_psi()`
  */
 static void init_from_dat()
 {
@@ -795,48 +804,35 @@ static void init_from_dat()
  * @brief Given that the initial \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$ are
  * already provided in `field`, construct the corresponding \f$\psi\f$ and
  * \f$\dot{\psi}\f$.
+ *
+ * We use an elliptic equation from the Hamiltonian constraint combined with
+ * the momentum contraint to compute \f$\psi\f$ and \f$\dot{\psi}\f$ from given
+ * \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$. TODO[link]
  */
 static void mk_initial_psi()
 {
+    TIME(mon.elliptic -= get_wall_time());
+    const size_t N = pars.N;
     #pragma omp parallel for
-    for (size_t i = 2 * pars.N; i < 4 * pars.N; ++i) {
+    for (size_t i = 2 * N; i < 4 * N; ++i) {
         field[i] = 0.0;
     }
     evo_flags.output = 0;
     evo_flags.filter = 0;
     mk_gradient_squared_and_laplacian(field);
     mk_rho_and_p(field);
-    mk_psi(field);
-    INFO(puts("Constructed psi and dot psi from existing phi and dot phi.\n"));
-}
 
-/**
- * @brief Computes \f$\psi\f$ and \f$\dot{\psi}\f$ from \f$\phi\f$ and
- * \f$\dot{\phi}\f$ on the initial timeslice.
- *
- * @param[in, out] f The fields. Expects \f$\phi\f$, \f$\dot{\phi}\f$ and
- * \f$a\f$ to be given in @p f. Fills in \f$\psi\f$ and \f$\dot{\psi}\f$ in @p
- * f.
- *
- * We use an elliptic equation from the Hamiltonian constraint combined with
- * the momentum contraint to compute \f$\psi\f$ and \f$\dot{\psi}\f$ from given
- * \f$\phi\f$, \f$\dot{\phi}\f$ and \f$a\f$. TODO[link]
- */
-static void mk_psi(double *f)
-{
-    TIME(mon.elliptic -= get_wall_time());
-    const size_t N = pars.N;
-    const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
+    const double a2 = field[pars.Ntot - 1] * field[pars.Ntot - 1];
     const double hubble = sqrt(rho_mean / 3.0);
-    const double phi_mean = mean(f, N);
-    const double dphi_mean = mean(f + N, N);
+    const double phi_mean = mean(field, N);
+    const double dphi_mean = mean(field + N, N);
     double extra1 = 0.0, extra2 = 0.0;
 
     #pragma omp parallel for reduction(+: extra1, extra2)
     for (size_t i = 0; i < N; ++i) {
         tmp.deltarho[i] = rho[i] - rho_mean;
-        tmp.f[i] = dphi_mean * (f[i] - phi_mean);
-        extra1 += f[N + i] * f[N + i];
+        tmp.f[i] = dphi_mean * (field[i] - phi_mean);
+        extra1 += field[N + i] * field[N + i];
         extra2 += tmp.grad[i];
     }
     const double extra = 0.5 * (extra1 - extra2 / a2) / N;
@@ -850,12 +846,13 @@ static void mk_psi(double *f)
     }
     tmp.phic[0] = 0.0;
 
-    ifft(tmp.phic, f + 2 * N);
+    ifft(tmp.phic, field + 2 * N);
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
-        f[3 * N + i] = 0.5 * tmp.f[i] - hubble * f[2 * N + i];
+        field[3 * N + i] = 0.5 * tmp.f[i] - hubble * field[2 * N + i];
     }
     TIME(mon.elliptic += get_wall_time());
+    INFO(puts("Constructed psi and dot psi from existing phi and dot phi.\n"));
 }
 
 #if INITIAL_CONDITIONS == IC_FROM_BUNCH_DAVIES
