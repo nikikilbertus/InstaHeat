@@ -12,7 +12,7 @@
 
 /**
  * @file toolbox.c
- * @brief A collection of routines to compute the right hand side of the pde as
+ * @brief A collection of routines to compute the right hand side of the PDE as
  * well as the desired output.
  */
 
@@ -51,12 +51,12 @@ static void ccontains_nan(const complex *f, const size_t N);
 #endif
 
 /**
- * @brief THe only instance of the `evolution_flags` structure.
+ * @brief The only instance of the `evolution_flags` structure.
  */
 struct evolution_flags evo_flags = {.filter = 0, .output = 0};
 
 /**
- * @brief Compute the right hand side of the pde, i.e. all first order temporal
+ * @brief Compute the right hand side of the PDE, i.e. all first order temporal
  * derivatives of the fields.
  *
  * @param[in] t The current time.
@@ -136,7 +136,6 @@ void mk_gradient_squared_and_laplacian(double *in)
         tmp.zphic[i] = pre * I * kvec.z[i];
         tmp.fc[i] = - pre * kvec.sq[i];
     }
-
     ifft(tmp.xphic, tmp.xphi);
     if (pars.dim > 1) {
         ifft(tmp.yphic, tmp.yphi);
@@ -270,12 +269,12 @@ static void output_all(double *f)
 }
 
 /**
- * @brief Computes and updates part of the right hand side of the pde, i.e. the
+ * @brief Computes and updates part of the right hand side of the PDE, i.e. the
  * first order temporal derivatives of \f$\phi\f$, \f$\dot{\phi}\f$, \f$\psi\f$,
  * \f$\dot{\psi}\f$.
  *
  * @param[in] f The fields.
- * @param[out] result The right hand side of the pde for the given fields.
+ * @param[out] result The right hand side of the PDE for the given fields.
  *
  * @see TODO[link] for more on the evolved fields and their equations of motion.
  */
@@ -285,7 +284,6 @@ static void update_phi_psi(double *f, double *result)
     const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
     const double hubble = sqrt(rho_mean / 3.0);
     const double h3 = 3.0 * hubble;
-
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
         double dph = f[N + i], ps = f[N2 + i], dps = f[N3 + i];
@@ -301,11 +299,11 @@ static void update_phi_psi(double *f, double *result)
 
 #ifdef ENABLE_GW
 /**
- * @brief Computes and updates part of the right hand side of the pde, i.e. the
+ * @brief Computes and updates part of the right hand side of the PDE, i.e. the
  * first order temporal derivatives of the tensor perturbations \f$h\f$.
  *
  * @param[in] f The fields.
- * @param[out] result The right hand side of the pde for the given fields.
+ * @param[out] result The right hand side of the PDE for the given fields.
  *
  * @see TODO[link] for more on the evolved fields and their equations of motion.
  */
@@ -316,7 +314,6 @@ static void update_h(double *f, double *result)
     const double a2 = f[pars.Ntot - 1] * f[pars.Ntot - 1];
     const double hubble = sqrt(rho_mean / 3.0);
     const double h3 = 3.0 * hubble;
-
     #pragma omp parallel for
     for (size_t i = 0; i < 2 * Next; ++i) {
         result[Nh1 + i] = f[Ndh1 + i]; // update dhijs
@@ -366,7 +363,6 @@ static void mk_gw_sources_tt(const double *f, complex **s)
 {
     TIME(mon.gw_sources -= get_wall_time());
     mk_gw_sources(f, s);
-
     #pragma omp parallel for
     for (size_t i = 1; i < pars.M; ++i) {
         double kx = kvec.xf[i], ky = kvec.yf[i], kz = kvec.zf[i];
@@ -377,7 +373,6 @@ static void mk_gw_sources_tt(const double *f, complex **s)
                      kx * fz * s[2][i] + ky * fz * s[4][i]);
         complex t2 = s[0][i] + s[3][i] + s[5][i];
         complex s1 = t1 + t2, s2 = t1 - t2;
-
         if (fabs(kz) > DBL_EPSILON) { // use s11 and s12
             complex k1 = kx * s[0][i] + ky * s[1][i] + kz * s[2][i];
             complex k2 = kx * s[1][i] + ky * s[3][i] + kz * s[4][i];
@@ -444,7 +439,7 @@ static void mk_gw_spectrum(double *f)
     const double ly= pars.y.b - pars.y.a;
     const double lz= pars.z.b - pars.z.a;
     const double hubble = sqrt(rho_mean / 3.0);
-    // ratio dof of today to mater-radiation-equality to the 1/3
+    // ratio dof of today to matter-radiation-equality to the 1/3
     const double rat = pow(0.01, 1.0/3.0);
     const double fac = PI * rat / (3.0 * hubble * hubble * lx * ly * lz);
     #pragma omp parallel for
@@ -536,7 +531,6 @@ static void mk_constraints(double *f)
     const double dphi_mean = mean(f + N, N);
     double ham_l2 = 0.0, ham_max = 0.0;
     double mom_l2 = 0.0, mom_max = 0.0;
-
     #pragma omp parallel for reduction(max: ham_max, mom_max) \
                              reduction(+: ham_l2, mom_l2)
     for (size_t i = 0; i < N; ++i) {
