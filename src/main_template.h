@@ -149,6 +149,7 @@
 #define __ENABLE_GW__
 #define __ENABLE_FOLLOWUP__
 #define __ENABLE_TIMING__
+#define __ENABLE_STIFFNESSCHECK__
 
 #ifndef ENABLE_GW
     #undef OUTPUT_H1_SMRY
@@ -296,6 +297,7 @@ struct monitor
     double cstr; ///< Total wall clock time for computing constraints
     double smry; ///< Total wall clock time for computing summaries
     double gw_sources; ///< Total wall clock time for computing \f$S_{ij}^{TT}\f$
+    double stiffcheck; ///< Total wall clock time for stiffness checking
 };
 
 extern struct parameters pars; ///< Only instance of the struct `parameters`
