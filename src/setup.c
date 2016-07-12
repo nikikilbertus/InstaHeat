@@ -1024,11 +1024,11 @@ static void mk_bunch_davies(double *f, const double meff2, const double homo,
 static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)
 {
     const double a = 0.0;
-    const double abs = 1.0e-10;
-    const double rel = 1.0e-8;
-    const size_t limit = 1e3;
+    const double abs = 1.0e-8;
+    const double rel = 1.0e-6;
+    const size_t limit = 3e3;
     double L = 0.0;
-    size_t trig_levels = 1e3;
+    size_t trig_levels = 3e3;
     const double rx = MAX(fabs(pars.x.a), fabs(pars.x.b));
     const double ry = MAX(fabs(pars.y.a), fabs(pars.y.b));
     const double rz = MAX(fabs(pars.z.a), fabs(pars.z.b));
