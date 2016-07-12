@@ -28,6 +28,9 @@ static int perform_step(const double dt_try);
 static void try_step(const double dt);
 static double error(const double dt);
 static int success(const double err, double *dt);
+#ifdef ENABLE_STIFFNESSCHECK
+static void check_for_stiffness(const double dt);
+#endif
 static void allocate_dopri853_values();
 static void allocate_and_initialize_tolerances();
 static void free_dopri853();
@@ -77,6 +80,10 @@ struct dopri853_control
     double err_old; ///< The previous error (on the last time slice)
     int reject; ///< Flag whether time step is rejected or accepted
     double eps; ///< Epsilon value for comparisons
+    double dtlamb; ///< The multiple of dt used for stiffness detection
+    int n_stiff; ///< Skips for stiffness detection
+    int stiff; ///< Counter for stiffness detection (set)
+    int nonstiff; ///< Counter for stiffness detection (reset)
 };
 
 /**
@@ -181,6 +188,10 @@ static void initialize_dopri853()
     dp.err_old = 1.0e-4;
     dp.reject = 0;
     dp.eps = DBL_EPSILON;
+    dp.dtlamb = 0.0;
+    dp.n_stiff = 10;
+    dp.stiff = 0;
+    dp.nonstiff = 0;
     INFO(puts("Initialized dopri853 parameters.\n"));
     allocate_dopri853_values();
     allocate_and_initialize_tolerances();
@@ -270,6 +281,12 @@ static int perform_step(const double dt_try)
     mk_rhs(dp.t + dt, field_new, dfield_new);
     evo_flags.output = 0;
     evo_flags.filter = 0;
+
+    #ifdef ENABLE_STIFFNESSCHECK
+    if ((dp.n_ok % dp.n_stiff) == 0 || dp.stiff > 0) {
+        check_for_stiffness(dt_try);
+    }
+    #endif
 
     #pragma omp parallel for
     for (size_t i = 0; i < pars.Ntot; ++i) {
@@ -511,6 +528,47 @@ static int success(const double err, double *dt)
         return 0;
     }
 }
+
+#ifdef ENABLE_STIFFNESSCHECK
+/**
+ * @brief Performs a check whether the evolution becomes stiff and aborts if
+ * necessary.
+ *
+ * If stiffness requirements are fulfilled on 15 subsequent time steps, the
+ * integration is aborted.
+ */
+static void check_for_stiffness(const double dt)
+{
+    TIME(mon.stiffcheck -= get_wall_time());
+    const size_t Ntot = pars.Ntot;
+    double num = 0.0;
+    double den = 0.0;
+    #pragma omp parallel for private(tmp) reduction(+: num, den)
+    for (size_t i = 0; i < Ntot; ++i) {
+        double tmp = dfield_new[i] - dpv.k3[i];
+        num += tmp * tmp;
+        tmp = field_new[i] - dpv.k_tmp[i];
+        den += tmp * tmp;
+    }
+    if (den > 0.0) {
+        dp.dtlamb = dt * sqrt(num / den);
+    }
+    if (dp.dtlamb > 6.1) {
+        dp.nonstiff = 0;
+        dp.stiff += 1;
+        if (dp.stiff == 15) {
+            fprintf(stderr, "Potential stiffness detected at t = %f\n", dp.t);
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        dp.nonstiff += 1;
+        if (dp.nonstiff == 6) {
+            dp.stiff = 0;
+        }
+    }
+    TIME(mon.stiffcheck += get_wall_time());
+}
+#endif
 
 /**
  * @brief Allocates memory for the Dormand Prince integrator.
