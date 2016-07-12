@@ -58,6 +58,7 @@
 #define     H5_RUNTIME_STEPPER_NAME         ("runtime_stepper")
 #define     H5_RUNTIME_CSTR_NAME            ("runtime_constraints")
 #define     H5_RUNTIME_SMRY_NAME            ("runtime_summaries")
+#define     H5_RUNTIME_STIFFCHECK_NAME      ("runtime_stiffcheck")
 #define     H5_COUNTER_RHS                  ("calls_rhs")
 #define     H5_STEPS_TOTAL_NAME             ("steps_total")
 #define     H5_STEPS_OK_NAME                ("steps_ok")
