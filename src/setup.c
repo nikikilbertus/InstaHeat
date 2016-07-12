@@ -336,6 +336,7 @@ static void init_monitoring()
     mon.cpy_buffers = 0.0;
     mon.cstr = 0.0;
     mon.smry = 0.0;
+    mon.stiffcheck = 0.0;
     INFO(puts("Initialized monitoring variables.\n"));
 }
 
