@@ -14,10 +14,8 @@
  */
 
 /**
- * @brief Holds the Butcher tableaux for the Dormand Prince integration routine.
- *
- * @note This is just a list of constant double values. Do not change
- * anything here.
+ * @brief The Butcher tableaux for the Dormand Prince 8(5,3) (DOPRI853)
+ * integration routine.
  */
 struct dopri853_constants
 {
@@ -45,7 +43,10 @@ struct dopri853_constants
     d71,d76,d77,d78,d79,d710,d711,d712,d713,d714,d715,d716;
 };
 
-extern struct dopri853_constants dpc; ///< Dormand Prince Butcher tableaux constants
+/**
+ * @brief The only instance of `dopri853_constants`.
+ */
+extern struct dopri853_constants dpc;
 
 void run_dopri853();
 
