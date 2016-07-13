@@ -307,6 +307,7 @@ static void h5_create_dset(const hsize_t rank, const hsize_t N, hsize_t *dset,
  * only writes parameters which can be given as a one dimensional array of
  * doubles.
  * @param[in] N The number of parameters, i.e. the length of the array @p val.
+ * @param[in] layout The H5D_layout_t of the dataset.
  *
  * @note We do not get back a handle to the dataset, i.e. the parameters are
  * written once and for all and not modified later.
