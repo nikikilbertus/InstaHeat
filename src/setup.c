@@ -661,6 +661,9 @@ static void mk_k_grid()
  *
  * @param[out] grid A double array of size `Nx + Ny + Nz` that is filled up
  * with the grid values in each direction.
+ * @param[in] Nx The number of gridpoints in the x direction.
+ * @param[in] Ny The number of gridpoints in the y direction.
+ * @param[in] Nz The number of gridpoints in the z direction.
  *
  * Since the grid is rectangular with uniform spacing in each direction, only
  * the discrete x, y and z values are computed.
