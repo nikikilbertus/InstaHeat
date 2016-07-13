@@ -2,7 +2,7 @@
 #define __RKF45__
 
 #include "main.h"
-#if INTEGRATION_METHOD == RKF45
+#ifdef GSL_STEPPER
 
 /**
  * @file RKF45.h
