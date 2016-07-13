@@ -12,16 +12,20 @@
 #include "toolbox.h"
 #include "io.h"
 
+static int mk_rhs_wrapper(double t, const double f[], double result[],
+        void *params);
+
 void run_rkf45()
 {
     INFO(puts("Starting rkf45 integration with:"));
-    INFO(printf("initial time: %f\n", pars.t.ti));
-    INFO(printf("final time: %f\n", pars.t.tf));
-    INFO(printf("initial time step dt: %f\n", pars.t.dt));
-    INFO(printf("minimal time step dt: %f\n", MINIMAL_DELTA_T));
-    INFO(printf("max number of steps: %f\n", MAX_STEPS));
-    INFO(printf("relative tolerance: %.15f\n", RELATIVE_TOLERANCE));
-    INFO(printf("absolute tolerance: %.15f\n\n", ABSOLUTE_TOLERANCE));
+    INFO(printf("  Initial time: %.17f\n", pars.t.ti));
+    INFO(printf("  Final time: %.17f\n", pars.t.tf));
+    INFO(printf("  Initial time step dt: %.17f\n", pars.t.dt));
+    INFO(printf("  Minimal time step dt: %.17f\n", MINIMAL_DELTA_T));
+    INFO(printf("  Max number of steps: %zu\n", MAX_STEPS));
+    // TODO: change this once I have more definitions
+    INFO(printf("  Relative tolerance: %.17f\n", RELATIVE_TOLERANCE));
+    INFO(printf("  Absolute tolerance: %.17f\n\n", ABSOLUTE_TOLERANCE));
 
     prepare_and_save_timeslice();
 
@@ -33,11 +37,11 @@ void run_rkf45()
             ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE);
     gsl_odeiv2_driver_set_hmin(d, MINIMAL_DELTA_T);
 
-    for (size_t i = 1; i <= OUTPUT_NUMBER; i++) {
-        double ti = i * (pars.t.tf - pars.t.ti) / OUTPUT_NUMBER;
+    for (size_t i = 1; i <= RKF45_OUTPUT_NUMBER; ++i) {
+        double ti = i * (pars.t.tf - pars.t.ti) / RKF45_OUTPUT_NUMBER;
         int status = gsl_odeiv2_driver_apply(d, &pars.t.t, ti, field);
         if (status != GSL_SUCCESS) {
-          printf ("error, return value=%d\n", status);
+          printf ("error in GSL integration: return value=%d\n", status);
           break;
         }
         prepare_and_save_timeslice();
@@ -45,7 +49,8 @@ void run_rkf45()
     gsl_odeiv2_driver_free(d);
 }
 
-int mk_rhs_wrapper(double t, const double f[], double result[], void *params)
+static int mk_rhs_wrapper(double t, const double f[], double result[],
+        void *params)
 {
     mk_rhs(t, (double*) f, result);
     return GSL_SUCCESS;
