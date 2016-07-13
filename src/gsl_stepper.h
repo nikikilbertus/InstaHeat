@@ -6,7 +6,7 @@
 
 /**
  * @file gsl_stepper.h
- * @brief Function declarations for gsl_stepper.c
+ * @brief Function declarations for `gsl_stepper.c`
  */
 
 void run_gsl_stepper();
