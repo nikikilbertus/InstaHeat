@@ -12,21 +12,19 @@
 #include "toolbox.h"
 #include "io.h"
 
-static int mk_rhs_wrapper(double t, const double f[], double result[],
-        void *params);
+static void write_start_info();
+static int mk_rhs_wrap(double t, const double f[], double res[], void *params);
 
+/**
+ * @brief Run the Runge Kutte Felberg 4,(5) integrator to evolve the fields.
+ *
+ * This is the main routine of `rkf45.c`. It integrates the field (assuming
+ * initial values are already present) and writes the evolution to disk as
+ * specified by calling integration routines implemented by GNU GSL.
+ */
 void run_rkf45()
 {
-    INFO(puts("Starting rkf45 integration with:"));
-    INFO(printf("  Initial time: %.17f\n", pars.t.ti));
-    INFO(printf("  Final time: %.17f\n", pars.t.tf));
-    INFO(printf("  Initial time step dt: %.17f\n", pars.t.dt));
-    INFO(printf("  Minimal time step dt: %.17f\n", MINIMAL_DELTA_T));
-    INFO(printf("  Max number of steps: %zu\n", MAX_STEPS));
-    // TODO: change this once I have more definitions
-    INFO(printf("  Relative tolerance: %.17f\n", RELATIVE_TOLERANCE));
-    INFO(printf("  Absolute tolerance: %.17f\n\n", ABSOLUTE_TOLERANCE));
-
+    write_start_info();
     prepare_and_save_timeslice();
 
     gsl_odeiv2_system sys = {mk_rhs_wrapper, NULL, pars.Ntot, NULL};
@@ -49,11 +47,37 @@ void run_rkf45()
     gsl_odeiv2_driver_free(d);
 }
 
-static int mk_rhs_wrapper(double t, const double f[], double result[],
-        void *params)
+/**
+ * @brief A wrapper for `mk_rhs(const double t, double *f, double *result)` in
+ * `toolbox.c` to suit the GSL integration routines.
+ *
+ * @param[in] t The current time.
+ * @param[in] f The fields.
+ * @param[out] res The right hand side of the partial differential equation,
+ * i.e. the first temporal derivatives of the fields in @p f.
+ * @param[in] params Arbitrary parameters.
+ *
+ * @see `mk_rhs(const double t, double *f, double *result)` in `toolbox.c`
+ */
+static int mk_rhs_wrap(double t, const double f[], double res[], void *params)
 {
     mk_rhs(t, (double*) f, result);
     return GSL_SUCCESS;
 }
 
+/**
+ * @brief Print information about the integration to stdout.
+ */
+static void write_start_info()
+{
+    INFO(puts("Starting rkf45 integration with:"));
+    INFO(printf("  Initial time: %.17f\n", pars.t.ti));
+    INFO(printf("  Final time: %.17f\n", pars.t.tf));
+    INFO(printf("  Initial time step dt: %.17f\n", pars.t.dt));
+    INFO(printf("  Minimal time step dt: %.17f\n", MINIMAL_DELTA_T));
+    INFO(printf("  Max number of steps: %zu\n", MAX_STEPS));
+    // TODO: change this once I have more definitions
+    INFO(printf("  Relative tolerance: %.17f\n", RELATIVE_TOLERANCE));
+    INFO(printf("  Absolute tolerance: %.17f\n\n", ABSOLUTE_TOLERANCE));
+}
 #endif
