@@ -37,9 +37,9 @@ void run_rkf45()
 
     for (size_t i = 1; i <= RKF45_OUTPUT_NUMBER; ++i) {
         double ti = i * (pars.t.tf - pars.t.ti) / RKF45_OUTPUT_NUMBER;
-        int status = gsl_odeiv2_driver_apply(d, &pars.t.t, ti, field);
+        int stat = gsl_odeiv2_driver_apply(d, &pars.t.t, ti, field);
         if (status != GSL_SUCCESS) {
-          printf ("error in GSL integration: return value=%d\n", status);
+          printf("error in GSL integration: %d\n", stat);
           break;
         }
         prepare_and_save_timeslice();
