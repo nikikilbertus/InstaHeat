@@ -77,7 +77,13 @@ static int mk_rhs_wrap(double t, const double f[], double res[], void *params)
  */
 static void write_start_info()
 {
+    #if INTEGRATION_METHOD == RKF45
     INFO(puts("Starting rkf45 integration with:"));
+    #elif INTEGRATION_METHOD == RKCK
+    INFO(puts("Starting rkck integration with:"));
+    #elif INTEGRATION_METHOD == DOPRI89
+    INFO(puts("Starting dopri89 integration with:"));
+    #endif
     INFO(printf("  Initial time: %g\n", pars.t.ti));
     INFO(printf("  Final time: %g\n", pars.t.tf));
     INFO(printf("  Initial time step dt: %g\n", pars.t.dt));
