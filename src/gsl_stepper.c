@@ -12,6 +12,19 @@
 #include "toolbox.h"
 #include "io.h"
 
+/**
+ * @file gsl_stepper.c
+ * @brief Contains various explicit ODE Runge Kutta stepper as implemented by
+ * GNU Scientific Library (GSL).
+ *
+ * Available methods are: Runge Kutta Felberg 4(5) (RKF45), Runge Kutta
+ * Cash-Karp 4(5) (RKCK), Runge Kutta Dormand Prince 8(9) (DOPRI89).  Only the
+ * function run_gsl_stepper() is called from outside this file. It is the only
+ * one that needs to be visible.
+ *
+ * @see <a href="https://www.gnu.org/software/gsl/manual/html_node/Ordinary-Differential-Equations.html">GSL ODE Manual</a>
+ */
+
 static void write_start_info();
 static int mk_rhs_wrap(double t, const double f[], double res[], void *params);
 
