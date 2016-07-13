@@ -8,7 +8,7 @@
 #include <fftw3.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_odeiv2.h>
-#include "rkf45.h"
+#include "gsl_stepper.h"
 #include "toolbox.h"
 #include "io.h"
 
@@ -16,13 +16,14 @@ static void write_start_info();
 static int mk_rhs_wrap(double t, const double f[], double res[], void *params);
 
 /**
- * @brief Run the Runge Kutte Felberg 4,(5) integrator to evolve the fields.
+ * @brief Run one of the supported GSL integration routines to evolve the
+ * fields.
  *
- * This is the main routine of `rkf45.c`. It integrates the field (assuming
- * initial values are already present) and writes the evolution to disk as
- * specified by calling integration routines implemented by GNU GSL.
+ * This is the main routine of `gsl_stepper.c`. It integrates the field
+ * (assuming initial values are already present) and writes the evolution to
+ * disk as specified by calling integration routines implemented by GNU GSL.
  */
-void run_rkf45()
+void run_gsl_stepper()
 {
     write_start_info();
     prepare_and_save_timeslice();
