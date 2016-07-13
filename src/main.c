@@ -86,10 +86,10 @@ int main(int argc, const char * argv[])
 
     #if INTEGRATION_METHOD == RK4
     run_rk4();
+    #elif defined(GSL_STEPPER)
+    run_rkf45();
     #elif INTEGRATION_METHOD == DOPRI853
     run_dopri853();
-    #elif INTEGRATION_METHOD == RKF45
-    run_rkf45();
     #endif
 
     #ifdef ENABLE_PROFILER
