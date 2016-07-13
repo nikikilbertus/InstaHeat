@@ -49,7 +49,7 @@ void run_rk4()
     INFO(printf("time step dt: %f\n", dt));
     INFO(printf("number of steps: %zu\n", Nt));
 
-    double secs = 0.0;
+    TIME(double secs = 0.0);
     TIME(secs = -get_wall_time());
 
     for (size_t nt = 0; t < pars.t.tf; ++nt) {
