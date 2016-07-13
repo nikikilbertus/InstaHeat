@@ -10,7 +10,7 @@
 #include <gperftools/profiler.h>
 #endif
 #include "setup.h"
-#include "rkf45.h"
+#include "gsl_stepper.h"
 #include "rk4.h"
 #include "dopri853.h"
 #include "io.h"
@@ -87,7 +87,7 @@ int main(int argc, const char * argv[])
     #if INTEGRATION_METHOD == RK4
     run_rk4();
     #elif defined(GSL_STEPPER)
-    run_rkf45();
+    run_gsl_stepper();
     #elif INTEGRATION_METHOD == DOPRI853
     run_dopri853();
     #endif
