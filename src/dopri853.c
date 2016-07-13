@@ -23,6 +23,7 @@
  */
 
 static void initialize_dopri853();
+static void write_start_info();
 static void wrap_up_dopri853();
 static int perform_step(const double dt_try);
 static void try_step(const double dt);
@@ -192,6 +193,13 @@ static void initialize_dopri853()
     dp.n_stiff = 10;
     dp.stiff = 0;
     dp.nonstiff = 0;
+}
+
+/**
+ * @brief Print information about the integration to stdout.
+ */
+static void write_start_info()
+{
     INFO(puts("Initialized dopri853 parameters.\n"));
     allocate_dopri853_values();
     allocate_and_initialize_tolerances();
