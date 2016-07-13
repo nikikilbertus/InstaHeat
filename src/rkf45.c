@@ -26,8 +26,7 @@ void run_rkf45()
 {
     write_start_info();
     prepare_and_save_timeslice();
-
-    gsl_odeiv2_system sys = {mk_rhs_wrapper, NULL, pars.Ntot, NULL};
+    gsl_odeiv2_system sys = {mk_rhs_wrap, NULL, pars.Ntot, NULL};
 
     //TODO: use gsl_odeiv2_driver_alloc_scaled_new for abs err vector
     gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(&sys,
@@ -38,7 +37,7 @@ void run_rkf45()
     for (size_t i = 1; i <= RKF45_OUTPUT_NUMBER; ++i) {
         double ti = i * (pars.t.tf - pars.t.ti) / RKF45_OUTPUT_NUMBER;
         int stat = gsl_odeiv2_driver_apply(d, &pars.t.t, ti, field);
-        if (status != GSL_SUCCESS) {
+        if (stat != GSL_SUCCESS) {
           printf("error in GSL integration: %d\n", stat);
           break;
         }
@@ -61,7 +60,7 @@ void run_rkf45()
  */
 static int mk_rhs_wrap(double t, const double f[], double res[], void *params)
 {
-    mk_rhs(t, (double*) f, result);
+    mk_rhs(t, (double*) f, res);
     return GSL_SUCCESS;
 }
 
@@ -75,7 +74,7 @@ static void write_start_info()
     INFO(printf("  Final time: %.17f\n", pars.t.tf));
     INFO(printf("  Initial time step dt: %.17f\n", pars.t.dt));
     INFO(printf("  Minimal time step dt: %.17f\n", MINIMAL_DELTA_T));
-    INFO(printf("  Max number of steps: %zu\n", MAX_STEPS));
+    INFO(printf("  Max number of steps: %f\n", MAX_STEPS));
     // TODO: change this once I have more definitions
     INFO(printf("  Relative tolerance: %.17f\n", RELATIVE_TOLERANCE));
     INFO(printf("  Absolute tolerance: %.17f\n\n", ABSOLUTE_TOLERANCE));
