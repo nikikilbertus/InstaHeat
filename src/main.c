@@ -22,7 +22,7 @@
  */
 
 #ifdef ENABLE_TIMING
-static void write_monitoring();
+static void print_monitoring();
 #endif
 
 #define LOGO ("********************************************************\n" \
@@ -99,7 +99,7 @@ int main(int argc, const char * argv[])
     mon.total += get_wall_time();
     INFO(printf("InstaHeat took %f seconds.\n\n", mon.total));
     h5_write_simple(H5_RUNTIME_TOTAL_NAME, &mon.total, 1, H5D_COMPACT);
-    TIME(write_monitoring());
+    TIME(print_monitoring());
     INFO(printf("The rhs was evaluated %zu times.\n\n", mon.calls_rhs));
     double tmp = (double) mon.calls_rhs;
     INFO(puts("Final write to disk.\n"));
@@ -130,7 +130,7 @@ double get_wall_time()
 /**
  * @brief Write monitoring info to h5 file and print on screen.
  */
-static void write_monitoring()
+static void print_monitoring()
 {
     INFO(puts("as percentage of total, not mutually disjoint:"));
     INFO(printf("fftw execution took %f seconds (%.2f %%).\n",
