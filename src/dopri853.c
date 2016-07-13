@@ -111,6 +111,7 @@ struct dopri853_values dpv;
 void run_dopri853()
 {
     initialize_dopri853();
+    write_start_info();
     prepare_and_save_timeslice();
     TIME(mon.integration = -get_wall_time());
     for (dp.n_stp = 0; ; ++dp.n_stp) {
