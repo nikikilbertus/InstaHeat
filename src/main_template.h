@@ -50,8 +50,15 @@
 
 #define RK4                 (0)
 #define RKF45               (1)
-#define DOPRI853            (2)
+#define RKCK                (2)
+#define DOPRI89             (3)
+#define DOPRI853            (4)
 #define INTEGRATION_METHOD  (__INTEGRATION_METHOD__)
+
+#if INTEGRATION_METHOD == RKF45 ||INTEGRATION_METHOD == RKCK \
+    || INTEGRATION_METHOD == DOPRI89
+    #define GSL_STEPPER
+#endif
 
 #define VERSION_CONTROL_NONE    (0)
 #define VERSION_CONTROL_HG      (1)
