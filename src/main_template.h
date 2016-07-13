@@ -49,7 +49,8 @@
 #endif
 
 #define RK4                 (0)
-#define DOPRI853            (1)
+#define RKF45               (1)
+#define DOPRI853            (2)
 #define INTEGRATION_METHOD  (__INTEGRATION_METHOD__)
 
 #define VERSION_CONTROL_NONE    (0)
@@ -145,6 +146,7 @@
 #define MAX_DT_HUBBLE_FRACTION  (__MAX_DT_HUBBLE_FRACTION__)
 #define BUNCH_DAVIES_CUTOFF     (__BUNCH_DAVIES_CUTOFF__)
 #define MAX_RUNTIME             (__MAX_RUNTIME__)
+#define OUTPUT_NUMBER           (__OUTPUT_NUMBER__)
 #define __ENABLE_FFT_FILTER__
 #define __ENABLE_GW__
 #define __ENABLE_FOLLOWUP__
