@@ -43,8 +43,8 @@ void run_gsl_stepper()
     #endif
     gsl_odeiv2_driver_set_hmin(d, MINIMAL_DELTA_T);
 
-    for (size_t i = 1; i <= RKF45_OUTPUT_NUMBER; ++i) {
-        double ti = i * (pars.t.tf - pars.t.ti) / RKF45_OUTPUT_NUMBER;
+    for (size_t i = 1; i <= GSL_OUTPUT_NUMBER; ++i) {
+        double ti = i * (pars.t.tf - pars.t.ti) / GSL_OUTPUT_NUMBER;
         int stat = gsl_odeiv2_driver_apply(d, &pars.t.t, ti, field);
         if (stat != GSL_SUCCESS) {
           printf("error in GSL integration: %d\n", stat);
