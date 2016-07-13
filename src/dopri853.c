@@ -243,7 +243,7 @@ static void wrap_up_dopri853()
 /**
  * @brief Evolves field forward in time by one step.
  *
- * @param[in] dt_dry The initially proposed stepsize for this step.
+ * @param[in] dt_try The initially proposed stepsize for this step.
  * @return Returns 0 in case of success and 1 in case of failure, in this case a
  * underflow of the specified minimal stepsize.
  *
