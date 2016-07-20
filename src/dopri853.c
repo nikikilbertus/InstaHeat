@@ -13,7 +13,8 @@
 
 /**
  * @file dopri853.c
- * @brief A 8th order explicit Dormand Prince integrator with 5th and 3rd order
+ *
+ * @brief An 8th order explicit Dormand Prince integrator with 5th and 3rd order
  * error estimates for adaptive stepsizes.
  *
  * Only the function run_dopri853() is called from outside this file. It is the
