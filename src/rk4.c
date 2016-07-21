@@ -52,7 +52,7 @@ void run_rk4()
     TIME(double secs = 0.0);
     TIME(secs = -get_wall_time());
 
-    for (size_t nt = 0; t < pars.t.tf; ++nt) {
+    for (size_t nt = 0; t < pars.t.tf && nt < MAX_STEPS; ++nt) {
         // to precisely reach final time in the last step, change dt
         if (t + dt * 1.0001 > pars.t.tf) {
             dt = pars.t.tf - t;
