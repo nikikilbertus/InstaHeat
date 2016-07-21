@@ -291,8 +291,12 @@ static void init_time_pars()
     }
     #if INTEGRATION_METHOD == RK4
     if (pars.t.Nt > MAX_STEPS) {
-        fputs("\n\nExeeding MAX_STEPS, decrease DELTA_T.\n", stderr);
-        exit(EXIT_FAILURE);
+        puts("For current settings MAX_STEPS would be exceeded!\n");
+    }
+    #endif
+    #ifdef GSL_STEPPER
+    if (GSL_OUTPUT_NUMBER > MAX_STEPS) {
+        puts("For current settings MAX_STEPS would be exceeded!\n");
     }
     #endif
     INFO(puts("Initialized time parameters.\n"));
