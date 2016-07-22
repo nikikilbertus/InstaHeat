@@ -742,7 +742,7 @@ static void mk_filter_mask()
 static double filter_window(const double x)
 {
     // exponential cutoff smoothing
-    return exp(-36.0 * pow(x/0.333, 36));
+    return exp(-36.0 * pow(x, 36));
 
     // two thirds rule
     /* return x < 2.0 / 3.0 ? 1.0 : 0.0; */
@@ -959,7 +959,6 @@ static void mk_bunch_davies(double *f, const double meff2, const double homo,
 
     double params[] = {meff2, gamma, kcut};
     gsl_function func;
-    func.function = &kernel_integrand;
     func.params = params;
     const size_t Nker = 1e3;
     double *rr = malloc(Nker * sizeof *rr);
@@ -975,7 +974,7 @@ static void mk_bunch_davies(double *f, const double meff2, const double homo,
     }
     INFO(puts("  Initialized spline interpolation for Bunch Davies kernel."));
 
-    const double fac = INFLATON_MASS / (Nx * Ny * Nz * sqrt(TWOPI * dk));
+    const double fac = INFLATON_MASS / (Nx * Ny * Nz * sqrt(2.0 * dk));
     double *grid = malloc((Nx + Ny + Nz) * sizeof *grid);
     mk_x_grid(grid, Nx, Ny, Nz);
 
@@ -1031,7 +1030,10 @@ static void mk_bunch_davies(double *f, const double meff2, const double homo,
  */
 static void mk_kernel(double *ker, double *rr, const size_t N, gsl_function *f)
 {
-    const double a = 0.0;
+    double a = 0.0;
+    if (pars.dim == 1) {
+        a = 1.0e-8;
+    }
     const double abs = 1.0e-8;
     const double rel = 1.0e-6;
     const size_t limit = 3e3;
@@ -1095,7 +1097,14 @@ static double kernel_integrand(double k, void *params)
     const double meff2 = *(double *) params;
     const double gamma = *(((double *) params) + 1);
     const double kcut = *(((double *) params) + 2);
-    return k * pow(meff2 + k * k, gamma) * exp(- pow(k / kcut, 36));
+    const double tmp = pow(meff2 + k * k, gamma) * exp(- pow(k / kcut, 36));
+    if (pars.dim == 3) {
+        return k * tmp / sqrt(PI);
+    } else if (pars.dim == 2) {
+        return tmp / sqrt(2.0);
+    } else {
+        return tmp / (k * sqrt(PI));
+    }
 }
 
 /**
