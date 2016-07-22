@@ -545,6 +545,7 @@ static fftw_plan mk_fftw_plan(double *r, complex *c,
         exit(EXIT_FAILURE);
     }
     TIME(mon.fftw_plan += get_wall_time());
+    INFO(puts("Constructed FFTW3 plan.\n"));
     return plan;
 }
 
