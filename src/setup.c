@@ -827,38 +827,72 @@ static void mk_initial_psi()
     }
     evo_flags.output = 0;
     evo_flags.filter = 0;
-    mk_gradient_squared_and_laplacian(field);
-    mk_rho_and_p(field);
 
+    //TODO: new routine
+    mk_rhs(pars.t.ti, field, dfield);
     const double a2 = field[pars.Ntot - 1] * field[pars.Ntot - 1];
     const double hubble = sqrt(rho_mean / 3.0);
     const double phi_mean = mean(field, N);
     const double dphi_mean = mean(field + N, N);
-    double extra1 = 0.0, extra2 = 0.0;
+    const double ddphi_mean = mean(dfield + N, N);
 
-    #pragma omp parallel for reduction(+: extra1, extra2)
+    #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
-        tmp.deltarho[i] = rho[i] - rho_mean;
-        tmp.f[i] = dphi_mean * (field[i] - phi_mean);
-        extra1 += field[N + i] * field[N + i];
-        extra2 += tmp.grad[i];
+        tmp.deltarho[i] = field[N + i] - dphi_mean;
+        tmp.f[i] = field[i] - phi_mean;
     }
-    const double extra = 0.5 * (extra1 - extra2 / a2) / N;
-
     fft(tmp.deltarho, tmp.deltarhoc);
     fft(tmp.f, tmp.fc);
+
     #pragma omp parallel for
     for (size_t i = 1; i < pars.M; ++i) {
-        tmp.phic[i] = 0.5 * (tmp.deltarhoc[i] +
-            3.0 * hubble * tmp.fc[i]) / ((- kvec.sq[i] / a2 + extra) * N);
+        tmp.phic[i] = (-dphi_mean * tmp.deltarhoc[i] + ddphi_mean * tmp.fc[i]) /
+                ((-dphi_mean * dphi_mean + 2.0 * kvec.sq[i] / a2) * N);
     }
     tmp.phic[0] = 0.0;
 
     ifft(tmp.phic, field + 2 * N);
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) {
-        field[3 * N + i] = 0.5 * tmp.f[i] - hubble * field[2 * N + i];
+        field[3 * N + i] = 0.5 * dphi_mean * tmp.f[i] - hubble * field[2 * N + i];
     }
+
+    //TODO: old routine (gives same results up to tiny deviations)
+    /* mk_gradient_squared_and_laplacian(field); */
+    /* mk_rho_and_p(field); */
+    /* const double a2 = field[pars.Ntot - 1] * field[pars.Ntot - 1]; */
+    /* const double hubble = sqrt(rho_mean / 3.0); */
+    /* const double phi_mean = mean(field, N); */
+    /* const double dphi_mean = mean(field + N, N); */
+    /* double extra1 = 0.0, extra2 = 0.0; */
+
+    /* #pragma omp parallel for reduction(+: extra1, extra2) */
+    /* for (size_t i = 0; i < N; ++i) { */
+    /*     tmp.deltarho[i] = rho[i] - rho_mean; */
+    /*     tmp.f[i] = dphi_mean * (field[i] - phi_mean); */
+    /*     extra1 += field[N + i] * field[N + i]; */
+    /*     extra2 += tmp.grad[i]; */
+    /* } */
+    /* const double extra = 0.5 * (extra1 - extra2 / a2) / N; */
+
+    /* printf("a2=%g hubble=%g phimean=%g dphimean=%g extra1=%g, extra2=%g" */
+    /*         "extra=%g\n", a2, hubble, phi_mean, dphi_mean, extra1/N, extra2/N, */
+    /*         extra); */
+
+    /* fft(tmp.deltarho, tmp.deltarhoc); */
+    /* fft(tmp.f, tmp.fc); */
+    /* #pragma omp parallel for */
+    /* for (size_t i = 1; i < pars.M; ++i) { */
+    /*     tmp.phic[i] = 0.5 * (tmp.deltarhoc[i] + */
+    /*         3.0 * hubble * tmp.fc[i]) / ((- kvec.sq[i] / a2 + extra) * N); */
+    /* } */
+    /* tmp.phic[0] = 0.0; */
+
+    /* ifft(tmp.phic, field + 2 * N); */
+    /* #pragma omp parallel for */
+    /* for (size_t i = 0; i < N; ++i) { */
+    /*     field[3 * N + i] = 0.5 * tmp.f[i] - hubble * field[2 * N + i]; */
+    /* } */
     TIME(mon.elliptic += get_wall_time());
     INFO(puts("Constructed psi and dot psi from existing phi and dot phi.\n"));
 }
