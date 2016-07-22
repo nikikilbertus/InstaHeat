@@ -22,8 +22,10 @@ DELTA_T	main.h	/^#define DELTA_T /;"	d
 DELTA_T	main_template.h	/^#define DELTA_T /;"	d
 DOPRI853	main.h	/^#define DOPRI853 /;"	d
 DOPRI853	main_template.h	/^#define DOPRI853 /;"	d
+DOPRI89	main.h	/^#define DOPRI89 /;"	d
+DOPRI89	main_template.h	/^#define DOPRI89 /;"	d
+ENABLE_FFT_FILTER	main.h	/^#define ENABLE_FFT_FILTER$/;"	d
 ENABLE_GW	main.h	/^#define ENABLE_GW$/;"	d
-ENABLE_STIFFNESSCHECK	main.h	/^#define ENABLE_STIFFNESSCHECK$/;"	d
 FFTW_DEFAULT_FLAG	main.h	/^#define FFTW_DEFAULT_FLAG /;"	d
 FFTW_DEFAULT_FLAG	main_template.h	/^#define FFTW_DEFAULT_FLAG /;"	d
 FINAL_TIME	main.h	/^#define FINAL_TIME /;"	d
@@ -34,6 +36,10 @@ GRIDPOINTS_Y	main.h	/^#define GRIDPOINTS_Y /;"	d
 GRIDPOINTS_Y	main_template.h	/^#define GRIDPOINTS_Y /;"	d
 GRIDPOINTS_Z	main.h	/^#define GRIDPOINTS_Z /;"	d
 GRIDPOINTS_Z	main_template.h	/^#define GRIDPOINTS_Z /;"	d
+GSL_OUTPUT_NUMBER	main.h	/^#define GSL_OUTPUT_NUMBER /;"	d
+GSL_OUTPUT_NUMBER	main_template.h	/^#define GSL_OUTPUT_NUMBER /;"	d
+GSL_STEPPER	main.h	/^    #define GSL_STEPPER$/;"	d
+GSL_STEPPER	main_template.h	/^    #define GSL_STEPPER$/;"	d
 H5_A_NAME	io.h	/^#define     H5_A_NAME /;"	d
 H5_BUNCH_DAVIES_CUTOFF_NAME	io.h	/^#define     H5_BUNCH_DAVIES_CUTOFF_NAME /;"	d
 H5_COMMIT_HASH_NAME	io.h	/^#define     H5_COMMIT_HASH_NAME /;"	d
@@ -151,8 +157,8 @@ N	main.h	/^    size_t N; \/\/\/< number of gridpoints in real space$/;"	m	struct
 N	main.h	/^    size_t N; \/\/\/< number of spatial gridpoints: N=Nx*Ny*Nz$/;"	m	struct:parameters
 N	main_template.h	/^    size_t N; \/\/\/< number of gridpoints in real space$/;"	m	struct:grid_dimension
 N	main_template.h	/^    size_t N; \/\/\/< number of spatial gridpoints: N=Nx*Ny*Nz$/;"	m	struct:parameters
-NOT_ENABLE_FFT_FILTER	main.h	/^#define NOT_ENABLE_FFT_FILTER$/;"	d
 NOT_ENABLE_FOLLOWUP	main.h	/^#define NOT_ENABLE_FOLLOWUP$/;"	d
+NOT_ENABLE_STIFFNESSCHECK	main.h	/^#define NOT_ENABLE_STIFFNESSCHECK$/;"	d
 NOT_ENABLE_TIMING	main.h	/^#define NOT_ENABLE_TIMING$/;"	d
 NOT_OUTPUT_H1_SMRY	main.h	/^#define NOT_OUTPUT_H1_SMRY$/;"	d
 NOT_OUTPUT_H2_SMRY	main.h	/^#define NOT_OUTPUT_H2_SMRY$/;"	d
@@ -196,6 +202,10 @@ RELATIVE_TOLERANCE	main.h	/^#define RELATIVE_TOLERANCE /;"	d
 RELATIVE_TOLERANCE	main_template.h	/^#define RELATIVE_TOLERANCE /;"	d
 RK4	main.h	/^#define RK4 /;"	d
 RK4	main_template.h	/^#define RK4 /;"	d
+RKCK	main.h	/^#define RKCK /;"	d
+RKCK	main_template.h	/^#define RKCK /;"	d
+RKF45	main.h	/^#define RKF45 /;"	d
+RKF45	main_template.h	/^#define RKF45 /;"	d
 SAFE	main.h	/^#define SAFE /;"	d
 SAFE	main_template.h	/^#define SAFE /;"	d
 SEED	main.h	/^#define SEED /;"	d
@@ -250,6 +260,7 @@ __ENABLE_GW__	main_template.h	/^#define __ENABLE_GW__$/;"	d
 __ENABLE_STIFFNESSCHECK__	main_template.h	/^#define __ENABLE_STIFFNESSCHECK__$/;"	d
 __ENABLE_TIMING__	main_template.h	/^#define __ENABLE_TIMING__$/;"	d
 __FILEHANDLING__	io.h	/^#define __FILEHANDLING__$/;"	d
+__GSL_STEPPER__	gsl_stepper.h	/^#define __GSL_STEPPER__$/;"	d
 __MAIN__	main.h	/^#define __MAIN__$/;"	d
 __MAIN__	main_template.h	/^#define __MAIN__$/;"	d
 __OUTPUT_CONSTRAINTS__	main_template.h	/^#define __OUTPUT_CONSTRAINTS__$/;"	d
@@ -618,6 +629,7 @@ mk_kernel	setup.c	/^static void mk_kernel(double *ker, double *rr, const size_t 
 mk_power_spectrum	toolbox.c	/^static void mk_power_spectrum(const fftw_complex *in, struct output out)$/;"	f	file:
 mk_rho_and_p	toolbox.c	/^void mk_rho_and_p(const double *f)$/;"	f
 mk_rhs	toolbox.c	/^void mk_rhs(const double t, double *f, double *result)$/;"	f
+mk_rhs_wrap	gsl_stepper.c	/^static int mk_rhs_wrap(double t, const double f[], double res[], void *params)$/;"	f	file:
 mk_summary	toolbox.c	/^static void mk_summary()$/;"	f	file:
 mk_x_grid	setup.c	/^static void mk_x_grid(double *grid, const size_t Nx, const size_t Ny,$/;"	f	file:
 mon	main.c	/^struct monitor mon;$/;"	v	typeref:struct:monitor
@@ -655,6 +667,7 @@ prepare_and_save_timeslice	toolbox.c	/^void prepare_and_save_timeslice()$/;"	f
 pressure	main.c	/^double *pressure;$/;"	v
 pressure_mean	main.c	/^double pressure_mean;$/;"	v
 print_flag_status	setup.c	/^static void print_flag_status()$/;"	f	file:
+print_monitoring	main.c	/^static void print_monitoring()$/;"	f	file:
 psi	main.c	/^struct output psi;$/;"	v	typeref:struct:output
 psi_ps	main.c	/^struct output psi_ps;$/;"	v	typeref:struct:output
 psi_smry	main.c	/^struct output psi_smry;$/;"	v	typeref:struct:output
@@ -671,6 +684,7 @@ rho_ps	main.c	/^struct output rho_ps;$/;"	v	typeref:struct:output
 rho_smry	main.c	/^struct output rho_smry;$/;"	v	typeref:struct:output
 rng	setup.c	/^static gsl_rng *rng;$/;"	v	file:
 run_dopri853	dopri853.c	/^void run_dopri853()$/;"	f
+run_gsl_stepper	gsl_stepper.c	/^void run_gsl_stepper()$/;"	f
 run_rk4	rk4.c	/^void run_rk4()$/;"	f
 safe	dopri853.c	/^    double safe; \/\/\/< Internal parameter for the error estimates$/;"	m	struct:dopri853_control	file:
 save	io.c	/^void save()$/;"	f
@@ -715,7 +729,8 @@ update_phi_psi	toolbox.c	/^static void update_phi_psi(double *f, double *result)
 variance	toolbox.c	/^double variance(const double mean, const double *f, const size_t N)$/;"	f
 wrap_up_dopri853	dopri853.c	/^static void wrap_up_dopri853()$/;"	f	file:
 wrapped_gaussian	setup.c	/^static double wrapped_gaussian(const double x, const double y, const double z)$/;"	f	file:
-write_monitoring	main.c	/^static void write_monitoring()$/;"	f	file:
+write_start_info	dopri853.c	/^static void write_start_info()$/;"	f	file:
+write_start_info	gsl_stepper.c	/^static void write_start_info()$/;"	f	file:
 x	main.h	/^    double *x; \/\/\/< the x component of the k vector (with zeros at N\/2)$/;"	m	struct:k_grid
 x	main.h	/^    struct grid_dimension x; \/\/\/< specification of the x direction$/;"	m	struct:parameters	typeref:struct:parameters::grid_dimension
 x	main_template.h	/^    double *x; \/\/\/< the x component of the k vector (with zeros at N\/2)$/;"	m	struct:k_grid
