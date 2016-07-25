@@ -2,6 +2,33 @@
 
 This is an explanation of the parameters in the file `parameters.sh`. We want to keep the parameter file itself short and concise to allow for quick changes. Therefore we do not clutter it by comments, but outsource the documentation to this file.
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [The build process](#the-build-process)
+- [How to handle the `parameters.sh` file](#how-to-handle-the-parameterssh-file)
+- [Simulation volume](#simulation-volume)
+  - [Remarks](#remarks)
+  - [Examples](#examples)
+- [Time evolution](#time-evolution)
+  - [Remarks](#remarks-1)
+- [Initial conditions](#initial-conditions)
+- [Potential parameters](#potential-parameters)
+- [File IO](#file-io)
+  - [Remarks](#remarks-2)
+  - [Examples](#examples-1)
+- [Performance parameters](#performance-parameters)
+- [Special paramaters for adaptive time step integration routines](#special-paramaters-for-adaptive-time-step-integration-routines)
+- [Program flow](#program-flow)
+- [Miscellaneous](#miscellaneous)
+- [Output](#output)
+  - [Remarks](#remarks-3)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## The build process
+
 __IMPORTANT:__ Unlike parameters that are passed to a program at runtime, our parameters are read even _before_ compilation. The build process initiated by `make` (see `Makefile`) goes as follows:
 
 1. From within the `Makefile` the executable script `configure` is called. It performs the following steps:
@@ -52,7 +79,7 @@ In this documentation, we choose another categorization of the parameters:
 * `SPATIAL_LOWER_BOUND_Z`: (double) Lower bound of the simulation box in the z-direction
 * `SPATIAL_UPPER_BOUND_Z`: (double) Upper bound of the simulation box in the z-direction
 
-__Remarks__:
+### Remarks
 
 * The code can handle 1, 2 and 3 dimensional simulations. The dimension is implicitly deduced from the `GRIDPOINTS` in X, Y, and Z direction. See examples for further information. If there is only one gridpoint in a certain direction, the `SPATIAL_LOWER_BOUND` is used as a value for this point. Some parts of the code require `GRIDPOINTS_X >= GRIDPOINTS_Y >= GRIDPOINTS_Z` and we recommend to always stick to this convention.
 
@@ -66,7 +93,7 @@ __Remarks__:
 
 * For most parts of the simulation only the box length in each direction (i.e. `SPATIAL_UPPER_BOUND - SPATIAL_LOWER_BOUND`) is relevant. However, the actual spatial gridpoint coordinates are of importance, if the initial conditions are constructed from internal functions. See [initial conditions](#initial-conditions) for the construction of initial conditions.
 
-__Examples__:
+### Examples
 
 * For a one-dimensional simulation with `N` gridpoints, one has to specify
     ```C
@@ -100,7 +127,7 @@ __Examples__:
 
 * `MAX_DT_HUBBLE_FRACTION`: (double, >0) This is only relevant if the chosen integration routine is the Dormand Prince 8(5,3) stepper (`DOPRI853`), see [program flow](#program-flow). To avoid large timesteps in the beginning of the evolution that could lead to instabilities, we limit the time step from above by `MAX_DT_HUBBLE_FRACTION` times the Hubble time $$1/H$$. Typical values are on the order of $$10^{-3}$$ to $$10^{-2}$$.
 
-__Remarks__:
+### Remarks
 
 * Even for the fixed time step `RK4` method, the time step might be different for the very last step. To ensure that the simulation always ends exactly at the specified `FINAL_TIME`, the time step might be adjusted for the very last step.
 
@@ -163,11 +190,11 @@ __Remarks__:
 
 * `STRIDE_Z`: (integer, >0) The stride in the z-direction of the output of fields. To avoid large ouput files, one can output the fields on a smaller grid than the one used for the computation internally.
 
-__Remarks__:
+### Remarks
 
 * Given the number of gridpoints $$n$$ in the x-direction by `GRIDPOINTS_X` and the stride $$s$$ in the x-direction by `STRIDE_X`, the number of gridpoints in the output is computed by $$(n+s-1)/s$$ rounded down to the next integer. The output gridpoints are evenly spaced within the number of gridpoints used for internal computations.
 
-__Examples__:
+### Examples
 
 * If we specify
 
@@ -267,7 +294,7 @@ Most of the simulation parameters are always present in the output (and cannot b
 
 * `OUTPUT_CONSTRAINTS`: The Hamiltonian constraint in $$l_2$$ and $$l_{\infty}$$ norm as well as the momentum constraint in $$l_2$$ and $$l_{\infty}$$ norm (in this order), where the various terms of the constraints have been combined in such a way to give 0. This means that the closer those 4 values are to 0, the better the constraints are fulfilled.
 
-__Remarks__:
+### Remarks
 
 * `PHI`, `DPHI`, `PSI`, `DPSI`, `RHO` result in `xout*yout*zout` double values where {x,y,z}out are determined from `GRIDPOINTS_{X,Y,Z}` and `STRIDE_{X,Y,Z}` (see [file IO](#file-io)) on __each__ output timeslice (per field).
 
