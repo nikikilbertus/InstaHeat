@@ -212,7 +212,7 @@ The parameters in this section are only relevant if one of the adaptive time ste
 
 ## Program flow
 
-* `INTEGRATION_METHOD`: There are three integration routines available:
+* `INTEGRATION_METHOD`: There are several integration routines available:
     - `"RK4"`: The standard 4th order Runge Kutta stepper with fixed time step size.
     - `"RKF45"`: A 4th order Runge Kutta Felberg method with 5th order error estimation for adaptive time stepping. We use the GSL implementation TODO(link to gsl).
     - `"RKCK"`: A 4th order Runge Kutta Cash-Karp method with 5th order error estimation for adaptive time stepping. We use the GSL implementation TODO(link to gsl).
