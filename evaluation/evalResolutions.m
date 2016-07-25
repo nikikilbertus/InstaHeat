@@ -2,12 +2,12 @@
 
 %% setup (user input)
 % setup different gridpoints or cutoffs in an array
-% res = [32 40 48 56 64 80 96 112 128 144 160 192 224 256];
-res = [32 40 48 56 64 72 80 88 96];
-% res = [1 2 3 4];
+% res = [32 48 64 96 128 192 256 384];
+res = [0.001, 0.0005, 0.0001, 0.00005, 0.00001, 0.000005, 0.000001];
+% res = 2.^(7:16);
 % construct the file names: prefix, suffix, indexset
-pre = 'res/';
-suf = '_8';
+pre = 'masses/1d/5e5/1024_64_';
+suf = '';
 ind = res;
 %figure offset
 os = 0;
@@ -82,14 +82,9 @@ for i = 1:nn
     subplot(1,2,1); loglog(k,phips(end,:)); hold on;
     subplot(1,2,2); loglog(k,rhops(end,:)); hold on;
     
-    phips(1,:)
-    pause;
-    
-    display(sprintf('processed %i of %i', i, nn));
+    display(sprintf('processed %i of %i: %s', i, nn, name));
 end
-for i = (1:7)+os
-    figure(os+i); hold off;
-end
+
 figure(os+1); xlabel('#step'); ylabel('\Delta t'); legend(legendinfo,'location','southeast'); shg;
 figure(os+2); xlabel('a'); ylabel('std(\rho) / |<\rho>|'); legend(legendinfo,'location','northwest'); shg;
 figure(os+3);
@@ -109,18 +104,18 @@ subplot(1,2,1); xlabel('a'); ylabel('rhomean'); legend(legendinfo); shg;
 subplot(1,2,2); xlabel('t'); ylabel('a'); legend(legendinfo,'location','northwest'); shg;
 if exist('constraints','var')
     figure(os+8);
-    subplot(1,2,1); xlabel('a'); ylabel('ham cstr l2'); legend(legendinfo); shg; hold off;
-    subplot(1,2,2); xlabel('a'); ylabel('ham cstr \infty'); legend(legendinfo); shg; hold off;
+    subplot(1,2,1); xlabel('a'); ylabel('ham cstr l2'); legend(legendinfo); shg;
+    subplot(1,2,2); xlabel('a'); ylabel('ham cstr \infty'); legend(legendinfo); shg;
     figure(os+9);
-    subplot(1,2,1); xlabel('a'); ylabel('mom cstr l2'); legend(legendinfo); shg; hold off;
-    subplot(1,2,2); xlabel('a'); ylabel('mom cstr \infty'); legend(legendinfo); shg; hold off;
+    subplot(1,2,1); xlabel('a'); ylabel('mom cstr l2'); legend(legendinfo); shg;
+    subplot(1,2,2); xlabel('a'); ylabel('mom cstr \infty'); legend(legendinfo); shg;
 end
 figure(os+10);
-subplot(1,2,1); xlabel('k'); ylabel('init powspec phi'); legend(legendinfo); shg; hold off;
-subplot(1,2,2); xlabel('k'); ylabel('init powspec rho'); legend(legendinfo); shg; hold off;
+subplot(1,2,1); xlabel('k'); ylabel('init powspec phi'); legend(legendinfo); shg;
+subplot(1,2,2); xlabel('k'); ylabel('init powspec rho'); legend(legendinfo); shg;
 figure(os+11);
-subplot(1,2,1); xlabel('k'); ylabel('final powspec phi'); legend(legendinfo); shg; hold off;
-subplot(1,2,2); xlabel('k'); ylabel('final powspec rho'); legend(legendinfo); shg; hold off;
+subplot(1,2,1); xlabel('k'); ylabel('final powspec phi'); legend(legendinfo); shg;
+subplot(1,2,2); xlabel('k'); ylabel('final powspec rho'); legend(legendinfo); shg;
 figure
 loglog(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('std(\rho) / |<\rho>|'); shg;
 legend('initial','final');
