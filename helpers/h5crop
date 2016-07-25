@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# create new h5 file with extension _crop.h5 that contains only summaries for
+# smaller file sizes
+declare -a arr=( \
+    "a" \
+    "bunch_davies_cutoff" \
+    "calls_rhs" \
+    "phi_summary" \
+    "dphi_summary" \
+    "psi_summary" \
+    "dpsi_summary" \
+    "rho_summary" \
+    "pressure_summary" \
+    "filter" \
+    "gravitational_waves" \
+    "gridpoints_internal" \
+    "gridpoints_output" \
+    "inflaton_mass" \
+    "mass" \
+    "max_dt_hubble_fraction" \
+    "method" \
+    "runtime_total" \
+    "seed" \
+    "spatial_bounds_x" \
+    "spatial_bounds_y" \
+    "spatial_bounds_z" \
+    "steps_bad" \
+    "steps_ok" \
+    "steps_total" \
+    "strides_space" \
+    "strides_time" \
+    "time" \
+    "tolerances" \
+    "threads" \
+    "constraints" \
+    )
+
+for f in "$@"
+do
+    for set in "${arr[@]}"
+    do
+        h5copy -i "$f" -o "${f/%.h5/_crop.h5}" -s "/${set}" -d "/${set}"
+    done
+done
