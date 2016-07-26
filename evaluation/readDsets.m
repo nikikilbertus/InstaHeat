@@ -1,7 +1,6 @@
 if ~exist('name','var')
     name = 'cutoff/96_16_5e-3';
 end
-% fullname = ['~/Dropbox/Uni/Exercises/12Semester/MAPhysics/data/' name '.h5'];
 fullname = ['~/Data/' name '.h5'];
 loadDsets;
 require('a');
