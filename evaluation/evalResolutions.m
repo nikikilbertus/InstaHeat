@@ -75,18 +75,26 @@ for i = 1:nn
     end
     
     figure(os+10);
-    subplot(1,2,1); loglog(k,phips(1,:)); hold on;
+    subplot(1,2,1); loglog(k,phips(2,:)); hold on;
     subplot(1,2,2); loglog(k,rhops(1,:)); hold on;
     
     figure(os+11);
-    subplot(1,2,1); loglog(k,phips(end,:)); hold on;
-    subplot(1,2,2); loglog(k,rhops(end,:)); hold on;
+    [idx, warn] = getIndexClosestTo(rhorms, 1);
+    if warn ~= 1
+        subplot(1,2,1); loglog(k,phips(idx,:)); hold on;
+        subplot(1,2,2); loglog(k,rhops(idx,:)); hold on;
+    else
+        subplot(1,2,1); loglog(k,1); hold on;
+        subplot(1,2,2); loglog(k,1); hold on;
+    end
     
     display(sprintf('processed %i of %i: %s', i, nn, name));
 end
 
 figure(os+1); xlabel('#step'); ylabel('\Delta t'); legend(legendinfo,'location','southeast'); shg;
-figure(os+2); xlabel('a'); ylabel('std(\rho) / |<\rho>|'); legend(legendinfo,'location','northwest'); shg;
+figure(os+2);
+loglog(a,1,'--');
+xlabel('a'); ylabel('std(\rho) / |<\rho>|'); legend(legendinfo,'location','northwest'); shg;
 figure(os+3);
 subplot(1,2,1); xlabel('a'); ylabel('|<\phi>|'); legend(legendinfo); shg;
 subplot(1,2,2); xlabel('a'); ylabel('std(\phi)'); legend(legendinfo); shg;
