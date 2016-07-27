@@ -2,9 +2,9 @@
 
 %% setup (user input)
 % setup different gridpoints or cutoffs in an array
-% res = [32 48 64 96 128 192 256 384];
-res = [0.001, 0.0005, 0.0001, 0.00005, 0.00001, 0.000005, 0.000001];
-% res = 2.^(7:16);
+% res = [1 2 3 4];
+% res = [0.001, 0.0005, 0.0001, 0.00005, 0.00001, 0.000005, 0.000001];
+res = 2.^(7:16);
 % construct the file names: prefix, suffix, indexset
 pre = 'masses/1d/5e5/1024_64_';
 suf = '';
@@ -93,7 +93,7 @@ end
 
 figure(os+1); xlabel('#step'); ylabel('\Delta t'); legend(legendinfo,'location','southeast'); shg;
 figure(os+2);
-loglog(a,1,'--');
+loglog([a(1) a(end)], [1 1],':');
 xlabel('a'); ylabel('std(\rho) / |<\rho>|'); legend(legendinfo,'location','northwest'); shg;
 figure(os+3);
 subplot(1,2,1); xlabel('a'); ylabel('|<\phi>|'); legend(legendinfo); shg;
@@ -119,11 +119,11 @@ if exist('constraints','var')
     subplot(1,2,2); xlabel('a'); ylabel('mom cstr \infty'); legend(legendinfo); shg;
 end
 figure(os+10);
-subplot(1,2,1); xlabel('k'); ylabel('init powspec phi'); legend(legendinfo); shg;
-subplot(1,2,2); xlabel('k'); ylabel('init powspec rho'); legend(legendinfo); shg;
+subplot(1,2,1); xlabel('k'); ylabel('init powspec phi'); legend(legendinfo,'location','southwest'); shg;
+subplot(1,2,2); xlabel('k'); ylabel('init powspec rho'); legend(legendinfo,'location','southwest'); shg;
 figure(os+11);
-subplot(1,2,1); xlabel('k'); ylabel('final powspec phi'); legend(legendinfo); shg;
-subplot(1,2,2); xlabel('k'); ylabel('final powspec rho'); legend(legendinfo); shg;
+subplot(1,2,1); xlabel('k'); ylabel('final powspec phi'); legend(legendinfo,'location','southwest'); shg;
+subplot(1,2,2); xlabel('k'); ylabel('final powspec rho'); legend(legendinfo,'location','southwest'); shg;
 figure
 loglog(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('std(\rho) / |<\rho>|'); shg;
 legend('initial','final');
