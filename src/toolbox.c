@@ -447,6 +447,10 @@ static void mk_gw_spectrum(double *f)
     for (size_t i = 0; i < gw.dim; ++i) {
         gw.tmp[i] = 0.0;
     }
+    #if OUTPUT_RHO_GW
+    complex *crho_gw = fftw_malloc(pars.M * sizeof *crho_gw);
+    crho_gw[0] = 0.0;
+    #endif
     // start with 1 to exclude constant offset, no omp!
     for (size_t i = 1; i < pars.M; ++i) {
         double kx = kvec.xf[i], ky = kvec.yf[i], kz = kvec.zf[i];
@@ -474,8 +478,12 @@ static void mk_gw_spectrum(double *f)
         if (fabs(kvec.z[i]) > DBL_EPSILON) {
             pow *= 2.0;
         }
+        pow *= fac * k2 * k;
         size_t idx = (int)trunc(gw.dim * k / kvec.k_max - 1.0e-14);
-        gw.tmp[idx] += fac * k2 * k * pow;
+        gw.tmp[idx] += pow;
+        #if OUTPUT_RHO_GW
+        crho_gw[i] = pow;
+        #endif
     }
     #pragma omp parallel for
     for (size_t i = 0; i < gw.dim; ++i) {
