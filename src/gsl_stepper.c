@@ -57,13 +57,15 @@ void run_gsl_stepper()
     #endif
     gsl_odeiv2_driver_set_hmin(d, MINIMAL_DELTA_T);
 
+    const double dt = (pars.t.tf - pars.t.ti) / GSL_OUTPUT_NUMBER
     for (size_t i = 1; i <= GSL_OUTPUT_NUMBER; ++i) {
-        double ti = i * (pars.t.tf - pars.t.ti) / GSL_OUTPUT_NUMBER;
+        double ti = i * dt;
         int stat = gsl_odeiv2_driver_apply(d, &pars.t.t, ti, field);
         if (stat != GSL_SUCCESS) {
           printf("error in GSL integration: %d\n", stat);
           break;
         }
+        t_out.tmp[0] = ti;
         prepare_and_save_timeslice();
     }
     gsl_odeiv2_driver_free(d);
