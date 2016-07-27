@@ -5,7 +5,7 @@ CFLAGS = -std=c99 -g -Wall -fopenmp -O2 -march=native -I /usr/local/include
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
     LIBS = -L/lib -L/share/sw/free/gsl/2.1/lib -g -shlib -lfftw3_threads -lfftw3 -lgsl -lgslcblas -lm -fopenmp
-    CFLAGS += -I/share -I/share/sw/free/gsl /2.1/include
+    CFLAGS += -I/share -I/share/sw/free/gsl/2.1/include
 endif
 ifeq ($(UNAME_S),Darwin)
     LIBS = -L /usr/local/lib -g -lfftw3_omp -lfftw3 -lgsl -lgslcblas -lm -fopenmp
