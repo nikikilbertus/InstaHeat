@@ -1,8 +1,6 @@
-function eq = equalruns(name1, name2)
-%     name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/' name1 '.h5'];
+function [] = equalruns(name1, name2)
     name = ['~/Data/' name1 '.h5'];
     pars1 = getparameters(name);
-%     name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/' name2 '.h5'];
     name = ['~/Data/' name2 '.h5'];
     [pars2, parnames] = getparameters(name);
     eq = true;
@@ -13,10 +11,15 @@ function eq = equalruns(name1, name2)
         end
         if any(pars1{i} ~= pars2{i})
             eq = false;
-            disp(['inequality in component ' parnames{i} ':'])
+            disp(['inequality in feature ' parnames{i} ':'])
             disp(pars1{i})
             disp(pars2{i})
         end
+    end
+    if (eq)
+        disp 'Run parameters seem to be equal';
+    else
+        disp 'Run parameters differ';
     end
 end
 
