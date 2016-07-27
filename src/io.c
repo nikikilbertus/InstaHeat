@@ -70,6 +70,9 @@ void h5_create_empty_by_path()
     #ifdef OUTPUT_RHO
     h5_create_dset(rank, rho_out.dim, &(rho_out.id), H5_RHO_NAME);
     #endif
+    #ifdef OUTPUT_RHO_GW
+    h5_create_dset(rank, rho_gw.dim, &(rho_gw.id), H5_RHO_GW_NAME);
+    #endif
 
     // ---------------------------summaries-------------------------------------
     #ifdef OUTPUT_PHI_SMRY
@@ -379,6 +382,9 @@ static void h5_write_all_buffers(const hsize_t Nt)
     #ifdef OUTPUT_RHO
     h5_write_buffer(rank, Nt, rho_out.dim, os, rho_out.id, rho_out.buf);
     #endif
+    #ifdef OUTPUT_RHO_GW
+    h5_write_buffer(rank, Nt, rho_gw.dim, os, rho_gw.id, rho_gw.buf);
+    #endif
 
     // --------------------------power spectra----------------------------------
     #ifdef OUTPUT_PHI_PS
@@ -583,6 +589,9 @@ void save()
                 #endif
                 #ifdef OUTPUT_RHO
                 rho_out.buf[os + idb] = rho[id];
+                #endif
+                #ifdef OUTPUT_RHO_GW
+                rho_gw.buf[os + idb] = rho_gw.tmp[id];
                 #endif
                 #ifdef CHECK_FOR_NAN
                 if (isnan(field[id]) || isnan(rho[id])) {
