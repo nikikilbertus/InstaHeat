@@ -73,6 +73,7 @@ static void print_flag_status();
 static void mk_initial_psi();
 static void destroy_and_cleanup_fftw();
 static void free_external();
+static void free_output(struct output *out);
 
 static gsl_rng *rng;
 
@@ -383,6 +384,9 @@ static void allocate_external()
     #ifdef OUTPUT_RHO
     init_output(&rho_out, outN, 0);
     #endif
+    #ifdef OUTPUT_RHO_GW
+    init_output(&rho_out_gw, outN, 1);
+    #endif
 
     // ---------------------------summaries-------------------------------------
     #ifdef OUTPUT_PHI_SMRY
@@ -486,9 +490,13 @@ static void allocate_external()
 static void init_output(struct output *out, const size_t dim, const int mode)
 {
     const size_t Nbuf = pars.file.buf_size;
+    out->mode = mode;
     out->dim = dim;
-    if (mode != 0) {
-        out->tmp = calloc(out->dim, sizeof *out->tmp);
+    if (out->mode != 0) {
+        out->tmp = fftw_malloc(out->dim, sizeof *out->tmp);
+        for (size_t i = 0; i < out->dim; ++i) {
+            out->tmp[i] = 0.0;
+        }
     }
     out->buf = calloc(Nbuf * out->dim, sizeof *out->buf);
     if (!out->buf || (mode != 0 && !out->tmp)) {
@@ -1535,79 +1543,67 @@ static void free_external()
     fftw_free(dfield_new);
     fftw_free(rho);
     fftw_free(pressure);
-    free(t_out.tmp);
-    free(t_out.buf);
-    free(a_out.tmp);
-    free(a_out.buf);
+    free_output(&t_out);
+    free_output(&a_out);
     #ifdef OUTPUT_PHI
-    free(phi.buf);
+    free_output(&phi);
     #endif
     #ifdef OUTPUT_DPHI
-    free(dphi.buf);
+    free_output(&dphi);
     #endif
     #ifdef OUTPUT_PSI
-    free(psi.buf);
+    free_output(&psi);
     #endif
     #ifdef OUTPUT_DPSI
-    free(dpsi.buf);
+    free_output(&dpsi);
     #endif
     #ifdef OUTPUT_RHO
-    free(rho_out.buf);
+    free_output(&rho_out);
+    #endif
+    #ifdef OUTPUT_RHO_GW
+    free_output(&rho_gw);
     #endif
 
     #ifdef OUTPUT_PHI_SMRY
-    free(phi_smry.tmp);
-    free(phi_smry.buf);
+    free_output(&phi_smry);
     #endif
     #ifdef OUTPUT_DPHI_SMRY
-    free(dphi_smry.tmp);
-    free(dphi_smry.buf);
+    free_output(&dphi_smry);
     #endif
     #ifdef OUTPUT_PSI_SMRY
-    free(psi_smry.tmp);
-    free(psi_smry.buf);
+    free_output(&psi_smry);
     #endif
     #ifdef OUTPUT_DPSI_SMRY
-    free(dpsi_smry.tmp);
-    free(dpsi_smry.buf);
+    free_output(&dpsi_smry);
     #endif
     #ifdef OUTPUT_RHO_SMRY
-    free(rho_smry.tmp);
-    free(rho_smry.buf);
+    free_output(&rho_smry);
     #endif
     #ifdef OUTPUT_PRESSURE_SMRY
-    free(p_smry.tmp);
-    free(p_smry.buf);
+    free_output(&p_smry);
     #endif
     #ifdef OUTPUT_H1_SMRY
-    free(h1_smry.tmp);
-    free(h1_smry.buf);
+    free_output(&h1_smry);
     #endif
     #ifdef OUTPUT_H2_SMRY
-    free(h2_smry.tmp);
-    free(h2_smry.buf);
+    free_output(&h2_smry);
     #endif
 
     #ifdef OUTPUT_PHI_PS
-    free(phi_ps.tmp);
-    free(phi_ps.buf);
+    free_output(&phi_ps);
     #endif
     #ifdef OUTPUT_PSI_PS
-    free(psi_ps.tmp);
-    free(psi_ps.buf);
+    free_output(&psi_ps);
     #endif
     #ifdef OUTPUT_RHO_PS
-    free(rho_ps.tmp);
-    free(rho_ps.buf);
+    free_output(&rho_ps);
     #endif
     #ifdef ENABLE_GW
-    free(gw.tmp);
-    free(gw.buf);
+    free_output(&gw);
     #endif
 
     #ifdef OUTPUT_CONSTRAINTS
-    free(cstr.tmp);
-    free(cstr.buf);
+    free_output(&cstr);
     #endif
 
     #ifdef ENABLE_FFT_FILTER
@@ -1636,4 +1632,11 @@ static void free_external()
     fftw_free(tmp.f);
     fftw_free(tmp.deltarho);
     INFO(puts("Freed memory of external variables.\n"));
+}
+
+static void free_output(struct output *out) {
+    if (out->mode == 1) {
+        fftw_free(out->tmp);
+    }
+    free(out->buf);
 }
