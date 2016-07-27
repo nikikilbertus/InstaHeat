@@ -1,6 +1,6 @@
 TARGET = run
 CC = h5cc
-CFLAGS = -std=c99 -g -Wall -fopenmp -O2 -march=native -I /usr/local/include
+CFLAGS = -std=c99 -g -Wall -fopenmp -O3
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
