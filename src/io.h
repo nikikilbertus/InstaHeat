@@ -15,6 +15,7 @@
 #define     H5_PSI_NAME                     ("psi")
 #define     H5_DPSI_NAME                    ("dpsi")
 #define     H5_RHO_NAME                     ("rho")
+#define     H5_RHO_GW_NAME                  ("rho_gravitational_waves")
 #define     H5_PHI_PS_NAME                  ("phi_power_spectrum")
 #define     H5_DPHI_PS_NAME                 ("dphi_power_spectrum")
 #define     H5_PSI_PS_NAME                  ("psi_power_spectrum")
