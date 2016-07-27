@@ -481,10 +481,14 @@ static void mk_gw_spectrum(double *f)
         pow *= fac * k2 * k;
         size_t idx = (int)trunc(gw.dim * k / kvec.k_max - 1.0e-14);
         gw.tmp[idx] += pow;
+        //TODO: what do I do here, do I have spatial information?
         #if OUTPUT_RHO_GW
-        crho_gw[i] = pow;
+        crho_gw[i] = pow / N;
         #endif
     }
+    #if OUTPUT_RHO_GW
+    ifft(crho_gw, rho_gw.tmp);
+    #endif
     #pragma omp parallel for
     for (size_t i = 0; i < gw.dim; ++i) {
         gw.tmp[i] /= pars.N;
