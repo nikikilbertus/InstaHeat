@@ -481,9 +481,23 @@ static void mk_gw_spectrum(double *f)
         pow *= fac * k2 * k;
         size_t idx = (int)trunc(gw.dim * k / kvec.k_max - 1.0e-14);
         gw.tmp[idx] += pow;
-        //TODO: what do I do here, do I have spatial information?
+        //TODO: check that and simplify! first naive approach
         #if OUTPUT_RHO_GW
-        crho_gw[i] = pow / N;
+        complex dh1 = dh1r + I * dh1i, dh2 = dh2r + I * dh2i;
+        complex val = dh1 + 2.0 * dh2;
+        // use h11 and h12
+        if (fabs(kz) > DBL_EPSILON) {
+            val += - 2.0 * (kx * dh1 + ky * dh2) / kz;
+            val += - ((kx2 + kz2) * dh1 + 2.0 * kx * ky * dh2) / (ky2 + kz2);
+            val += 2.0 * ((kx2 + kz2) * ky * dh1 + (ky2 + kz2) * kx * dh2) /
+                ((ky2 + kz2) * kz);
+        // use h11 and h13
+        } else if (fabs(ky) > DBL_EPSILON) {
+            val += - 2.0 * kx * dh1 / ky;
+            val += kx2 * dh1 / ky2;
+            val += - 2.0 * kx * dh2 / ky;
+        } // use h22 and h23 -> nothing to do
+        crho_gw[i] = val / N;
         #endif
     }
     #if OUTPUT_RHO_GW
