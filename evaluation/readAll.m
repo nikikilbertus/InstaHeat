@@ -2,7 +2,8 @@
 
 %% setup (user input)
 % the filename
-name = 'test2d64';
+name = 'test';
+ext = '';
 
 %% run
 loadDsets
