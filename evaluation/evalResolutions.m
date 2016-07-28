@@ -2,26 +2,27 @@
 
 %% setup (user input)
 % setup different gridpoints or cutoffs in an array
-% res = [1 2 3 4];
-% res = [0.001, 0.0005, 0.0001, 0.00005, 0.00001, 0.000005, 0.000001];
-res = 2.^(7:16);
+% res = [512 1024 1536 2048 3072];
+res = [0.001, 0.0005, 0.0001, 0.00005, 0.00001];
+% res = 2.^(7:16);
 % construct the file names: prefix, suffix, indexset
-pre = 'masses/1d/5e5/1024_64_';
+pre = 'massres1d/3072_64_';
 suf = '';
 ind = res;
 %figure offset
-os = 0;
+os = 50;
 
 %% run
 
 loadDsets;
 require(dsetsSummary,'constraints','steps_total','t','phips','rhops','psips','N','spatial_bounds_x');
-nn = length(res);
+nn = length(ind);
 colors = jet;
 ncol = size(colors,1);
 set(0,'DefaultAxesColorOrder',colors(1:int64(floor(ncol/nn)):end,:))
 rhos = zeros(nn,2); % rhorms values at beginning and end
 steps = zeros(nn,1);
+legendinfo = cell(nn,1);
 
 for i = 1:nn
     name = [pre num2str(ind(i)) suf];
@@ -36,10 +37,10 @@ for i = 1:nn
     N = N(1);
     L = spatial_bounds_x(2)-spatial_bounds_x(1);
     kmin = 2*pi/L; kmax = sqrt(3)*kmin*N/2;
-    k = (1:nbins)*kmax/nbins;
+    k = linspace(kmin,kmax,nbins);
     
     rhos(i,:) = [rhorms(1); rhorms(end)];
-    legendinfo{i} = ['N=' num2str(res(i))];
+    legendinfo{i} = num2str(ind(i));
     
     figure(os+1); plot(diff(t)); hold on;
     
@@ -75,7 +76,7 @@ for i = 1:nn
     end
     
     figure(os+10);
-    subplot(1,2,1); loglog(k,phips(2,:)); hold on;
+    subplot(1,2,1); loglog(k,phips(1,:)); hold on;
     subplot(1,2,2); loglog(k,rhops(1,:)); hold on;
     
     figure(os+11);
@@ -84,8 +85,8 @@ for i = 1:nn
         subplot(1,2,1); loglog(k,phips(idx,:)); hold on;
         subplot(1,2,2); loglog(k,rhops(idx,:)); hold on;
     else
-        subplot(1,2,1); loglog(k,1); hold on;
-        subplot(1,2,2); loglog(k,1); hold on;
+        subplot(1,2,1); loglog(k,k*nan); hold on;
+        subplot(1,2,2); loglog(k,k*nan); hold on;
     end
     
     display(sprintf('processed %i of %i: %s', i, nn, name));
@@ -125,8 +126,8 @@ figure(os+11);
 subplot(1,2,1); xlabel('k'); ylabel('final powspec phi'); legend(legendinfo,'location','southwest'); shg;
 subplot(1,2,2); xlabel('k'); ylabel('final powspec rho'); legend(legendinfo,'location','southwest'); shg;
 figure
-loglog(res.^3, rhos, '-o'); xlabel('N^3'); ylabel('std(\rho) / |<\rho>|'); shg;
+loglog(ind.^3, rhos, '-o'); xlabel('N^3'); ylabel('std(\rho) / |<\rho>|'); shg;
 legend('initial','final');
 figure
-loglog(res.^3, steps, '-o'); xlabel('N^3'); ylabel('steps'); shg;
+loglog(ind.^3, steps, '-o'); xlabel('N^3'); ylabel('steps'); shg;
 set(0,'DefaultAxesColorOrder','remove')
