@@ -13,7 +13,7 @@ BETA	main_template.h	/^#define BETA /;"	d
 BUNCH_DAVIES_CUTOFF	main.h	/^#define BUNCH_DAVIES_CUTOFF /;"	d
 BUNCH_DAVIES_CUTOFF	main_template.h	/^#define BUNCH_DAVIES_CUTOFF /;"	d
 CC	Makefile	/^CC = h5cc$/;"	m
-CFLAGS	Makefile	/^CFLAGS = -std=c99 -g -Wall -fopenmp -O2 -march=native -I \/usr\/local\/include$/;"	m
+CFLAGS	Makefile	/^CFLAGS = -std=c99 -g -Wall -fopenmp -O3$/;"	m
 COUPLING	main.h	/^#define COUPLING /;"	d
 COUPLING	main_template.h	/^#define COUPLING /;"	d
 DATAPATH	main.h	/^#define DATAPATH /;"	d
@@ -98,8 +98,8 @@ H5_STRIDES_TIME_NAME	io.h	/^#define     H5_STRIDES_TIME_NAME /;"	d
 H5_THREAD_NUMBER_NAME	io.h	/^#define     H5_THREAD_NUMBER_NAME /;"	d
 H5_TIME_NAME	io.h	/^#define     H5_TIME_NAME /;"	d
 H5_TOLERANCES_NAME	io.h	/^#define     H5_TOLERANCES_NAME /;"	d
-HDF5_CC	Makefile	/^export HDF5_CC = gcc-6$/;"	m
-HDF5_CLINKER	Makefile	/^export HDF5_CLINKER = gcc-6$/;"	m
+HDF5_CC	Makefile	/^    export HDF5_CC = gcc-6$/;"	m
+HDF5_CLINKER	Makefile	/^    export HDF5_CLINKER = gcc-6$/;"	m
 HEADERS	Makefile	/^HEADERS = $(wildcard *.h)$/;"	m
 IC_FROM_BUNCH_DAVIES	main.h	/^#define IC_FROM_BUNCH_DAVIES /;"	d
 IC_FROM_BUNCH_DAVIES	main_template.h	/^#define IC_FROM_BUNCH_DAVIES /;"	d
@@ -131,7 +131,8 @@ LARGEST_SCALING	main.h	/^#define LARGEST_SCALING /;"	d
 LARGEST_SCALING	main_template.h	/^#define LARGEST_SCALING /;"	d
 LARGE_OUTPUT	main.h	/^    #define LARGE_OUTPUT$/;"	d
 LARGE_OUTPUT	main_template.h	/^    #define LARGE_OUTPUT$/;"	d
-LIBS	Makefile	/^LIBS = -L \/usr\/local\/lib -g -lfftw3_omp -lfftw3 -lgsl -lgslcblas -lm -fopenmp$/;"	m
+LIBS	Makefile	/^    LIBS = -L \/usr\/local\/lib -g -lfftw3_omp -lfftw3 -lgsl -lgslcblas -lm -fopenmp$/;"	m
+LIBS	Makefile	/^    LIBS = -L\/lib -L\/share\/sw\/free\/gsl\/2.1\/lib -g -shlib -lfftw3_threads -lfftw3 -lgsl -lgslcblas -lm -fopenmp$/;"	m
 LOGO	main.c	/^#define LOGO /;"	d	file:
 M	main.h	/^    size_t M; \/\/\/< number of gridpoints in Fourier space$/;"	m	struct:grid_dimension
 M	main.h	/^    size_t M; \/\/\/< number of gridpoints in Fourier space$/;"	m	struct:parameters
@@ -160,8 +161,13 @@ N	main_template.h	/^    size_t N; \/\/\/< number of spatial gridpoints: N=Nx*Ny*
 NOT_ENABLE_FOLLOWUP	main.h	/^#define NOT_ENABLE_FOLLOWUP$/;"	d
 NOT_ENABLE_STIFFNESSCHECK	main.h	/^#define NOT_ENABLE_STIFFNESSCHECK$/;"	d
 NOT_ENABLE_TIMING	main.h	/^#define NOT_ENABLE_TIMING$/;"	d
+NOT_OUTPUT_DPHI	main.h	/^#define NOT_OUTPUT_DPHI$/;"	d
+NOT_OUTPUT_DPSI	main.h	/^#define NOT_OUTPUT_DPSI$/;"	d
 NOT_OUTPUT_H1_SMRY	main.h	/^#define NOT_OUTPUT_H1_SMRY$/;"	d
 NOT_OUTPUT_H2_SMRY	main.h	/^#define NOT_OUTPUT_H2_SMRY$/;"	d
+NOT_OUTPUT_PHI	main.h	/^#define NOT_OUTPUT_PHI$/;"	d
+NOT_OUTPUT_PSI	main.h	/^#define NOT_OUTPUT_PSI$/;"	d
+NOT_OUTPUT_RHO	main.h	/^#define NOT_OUTPUT_RHO$/;"	d
 NUMBER_CONSTRAINTS	main.h	/^#define NUMBER_CONSTRAINTS /;"	d
 NUMBER_CONSTRAINTS	main_template.h	/^#define NUMBER_CONSTRAINTS /;"	d
 Next	main.h	/^    size_t Next; \/\/\/< number of doubles in complex grid: N=Nx*Ny*(Nz+2)$/;"	m	struct:parameters
@@ -172,24 +178,19 @@ Ntot	main.h	/^    size_t Ntot; \/\/\/< number of scalar equations$/;"	m	struct:p
 Ntot	main_template.h	/^    size_t Ntot; \/\/\/< number of scalar equations$/;"	m	struct:parameters
 OBJECTS	Makefile	/^OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))$/;"	m
 OUTPUT_CONSTRAINTS	main.h	/^#define OUTPUT_CONSTRAINTS$/;"	d
-OUTPUT_DPHI	main.h	/^#define OUTPUT_DPHI$/;"	d
 OUTPUT_DPHI_SMRY	main.h	/^#define OUTPUT_DPHI_SMRY$/;"	d
-OUTPUT_DPSI	main.h	/^#define OUTPUT_DPSI$/;"	d
 OUTPUT_DPSI_SMRY	main.h	/^#define OUTPUT_DPSI_SMRY$/;"	d
 OUTPUT_H1_SMRY	main.h	/^    #undef OUTPUT_H1_SMRY$/;"	d
 OUTPUT_H1_SMRY	main_template.h	/^    #undef OUTPUT_H1_SMRY$/;"	d
 OUTPUT_H2_SMRY	main.h	/^    #undef OUTPUT_H2_SMRY$/;"	d
 OUTPUT_H2_SMRY	main_template.h	/^    #undef OUTPUT_H2_SMRY$/;"	d
-OUTPUT_PHI	main.h	/^#define OUTPUT_PHI$/;"	d
 OUTPUT_PHI_PS	main.h	/^#define OUTPUT_PHI_PS$/;"	d
 OUTPUT_PHI_SMRY	main.h	/^#define OUTPUT_PHI_SMRY$/;"	d
 OUTPUT_PRESSURE_SMRY	main.h	/^#define OUTPUT_PRESSURE_SMRY$/;"	d
 OUTPUT_PS	main.h	/^    #define OUTPUT_PS$/;"	d
 OUTPUT_PS	main_template.h	/^    #define OUTPUT_PS$/;"	d
-OUTPUT_PSI	main.h	/^#define OUTPUT_PSI$/;"	d
 OUTPUT_PSI_PS	main.h	/^#define OUTPUT_PSI_PS$/;"	d
 OUTPUT_PSI_SMRY	main.h	/^#define OUTPUT_PSI_SMRY$/;"	d
-OUTPUT_RHO	main.h	/^#define OUTPUT_RHO$/;"	d
 OUTPUT_RHO_PS	main.h	/^#define OUTPUT_RHO_PS$/;"	d
 OUTPUT_RHO_SMRY	main.h	/^#define OUTPUT_RHO_SMRY$/;"	d
 OUTPUT_SMRY	main.h	/^    #define OUTPUT_SMRY$/;"	d
@@ -243,6 +244,7 @@ TIME_STEP_SKIPS	main.h	/^#define TIME_STEP_SKIPS /;"	d
 TIME_STEP_SKIPS	main_template.h	/^#define TIME_STEP_SKIPS /;"	d
 TWOPI	main.h	/^#define TWOPI /;"	d
 TWOPI	main_template.h	/^#define TWOPI /;"	d
+UNAME_S	Makefile	/^UNAME_S := $(shell uname -s)$/;"	m
 VERSION_CONTROL	main.h	/^#define VERSION_CONTROL /;"	d
 VERSION_CONTROL	main_template.h	/^#define VERSION_CONTROL /;"	d
 VERSION_CONTROL_GIT	main.h	/^#define VERSION_CONTROL_GIT /;"	d

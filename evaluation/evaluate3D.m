@@ -1,3 +1,4 @@
+%% DEPRECATED!
 name = 'cutoff/96_16_5e-3_fil';
 interp = true;
 newoutput = true;
