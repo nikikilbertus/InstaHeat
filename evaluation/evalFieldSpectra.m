@@ -15,7 +15,7 @@ nbins = size(phips,2);
 N = N(1);
 L = spatial_bounds_x(2)-spatial_bounds_x(1);
 kmin = 2*pi/L; kmax = sqrt(3)*kmin*N/2;
-k = (1:nbins)*kmax/nbins;
+k = linspace(kmin,kmax,nbins);
 % TODO what mass do I need here?
 lc = 1./sqrt(3*H*mass);
 % body
