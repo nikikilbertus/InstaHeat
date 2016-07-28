@@ -1,4 +1,4 @@
-function data = readDset(dictNames, file, dset, indices)
+function data = readDset(dictNames, file, dset, ext, indices)
     try
         data = h5read(file, ['/' dset]);
         if size(data,2) > 1
@@ -18,22 +18,22 @@ function data = readDset(dictNames, file, dset, indices)
         end
     end
     if ~isempty(strfind(dset, 'summary'))
-        mkSummary(dictNames, dset, data);
+        mkSummary(dictNames, dset, data, ext);
     else
-        assignin('caller', dictNames(dset), data);
+        assignin('caller', [dictNames(dset) ext], data);
     end 
 end
 
 % TODO: check for constraints, compute rms for phi, psi, ...
 
-function [] = mkSummary(dictNames, dset, data)
-    assignin('base', strrep(dictNames(dset),'S','mean'), data(:,1));
-    assignin('base', strrep(dictNames(dset),'S','std'), sqrt(data(:,2)));
-    assignin('base', strrep(dictNames(dset),'S','min'), data(:,3));
-    assignin('base', strrep(dictNames(dset),'S','max'), data(:,4));
+function [] = mkSummary(dictNames, dset, data, ext)
+    assignin('base', strrep(dictNames(dset),'S',['mean' ext]), data(:,1));
+    assignin('base', strrep(dictNames(dset),'S',['std' ext]), sqrt(data(:,2)));
+    assignin('base', strrep(dictNames(dset),'S',['min' ext]), data(:,3));
+    assignin('base', strrep(dictNames(dset),'S',['max' ext]), data(:,4));
     if ~isempty(strfind(dset, 'rho'))
-        assignin('base', 'H', sqrt(data(:,1) / 3));
-        assignin('base', 'rhorms', sqrt(data(:,2)) ./ data(:,1));
+        assignin('base', ['H' ext], sqrt(data(:,1) / 3));
+        assignin('base', ['rhorms' ext], sqrt(data(:,2)) ./ data(:,1));
     end
 end
 
