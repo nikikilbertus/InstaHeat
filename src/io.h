@@ -37,6 +37,7 @@
 #define     H5_DIMENSION_NAME               ("dimension")
 #define     H5_SEED_NAME                    ("seed")
 #define     H5_THREAD_NUMBER_NAME           ("threads")
+#define     H5_FFTW_THREAD_NUMBER_NAME      ("fftw_threads")
 #define     H5_STRIDES_TIME_NAME            ("strides_time")
 #define     H5_STRIDES_SPACE_NAME           ("strides_space")
 #define     H5_TOLERANCES_NAME              ("tolerances")
