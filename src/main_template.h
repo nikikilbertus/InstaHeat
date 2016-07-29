@@ -122,6 +122,7 @@
 #define STRIDE_Y                (__STRIDE_Y__)
 #define STRIDE_Z                (__STRIDE_Z__)
 #define THREAD_NUMBER           (__THREAD_NUMBER__)
+#define FFTW_THREAD_NUMBER      (__FFTW_THREAD_NUMBER__)
 #define FFTW_DEFAULT_FLAG       (__FFTW_DEFAULT_FLAG__)
 #define GRIDPOINTS_X            (__GRIDPOINTS_X__)
 #define GRIDPOINTS_Y            (__GRIDPOINTS_Y__)
