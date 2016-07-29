@@ -141,6 +141,10 @@ void h5_create_empty_by_path()
     val[0] = THREAD_NUMBER <= 0 ? omp_get_max_threads() : THREAD_NUMBER;
     h5_write_simple(H5_THREAD_NUMBER_NAME, val, 1, H5D_COMPACT);
 
+    val[0] = FFTW_THREAD_NUMBER <= 0 ?
+        omp_get_max_threads() : FFTW_THREAD_NUMBER;
+    h5_write_simple(H5_FFTW_THREAD_NUMBER_NAME, val, 1, H5D_COMPACT);
+
     val[0] = pars.file.skip;
     h5_write_simple(H5_STRIDES_TIME_NAME, val, 1, H5D_COMPACT);
 
