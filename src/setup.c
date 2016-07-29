@@ -126,12 +126,13 @@ static void init_rng()
 }
 
 /**
- * @brief Initialize FFTW3 with the specified numbers of threads.
+ * @brief Initialize FFTW3 and OMP with the specified numbers of threads
+ * respectively.
  *
- * If the parameter `THREAD_NUMBER` is `0`, FFTW3 is initialized with the return
- * value of `omp_set_num_threads()` threads. Note that this might not be the
- * optimal number. It is worthwhile to empirically find the optimal number of
- * threads.
+ * If the parameter `THREAD_NUMBER` or `FFTW_THREAD_NUMBER` is `0`, OMP or FFTW3
+ * is initialized with the return value of `omp_set_num_threads()` threads. Note
+ * that this might not be the optimal number. It is worthwhile to empirically
+ * find the optimal number of threads.
  */
 static void init_threading()
 {
@@ -140,10 +141,13 @@ static void init_threading()
         fputs("\n\nCould not initialize FFTW3 threads.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    int threadnum = THREAD_NUMBER <= 0 ? omp_get_max_threads() : THREAD_NUMBER;
-    omp_set_num_threads(threadnum);
-    fftw_plan_with_nthreads(threadnum);
-    INFO(printf("Running omp & FFTW3 with %d thread(s).\n\n", threadnum));
+    int threads = THREAD_NUMBER <= 0 ? omp_get_max_threads() : THREAD_NUMBER;
+    omp_set_num_threads(threads);
+    int fftw_threads = FFTW_THREAD_NUMBER <= 0 ?
+        omp_get_max_threads() : FFTW_THREAD_NUMBER;
+    fftw_plan_with_nthreads(fftw_threads);
+    INFO(printf("Running omp with %d thread(s).\n", threads));
+    INFO(printf("Running FFTW3 with %d thread(s).\n\n", fftw_threads));
 }
 
 /**
