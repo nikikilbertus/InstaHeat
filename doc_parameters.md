@@ -147,7 +147,7 @@ In this documentation, we choose another categorization of the parameters:
       Then the program will find the time slice _closest_ to the specified `INITIAL_TIME` in the previous output file and use all necessary values (\f$a\f$, \f$\phi\f$, \f$\dot{\phi}\f$, \f$\psi\f$, \f$\dot{\psi}\f$, \f$t\f$) as initial conditions for the new simulation. Note that the simulation might therefore not start _precisely_ at the specified `INITIAL_TIME`.
 
     - `"IC_FROM_DAT_FILE_WITH_PSI"` and `"IC_FROM_DAT_FILE_WITHOUT_PSI"`: One can load initial conditions from a `.dat` file. This feature was implemented during development of the code when initial conditions were provided from a collaborator in a `.dat` file. There is an option to also import \f$\psi\f$ and \f$\dot{\psi}\f$ from this `.dat` file, or to compute them from the provided \f$\phi\f$ and \f$\dot{\phi}\f$ via `mk_initial_psi` in `setup.c`. If you want to read initial conditions from a separately generated file, you might change the method `read_initial_data` in `io.c` accordingly. Also make sure to read and understand the memory layout of the field variables TODO(link, where?).
-    - `"IC_FROM_BUNCH_DAVIES"`: The initial conditions are given by the Bunch Davies vacuum. Our implementation is similar in nature to the one used in DEFROST TODO(link, ref). We compute initial values for \f$\phi\f$ and \f$\dot{\phi}\f$ following the Bunch Davies spectrum. For detailed information see TODO(link paper, coderef). Subsequently we compute \f$\psi\f$ and \f$\dot{psi}\f$ via `mk_initial_psi` in `setup.c`. See also `BUNCH_DAVIES_CUTOFF` in this section.
+    - `"IC_FROM_BUNCH_DAVIES"`: The initial conditions are given by the Bunch Davies vacuum. Our implementation is similar in nature to the one used in DEFROST [arXiv:0809.4904](https://arxiv.org/abs/0809.4904). We compute initial values for \f$\phi\f$ and \f$\dot{\phi}\f$ following the Bunch Davies spectrum. For detailed information see [arXiv:0809.4904](https://arxiv.org/abs/0809.4904). Subsequently we compute \f$\psi\f$ and \f$\dot{psi}\f$ via `mk_initial_psi` in `setup.c`. See also `BUNCH_DAVIES_CUTOFF` in this section.
 
 * `BUNCH_DAVIES_CUTOFF`: (integer, >=0) The Bunch Davies vacumm has an ultra violet divergence that we circumvent by an exponential cutoff. If `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"`, this parameter sets the value of the cutoff as the number of gridpoints. It has to be smaller than half the number of gridpoints (i.e. we cut off the spectrum below the Nyquist frequency). For example, if we have a grid with \f$64\f$ gridpoints in each direction, `BUNCH_DAVIES_CUTOFF` has to be smaller or equal than \f$32\f$. If `BUNCH_DAVIES_CUTOFF="0"`, the cutoff is adjusted to the current grid automatically and chosen as large as possible. This parameter also controls the smoothness of the initial conditions for the Bunch Davies vacuum, i.e. a small value corresponds to few modes, i.e. very smooth and well behaved initial conditions.
 
@@ -214,7 +214,7 @@ then the computation would be done on a \f$256 \times 200 \times 59\f$ grid. How
 
 * `THREAD_NUMBER`: (integer, >=0) The number of threads used in OpenMP and also for the discrete Fourier transforms performed by FFTW3. __Important__: If `THREAD_NUMBER="0"`, the number of threads is determined automatically by `omp_get_max_threads()`. While this can be helpful when the target architecture is unknown, we strongly recommend running a short analysis to determine the optimal number of threads. It might differ significantly from the number of processors/cores on the target machine.
 
-* `FFTW_DEFAULT_FLAG`: The planning flag used in the discrete Fourier transforms performed by FFTW3. Take a look at the FFTW3 documentation TODO(link) for more information. The valid options are:
+* `FFTW_DEFAULT_FLAG`: The planning flag used in the discrete Fourier transforms performed by FFTW3. Take a look at the FFTW3 [documentation](http://www.fftw.org/#documentation) for more information. The valid options are:
     - `"FFTW_ESTIMATE"`
     - `"FFTW_MEASURE"`
     - `"FFTW_PATIENT"`
@@ -225,28 +225,28 @@ then the computation would be done on a \f$256 \times 200 \times 59\f$ grid. How
 
 The parameters in this section are only relevant if one of the adaptive time step integration routine is used, i.e. if `INTEGRATION_METHOD` is set to `"RKF45"`, `"RKCK"`, `"DOPRI89"`, or `"DOPRI853"`.
 
-* `RELATIVE_TOLERANCE`: (double, >=0) The relative tolerance in the integration routine. See TODO(link numerical recipes, paper?) for more information.
+* `RELATIVE_TOLERANCE`: (double, >=0) The relative tolerance in the integration routine. See [numerical recipes](http://numerical.recipes/) for more information.
 
-* `ABSOLUTE_TOLERANCE`: (double, >=0) The absolute tolerance in the integration routine. See TODO(link numerical recipes, paper?) for more information.
+* `ABSOLUTE_TOLERANCE`: (double, >=0) The absolute tolerance in the integration routine. See [numerical recipes](http://numerical.recipes/) for more information.
 
 * `SMALLEST_SCALING`: (double, >0, <=1) Only relevant for `DOPRI853`. The smallest possible rescaling of the step size in any step.
 
 * `LARGEST_SCALING`: (double, >=1) Only relevant for `DOPRI853`. The largest possible rescaling of the step size in any step.
 
-* `BETA`: (double) Only relevant for `DOPRI853`. This is an internal parameter of the adaptive step size control for PI control of the step size following the rescaling method of Lund. Only change this if you know exactly what you are doing. See TODO(link numerical recipes, Gustaffson paper) for more information.
+* `BETA`: (double) Only relevant for `DOPRI853`. This is an internal parameter of the adaptive step size control for PI control of the step size following the rescaling method of Lund. Only change this if you know exactly what you are doing. See [this paper](http://dl.acm.org/citation.cfm?doid=210232.210242) for more information.
 
-* `SAFE`: (double, >0, <=1) Only relevant for `DOPRI853`. This is an internal safety parameter of the adaptive step size control, which makes the next step size more likely to be accepted. Only change this if you know exactly what you are doing. See TODO(link numerical recipes, hairer book) for more information. The default value is 0.9.
+* `SAFE`: (double, >0, <=1) Only relevant for `DOPRI853`. This is an internal safety parameter of the adaptive step size control, which makes the next step size more likely to be accepted. Only change this if you know exactly what you are doing. See [numerical recipes](http://numerical.recipes/) for more information. The default value is 0.9.
 
 ## Program flow
 
 * `INTEGRATION_METHOD`: There are several integration routines available:
     - `"RK4"`: The standard 4th order Runge Kutta stepper with fixed time step size.
-    - `"RKF45"`: A 4th order Runge Kutta Felberg method with 5th order error estimation for adaptive time stepping. We use the GSL implementation TODO(link to gsl).
-    - `"RKCK"`: A 4th order Runge Kutta Cash-Karp method with 5th order error estimation for adaptive time stepping. We use the GSL implementation TODO(link to gsl).
-    - `"DOPRI89"`: A 8th order Runge Kutta Dormand Prince method with 9th order error estimation for adaptive time stepping. We use the GSL implementation TODO(link to gsl).
-    - `"DOPRI853"`: A 8th order Runge Kutta Dormand Prince method with 5th and 3rd order error estimation for adaptive time stepping. A detailed description can be found in TODO(link numerical recipes).
+    - `"RKF45"`: A 4th order Runge Kutta Felberg method with 5th order error estimation for adaptive time stepping. We use the [GSL implementation](https://www.gnu.org/software/gsl/manual/html_node/Stepping-Functions.html#Stepping-Functions).
+    - `"RKCK"`: A 4th order Runge Kutta Cash-Karp method with 5th order error estimation for adaptive time stepping. We use the GSL implementation [GSL implementation](https://www.gnu.org/software/gsl/manual/html_node/Stepping-Functions.html#Stepping-Functions).
+    - `"DOPRI89"`: A 8th order Runge Kutta Dormand Prince method with 9th order error estimation for adaptive time stepping. We use the GSL implementation [GSL implementation](https://www.gnu.org/software/gsl/manual/html_node/Stepping-Functions.html#Stepping-Functions).
+    - `"DOPRI853"`: A 8th order Runge Kutta Dormand Prince method with 5th and 3rd order error estimation for adaptive time stepping. A detailed description can be found in [numerical recipes](http://numerical.recipes/).
 
-* `ENABLE_FFT_FILTER`: (boolean) Switch for a spectral filter for the fields. If switched on, at each time step the highest modes of \f$\phi\f$, \f$\dot{\phi}\f$, \f$\psi\f$, \f$\dot{\psi}\f$ are cut off to avoid aliasing. A more detailed description can be found in TODO(link to thesis).
+* `ENABLE_FFT_FILTER`: (boolean) Switch for a spectral filter for the fields. If switched on, at each time step the highest modes of \f$\phi\f$, \f$\dot{\phi}\f$, \f$\psi\f$, \f$\dot{\psi}\f$ are cut off to avoid aliasing. A more detailed description can be found in TODO(link thesis).
 
 * `ENABLE_GW`: (boolean) Switch for the extraction of gravitational waves. If switched on, at each time step the generated gravitational wave spectrum is computed and added to the output.
 
@@ -254,7 +254,7 @@ The parameters in this section are only relevant if one of the adaptive time ste
 
 ## Miscellaneous
 
-* `SEED`: (integer, >0) The seed for the random number generation used for example to create the Bunch Davies vacuum if `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"` or also for `INITIAL_CONDITIONS="IC_FROM_INTERNAL_FUNCTION"` (depending on what the functions do). We use the GSL implementation of the Mersenne Twister. TODO(link)
+* `SEED`: (integer, >0) The seed for the random number generation used for example to create the Bunch Davies vacuum if `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"` or also for `INITIAL_CONDITIONS="IC_FROM_INTERNAL_FUNCTION"` (depending on what the functions do). We use the [GSL implementation](https://www.gnu.org/software/gsl/manual/html_node/Random-number-generator-algorithms.html#Random-number-generator-algorithms) of the Mersenne Twister.
 
 * `ENABLE_STIFFNESSCHECK`: (boolean) Only relevant for `DOPRI853`. Use a simple method to check whether the evolution of the equations becomes a stiff problem and abort the evolution if so. This was used mostly for debugging. According to this simple test we have never encountered stiffness.
 
