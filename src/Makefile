@@ -32,6 +32,10 @@ $(TARGET): $(OBJECTS)
 config:
 	./configure $(parameters)
 
+doc:
+	mkdir -p ../../doc
+	doxygen doxygen_config
+
 clean:
 	-rm -f *.o
 	-rm -f $(TARGET)
