@@ -1,4 +1,4 @@
-# InstaHeat -- Gravitational **Insta**bilities during Metric Pre**heat**ing
+# :fire: InstaHeat :fire: Gravitational **Insta**bilities during Metric Pre**heat**ing
 
 InstaHeat is a 3D pseudo-spectral preheating code including metric scalar perturbations to to analyze gravitational instabilities.
 
