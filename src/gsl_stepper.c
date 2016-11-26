@@ -15,8 +15,8 @@
 /**
  * @file gsl_stepper.c
  *
- * @brief Contains various explicit ODE Runge Kutta stepper as implemented by
- * GNU Scientific Library (GSL).
+ * @brief Contains wrapper for various explicit ODE Runge Kutta from the GNU
+ * Scientific Library (GSL).
  *
  * Available methods are: Runge Kutta Felberg 4(5) (RKF45), Runge Kutta
  * Cash-Karp 4(5) (RKCK), Runge Kutta Dormand Prince 8(9) (DOPRI89).  Only the
