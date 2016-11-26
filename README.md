@@ -110,8 +110,10 @@ Detailed information about the output options can be found in section [Parameter
 
 ## Parameters & Options
 
-[Here](@ref docparameters) is more information on the simulation parameters and
-output options. This is also important for the build process.
+The simulation parameters and output options are explained in great detail in the documentation of the parameters. This is also important for the build process. You can find the docs
+
+* [here](doc_parameters.md) if you are viewing this on GitHub, or
+* [here](@ref docparameters) if you are viewing this on Doxygen.
 
 ## Previous Codes
 
