@@ -1,9 +1,9 @@
 dim = 1;
 scaleamp = 1e0;
 massk = 1e-2;
-mkPlots = false;
+mkPlots = true;
 namepre = 'compare_psi';
-name = ['~/Dropbox/Uni/Exercises/11Semester/MAPhysics/data/karsten_compare/'...
+name = ['~/Dropbox/Uni/Exercises/12Semester/MAPhysics/data/karsten_compare/'...
     namepre '.dat'];
 
 raw = importdata(name);
