@@ -1,5 +1,8 @@
 syntax: glob
 
+# linux + dropbox
+*.dropbox.attr
+
 # annyoing Desktop Services Store files from Mac OS
 *.DS_Store
 
