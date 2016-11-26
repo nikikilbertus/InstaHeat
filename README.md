@@ -4,6 +4,8 @@ InstaHeat is a 3D pseudo-spectral preheating code including metric scalar pertur
 
 It evolves a single scalar field in the FLRW background metric including scalar metric perturbations and backreactions through a phase of metric preheating after the end of chaotic large field inflation. Due to parametric resonance the evolution becomes non-linear and the produced tensor perturbations are used to compute the power spectrum of the generated gravitational waves.
 
+>:exclamation: **Disclaimer:** InstaHeat is scientific code under active development. Expect things to be broken, documentation to be outdated and incorrect behavior. InstaHeat is written with speed in mind and, sadly, not enough consideration for readability.
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
@@ -68,6 +70,16 @@ The `LIBS` and `CFLAGS` flags are simply what we used on your systems and you mi
 Now `make` should do the job and produce an executable called `run` in the `src/` directory.
 
 >:exclamation: You have to specify the parameters **before** the build process! Read the [Parameters & Options](#parameters-&-options) section before running InstaHeat.
+
+### Build Documentation
+
+InstaHeat is extensively annotated with [Doxygen](http://www.stack.nl/~dimitri/doxygen/) comments. A detailed documentation of the code can be exported to `html` and `latex`. To build the documentation for both, simply type
+
+```sh
+make doc
+```
+
+The documentation then resides in the created `doc` folder on the same level as the repository folder.
 
 ## Physics & References
 
