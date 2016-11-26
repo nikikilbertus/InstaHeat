@@ -1,4 +1,4 @@
-# Parameter file documentation (`parameters.sh`)
+# Parameter file documentation (`parameters.sh`) {#docparameters}
 
 This is an explanation of the parameters in the file `parameters.sh`. We want to keep the parameter file itself short and concise to allow for quick changes. Therefore we do not clutter it by comments, but outsource the documentation to this file.
 
@@ -125,31 +125,31 @@ In this documentation, we choose another categorization of the parameters:
 
 * `MAX_RUNTIME`: (double, >0) The maximal wall clock runtime of the program in seconds. This is a handy termination criterion when running InstaHeat on a cluster with limited run time per job. For example, setting `MAX_RUNTIME="172500"` will automatically wrap up the program and flush all buffers to disk shortly before the simulation has run 48 hours. If a run is cancelled by the scheduler due to a time limit, the output file might be corrupt and unreadable, because it has not been closed properly. You can set it to a huge value if you do not want to restrict the simulation by a certain runtime.
 
-* `MAX_DT_HUBBLE_FRACTION`: (double, >0) This is only relevant if the chosen integration routine is the Dormand Prince 8(5,3) stepper (`DOPRI853`), see [program flow](#program-flow). To avoid large timesteps in the beginning of the evolution that could lead to instabilities, we limit the time step from above by `MAX_DT_HUBBLE_FRACTION` times the Hubble time $$1/H$$. Typical values are on the order of $$10^{-3}$$ to $$10^{-2}$$.
+* `MAX_DT_HUBBLE_FRACTION`: (double, >0) This is only relevant if the chosen integration routine is the Dormand Prince 8(5,3) stepper (`DOPRI853`), see [program flow](#program-flow). To avoid large timesteps in the beginning of the evolution that could lead to instabilities, we limit the time step from above by `MAX_DT_HUBBLE_FRACTION` times the Hubble time \f$1/H\f$. Typical values are on the order of \f$10^{-3}\f$ to \f$10^{-2}\f$.
 
 ### Remarks
 
 * Even for the fixed time step `RK4` method, the time step might be different for the very last step. To ensure that the simulation always ends exactly at the specified `FINAL_TIME`, the time step might be adjusted for the very last step.
 
-* When using one of the adaptive time step integrators (`RKF45`, `RKCK`, `DOPRI89` or `DOPRI853`), we recommend a very small `DELTA_T`, e.g. $$10^{-6}$$. The routines will quickly increase the time steps, if they are sufficiently small initially such that the code does not have to do much extra work. However, if the initial time step is too large, small errors in the first steps can lead to a seriously flawed evolution later on.
+* When using one of the adaptive time step integrators (`RKF45`, `RKCK`, `DOPRI89` or `DOPRI853`), we recommend a very small `DELTA_T`, e.g. \f$10^{-6}\f$. The routines will quickly increase the time steps, if they are sufficiently small initially such that the code does not have to do much extra work. However, if the initial time step is too large, small errors in the first steps can lead to a seriously flawed evolution later on.
 
 ## Initial conditions
 
-* `A_INITIAL`: (double, >0) The initial value for the scale factor $$a$$.
+* `A_INITIAL`: (double, >0) The initial value for the scale factor \f$a\f$.
 
-* `INITIAL_CONDITIONS`: This parameter determines how to obtain the initial conditions for the fields $$\phi$$, $$\dot{\phi}$$, $$\psi$$, $$\dot{\psi}$$ and $$a$$. The valid options are:
-    - `"IC_FROM_INTERNAL_FUNCTION"`: The initial $$\phi$$ and $$\dot{\phi}$$ are given as functions `phi_init` and `dphi_init` in `setup.c`. These are evaluated on the spatial grid specified by [simulation volume](#simulation-volume). The initial values for $$\psi$$ are computed via `mk_initial_psi` in `setup.c`.
+* `INITIAL_CONDITIONS`: This parameter determines how to obtain the initial conditions for the fields \f$\phi\f$, \f$\dot{\phi}\f$, \f$\psi\f$, \f$\dot{\psi}\f$ and \f$a\f$. The valid options are:
+    - `"IC_FROM_INTERNAL_FUNCTION"`: The initial \f$\phi\f$ and \f$\dot{\phi}\f$ are given as functions `phi_init` and `dphi_init` in `setup.c`. These are evaluated on the spatial grid specified by [simulation volume](#simulation-volume). The initial values for \f$\psi\f$ are computed via `mk_initial_psi` in `setup.c`.
     - `"IC_FROM_H5_FILE"`: One can load initial conditions from a previous simulation. The following conditions have to be satisfied:
           + The `INITIAL_DATAPATH` parameter in section [initial conditions](#initial-conditions) points to the output file of a previous simulation from which a certain timeslice should be used as initial conditions for the current run.
           + The `INITIAL_TIME` parameter in section [initial conditions](#initial-conditions) has to lie in the simulation region of the previous output file, i.e. `INITIAL_TIME` has to be larger than `INITIAL_TIME` of the previous simulation and smaller than `FINAL_TIME` of the previous simulation.
           + The number of gridpoints (`GRIDPOINTS_{X,Y,Z}` parameters in section [simulation volume](#simulation-volume)) have to coincide with the number of gridpoints from the previous simulation. In general, the spatial volume simulation parameters have to compatible.
 
-      Then the program will find the time slice _closest_ to the specified `INITIAL_TIME` in the previous output file and use all necessary values ($$a$$, $$\phi$$, $$\dot{\phi}$$, $$\psi$$, $$\dot{\psi}$$, $$t$$) as initial conditions for the new simulation. Note that the simulation might therefore not start _precisely_ at the specified `INITIAL_TIME`.
+      Then the program will find the time slice _closest_ to the specified `INITIAL_TIME` in the previous output file and use all necessary values (\f$a\f$, \f$\phi\f$, \f$\dot{\phi}\f$, \f$\psi\f$, \f$\dot{\psi}\f$, \f$t\f$) as initial conditions for the new simulation. Note that the simulation might therefore not start _precisely_ at the specified `INITIAL_TIME`.
 
-    - `"IC_FROM_DAT_FILE_WITH_PSI"` and `"IC_FROM_DAT_FILE_WITHOUT_PSI"`: One can load initial conditions from a `.dat` file. This feature was implemented during development of the code when initial conditions were provided from a collaborator in a `.dat` file. There is an option to also import $$\psi$$ and $$\dot{\psi}$$ from this `.dat` file, or to compute them from the provided $$\phi$$ and $$\dot{\phi}$$ via `mk_initial_psi` in `setup.c`. If you want to read initial conditions from a separately generated file, you might change the method `read_initial_data` in `io.c` accordingly. Also make sure to read and understand the memory layout of the field variables TODO(link, where?).
-    - `"IC_FROM_BUNCH_DAVIES"`: The initial conditions are given by the Bunch Davies vacuum. Our implementation is similar in nature to the one used in DEFROST TODO(link, ref). We compute initial values for $$\phi$$ and $$\dot{\phi}$$ following the Bunch Davies spectrum. For detailed information see TODO(link paper, coderef). Subsequently we compute $$\psi$$ and $$\dot{psi}$$ via `mk_initial_psi` in `setup.c`. See also `BUNCH_DAVIES_CUTOFF` in this section.
+    - `"IC_FROM_DAT_FILE_WITH_PSI"` and `"IC_FROM_DAT_FILE_WITHOUT_PSI"`: One can load initial conditions from a `.dat` file. This feature was implemented during development of the code when initial conditions were provided from a collaborator in a `.dat` file. There is an option to also import \f$\psi\f$ and \f$\dot{\psi}\f$ from this `.dat` file, or to compute them from the provided \f$\phi\f$ and \f$\dot{\phi}\f$ via `mk_initial_psi` in `setup.c`. If you want to read initial conditions from a separately generated file, you might change the method `read_initial_data` in `io.c` accordingly. Also make sure to read and understand the memory layout of the field variables TODO(link, where?).
+    - `"IC_FROM_BUNCH_DAVIES"`: The initial conditions are given by the Bunch Davies vacuum. Our implementation is similar in nature to the one used in DEFROST TODO(link, ref). We compute initial values for \f$\phi\f$ and \f$\dot{\phi}\f$ following the Bunch Davies spectrum. For detailed information see TODO(link paper, coderef). Subsequently we compute \f$\psi\f$ and \f$\dot{psi}\f$ via `mk_initial_psi` in `setup.c`. See also `BUNCH_DAVIES_CUTOFF` in this section.
 
-* `BUNCH_DAVIES_CUTOFF`: (integer, >=0) The Bunch Davies vacumm has an ultra violet divergence that we circumvent by an exponential cutoff. If `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"`, this parameter sets the value of the cutoff as the number of gridpoints. It has to be smaller than half the number of gridpoints (i.e. we cut off the spectrum below the Nyquist frequency). For example, if we have a grid with $$64$$ gridpoints in each direction, `BUNCH_DAVIES_CUTOFF` has to be smaller or equal than $$32$$. If `BUNCH_DAVIES_CUTOFF="0"`, the cutoff is adjusted to the current grid automatically and chosen as large as possible. This parameter also controls the smoothness of the initial conditions for the Bunch Davies vacuum, i.e. a small value corresponds to few modes, i.e. very smooth and well behaved initial conditions.
+* `BUNCH_DAVIES_CUTOFF`: (integer, >=0) The Bunch Davies vacumm has an ultra violet divergence that we circumvent by an exponential cutoff. If `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"`, this parameter sets the value of the cutoff as the number of gridpoints. It has to be smaller than half the number of gridpoints (i.e. we cut off the spectrum below the Nyquist frequency). For example, if we have a grid with \f$64\f$ gridpoints in each direction, `BUNCH_DAVIES_CUTOFF` has to be smaller or equal than \f$32\f$. If `BUNCH_DAVIES_CUTOFF="0"`, the cutoff is adjusted to the current grid automatically and chosen as large as possible. This parameter also controls the smoothness of the initial conditions for the Bunch Davies vacuum, i.e. a small value corresponds to few modes, i.e. very smooth and well behaved initial conditions.
 
 * `INITIAL_DATAPATH`: See section [file IO](#file-io).
 
@@ -159,7 +159,7 @@ In this documentation, we choose another categorization of the parameters:
 
 * `MASS`: (double, >0) The mass parameter used in the code. Note that this value can be easily rescaled, hence has no physical relevance.
 
-* `INFLATON_MASS`: (double, >0) If `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"`, this value is the inflaton mass in units of the Planck mass. While the actual mass parameter used in the code (for example when computing the potential) can be rescaled to arbitrary values, `INFLATON_MASS` is a physical quantity and only enters once when setting the amplitude of initial fluctuations in the Bunch Davies vacuum. Note that in the code $$8 \pi G = 1$$, hence we set the reduced Planck mass to one. `INFLATON_MASS` is the only mass related parameter in the code that carries physical meaning.
+* `INFLATON_MASS`: (double, >0) If `INITIAL_CONDITIONS="IC_FROM_BUNCH_DAVIES"`, this value is the inflaton mass in units of the Planck mass. While the actual mass parameter used in the code (for example when computing the potential) can be rescaled to arbitrary values, `INFLATON_MASS` is a physical quantity and only enters once when setting the amplitude of initial fluctuations in the Bunch Davies vacuum. Note that in the code \f$8 \pi G = 1\f$, hence we set the reduced Planck mass to one. `INFLATON_MASS` is the only mass related parameter in the code that carries physical meaning.
 
 * `MASS_KARSTEN`: (double, >0) Deprecated! Intended for developmental use only. This parameter was usde to scale certain amplitudes for comparison with Karsten Jedamzik's code.
 
@@ -192,7 +192,7 @@ In this documentation, we choose another categorization of the parameters:
 
 ### Remarks
 
-* Given the number of gridpoints $$n$$ in the x-direction by `GRIDPOINTS_X` and the stride $$s$$ in the x-direction by `STRIDE_X`, the number of gridpoints in the output is computed by $$(n+s-1)/s$$ rounded down to the next integer. The output gridpoints are evenly spaced within the number of gridpoints used for internal computations.
+* Given the number of gridpoints \f$n\f$ in the x-direction by `GRIDPOINTS_X` and the stride \f$s\f$ in the x-direction by `STRIDE_X`, the number of gridpoints in the output is computed by \f$(n+s-1)/s\f$ rounded down to the next integer. The output gridpoints are evenly spaced within the number of gridpoints used for internal computations.
 
 ### Examples
 
@@ -208,7 +208,7 @@ STRIDE_Y="1"
 STRIDE_Z="6"
 ```
 
-then the computation would be done on a $$256 \times 200 \times 59$$ grid. However the output of the fields would be on a $$64 \times 200 \times 10$$ grid.
+then the computation would be done on a \f$256 \times 200 \times 59\f$ grid. However the output of the fields would be on a \f$64 \times 200 \times 10\f$ grid.
 
 ## Performance parameters
 
@@ -246,11 +246,11 @@ The parameters in this section are only relevant if one of the adaptive time ste
     - `"DOPRI89"`: A 8th order Runge Kutta Dormand Prince method with 9th order error estimation for adaptive time stepping. We use the GSL implementation TODO(link to gsl).
     - `"DOPRI853"`: A 8th order Runge Kutta Dormand Prince method with 5th and 3rd order error estimation for adaptive time stepping. A detailed description can be found in TODO(link numerical recipes).
 
-* `ENABLE_FFT_FILTER`: (boolean) Switch for a spectral filter for the fields. If switched on, at each time step the highest modes of $$\phi$$, $$\dot{\phi}$$, $$\psi$$, $$\dot{\psi}$$ are cut off to avoid aliasing. A more detailed description can be found in TODO(link to thesis).
+* `ENABLE_FFT_FILTER`: (boolean) Switch for a spectral filter for the fields. If switched on, at each time step the highest modes of \f$\phi\f$, \f$\dot{\phi}\f$, \f$\psi\f$, \f$\dot{\psi}\f$ are cut off to avoid aliasing. A more detailed description can be found in TODO(link to thesis).
 
 * `ENABLE_GW`: (boolean) Switch for the extraction of gravitational waves. If switched on, at each time step the generated gravitational wave spectrum is computed and added to the output.
 
-* `ENABLE_FOLLOWUP`: (boolean) Switch for the output of all fields on the very last timeslice. If switched on, regardless of the output settings on the very last timeslice all the fields $$\phi$$, $$\dot{\phi}$$, $$\psi$$, $$\dot{\psi}$$ and $$a$$ are writtten to the output file on the last time slice of the simulation. We can then use these field values as initial conditions for a subsequent run using the `INITIAL_CONDITIONS="IC_FROM_H5_FILE"` option.
+* `ENABLE_FOLLOWUP`: (boolean) Switch for the output of all fields on the very last timeslice. If switched on, regardless of the output settings on the very last timeslice all the fields \f$\phi\f$, \f$\dot{\phi}\f$, \f$\psi\f$, \f$\dot{\psi}\f$ and \f$a\f$ are writtten to the output file on the last time slice of the simulation. We can then use these field values as initial conditions for a subsequent run using the `INITIAL_CONDITIONS="IC_FROM_H5_FILE"` option.
 
 ## Miscellaneous
 
@@ -264,35 +264,35 @@ The parameters in this section are only relevant if one of the adaptive time ste
 
 Most of the simulation parameters are always present in the output (and cannot be switched off). Each parameter takes either the value `"0"` (false) or `"1"` (true). The optional output consists of
 
-* `OUTPUT_PHI`: The scalar field $$\phi$$ on the entire output grid on each output timeslice.
+* `OUTPUT_PHI`: The scalar field \f$\phi\f$ on the entire output grid on each output timeslice.
 
-* `OUTPUT_DPHI`: The temporal derivative of the scalar field $$\dot{\phi}$$ on the entire output grid on each output timeslice.
+* `OUTPUT_DPHI`: The temporal derivative of the scalar field \f$\dot{\phi}\f$ on the entire output grid on each output timeslice.
 
-* `OUTPUT_PSI`: The scalar metric perturbation $$\psi$$ on the entire output grid.
+* `OUTPUT_PSI`: The scalar metric perturbation \f$\psi\f$ on the entire output grid.
 
-* `OUTPUT_DPSI`: The scalar metric perturbation $$\dot{\psi}$$ on the entire output grid on each output timeslice.
+* `OUTPUT_DPSI`: The scalar metric perturbation \f$\dot{\psi}\f$ on the entire output grid on each output timeslice.
 
-* `OUTPUT_RHO`: The energy density $$\rho$$ on the entire output grid on each output timeslice.
+* `OUTPUT_RHO`: The energy density \f$\rho\f$ on the entire output grid on each output timeslice.
 
-* `OUTPUT_PHI_SMRY`: The mean value, the variance, the minimum and the maximum of the scalar field $$\phi$$ on each output timeslice (in this order).
+* `OUTPUT_PHI_SMRY`: The mean value, the variance, the minimum and the maximum of the scalar field \f$\phi\f$ on each output timeslice (in this order).
 
-* `OUTPUT_DPHI_SMRY`: The mean value, the variance, the minimum and the maximum of the temporal derivative of the scalar field $$\dot{\phi}$$ on each output timeslice (in this order).
+* `OUTPUT_DPHI_SMRY`: The mean value, the variance, the minimum and the maximum of the temporal derivative of the scalar field \f$\dot{\phi}\f$ on each output timeslice (in this order).
 
-* `OUTPUT_PSI_SMRY`: The mean value, the variance, the minimum and the maximum of the scalar metric perturbation $$\psi$$ on each output timeslice (in this order).
+* `OUTPUT_PSI_SMRY`: The mean value, the variance, the minimum and the maximum of the scalar metric perturbation \f$\psi\f$ on each output timeslice (in this order).
 
-* `OUTPUT_DPSI_SMRY`: The mean value, the variance, the minimum and the maximum of the temporal derivative of the scalar metric perturbation $$\dot{\psi}$$ on each output timeslice (in this order).
+* `OUTPUT_DPSI_SMRY`: The mean value, the variance, the minimum and the maximum of the temporal derivative of the scalar metric perturbation \f$\dot{\psi}\f$ on each output timeslice (in this order).
 
-* `OUTPUT_RHO_SMRY`: The mean value, the variance, the minimum and the maximum of the energy density $$\rho$$ on each output timeslice (in this order).
+* `OUTPUT_RHO_SMRY`: The mean value, the variance, the minimum and the maximum of the energy density \f$\rho\f$ on each output timeslice (in this order).
 
-* `OUTPUT_PRESSURE_SMRY`: The mean value, the variance, the minimum and the maximum of the pressure $$p$$ on each output timeslice (in this order).
+* `OUTPUT_PRESSURE_SMRY`: The mean value, the variance, the minimum and the maximum of the pressure \f$p\f$ on each output timeslice (in this order).
 
-* `OUTPUT_PHI_PS`: The power spectrum of the field $$\phi$$ on each output timeslice.
+* `OUTPUT_PHI_PS`: The power spectrum of the field \f$\phi\f$ on each output timeslice.
 
-* `OUTPUT_PSI_PS`: The power spectrum of the field $$\psi$$ on each output timeslice.
+* `OUTPUT_PSI_PS`: The power spectrum of the field \f$\psi\f$ on each output timeslice.
 
-* `OUTPUT_RHO_PS`: The power spectrum of the field $$\rho$$ on each output timeslice.
+* `OUTPUT_RHO_PS`: The power spectrum of the field \f$\rho\f$ on each output timeslice.
 
-* `OUTPUT_CONSTRAINTS`: The Hamiltonian constraint in $$l_2$$ and $$l_{\infty}$$ norm as well as the momentum constraint in $$l_2$$ and $$l_{\infty}$$ norm (in this order), where the various terms of the constraints have been combined in such a way to give 0. This means that the closer those 4 values are to 0, the better the constraints are fulfilled.
+* `OUTPUT_CONSTRAINTS`: The Hamiltonian constraint in \f$l_2\f$ and \f$l_{\infty}\f$ norm as well as the momentum constraint in \f$l_2\f$ and \f$l_{\infty}\f$ norm (in this order), where the various terms of the constraints have been combined in such a way to give 0. This means that the closer those 4 values are to 0, the better the constraints are fulfilled.
 
 ### Remarks
 
