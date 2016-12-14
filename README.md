@@ -4,7 +4,7 @@ InstaHeat is a 3D pseudo-spectral preheating code including metric scalar pertur
 
 It evolves a single scalar field in the FLRW background metric including scalar metric perturbations and backreactions through a phase of metric preheating after the end of chaotic large field inflation. Due to parametric resonance the evolution becomes non-linear and the produced tensor perturbations are used to compute the power spectrum of the generated gravitational waves.
 
->:exclamation: **Disclaimer:** InstaHeat is scientific code under active development. Expect things to be broken and incorrect behavior. InstaHeat is written with speed in mind and, sadly, not enough consideration for readability. However, we put quite some effort into a detailed [documentation](#build-documentation).
+>:exclamation: **Disclaimer:** InstaHeat is scientific code under active development. Expect things to be broken and incorrect behavior. InstaHeat is written with speed in mind and, sadly, not enough consideration for readability. However, we put quite some effort into a detailed [documentation](#build-documentation) and explanation of the [parameters and options](#parameters-and-options).
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -18,7 +18,7 @@ It evolves a single scalar field in the FLRW background metric including scalar 
   - [A Short Intro](#a-short-intro)
 - [Numerics](#numerics)
 - [Output](#output)
-- [Parameters & Options](#parameters-&-options)
+- [Parameters and Options](#parameters-and-options)
 - [Previous Codes](#previous-codes)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -70,7 +70,7 @@ The `LIBS` and `CFLAGS` flags are simply what we used on your systems and you mi
 
 Now `make` should do the job and produce an executable called `run` in the `src/` directory.
 
->:exclamation: You have to specify the parameters **before** the build process! Read the [Parameters & Options](#parameters-&-options) section before running InstaHeat.
+>:exclamation: You have to specify the parameters **before** the build process! Read the [Parameters and Options](#parameters-and-options) section before running InstaHeat.
 
 ### Build Documentation
 
@@ -119,9 +119,9 @@ The full field (on part) of the simulation grid, the mean, the variance, the max
 * \f$\rho\f$ - The energy density.
 * \f$p\f$ - The pressure.
 
-Detailed information about the output options can be found in section [Parameters & Options](#parameters-&-options).
+Detailed information about the output options can be found in section [Parameters and Options](#parameters-and-options).
 
-## Parameters & Options
+## Parameters and Options
 
 The simulation parameters and output options are explained in great detail in the documentation of the parameters. This is also important for the build process. You can find the docs
 
