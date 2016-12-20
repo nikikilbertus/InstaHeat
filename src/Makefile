@@ -30,6 +30,7 @@ $(TARGET): $(OBJECTS)
 	$(CC) $(OBJECTS) -Wall $(LIBS) -o $@
 
 config:
+	@echo 'Compiling for $(UNAME_S)'
 	./configure $(parameters)
 
 doc:
