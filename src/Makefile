@@ -14,7 +14,7 @@ ifeq ($(UNAME_S),Darwin)
     export HDF5_CLINKER = gcc-6
 endif
 
-.PHONY: default all clean
+.PHONY: default all clean clear
 
 default: config $(TARGET)
 
@@ -40,3 +40,7 @@ doc:
 clean:
 	-rm -f *.o
 	-rm -f $(TARGET)
+
+clear:
+	-rm -f main.h
+	-rm -rf run.dSYM/
