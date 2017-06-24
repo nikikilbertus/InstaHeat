@@ -4,7 +4,7 @@ InstaHeat is a 3D pseudo-spectral preheating code including metric scalar pertur
 
 It evolves a single scalar field in the FLRW background metric including scalar metric perturbations and backreactions through a phase of metric preheating after the end of chaotic large field inflation. Due to parametric resonance the evolution becomes non-linear and the produced tensor perturbations are used to compute the power spectrum of the generated gravitational waves.
 
->:exclamation: **Disclaimer:** InstaHeat is scientific code under currently not under active development. Expect adventures. InstaHeat is written with speed in mind and, perhaps, not enough consideration for readability. However, we put quite some effort into a detailed [documentation](#build-documentation) and explanation of the [parameters and options](#parameters-and-options).
+>:exclamation: **Disclaimer:** InstaHeat is scientific code and currently not under active development. Expect adventures. InstaHeat is written with speed in mind and, perhaps, not enough consideration for readability. However, we put quite some effort into a detailed [documentation](#build-documentation) and explanation of the [parameters and options](#parameters-and-options).
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
